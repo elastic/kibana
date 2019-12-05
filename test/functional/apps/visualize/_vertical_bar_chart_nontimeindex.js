@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
+  // FLAKY: https://github.com/elastic/kibana/issues/22322
   describe.skip('vertical bar chart with index without time filter', function () {
     const vizName1 = 'Visualization VerticalBarChart without time filter';
 
@@ -50,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });

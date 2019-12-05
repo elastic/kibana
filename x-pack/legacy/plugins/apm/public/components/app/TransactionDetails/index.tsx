@@ -20,7 +20,7 @@ import { useWaterfall } from '../../../hooks/useWaterfall';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { TransactionDistribution } from './Distribution';
-import { Transaction } from './Transaction';
+import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
@@ -29,6 +29,7 @@ import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { useTrackPageview } from '../../../../../infra/public';
 import { PROJECTION } from '../../../../common/projections/typings';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { HeightRetainer } from '../../shared/HeightRetainer';
 
 export function TransactionDetails() {
   const location = useLocation();
@@ -39,10 +40,9 @@ export function TransactionDetails() {
   } = useTransactionDistribution(urlParams);
 
   const { data: transactionChartsData } = useTransactionCharts();
-
-  const { data: waterfall, exceedsMax } = useWaterfall(urlParams);
-  const transaction = waterfall.getTransactionById(urlParams.transactionId);
-
+  const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
+    urlParams
+  );
   const { transactionName, transactionType, serviceName } = urlParams;
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
@@ -60,6 +60,16 @@ export function TransactionDetails() {
     };
     return config;
   }, [transactionName, transactionType, serviceName]);
+
+  const bucketIndex = distributionData.buckets.findIndex(bucket =>
+    bucket.samples.some(
+      sample =>
+        sample.transactionId === urlParams.transactionId &&
+        sample.traceId === urlParams.traceId
+    )
+  );
+
+  const traceSamples = distributionData.buckets[bucketIndex]?.samples;
 
   return (
     <div>
@@ -92,25 +102,24 @@ export function TransactionDetails() {
           <EuiPanel>
             <TransactionDistribution
               distribution={distributionData}
-              isLoading={
-                distributionStatus === FETCH_STATUS.LOADING ||
-                distributionStatus === undefined
-              }
+              isLoading={distributionStatus === FETCH_STATUS.LOADING}
               urlParams={urlParams}
+              bucketIndex={bucketIndex}
             />
           </EuiPanel>
 
           <EuiSpacer size="s" />
 
-          {transaction && (
-            <Transaction
+          <HeightRetainer>
+            <WaterfallWithSummmary
               location={location}
-              transaction={transaction}
               urlParams={urlParams}
               waterfall={waterfall}
+              isLoading={waterfallStatus === FETCH_STATUS.LOADING}
               exceedsMax={exceedsMax}
+              traceSamples={traceSamples}
             />
-          )}
+          </HeightRetainer>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

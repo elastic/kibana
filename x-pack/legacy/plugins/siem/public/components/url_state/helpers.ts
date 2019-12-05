@@ -7,8 +7,13 @@
 import { decode, encode, RisonValue } from 'rison-node';
 import { Location } from 'history';
 import { QueryString } from 'ui/utils/query_string';
-import { CONSTANTS } from './constants';
-import { LocationTypes, UrlStateType } from './types';
+import { Query, esFilters } from 'src/plugins/data/public';
+
+import { inputsSelectors, State, timelineSelectors } from '../../store';
+import { SiemPageName } from '../../pages/home/types';
+import { NavTab } from '../navigation/types';
+import { CONSTANTS, UrlStateType } from './constants';
+import { LocationTypes, UrlStateContainerPropTypes } from './types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const decodeRisonUrlState = (value: string | undefined): RisonValue | any | undefined => {
@@ -38,12 +43,7 @@ export const replaceStateKeyInQueryString = <UrlState extends any>(
   urlState: UrlState | undefined
 ) => (queryString: string) => {
   const previousQueryValues = QueryString.decode(queryString);
-  if (
-    urlState == null ||
-    (typeof urlState === 'string' && urlState === '') ||
-    (urlState && urlState.filterQuery === null) ||
-    (urlState && urlState.filterQuery != null && urlState.filterQuery.expression === '')
-  ) {
+  if (urlState == null || (typeof urlState === 'string' && urlState === '')) {
     delete previousQueryValues[stateKey];
     return QueryString.encode({
       ...previousQueryValues,
@@ -71,50 +71,60 @@ export const replaceQueryStringInLocation = (location: Location, queryString: st
   }
 };
 
-export const getUrlType = (pathname: string): UrlStateType => {
-  const removeSlash = pathname.replace(/\/$/, '');
-  const trailingPath = removeSlash.match(/([^\/]+$)/);
-  if (trailingPath !== null) {
-    if (trailingPath[0] === 'hosts' || pathname.match(/^\/hosts\/.+$/) != null) {
-      return 'host';
-    } else if (trailingPath[0] === 'network' || pathname.match(/^\/network\/.+$/) != null) {
-      return 'network';
-    } else if (trailingPath[0] === 'overview') {
-      return 'overview';
-    } else if (trailingPath[0] === 'timelines') {
-      return 'timeline';
-    }
+export const getUrlType = (pageName: string): UrlStateType => {
+  if (pageName === SiemPageName.overview) {
+    return 'overview';
+  } else if (pageName === SiemPageName.hosts) {
+    return 'host';
+  } else if (pageName === SiemPageName.network) {
+    return 'network';
+  } else if (pageName === SiemPageName.detectionEngine) {
+    return 'detection-engine';
+  } else if (pageName === SiemPageName.timelines) {
+    return 'timeline';
   }
   return 'overview';
 };
 
-export const getCurrentLocation = (pathname: string): LocationTypes => {
-  const removeSlash = pathname.replace(/\/$/, '');
-  const trailingPath = removeSlash.match(/([^\/]+$)/);
-  if (trailingPath !== null) {
-    if (trailingPath[0] === 'hosts') {
-      return CONSTANTS.hostsPage;
-    } else if (pathname.match(/^\/hosts\/.+$/) != null) {
+export const getTitle = (
+  pageName: string,
+  detailName: string | undefined,
+  navTabs: Record<string, NavTab>
+): string => {
+  if (detailName != null) return detailName;
+  return navTabs[pageName] != null ? navTabs[pageName].name : '';
+};
+
+export const getCurrentLocation = (
+  pageName: string,
+  detailName: string | undefined
+): LocationTypes => {
+  if (pageName === SiemPageName.overview) {
+    return CONSTANTS.overviewPage;
+  } else if (pageName === SiemPageName.hosts) {
+    if (detailName != null) {
       return CONSTANTS.hostsDetails;
-    } else if (trailingPath[0] === 'network') {
-      return CONSTANTS.networkPage;
-    } else if (pathname.match(/^\/network\/.+$/) != null) {
-      return CONSTANTS.networkDetails;
-    } else if (trailingPath[0] === 'overview') {
-      return CONSTANTS.overviewPage;
-    } else if (trailingPath[0] === 'timelines') {
-      return CONSTANTS.timelinePage;
     }
+    return CONSTANTS.hostsPage;
+  } else if (pageName === SiemPageName.network) {
+    if (detailName != null) {
+      return CONSTANTS.networkDetails;
+    }
+    return CONSTANTS.networkPage;
+  } else if (pageName === SiemPageName.detectionEngine) {
+    return CONSTANTS.detectionEnginePage;
+  } else if (pageName === SiemPageName.timelines) {
+    return CONSTANTS.timelinePage;
   }
   return CONSTANTS.unknown;
-  // throw new Error(`'Unknown pathName in else if statement': ${pathname}`);
 };
 
 export const isKqlForRoute = (
-  pathname: string,
+  pageName: string,
+  detailName: string | undefined,
   queryLocation: LocationTypes | null = null
 ): boolean => {
-  const currentLocation = getCurrentLocation(pathname);
+  const currentLocation = getCurrentLocation(pageName, detailName);
   if (
     (currentLocation === CONSTANTS.hostsPage && queryLocation === CONSTANTS.hostsPage) ||
     (currentLocation === CONSTANTS.networkPage && queryLocation === CONSTANTS.networkPage) ||
@@ -124,4 +134,59 @@ export const isKqlForRoute = (
     return true;
   }
   return false;
+};
+
+export const makeMapStateToProps = () => {
+  const getInputsSelector = inputsSelectors.inputsSelector();
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+  const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
+  const getTimelines = timelineSelectors.getTimelines();
+  const mapStateToProps = (state: State, { pageName, detailName }: UrlStateContainerPropTypes) => {
+    const inputState = getInputsSelector(state);
+    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
+    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
+
+    const timeline = Object.entries(getTimelines(state)).reduce(
+      (obj, [timelineId, timelineObj]) => ({
+        id: timelineObj.savedObjectId != null ? timelineObj.savedObjectId : '',
+        isOpen: timelineObj.show,
+      }),
+      { id: '', isOpen: false }
+    );
+
+    let searchAttr: {
+      [CONSTANTS.appQuery]?: Query;
+      [CONSTANTS.filters]?: esFilters.Filter[];
+      [CONSTANTS.savedQuery]?: string;
+    } = {
+      [CONSTANTS.appQuery]: getGlobalQuerySelector(state),
+      [CONSTANTS.filters]: getGlobalFiltersQuerySelector(state),
+    };
+    const savedQuery = getGlobalSavedQuerySelector(state);
+    if (savedQuery != null && savedQuery.id !== '') {
+      searchAttr = {
+        [CONSTANTS.savedQuery]: savedQuery.id,
+      };
+    }
+
+    return {
+      urlState: {
+        ...searchAttr,
+        [CONSTANTS.timerange]: {
+          global: {
+            [CONSTANTS.timerange]: globalTimerange,
+            linkTo: globalLinkTo,
+          },
+          timeline: {
+            [CONSTANTS.timerange]: timelineTimerange,
+            linkTo: timelineLinkTo,
+          },
+        },
+        [CONSTANTS.timeline]: timeline,
+      },
+    };
+  };
+
+  return mapStateToProps;
 };

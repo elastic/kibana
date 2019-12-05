@@ -8,44 +8,32 @@ import React from 'react';
 import uuid from 'uuid/v4';
 
 import { VECTOR_SHAPE_TYPES } from '../vector_feature_types';
-import { AbstractESSource } from '../es_source';
 import { VectorLayer } from '../../vector_layer';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
-import { VectorStyle } from '../../styles/vector_style';
+import { VectorStyle } from '../../styles/vector/vector_style';
+import { vectorStyles } from '../../styles/vector/vector_style_defaults';
 import { i18n } from '@kbn/i18n';
-import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW } from '../../../../common/constants';
+import { SOURCE_DATA_ID_ORIGIN, ES_PEW_PEW, COUNT_PROP_NAME, COUNT_PROP_LABEL } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { AggConfigs } from 'ui/vis/agg_configs';
+import { AggConfigs } from 'ui/agg_types';
+import { AbstractESAggSource } from '../es_agg_source';
+import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 
-const COUNT_PROP_LABEL = 'count';
-const COUNT_PROP_NAME = 'doc_count';
 const MAX_GEOTILE_LEVEL = 29;
 
-const aggSchemas = new Schemas([
-  {
-    group: 'metrics',
-    name: 'metric',
-    title: 'Value',
-    min: 1,
-    max: Infinity,
-    aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
-  }
-]);
+const aggSchemas = new Schemas([AbstractESAggSource.METRIC_SCHEMA_CONFIG]);
 
-export class ESPewPewSource extends AbstractESSource {
+export class ESPewPewSource extends AbstractESAggSource {
 
   static type = ES_PEW_PEW;
   static title = i18n.translate('xpack.maps.source.pewPewTitle', {
-    defaultMessage: 'Source-destination connections'
+    defaultMessage: 'Point to point'
   });
   static description = i18n.translate('xpack.maps.source.pewPewDescription', {
-    defaultMessage: 'Aggregated data paths between the origin and destinations.'
+    defaultMessage: 'Aggregated data paths between the source and destination'
   });
 
   static createDescriptor({ indexPatternId, sourceGeoField, destGeoField }) {
@@ -79,6 +67,7 @@ export class ESPewPewSource extends AbstractESSource {
         indexPatternId={this._descriptor.indexPatternId}
         onChange={onChange}
         metrics={this._descriptor.metrics}
+        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -95,12 +84,6 @@ export class ESPewPewSource extends AbstractESSource {
     return true;
   }
 
-  async getNumberFields() {
-    return this.getMetricFields().map(({ propertyKey: name, propertyLabel: label }) => {
-      return { label, name };
-    });
-  }
-
   async getSupportedShapeTypes() {
     return [VECTOR_SHAPE_TYPES.LINE];
   }
@@ -108,7 +91,7 @@ export class ESPewPewSource extends AbstractESSource {
   async getImmutableProperties() {
     let indexPatternTitle = this._descriptor.indexPatternId;
     try {
-      const indexPattern = await this._getIndexPattern();
+      const indexPattern = await this.getIndexPattern();
       indexPatternTitle = indexPattern.title;
     } catch (error) {
       // ignore error, title will just default to id
@@ -141,8 +124,8 @@ export class ESPewPewSource extends AbstractESSource {
 
   createDefaultLayer(options) {
     const styleDescriptor = VectorStyle.createDescriptor({
-      lineColor: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      [vectorStyles.LINE_COLOR]: {
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: COUNT_PROP_LABEL,
@@ -152,8 +135,8 @@ export class ESPewPewSource extends AbstractESSource {
           color: 'Blues'
         }
       },
-      lineWidth: {
-        type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      [vectorStyles.LINE_WIDTH]: {
+        type: DynamicStyleProperty.type,
         options: {
           field: {
             label: COUNT_PROP_LABEL,
@@ -182,21 +165,9 @@ export class ESPewPewSource extends AbstractESSource {
     return Math.min(targetGeotileLevel, MAX_GEOTILE_LEVEL);
   }
 
-  async getGeoJsonWithMeta(layerName, searchFilters) {
-    const indexPattern = await this._getIndexPattern();
-    const metricAggConfigs = this.getMetricFields().map(metric => {
-      const metricAggConfig = {
-        id: metric.propertyKey,
-        enabled: true,
-        type: metric.type,
-        schema: 'metric',
-        params: {}
-      };
-      if (metric.type !== 'count') {
-        metricAggConfig.params = { field: metric.field };
-      }
-      return metricAggConfig;
-    });
+  async getGeoJsonWithMeta(layerName, searchFilters, registerCancelCallback) {
+    const indexPattern = await this.getIndexPattern();
+    const metricAggConfigs = this.createMetricAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, metricAggConfigs, aggSchemas.all);
 
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
@@ -232,9 +203,13 @@ export class ESPewPewSource extends AbstractESSource {
       }
     });
 
-    const esResponse = await this._runEsQuery(layerName, searchSource, i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
-      defaultMessage: 'Source-destination connections request'
-    }));
+    const esResponse = await this._runEsQuery(
+      layerName,
+      searchSource,
+      registerCancelCallback,
+      i18n.translate('xpack.maps.source.pewPew.inspectorDescription', {
+        defaultMessage: 'Source-destination connections request'
+      }));
 
     const { featureCollection } = convertToLines(esResponse);
 
@@ -246,17 +221,9 @@ export class ESPewPewSource extends AbstractESSource {
     };
   }
 
-  _formatMetricKey(metric) {
-    return metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : COUNT_PROP_NAME;
-  }
-
-  _formatMetricLabel(metric) {
-    return metric.type !== 'count' ? `${metric.type} of ${metric.field}` : COUNT_PROP_LABEL;
-  }
-
   async _getGeoField() {
-    const indexPattern = await this._getIndexPattern();
-    const geoField = indexPattern.fields.byName[this._descriptor.destGeoField];
+    const indexPattern = await this.getIndexPattern();
+    const geoField = indexPattern.fields.getByName(this._descriptor.destGeoField);
     if (!geoField) {
       throw new Error(i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
         defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,

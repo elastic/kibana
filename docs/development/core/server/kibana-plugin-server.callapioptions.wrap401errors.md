@@ -9,5 +9,5 @@ Indicates whether `401 Unauthorized` errors returned from the Elasticsearch API 
 <b>Signature:</b>
 
 ```typescript
-wrap401Errors: boolean;
+wrap401Errors?: boolean;
 ```

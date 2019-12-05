@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  EuiButtonEmpty,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -16,39 +15,41 @@ import {
   EuiText,
   EuiTitle,
   EuiSpacer,
-  EuiCallOut,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import euiStyled from '../../../../../../common/eui_styled_components';
+import { SetupStatus } from '../../../../common/log_analysis';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { AnalysisSetupSteps } from './setup';
 
-import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-import { CreateMLJobsButton } from './create_ml_jobs_button';
+type SetupHandler = (
+  indices: string[],
+  startTime: number | undefined,
+  endTime: number | undefined
+) => void;
 
 interface AnalysisSetupContentProps {
-  setupMlModule: (startTime?: number | undefined, endTime?: number | undefined) => Promise<any>;
-  isSettingUp: boolean;
-  didSetupFail: boolean;
-  isCleaningUpAFailedSetup: boolean;
-  indexPattern: string;
+  availableIndices: string[];
+  cleanupAndSetup: SetupHandler;
+  errorMessages: string[];
+  setup: SetupHandler;
+  setupStatus: SetupStatus;
+  timestampField: string;
+  viewResults: () => void;
 }
 
-const errorTitle = i18n.translate('xpack.infra.analysisSetup.errorTitle', {
-  defaultMessage: 'Sorry, there was an error setting up Machine Learning',
-});
-
 export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentProps> = ({
-  setupMlModule,
-  isSettingUp,
-  didSetupFail,
-  isCleaningUpAFailedSetup,
-  indexPattern,
+  availableIndices,
+  cleanupAndSetup,
+  errorMessages,
+  setup,
+  setupStatus,
+  timestampField,
+  viewResults,
 }) => {
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'analysis_setup', delay: 15000 });
 
-  const [showTimeRangeForm, setShowTimeRangeForm] = useState(false);
   return (
     <AnalysisSetupPage>
       <EuiPageBody>
@@ -76,52 +77,16 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
                 defaultMessage="Use Machine Learning to automatically detect anomalous log rate counts."
               />
             </EuiText>
-            {showTimeRangeForm ? (
-              <>
-                <EuiSpacer size="l" />
-                <AnalysisSetupTimerangeForm
-                  isSettingUp={isSettingUp}
-                  setupMlModule={setupMlModule}
-                />
-              </>
-            ) : (
-              <>
-                <EuiSpacer size="m" />
-                <ByDefaultText>
-                  <FormattedMessage
-                    id="xpack.infra.analysisSetup.timeRangeByDefault"
-                    defaultMessage="By default, we'll analyze all past and future log messages in your logs indices."
-                  />{' '}
-                  <EuiButtonEmpty onClick={() => setShowTimeRangeForm(true)}>
-                    <FormattedMessage
-                      id="xpack.infra.analysisSetup.configureTimeRange"
-                      defaultMessage="Configure time range?"
-                    />
-                  </EuiButtonEmpty>
-                </ByDefaultText>
-                <EuiSpacer size="l" />
-                <CreateMLJobsButton
-                  isLoading={isSettingUp || isCleaningUpAFailedSetup}
-                  onClick={() => setupMlModule()}
-                />
-              </>
-            )}
-            {didSetupFail && (
-              <>
-                <EuiSpacer />
-                <EuiCallOut color="danger" iconType="alert" title={errorTitle}>
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.infra.analysisSetup.errorText"
-                      defaultMessage="Please ensure your configured logs indices ({indexPattern}) exist. If your indices do exist, please try again."
-                      values={{
-                        indexPattern,
-                      }}
-                    />
-                  </EuiText>
-                </EuiCallOut>
-              </>
-            )}
+            <EuiSpacer />
+            <AnalysisSetupSteps
+              availableIndices={availableIndices}
+              cleanupAndSetup={cleanupAndSetup}
+              errorMessages={errorMessages}
+              setup={setup}
+              setupStatus={setupStatus}
+              timestampField={timestampField}
+              viewResults={viewResults}
+            />
           </EuiPageContentBody>
         </AnalysisPageContent>
       </EuiPageBody>
@@ -131,21 +96,9 @@ export const AnalysisSetupContent: React.FunctionComponent<AnalysisSetupContentP
 
 // !important due to https://github.com/elastic/eui/issues/2232
 const AnalysisPageContent = euiStyled(EuiPageContent)`
-  max-width: 518px !important;
+  max-width: 768px !important;
 `;
 
 const AnalysisSetupPage = euiStyled(EuiPage)`
   height: 100%;
-`;
-
-const ByDefaultText = euiStyled(EuiText).attrs({ size: 's' })`
-  & .euiButtonEmpty {
-    font-size: inherit;
-    line-height: inherit;
-    height: initial;
-  }
-
-  & .euiButtonEmpty__content {
-    padding: 0;
-  }
 `;

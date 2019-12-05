@@ -17,17 +17,17 @@ import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
 import { last } from 'lodash';
 import { rgba } from 'polished';
+import { scaleUtc } from 'd3-scale';
 
 import StatusText from './StatusText';
 import { SharedPlot } from './plotUtils';
 import { i18n } from '@kbn/i18n';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
+import { getTimezoneOffsetInMs } from './getTimezoneOffsetInMs';
 
 // undefined values are converted by react-vis into NaN when stacking
 // see https://github.com/uber/react-vis/issues/1214
 const getNull = d => isValidCoordinateValue(d.y) && !isNaN(d.y);
-
-const X_TICK_TOTAL = 7;
 
 class StaticPlot extends PureComponent {
   getVisSeries(series, plotValues) {
@@ -44,7 +44,7 @@ class StaticPlot extends PureComponent {
           <LineSeries
             getNull={getNull}
             key={serie.title}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
@@ -56,7 +56,7 @@ class StaticPlot extends PureComponent {
           <AreaSeries
             getNull={getNull}
             key={serie.title}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
@@ -80,7 +80,7 @@ class StaticPlot extends PureComponent {
           <AreaSeries
             getNull={getNull}
             key={`${serie.title}-area`}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={data}
             color={serie.color}
@@ -92,7 +92,7 @@ class StaticPlot extends PureComponent {
           <LineSeries
             getNull={getNull}
             key={`${serie.title}-line`}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={data}
             color={serie.color}
@@ -115,7 +115,7 @@ class StaticPlot extends PureComponent {
           <VerticalRectSeries
             getNull={getNull}
             key={serie.title}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={data}
             color={serie.color}
@@ -128,7 +128,7 @@ class StaticPlot extends PureComponent {
           <LineMarkSeries
             getNull={getNull}
             key={serie.title}
-            xType="time"
+            xType="time-utc"
             curve={'curveMonotoneX'}
             data={serie.data}
             color={serie.color}
@@ -140,13 +140,37 @@ class StaticPlot extends PureComponent {
     }
   }
 
+  /**
+   * A tick format function that takes the timezone from Kibana's settings into
+   * account. Used if no tickFormatX prop is supplied.
+   *
+   * This produces the same results as the built-in formatter from D3, which is
+   * what react-vis uses, but shifts the timezone.
+   */
+  tickFormatXTime = value => {
+    const xDomain = this.props.plotValues.x.domain();
+
+    const time = value.getTime();
+
+    return scaleUtc()
+      .domain(xDomain)
+      .tickFormat()(new Date(time - getTimezoneOffsetInMs(time)));
+  };
+
   render() {
-    const { series, tickFormatX, tickFormatY, plotValues, noHits } = this.props;
-    const { yTickValues } = plotValues;
+    const { series, tickFormatY, plotValues, noHits } = this.props;
+    const { xTickValues, yTickValues } = plotValues;
+
+    const tickFormatX = this.props.tickFormatX || this.tickFormatXTime;
 
     return (
       <SharedPlot plotValues={plotValues}>
-        <XAxis tickSize={0} tickTotal={X_TICK_TOTAL} tickFormat={tickFormatX} />
+        <XAxis
+          type="time-utc"
+          tickSize={0}
+          tickFormat={tickFormatX}
+          tickValues={xTickValues}
+        />
         {noHits ? (
           <StatusText
             marginLeft={30}
@@ -181,5 +205,6 @@ StaticPlot.propTypes = {
   series: PropTypes.array.isRequired,
   plotValues: PropTypes.object.isRequired,
   tickFormatX: PropTypes.func,
-  tickFormatY: PropTypes.func.isRequired
+  tickFormatY: PropTypes.func.isRequired,
+  width: PropTypes.number.isRequired
 };

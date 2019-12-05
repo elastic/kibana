@@ -17,8 +17,22 @@
  * under the License.
  */
 
-export { TimeRange, RefreshInterval } from '../../../../plugins/data/public';
+import uiRoutes from 'ui/routes';
+import { npStart } from 'ui/new_platform';
+import { TimefilterContract, TimeHistoryContract } from '../../../../plugins/data/public';
+import { registerTimefilterWithGlobalState } from './setup_router';
 
-export { timefilter, Timefilter, registerTimefilterWithGlobalState } from './timefilter';
-export { timeHistory, TimeHistory } from './time_history';
-export { getTime } from './get_time';
+export {
+  getTime,
+  InputTimeRange,
+  TimeHistoryContract,
+  TimefilterContract,
+} from '../../../../plugins/data/public';
+export type Timefilter = TimefilterContract;
+export type TimeHistory = TimeHistoryContract;
+export const timeHistory = npStart.plugins.data.query.timefilter.history;
+export const timefilter = npStart.plugins.data.query.timefilter.timefilter;
+
+uiRoutes.addSetupWork((globalState, $rootScope) => {
+  return registerTimefilterWithGlobalState(timefilter, globalState, $rootScope);
+});

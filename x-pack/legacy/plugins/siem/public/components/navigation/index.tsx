@@ -4,135 +4,76 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { compose } from 'redux';
+import { isEqual } from 'lodash/fp';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { compose } from 'redux';
 
+import { RouteSpyState } from '../../utils/route/types';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { makeMapStateToProps } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
-import { TabNavigationProps, SiemNavigationComponentProps } from './type';
-import {
-  inputsSelectors,
-  hostsSelectors,
-  networkSelectors,
-  timelineSelectors,
-  State,
-  hostsModel,
-  networkModel,
-} from '../../store';
-import { CONSTANTS } from '../url_state/constants';
+import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
-export class SiemNavigationComponent extends React.Component<
-  RouteComponentProps & TabNavigationProps
-> {
-  public shouldComponentUpdate(nextProps: Readonly<RouteComponentProps>): boolean {
-    if (
-      this.props.location.pathname === nextProps.location.pathname &&
-      this.props.location.search === nextProps.location.search
-    ) {
-      return false;
-    }
-    return true;
-  }
+export const SiemNavigationComponent = React.memo<
+  SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState
+>(
+  ({ detailName, display, navTabs, pageName, pathName, search, tabName, urlState }) => {
+    useEffect(() => {
+      if (pathName) {
+        setBreadcrumbs({
+          query: urlState.query,
+          detailName,
+          filters: urlState.filters,
+          navTabs,
+          pageName,
+          pathName,
+          savedQuery: urlState.savedQuery,
+          search,
+          tabName,
+          timerange: urlState.timerange,
+          timeline: urlState.timeline,
+        });
+      }
+    }, [pathName, search, navTabs, urlState]);
 
-  public componentWillMount(): void {
-    const {
-      location,
-      match: { params },
-    } = this.props;
-    if (location.pathname) {
-      setBreadcrumbs(location.pathname, params);
-    }
-  }
-
-  public componentWillReceiveProps(nextProps: Readonly<RouteComponentProps>): void {
-    if (this.props.location.pathname !== nextProps.location.pathname) {
-      setBreadcrumbs(nextProps.location.pathname, nextProps.match.params);
-    }
-  }
-
-  public render() {
-    const {
-      display,
-      location,
-      hosts,
-      hostDetails,
-      match,
-      navTabs,
-      network,
-      showBorder,
-      timerange,
-      timelineId,
-    } = this.props;
     return (
       <TabNavigation
+        query={urlState.query}
         display={display}
-        location={location}
-        hosts={hosts}
-        hostDetails={hostDetails}
-        match={match}
+        filters={urlState.filters}
         navTabs={navTabs}
-        network={network}
-        showBorder={showBorder}
-        timerange={timerange}
-        timelineId={timelineId}
+        pageName={pageName}
+        pathName={pathName}
+        savedQuery={urlState.savedQuery}
+        tabName={tabName}
+        timeline={urlState.timeline}
+        timerange={urlState.timerange}
       />
     );
-  }
-}
-
-const makeMapStateToProps = () => {
-  const getInputsSelector = inputsSelectors.inputsSelector();
-  const getHostsFilterQueryAsKuery = hostsSelectors.hostsFilterQueryAsKuery();
-  const getNetworkFilterQueryAsKuery = networkSelectors.networkFilterQueryAsKuery();
-  const getTimelines = timelineSelectors.getTimelines();
-  const mapStateToProps = (state: State) => {
-    const inputState = getInputsSelector(state);
-    const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
-    const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
-
-    const openTimelineId = Object.entries(getTimelines(state)).reduce(
-      (useTimelineId, [timelineId, timelineObj]) => {
-        if (timelineObj.savedObjectId != null) {
-          useTimelineId = timelineObj.savedObjectId;
-        }
-        return useTimelineId;
-      },
-      ''
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.pathName === nextProps.pathName &&
+      prevProps.search === nextProps.search &&
+      isEqual(prevProps.navTabs, nextProps.navTabs) &&
+      isEqual(prevProps.urlState, nextProps.urlState)
     );
+  }
+);
 
-    return {
-      hosts: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.page),
-        queryLocation: CONSTANTS.hostsPage,
-      },
-      hostDetails: {
-        filterQuery: getHostsFilterQueryAsKuery(state, hostsModel.HostsType.details),
-        queryLocation: CONSTANTS.hostsDetails,
-      },
-      network: {
-        filterQuery: getNetworkFilterQueryAsKuery(state, networkModel.NetworkType.page),
-        queryLocation: CONSTANTS.networkPage,
-      },
-      [CONSTANTS.timerange]: {
-        global: {
-          [CONSTANTS.timerange]: globalTimerange,
-          linkTo: globalLinkTo,
-        },
-        timeline: {
-          [CONSTANTS.timerange]: timelineTimerange,
-          linkTo: timelineLinkTo,
-        },
-      },
-      [CONSTANTS.timelineId]: openTimelineId,
-    };
+SiemNavigationComponent.displayName = 'SiemNavigationComponent';
+
+export const SiemNavigationRedux = compose<
+  React.ComponentClass<SiemNavigationProps & RouteSpyState>
+>(connect(makeMapStateToProps))(SiemNavigationComponent);
+
+export const SiemNavigation = React.memo<SiemNavigationProps>(props => {
+  const [routeProps] = useRouteSpy();
+  const stateNavReduxProps: RouteSpyState & SiemNavigationProps = {
+    ...routeProps,
+    ...props,
   };
-
-  return mapStateToProps;
-};
-
-export const SiemNavigation = compose<React.ComponentClass<SiemNavigationComponentProps>>(
-  withRouter,
-  connect(makeMapStateToProps)
-)(SiemNavigationComponent);
+  return <SiemNavigationRedux {...stateNavReduxProps} />;
+});

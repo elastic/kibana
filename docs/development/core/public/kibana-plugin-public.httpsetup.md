@@ -4,6 +4,7 @@
 
 ## HttpSetup type
 
+See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md)
 
 <b>Signature:</b>
 

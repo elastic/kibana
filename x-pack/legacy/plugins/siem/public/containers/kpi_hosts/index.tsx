@@ -14,7 +14,7 @@ import { pure } from 'recompose';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiHostsQuery } from './index.gql_query';
@@ -41,7 +41,7 @@ const KpiHostsComponentQuery = pure<KpiHostsProps & KpiHostsReducer>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
       query={kpiHostsQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
       variables={{

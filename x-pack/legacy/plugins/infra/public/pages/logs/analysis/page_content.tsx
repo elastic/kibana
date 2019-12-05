@@ -6,44 +6,38 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect } from 'react';
-import chrome from 'ui/chrome';
 
+import { isSetupStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
-import {
-  LogAnalysisCapabilities,
-  LogAnalysisJobs,
-  useLogAnalysisCleanup,
-} from '../../../containers/logs/log_analysis';
+import { LogAnalysisCapabilities, LogAnalysisJobs } from '../../../containers/logs/log_analysis';
 import { Source } from '../../../containers/source';
 import { AnalysisResultsContent } from './page_results_content';
 import { AnalysisSetupContent } from './page_setup_content';
 import { AnalysisUnavailableContent } from './page_unavailable_content';
+import { AnalysisSetupStatusUnknownContent } from './page_setup_status_unknown';
 
 export const AnalysisPageContent = () => {
-  const { sourceId, source } = useContext(Source.Context);
+  const { sourceId } = useContext(Source.Context);
   const { hasLogAnalysisCapabilites } = useContext(LogAnalysisCapabilities.Context);
 
-  const spaceId = chrome.getInjected('activeSpace').space.id;
-
   const {
-    isSetupRequired,
-    isLoadingSetupStatus,
-    setupMlModule,
-    isSettingUpMlModule,
-    didSetupFail,
-    hasCompletedSetup,
+    availableIndices,
+    cleanupAndSetup,
+    fetchJobStatus,
+    lastSetupErrorMessages,
+    setup,
+    setupStatus,
+    timestampField,
+    viewResults,
   } = useContext(LogAnalysisJobs.Context);
 
-  const { cleanupMLResources, isCleaningUp } = useLogAnalysisCleanup({ sourceId, spaceId });
   useEffect(() => {
-    if (didSetupFail) {
-      cleanupMLResources();
-    }
-  }, [didSetupFail, cleanupMLResources]);
+    fetchJobStatus();
+  }, []);
 
   if (!hasLogAnalysisCapabilites) {
     return <AnalysisUnavailableContent />;
-  } else if (isLoadingSetupStatus) {
+  } else if (setupStatus === 'initializing') {
     return (
       <LoadingPage
         message={i18n.translate('xpack.infra.logs.analysisPage.loadingMessage', {
@@ -51,17 +45,26 @@ export const AnalysisPageContent = () => {
         })}
       />
     );
-  } else if (isSetupRequired) {
+  } else if (setupStatus === 'unknown') {
+    return <AnalysisSetupStatusUnknownContent retry={fetchJobStatus} />;
+  } else if (isSetupStatusWithResults(setupStatus)) {
     return (
-      <AnalysisSetupContent
-        didSetupFail={didSetupFail}
-        isSettingUp={isSettingUpMlModule}
-        setupMlModule={setupMlModule}
-        isCleaningUpAFailedSetup={isCleaningUp}
-        indexPattern={source ? source.configuration.logAlias : ''}
+      <AnalysisResultsContent
+        sourceId={sourceId}
+        isFirstUse={setupStatus === 'hiddenAfterSuccess'}
       />
     );
   } else {
-    return <AnalysisResultsContent sourceId={sourceId} isFirstUse={hasCompletedSetup} />;
+    return (
+      <AnalysisSetupContent
+        availableIndices={availableIndices}
+        cleanupAndSetup={cleanupAndSetup}
+        errorMessages={lastSetupErrorMessages}
+        setup={setup}
+        setupStatus={setupStatus}
+        timestampField={timestampField}
+        viewResults={viewResults}
+      />
+    );
   }
 };

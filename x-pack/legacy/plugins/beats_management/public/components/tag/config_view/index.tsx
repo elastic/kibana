@@ -17,6 +17,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiSelect,
+  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -119,6 +120,7 @@ class ConfigViewUi extends React.Component<ComponentProps, ComponentState> {
               )}
             />
           </EuiFormRow>
+          <EuiSpacer />
           <h3>
             {i18n.translate('xpack.beatsManagement.tagConfig.configurationTypeText', {
               defaultMessage: '{configType} configuration',

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { UICapabilities } from 'ui/capabilities';
@@ -25,61 +26,58 @@ import { SettingsPage } from '../shared/settings';
 import { AppNavigation } from '../../components/navigation/app_navigation';
 
 interface InfrastructurePageProps extends RouteComponentProps {
-  intl: InjectedIntl;
   uiCapabilities: UICapabilities;
 }
 
 export const InfrastructurePage = injectUICapabilities(
-  injectI18n(({ match, intl, uiCapabilities }: InfrastructurePageProps) => (
+  ({ match, uiCapabilities }: InfrastructurePageProps) => (
     <Source.Provider sourceId="default">
       <ColumnarPage>
         <DocumentTitle
-          title={intl.formatMessage({
-            id: 'xpack.infra.homePage.documentTitle',
-            defaultMessage: 'Infrastructure',
+          title={i18n.translate('xpack.infra.homePage.documentTitle', {
+            defaultMessage: 'Metrics',
           })}
         />
 
         <HelpCenterContent
-          feedbackLink="https://discuss.elastic.co/c/infrastructure"
-          feedbackLinkText={intl.formatMessage({
-            id: 'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
-            defaultMessage: 'Provide feedback for Infrastructure',
+          feedbackLink="https://discuss.elastic.co/c/metrics"
+          appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+            defaultMessage: 'Metrics',
           })}
         />
 
         <Header
           breadcrumbs={[
             {
-              text: intl.formatMessage({
-                id: 'xpack.infra.header.infrastructureTitle',
-                defaultMessage: 'Infrastructure',
+              text: i18n.translate('xpack.infra.header.infrastructureTitle', {
+                defaultMessage: 'Metrics',
               }),
             },
           ]}
           readOnlyBadge={!uiCapabilities.infrastructure.save}
         />
 
-        <AppNavigation>
+        <AppNavigation
+          aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
+            defaultMessage: 'Metrics',
+          })}
+        >
           <RoutedTabs
             tabs={[
               {
-                title: intl.formatMessage({
-                  id: 'xpack.infra.homePage.inventoryTabTitle',
+                title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
                   defaultMessage: 'Inventory',
                 }),
                 path: `${match.path}/inventory`,
               },
               {
-                title: intl.formatMessage({
-                  id: 'xpack.infra.homePage.metricsExplorerTabTitle',
+                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
                   defaultMessage: 'Metrics Explorer',
                 }),
                 path: `${match.path}/metrics-explorer`,
               },
               {
-                title: intl.formatMessage({
-                  id: 'xpack.infra.homePage.settingsTabTitle',
+                title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
                   defaultMessage: 'Settings',
                 }),
                 path: `${match.path}/settings`,
@@ -111,5 +109,5 @@ export const InfrastructurePage = injectUICapabilities(
         </Switch>
       </ColumnarPage>
     </Source.Provider>
-  ))
+  )
 );

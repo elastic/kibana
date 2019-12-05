@@ -24,43 +24,32 @@ import { BrowserProvider } from './browser';
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
+  DashboardReplacePanelProvider,
   DashboardExpectProvider,
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
   // @ts-ignore not TS yet
 } from './dashboard';
-// @ts-ignore not TS yet
 import { DocTableProvider } from './doc_table';
-// @ts-ignore not TS yet
+import { ElasticChartProvider } from './elastic_chart';
 import { EmbeddingProvider } from './embedding';
-// @ts-ignore not TS yet
 import { FailureDebuggingProvider } from './failure_debugging';
-// @ts-ignore not TS yet
 import { FilterBarProvider } from './filter_bar';
 import { FindProvider } from './find';
-// @ts-ignore not TS yet
 import { FlyoutProvider } from './flyout';
-// @ts-ignore not TS yet
 import { GlobalNavProvider } from './global_nav';
-// @ts-ignore not TS yet
 import { InspectorProvider } from './inspector';
-// @ts-ignore not TS yet
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
-// @ts-ignore not TS yet
 import { RenderableProvider } from './renderable';
 import { ScreenshotsProvider } from './screenshots';
-// @ts-ignore not TS yet
 import { SnapshotsProvider } from './snapshots';
-// @ts-ignore not TS yet
 import { TableProvider } from './table';
 import { TestSubjectsProvider } from './test_subjects';
 import { ToastsProvider } from './toasts';
 // @ts-ignore not TS yet
 import { PieChartProvider } from './visualizations';
-// @ts-ignore not TS yet
 import { VisualizeListingTableProvider } from './visualize_listing_table';
-// @ts-ignore not TS yet
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 
 export const services = {
@@ -79,6 +68,7 @@ export const services = {
   failureDebugging: FailureDebuggingProvider,
   visualizeListingTable: VisualizeListingTableProvider,
   dashboardAddPanel: DashboardAddPanelProvider,
+  dashboardReplacePanel: DashboardReplacePanelProvider,
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
@@ -92,4 +82,5 @@ export const services = {
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
+  elasticChart: ElasticChartProvider,
 };

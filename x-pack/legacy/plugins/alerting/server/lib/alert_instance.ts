@@ -5,32 +5,62 @@
  */
 
 import { State, Context } from '../types';
+import { parseDuration } from './parse_duration';
+
+interface Meta {
+  lastScheduledActions?: {
+    group: string;
+    date: Date;
+  };
+}
+
+interface ScheduledExecutionOptions {
+  actionGroup: string;
+  context: Context;
+  state: State;
+}
 
 interface ConstructorOptions {
-  state?: Record<string, any>;
-  meta?: Record<string, any>;
+  state?: State;
+  meta?: Meta;
 }
 
 export class AlertInstance {
-  private fireOptions?: Record<string, any>;
-  private meta: Record<string, any>;
-  private state: Record<string, any>;
+  private scheduledExecutionOptions?: ScheduledExecutionOptions;
+  private meta: Meta;
+  private state: State;
 
   constructor({ state = {}, meta = {} }: ConstructorOptions = {}) {
     this.state = state;
     this.meta = meta;
   }
 
-  shouldFire() {
-    return this.fireOptions !== undefined;
+  hasScheduledActions() {
+    return this.scheduledExecutionOptions !== undefined;
   }
 
-  getFireOptions() {
-    return this.fireOptions;
+  isThrottled(throttle: string | null) {
+    if (this.scheduledExecutionOptions === undefined) {
+      return false;
+    }
+    const throttleMills = throttle ? parseDuration(throttle) : 0;
+    const actionGroup = this.scheduledExecutionOptions.actionGroup;
+    if (
+      this.meta.lastScheduledActions &&
+      this.meta.lastScheduledActions.group === actionGroup &&
+      new Date(this.meta.lastScheduledActions.date).getTime() + throttleMills > Date.now()
+    ) {
+      return true;
+    }
+    return false;
   }
 
-  resetFire() {
-    this.fireOptions = undefined;
+  getScheduledActionOptions() {
+    return this.scheduledExecutionOptions;
+  }
+
+  unscheduleActions() {
+    this.scheduledExecutionOptions = undefined;
     return this;
   }
 
@@ -38,15 +68,11 @@ export class AlertInstance {
     return this.state;
   }
 
-  getMeta() {
-    return this.meta;
-  }
-
-  fire(actionGroup: string, context: Context = {}) {
-    if (this.shouldFire()) {
-      throw new Error('Alert instance already fired, cannot fire twice');
+  scheduleActions(actionGroup: string, context: Context = {}) {
+    if (this.hasScheduledActions()) {
+      throw new Error('Alert instance execution has already been scheduled, cannot schedule twice');
     }
-    this.fireOptions = { actionGroup, context, state: this.state };
+    this.scheduledExecutionOptions = { actionGroup, context, state: this.state };
     return this;
   }
 
@@ -55,9 +81,8 @@ export class AlertInstance {
     return this;
   }
 
-  replaceMeta(meta: Record<string, any>) {
-    this.meta = meta;
-    return this;
+  updateLastScheduledActions(group: string) {
+    this.meta.lastScheduledActions = { group, date: new Date() };
   }
 
   /**

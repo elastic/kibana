@@ -35,16 +35,22 @@ const BadgeHighlighted = (props: EuiBadgeProps) => (
     style={{
       height: '20px',
       margin: '0 5px 0 5px',
-      maxWidth: '70px',
-      minWidth: '70px',
+      maxWidth: '85px',
+      minWidth: '85px',
     }}
   />
 );
 
 BadgeHighlighted.displayName = 'BadgeHighlighted';
 
+const HighlightedBackground = styled.span`
+  background-color: ${props => props.theme.eui.euiColorLightShade};
+`;
+
+HighlightedBackground.displayName = 'HighlightedBackground';
+
 const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
-  width: ${props => (props.showSmallMsg ? '60px' : 'auto')}
+  width: ${props => (props.showSmallMsg ? '60px' : 'auto')};
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -94,7 +100,9 @@ export const Empty = pure<Props>(({ showSmallMsg = false }) => (
           <Text color="subdued" size="s">
             {i18n.DROP_ANYTHING}
           </Text>
-          <BadgeHighlighted>{i18n.HIGHLIGHTED}</BadgeHighlighted>
+          <HighlightedBackground>
+            <BadgeHighlighted>{i18n.HIGHLIGHTED}</BadgeHighlighted>
+          </HighlightedBackground>
         </NoWrap>
 
         <NoWrap>

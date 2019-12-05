@@ -26,7 +26,7 @@ describe('stateful_body', () => {
           name: '@timestamp',
           searchable: true,
           type: 'date',
-          width: 240,
+          width: 190,
         },
         {
           aggregatable: true,

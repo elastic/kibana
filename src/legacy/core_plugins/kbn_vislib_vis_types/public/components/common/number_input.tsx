@@ -17,20 +17,33 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 interface NumberInputOptionProps<ParamName extends string> {
+  disabled?: boolean;
+  error?: ReactNode;
+  isInvalid?: boolean;
   label?: React.ReactNode;
   max?: number;
   min?: number;
-  step?: string | number;
   paramName: ParamName;
+  step?: number;
   value?: number | '';
+  'data-test-subj'?: string;
   setValue: (paramName: ParamName, value: number | '') => void;
 }
 
+/**
+ * Do not use this component anymore.
+ * Please, use NumberInputOption in 'required_number_input.tsx'.
+ * It is required for compatibility with TS 3.7.0
+ * This should be removed in the future
+ */
 function NumberInputOption<ParamName extends string>({
+  disabled,
+  error,
+  isInvalid,
   label,
   max,
   min,
@@ -38,11 +51,16 @@ function NumberInputOption<ParamName extends string>({
   step,
   value = '',
   setValue,
+  'data-test-subj': dataTestSubj,
 }: NumberInputOptionProps<ParamName>) {
   return (
-    <EuiFormRow label={label} fullWidth compressed>
+    <EuiFormRow label={label} error={error} isInvalid={isInvalid} fullWidth compressed>
       <EuiFieldNumber
+        data-test-subj={dataTestSubj}
+        disabled={disabled}
+        compressed
         fullWidth
+        isInvalid={isInvalid}
         step={step}
         max={max}
         min={min}

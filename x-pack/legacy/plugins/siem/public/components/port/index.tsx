@@ -35,7 +35,7 @@ export const Port = pure<{
   <DefaultDraggable
     data-test-subj="port"
     field={fieldName}
-    id={`${contextId}-${eventId}-${fieldName}-${value}`}
+    id={`port-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
     tooltipContent={fieldName}
     value={value}
   >

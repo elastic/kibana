@@ -16,30 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-import { npSetup, npStart } from 'ui/new_platform';
-import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
-import { ExitFullScreenButton } from 'ui/exit_full_screen';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
-
-import { plugin } from '.';
-import {
-  setup as embeddableSetup,
-  start as embeddableStart,
-} from '../../../../embeddable_api/public/np_ready/public/legacy';
-
-const pluginInstance = plugin({} as any);
-
-export const setup = pluginInstance.setup(npSetup.core, {
-  embeddable: embeddableSetup,
-});
-
-export const start = pluginInstance.start(npStart.core, {
-  embeddable: embeddableStart,
-  inspector: npStart.plugins.inspector,
-  __LEGACY: {
-    SavedObjectFinder,
-    ExitFullScreenButton,
-  },
-});

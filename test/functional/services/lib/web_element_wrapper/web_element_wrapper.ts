@@ -18,8 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, IKey, until } from 'selenium-webdriver';
-// @ts-ignore not supported yet
+import { WebElement, WebDriver, By, Key, until } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
@@ -33,9 +32,7 @@ import { Browsers } from '../../remote/browsers';
 interface Driver {
   driver: WebDriver;
   By: typeof By;
-  Key: IKey;
   until: typeof until;
-  LegacyActionSequence: any;
 }
 
 interface TypeOptions {
@@ -54,10 +51,10 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 ];
 
 export class WebElementWrapper {
-  private By: typeof By = this.webDriver.By;
-  private Keys: IKey = this.webDriver.Key;
+  private By = this.webDriver.By;
   private driver: WebDriver = this.webDriver.driver;
-  public LegacyAction: any = this.webDriver.LegacyActionSequence;
+  private Keys = Key;
+  public isW3CEnabled: boolean = (this.webDriver.driver as any).executor_.w3c === true;
 
   public static create(
     webElement: WebElement | WebElementWrapper,
@@ -98,11 +95,11 @@ export class WebElementWrapper {
     timeout?: number
   ) {
     if (timeout && timeout !== this.timeout) {
-      await (this.driver.manage() as any).setTimeouts({ implicit: timeout });
+      await this.driver.manage().setTimeouts({ implicit: timeout });
     }
     const elements = await findFunction();
     if (timeout && timeout !== this.timeout) {
-      await (this.driver.manage() as any).setTimeouts({ implicit: this.timeout });
+      await this.driver.manage().setTimeouts({ implicit: this.timeout });
     }
     return elements;
   }
@@ -147,6 +144,10 @@ export class WebElementWrapper {
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
+  }
+
+  private getActions() {
+    return this.isW3CEnabled ? this.driver.actions() : this.driver.actions({ bridge: true });
   }
 
   /**
@@ -219,6 +220,17 @@ export class WebElementWrapper {
   }
 
   /**
+   * Check if webelement wrapper has a specific class.
+   *
+   * @return {Promise<boolean>}
+   */
+  public async elementHasClass(className: string): Promise<boolean> {
+    const classes: string = await this._webElement.getAttribute('class');
+
+    return classes.includes(className);
+  }
+
+  /**
    * Clear the value of this element. This command has no effect if the underlying DOM element
    * is neither a text INPUT element nor a TEXTAREA element.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
@@ -227,6 +239,9 @@ export class WebElementWrapper {
    * @default { withJS: false }
    */
   async clearValue(options: ClearOptions = { withJS: false }) {
+    if (this.browserType === Browsers.InternetExplorer) {
+      return this.clearValueWithKeyboard();
+    }
     await this.retryCall(async function clearValue(wrapper) {
       if (wrapper.browserType === Browsers.Chrome || options.withJS) {
         // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
@@ -243,6 +258,16 @@ export class WebElementWrapper {
    * @default { charByChar: false }
    */
   async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }) {
+    if (this.browserType === Browsers.InternetExplorer) {
+      const value = await this.getAttribute('value');
+      // For IE testing, the text field gets clicked in the middle so
+      // first go HOME and then DELETE all chars
+      await this.pressKeys(this.Keys.HOME);
+      for (let i = 0; i <= value.length; i++) {
+        await this.pressKeys(this.Keys.DELETE);
+      }
+      return;
+    }
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
@@ -303,7 +328,7 @@ export class WebElementWrapper {
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  public async pressKeys<T extends IKey>(keys: T | T[]): Promise<void>;
+  public async pressKeys<T extends typeof Key>(keys: T | T[]): Promise<void>;
   public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
   public async pressKeys(keys: string): Promise<void> {
     await this.retryCall(async function pressKeys(wrapper) {
@@ -384,7 +409,7 @@ export class WebElementWrapper {
    */
   public async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.retryCall(async function getPosition(wrapper) {
-      return await (wrapper._webElement as any).getRect();
+      return await wrapper._webElement.getRect();
     });
   }
 
@@ -397,31 +422,83 @@ export class WebElementWrapper {
    */
   public async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.retryCall(async function getSize(wrapper) {
-      return await (wrapper._webElement as any).getRect();
+      return await wrapper._webElement.getRect();
     });
   }
 
   /**
-   * Moves the remote environment’s mouse cursor to the current element
+   * Moves the remote environment’s mouse cursor to the current element with optional offset
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
-   *
+   * @param { xOffset: 0, yOffset: 0 } options
    * @return {Promise<void>}
    */
-  public async moveMouseTo() {
+  public async moveMouseTo(options = { xOffset: 0, yOffset: 0 }) {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary();
-      if (wrapper.browserType === Browsers.Firefox) {
-        const actions = (wrapper.driver as any).actions();
-        await actions.move({ x: 0, y: 0 }).perform();
-        await actions.move({ x: 10, y: 10, origin: wrapper._webElement }).perform();
+      if (wrapper.isW3CEnabled) {
+        await wrapper
+          .getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        await wrapper
+          .getActions()
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .perform();
       } else {
-        const mouse = (wrapper.driver.actions() as any).mouse();
-        const actions = (wrapper.driver as any).actions({ bridge: true });
-        await actions
-          .pause(mouse)
-          .move({ origin: wrapper._webElement })
+        await wrapper
+          .getActions()
+          .pause(wrapper.getActions().mouse)
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
           .perform();
       }
+    });
+  }
+
+  /**
+   * Inserts an action for moving the mouse to element center, unless optional offset is provided.
+   * Then adds an action for left-click (down/up) with the mouse.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
+   *
+   * @param { xOffset: 0, yOffset: 0 } options Optional
+   * @return {Promise<void>}
+   */
+  public async clickMouseButton(options = { xOffset: 0, yOffset: 0 }) {
+    await this.retryCall(async function clickMouseButton(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      if (wrapper.isW3CEnabled) {
+        await wrapper
+          .getActions()
+          .move({ x: 0, y: 0 })
+          .perform();
+        await wrapper
+          .getActions()
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .click()
+          .perform();
+      } else {
+        await wrapper
+          .getActions()
+          .pause(wrapper.getActions().mouse)
+          .move({ x: options.xOffset, y: options.yOffset, origin: wrapper._webElement })
+          .click()
+          .perform();
+      }
+    });
+  }
+
+  /**
+   * Inserts action for performing a double left-click with the mouse.
+   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
+   * @param {WebElementWrapper} element
+   * @return {Promise<void>}
+   */
+  public async doubleClick() {
+    await this.retryCall(async function clickMouseButton(wrapper) {
+      await wrapper.scrollIntoViewIfNecessary();
+      await wrapper
+        .getActions()
+        .doubleClick(wrapper._webElement)
+        .perform();
     });
   }
 
@@ -621,7 +698,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async waitForDeletedByCssSelector(selector: string): Promise<void> {
-    await (this.driver.manage() as any).setTimeouts({ implicit: 1000 });
+    await this.driver.manage().setTimeouts({ implicit: 1000 });
     await this.driver.wait(
       async () => {
         const found = await this._webElement.findElements(this.By.css(selector));
@@ -630,7 +707,7 @@ export class WebElementWrapper {
       this.timeout,
       `The element with ${selector} selector was still present after ${this.timeout} sec.`
     );
-    await (this.driver.manage() as any).setTimeouts({ implicit: this.timeout });
+    await this.driver.manage().setTimeouts({ implicit: this.timeout });
   }
 
   /**
@@ -684,9 +761,9 @@ export class WebElementWrapper {
    *
    * @returns {Promise<void>}
    */
-  public async takeScreenshot(): Promise<void> {
+  public async takeScreenshot(): Promise<Buffer> {
     const screenshot = await this.driver.takeScreenshot();
-    const buffer = Buffer.from(screenshot.toString(), 'base64');
+    const buffer = Buffer.from(screenshot, 'base64');
     const { width, height, x, y } = await this.getPosition();
     const windowWidth: number = await this.driver.executeScript(
       'return window.document.body.clientWidth'
@@ -698,11 +775,12 @@ export class WebElementWrapper {
       src.height = src.height / 2;
       let h = false;
       let v = false;
-      src.data = src.data.filter((d: any, i: number) => {
+      const filteredData = src.data.filter((d: any, i: number) => {
         h = i % 4 ? h : !h;
         v = i % (src.width * 2 * 4) ? v : !v;
         return h && v;
       });
+      src.data = Buffer.from(filteredData);
     }
     const dst = new PNG({ width, height });
     PNG.bitblt(src, dst, x, y, width, height, 0, 0);

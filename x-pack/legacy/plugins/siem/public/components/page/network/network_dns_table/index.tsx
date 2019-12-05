@@ -5,7 +5,7 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -24,6 +24,7 @@ interface OwnProps {
   data: NetworkDnsEdges[];
   fakeTotalCount: number;
   id: string;
+  isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
   showMorePagesIndicator: boolean;
@@ -32,27 +33,17 @@ interface OwnProps {
 }
 
 interface NetworkDnsTableReduxProps {
+  activePage: number;
   limit: number;
-  dnsSortField: NetworkDnsSortField;
+  sort: NetworkDnsSortField;
   isPtrIncluded: boolean;
 }
 
 interface NetworkDnsTableDispatchProps {
-  updateDnsSort: ActionCreator<{
-    dnsSortField: NetworkDnsSortField;
+  updateNetworkTable: ActionCreator<{
     networkType: networkModel.NetworkType;
-  }>;
-  updateDnsLimit: ActionCreator<{
-    limit: number;
-    networkType: networkModel.NetworkType;
-  }>;
-  updateIsPtrIncluded: ActionCreator<{
-    isPtrIncluded: boolean;
-    networkType: networkModel.NetworkType;
-  }>;
-  updateTableActivePage: ActionCreator<{
-    activePage: number;
-    tableType: networkModel.NetworkTableType;
+    tableType: networkModel.AllNetworkTables;
+    updates: networkModel.TableUpdates;
   }>;
 }
 
@@ -69,76 +60,98 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps> {
-  public render() {
-    const {
-      data,
-      dnsSortField,
-      fakeTotalCount,
-      id,
-      isPtrIncluded,
-      limit,
-      loading,
-      loadPage,
-      showMorePagesIndicator,
-      totalCount,
-      type,
-      updateDnsLimit,
-      updateTableActivePage,
-    } = this.props;
+export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
+  ({
+    activePage,
+    data,
+    fakeTotalCount,
+    id,
+    isInspect,
+    isPtrIncluded,
+    limit,
+    loading,
+    loadPage,
+    showMorePagesIndicator,
+    sort,
+    totalCount,
+    type,
+    updateNetworkTable,
+  }) => {
+    const onChange = useCallback(
+      (criteria: Criteria) => {
+        if (criteria.sort != null) {
+          const newDnsSortField: NetworkDnsSortField = {
+            field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
+            direction: criteria.sort.direction,
+          };
+          if (!isEqual(newDnsSortField, sort)) {
+            updateNetworkTable({
+              networkType: type,
+              tableType,
+              updates: { sort: newDnsSortField },
+            });
+          }
+        }
+      },
+      [sort, type]
+    );
+
+    const onChangePtrIncluded = useCallback(
+      () =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { isPtrIncluded: !isPtrIncluded },
+        }),
+      [type, isPtrIncluded]
+    );
+
     return (
       <PaginatedTable
+        activePage={activePage}
         columns={getNetworkDnsColumns(type)}
+        dataTestSubj={`table-${tableType}`}
         headerCount={totalCount}
         headerSupplement={
-          <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
+          <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={onChangePtrIncluded} />
         }
         headerTitle={i18n.TOP_DNS_DOMAINS}
         headerTooltip={i18n.TOOLTIP}
         headerUnit={i18n.UNIT(totalCount)}
         id={id}
         itemsPerRow={rowItems}
+        isInspect={isInspect}
         limit={limit}
         loading={loading}
         loadPage={newActivePage => loadPage(newActivePage)}
-        onChange={this.onChange}
+        onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={{
-          field: `node.${dnsSortField.field}`,
-          direction: dnsSortField.direction,
+          field: `node.${sort.field}`,
+          direction: sort.direction,
         }}
         totalCount={fakeTotalCount}
         updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
+          updateNetworkTable({
+            networkType: type,
             tableType,
+            updates: { activePage: newPage },
           })
         }
-        updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
-        updateProps={{ isPtrIncluded, totalCount, dnsSortField }}
+        updateLimitPagination={newLimit =>
+          updateNetworkTable({
+            networkType: type,
+            tableType,
+            updates: { limit: newLimit },
+          })
+        }
       />
     );
   }
+);
 
-  private onChange = (criteria: Criteria) => {
-    if (criteria.sort != null) {
-      const newDnsSortField: NetworkDnsSortField = {
-        field: criteria.sort.field.split('.')[1] as NetworkDnsFields,
-        direction: criteria.sort.direction,
-      };
-      if (!isEqual(newDnsSortField, this.props.dnsSortField)) {
-        this.props.updateDnsSort({ dnsSortField: newDnsSortField, networkType: this.props.type });
-      }
-    }
-  };
-
-  private onChangePtrIncluded = () =>
-    this.props.updateIsPtrIncluded({
-      isPtrIncluded: !this.props.isPtrIncluded,
-      networkType: this.props.type,
-    });
-}
+NetworkDnsTableComponent.displayName = 'NetworkDnsTableComponent';
 
 const makeMapStateToProps = () => {
   const getNetworkDnsSelector = networkSelectors.dnsSelector();
@@ -146,12 +159,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const NetworkDnsTable = connect(
-  makeMapStateToProps,
-  {
-    updateTableActivePage: networkActions.updateNetworkPageTableActivePage,
-    updateDnsLimit: networkActions.updateDnsLimit,
-    updateDnsSort: networkActions.updateDnsSort,
-    updateIsPtrIncluded: networkActions.updateIsPtrIncluded,
-  }
-)(NetworkDnsTableComponent);
+export const NetworkDnsTable = connect(makeMapStateToProps, {
+  updateNetworkTable: networkActions.updateNetworkTable,
+})(NetworkDnsTableComponent);

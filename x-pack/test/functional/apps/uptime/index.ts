@@ -18,7 +18,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
     });
     after(async () => await esArchiver.unload(ARCHIVE));
-    this.tags('ciGroup1');
+    this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./overview'));

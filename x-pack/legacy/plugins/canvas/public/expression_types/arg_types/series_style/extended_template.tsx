@@ -4,14 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, ChangeEvent } from 'react';
+import React, { FunctionComponent, ChangeEvent, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { ExpressionAST } from '../../../../types';
+import { ArgTypesStrings } from '../../../../i18n';
 
 const { set, del } = immutable;
+const { SeriesStyle: strings } = ArgTypesStrings;
 
 export interface Arguments {
   label: string;
@@ -59,7 +61,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
   // TODO: add fill and stack options
   // TODO: add label name auto-complete
   const values = [
-    { value: 0, text: 'None' },
+    { value: 0, text: strings.getNoneOption() },
     { value: 1, text: '1' },
     { value: 2, text: '2' },
     { value: 3, text: '3' },
@@ -67,56 +69,66 @@ export const ExtendedTemplate: FunctionComponent<Props> = props => {
     { value: 5, text: '5' },
   ];
 
-  const labelOptions = [{ value: '', text: 'Select Series' }];
+  const labelOptions = [{ value: '', text: strings.getSelectSeriesOption() }];
   labels.sort().forEach(val => labelOptions.push({ value: val, text: val }));
 
   return (
     <div>
       {name !== 'defaultStyle' && (
-        <EuiFormRow label="Series Identifier" compressed>
-          <EuiSelect
-            value={selectedSeries}
-            options={labelOptions}
-            onChange={ev => handleChange('label', ev)}
-          />
-        </EuiFormRow>
+        <Fragment>
+          <EuiFormRow label={strings.getSeriesIdentifierLabel()} display="columnCompressed">
+            <EuiSelect
+              compressed
+              value={selectedSeries}
+              options={labelOptions}
+              onChange={ev => handleChange('label', ev)}
+            />
+          </EuiFormRow>
+          <EuiSpacer size="s" />
+        </Fragment>
       )}
       {hasPropFields && (
-        <EuiFlexGroup gutterSize="s">
-          {fields.includes('lines') && (
-            <EuiFlexItem>
-              <EuiFormRow label="Line" compressed>
-                <EuiSelect
-                  value={get(chainArgs, 'lines.0', 0)}
-                  options={values}
-                  onChange={ev => handleChange('lines', ev)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
-          {fields.includes('bars') && (
-            <EuiFlexItem>
-              <EuiFormRow label="Bar" compressed>
-                <EuiSelect
-                  value={get(chainArgs, 'bars.0', 0)}
-                  options={values}
-                  onChange={ev => handleChange('bars', ev)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
-          {fields.includes('points') && (
-            <EuiFlexItem>
-              <EuiFormRow label="Point" compressed>
-                <EuiSelect
-                  value={get(chainArgs, 'points.0', 0)}
-                  options={values}
-                  onChange={ev => handleChange('points', ev)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <Fragment>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s">
+            {fields.includes('lines') && (
+              <EuiFlexItem>
+                <EuiFormRow label={strings.getLineLabel()} display="rowCompressed">
+                  <EuiSelect
+                    value={get(chainArgs, 'lines.0', 0)}
+                    options={values}
+                    compressed
+                    onChange={ev => handleChange('lines', ev)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
+            {fields.includes('bars') && (
+              <EuiFlexItem>
+                <EuiFormRow label={strings.getBarLabel()} display="rowCompressed">
+                  <EuiSelect
+                    value={get(chainArgs, 'bars.0', 0)}
+                    options={values}
+                    compressed
+                    onChange={ev => handleChange('bars', ev)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
+            {fields.includes('points') && (
+              <EuiFlexItem>
+                <EuiFormRow label={strings.getPointLabel()} display="rowCompressed">
+                  <EuiSelect
+                    value={get(chainArgs, 'points.0', 0)}
+                    options={values}
+                    compressed
+                    onChange={ev => handleChange('points', ev)}
+                  />
+                </EuiFormRow>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </Fragment>
       )}
     </div>
   );

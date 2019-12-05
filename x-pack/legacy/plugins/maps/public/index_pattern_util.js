@@ -23,3 +23,12 @@ export function getTermsFields(fields) {
     return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
   });
 }
+
+// Returns filtered fields list containing only fields that exist in _source.
+export function getSourceFields(fields) {
+  return fields.filter(field => {
+    // Multi fields are not stored in _source and only exist in index.
+    const isMultiField = field.subType && field.subType.multi;
+    return !isMultiField;
+  });
+}

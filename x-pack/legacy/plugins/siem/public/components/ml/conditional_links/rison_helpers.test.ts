@@ -24,14 +24,8 @@ describe('rison_helpers', () => {
     });
 
     test('returns a RISON value decoded if sent in an object', () => {
-      const expected = decodeRison(
-        '(filterQuery:(expression:\'process.name: "process-name-1"\',kind:kuery),queryLocation:hosts.details,type:details)'
-      );
-      expect(expected).toEqual({
-        filterQuery: { expression: 'process.name: "process-name-1"', kind: 'kuery' },
-        queryLocation: 'hosts.details',
-        type: 'details',
-      });
+      const expected = decodeRison('(query:\'process.name: "process-name-1"\',language:kuery)');
+      expect(expected).toEqual({ query: 'process.name: "process-name-1"', language: 'kuery' });
     });
   });
 

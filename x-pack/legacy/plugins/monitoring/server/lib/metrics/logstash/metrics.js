@@ -324,7 +324,7 @@ export const metrics = {
     label: pipelineThroughputLabel,
     description: pipelineThroughputDescription,
     format: LARGE_FLOAT,
-    units: eventsPerSecondUnitLabel
+    units: eventsPerSecondUnitLabel,
   }),
   logstash_node_pipeline_throughput: new LogstashPipelineThroughputMetric({
     uuidField: 'logstash_stats.logstash.uuid', // TODO: add comment explaining why

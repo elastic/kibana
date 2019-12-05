@@ -111,37 +111,19 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
         </EuiCodeBlock>
         <EuiSpacer />
       </div>
-      <EuiTable
-        responsive={true}
-      >
+      <EuiTable>
         <EuiTableBody>
           <EuiTableRow
             key="events_latency"
           >
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <FormattedMessage
                 defaultMessage="Events Latency"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
                 values={Object {}}
               />
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <div
                 className="lspvDetailDrawerSparklineContainer"
               >
@@ -176,45 +158,21 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
                 />
               </div>
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               0.23 ms/e
             </EuiTableRowCell>
           </EuiTableRow>
           <EuiTableRow
             key="events_out_rate"
           >
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <FormattedMessage
                 defaultMessage="Events Emitted Rate"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
                 values={Object {}}
               />
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <div
                 className="lspvDetailDrawerSparklineContainer"
               >
@@ -249,45 +207,21 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
                 />
               </div>
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               N/A
             </EuiTableRowCell>
           </EuiTableRow>
           <EuiTableRow
             key="events_in"
           >
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <FormattedMessage
                 defaultMessage="Events Received"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
                 values={Object {}}
               />
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <div
                 className="lspvDetailDrawerSparklineContainer"
               >
@@ -322,45 +256,21 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
                 />
               </div>
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               203 events
             </EuiTableRowCell>
           </EuiTableRow>
           <EuiTableRow
             key="events_out"
           >
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <FormattedMessage
                 defaultMessage="Events Emitted"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
                 values={Object {}}
               />
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <div
                 className="lspvDetailDrawerSparklineContainer"
               >
@@ -395,15 +305,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
                 />
               </div>
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               200 events
             </EuiTableRowCell>
           </EuiTableRow>
@@ -460,37 +362,19 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
           }
         />
       </p>
-      <EuiTable
-        responsive={true}
-      >
+      <EuiTable>
         <EuiTableBody>
           <EuiTableRow
             key="events_latency"
           >
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <FormattedMessage
                 defaultMessage="Events Latency"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsLatencyLabel"
                 values={Object {}}
               />
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <div
                 className="lspvDetailDrawerSparklineContainer"
               >
@@ -525,45 +409,21 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
                 />
               </div>
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               0.23 ms/e
             </EuiTableRowCell>
           </EuiTableRow>
           <EuiTableRow
             key="events_out_rate"
           >
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <FormattedMessage
                 defaultMessage="Events Emitted Rate"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedRateLabel"
                 values={Object {}}
               />
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <div
                 className="lspvDetailDrawerSparklineContainer"
               >
@@ -598,45 +458,21 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
                 />
               </div>
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               N/A
             </EuiTableRowCell>
           </EuiTableRow>
           <EuiTableRow
             key="events_in"
           >
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <FormattedMessage
                 defaultMessage="Events Received"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsReceivedLabel"
                 values={Object {}}
               />
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <div
                 className="lspvDetailDrawerSparklineContainer"
               >
@@ -671,45 +507,21 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
                 />
               </div>
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               203 events
             </EuiTableRowCell>
           </EuiTableRow>
           <EuiTableRow
             key="events_out"
           >
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <FormattedMessage
                 defaultMessage="Events Emitted"
                 id="xpack.monitoring.logstash.pipeline.detailDrawer.eventsEmittedLabel"
                 values={Object {}}
               />
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               <div
                 className="lspvDetailDrawerSparklineContainer"
               >
@@ -744,15 +556,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
                 />
               </div>
             </EuiTableRowCell>
-            <EuiTableRowCell
-              align="left"
-              mobileOptions={
-                Object {
-                  "show": true,
-                }
-              }
-              textOnly={true}
-            >
+            <EuiTableRowCell>
               200 events
             </EuiTableRowCell>
           </EuiTableRow>

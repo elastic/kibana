@@ -26,9 +26,8 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
+  // FLAKY: https://github.com/elastic/kibana/issues/22322
   describe('vertical bar chart', function () {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
     const vizName1 = 'Visualization VerticalBarChart';
 
     const initBarChart = async () => {
@@ -37,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
@@ -53,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
@@ -109,8 +108,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should have `drop partial buckets` option', async () => {
-      const fromTime = '2015-09-20 06:31:44.000';
-      const toTime = '2015-09-22 18:31:44.000';
+      const fromTime = 'Sep 20, 2015 @ 06:31:44.000';
+      const toTime = 'Sep 22, 2015 @ 18:31:44.000';
 
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
@@ -304,6 +303,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct series when disabling first agg', async function () {
+        // this will avoid issues with the play tooltip covering the disable agg button
+        await PageObjects.visualize.scrollSubjectIntoView('metricsAggGroup');
         await PageObjects.visualize.toggleDisabledAgg(3);
         await PageObjects.visualize.clickGo();
 

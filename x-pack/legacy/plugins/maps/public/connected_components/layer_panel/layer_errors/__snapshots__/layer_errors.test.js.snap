@@ -4,7 +4,6 @@ exports[`Should render errors when layer has errors 1`] = `
 <Fragment>
   <EuiCallOut
     color="warning"
-    size="m"
     title="Unable to load layer"
   >
     <p

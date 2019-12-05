@@ -7,6 +7,7 @@
 import { rootSchema } from '../../common/graphql/root';
 import { sharedSchema } from '../../common/graphql/shared';
 
+import { anomaliesSchema } from './anomalies';
 import { authenticationsSchema } from './authentications';
 import { ecsSchema } from './ecs';
 import { eventsSchema } from './events';
@@ -25,9 +26,11 @@ import { toNumberSchema } from './scalar_to_number_array';
 import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
 import { timelineSchema } from './timeline';
+import { tlsSchema } from './tls';
 import { uncommonProcessesSchema } from './uncommon_processes';
 import { whoAmISchema } from './who_am_i';
 export const schemas = [
+  anomaliesSchema,
   authenticationsSchema,
   ecsSchema,
   eventsSchema,
@@ -48,6 +51,7 @@ export const schemas = [
   sourceStatusSchema,
   sharedSchema,
   timelineSchema,
+  tlsSchema,
   uncommonProcessesSchema,
   whoAmISchema,
 ];

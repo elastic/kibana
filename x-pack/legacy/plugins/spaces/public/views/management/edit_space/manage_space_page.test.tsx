@@ -7,6 +7,7 @@ jest.mock('ui/kfetch', () => ({
   kfetch: () => Promise.resolve([{ id: 'feature-1', name: 'feature 1' }]),
 }));
 import '../../../__mocks__/ui_capabilities';
+import '../../../__mocks__/xpack_info';
 import { EuiButton, EuiLink, EuiSwitch } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
@@ -232,8 +233,8 @@ function toggleFeature(wrapper: ReactWrapper<any, any>) {
 
   wrapper
     .find(EuiSwitch)
-    .find('input')
-    .simulate('change', { target: { checked: false } });
+    .find('button')
+    .simulate('click');
 
   wrapper.update();
 }

@@ -5,7 +5,7 @@
  */
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
@@ -111,18 +111,33 @@ const FlyoutHeaderWithCloseButton = React.memo<{
 
 FlyoutHeaderWithCloseButton.displayName = 'FlyoutHeaderWithCloseButton';
 
-class FlyoutPaneComponent extends React.PureComponent<Props> {
-  public render() {
-    const {
-      children,
-      flyoutHeight,
-      headerHeight,
-      onClose,
-      timelineId,
-      usersViewing,
-      width,
-    } = this.props;
+const FlyoutPaneComponent = React.memo<Props>(
+  ({
+    applyDeltaToWidth,
+    children,
+    flyoutHeight,
+    headerHeight,
+    onClose,
+    timelineId,
+    usersViewing,
+    width,
+  }) => {
+    const renderFlyout = useCallback(() => <></>, []);
 
+    const onResize: OnResize = useCallback(
+      ({ delta, id }) => {
+        const bodyClientWidthPixels = document.body.clientWidth;
+
+        applyDeltaToWidth({
+          bodyClientWidthPixels,
+          delta,
+          id,
+          maxWidthPercent,
+          minWidthPixels,
+        });
+      },
+      [applyDeltaToWidth, maxWidthPercent, minWidthPixels]
+    );
     return (
       <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane" width={width}>
         <EuiFlyout
@@ -139,8 +154,8 @@ class FlyoutPaneComponent extends React.PureComponent<Props> {
               <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
             }
             id={timelineId}
-            onResize={this.onResize}
-            render={this.renderFlyout}
+            onResize={onResize}
+            render={renderFlyout}
           />
           <EuiFlyoutHeader
             className="timeline-flyout-header"
@@ -160,27 +175,10 @@ class FlyoutPaneComponent extends React.PureComponent<Props> {
       </EuiFlyoutContainer>
     );
   }
+);
 
-  private renderFlyout = () => <></>;
+FlyoutPaneComponent.displayName = 'FlyoutPaneComponent';
 
-  private onResize: OnResize = ({ delta, id }) => {
-    const { applyDeltaToWidth } = this.props;
-
-    const bodyClientWidthPixels = document.body.clientWidth;
-
-    applyDeltaToWidth({
-      bodyClientWidthPixels,
-      delta,
-      id,
-      maxWidthPercent,
-      minWidthPixels,
-    });
-  };
-}
-
-export const Pane = connect(
-  null,
-  {
-    applyDeltaToWidth: timelineActions.applyDeltaToWidth,
-  }
-)(FlyoutPaneComponent);
+export const Pane = connect(null, {
+  applyDeltaToWidth: timelineActions.applyDeltaToWidth,
+})(FlyoutPaneComponent);

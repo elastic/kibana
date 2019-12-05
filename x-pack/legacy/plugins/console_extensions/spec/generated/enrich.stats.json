@@ -1,0 +1,10 @@
+{
+  "enrich.stats": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_enrich/_stats"
+    ]
+  }
+}

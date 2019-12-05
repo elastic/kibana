@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiText, EuiSpacer, EuiCodeBlock, EuiCode } from '@elastic/eui';
 import { Clipboard } from '../../clipboard';
 
@@ -24,8 +25,14 @@ export const DisabledPanel = ({ onCopy }: Props) => (
   <div className="canvasWorkpadExport__panelContent">
     <EuiText size="s">
       <p>
-        Export to PDF is disabled. You must configure reporting to use the Chromium browser. Add
-        this to your <EuiCode>kibana.yml</EuiCode> file.
+        <FormattedMessage
+          id="xpack.canvas.workpadHeaderWorkpadExport.pdfPanelDisabledDescription"
+          defaultMessage="Export to PDF is disabled. You must configure reporting to use the Chromium browser. Add
+          this to your {fileName} file."
+          values={{
+            fileName: <EuiCode>kibana.yml</EuiCode>,
+          }}
+        />
       </p>
     </EuiText>
     <EuiSpacer />

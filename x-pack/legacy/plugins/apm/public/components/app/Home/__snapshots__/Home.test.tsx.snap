@@ -1,137 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Home component should render services 1`] = `
-<div>
-  <ApmHeader>
-    <EuiFlexGroup
-      alignItems="center"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiTitle
-          size="l"
-        >
-          <h1>
-            APM
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <SettingsLink>
-          <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
-            iconType="gear"
-            size="s"
-            type="button"
-          >
-            Settings
-          </EuiButtonEmpty>
-        </SettingsLink>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <SetupInstructionsLink />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </ApmHeader>
-  <EuiTabs
-    display="default"
-    expand={false}
-    size="m"
-  >
-    <Styled(EuiTab)
-      isSelected={true}
-      key="services"
-      onClick={[Function]}
-    >
-      <ServiceOverviewLink>
-        Services
-      </ServiceOverviewLink>
-    </Styled(EuiTab)>
-    <Styled(EuiTab)
-      isSelected={false}
-      key="traces"
-      onClick={[Function]}
-    >
-      <TraceOverviewLink>
-        Traces
-      </TraceOverviewLink>
-    </Styled(EuiTab)>
-  </EuiTabs>
-  <EuiSpacer />
-  <ServiceOverview />
-</div>
+<ContextProvider
+  value={
+    Object {
+      "apm": Object {
+        "config": Object {},
+        "stackVersion": "0",
+      },
+    }
+  }
+>
+  <Home
+    tab="services"
+  />
+</ContextProvider>
 `;
 
 exports[`Home component should render traces 1`] = `
-<div>
-  <ApmHeader>
-    <EuiFlexGroup
-      alignItems="center"
-    >
-      <EuiFlexItem
-        grow={false}
-      >
-        <EuiTitle
-          size="l"
-        >
-          <h1>
-            APM
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <SettingsLink>
-          <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
-            iconType="gear"
-            size="s"
-            type="button"
-          >
-            Settings
-          </EuiButtonEmpty>
-        </SettingsLink>
-      </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-      >
-        <SetupInstructionsLink />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </ApmHeader>
-  <EuiTabs
-    display="default"
-    expand={false}
-    size="m"
-  >
-    <Styled(EuiTab)
-      isSelected={false}
-      key="services"
-      onClick={[Function]}
-    >
-      <ServiceOverviewLink>
-        Services
-      </ServiceOverviewLink>
-    </Styled(EuiTab)>
-    <Styled(EuiTab)
-      isSelected={true}
-      key="traces"
-      onClick={[Function]}
-    >
-      <TraceOverviewLink>
-        Traces
-      </TraceOverviewLink>
-    </Styled(EuiTab)>
-  </EuiTabs>
-  <EuiSpacer />
-  <TraceOverview />
-</div>
+<ContextProvider
+  value={
+    Object {
+      "apm": Object {
+        "config": Object {},
+        "stackVersion": "0",
+      },
+    }
+  }
+>
+  <Home
+    tab="traces"
+  />
+</ContextProvider>
 `;

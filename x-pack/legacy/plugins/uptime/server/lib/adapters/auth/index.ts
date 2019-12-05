@@ -5,5 +5,4 @@
  */
 
 export { UMAuthAdapter, UMAuthContainer } from './adapter_types';
-export { UMMemoryAuthAdapter } from './memory_auth_adapter';
 export { UMXPackAuthAdapter } from './xpack_auth_adapter';

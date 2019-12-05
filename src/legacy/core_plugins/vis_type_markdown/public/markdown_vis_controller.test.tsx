@@ -22,7 +22,7 @@ import { render, mount } from 'enzyme';
 import { MarkdownVisWrapper } from './markdown_vis_controller';
 
 // We need Markdown to do these tests, so mock data plugin
-jest.mock('../../data/public', () => {
+jest.mock('../../data/public/legacy', () => {
   return {};
 });
 

@@ -78,7 +78,15 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       </WithLogFilter>
       <PageContent key={`${sourceId}-${version}`}>
         <WithLogPosition>
-          {({ isAutoReloading, jumpToTargetPosition, reportVisiblePositions, targetPosition }) => (
+          {({
+            isAutoReloading,
+            jumpToTargetPosition,
+            reportVisiblePositions,
+            targetPosition,
+            scrollLockLiveStreaming,
+            scrollUnlockLiveStreaming,
+            isScrollLocked,
+          }) => (
             <WithStreamItems initializeOnMount={!isAutoReloading}>
               {({
                 currentHighlightKey,
@@ -109,6 +117,11 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   setFlyoutVisibility={setFlyoutVisibility}
                   highlightedItem={surroundingLogsId ? surroundingLogsId : null}
                   currentHighlightKey={currentHighlightKey}
+                  scrollLock={{
+                    enable: scrollLockLiveStreaming,
+                    disable: scrollUnlockLiveStreaming,
+                    isEnabled: isScrollLocked,
+                  }}
                 />
               )}
             </WithStreamItems>
@@ -117,7 +130,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
         <AutoSizer content bounds detectAnyWindowResize="height">
           {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => {
             return (
-              <LogPageMinimapColumn innerRef={measureRef}>
+              <LogPageMinimapColumn ref={measureRef}>
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>

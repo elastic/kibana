@@ -31,12 +31,21 @@ export default function ({ getService, getPageObjects }) {
   const renderable = getService('renderable');
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
   describe('dashboard filtering', function () {
     this.tags('smoke');
+
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
@@ -74,7 +83,6 @@ export default function ({ getService, getPageObjects }) {
 
       it('tsvb time series shows no data message', async () => {
         expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
-        await dashboardExpect.tsvbTimeSeriesLegendCount(0);
       });
 
       it('metric value shows no data', async () => {
@@ -134,11 +142,6 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.goalAndGuageLabelsExist(['0', '0%']);
       });
 
-      it('tsvb time series shows no data message', async () => {
-        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
-        await dashboardExpect.tsvbTimeSeriesLegendCount(0);
-      });
-
       it('metric value shows no data', async () => {
         await dashboardExpect.metricValuesExist(['-']);
       });
@@ -193,11 +196,6 @@ export default function ({ getService, getPageObjects }) {
 
       it('goal and guages', async () => {
         await dashboardExpect.goalAndGuageLabelsExist(['39.958%', '7,544']);
-      });
-
-      it('tsvb time series', async () => {
-        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(false);
-        await dashboardExpect.tsvbTimeSeriesLegendCount(10);
       });
 
       it('metric value', async () => {

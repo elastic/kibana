@@ -14,7 +14,11 @@ async function isTaskManagerReady(server: HapiServer) {
 }
 
 async function fetch(server: HapiServer) {
-  const taskManager = server.plugins.task_manager!;
+  const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    return null;
+  }
 
   let docs;
   try {

@@ -91,7 +91,7 @@ Array [
               <caption
                 aria-live="polite"
                 aria-relevant="text"
-                className="euiScreenReaderOnly"
+                className="euiScreenReaderOnly euiTableCaption"
                 role="status"
               >
                 <EuiDelayRender
@@ -106,18 +106,17 @@ Array [
                     align="left"
                     data-test-subj="tableHeaderCell_object_title_0"
                     key="_data_h_object_title_0"
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    scope="col"
                   >
                     <th
                       className="euiTableHeaderCell"
                       data-test-subj="tableHeaderCell_object_title_0"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -134,18 +133,17 @@ Array [
                     align="left"
                     data-test-subj="tableHeaderCell_created_at_1"
                     key="_data_h_created_at_1"
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    scope="col"
                   >
                     <th
                       className="euiTableHeaderCell"
                       data-test-subj="tableHeaderCell_created_at_1"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -162,18 +160,17 @@ Array [
                     align="left"
                     data-test-subj="tableHeaderCell_status_2"
                     key="_data_h_status_2"
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    scope="col"
                   >
                     <th
                       className="euiTableHeaderCell"
                       data-test-subj="tableHeaderCell_status_2"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent"
@@ -189,17 +186,16 @@ Array [
                   <EuiTableHeaderCell
                     align="right"
                     key="_actions_h_3"
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    scope="col"
                   >
                     <th
                       className="euiTableHeaderCell"
                       role="columnheader"
                       scope="col"
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent euiTableCellContent--alignRight"
@@ -225,16 +221,15 @@ Array [
                       align="center"
                       colSpan={4}
                       isMobileFullWidth={true}
-                      mobileOptions={
-                        Object {
-                          "show": true,
-                        }
-                      }
-                      textOnly={true}
                     >
                       <td
                         className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
                         colSpan={4}
+                        style={
+                          Object {
+                            "width": undefined,
+                          }
+                        }
                       >
                         <div
                           className="euiTableCellContent euiTableCellContent--alignCenter"
@@ -371,7 +366,7 @@ Array [
             <caption
               aria-live="polite"
               aria-relevant="text"
-              className="euiScreenReaderOnly"
+              className="euiScreenReaderOnly euiTableCaption"
               role="status"
             >
               <EuiDelayRender
@@ -386,18 +381,17 @@ Array [
                   align="left"
                   data-test-subj="tableHeaderCell_object_title_0"
                   key="_data_h_object_title_0"
-                  mobileOptions={
-                    Object {
-                      "show": true,
-                    }
-                  }
-                  scope="col"
                 >
                   <th
                     className="euiTableHeaderCell"
                     data-test-subj="tableHeaderCell_object_title_0"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -414,18 +408,17 @@ Array [
                   align="left"
                   data-test-subj="tableHeaderCell_created_at_1"
                   key="_data_h_created_at_1"
-                  mobileOptions={
-                    Object {
-                      "show": true,
-                    }
-                  }
-                  scope="col"
                 >
                   <th
                     className="euiTableHeaderCell"
                     data-test-subj="tableHeaderCell_created_at_1"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -442,18 +435,17 @@ Array [
                   align="left"
                   data-test-subj="tableHeaderCell_status_2"
                   key="_data_h_status_2"
-                  mobileOptions={
-                    Object {
-                      "show": true,
-                    }
-                  }
-                  scope="col"
                 >
                   <th
                     className="euiTableHeaderCell"
                     data-test-subj="tableHeaderCell_status_2"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent"
@@ -469,17 +461,16 @@ Array [
                 <EuiTableHeaderCell
                   align="right"
                   key="_actions_h_3"
-                  mobileOptions={
-                    Object {
-                      "show": true,
-                    }
-                  }
-                  scope="col"
                 >
                   <th
                     className="euiTableHeaderCell"
                     role="columnheader"
                     scope="col"
+                    style={
+                      Object {
+                        "width": undefined,
+                      }
+                    }
                   >
                     <div
                       className="euiTableCellContent euiTableCellContent--alignRight"
@@ -505,16 +496,15 @@ Array [
                     align="center"
                     colSpan={4}
                     isMobileFullWidth={true}
-                    mobileOptions={
-                      Object {
-                        "show": true,
-                      }
-                    }
-                    textOnly={true}
                   >
                     <td
                       className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
                       colSpan={4}
+                      style={
+                        Object {
+                          "width": undefined,
+                        }
+                      }
                     >
                       <div
                         className="euiTableCellContent euiTableCellContent--alignCenter"

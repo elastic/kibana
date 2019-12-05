@@ -28,7 +28,9 @@ async function getBuildNumber() {
     return log.stdout.split('\n').length;
   }
 
-  const wc = await execa.shell('git log --format="%h" | wc -l');
+  const wc = await execa.command('git log --format="%h" | wc -l', {
+    shell: true
+  });
   return parseFloat(wc.stdout.trim());
 }
 
@@ -39,7 +41,7 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }) {
   );
 
   return {
-    buildSha: await execa.stdout('git', ['rev-parse', 'HEAD']),
+    buildSha: (await execa('git', ['rev-parse', 'HEAD'])).stdout,
     buildVersion,
     buildNumber: await getBuildNumber(),
   };

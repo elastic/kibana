@@ -17,22 +17,22 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { ExpressionsService, ExpressionsSetup } from './expressions';
-import { SearchService, SearchSetup } from './search';
-import { QueryService, QuerySetup } from './query';
-import { FilterService, FilterSetup } from './filter';
-import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
-import { LegacyDependenciesPluginSetup } from './shim/legacy_dependencies_plugin';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { createSearchBar, StatetfulSearchBarProps } from './search';
+import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
+import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from '../../../../plugins/data/public';
+import { initLegacyModule } from './shim/legacy_module';
+import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
+import {
+  createFilterAction,
+  GLOBAL_APPLY_FILTER_ACTION,
+} from './filter/action/apply_filter_action';
+import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
 
-/**
- * Interface for any dependencies on other plugins' `setup` contracts.
- *
- * @internal
- */
-export interface DataPluginSetupDependencies {
-  __LEGACY: LegacyDependenciesPluginSetup;
-  interpreter: any;
+export interface DataPluginStartDependencies {
+  data: DataPublicPluginStart;
+  uiActions: IUiActionsSetup;
 }
 
 /**
@@ -41,11 +41,19 @@ export interface DataPluginSetupDependencies {
  * @public
  */
 export interface DataSetup {
-  expressions: ExpressionsSetup;
   indexPatterns: IndexPatternsSetup;
-  filter: FilterSetup;
-  query: QuerySetup;
-  search: SearchSetup;
+}
+
+/**
+ * Interface for this plugin's returned `start` contract.
+ *
+ * @public
+ */
+export interface DataStart {
+  indexPatterns: IndexPatternsStart;
+  ui: {
+    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
+  };
 }
 
 /**
@@ -59,43 +67,63 @@ export interface DataSetup {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin implements Plugin<DataSetup, void, DataPluginSetupDependencies> {
-  // Exposed services, sorted alphabetically
-  private readonly expressions: ExpressionsService = new ExpressionsService();
-  private readonly filter: FilterService = new FilterService();
+
+export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginStartDependencies> {
   private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
-  private readonly query: QueryService = new QueryService();
-  private readonly search: SearchService = new SearchService();
 
-  public setup(core: CoreSetup, { __LEGACY, interpreter }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings } = core;
-    const savedObjectsClient = __LEGACY.savedObjectsClient;
+  private setupApi!: DataSetup;
+  private storage!: IStorageWrapper;
 
-    const indexPatternsService = this.indexPatterns.setup({
+  public setup(core: CoreSetup): DataSetup {
+    this.storage = new Storage(window.localStorage);
+
+    this.setupApi = {
+      indexPatterns: this.indexPatterns.setup(),
+    };
+
+    return this.setupApi;
+  }
+
+  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+    const { uiSettings, http, notifications, savedObjects } = core;
+
+    const indexPatternsService = this.indexPatterns.start({
       uiSettings,
-      savedObjectsClient,
+      savedObjectsClient: savedObjects.client,
+      http,
+      notifications,
+      fieldFormats: data.fieldFormats,
     });
+
+    initLegacyModule(indexPatternsService.indexPatterns);
+
+    const SearchBar = createSearchBar({
+      core,
+      data,
+      storage: this.storage,
+    });
+
+    uiActions.registerAction(
+      createFilterAction(
+        core.overlays,
+        data.query.filterManager,
+        data.query.timefilter.timefilter,
+        indexPatternsService
+      )
+    );
+
+    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
+
     return {
-      expressions: this.expressions.setup({
-        interpreter,
-      }),
+      ...this.setupApi!,
       indexPatterns: indexPatternsService,
-      filter: this.filter.setup({
-        uiSettings,
-        indexPatterns: indexPatternsService.indexPatterns,
-      }),
-      query: this.query.setup(),
-      search: this.search.setup(savedObjectsClient),
+      ui: {
+        SearchBar,
+      },
     };
   }
 
-  public start(core: CoreStart) {}
-
   public stop() {
-    this.expressions.stop();
     this.indexPatterns.stop();
-    this.filter.stop();
-    this.query.stop();
-    this.search.stop();
   }
 }

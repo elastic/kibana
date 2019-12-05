@@ -84,7 +84,7 @@ export class Popover extends Component<Props, State> {
     };
 
     const appWrapper = document.querySelector('.app-wrapper');
-    const EuiPopoverAny = EuiPopover as React.FC<any>;
+    const EuiPopoverAny = (EuiPopover as any) as React.FC<any>;
 
     return (
       <EuiPopoverAny

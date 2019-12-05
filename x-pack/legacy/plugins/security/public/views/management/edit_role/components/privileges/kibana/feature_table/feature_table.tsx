@@ -17,7 +17,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { Feature } from '../../../../../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../../../../../plugins/features/server';
 import { FeaturesPrivileges, KibanaPrivileges, Role } from '../../../../../../../../common/model';
 import {
   AllowedPrivilege,

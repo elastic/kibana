@@ -22,6 +22,7 @@ import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
+import { CriticalError } from './errors';
 
 interface KibanaFeatures {
   // Indicates whether we can run Kibana in a so called cluster mode in which
@@ -70,6 +71,22 @@ export async function bootstrap({
 
   const root = new Root(rawConfigService.getConfig$(), env, onRootShutdown);
 
+  process.on('SIGHUP', () => {
+    const cliLogger = root.logger.get('cli');
+    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
+
+    try {
+      rawConfigService.reloadConfig();
+    } catch (err) {
+      return shutdown(err);
+    }
+
+    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
+  });
+
+  process.on('SIGINT', () => shutdown());
+  process.on('SIGTERM', () => shutdown());
+
   function shutdown(reason?: Error) {
     rawConfigService.stop();
     return root.shutdown(reason);
@@ -87,22 +104,6 @@ export async function bootstrap({
     cliLogger.info('Optimization done.');
     await shutdown();
   }
-
-  process.on('SIGHUP', () => {
-    const cliLogger = root.logger.get('cli');
-    cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
-
-    try {
-      rawConfigService.reloadConfig();
-    } catch (err) {
-      return shutdown(err);
-    }
-
-    cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
-  });
-
-  process.on('SIGINT', () => shutdown());
-  process.on('SIGTERM', () => shutdown());
 }
 
 function onRootShutdown(reason?: any) {
@@ -112,7 +113,9 @@ function onRootShutdown(reason?: any) {
     // mirror such fatal errors in standard output with `console.error`.
     // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+
+    process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }
 
-  process.exit(reason === undefined ? 0 : (reason as any).processExitCode || 1);
+  process.exit(0);
 }

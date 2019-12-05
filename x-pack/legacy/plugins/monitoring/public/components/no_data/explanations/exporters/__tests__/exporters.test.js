@@ -10,11 +10,15 @@ import { ExplainExporters, ExplainExportersCloud } from '../exporters';
 
 describe('ExplainExporters', () => {
   test('should explain about xpack.monitoring.exporters setting', () => {
+    const reason = {
+      property: 'xpack.monitoring.exporters',
+      data: 'myMonitoringClusterExporter1',
+      context: 'esProd001'
+    };
+
     const component = renderWithIntl(
       <ExplainExporters
-        property="xpack.monitoring.exporters"
-        data={'myMonitoringClusterExporter1'}
-        context="esProd001"
+        {...{ reason }}
       />
     );
     expect(component).toMatchSnapshot();

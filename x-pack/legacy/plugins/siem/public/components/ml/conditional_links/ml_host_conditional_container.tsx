@@ -6,44 +6,41 @@
 
 import React from 'react';
 
-import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 import { QueryString } from 'ui/utils/query_string';
-import { pure } from 'recompose';
 import { addEntitiesToKql } from './add_entities_to_kql';
 import { replaceKQLParts } from './replace_kql_parts';
 import { emptyEntity, multipleEntities, getMultipleEntities } from './entity_helpers';
-import { replaceKqlQueryLocationForHostPage } from './replace_kql_query_location_for_host_page';
-
-interface MlHostConditionalProps {
-  match: RouteMatch<{}>;
-  location: Location;
-}
+import { SiemPageName } from '../../../pages/home/types';
+import { HostsTableType } from '../../../store/hosts/model';
 
 interface QueryStringType {
   '?_g': string;
-  kqlQuery: string | null;
+  query: string | null;
   timerange: string | null;
 }
 
-export const MlHostConditionalContainer = pure<MlHostConditionalProps>(({ match }) => (
+type MlHostConditionalProps = Partial<RouteComponentProps<{}>> & { url: string };
+
+export const MlHostConditionalContainer = React.memo<MlHostConditionalProps>(({ url }) => (
   <Switch>
     <Route
       strict
       exact
-      path={match.url}
+      path={url}
       render={({ location }) => {
         const queryStringDecoded: QueryStringType = QueryString.decode(
           location.search.substring(1)
         );
-        if (queryStringDecoded.kqlQuery != null) {
-          queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+        if (queryStringDecoded.query != null) {
+          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         const reEncoded = QueryString.encode(queryStringDecoded);
-        return <Redirect to={`/hosts?${reEncoded}`} />;
+        return <Redirect to={`/${SiemPageName.hosts}?${reEncoded}`} />;
       }}
     />
     <Route
-      path={`${match.url}/:hostName`}
+      path={`${url}/:hostName`}
       render={({
         location,
         match: {
@@ -53,38 +50,41 @@ export const MlHostConditionalContainer = pure<MlHostConditionalProps>(({ match 
         const queryStringDecoded: QueryStringType = QueryString.decode(
           location.search.substring(1)
         );
-        if (queryStringDecoded.kqlQuery != null) {
-          queryStringDecoded.kqlQuery = replaceKQLParts(queryStringDecoded.kqlQuery);
+        if (queryStringDecoded.query != null) {
+          queryStringDecoded.query = replaceKQLParts(queryStringDecoded.query);
         }
         if (emptyEntity(hostName)) {
-          if (queryStringDecoded.kqlQuery != null) {
-            queryStringDecoded.kqlQuery = replaceKqlQueryLocationForHostPage(
-              queryStringDecoded.kqlQuery
-            );
-          }
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts?${reEncoded}`} />;
+          return (
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+          );
         } else if (multipleEntities(hostName)) {
           const hosts: string[] = getMultipleEntities(hostName);
-          if (queryStringDecoded.kqlQuery != null) {
-            queryStringDecoded.kqlQuery = addEntitiesToKql(
-              ['host.name'],
-              hosts,
-              queryStringDecoded.kqlQuery
-            );
-            queryStringDecoded.kqlQuery = replaceKqlQueryLocationForHostPage(
-              queryStringDecoded.kqlQuery
-            );
-          }
+          queryStringDecoded.query = addEntitiesToKql(
+            ['host.name'],
+            hosts,
+            queryStringDecoded.query || ''
+          );
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts?${reEncoded}`} />;
+          return (
+            <Redirect to={`/${SiemPageName.hosts}/${HostsTableType.anomalies}?${reEncoded}`} />
+          );
         } else {
           const reEncoded = QueryString.encode(queryStringDecoded);
-          return <Redirect to={`/hosts/${hostName}?${reEncoded}`} />;
+          return (
+            <Redirect
+              to={`/${SiemPageName.hosts}/${hostName}/${HostsTableType.anomalies}?${reEncoded}`}
+            />
+          );
         }
       }}
     />
-    <Redirect from="/ml-hosts/" to="/ml-hosts" />
+    <Route
+      path="/ml-hosts/"
+      render={({ location: { search = '' } }) => (
+        <Redirect from="/ml-hosts/" to={`/ml-hosts${search}`} />
+      )}
+    />
   </Switch>
 ));
 

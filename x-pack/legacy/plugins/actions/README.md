@@ -23,11 +23,34 @@ action types.
 2. Create an action by using the RESTful API (see actions -> create action).
 3. Use alerts to execute actions or execute manually (see firing actions).
 
+## Kibana Actions Configuration
+Implemented under the [Actions Config](./server/actions_config.ts).
+
+### Configuration Options
+
+Built-In-Actions are configured using the _xpack.actions_ namespoace under _kibana.yml_, and have the following configuration options:
+
+| Namespaced Key                       | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Type                  |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| _xpack.actions._**enabled**          | Feature toggle which enabled Actions in Kibana. Currently defaulted to false while Actions are experimental.                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | boolean               |
+| _xpack.actions._**WhitelistedHosts** | Which _hostnames_ are whitelisted for the Built-In-Action? This list should contain hostnames of every external service you wish to interact with using Webhooks, Email or any other built in Action. Note that you may use the string "\*" in place of a specific hostname to enable Kibana to target any URL, but keep in mind the potential use of such a feature to execute [SSRF](https://www.owasp.org/index.php/Server_Side_Request_Forgery) attacks from your server. | Array<String> |
+
+### Configuration Utilities
+
+This module provides a Utilities for interacting with the configuration.
+
+| Method                | Arguments                                          | Description                                                                                                                                                                                                                                                            | Return Type                                                                                                                                                                                                                   |
+| --------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| isWhitelistedUri | _uri_: The URI you wish to validate is whitelisted | Validates whether the URI is whitelisted. This checks the configuration and validates that the hostname of the URI is in the list of whitelisted Hosts and returns `true` if it is whitelisted. If the configuration says that all URI's are whitelisted (using an "\*") then it will always return `true`. | Boolean |
+| isWhitelistedHostname | _hostname_: The Hostname you wish to validate is whitelisted | Validates whether the Hostname is whitelisted. This checks the configuration and validates that the hostname is in the list of whitelisted Hosts and returns `true` if it is whitelisted. If the configuration says that all Hostnames are whitelisted (using an "\*") then it will always return `true`. | Boolean |
+| ensureWhitelistedUri | _uri_: The URI you wish to validate is whitelisted | Validates whether the URI is whitelisted. This checks the configuration and validates that the hostname of the URI is in the list of whitelisted Hosts and throws an error if it is not whitelisted. If the configuration says that all URI's are whitelisted (using an "\*") then it will never throw. | No return value, throws if URI isn't whitelisted |
+| ensureWhitelistedHostname | _hostname_: The Hostname you wish to validate is whitelisted | Validates whether the Hostname is whitelisted. This checks the configuration and validates that the hostname is in the list of whitelisted Hosts and throws an error if it is not whitelisted. If the configuration says that all Hostnames are whitelisted (using an "\*") then it will never throw | No return value, throws if Hostname isn't whitelisted |
+
 ## Action types
 
 ### Methods
 
-**server.plugins.actions.registerType(options)**
+**server.plugins.actions.setup.registerType(options)**
 
 The following table describes the properties of the `options` object.
 
@@ -50,6 +73,7 @@ This is the primary function for an action type. Whenever the action needs to ex
 
 |Property|Description|
 |---|---|
+|actionId|The action saved object id that the action type is executing for.|
 |config|The decrypted configuration given to an action. This comes from the action saved object that is partially or fully encrypted within the data store. If you would like to validate the config before being passed to the executor, define `validate.config` within the action type.|
 |params|Parameters for the execution. These will be given at execution time by either an alert or manually provided when calling the plugin provided execute function.|
 |services.callCluster(path, opts)|Use this to do Elasticsearch queries on the cluster Kibana connects to. This function is the same as any other `callCluster` in Kibana.<br><br>**NOTE**: This currently authenticates as the Kibana internal user, but will change in a future PR.|
@@ -72,7 +96,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|name|A name to reference and search in the future. This value will be used to populate dropdowns.|string|
 |actionTypeId|The id value of the action type you want to call when the action executes.|string|
 |config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
 |secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
@@ -115,7 +139,7 @@ Payload:
 
 |Property|Description|Type|
 |---|---|---|
-|description|A description to reference and search in the future. This value will be used to populate dropdowns.|string|
+|name|A name to reference and search in the future. This value will be used to populate dropdowns.|string|
 |config|The configuration the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if config validation is defined.|object|
 |secrets|The secrets the action type expects. See related action type to see what attributes are expected. This will also validate against the action type if secrets validation is defined.|object|
 
@@ -248,7 +272,7 @@ This action type interfaces with the [Slack Incoming Webhooks feature](https://a
 
 ## index, action id: `.index`
 
-The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elastic-stack-overview/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
+The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elasticsearch/reference/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
 
 #### config properties
 
@@ -277,7 +301,7 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "id": "d6f1e228-1806-4a72-83ac-e06f3d5c2fbe",
     "attributes": {
         "actionTypeId": ".slack",
-        "description": "post to slack",
+        "name": "post to slack",
         "config": {}
     },
     "references": [],

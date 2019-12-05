@@ -19,6 +19,7 @@
 
 import { AggParam } from '../../../agg_types';
 import { AggGroupNames } from './agg_groups';
+import { AggControlProps } from './controls/agg_control_props';
 
 export interface Schema {
   aggFilter: string | string[];
@@ -29,4 +30,8 @@ export interface Schema {
   name: string;
   params: AggParam[];
   title: string;
+  defaults: unknown;
+  hideCustomLabel?: boolean;
+  mustBeFirst?: boolean;
+  editorComponent?: React.ComponentType<AggControlProps>;
 }

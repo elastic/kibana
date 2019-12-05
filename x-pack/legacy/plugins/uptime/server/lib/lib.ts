@@ -4,17 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DatabaseAdapter } from './adapters/database';
-import { UMBackendFrameworkAdapter } from './adapters/framework';
-import { UMMonitorsDomain, UMPingsDomain } from './domains';
-import { UMAuthDomain } from './domains/auth';
-import { UMMonitorStatesAdapter } from './adapters/monitor_states';
+import { UMAuthDomain } from './domains';
+import {
+  DatabaseAdapter,
+  UMBackendFrameworkAdapter,
+  UMMonitorsAdapter,
+  UMMonitorStatesAdapter,
+  UMPingsAdapter,
+  UMSavedObjectsAdapter,
+} from './adapters';
 
 export interface UMDomainLibs {
   auth: UMAuthDomain;
-  monitors: UMMonitorsDomain;
+  monitors: UMMonitorsAdapter;
   monitorStates: UMMonitorStatesAdapter;
-  pings: UMPingsDomain;
+  pings: UMPingsAdapter;
+  savedObjects: UMSavedObjectsAdapter;
 }
 
 export interface UMServerLibs extends UMDomainLibs {

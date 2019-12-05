@@ -178,6 +178,7 @@ export class TOCEntry extends React.Component {
 
   _renderLayerHeader() {
     const {
+      removeLayer,
       cloneLayer,
       isReadOnly,
       layer,
@@ -211,6 +212,9 @@ export class TOCEntry extends React.Component {
           }}
           editLayer={this._openLayerPanelWithCheck}
           isReadOnly={isReadOnly}
+          removeLayer={() => {
+            removeLayer(layer.getId());
+          }}
         />
 
         {this._renderLayerIcons()}
@@ -223,7 +227,7 @@ export class TOCEntry extends React.Component {
       return null;
     }
 
-    const tocDetails = this.props.layer.getLegendDetails();
+    const tocDetails = this.props.layer.renderLegendDetails();
     if (!tocDetails) {
       return null;
     }

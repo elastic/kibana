@@ -6,7 +6,7 @@
 
 export default function ({ loadTestFile }) {
   describe('security', function () {
-    this.tags('ciGroup1');
+    this.tags('ciGroup6');
 
     loadTestFile(require.resolve('./basic_login'));
     loadTestFile(require.resolve('./builtin_es_privileges'));
@@ -14,5 +14,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./index_fields'));
     loadTestFile(require.resolve('./roles'));
     loadTestFile(require.resolve('./privileges'));
+    loadTestFile(require.resolve('./session'));
   });
 }

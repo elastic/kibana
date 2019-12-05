@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
 import { pure } from 'recompose';
 
-import { HeaderPanel } from '../../../header_panel';
+import { HeaderSection } from '../../../header_section';
 import { manageQuery } from '../../../page/manage_query';
 import {
   ID as OverviewHostQueryId,
@@ -17,6 +17,7 @@ import {
 } from '../../../../containers/overview/overview_host';
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewHostStats } from '../overview_host_stats';
+import { getHostsUrl } from '../../../link_to';
 
 export interface OwnProps {
   startDate: number;
@@ -41,7 +42,7 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
   return (
     <EuiFlexItem>
       <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
-        <HeaderPanel
+        <HeaderSection
           border
           id={OverviewHostQueryId}
           showInspect={isHover}
@@ -55,10 +56,10 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
             <FormattedMessage id="xpack.siem.overview.hostsTitle" defaultMessage="Host events" />
           }
         >
-          <EuiButton href="#/link-to/hosts">
+          <EuiButton href={getHostsUrl()}>
             <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View hosts" />
           </EuiButton>
-        </HeaderPanel>
+        </HeaderSection>
 
         <OverviewHostQuery endDate={endDate} sourceId="default" startDate={startDate}>
           {({ overviewHost, loading, id, inspect, refetch }) => (

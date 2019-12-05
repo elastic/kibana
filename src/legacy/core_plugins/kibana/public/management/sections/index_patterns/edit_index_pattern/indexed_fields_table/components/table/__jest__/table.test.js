@@ -19,9 +19,9 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { TableComponent } from '../table';
+import { Table } from '../table';
 
 const indexPattern = {
   timeFieldName: 'timestamp'
@@ -35,8 +35,8 @@ const items = [
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -47,8 +47,8 @@ describe('Table', () => {
   });
 
   it('should render normal field name', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -60,8 +60,8 @@ describe('Table', () => {
   });
 
   it('should render timestamp field name', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -73,8 +73,8 @@ describe('Table', () => {
   });
 
   it('should render the boolean template (true)', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -86,8 +86,8 @@ describe('Table', () => {
   });
 
   it('should render the boolean template (false)', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -99,8 +99,8 @@ describe('Table', () => {
   });
 
   it('should render normal type', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -112,8 +112,8 @@ describe('Table', () => {
   });
 
   it('should render conflicting type', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -127,8 +127,8 @@ describe('Table', () => {
   it('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={editField}

@@ -7,10 +7,10 @@
 import _ from 'lodash';
 import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_task';
 
-export function initTelemetryCollection(server) {
+export function initTelemetryCollection(usageCollection, server) {
   registerMapsTelemetryTask(server);
-  scheduleTask(server, server.plugins.task_manager);
-  registerMapsUsageCollector(server);
+  scheduleTask(server);
+  registerMapsUsageCollector(usageCollection, server);
 }
 
 async function isTaskManagerReady(server) {
@@ -21,6 +21,11 @@ async function isTaskManagerReady(server) {
 async function fetch(server) {
   let docs;
   const taskManager = server.plugins.task_manager;
+
+  if (!taskManager) {
+    return null;
+  }
+
   try {
     ({ docs } = await taskManager.fetch({
       query: {
@@ -76,9 +81,8 @@ export function buildCollectorObj(server) {
   };
 }
 
-export function registerMapsUsageCollector(server) {
+export function registerMapsUsageCollector(usageCollection, server) {
   const collectorObj = buildCollectorObj(server);
-  const mapsUsageCollector = server.usage.collectorSet
-    .makeUsageCollector(collectorObj);
-  server.usage.collectorSet.register(mapsUsageCollector);
+  const mapsUsageCollector = usageCollection.makeUsageCollector(collectorObj);
+  usageCollection.registerCollector(mapsUsageCollector);
 }

@@ -269,6 +269,14 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       }
     }
 
+    async isBetaInfoShown() {
+      return await testSubjects.exists('betaVisInfo');
+    }
+
+    async getBetaTypeLinks() {
+      return await find.allByCssSelector('[data-vis-stage="beta"]');
+    }
+
     async getExperimentalTypeLinks() {
       return await find.allByCssSelector('[data-vis-stage="experimental"]');
     }
@@ -360,6 +368,28 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const isChecked = await this.isChecked(selector);
       if (isChecked) {
         log.debug(`unchecking checkbox ${selector}`);
+        await testSubjects.click(selector);
+      }
+    }
+
+    async isSwitchChecked(selector) {
+      const checkbox = await testSubjects.find(selector);
+      const isChecked = await checkbox.getAttribute('aria-checked');
+      return isChecked === 'true';
+    }
+
+    async checkSwitch(selector) {
+      const isChecked = await this.isSwitchChecked(selector);
+      if (!isChecked) {
+        log.debug(`checking switch ${selector}`);
+        await testSubjects.click(selector);
+      }
+    }
+
+    async uncheckSwitch(selector) {
+      const isChecked = await this.isSwitchChecked(selector);
+      if (isChecked) {
+        log.debug(`unchecking switch ${selector}`);
         await testSubjects.click(selector);
       }
     }
@@ -481,13 +511,23 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleOpenEditor(index, toState = 'true') {
       // index, see selectYAxisAggregation
-      const toggle = await find.byCssSelector(`button[aria-controls="visEditorAggAccordion${index}"]`);
+      await this.toggleAccordion(`visEditorAggAccordion${index}`, toState);
+    }
+
+    async toggleAccordion(id, toState = 'true') {
+      const toggle = await find.byCssSelector(`button[aria-controls="${id}"]`);
       const toggleOpen = await toggle.getAttribute('aria-expanded');
-      log.debug(`toggle ${index} expand = ${toggleOpen}`);
+      log.debug(`toggle ${id} expand = ${toggleOpen}`);
       if (toggleOpen !== toState) {
-        log.debug(`toggle ${index} click()`);
+        log.debug(`toggle ${id} click()`);
         await toggle.click();
       }
+    }
+
+    async toggleAdvancedParams(aggId) {
+      const accordion = await testSubjects.find(`advancedParams-${aggId}`);
+      const accordionButton = await find.descendantDisplayedByCssSelector('button', accordion);
+      await accordionButton.click();
     }
 
     async selectYAxisAggregation(agg, field, label, index = 1) {
@@ -514,34 +554,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       customLabel.type(label);
     }
 
-    async setAxisExtents(min, max, axis = 'LeftAxis-1') {
-      const axisOptions = await find.byCssSelector(`div[aria-label="Toggle ${axis} options"]`);
-      const isOpen = await axisOptions.getAttribute('aria-expanded');
-      if (isOpen === 'false') {
-        log.debug(`click to open ${axis} options`);
-        await axisOptions.click();
-      }
-      // it would be nice to get the correct axis by name like "LeftAxis-1"
-      // instead of an incremented index, but this link isn't under the div above
-      const advancedLink =
-        await find.byCssSelector(`#axisOptionsValueAxis-1 .visEditorSidebar__advancedLinkIcon`);
+    async setAxisExtents(min, max, axisId = 'ValueAxis-1') {
+      await this.toggleAccordion(`yAxisAccordion${axisId}`);
+      await this.toggleAccordion(`yAxisOptionsAccordion${axisId}`);
 
-      const advancedLinkState = await advancedLink.getAttribute('type');
-      if (advancedLinkState.includes('arrowRight')) {
-        await advancedLink.moveMouseTo();
-        log.debug('click advancedLink');
-        await advancedLink.click();
-      }
-      const checkbox = await find.byCssSelector('input[ng-model="axis.scale.setYExtents"]');
-      const checkboxState = await checkbox.getAttribute('class');
-      if (checkboxState.includes('ng-empty')) {
-        await checkbox.moveMouseTo();
-        await checkbox.click();
-      }
-      const maxField = await find.byCssSelector('[ng-model="axis.scale.max"]');
-      await maxField.type(max);
-      const minField = await find.byCssSelector('[ng-model="axis.scale.min"]');
-      await minField.type(min);
+      await testSubjects.click('yAxisSetYExtents');
+      await testSubjects.setValue('yAxisYExtentsMax', max);
+      await testSubjects.setValue('yAxisYExtentsMin', min);
 
     }
 
@@ -563,9 +582,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectAggregateWith(fieldValue) {
-      const sortSelect = await testSubjects.find(`visDefaultEditorAggregateWith`);
-      const sortMetric = await sortSelect.findByCssSelector(`option[value="${fieldValue}"]`);
-      await sortMetric.click();
+      await testSubjects.selectValue('visDefaultEditorAggregateWith', fieldValue);
     }
 
     async getInterval() {
@@ -595,12 +612,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async setSize(newValue, aggId) {
-      const dataTestSubj = aggId ? `visEditorAggAccordion${aggId} sizeParamEditor` : 'sizeParamEditor';
+      const dataTestSubj = aggId ? `visEditorAggAccordion${aggId} > sizeParamEditor` : 'sizeParamEditor';
       await testSubjects.setValue(dataTestSubj, String(newValue));
     }
 
     async toggleDisabledAgg(agg) {
-      await testSubjects.click(`visEditorAggAccordion${agg} toggleDisableAggregationBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} > ~toggleDisableAggregationBtn`);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
@@ -610,11 +627,15 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async toggleOtherBucket(agg = 2) {
-      return await testSubjects.click(`visEditorAggAccordion${agg} otherBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} > otherBucketSwitch`);
     }
 
     async toggleMissingBucket(agg = 2) {
-      return await testSubjects.click(`visEditorAggAccordion${agg} missingBucketSwitch`);
+      return await testSubjects.click(`visEditorAggAccordion${agg} > missingBucketSwitch`);
+    }
+
+    async toggleScaleMetrics() {
+      return await testSubjects.click('scaleMetricsSwitch');
     }
 
     async isApplyEnabled() {
@@ -649,8 +670,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async changeHeatmapColorNumbers(value = 6) {
-      const input = await testSubjects.find(`heatmapOptionsColorsNumberInput`);
-      await input.clearValue();
+      const input = await testSubjects.find(`heatmapColorsNumber`);
+      await input.clearValueWithKeyboard();
       await input.type(`${value}`);
     }
 
@@ -663,26 +684,16 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async clickEnableCustomRanges() {
-      await testSubjects.click('heatmapEnableCustomRanges');
+      await testSubjects.click('heatmapUseCustomRanges');
     }
 
     async clickAddRange() {
-      await testSubjects.click(`heatmapAddRangeButton`);
+      await testSubjects.click(`heatmapColorRange__addRangeButton`);
     }
 
-    async isCustomRangeTableShown() {
-      await testSubjects.exists('heatmapCustomRangesTable');
-    }
-
-    async addCustomRange(from, to) {
-      const table = await testSubjects.find('heatmapCustomRangesTable');
-      const lastRow = await table.findByCssSelector('tr:last-child');
-      const fromCell = await lastRow.findByCssSelector('td:first-child input');
-      await fromCell.clearValue();
-      await fromCell.type(`${from}`, { charByChar: true });
-      const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
-      await toCell.clearValue();
-      await toCell.type(`${to}`, { charByChar: true });
+    async setCustomRangeByIndex(index, from, to) {
+      await testSubjects.setValue(`heatmapColorRange${index}__from`, from);
+      await testSubjects.setValue(`heatmapColorRange${index}__to`, to);
     }
 
     async clickYAxisOptions(axisId) {
@@ -699,18 +710,18 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async selectChartMode(mode) {
-      const selector = await find.byCssSelector(`#seriesMode0 > option[label="${mode}"]`);
+      const selector = await find.byCssSelector(`#seriesMode0 > option[value="${mode}"]`);
       await selector.click();
     }
 
     async selectYAxisScaleType(axisId, scaleType) {
       const selectElement = await testSubjects.find(`scaleSelectYAxis-${axisId}`);
-      const selector = await selectElement.findByCssSelector(`option[label="${scaleType}"]`);
+      const selector = await selectElement.findByCssSelector(`option[value="${scaleType}"]`);
       await selector.click();
     }
 
     async selectYAxisMode(mode) {
-      const selector = await find.byCssSelector(`#valueAxisMode0 > option[label="${mode}"]`);
+      const selector = await find.byCssSelector(`#valueAxisMode0 > option[value="${mode}"]`);
       await selector.click();
     }
 
@@ -745,18 +756,23 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         await testSubjects.click('saveAsNewCheckbox');
       }
       log.debug('Click Save Visualization button');
+
       await testSubjects.click('confirmSaveSavedObjectButton');
 
-      // wait for save to complete before completion
+      // Confirm that the Visualization has actually been saved
+      await testSubjects.existOrFail('saveVisualizationSuccess');
+      const message =  await PageObjects.common.closeToast();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.waitForSaveModalToClose();
+
+      return message;
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
-      await this.saveVisualization(vizName, { saveAsNew });
-      const successToast = await testSubjects.exists('saveVisualizationSuccess', {
-        timeout: defaultFindTimeout
-      });
-      expect(successToast).to.be(true);
+      const saveMessage = await this.saveVisualization(vizName, { saveAsNew });
+      if (!saveMessage) {
+        throw new Error(`Expected saveVisualization to respond with the saveMessage from the toast, got ${saveMessage}`);
+      }
     }
 
     async saveVisualizationExpectSuccessAndBreadcrumb(vizName, { saveAsNew = false } = {}) {
@@ -863,7 +879,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // by a bunch of 'L'ines from that point to the next.  Those points are
       // the values we're going to use to calculate the data values we're testing.
       // So git rid of the one 'M' and split the rest on the 'L's.
-      const tempArray = data.replace('M', '').split('L');
+      const tempArray = data.replace('M ', '').replace('M', '').replace(/ L /g, 'L').replace(/ /g, ',').split('L');
       const chartSections = tempArray.length / 2;
       // log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];
@@ -917,7 +933,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       // 1). get the range/pixel ratio
       const yAxisRatio = await this.getChartYAxisRatio(axis);
       // 3). get the visWrapper__chart elements
-      const svg = await find.byCssSelector('div.chart > svg');
+      const svg = await find.byCssSelector('div.chart');
       const $ = await svg.parseDomContent();
       const chartData = $(`g > g.series > rect[data-label="${dataLabel}"]`).toArray().map(chart => {
         const barHeight = $(chart).attr('height');
@@ -1015,6 +1031,16 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleIsFilteredByCollarCheckbox() {
       await testSubjects.click('isFilteredByCollarCheckbox');
+    }
+
+    async setIsFilteredByCollarCheckbox(value = true) {
+      await retry.try(async () => {
+        const isChecked = await this.isSwitchChecked('isFilteredByCollarCheckbox');
+        if (isChecked !== value) {
+          await testSubjects.click('isFilteredByCollarCheckbox');
+          throw new Error('isFilteredByCollar not set correctly');
+        }
+      });
     }
 
     async getMarkdownData() {
@@ -1164,8 +1190,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getLegendEntries() {
-      const legendEntries = await find.allByCssSelector('.visLegend__valueTitle', defaultFindTimeout * 2);
-      return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
+      const legendEntries = await find.allByCssSelector(
+        '.visLegend__button',
+        defaultFindTimeout * 2
+      );
+      return await Promise.all(
+        legendEntries.map(async chart => await chart.getAttribute('data-label'))
+      );
     }
 
     async openLegendOptionColors(name) {
@@ -1187,7 +1218,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await retry.try(async () => {
         const table = await testSubjects.find('tableVis');
         const cell = await table.findByCssSelector(`tbody tr:nth-child(${row}) td:nth-child(${column})`);
-        await browser.moveMouseTo(cell);
+        await cell.moveMouseTo();
         const filterBtn = await testSubjects.findDescendant('filterForCellValue', cell);
         await filterBtn.click();
       });
@@ -1195,7 +1226,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleLegend(show = true) {
       await retry.try(async () => {
-        const isVisible = find.byCssSelector('vislib-legend');
+        const isVisible = find.byCssSelector('.visLegend');
         if ((show && !isVisible) || (!show && isVisible)) {
           await testSubjects.click('vislibToggleLegend');
         }
@@ -1205,7 +1236,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async filterLegend(name) {
       await this.toggleLegend();
       await testSubjects.click(`legend-${name}`);
-      await testSubjects.click(`legend-${name}-filterIn`);
+      const filters = await testSubjects.find(`legend-${name}-filters`);
+      const [filterIn] = await filters.findAllByCssSelector(`input`);
+      await filterIn.click();
       await this.waitForVisualizationRenderingStabilized();
     }
 
@@ -1273,7 +1306,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async removeDimension(agg) {
-      await testSubjects.click(`visEditorAggAccordion${agg} removeDimensionBtn`);
+      await testSubjects.click(`visEditorAggAccordion${agg} > removeDimensionBtn`);
     }
 
     async setFilterParams({ aggNth = 0, indexPattern, field }) {
@@ -1287,6 +1320,11 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await inputMin.type(min);
       const inputMax = await control.findByCssSelector('[name$="maxValue"]');
       await inputMax.type(max);
+    }
+
+    async scrollSubjectIntoView(subject) {
+      const element = await testSubjects.find(subject);
+      await element.scrollIntoViewIfNecessary();
     }
   }
 

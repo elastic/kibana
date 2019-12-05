@@ -5,19 +5,31 @@
  */
 
 import { getHeapMemoryChart } from './heap_memory';
-import { Setup } from '../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../helpers/setup_request';
 import { getNonHeapMemoryChart } from './non_heap_memory';
 import { getThreadCountChart } from './thread_count';
 import { getCPUChartData } from '../shared/cpu';
 import { getMemoryChartData } from '../shared/memory';
+import { getGcRateChart } from './gc/getGcRateChart';
+import { getGcTimeChart } from './gc/getGcTimeChart';
 
-export async function getJavaMetricsCharts(setup: Setup, serviceName: string) {
+export async function getJavaMetricsCharts(
+  setup: Setup & SetupTimeRange & SetupUIFilters,
+  serviceName: string,
+  serviceNodeName?: string
+) {
   const charts = await Promise.all([
-    getCPUChartData(setup, serviceName),
-    getMemoryChartData(setup, serviceName),
-    getHeapMemoryChart(setup, serviceName),
-    getNonHeapMemoryChart(setup, serviceName),
-    getThreadCountChart(setup, serviceName)
+    getCPUChartData(setup, serviceName, serviceNodeName),
+    getMemoryChartData(setup, serviceName, serviceNodeName),
+    getHeapMemoryChart(setup, serviceName, serviceNodeName),
+    getNonHeapMemoryChart(setup, serviceName, serviceNodeName),
+    getThreadCountChart(setup, serviceName, serviceNodeName),
+    getGcRateChart(setup, serviceName, serviceNodeName),
+    getGcTimeChart(setup, serviceName, serviceNodeName)
   ]);
 
   return { charts };

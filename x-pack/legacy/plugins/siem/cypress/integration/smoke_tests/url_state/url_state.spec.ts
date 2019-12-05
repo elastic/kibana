@@ -17,6 +17,8 @@ import {
   DATE_PICKER_START_DATE_POPOVER_BUTTON_TIMELINE,
   KQL_INPUT,
   TIMELINE_TITLE,
+  HOST_DETAIL_SIEM_KIBANA,
+  BREADCRUMBS,
 } from '../../lib/url_state';
 import { DEFAULT_TIMEOUT, loginAndWaitForPage } from '../../lib/util/helpers';
 import {
@@ -25,8 +27,10 @@ import {
   hostExistsQuery,
   toggleTimelineVisibility,
 } from '../../lib/timeline/helpers';
-import { NAVIGATION_NETWORK } from '../../lib/navigation/selectors';
+import { NAVIGATION_NETWORK, NAVIGATION_HOSTS } from '../../lib/navigation/selectors';
 import { HOSTS_PAGE } from '../../lib/urls';
+import { waitForAllHostsWidget } from '../../lib/hosts/helpers';
+import { NAVIGATION_HOSTS_ALL_HOSTS, NAVIGATION_HOSTS_ANOMALIES } from '../../lib/hosts/selectors';
 
 describe('url state', () => {
   afterEach(() => {
@@ -60,7 +64,7 @@ describe('url state', () => {
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`
     );
 
-    cy.get(DATE_PICKER_APPLY_BUTTON).click({ force: true });
+    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: 5000 }).click();
 
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).click({ force: true });
 
@@ -72,7 +76,7 @@ describe('url state', () => {
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}`
     );
 
-    cy.get(DATE_PICKER_APPLY_BUTTON).click({ force: true });
+    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: 5000 }).click();
 
     cy.url().should(
       'include',
@@ -161,39 +165,86 @@ describe('url state', () => {
     );
   });
 
-  it('sets kql on network page when queryLocation == network.page', () => {
+  it('sets kql on network page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
-  it('does not set kql on network page when queryLocation != network.page', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlNetworkHosts);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', '');
-  });
-
-  it('sets kql on hosts page when queryLocation == hosts.page', () => {
+  it('sets kql on hosts page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
-  });
-
-  it('does not set kql on hosts page when queryLocation != hosts.page', () => {
-    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsNetwork);
-    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', '');
   });
 
   it('sets the url state when kql is set', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
     cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
-    cy.url().should(
-      'include',
-      `kqlQuery=(filterQuery:(expression:'source.ip:%20%2210.142.0.9%22%20',kind:kuery),queryLocation:network.page)`
+    cy.url().should('include', `query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')`);
+  });
+
+  it('sets the url state when kql is set and check if href reflect this change', () => {
+    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
+    cy.get(KQL_INPUT, { timeout: 5000 }).type('source.ip: "10.142.0.9" {enter}');
+    cy.get(NAVIGATION_HOSTS)
+      .first()
+      .click({ force: true });
+    cy.get(NAVIGATION_NETWORK).should(
+      'have.attr',
+      'href',
+      "#/link-to/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
     );
   });
 
-  it('clears kql when navigating to a new page', () => {
+  it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
+    loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlHost);
+    cy.get(KQL_INPUT, { timeout: 5000 }).type('host.name: "siem-kibana" {enter}');
+    cy.get(NAVIGATION_HOSTS_ALL_HOSTS, { timeout: 5000 })
+      .first()
+      .click({ force: true });
+    waitForAllHostsWidget();
+    cy.get(NAVIGATION_HOSTS).should(
+      'have.attr',
+      'href',
+      "#/link-to/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+    );
+    cy.get(NAVIGATION_NETWORK).should(
+      'have.attr',
+      'href',
+      "#/link-to/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+    );
+    cy.get(HOST_DETAIL_SIEM_KIBANA, { timeout: 5000 })
+      .first()
+      .invoke('text')
+      .should('eq', 'siem-kibana');
+    cy.get(HOST_DETAIL_SIEM_KIBANA)
+      .first()
+      .click({ force: true });
+    cy.get(KQL_INPUT, { timeout: 5000 }).clear();
+    cy.get(KQL_INPUT, { timeout: 5000 }).type('agent.type: "auditbeat" {enter}');
+    cy.get(NAVIGATION_HOSTS_ANOMALIES).should(
+      'have.attr',
+      'href',
+      "#/hosts/siem-kibana/anomalies?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+    );
+    cy.get(BREADCRUMBS)
+      .eq(1)
+      .should(
+        'have.attr',
+        'href',
+        "#/link-to/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+      );
+    cy.get(BREADCRUMBS)
+      .eq(2)
+      .should(
+        'have.attr',
+        'href',
+        "#/link-to/hosts/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')&timerange=(global:(linkTo:!(timeline),timerange:(from:1564689809186,kind:absolute,to:1564691609186)),timeline:(linkTo:!(global),timerange:(from:1564689809186,kind:absolute,to:1564691609186)))"
+      );
+  });
+
+  it('Do not clears kql when navigating to a new page', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
     cy.get(NAVIGATION_NETWORK).click({ force: true });
-    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', '');
+    cy.get(KQL_INPUT, { timeout: 5000 }).should('have.attr', 'value', 'source.ip: "10.142.0.9"');
   });
 
   it('sets and reads the url state for timeline by id', () => {
@@ -202,17 +253,10 @@ describe('url state', () => {
     executeKQL(hostExistsQuery);
     assertAtLeastOneEventMatchesSearch();
     const bestTimelineName = 'The Best Timeline';
-    cy.get(TIMELINE_TITLE).type(bestTimelineName);
-    cy.hash().then(hash => {
-      const matched = hash.match(/(?<=timelineId=\').+?(?=\')/g);
-      const newTimelineId = matched && matched.length > 0 ? matched[0] : 'null';
-      expect(matched).to.have.lengthOf(1);
-      cy.log('hash', hash);
-      cy.log('matched', matched);
-      cy.log('newTimelineId', newTimelineId);
-      cy.visit(
-        `/app/siem#/timelines?timelineId='${newTimelineId}'&timerange=(global:(linkTo:!(),timerange:(from:1565274377369,kind:absolute,to:1565360777369)),timeline:(linkTo:!(),timerange:(from:1565274377369,kind:absolute,to:1565360777369)))`
-      ).then(() => cy.get(TIMELINE_TITLE).should('have.attr', 'value', bestTimelineName));
-    });
+    cy.get(TIMELINE_TITLE, { timeout: 5000 }).type(bestTimelineName);
+    cy.url().should('include', 'timeline=');
+    cy.visit(
+      `/app/siem#/timelines?timerange=(global:(linkTo:!(),timerange:(from:1565274377369,kind:absolute,to:1565360777369)),timeline:(linkTo:!(),timerange:(from:1565274377369,kind:absolute,to:1565360777369)))`
+    ).then(() => cy.get(TIMELINE_TITLE).should('have.attr', 'value', bestTimelineName));
   });
 });

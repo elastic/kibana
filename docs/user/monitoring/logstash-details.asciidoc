@@ -1,0 +1,27 @@
+[role="xpack"]
+[[logstash-page]]
+== Logstash Monitoring Metrics
+++++
+<titleabbrev>Logstash Metrics</titleabbrev>
+++++
+
+If you are monitoring Logstash nodes, click **Overview** in the Logstash section
+of the *Stack Monitoring* page in {kib}. You can view the overall health of the
+Logstash nodes.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-logstash-overview.png["Logstash Overview",link="images/monitoring-logstash-overview.png"]
+
+To view Logstash node metrics, click **Nodes**. The Nodes section shows the
+status of each Logstash node.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-logstash-nodes.png["Logstash Nodes",link="images/monitoring-logstash-nodes.png"]
+
+Click the name of a node to view its statistics over time.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-logstash-node.png["Logstash Node View",link="images/monitoring-logstash-node.png"]
+
+For more information, see
+{logstash-ref}/monitoring-logstash.html[Monitoring Logstash].

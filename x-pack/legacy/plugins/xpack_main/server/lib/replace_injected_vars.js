@@ -5,14 +5,12 @@
  */
 
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { getTelemetryOptIn } from '../../../telemetry/server';
 
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;
 
   const withXpackInfo = async () => ({
     ...originalInjectedVars,
-    telemetryOptedIn: await getTelemetryOptIn(request),
     xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined,
   });
 

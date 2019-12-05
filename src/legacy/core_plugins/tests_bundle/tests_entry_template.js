@@ -70,9 +70,9 @@ const uiCapabilities = {
 
 // Mock fetch for CoreSystem calls.
 fetchMock.config.fallbackToNetwork = true;
-fetchMock.post(/\\/api\\/capabilities/, {
+fetchMock.post(/\\/api\\/core\\/capabilities/, {
   status: 200,
-  body: JSON.stringify({ capabilities: uiCapabilities }),
+  body: JSON.stringify(uiCapabilities),
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -85,6 +85,7 @@ const coreSystem = new CoreSystem({
   injectedMetadata: {
     version: '1.2.3',
     buildNumber: 1234,
+    legacyMode: true,
     legacyMetadata: {
       nav: [],
       version: '1.2.3',
@@ -126,9 +127,6 @@ const coreSystem = new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
-      interpreterConfig: {
-        enableInVisualize: true
-      }
     },
   },
   rootDomElement,

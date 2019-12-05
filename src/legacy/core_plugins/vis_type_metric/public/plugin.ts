@@ -18,19 +18,16 @@
  */
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-import { LegacyDependenciesPlugin } from './shim';
-import { Plugin as DataPublicPlugin } from '../../../../plugins/data/public';
+import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createMetricVisFn } from './metric_vis_fn';
-// @ts-ignore
-import { createMetricVisTypeDefinition } from './metric_vis_type';
+import { metricVisDefinition } from './metric_vis_type';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
-  data: ReturnType<DataPublicPlugin['setup']>;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
-  __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
@@ -41,14 +38,9 @@ export class MetricVisPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(
-    core: CoreSetup,
-    { data, visualizations, __LEGACY }: MetricVisPluginSetupDependencies
-  ) {
-    __LEGACY.setup();
-
-    data.expressions.registerFunction(createMetricVisFn);
-    visualizations.types.VisTypesRegistryProvider.register(createMetricVisTypeDefinition);
+  public setup(core: CoreSetup, { expressions, visualizations }: MetricVisPluginSetupDependencies) {
+    expressions.registerFunction(createMetricVisFn);
+    visualizations.types.createReactVisualization(metricVisDefinition);
   }
 
   public start(core: CoreStart) {

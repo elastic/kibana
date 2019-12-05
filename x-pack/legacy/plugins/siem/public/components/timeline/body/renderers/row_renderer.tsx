@@ -4,24 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+
 import { BrowserFields } from '../../../../containers/source';
 import { Ecs } from '../../../../graphql/types';
-import { TimelineWidthContext } from '../../timeline_context';
+import { EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
+import { useTimelineWidthContext } from '../../timeline_context';
 
 interface RowRendererContainerProps {
   children: React.ReactNode;
 }
 
 export const RowRendererContainer = React.memo<RowRendererContainerProps>(({ children }) => {
-  const width = useContext(TimelineWidthContext);
+  const width = useTimelineWidthContext();
 
   // Passing the styles directly to the component because the width is
   // being calculated and is recommended by Styled Components for performance
   // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-  return <div style={{ width: `${width}px` }}>{children}</div>;
+  return (
+    <EventsTrSupplement
+      className="siemEventsTable__trSupplement--summary"
+      style={{ width: `${width - OFFSET_SCROLLBAR}px` }}
+    >
+      {children}
+    </EventsTrSupplement>
+  );
 });
-
 RowRendererContainer.displayName = 'RowRendererContainer';
 
 export interface RowRenderer {
@@ -30,9 +38,11 @@ export interface RowRenderer {
     browserFields,
     data,
     children,
+    timelineId,
   }: {
     browserFields: BrowserFields;
     data: Ecs;
     children: React.ReactNode;
+    timelineId: string;
   }) => React.ReactNode;
 }

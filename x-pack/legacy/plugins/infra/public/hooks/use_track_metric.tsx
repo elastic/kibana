@@ -7,6 +7,7 @@
 import { useEffect } from 'react';
 import {
   createUiStatsReporter,
+  UiStatsMetricType,
   METRIC_TYPE,
 } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 
@@ -36,7 +37,7 @@ function getTrackerForApp(app: string) {
 
 interface TrackOptions {
   app: ObservabilityApp;
-  metricType?: METRIC_TYPE;
+  metricType?: UiStatsMetricType;
   delay?: number; // in ms
 }
 type EffectDeps = unknown[];
@@ -71,4 +72,15 @@ export function useTrackPageview(
   effectDependencies: EffectDeps = []
 ) {
   useTrackMetric({ ...rest, metric: `pageview__${path}` }, effectDependencies);
+}
+
+interface TrackEventProps {
+  app: ObservabilityApp;
+  name: string;
+  metricType?: UiStatsMetricType;
+}
+
+export function trackEvent({ app, name, metricType = METRIC_TYPE.CLICK }: TrackEventProps) {
+  const trackUiMetric = getTrackerForApp(app);
+  trackUiMetric(metricType, `event__${name}`);
 }

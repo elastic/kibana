@@ -5,17 +5,18 @@
  */
 
 import { mount } from 'enzyme';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
+import { MockedProvider } from 'react-apollo/test-utils';
 
 import '../../mock/match_media';
-import '../../mock/ui_settings';
-import { Network } from './network';
 
 import { mocksSource } from '../../containers/source/mock';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { TestProviders } from '../../mock';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { cloneDeep } from 'lodash/fp';
+import { mockUiSettings } from '../../mock/ui_settings';
+import { Network } from './network';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
@@ -23,6 +24,21 @@ jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     kibana: 'http://www.example.com',
   },
+}));
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar and QueryBar
+jest.mock('../../components/search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+jest.mock('../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 let localSource: Array<{
@@ -59,17 +75,21 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
+
+const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
+const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
+
+const getMockProps = () => ({
+  networkPagePath: '',
+  to,
+  from,
+  isInitializing: false,
+  setQuery: jest.fn(),
+  capabilitiesFetched: true,
+  hasMlUserPermissions: true,
+});
 
 describe('rendering - rendering', () => {
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-  afterAll(() => {
-    console.error = originalError;
-  });
   beforeEach(() => {
     localSource = cloneDeep(mocksSource);
   });
@@ -80,7 +100,7 @@ describe('rendering - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Network />
+            <Network {...getMockProps()} />
           </Router>
         </MockedProvider>
       </TestProviders>
@@ -97,7 +117,7 @@ describe('rendering - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Network />
+            <Network {...getMockProps()} />
           </Router>
         </MockedProvider>
       </TestProviders>

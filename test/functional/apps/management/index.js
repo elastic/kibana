@@ -33,7 +33,7 @@ export default function ({ getService, loadTestFile }) {
     });
 
     describe('', function () {
-      this.tags('ciGroup1');
+      this.tags('ciGroup7');
 
       loadTestFile(require.resolve('./_create_index_pattern_wizard'));
       loadTestFile(require.resolve('./_index_pattern_create_delete'));
@@ -42,10 +42,12 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_kibana_settings'));
       loadTestFile(require.resolve('./_scripted_fields'));
       loadTestFile(require.resolve('./_scripted_fields_preview'));
+      loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
+
     });
 
     describe('', function () {
-      this.tags('ciGroup2');
+      this.tags('ciGroup8');
 
       loadTestFile(require.resolve('./_index_pattern_filter'));
       loadTestFile(require.resolve('./_scripted_fields_filter'));

@@ -28,18 +28,18 @@ import { GaugeOptionsInternalProps } from '.';
 
 function StylePanel({ aggs, setGaugeValue, stateParams, vis }: GaugeOptionsInternalProps) {
   const diasableAlignment =
-    aggs.bySchemaGroup[AggGroupNames.Metrics].length === 1 &&
-    !aggs.bySchemaGroup[AggGroupNames.Buckets];
+    aggs.bySchemaGroup(AggGroupNames.Metrics).length === 1 &&
+    !aggs.bySchemaGroup(AggGroupNames.Buckets);
 
   return (
     <EuiPanel paddingSize="s">
       <EuiTitle size="xs">
-        <h2>
+        <h3>
           <FormattedMessage
             id="kbnVislibVisTypes.controls.gaugeOptions.styleTitle"
             defaultMessage="Style"
           />
-        </h2>
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
 

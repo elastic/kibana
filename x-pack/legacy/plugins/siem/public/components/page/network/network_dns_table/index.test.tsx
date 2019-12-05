@@ -37,6 +37,7 @@ describe('NetworkTopNFlow Table Component', () => {
             data={mockData.NetworkDns.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
             id="dns"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(
@@ -50,7 +51,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(NetworkDnsTableComponent)'))).toMatchSnapshot();
     });
   });
 
@@ -63,6 +64,7 @@ describe('NetworkTopNFlow Table Component', () => {
               data={mockData.NetworkDns.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.NetworkDns.pageInfo)}
               id="dns"
+              isInspect={false}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(
@@ -77,7 +79,7 @@ describe('NetworkTopNFlow Table Component', () => {
         </MockedProvider>
       );
 
-      expect(store.getState().network.page.queries!.dns.dnsSortField).toEqual({
+      expect(store.getState().network.page.queries!.dns.sort).toEqual({
         direction: 'desc',
         field: 'queryCount',
       });
@@ -89,7 +91,7 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.dns.dnsSortField).toEqual({
+      expect(store.getState().network.page.queries!.dns.sort).toEqual({
         direction: 'asc',
         field: 'dnsName',
       });

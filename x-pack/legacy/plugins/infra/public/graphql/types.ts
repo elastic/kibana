@@ -1,3 +1,5 @@
+import { SnapshotMetricType } from '../../common/inventory_models/types';
+
 /* tslint:disable */
 
 // ====================================================
@@ -131,6 +133,8 @@ export interface InfraIndexField {
   searchable: boolean;
   /** Whether the field's values can be aggregated */
   aggregatable: boolean;
+  /** Whether the field should be displayed based on event.module and a ECS allowed list */
+  displayable: boolean;
 }
 /** A consecutive sequence of log entries */
 export interface InfraLogEntryInterval {
@@ -289,7 +293,7 @@ export interface InfraSnapshotNodePath {
 }
 
 export interface InfraSnapshotNodeMetric {
-  name: InfraSnapshotMetricType;
+  name: SnapshotMetricType;
 
   value?: number | null;
 
@@ -306,6 +310,8 @@ export interface InfraMetricData {
 
 export interface InfraDataSeries {
   id: string;
+
+  label: string;
 
   data: InfraDataPoint[];
 }
@@ -572,6 +578,10 @@ export enum InfraMetric {
   hostLoad = 'hostLoad',
   hostMemoryUsage = 'hostMemoryUsage',
   hostNetworkTraffic = 'hostNetworkTraffic',
+  hostDockerOverview = 'hostDockerOverview',
+  hostDockerInfo = 'hostDockerInfo',
+  hostDockerTop5ByCpu = 'hostDockerTop5ByCpu',
+  hostDockerTop5ByMemory = 'hostDockerTop5ByMemory',
   podOverview = 'podOverview',
   podCpuUsage = 'podCpuUsage',
   podMemoryUsage = 'podMemoryUsage',
@@ -836,6 +846,8 @@ export namespace MetricsQuery {
     __typename?: 'InfraDataSeries';
 
     id: string;
+
+    label: string;
 
     data: Data[];
   };
@@ -1138,6 +1150,8 @@ export namespace SourceStatusFields {
     searchable: boolean;
 
     aggregatable: boolean;
+
+    displayable: boolean;
   };
 }
 

@@ -18,7 +18,7 @@
  */
 
 const fn = require(`../yaxis`);
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
@@ -36,7 +36,7 @@ describe('yaxis.js', () => {
   });
 
   it('puts odd numbers of the left, even on the right, by default', () => {
-    return Promise.all([
+    return Bluebird.all([
       invoke(fn, [seriesList, 1]).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].position).to.equal('left');
       }),
@@ -50,7 +50,7 @@ describe('yaxis.js', () => {
   });
 
   it('it lets you override default positions', () => {
-    return Promise.all([
+    return Bluebird.all([
       invoke(fn, [seriesList, 1, null, null, 'right']).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].position).to.equal('right');
       }),
@@ -61,7 +61,7 @@ describe('yaxis.js', () => {
   });
 
   it('sets the minimum (default: no min)', () => {
-    return Promise.all([
+    return Bluebird.all([
       invoke(fn, [seriesList, 1, null]).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].min).to.equal(null);
       }),
@@ -72,7 +72,7 @@ describe('yaxis.js', () => {
   });
 
   it('sets the max (default: no max)', () => {
-    return Promise.all([
+    return Bluebird.all([
       invoke(fn, [seriesList, 1, null]).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].max).to.equal(undefined);
       }),
@@ -83,7 +83,7 @@ describe('yaxis.js', () => {
   });
 
   it('sets the units (default: no unit', () => {
-    return Promise.all([
+    return Bluebird.all([
       invoke(fn, [seriesList, 1, null, null, null, null, null, null]).then((r) => {
         expect(r.output.list[0]._global.yaxes[0].units).to.equal(undefined);
       }),
@@ -95,16 +95,16 @@ describe('yaxis.js', () => {
 
   it('throws an error if currency is not three letter code', () => {
     invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:abcde']).catch(e => {
-      expect(e).to.be.an(Error);
+      expect(e).to.be.an.instanceof(Error);
     });
     invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:12']).catch(e => {
-      expect(e).to.be.an(Error);
+      expect(e).to.be.an.instanceof(Error);
     });
     invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:$#']).catch(e => {
-      expect(e).to.be.an(Error);
+      expect(e).to.be.an.instanceof(Error);
     });
     invoke(fn, [seriesList, 1, null, null, null, null, null, 'currency:ab']).catch(e => {
-      expect(e).to.be.an(Error);
+      expect(e).to.be.an.instanceof(Error);
     });
   });
 

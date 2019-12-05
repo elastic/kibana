@@ -19,7 +19,7 @@
 
 import { resolve } from 'path';
 import { KIBANA_ROOT } from './paths';
-import { createEsTestCluster } from '../../es';
+import { createLegacyEsTestCluster } from '../../legacy_es';
 
 import { setupUsers, DEFAULT_SUPERUSER_PASS } from './auth';
 
@@ -31,7 +31,7 @@ export async function runElasticsearch({ config, options }) {
   const esEnvVars = config.get('esTestCluster.serverEnvVars');
   const isSecurityEnabled = esArgs.includes('xpack.security.enabled=true');
 
-  const cluster = createEsTestCluster({
+  const cluster = createLegacyEsTestCluster({
     port: config.get('servers.elasticsearch.port'),
     password: isSecurityEnabled
       ? DEFAULT_SUPERUSER_PASS

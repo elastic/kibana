@@ -4,23 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
-import { LayoutInstance } from '../common/layouts/layout';
-import { ConditionalHeaders, KbnServer } from '../../types';
+import { LayoutInstance, LayoutParams } from '../common/layouts/layout';
+import { JobDocPayload, ServerFacade, RequestFacade } from '../../types';
 
-// NOTE: this does not extend the main Params
+// Job params: structure of incoming user request data, after being parsed from RISON
 export interface JobParamsPDF {
   objectType: string;
   title: string;
-  relativeUrl: string;
+  relativeUrls: string[];
   browserTimezone: string;
   layout: LayoutInstance;
 }
 
-export type ESQueueCreateJobFnPDF = (
-  jobParams: JobParamsPDF,
-  headers: ConditionalHeaders,
-  request: Request
-) => Promise<JobParamsPDF>;
-
-export type CreateJobFactoryPDF = (server: KbnServer) => ESQueueCreateJobFnPDF;
+// Job payload: structure of stored job data provided by create_job
+export interface JobDocPayloadPDF extends JobDocPayload<JobParamsPDF> {
+  basePath?: string;
+  browserTimezone: string;
+  forceNow?: string;
+  layout: LayoutParams;
+  objects: Array<{
+    relativeUrl: string;
+  }>;
+}

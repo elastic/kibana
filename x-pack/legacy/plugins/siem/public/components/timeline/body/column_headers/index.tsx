@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import * as React from 'react';
-import { Draggable } from 'react-beautiful-dnd';
-import styled from 'styled-components';
+import { Draggable, Droppable } from 'react-beautiful-dnd';
 
 import { BrowserFields } from '../../../../containers/source';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
-import { DroppableWrapper } from '../../../drag_and_drop/droppable_wrapper';
 import {
   droppableTimelineColumnsPrefix,
   getDraggableFieldId,
@@ -20,6 +17,8 @@ import {
 } from '../../../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { StatefulFieldsBrowser } from '../../../fields_browser';
+import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
+import { useIsContainerResizing } from '../../../resize_handle/is_resizing';
 import {
   OnColumnRemoved,
   OnColumnResized,
@@ -27,20 +26,18 @@ import {
   OnFilterChange,
   OnUpdateColumns,
 } from '../../events';
+import {
+  EventsTh,
+  EventsThContent,
+  EventsThead,
+  EventsThGroupActions,
+  EventsThGroupData,
+  EventsTrHeader,
+} from '../../styles';
 import { Sort } from '../sort';
-
 import { ColumnHeader } from './column_header';
 import { EventsSelect } from './events_select';
 import { Header } from './header';
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from '../../../fields_browser/helpers';
-import { isContainerResizing } from '../../../resize_handle/is_resizing';
-
-const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
-  overflow: hidden;
-  width: ${({ actionsColumnWidth }) => actionsColumnWidth}px;
-`;
-
-ActionsContainer.displayName = 'ActionsContainer';
 
 interface Props {
   actionsColumnWidth: number;
@@ -56,144 +53,133 @@ interface Props {
   sort: Sort;
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
-  minWidth: number;
 }
 
-const COLUMN_HEADERS_HEIGHT = '38px';
-
-const ColumnHeadersContainer = styled.div<{
-  minWidth: number;
-}>`
-  display: block;
-  height: ${COLUMN_HEADERS_HEIGHT};
-  overflow: hidden;
-  min-width: ${({ minWidth }) => `${minWidth}px`};
-  margin-bottom: 2px;
-`;
-
-ColumnHeadersContainer.displayName = 'ColumnHeadersContainer';
-
-const ColumnHeadersFlexGroup = styled(EuiFlexGroup)`
-  height: ${COLUMN_HEADERS_HEIGHT};
-`;
-
-ColumnHeadersFlexGroup.displayName = 'ColumnHeadersFlexGroup';
-
-const EventsSelectContainer = styled(EuiFlexItem)`
-  margin-right: 4px;
-`;
-
-EventsSelectContainer.displayName = 'EventsSelectContainer';
-
 /** Renders the timeline header columns */
-export const ColumnHeaders = React.memo<Props>(
-  ({
-    actionsColumnWidth,
-    browserFields,
-    columnHeaders,
-    isEventViewer = false,
-    onColumnRemoved,
-    onColumnResized,
-    onColumnSorted,
-    onUpdateColumns,
-    onFilterChange = noop,
-    showEventsSelect,
-    sort,
-    timelineId,
-    toggleColumn,
-    minWidth,
-  }) => {
-    const { isResizing, setIsResizing } = isContainerResizing();
-    return (
-      <ColumnHeadersContainer data-test-subj="column-headers" minWidth={minWidth}>
-        <ColumnHeadersFlexGroup
-          alignItems="center"
-          data-test-subj="column-headers-group"
-          gutterSize="none"
-        >
-          <EuiFlexItem data-test-subj="actions-item" grow={false}>
-            <ActionsContainer
-              actionsColumnWidth={actionsColumnWidth}
-              data-test-subj="actions-container"
-            >
-              <EuiFlexGroup gutterSize="none">
-                {showEventsSelect && (
-                  <EventsSelectContainer grow={false}>
-                    <EventsSelect checkState="unchecked" timelineId={timelineId} />
-                  </EventsSelectContainer>
-                )}
-                <EuiFlexItem grow={true}>
-                  <StatefulFieldsBrowser
-                    browserFields={browserFields}
-                    columnHeaders={columnHeaders}
-                    data-test-subj="field-browser"
-                    height={FIELD_BROWSER_HEIGHT}
-                    isEventViewer={isEventViewer}
-                    onUpdateColumns={onUpdateColumns}
-                    timelineId={timelineId}
-                    toggleColumn={toggleColumn}
-                    width={FIELD_BROWSER_WIDTH}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </ActionsContainer>
-          </EuiFlexItem>
+export const ColumnHeadersComponent = ({
+  actionsColumnWidth,
+  browserFields,
+  columnHeaders,
+  isEventViewer = false,
+  onColumnRemoved,
+  onColumnResized,
+  onColumnSorted,
+  onUpdateColumns,
+  onFilterChange = noop,
+  showEventsSelect,
+  sort,
+  timelineId,
+  toggleColumn,
+}: Props) => {
+  const { isResizing, setIsResizing } = useIsContainerResizing();
 
-          <EuiFlexItem data-test-subj="headers-item" grow={false}>
-            <DroppableWrapper
-              droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
-              height={COLUMN_HEADERS_HEIGHT}
-              isDropDisabled={false}
-              type={DRAG_TYPE_FIELD}
+  return (
+    <EventsThead data-test-subj="column-headers">
+      <EventsTrHeader>
+        <EventsThGroupActions
+          actionsColumnWidth={actionsColumnWidth}
+          data-test-subj="actions-container"
+        >
+          {showEventsSelect && (
+            <EventsTh>
+              <EventsThContent textAlign="center">
+                <EventsSelect checkState="unchecked" timelineId={timelineId} />
+              </EventsThContent>
+            </EventsTh>
+          )}
+
+          <EventsTh>
+            <EventsThContent textAlign="center">
+              <StatefulFieldsBrowser
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                data-test-subj="field-browser"
+                height={FIELD_BROWSER_HEIGHT}
+                isEventViewer={isEventViewer}
+                onUpdateColumns={onUpdateColumns}
+                timelineId={timelineId}
+                toggleColumn={toggleColumn}
+                width={FIELD_BROWSER_WIDTH}
+              />
+            </EventsThContent>
+          </EventsTh>
+        </EventsThGroupActions>
+
+        <Droppable
+          direction={'horizontal'}
+          droppableId={`${droppableTimelineColumnsPrefix}${timelineId}`}
+          isDropDisabled={false}
+          type={DRAG_TYPE_FIELD}
+        >
+          {dropProvided => (
+            <EventsThGroupData
+              data-test-subj="headers-group"
+              ref={dropProvided.innerRef}
+              {...dropProvided.droppableProps}
             >
-              <EuiFlexGroup data-test-subj="headers-group" gutterSize="none">
-                {columnHeaders.map((header, i) => (
-                  <EuiFlexItem grow={false} key={header.id}>
-                    <Draggable
-                      data-test-subj="draggable"
-                      draggableId={getDraggableFieldId({
-                        contextId: `timeline-column-headers-${timelineId}`,
-                        fieldId: header.id,
-                      })}
-                      index={i}
-                      type={DRAG_TYPE_FIELD}
-                      isDragDisabled={isResizing}
+              {columnHeaders.map((header, i) => (
+                <Draggable
+                  data-test-subj="draggable"
+                  // Required for drag events while hovering the sort button to work: https://github.com/atlassian/react-beautiful-dnd/blob/master/docs/api/draggable.md#interactive-child-elements-within-a-draggable-
+                  disableInteractiveElementBlocking
+                  draggableId={getDraggableFieldId({
+                    contextId: `timeline-column-headers-${timelineId}`,
+                    fieldId: header.id,
+                  })}
+                  index={i}
+                  isDragDisabled={isResizing}
+                  key={header.id}
+                  type={DRAG_TYPE_FIELD}
+                >
+                  {(dragProvided, dragSnapshot) => (
+                    <EventsTh
+                      {...dragProvided.draggableProps}
+                      {...dragProvided.dragHandleProps}
+                      data-test-subj="draggable-header"
+                      ref={dragProvided.innerRef}
+                      isDragging={dragSnapshot.isDragging}
+                      position="relative"
+                      // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
+                      style={{
+                        flexBasis: header.width + 'px',
+                        ...dragProvided.draggableProps.style,
+                      }}
                     >
-                      {(provided, snapshot) => (
-                        <div
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                          data-test-subj="draggable-header"
-                        >
-                          {!snapshot.isDragging ? (
-                            <Header
-                              timelineId={timelineId}
-                              header={header}
-                              onColumnRemoved={onColumnRemoved}
-                              onColumnResized={onColumnResized}
-                              onColumnSorted={onColumnSorted}
-                              onFilterChange={onFilterChange}
-                              setIsResizing={setIsResizing}
-                              sort={sort}
-                            />
-                          ) : (
-                            <DragEffects>
-                              <DraggableFieldBadge fieldId={header.id} />
-                            </DragEffects>
-                          )}
-                        </div>
+                      {!dragSnapshot.isDragging ? (
+                        <EventsThContent>
+                          <Header
+                            timelineId={timelineId}
+                            header={header}
+                            onColumnRemoved={onColumnRemoved}
+                            onColumnResized={onColumnResized}
+                            onColumnSorted={onColumnSorted}
+                            onFilterChange={onFilterChange}
+                            setIsResizing={setIsResizing}
+                            sort={sort}
+                          />
+                        </EventsThContent>
+                      ) : (
+                        <DragEffects>
+                          <DraggableFieldBadge
+                            fieldId={header.id}
+                            fieldWidth={header.width + 'px'}
+                          />
+                        </DragEffects>
                       )}
-                    </Draggable>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </DroppableWrapper>
-          </EuiFlexItem>
-        </ColumnHeadersFlexGroup>
-      </ColumnHeadersContainer>
-    );
-  }
-);
+                    </EventsTh>
+                  )}
+                </Draggable>
+              ))}
+            </EventsThGroupData>
+          )}
+        </Droppable>
+      </EventsTrHeader>
+    </EventsThead>
+  );
+};
+
+ColumnHeadersComponent.displayName = 'ColumnHeadersComponent';
+
+export const ColumnHeaders = React.memo(ColumnHeadersComponent);
 
 ColumnHeaders.displayName = 'ColumnHeaders';

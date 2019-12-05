@@ -4,24 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { fold } from 'fp-ts/lib/Either';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { identity } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
 import { kfetch } from 'ui/kfetch';
 
-import { getJobIdPrefix } from '../../../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-
-const MODULE_ID = 'logs_ui_analysis';
-
-// This is needed due to: https://github.com/elastic/kibana/issues/43671
-const removeSampleDataIndex = (indexPattern: string) => {
-  const SAMPLE_DATA_INDEX = 'kibana_sample_data_logs*';
-  return indexPattern
-    .split(',')
-    .filter(index => index !== SAMPLE_DATA_INDEX)
-    .join(',');
-};
+import { getJobIdPrefix } from '../../../../../common/log_analysis';
+import { jobCustomSettingsRT } from './ml_api_types';
 
 export const callSetupMlModuleAPI = async (
+  moduleId: string,
   start: number | undefined,
   end: number | undefined,
   spaceId: string,
@@ -32,22 +26,29 @@ export const callSetupMlModuleAPI = async (
 ) => {
   const response = await kfetch({
     method: 'POST',
-    pathname: `/api/ml/modules/setup/${MODULE_ID}`,
+    pathname: `/api/ml/modules/setup/${moduleId}`,
     body: JSON.stringify(
       setupMlModuleRequestPayloadRT.encode({
         start,
         end,
-        indexPatternName: removeSampleDataIndex(indexPattern),
+        indexPatternName: indexPattern,
         prefix: getJobIdPrefix(spaceId, sourceId),
         startDatafeed: true,
         jobOverrides: [
           {
-            job_id: 'log-entry-rate',
+            job_id: 'log-entry-rate' as const,
             analysis_config: {
               bucket_span: `${bucketSpan}ms`,
             },
             data_description: {
               time_field: timeField,
+            },
+            custom_settings: {
+              logs_source_config: {
+                indexPattern,
+                timestampField: timeField,
+                bucketSpan,
+              },
             },
           },
         ],
@@ -56,7 +57,10 @@ export const callSetupMlModuleAPI = async (
     ),
   });
 
-  return setupMlModuleResponsePayloadRT.decode(response).getOrElseL(throwErrors(createPlainError));
+  return pipe(
+    setupMlModuleResponsePayloadRT.decode(response),
+    fold(throwErrors(createPlainError), identity)
+  );
 };
 
 const setupMlModuleTimeParamsRT = rt.partial({
@@ -64,11 +68,22 @@ const setupMlModuleTimeParamsRT = rt.partial({
   end: rt.number,
 });
 
+const setupMlModuleLogEntryRateJobOverridesRT = rt.type({
+  job_id: rt.literal('log-entry-rate'),
+  analysis_config: rt.type({
+    bucket_span: rt.string,
+  }),
+  data_description: rt.type({
+    time_field: rt.string,
+  }),
+  custom_settings: jobCustomSettingsRT,
+});
+
 const setupMlModuleRequestParamsRT = rt.type({
   indexPatternName: rt.string,
   prefix: rt.string,
   startDatafeed: rt.boolean,
-  jobOverrides: rt.array(rt.object),
+  jobOverrides: rt.array(setupMlModuleLogEntryRateJobOverridesRT),
   datafeedOverrides: rt.array(rt.object),
 });
 
@@ -77,22 +92,34 @@ const setupMlModuleRequestPayloadRT = rt.intersection([
   setupMlModuleRequestParamsRT,
 ]);
 
+const setupErrorResponseRT = rt.type({
+  msg: rt.string,
+});
+
+const datafeedSetupResponseRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    started: rt.boolean,
+    success: rt.boolean,
+  }),
+  rt.partial({
+    error: setupErrorResponseRT,
+  }),
+]);
+
+const jobSetupResponseRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    success: rt.boolean,
+  }),
+  rt.partial({
+    error: setupErrorResponseRT,
+  }),
+]);
+
 const setupMlModuleResponsePayloadRT = rt.type({
-  datafeeds: rt.array(
-    rt.type({
-      id: rt.string,
-      started: rt.boolean,
-      success: rt.boolean,
-      error: rt.any,
-    })
-  ),
-  jobs: rt.array(
-    rt.type({
-      id: rt.string,
-      success: rt.boolean,
-      error: rt.any,
-    })
-  ),
+  datafeeds: rt.array(datafeedSetupResponseRT),
+  jobs: rt.array(jobSetupResponseRT),
 });
 
 export type SetupMlModuleResponsePayload = rt.TypeOf<typeof setupMlModuleResponsePayloadRT>;

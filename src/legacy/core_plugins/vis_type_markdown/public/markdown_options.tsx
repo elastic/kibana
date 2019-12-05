@@ -46,7 +46,9 @@ function MarkdownOptions({ stateParams, setValue }: VisOptionsProps<MarkdownVisP
           <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="baseline">
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h2>Markdown</h2>
+                <h2>
+                  <label htmlFor="markdownVisInput">Markdown</label>
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
 

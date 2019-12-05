@@ -5,37 +5,47 @@
  */
 
 import { isEqual } from 'lodash/fp';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
-
-import { WithSource } from '../../containers/source';
+import chrome from 'ui/chrome';
 import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
-import { timelineActions } from '../../store/actions';
-import { KqlMode, TimelineModel } from '../../store/timeline/model';
+import { inputsActions, timelineActions } from '../../store/actions';
+import { KqlMode, SubsetTimelineModel, TimelineModel } from '../../store/timeline/model';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { DataProvider } from '../timeline/data_providers/data_provider';
 import { Sort } from '../timeline/body/sort';
 import { OnChangeItemsPerPage } from '../timeline/events';
+import { esFilters, Query } from '../../../../../../../src/plugins/data/public';
 
 import { EventsViewer } from './events_viewer';
-import { defaultHeaders } from './default_headers';
+import { InputsModelId } from '../../store/inputs/constants';
+import { useFetchIndexPatterns } from '../../containers/detection_engine/rules/fetch_index_patterns';
+import { TimelineTypeContextProps } from '../timeline/timeline_context';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 
 export interface OwnProps {
+  defaultIndices?: string[];
+  defaultFilters?: esFilters.Filter[];
+  defaultModel: SubsetTimelineModel;
   end: number;
   id: string;
-  kqlQueryExpression: string;
   start: number;
+  headerFilterGroup?: React.ReactNode;
+  timelineTypeContext?: TimelineTypeContextProps;
+  utilityBar?: (totalCount: number) => React.ReactNode;
 }
 
 interface StateReduxProps {
   activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
+  filters: esFilters.Filter[];
   isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
   kqlMode: KqlMode;
+  query: Query;
   pageCount?: number;
   sort?: Sort;
 }
@@ -44,6 +54,12 @@ interface DispatchProps {
   createTimeline: ActionCreator<{
     id: string;
     columns: ColumnHeader[];
+    itemsPerPage?: number;
+    sort?: Sort;
+  }>;
+  deleteEventQuery: ActionCreator<{
+    id: string;
+    inputId: InputsModelId;
   }>;
   removeColumn: ActionCreator<{
     id: string;
@@ -67,74 +83,98 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
+    defaultModel,
+    defaultIndices,
+    deleteEventQuery,
     end,
+    filters,
+    headerFilterGroup,
     id,
     isLive,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
-    kqlQueryExpression,
+    query,
     removeColumn,
     start,
     sort,
+    timelineTypeContext = {
+      showCheckboxes: false,
+      showRowRenderers: true,
+    },
     updateItemsPerPage,
     upsertColumn,
+    utilityBar,
   }) => {
-    const [showInspect, setShowInspect] = useState<boolean>(false);
+    const [showInspect, setShowInspect] = useState(false);
+    const [{ browserFields, indexPatterns }] = useFetchIndexPatterns(
+      defaultIndices ?? chrome.getUiSettingsClient().get(DEFAULT_INDEX_KEY)
+    );
 
     useEffect(() => {
       if (createTimeline != null) {
-        createTimeline({ id, columns: defaultHeaders });
+        createTimeline({ id, columns, sort, itemsPerPage });
       }
+      return () => {
+        deleteEventQuery({ id, inputId: 'global' });
+      };
     }, []);
 
-    const onChangeItemsPerPage: OnChangeItemsPerPage = itemsChangedPerPage =>
-      updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage });
+    const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
+      itemsChangedPerPage => updateItemsPerPage({ id, itemsPerPage: itemsChangedPerPage }),
+      [id, updateItemsPerPage]
+    );
 
-    const toggleColumn = (column: ColumnHeader) => {
-      const exists = columns.findIndex(c => c.id === column.id) !== -1;
+    const toggleColumn = useCallback(
+      (column: ColumnHeader) => {
+        const exists = columns.findIndex(c => c.id === column.id) !== -1;
 
-      if (!exists && upsertColumn != null) {
-        upsertColumn({
-          column,
-          id,
-          index: 1,
-        });
-      }
+        if (!exists && upsertColumn != null) {
+          upsertColumn({
+            column,
+            id,
+            index: 1,
+          });
+        }
 
-      if (exists && removeColumn != null) {
-        removeColumn({
-          columnId: column.id,
-          id,
-        });
-      }
-    };
+        if (exists && removeColumn != null) {
+          removeColumn({
+            columnId: column.id,
+            id,
+          });
+        }
+      },
+      [columns, id, upsertColumn, removeColumn]
+    );
+
+    const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
+    const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);
 
     return (
-      <WithSource sourceId="default">
-        {({ indexPattern, browserFields }) => (
-          <div onMouseEnter={() => setShowInspect(true)} onMouseLeave={() => setShowInspect(false)}>
-            <EventsViewer
-              browserFields={browserFields}
-              columns={columns}
-              id={id}
-              dataProviders={dataProviders!}
-              end={end}
-              indexPattern={indexPattern}
-              isLive={isLive}
-              itemsPerPage={itemsPerPage!}
-              itemsPerPageOptions={itemsPerPageOptions!}
-              kqlMode={kqlMode}
-              kqlQueryExpression={kqlQueryExpression}
-              onChangeItemsPerPage={onChangeItemsPerPage}
-              showInspect={showInspect}
-              start={start}
-              sort={sort!}
-              toggleColumn={toggleColumn}
-            />
-          </div>
-        )}
-      </WithSource>
+      <div onMouseEnter={handleOnMouseEnter} onMouseLeave={handleOnMouseLeave}>
+        <EventsViewer
+          browserFields={browserFields ?? {}}
+          columns={columns}
+          id={id}
+          dataProviders={dataProviders!}
+          end={end}
+          filters={filters}
+          headerFilterGroup={headerFilterGroup}
+          indexPattern={indexPatterns ?? { fields: [], title: '' }}
+          isLive={isLive}
+          itemsPerPage={itemsPerPage!}
+          itemsPerPageOptions={itemsPerPageOptions!}
+          kqlMode={kqlMode}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          query={query}
+          showInspect={showInspect}
+          start={start}
+          sort={sort!}
+          timelineTypeContext={timelineTypeContext}
+          toggleColumn={toggleColumn}
+          utilityBar={utilityBar}
+        />
+      </div>
     );
   },
   (prevProps, nextProps) =>
@@ -143,11 +183,12 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     isEqual(prevProps.columns, nextProps.columns) &&
     isEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.end === nextProps.end &&
+    isEqual(prevProps.filters, nextProps.filters) &&
     prevProps.isLive === nextProps.isLive &&
     prevProps.itemsPerPage === nextProps.itemsPerPage &&
     isEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
     prevProps.kqlMode === nextProps.kqlMode &&
-    prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
+    isEqual(prevProps.query, nextProps.query) &&
     prevProps.pageCount === nextProps.pageCount &&
     isEqual(prevProps.sort, nextProps.sort) &&
     prevProps.start === nextProps.start
@@ -157,33 +198,35 @@ StatefulEventsViewerComponent.displayName = 'StatefulEventsViewerComponent';
 
 const makeMapStateToProps = () => {
   const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { id }: OwnProps) => {
+  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
+  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
+  const getEvents = timelineSelectors.getEventsByIdSelector();
+  const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const timeline: TimelineModel = getTimeline(state, id);
-    const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = timeline;
+    const events: TimelineModel = getEvents(state, id) ?? defaultModel;
+    const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = events;
 
     return {
       columns,
       dataProviders,
+      filters: getGlobalFiltersQuerySelector(state),
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
+      query: getGlobalQuerySelector(state),
       sort,
     };
   };
   return mapStateToProps;
 };
 
-export const StatefulEventsViewer = connect(
-  makeMapStateToProps,
-  {
-    createTimeline: timelineActions.createTimeline,
-    updateItemsPerPage: timelineActions.updateItemsPerPage,
-    updateSort: timelineActions.updateSort,
-    removeColumn: timelineActions.removeColumn,
-    upsertColumn: timelineActions.upsertColumn,
-  }
-)(StatefulEventsViewerComponent);
+export const StatefulEventsViewer = connect(makeMapStateToProps, {
+  createTimeline: timelineActions.createTimeline,
+  deleteEventQuery: inputsActions.deleteOneQuery,
+  updateItemsPerPage: timelineActions.updateItemsPerPage,
+  updateSort: timelineActions.updateSort,
+  removeColumn: timelineActions.removeColumn,
+  upsertColumn: timelineActions.upsertColumn,
+})(StatefulEventsViewerComponent);

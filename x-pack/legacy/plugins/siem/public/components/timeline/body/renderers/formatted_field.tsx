@@ -4,21 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { isNumber, isString } from 'lodash/fp';
 import * as React from 'react';
 import { pure } from 'recompose';
-import { isNumber, isString } from 'lodash/fp';
-import { EuiToolTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import { Bytes, BYTES_FORMAT } from '../../../bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue, getEmptyTagValue } from '../../../empty_value';
 import { FormattedDate } from '../../../formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../helpers';
 import { HostDetailsLink } from '../../../links';
 import { Port, PORT_NAMES } from '../../../port';
 import { TruncatableText } from '../../../truncatable_text';
-
 import {
   DATE_FIELD_TYPE,
   HOST_NAME_FIELD_NAME,
@@ -32,9 +30,9 @@ export const FormattedFieldValue = pure<{
   fieldFormat?: string;
   fieldName: string;
   fieldType: string;
+  truncate?: boolean;
   value: string | number | undefined | null;
-  width?: string;
-}>(({ eventId, contextId, fieldFormat, fieldName, fieldType, value, width }) => {
+}>(({ contextId, eventId, fieldFormat, fieldName, fieldType, truncate, value }) => {
   if (fieldType === IP_FIELD_TYPE) {
     return (
       <FormattedIp
@@ -72,28 +70,29 @@ export const FormattedFieldValue = pure<{
     );
   } else if (fieldName === MESSAGE_FIELD_NAME && value != null && value !== '') {
     return (
-      <EuiToolTip
-        position="left"
-        data-test-subj="message-tool-tip"
-        content={
-          <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <span>{fieldName}</span>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <span>{value}</span>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-      >
-        <TruncatableText
-          data-test-subj="truncatable-message"
-          size="s"
-          width={width != null ? width : `${DEFAULT_COLUMN_MIN_WIDTH}px`}
-        >
-          {value}
-        </TruncatableText>
-      </EuiToolTip>
+      <>
+        {truncate ? (
+          <TruncatableText data-test-subj="truncatable-message">
+            <EuiToolTip
+              data-test-subj="message-tool-tip"
+              content={
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    <span>{fieldName}</span>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <span>{value}</span>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              <>{value}</>
+            </EuiToolTip>
+          </TruncatableText>
+        ) : (
+          <>{value}</>
+        )}
+      </>
     );
   } else {
     return getOrEmptyTagFromValue(value);

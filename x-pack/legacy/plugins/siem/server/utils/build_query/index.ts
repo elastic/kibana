@@ -7,6 +7,7 @@
 export * from './fields';
 export * from './filters';
 export * from './merge_fields_with_hits';
+export * from './calculate_timeseries_interval';
 
 export const assertUnreachable = (
   x: never,

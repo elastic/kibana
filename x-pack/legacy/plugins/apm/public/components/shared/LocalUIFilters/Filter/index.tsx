@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { FunctionComponent, useState, useMemo, useEffect } from 'react';
 import {
   EuiTitle,
   EuiPopover,
+  EuiPopoverProps,
   EuiSelectable,
   EuiSpacer,
   EuiHorizontalRule,
@@ -23,9 +24,11 @@ import { FilterBadgeList } from './FilterBadgeList';
 import { unit, px } from '../../../../style/variables';
 import { FilterTitleButton } from './FilterTitleButton';
 
-const Popover = styled(EuiPopover).attrs({
-  anchorClassName: 'anchor'
-})`
+const Popover = styled((EuiPopover as unknown) as FunctionComponent).attrs(
+  () => ({
+    anchorClassName: 'anchor'
+  })
+)<EuiPopoverProps & { className?: string; id?: string }>`
   .anchor {
     display: block;
   }
@@ -43,6 +46,11 @@ const Counter = styled.div`
 
 const ApplyButton = styled(EuiButton)`
   align-self: flex-end;
+`;
+
+// needed for IE11
+const FlexItem = styled(EuiFlexItem)`
+  flex-basis: auto !important;
 `;
 
 interface Props {
@@ -115,7 +123,7 @@ const Filter = ({
           {(list, search) => (
             <SelectContainer>
               <EuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem grow={true}>
+                <FlexItem grow={true}>
                   <EuiTitle size="xxxs" textTransform="uppercase">
                     <h4>
                       {i18n.translate('xpack.apm.applyFilter', {
@@ -130,8 +138,8 @@ const Filter = ({
                   <EuiSpacer size="s" />
                   {list}
                   <EuiSpacer size="s" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                </FlexItem>
+                <FlexItem grow={false}>
                   <ApplyButton
                     color="primary"
                     fill={true}
@@ -149,7 +157,7 @@ const Filter = ({
                       defaultMessage: 'Apply options'
                     })}
                   </ApplyButton>
-                </EuiFlexItem>
+                </FlexItem>
               </EuiFlexGroup>
             </SelectContainer>
           )}
@@ -163,7 +171,7 @@ const Filter = ({
             }}
             value={value}
           />
-          <EuiSpacer size="s"></EuiSpacer>
+          <EuiSpacer size="s" />
         </>
       ) : null}
     </>

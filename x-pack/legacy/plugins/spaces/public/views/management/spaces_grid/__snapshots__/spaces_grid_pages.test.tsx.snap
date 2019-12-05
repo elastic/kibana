@@ -39,12 +39,8 @@ exports[`SpacesGridPage renders as expected 1`] = `
         grow={false}
       >
         <EuiButton
-          color="primary"
           fill={true}
-          iconSide="left"
           onClick={[Function]}
-          size="m"
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Create a space"
@@ -61,10 +57,9 @@ exports[`SpacesGridPage renders as expected 1`] = `
       columns={
         Array [
           Object {
-            "field": "name",
+            "field": "initials",
             "name": "",
             "render": [Function],
-            "sortable": true,
             "width": "50px",
           },
           Object {
@@ -82,7 +77,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
             "field": "disabledFeatures",
             "name": "Features",
             "render": [Function],
-            "sortable": true,
+            "sortable": [Function],
           },
           Object {
             "field": "id",
@@ -125,7 +120,7 @@ exports[`SpacesGridPage renders as expected 1`] = `
           },
         }
       }
-      sorting={false}
+      sorting={true}
     />
   </EuiPageContent>
   <SecureSpaceMessage />
@@ -149,6 +144,7 @@ Array [
     <EuiAvatar
       color="#461A0A"
       data-test-subj="space-avatar-default"
+      imageUrl=""
       initials="D"
       initialsLength={2}
       name="Default"
@@ -190,6 +186,7 @@ Array [
     <EuiAvatar
       color="#BFA180"
       data-test-subj="space-avatar-custom-1"
+      imageUrl=""
       initials="C1"
       initialsLength={2}
       name="Custom 1"
@@ -234,6 +231,7 @@ Array [
     <EuiAvatar
       color="#ABCDEF"
       data-test-subj="space-avatar-custom-2"
+      imageUrl=""
       initials="LG"
       initialsLength={2}
       name="Custom 2"

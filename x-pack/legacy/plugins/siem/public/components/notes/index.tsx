@@ -4,15 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore
-  EuiInMemoryTable,
-  EuiModalBody,
-  EuiModalHeader,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
-import * as React from 'react';
+import { EuiInMemoryTable, EuiModalBody, EuiModalHeader, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import { Note } from '../../lib/note';
@@ -28,10 +21,6 @@ interface Props {
   getNewNoteId: GetNewNoteId;
   noteIds: string[];
   updateNote: UpdateNote;
-}
-
-interface State {
-  newNote: string;
 }
 
 const NotesPanel = styled(EuiPanel)`
@@ -54,15 +43,9 @@ const InMemoryTable = styled(EuiInMemoryTable)`
 InMemoryTable.displayName = 'InMemoryTable';
 
 /** A view for entering and reviewing notes */
-export class Notes extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = { newNote: '' };
-  }
-
-  public render() {
-    const { associateNote, getNotesByIds, getNewNoteId, noteIds, updateNote } = this.props;
+export const Notes = React.memo<Props>(
+  ({ associateNote, getNotesByIds, getNewNoteId, noteIds, updateNote }) => {
+    const [newNote, setNewNote] = useState('');
 
     return (
       <NotesPanel>
@@ -74,8 +57,8 @@ export class Notes extends React.PureComponent<Props, State> {
           <AddNote
             associateNote={associateNote}
             getNewNoteId={getNewNoteId}
-            newNote={this.state.newNote}
-            updateNewNote={this.updateNewNote}
+            newNote={newNote}
+            updateNewNote={setNewNote}
             updateNote={updateNote}
           />
           <EuiSpacer size="s" />
@@ -91,8 +74,6 @@ export class Notes extends React.PureComponent<Props, State> {
       </NotesPanel>
     );
   }
+);
 
-  private updateNewNote = (newNote: string): void => {
-    this.setState({ newNote });
-  };
-}
+Notes.displayName = 'Notes';

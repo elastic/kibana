@@ -37,7 +37,7 @@ import {
 import * as StatusCheckStates from './status_check_states';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import chrome from 'ui/chrome';
+import { getServices } from '../../kibana_services';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -67,7 +67,7 @@ class TutorialUi extends React.Component {
     }
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this._isMounted = true;
   }
 
@@ -94,7 +94,7 @@ class TutorialUi extends React.Component {
       });
     }
 
-    chrome.breadcrumbs.set([
+    getServices().chrome.setBreadcrumbs([
       {
         text: homeTitle,
         href: '#/home'

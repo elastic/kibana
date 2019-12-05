@@ -15,13 +15,14 @@ export default function ({ getService, getPageObjects }) {
   const shards = getService('monitoringElasticsearchShards');
   const retry = getService('retry');
 
-  describe('Elasticsearch shard legends', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/47184
+  describe.skip('Elasticsearch shard legends', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
       await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-        from: '2017-10-05 19:34:48.000',
-        to: '2017-10-05 20:35:12.000',
+        from: 'Oct 5, 2017 @ 19:34:48.000',
+        to: 'Oct 5, 2017 @ 20:35:12.000',
       });
     });
 
@@ -32,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Shard Allocation Per Node', () => {
       before(async () => {
         // start on cluster overview
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters');
 
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -42,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       afterEach(async () => {
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsNodes'); // return back for next test
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsNodes'); // return back for next test
       });
 
       it('master-data node with 20 indices and 38 shards', async () => {
@@ -99,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Shard Allocation Per Index', () => {
       before(async () => {
         // start on cluster overview
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbClusters');
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters');
 
         // go to indices listing
         await overview.clickEsIndices();
@@ -107,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       afterEach(async () => {
-        await PageObjects.monitoring.clickBreadcrumb('breadcrumbEsIndices'); // return back for next test
+        await PageObjects.monitoring.clickBreadcrumb('~breadcrumbEsIndices'); // return back for next test
       });
 
       it('green status index with full shard allocation', async () => {

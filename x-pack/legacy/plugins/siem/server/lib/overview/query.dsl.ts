@@ -138,6 +138,64 @@ export const buildOverviewHostQuery = ({
             },
           },
         },
+        endgame_module: {
+          filter: {
+            term: {
+              'event.module': 'endgame',
+            },
+          },
+          aggs: {
+            dns_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'dns_event',
+                },
+              },
+            },
+            file_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'file_event',
+                },
+              },
+            },
+            image_load_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'image_load_event',
+                },
+              },
+            },
+            network_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'network_event',
+                },
+              },
+            },
+            process_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'process_event',
+                },
+              },
+            },
+            registry_event: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'registry_event',
+                },
+              },
+            },
+            security_event_count: {
+              filter: {
+                term: {
+                  'endgame.event_type_full': 'security_event',
+                },
+              },
+            },
+          },
+        },
         fim_count: {
           filter: {
             term: {

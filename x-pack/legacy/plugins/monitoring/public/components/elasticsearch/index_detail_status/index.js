@@ -44,7 +44,7 @@ export function IndexDetailStatus({ stats }) {
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.indexDetailStatus.totalShardsTitle', {
-        defaultMessage: 'Total Shards'
+        defaultMessage: 'Total shards'
       }),
       value: formatMetric(totalShards, 'int_commas'),
       'data-test-subj': 'totalShards'
@@ -53,7 +53,7 @@ export function IndexDetailStatus({ stats }) {
       label: i18n.translate(
         'xpack.monitoring.elasticsearch.indexDetailStatus.unassignedShardsTitle',
         {
-          defaultMessage: 'Unassigned Shards'
+          defaultMessage: 'Unassigned shards'
         }
       ),
       value: formatMetric(unassignedShards, 'int_commas'),

@@ -10,16 +10,10 @@ import { REPOSITORY_DOC_PATHS } from '../../constants';
 class DocumentationLinksService {
   private esDocBasePath: string = '';
   private esPluginDocBasePath: string = '';
-  private esStackOverviewDocBasePath: string = '';
 
-  public init(
-    esDocBasePath: string,
-    esPluginDocBasePath: string,
-    esStackOverviewDocBasePath: string
-  ): void {
+  public init(esDocBasePath: string, esPluginDocBasePath: string): void {
     this.esDocBasePath = esDocBasePath;
     this.esPluginDocBasePath = esPluginDocBasePath;
-    this.esStackOverviewDocBasePath = esStackOverviewDocBasePath;
   }
 
   public getRepositoryPluginDocUrl() {
@@ -48,31 +42,31 @@ class DocumentationLinksService {
   }
 
   public getSnapshotDocUrl() {
-    return `${this.esDocBasePath}/modules-snapshots.html#snapshots-take-snapshot`;
+    return `${this.esDocBasePath}modules-snapshots.html#snapshots-take-snapshot`;
   }
 
   public getRestoreDocUrl() {
-    return `${this.esDocBasePath}/modules-snapshots.html#restore-snapshot`;
+    return `${this.esDocBasePath}modules-snapshots.html#restore-snapshot`;
   }
 
   public getRestoreIndexSettingsUrl() {
-    return `${this.esDocBasePath}/modules-snapshots.html#_changing_index_settings_during_restore`;
+    return `${this.esDocBasePath}modules-snapshots.html#_changing_index_settings_during_restore`;
   }
 
   public getIndexSettingsUrl() {
-    return `${this.esDocBasePath}/index-modules.html`;
+    return `${this.esDocBasePath}index-modules.html`;
   }
 
   public getDateMathIndexNamesUrl() {
-    return `${this.esDocBasePath}/date-math-index-names.html`;
+    return `${this.esDocBasePath}date-math-index-names.html`;
   }
 
   public getSlmUrl() {
-    return `${this.esDocBasePath}/slm-api-put.html`;
+    return `${this.esDocBasePath}slm-api-put.html`;
   }
 
   public getCronUrl() {
-    return `${this.esStackOverviewDocBasePath}/trigger-schedule.html#schedule-cron`;
+    return `${this.esDocBasePath}trigger-schedule.html#schedule-cron`;
   }
 }
 

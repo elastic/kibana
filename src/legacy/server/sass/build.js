@@ -24,16 +24,15 @@ import sass from 'node-sass';
 import autoprefixer from 'autoprefixer';
 import postcss from 'postcss';
 import postcssUrl from 'postcss-url';
-import mkdirp from 'mkdirp';
 import chalk from 'chalk';
 import isPathInside from 'is-path-inside';
 import { PUBLIC_PATH_PLACEHOLDER } from '../../../optimize/public_path_placeholder';
 
 const renderSass = promisify(sass.render);
 const writeFile = promisify(fs.writeFile);
-const exists = promisify(fs.exists);
+const access = promisify(fs.access);
 const copyFile = promisify(fs.copyFile);
-const mkdirpAsync = promisify(mkdirp);
+const mkdirAsync = promisify(fs.mkdir);
 
 const UI_ASSETS_DIR = resolve(__dirname, '../../ui/public/assets');
 const DARK_THEME_IMPORTER = (url) => {
@@ -146,26 +145,30 @@ export class Build {
     ];
 
     // verify that asset sources exist and import is valid before writing anything
-    await Promise.all(urlAssets.map(async (asset) => {
-      if (!await exists(asset.path)) {
-        throw this._makeError(
-          'Invalid url() in css output',
-          `url("${asset.requestUrl}") resolves to "${asset.path}", which does not exist.\n` +
-          `  Make sure that the request is relative to "${asset.root}"`
-        );
-      }
+    await Promise.all(
+      urlAssets.map(async asset => {
+        try {
+          await access(asset.path);
+        } catch (e) {
+          throw this._makeError(
+            'Invalid url() in css output',
+            `url("${asset.requestUrl}") resolves to "${asset.path}", which does not exist.\n` +
+              `  Make sure that the request is relative to "${asset.root}"`
+          );
+        }
 
-      if (!isPathInside(asset.path, asset.boundry)) {
-        throw this._makeError(
-          'Invalid url() in css output',
-          `url("${asset.requestUrl}") resolves to "${asset.path}"\n` +
-          `  which is outside of "${asset.boundry}"`
-        );
-      }
-    }));
+        if (!isPathInside(asset.path, asset.boundry)) {
+          throw this._makeError(
+            'Invalid url() in css output',
+            `url("${asset.requestUrl}") resolves to "${asset.path}"\n` +
+              `  which is outside of "${asset.boundry}"`
+          );
+        }
+      })
+    );
 
     // write css
-    await mkdirpAsync(this.targetDir);
+    await mkdirAsync(this.targetDir, { recursive: true });
     await writeFile(this.targetPath, prefixed.css);
 
     // copy non-shared urlAssets
@@ -174,7 +177,7 @@ export class Build {
         return;
       }
 
-      await mkdirpAsync(dirname(asset.copyTo));
+      await mkdirAsync(dirname(asset.copyTo), { recursive: true });
       await copyFile(asset.path, asset.copyTo);
     }));
 

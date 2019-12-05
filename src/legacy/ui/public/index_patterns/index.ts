@@ -24,39 +24,26 @@
  * from ui/index_patterns for backwards compatibility.
  */
 
-import { setup as data } from '../../../core_plugins/data/public/legacy';
-
-export const {
-  FieldList, // only used in Discover and StubIndexPattern
-  flattenHitWrapper,
-  formatHitProvider,
-  IndexPatternSelect, // only used in x-pack/plugin/maps and input control vis
-} = data.indexPatterns;
+import { indexPatterns } from '../../../../plugins/data/public';
 
 // static code
-export {
-  CONTAINS_SPACES,
-  getFromSavedObject,
-  getRoutes,
-  isFilterable,
-  IndexPatternsProvider, // LEGACY
-  validateIndexPattern,
-  ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefaultIndexPattern,
-  NoDefinedIndexPatterns,
-  mockFields,
-  mockIndexPattern,
-} from '../../../core_plugins/data/public';
+export { getFromSavedObject, getRoutes } from '../../../core_plugins/data/public';
+
+export const INDEX_PATTERN_ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS;
+export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE;
+export const ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS_KEY;
+export const CONTAINS_SPACES = indexPatterns.CONTAINS_SPACES_KEY;
+export const validateIndexPattern = indexPatterns.validate;
+export const flattenHitWrapper = indexPatterns.flattenHitWrapper;
+export const formatHitProvider = indexPatterns.formatHitProvider;
 
 // types
 export {
   Field,
   FieldType,
+  FieldListInterface,
   IndexPattern,
   IndexPatterns,
-  StaticIndexPattern,
 } from '../../../core_plugins/data/public';
+
+export { FieldList } from '../../../../plugins/data/public';

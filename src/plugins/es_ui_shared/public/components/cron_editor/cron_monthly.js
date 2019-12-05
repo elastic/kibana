@@ -20,14 +20,9 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 export const CronMonthly = ({
   minute,
@@ -40,12 +35,9 @@ export const CronMonthly = ({
 }) => (
   <Fragment>
     <EuiFormRow
-      label={(
-        <FormattedMessage
-          id="esUi.cronEditor.cronMonthly.fieldDateLabel"
-          defaultMessage="Date"
-        />
-      )}
+      label={
+        <FormattedMessage id="esUi.cronEditor.cronMonthly.fieldDateLabel" defaultMessage="Date" />
+      }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
@@ -54,27 +46,17 @@ export const CronMonthly = ({
         value={date}
         onChange={e => onChange({ date: e.target.value })}
         fullWidth
-        prepend={(
-          <EuiText size="xs">
-            <strong>
-              <FormattedMessage
-                id="esUi.cronEditor.cronMonthly.textOnTheLabel"
-                defaultMessage="On the"
-              />
-            </strong>
-          </EuiText>
-        )}
+        prepend={i18n.translate('esUi.cronEditor.cronMonthly.textOnTheLabel', {
+          defaultMessage: 'On the',
+        })}
         data-test-subj="cronFrequencyMonthlyDateSelect"
       />
     </EuiFormRow>
 
     <EuiFormRow
-      label={(
-        <FormattedMessage
-          id="esUi.cronEditor.cronMonthly.fieldTimeLabel"
-          defaultMessage="Time"
-        />
-      )}
+      label={
+        <FormattedMessage id="esUi.cronEditor.cronMonthly.fieldTimeLabel" defaultMessage="Time" />
+      }
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
@@ -83,18 +65,14 @@ export const CronMonthly = ({
           <EuiSelect
             options={hourOptions}
             value={hour}
+            aria-label={i18n.translate('esUi.cronEditor.cronMonthly.hourSelectLabel', {
+              defaultMessage: 'Hour',
+            })}
             onChange={e => onChange({ hour: e.target.value })}
             fullWidth
-            prepend={(
-              <EuiText size="xs">
-                <strong>
-                  <FormattedMessage
-                    id="esUi.cronEditor.cronMonthly.fieldHour.textAtLabel"
-                    defaultMessage="At"
-                  />
-                </strong>
-              </EuiText>
-            )}
+            prepend={i18n.translate('esUi.cronEditor.cronMonthly.fieldHour.textAtLabel', {
+              defaultMessage: 'At',
+            })}
             data-test-subj="cronFrequencyMonthlyHourSelect"
           />
         </EuiFlexItem>
@@ -103,15 +81,12 @@ export const CronMonthly = ({
           <EuiSelect
             options={minuteOptions}
             value={minute}
+            aria-label={i18n.translate('esUi.cronEditor.cronMonthly.minuteSelectLabel', {
+              defaultMessage: 'Minute',
+            })}
             onChange={e => onChange({ minute: e.target.value })}
             fullWidth
-            prepend={(
-              <EuiText size="xs">
-                <strong>
-                  :
-                </strong>
-              </EuiText>
-            )}
+            prepend=":"
             data-test-subj="cronFrequencyMonthlyMinuteSelect"
           />
         </EuiFlexItem>

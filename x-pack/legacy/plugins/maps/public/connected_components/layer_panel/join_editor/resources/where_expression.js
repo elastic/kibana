@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -15,10 +14,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { SearchBar } from 'plugins/data';
-import { Storage } from 'ui/storage';
-
-const settings = chrome.getUiSettingsClient();
-const localStorage = new Storage(window.localStorage);
+import { npStart } from 'ui/new_platform';
 
 export class WhereExpression extends Component {
 
@@ -51,6 +47,8 @@ export class WhereExpression extends Component {
         defaultMessage: '-- add filter --'
       });
 
+    const { uiSettings } = npStart.core;
+
     return (
       <EuiPopover
         id="whereClausePopover"
@@ -79,15 +77,12 @@ export class WhereExpression extends Component {
             />
           </EuiFormHelpText>
           <SearchBar
-            uiSettings={settings}
             showFilterBar={false}
             showDatePicker={false}
             showQueryInput={true}
-            query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
+            query={whereQuery ? whereQuery : { language: uiSettings.get('search:queryLanguage'), query: '' }}
             onQuerySubmit={this._onQueryChange}
-            appName="maps"
             indexPatterns={[indexPattern]}
-            store={localStorage}
             customSubmitButton={
               <EuiButton
                 fill

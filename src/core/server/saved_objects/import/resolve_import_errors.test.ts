@@ -20,6 +20,7 @@
 import { Readable } from 'stream';
 import { SavedObject } from '../types';
 import { resolveImportErrors } from './resolve_import_errors';
+import { savedObjectsClientMock } from '../../mocks';
 
 describe('resolveImportErrors()', () => {
   const savedObjects: SavedObject[] = [
@@ -62,16 +63,7 @@ describe('resolveImportErrors()', () => {
       ],
     },
   ];
-  const savedObjectsClient = {
-    errors: {} as any,
-    bulkCreate: jest.fn(),
-    bulkGet: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -316,6 +308,8 @@ describe('resolveImportErrors()', () => {
           statusCode: 409,
           message: 'conflict',
         },
+        attributes: {},
+        references: [],
       })),
     });
     const result = await resolveImportErrors({
@@ -416,6 +410,8 @@ describe('resolveImportErrors()', () => {
             statusCode: 404,
             message: 'Not found',
           },
+          attributes: {},
+          references: [],
         },
       ],
     });

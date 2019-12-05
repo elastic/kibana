@@ -15,7 +15,7 @@ export const MAPBOX_STYLES = {
       'all',
       [
         '==',
-        ['get', '__kbn__isvisible__'],
+        ['get', '__kbn_isvisibleduetojoin__'],
         true
       ],
       [
@@ -49,7 +49,7 @@ export const MAPBOX_STYLES = {
           'coalesce',
           [
             'feature-state',
-            '__kbn__scaled(__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name)'
+            '__kbn__dynamic____kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name__fillColor'
           ],
           -1
         ],
@@ -89,7 +89,7 @@ export const MAPBOX_STYLES = {
       'all',
       [
         '==',
-        ['get', '__kbn__isvisible__'],
+        ['get', '__kbn_isvisibleduetojoin__'],
         true
       ],
       [
@@ -123,7 +123,7 @@ export const MAPBOX_STYLES = {
           'coalesce',
           [
             'feature-state',
-            '__kbn__scaled(__kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name)'
+            '__kbn__dynamic____kbnjoin__max_of_prop1_groupby_meta_for_geo_shapes*.shape_name__fillColor'
           ],
           -1
         ],
@@ -160,7 +160,7 @@ export const MAPBOX_STYLES = {
       'all',
       [
         '==',
-        ['get', '__kbn__isvisible__'],
+        ['get', '__kbn_isvisibleduetojoin__'],
         true
       ],
       [

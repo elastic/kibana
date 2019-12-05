@@ -4,45 +4,78 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Redirect, Route, Switch, RouteComponentProps } from 'react-router-dom';
 
-import { pure } from 'recompose';
-
-import { i18n } from '@kbn/i18n';
-import { NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { MlCapabilitiesContext } from '../../components/ml/permissions/ml_capabilities_provider';
+import { hasMlUserPermissions } from '../../components/ml/permissions/has_ml_user_permissions';
 
 import { IPDetails } from './ip_details';
 import { Network } from './network';
-import { PageRoute } from '../../components/page_route/pageroute';
+import { GlobalTime } from '../../containers/global_time';
+import { SiemPageName } from '../home/types';
+import { getNetworkRoutePath } from './navigation';
+import { NetworkRouteType } from './navigation/types';
 
-const networkPath = `/:pageName(network)`;
-export const NetworkContainer = pure<NetworkComponentProps>(({ match }) => (
-  <>
-    <Switch>
-      <Route
-        strict
-        exact
-        path={networkPath}
-        render={props => (
-          <PageRoute
-            {...props}
-            component={Network}
-            title={i18n.translate('xpack.siem.pages.network.networkTitle', {
-              defaultMessage: 'Network',
-            })}
+type Props = Partial<RouteComponentProps<{}>> & { url: string };
+
+const networkPagePath = `/:pageName(${SiemPageName.network})`;
+const ipDetailsPagePath = `${networkPagePath}/ip/:detailName`;
+
+export const NetworkContainer = React.memo<Props>(() => {
+  const capabilities = useContext(MlCapabilitiesContext);
+
+  return (
+    <GlobalTime>
+      {({ to, from, setQuery, deleteQuery, isInitializing }) => (
+        <Switch>
+          <Route
+            strict
+            path={getNetworkRoutePath(
+              networkPagePath,
+              capabilities.capabilitiesFetched,
+              hasMlUserPermissions(capabilities)
+            )}
+            render={() => (
+              <Network
+                networkPagePath={networkPagePath}
+                to={to}
+                from={from}
+                setQuery={setQuery}
+                deleteQuery={deleteQuery}
+                isInitializing={isInitializing}
+                capabilitiesFetched={capabilities.capabilitiesFetched}
+                hasMlUserPermissions={hasMlUserPermissions(capabilities)}
+              />
+            )}
           />
-        )}
-      />
-      <Route
-        path={`${networkPath}/ip/:ip`}
-        render={props => (
-          <PageRoute {...props} component={IPDetails} title={props.match.params.ip} />
-        )}
-      />
-      <Redirect from="/network/" to="/network" />
-    </Switch>
-  </>
-));
+          <Route
+            path={ipDetailsPagePath}
+            render={({
+              match: {
+                params: { detailName },
+              },
+            }) => (
+              <IPDetails
+                detailName={detailName}
+                to={to}
+                from={from}
+                setQuery={setQuery}
+                deleteQuery={deleteQuery}
+                isInitializing={isInitializing}
+              />
+            )}
+          />
+          <Route
+            path={`/${SiemPageName.network}/`}
+            render={({ location: { search = '' } }) => (
+              <Redirect to={`/${SiemPageName.network}/${NetworkRouteType.flows}${search}`} />
+            )}
+          />
+        </Switch>
+      )}
+    </GlobalTime>
+  );
+});
 
 NetworkContainer.displayName = 'NetworkContainer';

@@ -1,0 +1,138 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JobsTableFilters renders correctly against snapshot 1`] = `
+<EuiFlexGroup
+  gutterSize="m"
+  justifyContent="flexEnd"
+>
+  <EuiFlexItem
+    grow={true}
+  >
+    <EuiSearchBar
+      box={
+        Object {
+          "incremental": true,
+          "placeholder": "e.g. rare_process_linux",
+        }
+      }
+      data-test-subj="jobs-filter-bar"
+      onChange={[Function]}
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFilterGroup>
+      <GroupsFilterPopover
+        onSelectedGroupsChanged={[Function]}
+        siemJobs={
+          Array [
+            Object {
+              "datafeedId": "datafeed-linux_anomalous_network_activity_ecs",
+              "datafeedIndices": Array [
+                "auditbeat-*",
+              ],
+              "datafeedState": "stopped",
+              "defaultIndexPattern": "auditbeat-*",
+              "description": "SIEM Auditbeat: Looks for unusual processes using the network which could indicate command-and-control, lateral movement, persistence, or data exfiltration activity (beta)",
+              "earliestTimestampMs": 1569812391387,
+              "groups": Array [
+                "auditbeat",
+                "process",
+                "siem",
+              ],
+              "hasDatafeed": true,
+              "id": "linux_anomalous_network_activity_ecs",
+              "isCompatible": true,
+              "isElasticJob": true,
+              "isInstalled": true,
+              "isSingleMetricViewerJob": true,
+              "jobState": "closed",
+              "latestResultsTimestampMs": 1571022900000,
+              "latestTimestampMs": 1571022859393,
+              "memory_status": "ok",
+              "moduleId": "siem_auditbeat",
+              "processed_record_count": 32010,
+            },
+            Object {
+              "datafeedId": "datafeed-rare_process_by_host_linux_ecs",
+              "datafeedIndices": Array [
+                "auditbeat-*",
+              ],
+              "datafeedState": "stopped",
+              "defaultIndexPattern": "auditbeat-*",
+              "description": "SIEM Auditbeat: Detect unusually rare processes on Linux (beta)",
+              "groups": Array [
+                "auditbeat",
+                "process",
+                "siem",
+              ],
+              "hasDatafeed": true,
+              "id": "rare_process_by_host_linux_ecs",
+              "isCompatible": true,
+              "isElasticJob": true,
+              "isInstalled": true,
+              "isSingleMetricViewerJob": true,
+              "jobState": "closed",
+              "memory_status": "ok",
+              "moduleId": "siem_auditbeat",
+              "processed_record_count": 0,
+            },
+            Object {
+              "datafeedId": "",
+              "datafeedIndices": Array [],
+              "datafeedState": "",
+              "defaultIndexPattern": "winlogbeat-*",
+              "description": "SIEM Winlogbeat: Detect unusually rare processes on Windows (beta)",
+              "groups": Array [
+                "process",
+                "siem",
+                "winlogbeat",
+              ],
+              "hasDatafeed": false,
+              "id": "rare_process_by_host_windows_ecs",
+              "isCompatible": false,
+              "isElasticJob": true,
+              "isInstalled": false,
+              "isSingleMetricViewerJob": false,
+              "jobState": "",
+              "memory_status": "",
+              "moduleId": "siem_winlogbeat",
+              "processed_record_count": 0,
+            },
+          ]
+        }
+      />
+    </EuiFilterGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFilterGroup>
+      <EuiFilterButton
+        color="text"
+        data-test-subj="show-elastic-jobs-filter-button"
+        grow={true}
+        hasActiveFilters={false}
+        iconSide="right"
+        onClick={[Function]}
+        type="button"
+        withNext={true}
+      >
+        Elastic jobs
+      </EuiFilterButton>
+      <EuiFilterButton
+        color="text"
+        data-test-subj="show-custom-jobs-filter-button"
+        grow={true}
+        hasActiveFilters={false}
+        iconSide="right"
+        onClick={[Function]}
+        type="button"
+      >
+        Custom jobs
+      </EuiFilterButton>
+    </EuiFilterGroup>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

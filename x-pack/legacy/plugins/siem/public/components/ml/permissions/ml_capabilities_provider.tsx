@@ -16,30 +16,54 @@ import { DEFAULT_KBN_VERSION } from '../../../../common/constants';
 
 import * as i18n from './translations';
 
-export const MlCapabilitiesContext = React.createContext<MlCapabilities>(emptyMlCapabilities);
+interface MlCapabilitiesProvider extends MlCapabilities {
+  capabilitiesFetched: boolean;
+}
+
+const emptyMlCapabilitiesProvider = {
+  ...emptyMlCapabilities,
+  capabilitiesFetched: false,
+};
+
+export const MlCapabilitiesContext = React.createContext<MlCapabilitiesProvider>(
+  emptyMlCapabilitiesProvider
+);
 
 MlCapabilitiesContext.displayName = 'MlCapabilitiesContext';
 
 export const MlCapabilitiesProvider = React.memo<{ children: JSX.Element }>(({ children }) => {
-  const [capabilities, setCapabilities] = useState(emptyMlCapabilities);
+  const [capabilities, setCapabilities] = useState<MlCapabilitiesProvider>(
+    emptyMlCapabilitiesProvider
+  );
   const [, dispatchToaster] = useStateToaster();
   const [kbnVersion] = useKibanaUiSetting(DEFAULT_KBN_VERSION);
 
-  const fetchFunc = async () => {
-    try {
-      const mlCapabilities = await getMlCapabilities({ 'kbn-version': kbnVersion });
-      setCapabilities(mlCapabilities);
-    } catch (error) {
-      errorToToaster({
-        title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
-        error,
-        dispatchToaster,
-      });
-    }
-  };
-
   useEffect(() => {
-    fetchFunc();
+    let isSubscribed = true;
+    const abortCtrl = new AbortController();
+
+    async function fetchMlCapabilities() {
+      try {
+        const mlCapabilities = await getMlCapabilities(kbnVersion, abortCtrl.signal);
+        if (isSubscribed) {
+          setCapabilities({ ...mlCapabilities, capabilitiesFetched: true });
+        }
+      } catch (error) {
+        if (isSubscribed) {
+          errorToToaster({
+            title: i18n.MACHINE_LEARNING_PERMISSIONS_FAILURE,
+            error,
+            dispatchToaster,
+          });
+        }
+      }
+    }
+
+    fetchMlCapabilities();
+    return () => {
+      isSubscribed = false;
+      abortCtrl.abort();
+    };
   }, []);
 
   return (

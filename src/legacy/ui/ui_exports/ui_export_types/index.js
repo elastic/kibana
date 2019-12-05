@@ -41,8 +41,6 @@ export {
 
 export {
   visTypes,
-  visResponseHandlers,
-  visRequestHandlers,
   visEditorTypes,
   interpreter,
   savedObjectTypes,
@@ -65,7 +63,6 @@ export {
   aliases,
   visualize,
   search,
-  autocompleteProviders,
   shareContextMenuExtensions,
 } from './ui_app_extensions';
 

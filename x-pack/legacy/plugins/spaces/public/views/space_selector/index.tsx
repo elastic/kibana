@@ -7,7 +7,6 @@
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
 // @ts-ignore
 import template from 'plugins/spaces/views/space_selector/space_selector.html';
-import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 // @ts-ignore
@@ -21,10 +20,10 @@ import { SpaceSelector } from './space_selector';
 const module = uiModules.get('spaces_selector', []);
 module.controller(
   'spacesSelectorController',
-  ($scope: any, spaces: Space[], spaceSelectorURL: string) => {
+  ($scope: any, spaces: Space[], serverBasePath: string) => {
     const domNode = document.getElementById('spaceSelectorRoot');
 
-    const spacesManager = new SpacesManager(spaceSelectorURL);
+    const spacesManager = new SpacesManager(serverBasePath);
 
     render(
       <I18nContext>

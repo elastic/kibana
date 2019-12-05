@@ -19,83 +19,11 @@
 
 import { once } from 'lodash';
 
-import { wrapInI18nContext } from 'ui/i18n';
-import { Filter } from '@kbn/es-query';
-
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { npSetup } from 'ui/new_platform';
-import { IndexPatterns } from 'src/legacy/core_plugins/data/public';
-import { FilterBar, ApplyFiltersPopover } from '../filter';
-import template from './apply_filter_directive.html';
-
-// @ts-ignore
-import { mapAndFlattenFilters } from '../filter/filter_manager/lib/map_and_flatten_filters';
+import { IndexPatterns } from '../';
 
 /** @internal */
-export const initLegacyModule = once((): void => {
-  uiModules
-    .get('app/kibana', ['react'])
-    .directive('filterBar', () => {
-      return {
-        restrict: 'E',
-        template: '',
-        compile: (elem: any) => {
-          const child = document.createElement('filter-bar-helper');
-
-          // Copy attributes to the child directive
-          for (const attr of elem[0].attributes) {
-            child.setAttribute(attr.name, attr.value);
-          }
-
-          child.setAttribute('ui-settings', 'uiSettings');
-
-          // Append helper directive
-          elem.append(child);
-
-          const linkFn = ($scope: any) => {
-            $scope.uiSettings = npSetup.core.uiSettings;
-          };
-
-          return linkFn;
-        },
-      };
-    })
-    .directive('filterBarHelper', (reactDirective: any) => {
-      return reactDirective(wrapInI18nContext(FilterBar), [
-        ['uiSettings', { watchDepth: 'reference' }],
-        ['onFiltersUpdated', { watchDepth: 'reference' }],
-        ['indexPatterns', { watchDepth: 'collection' }],
-        ['filters', { watchDepth: 'collection' }],
-        ['className', { watchDepth: 'reference' }],
-      ]);
-    })
-    .directive('applyFiltersPopoverComponent', (reactDirective: any) =>
-      reactDirective(wrapInI18nContext(ApplyFiltersPopover))
-    )
-    .directive('applyFiltersPopover', (indexPatterns: IndexPatterns) => {
-      return {
-        template,
-        restrict: 'E',
-        scope: {
-          filters: '=',
-          onCancel: '=',
-          onSubmit: '=',
-        },
-        link($scope: any) {
-          $scope.state = {};
-
-          // Each time the new filters change we want to rebuild (not just re-render) the "apply filters"
-          // popover, because it has to reset its state whenever the new filters change. Setting a `key`
-          // property on the component accomplishes this due to how React handles the `key` property.
-          $scope.$watch('filters', async (filters: any) => {
-            const mappedFilters: Filter[] = await mapAndFlattenFilters(indexPatterns, filters);
-            $scope.state = {
-              filters: mappedFilters,
-              key: Date.now(),
-            };
-          });
-        },
-      };
-    });
+export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
+  uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

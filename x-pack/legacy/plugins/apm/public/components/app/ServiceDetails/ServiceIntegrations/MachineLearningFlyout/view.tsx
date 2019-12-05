@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useEffect } from 'react';
 import { isEmpty } from 'lodash';
+import { useKibanaCore } from '../../../../../../../observability/public';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../../../services/rest/ml';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
@@ -49,14 +50,18 @@ export function MachineLearningFlyoutView({
   const [selectedTransactionType, setSelectedTransactionType] = useState<
     string | undefined
   >(undefined);
+
+  const { http } = useKibanaCore();
+
   const { data: hasMLJob = false, status } = useFetcher(() => {
     if (serviceName && selectedTransactionType) {
       return getHasMLJob({
         serviceName,
-        transactionType: selectedTransactionType
+        transactionType: selectedTransactionType,
+        http
       });
     }
-  }, [serviceName, selectedTransactionType]);
+  }, [serviceName, selectedTransactionType, http]);
 
   // update selectedTransactionType when list of transaction types has loaded
   useEffect(() => {

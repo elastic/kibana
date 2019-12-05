@@ -17,68 +17,81 @@
  * under the License.
  */
 
-import { Filter } from '@kbn/es-query';
+import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { Storage } from 'ui/storage';
 import { get, isEqual } from 'lodash';
 
-import { toastNotifications } from 'ui/notify';
-import { UiSettingsClientContract, SavedObjectsClientContract } from 'src/core/public';
-import { IndexPattern, Query, QueryBar, FilterBar } from '../../../../../data/public';
-import { SavedQuery, SavedQueryAttributes } from '../index';
-import { SavedQueryMeta, SaveQueryForm } from './saved_query_management/save_query_form';
-import { SavedQueryManagementComponent } from './saved_query_management/saved_query_management_component';
-import { SavedQueryService } from '../lib/saved_query_service';
-import { createSavedQueryService } from '../lib/saved_query_service';
+import {
+  withKibana,
+  KibanaReactContextValue,
+} from '../../../../../../../plugins/kibana_react/public';
+import {
+  IDataPluginServices,
+  TimeRange,
+  Query,
+  esFilters,
+  IIndexPattern,
+  TimeHistoryContract,
+  FilterBar,
+  SavedQuery,
+  SavedQueryAttributes,
+  SavedQueryMeta,
+  SaveQueryForm,
+  SavedQueryManagementComponent,
+  QueryBarTopRow,
+} from '../../../../../../../plugins/data/public';
 
-interface DateRange {
-  from: string;
-  to: string;
-}
-
-/**
- * NgReact lib requires that changes to the props need to be made in the directive config as well
- * See [search_bar\directive\index.js] file
- */
-export interface SearchBarProps {
-  appName: string;
+interface SearchBarInjectedDeps {
+  kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
-  uiSettings: UiSettingsClientContract;
-  savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns?: IndexPattern[];
-  // Query bar
-  showQueryBar?: boolean;
-  showQueryInput?: boolean;
-  screenTitle?: string;
-  store?: Storage;
-  query?: Query;
-  savedQuery?: SavedQuery;
-  onQuerySubmit?: (payload: { dateRange: DateRange; query?: Query }) => void;
+  timeHistory: TimeHistoryContract;
   // Filter bar
-  showFilterBar?: boolean;
-  filters?: Filter[];
-  onFiltersUpdated?: (filters: Filter[]) => void;
+  onFiltersUpdated?: (filters: esFilters.Filter[]) => void;
+  filters?: esFilters.Filter[];
   // Date picker
-  showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   // Autorefresh
+  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   isRefreshPaused?: boolean;
   refreshInterval?: number;
-  showAutoRefreshOnly?: boolean;
-  showSaveQuery?: boolean;
-  onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
-  onSaved?: (savedQuery: SavedQuery) => void;
-  onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
-  onClearSavedQuery?: () => void;
-  customSubmitButton?: React.ReactNode;
 }
 
+export interface SearchBarOwnProps {
+  indexPatterns?: IIndexPattern[];
+  isLoading?: boolean;
+  customSubmitButton?: React.ReactNode;
+  screenTitle?: string;
+  dataTestSubj?: string;
+  // Togglers
+  showQueryBar?: boolean;
+  showQueryInput?: boolean;
+  showFilterBar?: boolean;
+  showDatePicker?: boolean;
+  showAutoRefreshOnly?: boolean;
+  // Query bar - should be in SearchBarInjectedDeps
+  query?: Query;
+  // Show when user has privileges to save
+  showSaveQuery?: boolean;
+  savedQuery?: SavedQuery;
+  onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }) => void;
+  // User has saved the current state as a saved query
+  onSaved?: (savedQuery: SavedQuery) => void;
+  // User has modified the saved query, your app should persist the update
+  onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
+  // User has cleared the active query, your app should clear the entire query bar
+  onClearSavedQuery?: () => void;
+
+  onRefresh?: (payload: { dateRange: TimeRange }) => void;
+}
+
+export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
+
 interface State {
-  savedQueryService: SavedQueryService;
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
   showSaveNewQueryModal: boolean;
@@ -97,6 +110,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     showAutoRefreshOnly: false,
   };
 
+  private services = this.props.kibana.services;
+  private savedQueryService = this.services.data.query.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -167,7 +182,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
-    savedQueryService: createSavedQueryService(this.props.savedObjectsClient),
   };
 
   public isDirty = () => {
@@ -182,13 +196,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  private getFilterUpdateFunction() {
-    if (this.props.showFilterBar && this.props.onFiltersUpdated) {
-      return this.props.onFiltersUpdated;
-    }
-    return (filters: Filter[]) => {};
-  }
-
   private shouldRenderQueryBar() {
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryInput =
@@ -197,7 +204,24 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private shouldRenderFilterBar() {
-    return this.props.showFilterBar && this.props.filters && this.props.indexPatterns;
+    return (
+      this.props.showFilterBar &&
+      this.props.filters &&
+      this.props.indexPatterns &&
+      compact(this.props.indexPatterns).length > 0
+    );
+  }
+
+  /*
+   * This Function is here to show the toggle in saved query form
+   * in case you the date range (from/to)
+   */
+  private shouldRenderTimeFilterInSavedQueryForm() {
+    const { dateRangeFrom, dateRangeTo, showDatePicker } = this.props;
+    return (
+      showDatePicker ||
+      (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined)
+    );
   }
 
   public setFilterBarHeight = () => {
@@ -248,14 +272,16 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     try {
       let response;
       if (this.props.savedQuery && !saveAsNew) {
-        response = await this.state.savedQueryService.saveQuery(savedQueryAttributes, {
+        response = await this.savedQueryService.saveQuery(savedQueryAttributes, {
           overwrite: true,
         });
       } else {
-        response = await this.state.savedQueryService.saveQuery(savedQueryAttributes);
+        response = await this.savedQueryService.saveQuery(savedQueryAttributes);
       }
 
-      toastNotifications.addSuccess(`Your query "${response.attributes.title}" was saved`);
+      this.services.notifications.toasts.addSuccess(
+        `Your query "${response.attributes.title}" was saved`
+      );
 
       this.setState({
         showSaveQueryModal: false,
@@ -265,18 +291,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       if (this.props.onSaved) {
         this.props.onSaved(response);
       }
-
-      if (this.props.onQuerySubmit) {
-        this.props.onQuerySubmit({
-          query: this.state.query,
-          dateRange: {
-            from: this.state.dateRangeFrom,
-            to: this.state.dateRangeTo,
-          },
-        });
-      }
     } catch (error) {
-      toastNotifications.addDanger(`An error occured while saving your query: ${error.message}`);
+      this.services.notifications.toasts.addDanger(
+        `An error occured while saving your query: ${error.message}`
+      );
       throw error;
     }
   };
@@ -293,15 +311,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     });
   };
 
-  public onQueryBarChange = (queryAndDateRange: { dateRange: DateRange; query?: Query }) => {
+  public onQueryBarChange = (queryAndDateRange: { dateRange: TimeRange; query?: Query }) => {
     this.setState({
       query: queryAndDateRange.query,
       dateRangeFrom: queryAndDateRange.dateRange.from,
       dateRangeTo: queryAndDateRange.dateRange.to,
     });
+    if (this.props.onQueryChange) {
+      this.props.onQueryChange(queryAndDateRange);
+    }
   };
 
-  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: DateRange; query?: Query }) => {
+  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: Query }) => {
     this.setState(
       {
         query: queryAndDateRange.query,
@@ -355,12 +376,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
-    // This is needed, as kbn-top-nav might render before npSetup.core.uiSettings is set.
-    // This won't be needed when it's loaded exclusively with React.
-    if (!this.props.uiSettings) {
-      return null;
-    }
-
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
         showSaveQuery={this.props.showSaveQuery}
@@ -368,23 +383,21 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onSave={this.onInitiateSave}
         onSaveAsNew={this.onInitiateSaveNew}
         onLoad={this.onLoadSavedQuery}
-        savedQueryService={this.state.savedQueryService}
+        savedQueryService={this.savedQueryService}
         onClearSavedQuery={this.props.onClearSavedQuery}
-      ></SavedQueryManagementComponent>
+      />
     );
 
     let queryBar;
     if (this.shouldRenderQueryBar()) {
       queryBar = (
-        <QueryBar
-          uiSettings={this.props.uiSettings}
-          savedObjectsClient={this.props.savedObjectsClient}
+        <QueryBarTopRow
+          timeHistory={this.props.timeHistory}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
-          appName={this.props.appName}
           indexPatterns={this.props.indexPatterns}
-          store={this.props.store}
+          isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
@@ -393,12 +406,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           refreshInterval={this.props.refreshInterval}
           showAutoRefreshOnly={this.props.showAutoRefreshOnly}
           showQueryInput={this.props.showQueryInput}
+          onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onChange={this.onQueryBarChange}
           isDirty={this.isDirty()}
           customSubmitButton={
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
+          dataTestSubj={this.props.dataTestSubj}
         />
       );
     }
@@ -423,9 +438,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           >
             <FilterBar
               className="globalFilterGroup__filterBar"
-              uiSettings={this.props.uiSettings}
               filters={this.props.filters!}
-              onFiltersUpdated={this.getFilterUpdateFunction()}
+              onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
             />
           </div>
@@ -441,20 +455,20 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
-            savedQueryService={this.state.savedQueryService}
+            savedQueryService={this.savedQueryService}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
-            showTimeFilterOption={this.props.showDatePicker}
+            showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
         ) : null}
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
-            savedQueryService={this.state.savedQueryService}
+            savedQueryService={this.savedQueryService}
             onSave={savedQueryMeta => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
             showFilterOption={this.props.showFilterBar}
-            showTimeFilterOption={this.props.showDatePicker}
+            showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
         ) : null}
       </div>
@@ -462,4 +476,4 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 }
 
-export const SearchBar = injectI18n(SearchBarUI);
+export const SearchBar = injectI18n(withKibana(SearchBarUI));

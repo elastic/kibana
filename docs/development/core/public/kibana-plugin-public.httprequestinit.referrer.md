@@ -4,6 +4,8 @@
 
 ## HttpRequestInit.referrer property
 
+The referrer of request. Its value can be a same-origin URL if explicitly set in init, the empty string to indicate no referrer, and "about:client" when defaulting to the global's default. This is used during fetching to determine the value of the `Referer` header of the request being made.
+
 <b>Signature:</b>
 
 ```typescript

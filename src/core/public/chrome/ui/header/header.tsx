@@ -19,26 +19,18 @@
 
 import Url from 'url';
 
-import React, { Component, createRef, Fragment } from 'react';
+import React, { Component, createRef } from 'react';
 import * as Rx from 'rxjs';
 
 import {
   // TODO: add type annotations
-  // @ts-ignore
   EuiHeader,
-  // @ts-ignore
   EuiHeaderLogo,
-  // @ts-ignore
   EuiHeaderSection,
-  // @ts-ignore
   EuiHeaderSectionItem,
-  // @ts-ignore
   EuiHeaderSectionItemButton,
-  // @ts-ignore
-  EuiHideFor,
   EuiHorizontalRule,
   EuiIcon,
-  // @ts-ignore
   EuiImage,
   // @ts-ignore
   EuiNavDrawer,
@@ -65,6 +57,7 @@ import {
 } from '../..';
 import { HttpStart } from '../../../http';
 import { ChromeHelpExtension } from '../../chrome_service';
+import { ApplicationStart, InternalApplicationStart } from '../../../application/types';
 
 // Providing a buffer between the limit and the cut off index
 // protects from truncating just the last couple (6) characters
@@ -115,11 +108,22 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
-function extendNavLink(navLink: ChromeNavLink) {
+function extendNavLink(navLink: ChromeNavLink, urlForApp: ApplicationStart['getUrlForApp']) {
+  if (navLink.legacy) {
+    return {
+      ...navLink,
+      href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
+    };
+  }
+
   return {
     ...navLink,
-    href: navLink.url && !navLink.active ? navLink.url : navLink.baseUrl,
+    href: urlForApp(navLink.id),
   };
+}
+
+function isModifiedEvent(event: MouseEvent) {
+  return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 }
 
 function findClosestAnchor(element: HTMLElement): HTMLAnchorElement | void {
@@ -149,6 +153,7 @@ export type HeaderProps = Pick<Props, Exclude<keyof Props, 'intl'>>;
 
 interface Props {
   kibanaVersion: string;
+  application: InternalApplicationStart;
   appTitle$: Rx.Observable<string>;
   badge$: Rx.Observable<ChromeBadge | undefined>;
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
@@ -158,7 +163,9 @@ interface Props {
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
-  helpExtension$: Rx.Observable<ChromeHelpExtension>;
+  helpExtension$: Rx.Observable<ChromeHelpExtension | undefined>;
+  helpSupportUrl$: Rx.Observable<string>;
+  legacyMode: boolean;
   navControlsLeft$: Rx.Observable<readonly ChromeNavControl[]>;
   navControlsRight$: Rx.Observable<readonly ChromeNavControl[]>;
   intl: InjectedIntl;
@@ -169,6 +176,7 @@ interface Props {
 
 interface State {
   appTitle: string;
+  currentAppId?: string;
   isVisible: boolean;
   navLinks: ReadonlyArray<ReturnType<typeof extendNavLink>>;
   recentlyAccessed: ReadonlyArray<ReturnType<typeof extendRecentlyAccessedHistoryItem>>;
@@ -203,7 +211,11 @@ class HeaderUI extends Component<Props, State> {
       this.props.navLinks$,
       this.props.recentlyAccessed$,
       // Types for combineLatest only handle up to 6 inferred types so we combine these two separately.
-      Rx.combineLatest(this.props.navControlsLeft$, this.props.navControlsRight$)
+      Rx.combineLatest(
+        this.props.navControlsLeft$,
+        this.props.navControlsRight$,
+        this.props.application.currentAppId$
+      )
     ).subscribe({
       next: ([
         appTitle,
@@ -211,18 +223,21 @@ class HeaderUI extends Component<Props, State> {
         forceNavigation,
         navLinks,
         recentlyAccessed,
-        [navControlsLeft, navControlsRight],
+        [navControlsLeft, navControlsRight, currentAppId],
       ]) => {
         this.setState({
           appTitle,
           isVisible,
           forceNavigation,
-          navLinks: navLinks.map(navLink => extendNavLink(navLink)),
+          navLinks: navLinks.map(navLink =>
+            extendNavLink(navLink, this.props.application.getUrlForApp)
+          ),
           recentlyAccessed: recentlyAccessed.map(ra =>
             extendRecentlyAccessedHistoryItem(navLinks, ra, this.props.basePath)
           ),
           navControlsLeft,
           navControlsRight,
+          currentAppId,
         });
       },
     });
@@ -263,18 +278,22 @@ class HeaderUI extends Component<Props, State> {
 
   public render() {
     const {
+      application,
       badge$,
       basePath,
       breadcrumbs$,
       helpExtension$,
+      helpSupportUrl$,
       intl,
       isLocked,
       kibanaDocLink,
       kibanaVersion,
       onIsLockedUpdate,
+      legacyMode,
     } = this.props;
     const {
       appTitle,
+      currentAppId,
       isVisible,
       navControlsLeft,
       navControlsRight,
@@ -291,9 +310,26 @@ class HeaderUI extends Component<Props, State> {
       .map(navLink => ({
         key: navLink.id,
         label: navLink.title,
+
+        // Use href and onClick to support "open in new tab" and SPA navigation in the same link
         href: navLink.href,
+        onClick: (event: MouseEvent) => {
+          if (
+            !legacyMode && // ignore when in legacy mode
+            !navLink.legacy && // ignore links to legacy apps
+            !event.defaultPrevented && // onClick prevented default
+            event.button === 0 && // ignore everything but left clicks
+            !isModifiedEvent(event) // ignore clicks with modifier keys
+          ) {
+            event.preventDefault();
+            application.navigateToApp(navLink.id);
+          }
+        },
+
+        // Legacy apps use `active` property, NP apps should match the current app
+        isActive: navLink.active || currentAppId === navLink.id,
         isDisabled: navLink.disabled,
-        isActive: navLink.active,
+
         iconType: navLink.euiIconType,
         icon:
           !navLink.euiIconType && navLink.icon ? (
@@ -334,7 +370,7 @@ class HeaderUI extends Component<Props, State> {
     ];
 
     return (
-      <Fragment>
+      <header>
         <EuiHeader>
           <EuiHeaderSection grow={false}>
             <EuiShowFor sizes={['xs', 's']}>
@@ -352,7 +388,14 @@ class HeaderUI extends Component<Props, State> {
 
           <EuiHeaderSection side="right">
             <EuiHeaderSectionItem>
-              <HeaderHelpMenu {...{ helpExtension$, kibanaDocLink, kibanaVersion }} />
+              <HeaderHelpMenu
+                {...{
+                  helpExtension$,
+                  helpSupportUrl$,
+                  kibanaDocLink,
+                  kibanaVersion,
+                }}
+              />
             </EuiHeaderSectionItem>
 
             <HeaderNavControls side="right" navControls={navControlsRight} />
@@ -364,12 +407,26 @@ class HeaderUI extends Component<Props, State> {
           data-test-subj="navDrawer"
           isLocked={isLocked}
           onIsLockedUpdate={onIsLockedUpdate}
+          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+            defaultMessage: 'Primary',
+          })}
         >
-          <EuiNavDrawerGroup listItems={recentLinksArray} />
+          <EuiNavDrawerGroup
+            listItems={recentLinksArray}
+            aria-label={i18n.translate('core.ui.recentLinks.screenReaderLabel', {
+              defaultMessage: 'Recently viewed links, navigation',
+            })}
+          />
           <EuiHorizontalRule margin="none" />
-          <EuiNavDrawerGroup data-test-subj="navDrawerAppsMenu" listItems={navLinksArray} />
+          <EuiNavDrawerGroup
+            data-test-subj="navDrawerAppsMenu"
+            listItems={navLinksArray}
+            aria-label={i18n.translate('core.ui.primaryNavList.screenReaderLabel', {
+              defaultMessage: 'Primary navigation links',
+            })}
+          />
         </EuiNavDrawer>
-      </Fragment>
+      </header>
     );
   }
 

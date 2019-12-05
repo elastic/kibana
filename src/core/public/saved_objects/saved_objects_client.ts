@@ -33,6 +33,7 @@ import {
 import {
   isAutoCreateIndexError,
   showAutoCreateIndexErrorPage,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../legacy/ui/public/error_auto_create_index/error_auto_create_index';
 import { SimpleSavedObject } from './simple_saved_object';
 import { HttpFetchOptions, HttpServiceBase } from '../http';
@@ -71,6 +72,22 @@ export interface SavedObjectsBulkCreateObject<
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
+}
+
+/** @public */
+export interface SavedObjectsBulkUpdateObject<
+  T extends SavedObjectAttributes = SavedObjectAttributes
+> {
+  type: string;
+  id: string;
+  attributes: T;
+  version?: string;
+  references?: SavedObjectReference[];
+}
+
+/** @public */
+export interface SavedObjectsBulkUpdateOptions {
+  namespace?: string;
 }
 
 /** @public */
@@ -297,6 +314,7 @@ export class SavedObjectsClient {
       searchFields: 'search_fields',
       sortField: 'sort_field',
       type: 'type',
+      filter: 'filter',
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
@@ -407,6 +425,27 @@ export class SavedObjectsClient {
       body: JSON.stringify(body),
     }).then((resp: SavedObject<T>) => {
       return this.createSavedObject(resp);
+    });
+  }
+
+  /**
+   * Update multiple documents at once
+   *
+   * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
+   * @returns The result of the update operation containing both failed and updated saved objects.
+   */
+  public bulkUpdate<T extends SavedObjectAttributes>(objects: SavedObjectsBulkUpdateObject[] = []) {
+    const path = this.getPath(['_bulk_update']);
+
+    return this.savedObjectsFetch(path, {
+      method: 'PUT',
+      body: JSON.stringify(objects),
+    }).then(resp => {
+      resp.saved_objects = resp.saved_objects.map((d: SavedObject<T>) => this.createSavedObject(d));
+      return renameKeys<
+        PromiseType<ReturnType<SavedObjectsApi['bulkUpdate']>>,
+        SavedObjectsBatchResponse
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   }
 

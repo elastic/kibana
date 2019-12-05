@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { setup as data } from '../../../../../../../data/public/legacy';
-const { FieldImpl: Field } = data.indexPatterns.__LEGACY;
-
+import { Field } from '../../../../../../../../../plugins/data/public';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
@@ -115,7 +113,7 @@ uiRoutes
 
       if (this.mode === 'edit') {
         const fieldName = $route.current.params.fieldName;
-        this.field = this.indexPattern.fields.byName[fieldName];
+        this.field = this.indexPattern.fields.getByName(fieldName);
 
         if (!this.field) {
           const message = i18n.translate('kbn.management.editIndexPattern.scripted.noFieldLabel',

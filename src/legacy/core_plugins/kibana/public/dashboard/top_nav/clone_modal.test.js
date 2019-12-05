@@ -19,55 +19,48 @@
 
 import React from 'react';
 import sinon from 'sinon';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import {
-  findTestSubject,
-} from '@elastic/eui/lib/test';
+import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-import {
-  DashboardCloneModal,
-} from './clone_modal';
+import { DashboardCloneModal } from './clone_modal';
 
 let onClone;
 let onClose;
-let component;
 
 beforeEach(() => {
   onClone = sinon.spy();
   onClose = sinon.spy();
 });
 
-function createComponent(creationMethod = mountWithIntl) {
-  component = creationMethod(
-    <DashboardCloneModal.WrappedComponent
-      title="dash title"
-      onClose={onClose}
-      onClone={onClone}
-    />
-  );
-}
-
 test('renders DashboardCloneModal', () => {
-  createComponent(shallowWithIntl);
+  const component = shallowWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('onClone', () => {
-  createComponent();
+  const component = mountWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
   findTestSubject(component, 'cloneConfirmButton').simulate('click');
   sinon.assert.calledWith(onClone, 'dash title');
   sinon.assert.notCalled(onClose);
 });
 
 test('onClose', () => {
-  createComponent();
+  const component = mountWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
   findTestSubject(component, 'cloneCancelButton').simulate('click');
   sinon.assert.calledOnce(onClose);
   sinon.assert.notCalled(onClone);
 });
 
 test('title', () => {
-  createComponent();
+  const component = mountWithI18nProvider(
+    <DashboardCloneModal title="dash title" onClose={onClose} onClone={onClone} />
+  );
   const event = { target: { value: 'a' } };
   component.find('input').simulate('change', event);
   findTestSubject(component, 'cloneConfirmButton').simulate('click');

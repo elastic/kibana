@@ -9,12 +9,14 @@ import expect from '@kbn/expect';
 import url from 'url';
 import supertestAsPromised from 'supertest-as-promised';
 
+const { task: { properties: taskManagerIndexMapping } } = require('../../../../legacy/plugins/task_manager/mappings.json');
+
 export default function ({ getService }) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const log = getService('log');
   const retry = getService('retry');
   const config = getService('config');
-  const testHistoryIndex = '.task_manager_test_result';
+  const testHistoryIndex = '.kibana_task_manager_test_result';
   const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
@@ -29,6 +31,15 @@ export default function ({ getService }) {
           index: testHistoryIndex,
           q: 'type:task',
           refresh: true,
+        });
+      } else {
+        await es.indices.create({
+          index: testHistoryIndex,
+          body: {
+            mappings: {
+              properties: taskManagerIndexMapping
+            },
+          },
         });
       }
     });
@@ -47,11 +58,26 @@ export default function ({ getService }) {
     }
 
     function scheduleTask(task) {
-      return supertest.post('/api/sample_tasks')
+      return supertest.post('/api/sample_tasks/schedule')
         .set('kbn-xsrf', 'xxx')
-        .send(task)
+        .send({ task })
         .expect(200)
         .then((response) => response.body);
+    }
+
+    function scheduleTaskIfNotExists(task) {
+      return supertest.post('/api/sample_tasks/ensure_scheduled')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
+    function releaseTasksWaitingForEventToComplete(event) {
+      return supertest.post('/api/sample_tasks/event')
+        .set('kbn-xsrf', 'xxx')
+        .send({ event })
+        .expect(200);
     }
 
     it('should support middleware', async () => {
@@ -103,6 +129,24 @@ export default function ({ getService }) {
       });
 
       expect(result.id).to.be('test-task-for-sample-task-plugin-to-test-task-manager');
+    });
+
+    it('should allow a task with a given ID to be scheduled multiple times', async () => {
+      const result = await scheduleTaskIfNotExists({
+        id: 'test-task-to-reschedule-in-task-manager',
+        taskType: 'sampleTask',
+        params: { },
+      });
+
+      expect(result.id).to.be('test-task-to-reschedule-in-task-manager');
+
+      const rescheduleResult = await scheduleTaskIfNotExists({
+        id: 'test-task-to-reschedule-in-task-manager',
+        taskType: 'sampleTask',
+        params: { },
+      });
+
+      expect(rescheduleResult.id).to.be('test-task-to-reschedule-in-task-manager');
     });
 
     it('should reschedule if task errors', async () => {
@@ -167,5 +211,45 @@ export default function ({ getService }) {
       expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.greaterThan(expectedDiff - buffer);
       expect(Date.parse(currentTask.runAt) - originalRunAt).to.be.lessThan(expectedDiff + buffer);
     }
+
+    it('should run tasks in parallel, allowing for long running tasks along side faster tasks', async () => {
+      /**
+       * It's worth noting this test relies on the /event endpoint that forces Task Manager to hold off
+       * on completing a task until a call is made by the test suite.
+       * If we begin testing with multiple Kibana instacnes in Parallel this will likely become flaky.
+       * If you end up here because the test is flaky, this might be why.
+       */
+      const fastTask = await scheduleTask({
+        taskType: 'sampleTask',
+        interval: `1s`,
+        params: { },
+      });
+
+      const longRunningTask = await scheduleTask({
+        taskType: 'sampleTask',
+        interval: `1s`,
+        params: {
+          waitForEvent: 'rescheduleHasHappened'
+        },
+      });
+
+      function getTaskById(tasks, id) {
+        return tasks.filter(task => task.id === id)[0];
+      }
+
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, fastTask.id).state.count).to.eql(2);
+      });
+
+      await releaseTasksWaitingForEventToComplete('rescheduleHasHappened');
+
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+
+        expect(getTaskById(tasks, fastTask.id).state.count).to.greaterThan(2);
+        expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
+      });
+    });
   });
 }

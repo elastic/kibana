@@ -9,29 +9,16 @@ import dedent from 'dedent';
 import {
   XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
 } from '../../server/lib/constants';
-import { getXpackConfigWithDeprecated } from '../telemetry/common/get_xpack_config_with_deprecated';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
-import {
-  xpackInfoRoute,
-  featuresRoute,
-  settingsRoute,
-} from './server/routes/api/v1';
+import { xpackInfoRoute, settingsRoute } from './server/routes/api/v1';
 
-import { registerOssFeatures } from './server/lib/register_oss_features';
-import { uiCapabilitiesForFeatures } from './server/lib/ui_capabilities_for_features';
 import { has } from 'lodash';
 
-function movedToTelemetry(configPath) {
-  return (settings, log) => {
-    if (has(settings, configPath)) {
-      log(`Config key ${configPath} is deprecated. Use "xpack.telemetry.${configPath}" instead.`);
-    }
-  };
-}
-
 export { callClusterFactory } from './server/lib/call_cluster_factory';
+import { registerMonitoringCollection } from './server/telemetry_collection';
+
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
     id: 'xpack_main',
@@ -52,7 +39,11 @@ export const xpackMain = (kibana) => {
     },
 
     uiCapabilities(server) {
-      return uiCapabilitiesForFeatures(server.plugins.xpack_main);
+      const featuresPlugin = server.newPlatform.setup.plugins.features;
+      if (!featuresPlugin) {
+        throw new Error('New Platform XPack Features plugin is not available.');
+      }
+      return featuresPlugin.getFeaturesUICapabilities();
     },
 
     uiExports: {
@@ -64,7 +55,6 @@ export const xpackMain = (kibana) => {
         const config = server.config();
 
         return {
-          telemetryEnabled: getXpackConfigWithDeprecated(config, 'telemetry.enabled'),
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
         };
@@ -81,21 +71,36 @@ export const xpackMain = (kibana) => {
     },
 
     init(server) {
-      mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
+      const featuresPlugin = server.newPlatform.setup.plugins.features;
+      if (!featuresPlugin) {
+        throw new Error('New Platform XPack Features plugin is not available.');
+      }
 
-      setupXPackMain(server);
-      const { types: savedObjectTypes } = server.savedObjects;
-      registerOssFeatures(server.plugins.xpack_main.registerFeature, savedObjectTypes, server.config().get('timelion.ui.enabled'));
+      mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
+      registerMonitoringCollection();
+
+      featuresPlugin.registerLegacyAPI({
+        xpackInfo: setupXPackMain(server),
+        savedObjectTypes: server.savedObjects.types
+      });
 
       // register routes
       xpackInfoRoute(server);
       settingsRoute(server, this.kbnServer);
-      featuresRoute(server);
     },
-    deprecations: () => [
-      movedToTelemetry('telemetry.config'),
-      movedToTelemetry('telemetry.url'),
-      movedToTelemetry('telemetry.enabled'),
-    ],
+    deprecations: () => {
+      function movedToTelemetry(configPath) {
+        return (settings, log) => {
+          if (has(settings, configPath)) {
+            log(`Config key "xpack.xpack_main.${configPath}" is deprecated. Use "telemetry.${configPath}" instead.`);
+          }
+        };
+      }
+      return [
+        movedToTelemetry('telemetry.config'),
+        movedToTelemetry('telemetry.url'),
+        movedToTelemetry('telemetry.enabled'),
+      ];
+    },
   });
 };

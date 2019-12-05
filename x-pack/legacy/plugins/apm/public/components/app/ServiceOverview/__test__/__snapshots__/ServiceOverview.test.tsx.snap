@@ -138,12 +138,20 @@ NodeList [
 
 exports[`Service Overview -> View should render services, when list is not empty 1`] = `
 NodeList [
-  <tr
+  .c0 {
+  font-size: 16px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+<tr
     class="euiTableRow"
   >
     <td
       class="euiTableRowCell"
-      width="40%"
+      style="width: 40%;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -157,7 +165,7 @@ NodeList [
           class="euiToolTipAnchor"
         >
           <a
-            class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
+            class="euiLink euiLink--primary c0"
             href="#/services/My Go Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
           >
@@ -168,7 +176,7 @@ NodeList [
     </td>
     <td
       class="euiTableRowCell"
-      width="20%"
+      style="width: 20%;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -236,12 +244,20 @@ NodeList [
       </div>
     </td>
   </tr>,
-  <tr
+  .c0 {
+  font-size: 16px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+<tr
     class="euiTableRow"
   >
     <td
       class="euiTableRowCell"
-      width="40%"
+      style="width: 40%;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -255,7 +271,7 @@ NodeList [
           class="euiToolTipAnchor"
         >
           <a
-            class="euiLink euiLink--primary sc-bdVaJa eQDnXY"
+            class="euiLink euiLink--primary c0"
             href="#/services/My Python Service/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0"
             rel="noreferrer"
           >
@@ -266,7 +282,7 @@ NodeList [
     </td>
     <td
       class="euiTableRowCell"
-      width="20%"
+      style="width: 20%;"
     >
       <div
         class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"

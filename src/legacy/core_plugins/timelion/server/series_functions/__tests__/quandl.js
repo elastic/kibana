@@ -18,7 +18,7 @@
  */
 
 import proxyquire from 'proxyquire';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import assert from 'chai';
 const expect = assert.expect;
 
@@ -41,7 +41,7 @@ describe(filename, function () {
         params: parseQueryString(parseURL(url).query),
         code: url.match(/datasets\/(.*).json/)[1]
       };
-      return Promise.resolve({
+      return Bluebird.resolve({
         json: function () {
           return {
             name: '__beer__',

@@ -10,12 +10,11 @@ import JoiNamespace from 'joi';
 import { initInfraServer } from './infra_server';
 import { compose } from './lib/compose/kibana';
 import { UsageCollector } from './usage/usage_collector';
+import { inventoryViewSavedObjectType } from '../common/saved_objects/inventory_view';
+import { metricsExplorerViewSavedObjectType } from '../common/saved_objects/metrics_explorer_view';
 
-export interface KbnServer extends Server {
-  usage: any;
-}
-
-export const initServerWithKibana = (kbnServer: KbnServer) => {
+export const initServerWithKibana = (kbnServer: Server) => {
+  const { usageCollection } = kbnServer.newPlatform.setup.plugins;
   const libs = compose(kbnServer);
   initInfraServer(libs);
 
@@ -25,15 +24,15 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   );
 
   // Register a function with server to manage the collection of usage stats
-  kbnServer.usage.collectorSet.register(UsageCollector.getUsageCollector(kbnServer));
+  UsageCollector.registerUsageCollector(usageCollection);
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
     id: 'infrastructure',
     name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
-      defaultMessage: 'Infrastructure',
+      defaultMessage: 'Metrics',
     }),
-    icon: 'infraApp',
+    icon: 'metricsApp',
     navLinkId: 'infra:home',
     app: ['infra', 'kibana'],
     catalogue: ['infraops'],
@@ -41,7 +40,11 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
       all: {
         api: ['infra'],
         savedObject: {
-          all: ['infrastructure-ui-source'],
+          all: [
+            'infrastructure-ui-source',
+            inventoryViewSavedObjectType,
+            metricsExplorerViewSavedObjectType,
+          ],
           read: ['index-pattern'],
         },
         ui: ['show', 'configureSource', 'save'],
@@ -50,7 +53,12 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
         api: ['infra'],
         savedObject: {
           all: [],
-          read: ['infrastructure-ui-source', 'index-pattern'],
+          read: [
+            'infrastructure-ui-source',
+            'index-pattern',
+            inventoryViewSavedObjectType,
+            metricsExplorerViewSavedObjectType,
+          ],
         },
         ui: ['show'],
       },
@@ -62,7 +70,7 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
     name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
       defaultMessage: 'Logs',
     }),
-    icon: 'loggingApp',
+    icon: 'logsApp',
     navLinkId: 'infra:logs',
     app: ['infra', 'kibana'],
     catalogue: ['infralogging'],

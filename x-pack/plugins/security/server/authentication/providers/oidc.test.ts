@@ -105,7 +105,14 @@ describe('OIDCAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.oidcAuthenticate',
-          { body: { state: 'statevalue', nonce: 'noncevalue', redirect_uri: expectedRedirectURI } }
+          {
+            body: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              redirect_uri: expectedRedirectURI,
+              realm: 'oidc1',
+            },
+          }
         );
 
         expect(authenticationResult.redirected()).toBe(true);
@@ -180,7 +187,14 @@ describe('OIDCAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.oidcAuthenticate',
-          { body: { state: 'statevalue', nonce: 'noncevalue', redirect_uri: expectedRedirectURI } }
+          {
+            body: {
+              state: 'statevalue',
+              nonce: 'noncevalue',
+              redirect_uri: expectedRedirectURI,
+              realm: 'oidc1',
+            },
+          }
         );
 
         expect(authenticationResult.failed()).toBe(true);
@@ -584,7 +598,7 @@ describe('OIDCAuthenticationProvider', () => {
       });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/base-path/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects user to the OpenID Connect Provider if RP initiated SLO is supported.', async () => {

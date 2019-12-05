@@ -15,6 +15,13 @@ export default function(kibana: any) {
     name: 'alerts',
     init(server: any) {
       // Action types
+      const noopActionType: ActionType = {
+        id: 'test.noop',
+        name: 'Test: Noop',
+        async executor() {
+          return { status: 'ok' };
+        },
+      };
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
@@ -158,23 +165,33 @@ export default function(kibana: any) {
           };
         },
       };
-      server.plugins.actions.registerType(indexRecordActionType);
-      server.plugins.actions.registerType(failingActionType);
-      server.plugins.actions.registerType(rateLimitedActionType);
-      server.plugins.actions.registerType(authorizationActionType);
+      server.plugins.actions.setup.registerType(noopActionType);
+      server.plugins.actions.setup.registerType(indexRecordActionType);
+      server.plugins.actions.setup.registerType(failingActionType);
+      server.plugins.actions.setup.registerType(rateLimitedActionType);
+      server.plugins.actions.setup.registerType(authorizationActionType);
 
       // Alert types
       const alwaysFiringAlertType: AlertType = {
         id: 'test.always-firing',
         name: 'Test: Always Firing',
+        actionGroups: ['default', 'other'],
         async executor({ services, params, state }: AlertExecutorOptions) {
-          const actionGroupToFire = params.actionGroupToFire || 'default';
-          services
-            .alertInstanceFactory('1')
-            .replaceState({ instanceStateValue: true })
-            .fire(actionGroupToFire, {
-              instanceContextValue: true,
-            });
+          let group = 'default';
+
+          if (params.groupsToScheduleActionsInSeries) {
+            const index = state.groupInSeriesIndex || 0;
+            group = params.groupsToScheduleActionsInSeries[index];
+          }
+
+          if (group) {
+            services
+              .alertInstanceFactory('1')
+              .replaceState({ instanceStateValue: true })
+              .scheduleActions(group, {
+                instanceContextValue: true,
+              });
+          }
           await services.callCluster('index', {
             index: params.index,
             refresh: 'wait_for',
@@ -187,12 +204,14 @@ export default function(kibana: any) {
           });
           return {
             globalStateValue: true,
+            groupInSeriesIndex: (state.groupInSeriesIndex || 0) + 1,
           };
         },
       };
       const neverFiringAlertType: AlertType = {
         id: 'test.never-firing',
         name: 'Test: Never firing',
+        actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -212,6 +231,7 @@ export default function(kibana: any) {
       const failingAlertType: AlertType = {
         id: 'test.failing',
         name: 'Test: Failing',
+        actionGroups: [],
         async executor({ services, params, state }: AlertExecutorOptions) {
           await services.callCluster('index', {
             index: params.index,
@@ -229,6 +249,7 @@ export default function(kibana: any) {
       const authorizationAlertType: AlertType = {
         id: 'test.authorization',
         name: 'Test: Authorization',
+        actionGroups: [],
         validate: {
           params: schema.object({
             callClusterAuthorizationIndex: schema.string(),
@@ -287,6 +308,7 @@ export default function(kibana: any) {
       const validationAlertType: AlertType = {
         id: 'test.validation',
         name: 'Test: Validation',
+        actionGroups: [],
         validate: {
           params: schema.object({
             param1: schema.string(),
@@ -297,14 +319,15 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
+        actionGroups: ['default'],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
-      server.plugins.alerting.registerType(alwaysFiringAlertType);
-      server.plugins.alerting.registerType(neverFiringAlertType);
-      server.plugins.alerting.registerType(failingAlertType);
-      server.plugins.alerting.registerType(validationAlertType);
-      server.plugins.alerting.registerType(authorizationAlertType);
-      server.plugins.alerting.registerType(noopAlertType);
+      server.plugins.alerting.setup.registerType(alwaysFiringAlertType);
+      server.plugins.alerting.setup.registerType(neverFiringAlertType);
+      server.plugins.alerting.setup.registerType(failingAlertType);
+      server.plugins.alerting.setup.registerType(validationAlertType);
+      server.plugins.alerting.setup.registerType(authorizationAlertType);
+      server.plugins.alerting.setup.registerType(noopAlertType);
     },
   });
 }

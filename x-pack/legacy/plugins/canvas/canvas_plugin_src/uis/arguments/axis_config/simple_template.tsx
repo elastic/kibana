@@ -15,7 +15,13 @@ export interface Props {
 
 export const SimpleTemplate: FunctionComponent<Props> = ({ onValueChange, argValue }) => {
   return (
-    <EuiSwitch checked={Boolean(argValue)} onChange={() => onValueChange(!Boolean(argValue))} />
+    <EuiSwitch
+      compressed
+      checked={Boolean(argValue)}
+      onChange={() => onValueChange(!Boolean(argValue))}
+      showLabel={false}
+      label=""
+    />
   );
 };
 

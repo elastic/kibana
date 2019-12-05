@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 export const TRANSPORT_LAYER_SECURITY = i18n.translate(
   'xpack.siem.network.ipDetails.tlsTable.transportLayerSecurityTitle',
   {
-    defaultMessage: 'Transport layer security',
+    defaultMessage: 'Transport Layer Security',
   }
 );
 

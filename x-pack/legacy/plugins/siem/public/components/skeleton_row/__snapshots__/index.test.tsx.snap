@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SkeletonRow it renders 1`] = `
+<Component>
+  <SkeletonRow />
+</Component>
+`;

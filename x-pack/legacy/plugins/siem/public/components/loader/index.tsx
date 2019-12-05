@@ -12,43 +12,42 @@ import {
   EuiLoadingSpinnerSize,
   EuiText,
 } from '@elastic/eui';
+import { rgba } from 'polished';
 import React from 'react';
 import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
 const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
-  ${props => css`
-    padding: ${props.theme.eui.paddingSizes.m};
+  padding: ${({ theme }) => theme.eui.paddingSizes.m};
 
-    ${props.overlay &&
-      `
-      background: ${
-        props.overlayBackground ? props.overlayBackground : props.theme.eui.euiColorEmptyShade
-      };
+  ${({ overlay, overlayBackground, theme }) =>
+    overlay &&
+    css`
+      background: ${overlayBackground
+        ? rgba(overlayBackground, 0.9)
+        : rgba(theme.eui.euiColorEmptyShade, 0.9)};
       bottom: 0;
       left: 0;
-      opacity: 0.9; // Michael - Using opacity instead of rgba because styled components don't support hex colors in rgba
       position: absolute;
       right: 0;
       top: 0;
-      z-index: 3;
+      z-index: ${theme.eui.euiZLevel1};
     `}
-  `}
 `;
 
 Aside.displayName = 'Aside';
 
-const FlexGroup = styled(EuiFlexGroup).attrs({
+const FlexGroup = styled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',
   direction: 'column',
   gutterSize: 's',
   justifyContent: 'center',
-})<{ overlay: { overlay?: boolean } }>`
+}))<{ overlay: { overlay?: boolean } }>`
   ${({ overlay }) =>
     overlay &&
-    `
-    height: 100%;
-  `}
+    css`
+      height: 100%;
+    `}
 `;
 
 FlexGroup.displayName = 'FlexGroup';

@@ -12,25 +12,27 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { PROJECTION } from '../../../../common/projections/typings';
-import { callApmApi } from '../../../services/rest/callApmApi';
 
 export function TraceOverview() {
   const { urlParams, uiFilters } = useUrlParams();
   const { start, end } = urlParams;
-  const { status, data = [] } = useFetcher(() => {
-    if (start && end) {
-      return callApmApi({
-        pathname: '/api/apm/traces',
-        params: {
-          query: {
-            start,
-            end,
-            uiFilters: JSON.stringify(uiFilters)
+  const { status, data = [] } = useFetcher(
+    callApmApi => {
+      if (start && end) {
+        return callApmApi({
+          pathname: '/api/apm/traces',
+          params: {
+            query: {
+              start,
+              end,
+              uiFilters: JSON.stringify(uiFilters)
+            }
           }
-        }
-      });
-    }
-  }, [start, end, uiFilters]);
+        });
+      }
+    },
+    [start, end, uiFilters]
+  );
 
   useTrackPageview({ app: 'apm', path: 'traces_overview' });
   useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });
@@ -47,7 +49,7 @@ export function TraceOverview() {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
-        <LocalUIFilters {...localUIFiltersConfig}></LocalUIFilters>
+        <LocalUIFilters {...localUIFiltersConfig} />
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
         <EuiPanel>

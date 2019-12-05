@@ -21,12 +21,12 @@ export const SetPriorityInput = props => {
   return (
     <EuiDescribedFormGroup
       title={
-        <p>
+        <h3>
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.indexPriorityText"
             defaultMessage="Index priority"
           />
-        </p>
+        </h3>
       }
       description={
         <EuiTextColor color="subdued">

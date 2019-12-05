@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
+import { IClusterClient, KibanaRequest, Logger } from '../../../../../src/core/server';
+import { SecurityLicense } from '../licensing';
 
 /**
  * Represents the options to create an APIKey class instance that will be
@@ -12,8 +13,8 @@ import { ClusterClient, KibanaRequest, Logger } from '../../../../../src/core/se
  */
 export interface ConstructorOptions {
   logger: Logger;
-  clusterClient: PublicMethodsOf<ClusterClient>;
-  isSecurityFeatureDisabled: () => boolean;
+  clusterClient: IClusterClient;
+  license: SecurityLicense;
 }
 
 /**
@@ -91,13 +92,13 @@ export interface InvalidateAPIKeyResult {
  */
 export class APIKeys {
   private readonly logger: Logger;
-  private readonly clusterClient: PublicMethodsOf<ClusterClient>;
-  private readonly isSecurityFeatureDisabled: () => boolean;
+  private readonly clusterClient: IClusterClient;
+  private readonly license: SecurityLicense;
 
-  constructor({ logger, clusterClient, isSecurityFeatureDisabled }: ConstructorOptions) {
+  constructor({ logger, clusterClient, license }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
-    this.isSecurityFeatureDisabled = isSecurityFeatureDisabled;
+    this.license = license;
   }
 
   /**
@@ -109,7 +110,7 @@ export class APIKeys {
     request: KibanaRequest,
     params: CreateAPIKeyParams
   ): Promise<CreateAPIKeyResult | null> {
-    if (this.isSecurityFeatureDisabled()) {
+    if (!this.license.isEnabled()) {
       return null;
     }
 
@@ -139,7 +140,7 @@ export class APIKeys {
     request: KibanaRequest,
     params: InvalidateAPIKeyParams
   ): Promise<InvalidateAPIKeyResult | null> {
-    if (this.isSecurityFeatureDisabled()) {
+    if (!this.license.isEnabled()) {
       return null;
     }
 

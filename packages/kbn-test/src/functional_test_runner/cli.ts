@@ -18,23 +18,35 @@
  */
 
 import { resolve } from 'path';
-import { run } from '@kbn/dev-utils';
+import { run, createFlagError, Flags } from '@kbn/dev-utils';
 import { FunctionalTestRunner } from './functional_test_runner';
+
+const makeAbsolutePath = (v: string) => resolve(process.cwd(), v);
+const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
+const parseInstallDir = (flags: Flags) => {
+  const flag = flags['kibana-install-dir'];
+
+  if (typeof flag !== 'string' && flag !== undefined) {
+    throw createFlagError('--kibana-install-dir must be a string or not defined');
+  }
+
+  return flag ? makeAbsolutePath(flag) : undefined;
+};
 
 export function runFtrCli() {
   run(
     async ({ flags, log }) => {
-      const resolveConfigPath = (v: string) => resolve(process.cwd(), v);
-      const toArray = (v: string | string[]) => ([] as string[]).concat(v || []);
-
       const functionalTestRunner = new FunctionalTestRunner(
         log,
-        resolveConfigPath(flags.config as string),
+        makeAbsolutePath(flags.config as string),
         {
           mochaOpts: {
             bail: flags.bail,
             grep: flags.grep || undefined,
             invert: flags.invert,
+          },
+          kbnTestServer: {
+            installDir: parseInstallDir(flags),
           },
           suiteTags: {
             include: toArray(flags['include-tag'] as string | string[]),
@@ -84,7 +96,7 @@ export function runFtrCli() {
     },
     {
       flags: {
-        string: ['config', 'grep', 'exclude', 'include-tag', 'exclude-tag'],
+        string: ['config', 'grep', 'exclude', 'include-tag', 'exclude-tag', 'kibana-install-dir'],
         boolean: ['bail', 'invert', 'test-stats', 'updateBaselines'],
         default: {
           config: 'test/functional/config.js',
@@ -100,6 +112,7 @@ export function runFtrCli() {
         --exclude-tag=tag  a tag to be excluded, pass multiple times for multiple tags
         --test-stats       print the number of tests (included and excluded) to STDERR
         --updateBaselines  replace baseline screenshots with whatever is generated from the test
+        --kibana-install-dir  directory where the Kibana install being tested resides
       `,
       },
     }

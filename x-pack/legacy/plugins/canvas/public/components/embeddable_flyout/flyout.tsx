@@ -6,19 +6,23 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import {
   SavedObjectFinder,
   SavedObjectMetaData,
-} from 'ui/saved_objects/components/saved_object_finder';
-import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
+} from '../../../../../../../src/plugins/kibana_react/public/saved_objects'; // eslint-disable-line
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { ComponentStrings } from '../../../i18n';
+import { CoreStart } from '../../../../../../../src/core/public';
+
+const { AddEmbeddableFlyout: strings } = ComponentStrings;
 
 export interface Props {
   onClose: () => void;
   onSelect: (id: string, embeddableType: string) => void;
   availableEmbeddables: string[];
+  savedObjects: CoreStart['savedObjects'];
+  uiSettings: CoreStart['uiSettings'];
 }
 
 export class AddEmbeddableFlyout extends React.Component<Props> {
@@ -56,9 +60,7 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
       <EuiFlyout ownFocus onClose={this.props.onClose} data-test-subj="dashboardAddPanel">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>
-              <FormattedMessage id="xpack.canvas.embedObject.title" defaultMessage="Embed Object" />
-            </h2>
+            <h2>{strings.getTitleText()}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -66,9 +68,9 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
             onChoose={this.onAddPanel}
             savedObjectMetaData={availableSavedObjects}
             showFilter={true}
-            noItemsMessage={i18n.translate('xpack.canvas.embedObject.noMatchingObjectsMessage', {
-              defaultMessage: 'No matching objects found.',
-            })}
+            noItemsMessage={strings.getNoItemsText()}
+            savedObjects={this.props.savedObjects}
+            uiSettings={this.props.uiSettings}
           />
         </EuiFlyoutBody>
       </EuiFlyout>

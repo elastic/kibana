@@ -1,0 +1,23 @@
+{
+  "sql.query": {
+    "data_autocomplete_rules": {
+      "query": {
+        "__template": {
+          "__raw": true,
+          "value": "\"\"\"\nSELECT * FROM \"TABLE\"\n\"\"\""
+        }
+      }
+    },
+    "url_params": {
+      "format": [
+        "csv",
+        "json",
+        "tsv",
+        "txt",
+        "yaml",
+        "cbor",
+        "smile"
+      ]
+    }
+  }
+}

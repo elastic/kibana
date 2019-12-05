@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
-import { oncePerServer } from './once_per_server';
-import { KbnServer, Logger, JobParams, ConditionalHeaders } from '../../types';
+import {
+  ESQueueCreateJobFn,
+  ImmediateCreateJobFn,
+  Job,
+  ServerFacade,
+  RequestFacade,
+  Logger,
+  CaptureConfig,
+  QueueConfig,
+  ConditionalHeaders,
+} from '../../types';
 
 interface ConfirmedJob {
   id: string;
@@ -18,30 +26,34 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-function enqueueJobFn(server: KbnServer) {
-  const jobQueue = server.plugins.reporting.queue;
+export function enqueueJobFactory(server: ServerFacade) {
   const config = server.config();
-  const queueConfig = config.get('xpack.reporting.queue');
-  const browserType = config.get('xpack.reporting.capture.browser.type');
-  const exportTypesRegistry = server.plugins.reporting.exportTypesRegistry;
+  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
+  const browserType = captureConfig.browser.type;
+  const maxAttempts = captureConfig.maxAttempts;
+  const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
+  const { exportTypesRegistry, queue: jobQueue } = server.plugins.reporting!;
 
-  return async function enqueueJob(
+  return async function enqueueJob<JobParamsType>(
     parentLogger: Logger,
     exportTypeId: string,
-    jobParams: JobParams,
+    jobParams: JobParamsType,
     user: string,
-    headers: ConditionalHeaders,
-    request: Request
-  ) {
+    headers: ConditionalHeaders['headers'],
+    request: RequestFacade
+  ): Promise<Job> {
+    type CreateJobFn = ESQueueCreateJobFn<JobParamsType> | ImmediateCreateJobFn<JobParamsType>;
+
     const logger = parentLogger.clone(['queue-job']);
     const exportType = exportTypesRegistry.getById(exportTypeId);
-    const createJob = exportType.createJobFactory(server);
+    const createJob = exportType.createJobFactory(server) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 
     const options = {
       timeout: queueConfig.timeout,
       created_by: get(user, 'username', false),
       browser_type: browserType,
+      max_attempts: maxAttempts,
     };
 
     return new Promise((resolve, reject) => {
@@ -57,5 +69,3 @@ function enqueueJobFn(server: KbnServer) {
     });
   };
 }
-
-export const enqueueJobFactory = oncePerServer(enqueueJobFn);

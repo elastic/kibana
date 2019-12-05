@@ -1,0 +1,11 @@
+{
+  "enrich.get_policy": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_enrich/policy/{name}",
+      "_enrich/policy"
+    ]
+  }
+}

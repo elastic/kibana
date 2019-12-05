@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
-import { MetricsChart } from './MetricsChart';
+import { MetricsChart } from '../../shared/charts/MetricsChart';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
 import { PROJECTION } from '../../../../common/projections/typings';
@@ -25,22 +25,21 @@ interface ServiceMetricsProps {
 
 export function ServiceMetrics({ agentName }: ServiceMetricsProps) {
   const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
+  const { serviceName, serviceNodeName } = urlParams;
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
 
-  const localFiltersConfig: React.ComponentProps<
-    typeof LocalUIFilters
-  > = useMemo(
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
     () => ({
       filterNames: ['host', 'containerId', 'podName'],
       params: {
-        serviceName
+        serviceName,
+        serviceNodeName
       },
       projection: PROJECTION.METRICS,
       showCount: false
     }),
-    [serviceName]
+    [serviceName, serviceNodeName]
   );
 
   return (

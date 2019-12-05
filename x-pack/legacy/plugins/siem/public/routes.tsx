@@ -10,16 +10,19 @@ import { Route, Router, Switch } from 'react-router-dom';
 
 import { NotFoundPage } from './pages/404';
 import { HomePage } from './pages/home';
+import { ManageRoutesSpy } from './utils/route/manage_spy_routes';
 
 interface RouterProps {
   history: History;
 }
 
 export const PageRouter: FC<RouterProps> = memo(({ history }) => (
-  <Router history={history}>
-    <Switch>
-      <Route path="/" component={HomePage} />
-      <Route component={NotFoundPage} />
-    </Switch>
-  </Router>
+  <ManageRoutesSpy>
+    <Router history={history}>
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route component={NotFoundPage} />
+      </Switch>
+    </Router>
+  </ManageRoutesSpy>
 ));

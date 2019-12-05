@@ -18,47 +18,37 @@
  */
 
 import './np_core.test.mocks';
-
 import { DashboardStateManager } from './dashboard_state_manager';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
-import { AppStateClass } from 'ui/state_management/app_state';
+import { AppStateClass } from './legacy_imports';
 import { DashboardAppState } from './types';
-import { Timefilter, TimeRange } from 'ui/timefilter';
-import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
+import { TimeRange, TimefilterContract, InputTimeRange } from 'src/plugins/data/public';
+import { ViewMode } from 'src/plugins/embeddable/public';
+
+jest.mock('ui/state_management/state', () => ({
+  State: {},
+}));
 
 describe('DashboardState', function() {
   let dashboardState: DashboardStateManager;
   const savedDashboard = getSavedDashboardMock();
 
   let mockTime: TimeRange = { to: 'now', from: 'now-15m' };
-  const mockTimefilter: Partial<Timefilter> = {
-    setTime(time) {
-      mockTime = time as TimeRange;
-    },
-    getTime() {
+  const mockTimefilter = {
+    getTime: () => {
       return mockTime;
     },
-    disableAutoRefreshSelector: jest.fn(),
-    setRefreshInterval: jest.fn(),
-    getRefreshInterval: jest.fn(),
-    disableTimeRangeSelector: jest.fn(),
-    enableAutoRefreshSelector: jest.fn(),
-    getActiveBounds: jest.fn(),
-    enableTimeRangeSelector: () => {},
-    isAutoRefreshSelectorEnabled: true,
-    isTimeRangeSelectorEnabled: true,
-    getAutoRefreshFetch$: jest.fn(),
-    getEnabledUpdated$: jest.fn(),
-    getRefreshIntervalUpdate$: jest.fn(),
-    getFetch$: jest.fn(),
-    getTimeUpdate$: jest.fn(),
-  };
+    setTime: (time: InputTimeRange) => {
+      mockTime = time as TimeRange;
+    },
+  } as TimefilterContract;
 
   function initDashboardState() {
     dashboardState = new DashboardStateManager({
       savedDashboard,
       AppStateClass: getAppStateMock() as AppStateClass<DashboardAppState>,
       hideWriteControls: false,
+      kibanaVersion: '7.0.0',
     });
   }
 
@@ -72,7 +62,7 @@ describe('DashboardState', function() {
       mockTime.to = '2015-09-29 06:31:44.000';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter as Timefilter);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
 
       expect(mockTime.to).toBe('now/w');
       expect(mockTime.from).toBe('now/w');
@@ -87,7 +77,7 @@ describe('DashboardState', function() {
       mockTime.to = '2015-09-29 06:31:44.000';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter as Timefilter);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
 
       expect(mockTime.to).toBe('now');
       expect(mockTime.from).toBe('now-13d');
@@ -102,7 +92,7 @@ describe('DashboardState', function() {
       mockTime.to = 'now/w';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(mockTimefilter as Timefilter);
+      dashboardState.syncTimefilterWithDashboard(mockTimefilter);
 
       expect(mockTime.to).toBe(savedDashboard.timeTo);
       expect(mockTime.from).toBe(savedDashboard.timeFrom);

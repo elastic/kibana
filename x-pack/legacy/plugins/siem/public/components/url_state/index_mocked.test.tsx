@@ -5,28 +5,27 @@
  */
 
 import { mount } from 'enzyme';
-import { difference } from 'lodash/fp';
 import * as React from 'react';
 
 import { HookWrapper } from '../../mock/hook_wrapper';
+import { SiemPageName } from '../../pages/home/types';
 
 import { CONSTANTS } from './constants';
 import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_dependencies';
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 
-jest.mock('lodash/fp');
+jest.mock('../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
 
 let mockProps: UrlStateContainerPropTypes;
 
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
-  beforeEach(() => {
-    // @ts-ignore property mockImplementation does not exists
-    difference.mockImplementation((all, items) =>
-      all.filter((item: string) => !items.includes(item))
-    );
-  });
   afterEach(() => {
+    jest.clearAllMocks();
     jest.resetAllMocks();
   });
 
@@ -36,6 +35,8 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         page: CONSTANTS.networkPage,
         examplePath: '/network',
         namespaceLower: 'network',
+        pageName: SiemPageName.network,
+        detailName: undefined,
       }).noSearch.definedQuery;
       const wrapper = mount(
         <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
@@ -75,7 +76,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:network.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
+          "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)),timeline:(linkTo:!(global),timerange:(from:0,fromStr:now-24h,kind:relative,to:1,toStr:now)))",
         state: '',
       });
     });
@@ -85,16 +86,15 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         page: CONSTANTS.networkPage,
         examplePath: '/network',
         namespaceLower: 'network',
+        pageName: SiemPageName.network,
+        detailName: undefined,
       }).noSearch.undefinedQuery;
       const wrapper = mount(
         <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
       );
       const newUrlState = {
         ...mockProps.urlState,
-        [CONSTANTS.kqlQuery]: {
-          ...getFilterQuery(CONSTANTS.networkPage),
-          queryLocation: CONSTANTS.networkPage,
-        },
+        [CONSTANTS.appQuery]: getFilterQuery(),
       };
       wrapper.setProps({
         hookProps: { ...mockProps, urlState: newUrlState, isInitializing: false },
@@ -107,7 +107,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          "?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:network.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))",
+          "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))",
         state: '',
       });
     });
@@ -117,14 +117,18 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         page: CONSTANTS.networkPage,
         examplePath: '/network',
         namespaceLower: 'network',
+        pageName: SiemPageName.network,
+        detailName: undefined,
       }).noSearch.undefinedQuery;
+
       const wrapper = mount(
         <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
       );
       const newUrlState = {
         ...mockProps.urlState,
-        timelineId: 'hello_timeline_id',
+        timeline: { id: 'hello_timeline_id', isOpen: true },
       };
+
       wrapper.setProps({
         hookProps: { ...mockProps, urlState: newUrlState, isInitializing: false },
       });
@@ -136,7 +140,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
         hash: '',
         pathname: '/network',
         search:
-          '?_g=()&timelineId=hello_timeline_id&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+          '?_g=()&timeline=(id:hello_timeline_id,isOpen:!t)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
         state: '',
       });
     });
@@ -145,39 +149,46 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
   describe('handleInitialize', () => {
     describe('Redux updates URL state', () => {
       describe('Timerange url state is set when not defined on component mount', () => {
-        test.each(testCases)('%o', (page, namespaceLower, namespaceUpper, examplePath) => {
-          mockProps = getMockPropsObj({ page, examplePath, namespaceLower }).noSearch
-            .undefinedQuery;
-          mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
+        test.each(testCases)(
+          '%o',
+          (page, namespaceLower, namespaceUpper, examplePath, type, pageName, detailName) => {
+            mockProps = getMockPropsObj({ page, examplePath, namespaceLower, pageName, detailName })
+              .noSearch.undefinedQuery;
+            mount(<HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />);
 
-          expect(mockHistory.replace.mock.calls[0][0]).toEqual({
-            hash: '',
-            pathname: examplePath,
-            search: '?_g=()',
-            state: '',
-          });
+            expect(mockHistory.replace.mock.calls[0][0]).toEqual({
+              hash: '',
+              pathname: examplePath,
+              search: '?_g=()',
+              state: '',
+            });
 
-          expect(
-            mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
-          ).toEqual({
-            hash: '',
-            pathname: examplePath,
-            search:
-              '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
-            state: '',
-          });
-        });
+            expect(
+              mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0]
+            ).toEqual({
+              hash: '',
+              pathname: examplePath,
+              search:
+                '?_g=()&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
+              state: '',
+            });
+          }
+        );
 
         test('url state is set from redux data when location updates and initialization', () => {
           mockProps = getMockPropsObj({
             page: CONSTANTS.hostsPage,
             examplePath: '/hosts',
             namespaceLower: 'hosts',
+            pageName: SiemPageName.hosts,
+            detailName: undefined,
           }).noSearch.undefinedQuery;
           const updatedProps = getMockPropsObj({
             page: CONSTANTS.networkPage,
             examplePath: '/network',
             namespaceLower: 'network',
+            pageName: SiemPageName.network,
+            detailName: undefined,
           }).noSearch.definedQuery;
           const wrapper = mount(
             <HookWrapper hookProps={mockProps} hook={args => useUrlStateHooks(args)} />
@@ -195,7 +206,7 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
           expect(
             mockHistory.replace.mock.calls[mockHistory.replace.mock.calls.length - 1][0].search
           ).toEqual(
-            "?_g=()&kqlQuery=(filterQuery:(expression:'host.name:%22siem-es%22',kind:kuery),queryLocation:network.page)&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
+            "?_g=()&query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))"
           );
         });
       });

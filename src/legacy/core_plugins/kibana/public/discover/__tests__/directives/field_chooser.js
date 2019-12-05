@@ -23,8 +23,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import expect from '@kbn/expect';
 import $ from 'jquery';
-import 'ui/private';
-import '../../components/field_chooser/field_chooser';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import FixturesHitsProvider from 'fixtures/hits';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { SimpleSavedObject } from '../../../../../../../core/public';
@@ -71,8 +70,10 @@ describe('discover field chooser directives', function () {
       on-remove-field="removeField"
     ></disc-field-chooser>
   `);
+  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
 
-  beforeEach(ngMock.module('kibana', ($provide) => {
+  beforeEach(ngMock.module('app/discover', ($provide) => {
     $provide.decorator('config', ($delegate) => {
       // disable shortDots for these tests
       $delegate.get = _.wrap($delegate.get, function (origGet, name) {
@@ -126,13 +127,6 @@ describe('discover field chooser directives', function () {
       unpopular: $('.dscFieldList--unpopular', ctx),
     };
   };
-
-  describe('Index list', function () {
-    it('should be in alphabetical order', function () {
-      $elem.find('.ui-select-toggle').click();
-      expect($elem.find('[role=option]').text().replace(/\W+/g, '')).to.be('abc');
-    });
-  });
 
   describe('Field listing', function () {
     it('should have Selected Fields, Fields and Popular Fields sections', function () {
@@ -249,7 +243,6 @@ describe('discover field chooser directives', function () {
       $scope.computeDetails(field);
       expect(field.details.buckets).to.not.be(undefined);
       expect(field.details.buckets[0].value).to.be(40.141592);
-      expect(field.details.buckets[0].display).to.be('40.142');
     });
 
 

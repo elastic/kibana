@@ -25,7 +25,7 @@ export const getBeginningTokens = (signature: string): string[] => {
       (accum.length === index && curr === curr.toUpperCase() && curr !== '') ||
       specialTokenRules.includes(curr)
     ) {
-      accum = accum.concat(curr);
+      return [...accum, curr];
     }
     return accum;
   }, []);

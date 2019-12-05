@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import { nullableType } from './lib/nullable';
+import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 
 // config definition
@@ -22,7 +24,7 @@ const ConfigSchema = schema.object({
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-// see: https://www.elastic.co/guide/en/elastic-stack-overview/current/actions-index.html
+// see: https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-index.html
 // - timeout not added here, as this seems to be a generic thing we want to do
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
 const ParamsSchema = schema.object({
@@ -33,30 +35,34 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-
-export const actionType: ActionType = {
-  id: '.index',
-  name: 'index',
-  validate: {
-    config: ConfigSchema,
-    params: ParamsSchema,
-  },
-  executor,
-};
+export function getActionType({ logger }: { logger: Logger }): ActionType {
+  return {
+    id: '.index',
+    name: 'index',
+    validate: {
+      config: ConfigSchema,
+      params: ParamsSchema,
+    },
+    executor: curry(executor)({ logger }),
+  };
+}
 
 // action executor
 
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+async function executor(
+  { logger }: { logger: Logger },
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
+  const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const params = execOptions.params as ActionParamsType;
   const services = execOptions.services;
 
   if (config.index == null && params.index == null) {
     const message = i18n.translate('xpack.actions.builtin.esIndex.indexParamRequiredErrorMessage', {
-      defaultMessage: 'index param needs to be set because not set in config for action {id}',
+      defaultMessage: 'index param needs to be set because not set in config for action {actionId}',
       values: {
-        id,
+        actionId,
       },
     });
     return {
@@ -66,10 +72,7 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   }
 
   if (config.index != null && params.index != null) {
-    services.log(
-      ['debug', 'actions'],
-      `index passed in params overridden by index set in config for action ${id}`
-    );
+    logger.debug(`index passed in params overridden by index set in config for action ${actionId}`);
   }
 
   const index = config.index || params.index;
@@ -98,9 +101,9 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
     result = await services.callCluster('bulk', bulkParams);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
-      defaultMessage: 'error in action "{id}" indexing data: {errorMessage}',
+      defaultMessage: 'error in action "{actionId}" indexing data: {errorMessage}',
       values: {
-        id,
+        actionId,
         errorMessage: err.message,
       },
     });

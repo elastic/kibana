@@ -181,7 +181,7 @@ describe('CreateIndexPatternWizard', () => {
           ...services,
           config: { get, set },
           indexPatterns: {
-            get: () => ({
+            make: () => ({
               create,
             }),
             clearCache: clear,

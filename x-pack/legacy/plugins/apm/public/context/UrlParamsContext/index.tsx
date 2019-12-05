@@ -22,24 +22,21 @@ import {
   LocalUIFilterName
 } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../utils/pickKeys';
+import { useDeepObjectIdentity } from '../../hooks/useDeepObjectIdentity';
 
 interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
 }
 
-function useUiFilters(
-  params: Pick<IUrlParams, 'kuery' | 'environment' | LocalUIFilterName>
-): UIFilters {
-  return useMemo(() => {
-    const { kuery, environment, ...localUIFilters } = params;
-    const mappedLocalFilters = mapValues(
-      pickKeys(localUIFilters, ...localUIFilterNames),
-      val => (val ? val.split(',') : [])
-    ) as Partial<Record<LocalUIFilterName, string[]>>;
+function useUiFilters(params: IUrlParams): UIFilters {
+  const { kuery, environment, ...urlParams } = params;
+  const localUiFilters = mapValues(
+    pickKeys(urlParams, ...localUIFilterNames),
+    val => (val ? val.split(',') : [])
+  ) as Partial<Record<LocalUIFilterName, string[]>>;
 
-    return { kuery, environment, ...mappedLocalFilters };
-  }, [params]);
+  return useDeepObjectIdentity({ kuery, environment, ...localUiFilters });
 }
 
 const defaultRefresh = (time: TimeRange) => {};

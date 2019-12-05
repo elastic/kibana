@@ -26,7 +26,7 @@ import buildRequest from '../es/lib/build_request';
 import createDateAgg from '../es/lib/create_date_agg';
 import esResponse from './fixtures/es_response';
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import _ from 'lodash';
 import { expect } from 'chai';
 import sinon from 'sinon';
@@ -39,7 +39,7 @@ function stubRequestAndServer(response, indexPatternSavedObjects = []) {
         elasticsearch: {
           getCluster: sinon.stub().withArgs('data').returns({
             callWithRequest: function () {
-              return Promise.resolve(response);
+              return Bluebird.resolve(response);
             }
           })
         }
@@ -49,7 +49,7 @@ function stubRequestAndServer(response, indexPatternSavedObjects = []) {
       getSavedObjectsClient: function () {
         return {
           find: function () {
-            return Promise.resolve({
+            return Bluebird.resolve({
               saved_objects: indexPatternSavedObjects
             });
           }

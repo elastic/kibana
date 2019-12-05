@@ -28,6 +28,7 @@ function parsePort(url: Record<string, string>): Record<string, string | null | 
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   async function createWebhookAction(
     urlWithCreds: string,
@@ -47,7 +48,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       .post('/api/action')
       .set('kbn-xsrf', 'test')
       .send({
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         secrets: {
           user,
@@ -65,10 +66,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      const kibanaServer = getService('kibanaServer');
-      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      const webhookServiceUrl = getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK);
-      webhookSimulatorURL = `${kibanaUrl}${webhookServiceUrl}`;
+      webhookSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
+      );
     });
 
     after(() => esArchiver.unload('empty_kibana'));
@@ -78,7 +78,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'test')
         .send({
-          description: 'A generic Webhook action',
+          name: 'A generic Webhook action',
           actionTypeId: '.webhook',
           secrets: {
             user: 'username',
@@ -92,7 +92,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
           ...defaultValues,
@@ -108,7 +108,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
           ...defaultValues,
@@ -162,6 +162,27 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('ok');
     });
 
+    it('should handle target webhooks that are not whitelisted', async () => {
+      const { body: result } = await supertest
+        .post('/api/action')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'A generic Webhook action',
+          actionTypeId: '.webhook',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: 'http://a.none.whitelisted.webhook/endpoint',
+          },
+        })
+        .expect(400);
+
+      expect(result.error).to.eql('Bad Request');
+      expect(result.message).to.match(/not in the Kibana whitelist/);
+    });
+
     it('should handle unreachable webhook targets', async () => {
       const webhookActionId = await createWebhookAction('http://some.non.existent.com/endpoint');
       const { body: result } = await supertest
@@ -177,7 +198,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       expect(result.status).to.eql('error');
       expect(result.message).to.match(/Unreachable Remote Webhook/);
     });
-
     it('should handle failing webhook targets', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL);
       const { body: result } = await supertest

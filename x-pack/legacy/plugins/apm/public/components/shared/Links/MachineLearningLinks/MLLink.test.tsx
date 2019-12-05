@@ -8,11 +8,8 @@ import { Location } from 'history';
 import React from 'react';
 import { getRenderedHref } from '../../../../utils/testHelpers';
 import { MLLink } from './MLLink';
-import * as savedObjects from '../../../../services/rest/savedObjects';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
-import { InternalCoreStart } from 'src/core/public';
-
-jest.mock('ui/kfetch');
+import { LegacyCoreStart } from 'src/core/public';
 
 const coreMock = ({
   http: {
@@ -20,13 +17,9 @@ const coreMock = ({
       prepend: (path: string) => `/basepath${path}`
     }
   }
-} as unknown) as InternalCoreStart;
+} as unknown) as LegacyCoreStart;
 
 jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
-
-jest
-  .spyOn(savedObjects, 'getAPMIndexPattern')
-  .mockResolvedValue({ id: 'apm-index-pattern-id' } as any);
 
 beforeAll(() => {
   jest.spyOn(console, 'error').mockImplementation(() => null);

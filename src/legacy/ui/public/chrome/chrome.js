@@ -26,7 +26,7 @@ import '../config';
 import '../notify';
 import '../private';
 import '../promises';
-import '../storage';
+import '../directives/storage';
 import '../directives/watch_multi';
 import './services';
 import '../react_components';
@@ -95,7 +95,6 @@ const waitForBootstrap = new Promise(resolve => {
     document.body.setAttribute('id', `${internals.app.id}-app`);
 
     chrome.setupAngular();
-    // targetDomElement.setAttribute('id', 'kibana-body');
     targetDomElement.setAttribute('kbn-chrome', 'true');
     targetDomElement.setAttribute('ng-class', '{ \'hidden-chrome\': !chrome.getVisible() }');
     targetDomElement.className = 'app-wrapper';

@@ -16,13 +16,13 @@ export class Overview {
     req: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<OverviewNetworkData> {
-    return await this.adapter.getOverviewNetwork(req, options);
+    return this.adapter.getOverviewNetwork(req, options);
   }
 
   public async getOverviewHost(
     req: FrameworkRequest,
     options: RequestBasicOptions
   ): Promise<OverviewHostData> {
-    return await this.adapter.getOverviewHost(req, options);
+    return this.adapter.getOverviewHost(req, options);
   }
 }

@@ -35,8 +35,11 @@ image:management/index-patterns/images/rollup-index-pattern.png["Menu with rollu
 
 {kib} makes it easy for you to create an index pattern by walking you through 
 the process. Just start typing in the *Index pattern* field, and {kib} looks for 
-the names of {es} indices that match your input. If you want to include 
-system indices in your search, toggle the switch in the upper right.
+the names of {es} indices that match your input. Make sure that the name of the 
+index pattern is unique.
+
+If you want to include system indices in your search, toggle the switch in the 
+upper right.
 
 [role="screenshot"]
 image:management/index-patterns/images/create-index-pattern.png["Create index pattern"]

@@ -27,7 +27,7 @@ export function convertToLines(esResponse) {
     const sourceBuckets = _.get(destBucket, 'sourceGrid.buckets', []);
     for (let j = 0; j < sourceBuckets.length; j++) {
       const {
-        key, // eslint-disable-line no-unused-vars
+        key,
         sourceCentroid,
         ...rest
       } = sourceBuckets[j];
@@ -45,9 +45,10 @@ export function convertToLines(esResponse) {
           type: 'LineString',
           coordinates: [[sourceCentroid.location.lon, sourceCentroid.location.lat], dest]
         },
+        id: `${dest.join()},${key}`,
         properties: {
           ...rest
-        }
+        },
       });
     }
   }

@@ -43,12 +43,12 @@ export class DeletePhase extends PureComponent {
         <EuiDescribedFormGroup
           title={
             <div>
-              <span className="eui-displayInlineBlock eui-alignMiddle">
+              <h2 className="eui-displayInlineBlock eui-alignMiddle">
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.deletePhaseLabel"
                   defaultMessage="Delete phase"
                 />
-              </span>{' '}
+              </h2>{' '}
               {phaseData[PHASE_ENABLED] && !isShowingErrors ? (
                 <ActiveBadge />
               ) : null}

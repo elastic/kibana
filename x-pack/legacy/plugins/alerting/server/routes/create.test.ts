@@ -8,12 +8,14 @@ import { createMockServer } from './_mock_server';
 import { createAlertRoute } from './create';
 
 const { server, alertsClient } = createMockServer();
-createAlertRoute(server);
+server.route(createAlertRoute);
 
 const mockedAlert = {
   alertTypeId: '1',
+  name: 'abc',
   interval: '10s',
-  alertTypeParams: {
+  tags: ['foo'],
+  params: {
     bar: true,
   },
   actions: [
@@ -55,11 +57,15 @@ test('creates an alert with proper parameters', async () => {
         },
       ],
       "alertTypeId": "1",
-      "alertTypeParams": Object {
-        "bar": true,
-      },
       "id": "123",
       "interval": "10s",
+      "name": "abc",
+      "params": Object {
+        "bar": true,
+      },
+      "tags": Array [
+        "foo",
+      ],
     }
   `);
   expect(alertsClient.create).toHaveBeenCalledTimes(1);
@@ -77,11 +83,16 @@ test('creates an alert with proper parameters', async () => {
             },
           ],
           "alertTypeId": "1",
-          "alertTypeParams": Object {
-            "bar": true,
-          },
           "enabled": true,
           "interval": "10s",
+          "name": "abc",
+          "params": Object {
+            "bar": true,
+          },
+          "tags": Array [
+            "foo",
+          ],
+          "throttle": null,
         },
       },
     ]
@@ -101,11 +112,16 @@ test('creates an alert with proper parameters', async () => {
             },
           ],
           "alertTypeId": "1",
-          "alertTypeParams": Object {
-            "bar": true,
-          },
           "enabled": true,
           "interval": "10s",
+          "name": "abc",
+          "params": Object {
+            "bar": true,
+          },
+          "tags": Array [
+            "foo",
+          ],
+          "throttle": null,
         },
       },
     ]

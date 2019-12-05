@@ -5,8 +5,6 @@ exports[`Form should not render no settings message when instructed not to 1`] =
 exports[`Form should render no settings message when there are no settings 1`] = `
 <Fragment>
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="l"
   >
     <FormattedMessage
@@ -14,17 +12,15 @@ exports[`Form should render no settings message when there are no settings 1`] =
       id="kbn.management.settings.form.noSearchResultText"
       values={
         Object {
-          "clearSearch": <EuiLink
-            color="primary"
+          "clearSearch": <ForwardRef
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="(clear search)"
               id="kbn.management.settings.form.clearNoSearchResultText"
               values={Object {}}
             />
-          </EuiLink>,
+          </ForwardRef>,
         }
       }
     />
@@ -35,8 +31,6 @@ exports[`Form should render no settings message when there are no settings 1`] =
 exports[`Form should render normally 1`] = `
 <Fragment>
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="l"
   >
     <EuiForm>
@@ -96,8 +90,6 @@ exports[`Form should render normally 1`] = `
     size="l"
   />
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="l"
   >
     <EuiForm>
@@ -139,8 +131,6 @@ exports[`Form should render normally 1`] = `
     size="l"
   />
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="l"
   >
     <EuiForm>
@@ -164,10 +154,8 @@ exports[`Form should render normally 1`] = `
                 id="kbn.management.settings.form.searchResultText"
                 values={
                   Object {
-                    "clearSearch": <EuiLink
-                      color="primary"
+                    "clearSearch": <ForwardRef
                       onClick={[Function]}
-                      type="button"
                     >
                       <em>
                         <FormattedMessage
@@ -176,7 +164,7 @@ exports[`Form should render normally 1`] = `
                           values={Object {}}
                         />
                       </em>
-                    </EuiLink>,
+                    </ForwardRef>,
                     "settingsCount": 9,
                   }
                 }
@@ -216,8 +204,6 @@ exports[`Form should render normally 1`] = `
 exports[`Form should render read-only when saving is disabled 1`] = `
 <Fragment>
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="l"
   >
     <EuiForm>
@@ -277,8 +263,6 @@ exports[`Form should render read-only when saving is disabled 1`] = `
     size="l"
   />
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="l"
   >
     <EuiForm>
@@ -320,8 +304,6 @@ exports[`Form should render read-only when saving is disabled 1`] = `
     size="l"
   />
   <EuiPanel
-    grow={true}
-    hasShadow={false}
     paddingSize="l"
   >
     <EuiForm>
@@ -345,10 +327,8 @@ exports[`Form should render read-only when saving is disabled 1`] = `
                 id="kbn.management.settings.form.searchResultText"
                 values={
                   Object {
-                    "clearSearch": <EuiLink
-                      color="primary"
+                    "clearSearch": <ForwardRef
                       onClick={[Function]}
-                      type="button"
                     >
                       <em>
                         <FormattedMessage
@@ -357,7 +337,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
                           values={Object {}}
                         />
                       </em>
-                    </EuiLink>,
+                    </ForwardRef>,
                     "settingsCount": 9,
                   }
                 }

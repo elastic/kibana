@@ -26,11 +26,19 @@ export const App: React.FunctionComponent = () => {
   const {
     core: {
       i18n: { FormattedMessage },
+      chrome,
     },
   } = useAppDependencies();
   const { apiError } = useContext(AuthorizationContext);
 
-  const sections: Section[] = ['repositories', 'snapshots', 'restore_status', 'policies'];
+  const slmUiEnabled = chrome.getInjected('slmUiEnabled');
+
+  const sections: Section[] = ['repositories', 'snapshots', 'restore_status'];
+
+  if (slmUiEnabled) {
+    sections.push('policies' as Section);
+  }
+
   const sectionsRegex = sections.join('|');
 
   return apiError ? (
@@ -77,8 +85,12 @@ export const App: React.FunctionComponent = () => {
                 path={`${BASE_PATH}/restore/:repositoryName/:snapshotId*`}
                 component={RestoreSnapshot}
               />
-              <Route exact path={`${BASE_PATH}/add_policy`} component={PolicyAdd} />
-              <Route exact path={`${BASE_PATH}/edit_policy/:name*`} component={PolicyEdit} />
+              {slmUiEnabled && (
+                <Route exact path={`${BASE_PATH}/add_policy`} component={PolicyAdd} />
+              )}
+              {slmUiEnabled && (
+                <Route exact path={`${BASE_PATH}/edit_policy/:name*`} component={PolicyEdit} />
+              )}
               <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
             </Switch>
           </div>

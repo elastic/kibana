@@ -17,10 +17,10 @@
  * under the License.
  */
 
-export { ConfigService } from './config_service';
+export { ConfigService, IConfigService } from './config_service';
 export { RawConfigService } from './raw_config_service';
 export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
 export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs } from './env';
+export { CliArgs, Env } from './env';
 
-export { Env, EnvironmentMode, PackageInfo } from './env';
+export { EnvironmentMode, PackageInfo } from './types';

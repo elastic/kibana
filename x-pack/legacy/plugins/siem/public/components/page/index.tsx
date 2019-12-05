@@ -5,12 +5,21 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiIcon, EuiPage } from '@elastic/eui';
-import styled, { injectGlobal } from 'styled-components';
+import {
+  EuiBadge,
+  EuiBadgeProps,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiPage,
+} from '@elastic/eui';
+import styled, { createGlobalStyle } from 'styled-components';
 
-// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
-// eslint-disable-next-line no-unused-expressions
-injectGlobal`
+/*
+  SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
+  and `EuiPopover`, `EuiToolTip` global styles
+*/
+export const AppGlobalStyle = createGlobalStyle`
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
@@ -18,7 +27,30 @@ injectGlobal`
   div.application {
     background-color: rgba(0,0,0,0);
   }
+
+  .euiPopover__panel.euiPopover__panel-isOpen {
+    z-index: 9900 !important;
+  }
+  .euiToolTip {
+    z-index: 9950 !important;
+  }
 `;
+
+export const DescriptionListStyled = styled(EuiDescriptionList)`
+  ${({ theme }) => `
+    dt {
+      font-size: ${theme.eui.euiFontSizeXS} !important;
+    }
+    dd {
+      width: fit-content;
+    }
+    dd > div {
+      width: fit-content;
+    }
+  `}
+`;
+
+DescriptionListStyled.displayName = 'DescriptionListStyled';
 
 export const PageContainer = styled.div`
   display: flex;

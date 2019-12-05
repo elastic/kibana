@@ -2,41 +2,21 @@
 
 exports[`PingList component renders sorted list without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup
-    alignItems="center"
-    gutterSize="s"
-    responsive={false}
-  >
-    <EuiFlexItem
-      grow={false}
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
     >
-      <EuiTitle
-        size="xs"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="History"
-            id="xpack.uptime.pingList.checkHistoryTitle"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiBadge
-        color="hollow"
-      >
-        9231
-      </EuiBadge>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="s"
-  >
+      <h4>
+        <FormattedMessage
+          defaultMessage="History"
+          id="xpack.uptime.pingList.checkHistoryTitle"
+          values={Object {}}
+        />
+      </h4>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <EuiFlexGroup
       justifyContent="spaceBetween"
     >
@@ -56,46 +36,37 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 <EuiFormRow
                   aria-label="Status"
                   describedByIds={Array []}
+                  display="row"
                   fullWidth={false}
+                  hasChildLabel={true}
                   hasEmptyLabelSpace={false}
                   label="Status"
                   labelType="label"
                 >
-                  <EuiComboBox
+                  <EuiSelect
                     aria-label="Status"
                     compressed={false}
                     fullWidth={false}
-                    isClearable={false}
+                    hasNoInitialSelection={false}
+                    isLoading={false}
                     onChange={[Function]}
                     options={
                       Array [
                         Object {
-                          "label": "All",
+                          "text": "All",
                           "value": "",
                         },
                         Object {
-                          "label": "Up",
+                          "text": "Up",
                           "value": "up",
                         },
                         Object {
-                          "label": "Down",
+                          "text": "Down",
                           "value": "down",
                         },
                       ]
                     }
-                    selectedOptions={
-                      Array [
-                        Object {
-                          "label": "Down",
-                          "value": "down",
-                        },
-                      ]
-                    }
-                    singleSelection={
-                      Object {
-                        "asPlainText": true,
-                      }
-                    }
+                    value="down"
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -103,42 +74,33 @@ exports[`PingList component renders sorted list without errors 1`] = `
                 <EuiFormRow
                   aria-label="Location"
                   describedByIds={Array []}
+                  display="row"
                   fullWidth={false}
+                  hasChildLabel={true}
                   hasEmptyLabelSpace={false}
                   label="Location"
                   labelType="label"
                 >
-                  <EuiComboBox
+                  <EuiSelect
                     aria-label="Location"
                     compressed={false}
                     fullWidth={false}
-                    isClearable={false}
+                    hasNoInitialSelection={false}
+                    isLoading={false}
                     onChange={[Function]}
                     options={
                       Array [
                         Object {
-                          "label": "All",
-                          "value": "All",
+                          "text": "All",
+                          "value": "",
                         },
                         Object {
-                          "label": "nyc",
+                          "text": "nyc",
                           "value": "nyc",
                         },
                       ]
                     }
-                    selectedOptions={
-                      Array [
-                        Object {
-                          "label": "All",
-                          "value": "All",
-                        },
-                      ]
-                    }
-                    singleSelection={
-                      Object {
-                        "asPlainText": true,
-                      }
-                    }
+                    value=""
                   />
                 </EuiFormRow>
               </EuiFlexItem>
@@ -166,7 +128,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "align": "left",
+            "align": "right",
             "dataType": "number",
             "field": "monitor.ip",
             "name": "IP",

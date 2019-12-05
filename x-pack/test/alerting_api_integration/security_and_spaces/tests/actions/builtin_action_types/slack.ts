@@ -17,6 +17,7 @@ import {
 export default function slackTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('slack action', () => {
     let simulatedActionId = '';
@@ -24,11 +25,9 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
     // need to wait for kibanaServer to settle ...
     before(() => {
-      const kibanaServer = getService('kibanaServer');
-      const kibanaUrl = kibanaServer.status && kibanaServer.status.kibanaServerUrl;
-      slackSimulatorURL = `${kibanaUrl}${getExternalServiceSimulatorPath(
-        ExternalServiceSimulator.SLACK
-      )}`;
+      slackSimulatorURL = kibanaServer.resolveUrl(
+        getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK)
+      );
     });
 
     after(() => esArchiver.unload('empty_kibana'));
@@ -38,7 +37,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack action',
+          name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {
             webhookUrl: 'http://example.com',
@@ -48,7 +47,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A slack action',
+        name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
       });
@@ -61,7 +60,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A slack action',
+        name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
       });
@@ -72,7 +71,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack action',
+          name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {},
         })
@@ -92,7 +91,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack simulator',
+          name: 'A slack simulator',
           actionTypeId: '.slack',
           secrets: {
             webhookUrl: slackSimulatorURL,

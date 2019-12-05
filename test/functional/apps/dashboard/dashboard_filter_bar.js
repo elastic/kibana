@@ -25,11 +25,17 @@ export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const pieChart = getService('pieChart');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
   describe('dashboard filter bar', () => {
     before(async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
     describe('Add a filter bar', function () {
@@ -133,10 +139,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.setTimepickerInDataRange();
       });
 
-      it('are added when pie chart legend item is clicked', async function () {
-        await dashboardAddPanel.addVisualization('Rendering Test: pie');
+      it('are added when a cell magnifying glass is clicked', async function () {
+        await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
-        await pieChart.filterByLegendItem('4,886');
+        await testSubjects.click('docTableCellFilter');
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

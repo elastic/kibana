@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -224,6 +225,8 @@ function optimized(config) {
             // the parallel processes on terser
             parallel: config.threadLoaderPoolConfig.workers,
             sourceMap: false,
+            cache: false,
+            extractComments: false,
             terserOptions: {
               compress: {
                 // The following is required for dead-code the removal

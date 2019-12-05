@@ -12,6 +12,7 @@ export const ecsSchema = gql`
   type EventEcsFields {
     action: ToStringArray
     category: ToStringArray
+    code: ToStringArray
     created: ToDateArray
     dataset: ToStringArray
     duration: ToNumberArray
@@ -97,7 +98,14 @@ export const ecsSchema = gql`
     start: ToStringArray
   }
 
+  type ProcessHashData {
+    md5: ToStringArray
+    sha1: ToStringArray
+    sha256: ToStringArray
+  }
+
   type ProcessEcsFields {
+    hash: ProcessHashData
     pid: ToNumberArray
     name: ToStringArray
     ppid: ToNumberArray
@@ -124,6 +132,33 @@ export const ecsSchema = gql`
     domain: ToStringArray
     geo: GeoEcsFields
     packets: ToNumberArray
+  }
+
+  type DnsQuestionData {
+    name: ToStringArray
+    type: ToStringArray
+  }
+
+  type DnsEcsFields {
+    question: DnsQuestionData
+    resolved_ip: ToStringArray
+    response_code: ToStringArray
+  }
+
+  type EndgameEcsFields {
+    exit_code: ToNumberArray
+    file_name: ToStringArray
+    file_path: ToStringArray
+    logon_type: ToNumberArray
+    parent_process_name: ToStringArray
+    pid: ToNumberArray
+    process_name: ToStringArray
+    subject_domain_name: ToStringArray
+    subject_logon_id: ToStringArray
+    subject_user_name: ToStringArray
+    target_domain_name: ToStringArray
+    target_logon_id: ToStringArray
+    target_user_name: ToStringArray
   }
 
   type SuricataAlertData {
@@ -200,6 +235,7 @@ export const ecsSchema = gql`
   }
 
   type FileFields {
+    name: ToStringArray
     path: ToStringArray
     target_path: ToStringArray
     extension: ToStringArray
@@ -294,12 +330,17 @@ export const ecsSchema = gql`
   }
 
   type UserEcsFields {
+    domain: ToStringArray
     id: ToStringArray
     name: ToStringArray
     full_name: ToStringArray
     email: ToStringArray
     hash: ToStringArray
     group: ToStringArray
+  }
+
+  type WinlogEcsFields {
+    event_id: ToNumberArray
   }
 
   type NetworkEcsField {
@@ -343,6 +384,8 @@ export const ecsSchema = gql`
     _index: String
     auditd: AuditdEcsFields
     destination: DestinationEcsFields
+    dns: DnsEcsFields
+    endgame: EndgameEcsFields
     event: EventEcsFields
     geo: GeoEcsFields
     host: HostEcsFields
@@ -356,6 +399,7 @@ export const ecsSchema = gql`
     timestamp: Date
     message: ToStringArray
     user: UserEcsFields
+    winlog: WinlogEcsFields
     process: ProcessEcsFields
     file: FileFields
     system: SystemEcsField

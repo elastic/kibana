@@ -52,7 +52,7 @@ export const DurationEventStartEnd = pure<{
             <DefaultDraggable
               data-test-subj="event-duration"
               field={EVENT_DURATION_FIELD_NAME}
-              id={`${contextId}-${eventId}-${EVENT_DURATION_FIELD_NAME}-${duration}`}
+              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_DURATION_FIELD_NAME}-${duration}`}
               name={name}
               tooltipContent={null}
               value={duration}
@@ -74,7 +74,7 @@ export const DurationEventStartEnd = pure<{
             <DefaultDraggable
               data-test-subj="event-start"
               field={EVENT_START_FIELD_NAME}
-              id={`${contextId}-${eventId}-${EVENT_START_FIELD_NAME}-${start}`}
+              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_START_FIELD_NAME}-${start}`}
               tooltipContent={null}
               value={start}
             >
@@ -92,7 +92,7 @@ export const DurationEventStartEnd = pure<{
             <DefaultDraggable
               data-test-subj="event-end"
               field={EVENT_END_FIELD_NAME}
-              id={`${contextId}-${eventId}-${EVENT_END_FIELD_NAME}-${end}`}
+              id={`duration-event-start-end-default-draggable-${contextId}-${eventId}-${EVENT_END_FIELD_NAME}-${end}`}
               tooltipContent={null}
               value={end}
             >

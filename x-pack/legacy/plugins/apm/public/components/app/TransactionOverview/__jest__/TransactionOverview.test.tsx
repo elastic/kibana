@@ -8,12 +8,11 @@ import React from 'react';
 import {
   queryByLabelText,
   render,
-  queryBySelectText,
   getByText,
   getByDisplayValue,
   queryByDisplayValue,
   fireEvent
-} from 'react-testing-library';
+} from '@testing-library/react';
 import { omit } from 'lodash';
 import { history } from '../../../../utils/history';
 import { TransactionOverview } from '..';
@@ -22,21 +21,15 @@ import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTra
 import { fromQuery } from '../../../shared/Links/url_helpers';
 import { Router } from 'react-router-dom';
 import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
+import { KibanaCoreContext } from '../../../../../../observability/public';
+import { LegacyCoreStart } from 'kibana/public';
 
 jest.spyOn(history, 'push');
 jest.spyOn(history, 'replace');
 
-jest.mock('ui/kfetch');
-
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-beforeAll(() => {
-  console.error = jest.fn();
-});
-afterAll(() => {
-  console.error = originalError;
-});
+const coreMock = ({
+  notifications: { toasts: { addWarning: () => {} } }
+} as unknown) as LegacyCoreStart;
 
 function setup({
   urlParams,
@@ -59,11 +52,13 @@ function setup({
     .mockReturnValue(serviceTransactionTypes);
 
   return render(
-    <Router history={history}>
-      <UrlParamsProvider>
-        <TransactionOverview />
-      </UrlParamsProvider>
-    </Router>
+    <KibanaCoreContext.Provider value={coreMock}>
+      <Router history={history}>
+        <UrlParamsProvider>
+          <TransactionOverview />
+        </UrlParamsProvider>
+      </Router>
+    </KibanaCoreContext.Provider>
   );
 }
 
@@ -101,8 +96,8 @@ describe('TransactionOverview', () => {
       });
 
       // secondType is selected in the dropdown
-      expect(queryBySelectText(container, 'secondType')).not.toBeNull();
-      expect(queryBySelectText(container, 'firstType')).toBeNull();
+      expect(queryByDisplayValue(container, 'secondType')).not.toBeNull();
+      expect(queryByDisplayValue(container, 'firstType')).toBeNull();
 
       expect(getByText(container, 'firstType')).not.toBeNull();
     });

@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DonutChartLegend applies valid props as expected 1`] = `
+<styled.div>
+  <DonutChartLegendRow
+    color="#bd271e"
+    content={23}
+    message="Down"
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <DonutChartLegendRow
+    color="#d3dae6"
+    content={45}
+    message="Up"
+  />
+</styled.div>
+`;

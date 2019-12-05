@@ -22,7 +22,7 @@ import sinon from 'sinon';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import { PersistedStateError } from '../../errors';
+import { PersistedStateError } from '../errors';
 import '..';
 
 let PersistedState;

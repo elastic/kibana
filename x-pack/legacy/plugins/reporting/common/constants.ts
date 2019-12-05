@@ -6,6 +6,8 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const BROWSER_TYPE = 'chromium';
+
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
   'xpack.reporting.jobCompletionNotifications';
 

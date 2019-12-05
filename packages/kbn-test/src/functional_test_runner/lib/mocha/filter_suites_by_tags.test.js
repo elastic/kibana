@@ -95,16 +95,16 @@ it('only runs hooks of parents and tests in level1a', async () => {
   });
 
   expect(history).toMatchInlineSnapshot(`
-Array [
-  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1a' ]",
-  "suite: ",
-  "suite: level 1",
-  "suite: level 1 level 1a",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
-  "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
-  "test:  level 1 level 1a test 1a",
-]
-`);
+    Array [
+      "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1a' ]",
+      "suite: ",
+      "suite: level 1",
+      "suite: level 1 level 1a",
+      "hook:  \\"before each\\" hook: rootBeforeEach",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "test:  level 1 level 1a test 1a",
+    ]
+  `);
 });
 
 it('only runs hooks of parents and tests in level1b', async () => {
@@ -114,16 +114,16 @@ it('only runs hooks of parents and tests in level1b', async () => {
   });
 
   expect(history).toMatchInlineSnapshot(`
-Array [
-  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1b' ]",
-  "suite: ",
-  "suite: level 1",
-  "suite: level 1 level 1b",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
-  "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
-  "test:  level 1 level 1b test 1b",
-]
-`);
+    Array [
+      "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1b' ]",
+      "suite: ",
+      "suite: level 1",
+      "suite: level 1 level 1b",
+      "hook:  \\"before each\\" hook: rootBeforeEach",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "test:  level 1 level 1b test 1b",
+    ]
+  `);
 });
 
 it('only runs hooks of parents and tests in level1a and level1b', async () => {
@@ -133,20 +133,20 @@ it('only runs hooks of parents and tests in level1a and level1b', async () => {
   });
 
   expect(history).toMatchInlineSnapshot(`
-Array [
-  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1a', 'level1b' ]",
-  "suite: ",
-  "suite: level 1",
-  "suite: level 1 level 1a",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
-  "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
-  "test:  level 1 level 1a test 1a",
-  "suite: level 1 level 1b",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
-  "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
-  "test:  level 1 level 1b test 1b",
-]
-`);
+    Array [
+      "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1a', 'level1b' ]",
+      "suite: ",
+      "suite: level 1",
+      "suite: level 1 level 1a",
+      "hook:  \\"before each\\" hook: rootBeforeEach",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "test:  level 1 level 1a test 1a",
+      "suite: level 1 level 1b",
+      "hook:  \\"before each\\" hook: rootBeforeEach",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "test:  level 1 level 1b test 1b",
+    ]
+  `);
 });
 
 it('only runs level1a if including level1 and excluding level1b', async () => {
@@ -156,17 +156,17 @@ it('only runs level1a if including level1 and excluding level1b', async () => {
   });
 
   expect(history).toMatchInlineSnapshot(`
-Array [
-  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1' ]",
-  "info: Filtering out any suites that include the tag(s): [ 'level1b' ]",
-  "suite: ",
-  "suite: level 1",
-  "suite: level 1 level 1a",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
-  "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
-  "test:  level 1 level 1a test 1a",
-]
-`);
+    Array [
+      "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1' ]",
+      "info: Filtering out any suites that include the tag(s): [ 'level1b' ]",
+      "suite: ",
+      "suite: level 1",
+      "suite: level 1 level 1a",
+      "hook:  \\"before each\\" hook: rootBeforeEach",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "test:  level 1 level 1a test 1a",
+    ]
+  `);
 });
 
 it('only runs level1b if including level1 and excluding level1a', async () => {
@@ -176,17 +176,17 @@ it('only runs level1b if including level1 and excluding level1a', async () => {
   });
 
   expect(history).toMatchInlineSnapshot(`
-Array [
-  "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1' ]",
-  "info: Filtering out any suites that include the tag(s): [ 'level1a' ]",
-  "suite: ",
-  "suite: level 1",
-  "suite: level 1 level 1b",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
-  "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
-  "test:  level 1 level 1b test 1b",
-]
-`);
+    Array [
+      "info: Only running suites (and their sub-suites) if they include the tag(s): [ 'level1' ]",
+      "info: Filtering out any suites that include the tag(s): [ 'level1a' ]",
+      "suite: ",
+      "suite: level 1",
+      "suite: level 1 level 1b",
+      "hook:  \\"before each\\" hook: rootBeforeEach",
+      "hook:  level 1 \\"before each\\" hook: level1BeforeEach",
+      "test:  level 1 level 1b test 1b",
+    ]
+  `);
 });
 
 it('only runs level2 if excluding level1', async () => {
@@ -196,15 +196,15 @@ it('only runs level2 if excluding level1', async () => {
   });
 
   expect(history).toMatchInlineSnapshot(`
-Array [
-  "info: Filtering out any suites that include the tag(s): [ 'level1' ]",
-  "suite: ",
-  "suite: level 2",
-  "suite: level 2 level 2a",
-  "hook:   \\"before each\\" hook: rootBeforeEach",
-  "test:  level 2 level 2a test 2a",
-]
-`);
+    Array [
+      "info: Filtering out any suites that include the tag(s): [ 'level1' ]",
+      "suite: ",
+      "suite: level 2",
+      "suite: level 2 level 2a",
+      "hook:  \\"before each\\" hook: rootBeforeEach",
+      "test:  level 2 level 2a test 2a",
+    ]
+  `);
 });
 
 it('does nothing if everything excluded', async () => {
@@ -214,8 +214,8 @@ it('does nothing if everything excluded', async () => {
   });
 
   expect(history).toMatchInlineSnapshot(`
-Array [
-  "info: Filtering out any suites that include the tag(s): [ 'level1', 'level2a' ]",
-]
-`);
+    Array [
+      "info: Filtering out any suites that include the tag(s): [ 'level1', 'level2a' ]",
+    ]
+  `);
 });

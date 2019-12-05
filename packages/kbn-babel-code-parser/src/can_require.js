@@ -17,18 +17,18 @@
  * under the License.
  */
 
-export function canRequire(cwd, entry) {
+export function canRequire(entry, cwd = require.resolve.paths(entry) || []) {
   try {
     // We will try to test if we can resolve
     // this entry through the require.resolve
     // setting as the start looking path the
-    // given cwd. Require.resolve will keep
+    // given cwd. That cwd variable could be
+    // a path or an array of paths
+    // from where Require.resolve will keep
     // looking recursively as normal starting
-    // from that location.
+    // from those locations.
     return require.resolve(entry, {
-      paths: [
-        cwd
-      ]
+      paths: [].concat(cwd)
     });
   } catch (e) {
     return false;

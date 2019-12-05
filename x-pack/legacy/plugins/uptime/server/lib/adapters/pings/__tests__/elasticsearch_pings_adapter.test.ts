@@ -7,6 +7,7 @@
 import { set } from 'lodash';
 import { DatabaseAdapter } from '../../database';
 import { ElasticsearchPingsAdapter } from '../elasticsearch_pings_adapter';
+import { assertCloseTo } from '../../../helper';
 
 describe('ElasticsearchPingsAdapter class', () => {
   let database: DatabaseAdapter;
@@ -88,7 +89,7 @@ describe('ElasticsearchPingsAdapter class', () => {
   });
 
   describe('getPingHistogram', () => {
-    it('returns an empty array for <= 1 bucket', async () => {
+    it('returns a single bucket if array has 1', async () => {
       expect.assertions(2);
       const search = jest.fn();
       search.mockReturnValue({
@@ -114,9 +115,11 @@ describe('ElasticsearchPingsAdapter class', () => {
         head: async (request: any, params: any) => null,
       };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(serverRequest, '1234', '5678', null);
+      const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
+      assertCloseTo(result.interval, 36000, 100);
+      result.interval = 36000;
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
-      expect(result).toEqual([]);
+      expect(result).toMatchSnapshot();
     });
 
     it('returns expected result for no status filter', async () => {
@@ -131,7 +134,9 @@ describe('ElasticsearchPingsAdapter class', () => {
         head: async (request: any, params: any) => null,
       };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
-      const result = await pingAdapter.getPingHistogram(serverRequest, '1234', '5678', null);
+      const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
+      assertCloseTo(result.interval, 36000, 100);
+      result.interval = 36000;
 
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -178,7 +183,6 @@ describe('ElasticsearchPingsAdapter class', () => {
       const searchFilter = {
         bool: {
           must: [
-            { match: { 'monitor.status': { query: 'down', operator: 'and' } } },
             { match: { 'monitor.id': { query: 'auto-http-0X89BB0F9A6C81D178', operator: 'and' } } },
             { match: { 'monitor.name': { query: 'my-new-test-site-name', operator: 'and' } } },
           ],
@@ -194,8 +198,12 @@ describe('ElasticsearchPingsAdapter class', () => {
         serverRequest,
         '1234',
         '5678',
-        JSON.stringify(searchFilter)
+        JSON.stringify(searchFilter),
+        undefined,
+        'down'
       );
+      assertCloseTo(result.interval, 5609564928000, 1000);
+      result.interval = 5609564928000;
 
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -248,11 +256,13 @@ describe('ElasticsearchPingsAdapter class', () => {
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(
         serverRequest,
-        '1234',
-        '5678',
+        'now-15m',
+        'now',
         searchFilter
       );
 
+      assertCloseTo(result.interval, 36000, 100);
+      result.interval = 36000;
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
@@ -261,7 +271,6 @@ describe('ElasticsearchPingsAdapter class', () => {
       expect.assertions(2);
       const search = jest.fn();
       search.mockReturnValue(standardMockResponse);
-      const searchFilter = `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`;
       const pingDatabase = {
         search,
         count: jest.fn(),
@@ -272,8 +281,12 @@ describe('ElasticsearchPingsAdapter class', () => {
         serverRequest,
         '1234',
         '5678',
-        searchFilter
+        '',
+        undefined,
+        'down'
       );
+      assertCloseTo(result.interval, 5609564928000, 1000);
+      result.interval = 5609564928000;
 
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -285,7 +298,6 @@ describe('ElasticsearchPingsAdapter class', () => {
 
       search.mockReturnValue(standardMockResponse);
 
-      const searchFilter = `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`;
       const pingDatabase = {
         search,
         count: jest.fn(),
@@ -296,7 +308,9 @@ describe('ElasticsearchPingsAdapter class', () => {
         serverRequest,
         '1234',
         '5678',
-        searchFilter
+        '',
+        undefined,
+        'up'
       );
 
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);

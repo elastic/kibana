@@ -9,9 +9,10 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { RedirectWrapper } from './redirect_wrapper';
 import { HostsTableType } from '../../store/hosts/model';
+import { SiemPageName } from '../../pages/home/types';
 
 export type HostComponentProps = RouteComponentProps<{
-  hostName: string;
+  detailName: string;
   tabName: HostsTableType;
   search: string;
 }>;
@@ -24,29 +25,31 @@ export const RedirectToHostsPage = ({
 }: HostComponentProps) => {
   const defaultSelectedTab = HostsTableType.hosts;
   const selectedTab = tabName ? tabName : defaultSelectedTab;
-  const to = `/hosts/${selectedTab}${search}`;
+  const to = `/${SiemPageName.hosts}/${selectedTab}${search}`;
 
   return <RedirectWrapper to={to} />;
 };
 
 export const RedirectToHostDetailsPage = ({
   match: {
-    params: { hostName, tabName },
+    params: { detailName, tabName },
   },
   location: { search },
 }: HostComponentProps) => {
   const defaultSelectedTab = HostsTableType.authentications;
   const selectedTab = tabName ? tabName : defaultSelectedTab;
-  const to = `/hosts/${hostName}/${selectedTab}${search}`;
+  const to = `/${SiemPageName.hosts}/${detailName}/${selectedTab}${search}`;
   return <RedirectWrapper to={to} />;
 };
 
-export const getHostsUrl = () => '#/link-to/hosts';
+const baseHostsUrl = `#/link-to/${SiemPageName.hosts}`;
 
-export const getTabsOnHostsUrl = (tabName: HostsTableType) => `#/link-to/hosts/${tabName}`;
+export const getHostsUrl = () => baseHostsUrl;
 
-export const getHostDetailsUrl = (hostName: string) => `#/link-to/hosts/${hostName}`;
+export const getTabsOnHostsUrl = (tabName: HostsTableType) => `${baseHostsUrl}/${tabName}`;
 
-export const getTabsOnHostDetailsUrl = (hostName: string, tabName: HostsTableType) => {
-  return `#/link-to/hosts/${hostName}/${tabName}`;
+export const getHostDetailsUrl = (detailName: string) => `${baseHostsUrl}/${detailName}`;
+
+export const getTabsOnHostDetailsUrl = (detailName: string, tabName: HostsTableType) => {
+  return `${baseHostsUrl}/${detailName}/${tabName}`;
 };

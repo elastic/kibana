@@ -16,41 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-// @ts-ignore
-import { getFilterGenerator } from 'ui/filter_manager';
-import angular from 'angular';
 import _ from 'lodash';
-import { SearchSource } from 'ui/courier';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from 'ui/courier/utils/courier_inspector_utils';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { RequestAdapter } from 'ui/inspector/adapters';
-import { Adapters } from 'ui/inspector/types';
-import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
-import { Filter, FilterStateStore } from '@kbn/es-query';
-import chrome from 'ui/chrome';
+import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { toastNotifications } from 'ui/notify';
-import { timefilter, getTime, TimeRange } from 'ui/timefilter';
-import { Query, onlyDisabledFiltersChanged } from '../../../../data/public';
+import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
+import { SearchSourceContract } from '../../../../../ui/public/courier';
+import {
+  esFilters,
+  TimeRange,
+  FilterManager,
+  onlyDisabledFiltersChanged,
+  generateFilters,
+  getTime,
+  Query,
+  IFieldType,
+} from '../../../../../../plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
-  Embeddable,
   Container,
-  ExecuteTriggerActions,
+  Embeddable,
 } from '../../../../embeddable_api/public/np_ready/public';
-import * as columnActions from '../doc_table/actions/columns';
+import * as columnActions from '../angular/doc_table/actions/columns';
 import { SavedSearch } from '../types';
 import searchTemplate from './search_template.html';
 import { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
-import { getSort } from '../doc_table/lib/get_sort';
-import { SortOrder } from '../doc_table/components/table_header/helpers';
-
-const config = chrome.getUiSettingsClient();
+import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
+import { getSortForSearchSource } from '../angular/doc_table/lib/get_sort_for_search_source';
+import {
+  Adapters,
+  angular,
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+  getServices,
+  IndexPattern,
+  RequestAdapter,
+} from '../kibana_services';
+import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -62,23 +64,11 @@ interface SearchScope extends ng.IScope {
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
-  filter?: (field: { name: string; scripted: boolean }, value: string[], operator: string) => void;
+  filter?: (field: IFieldType, value: string[], operator: string) => void;
   hits?: any[];
-  indexPattern?: StaticIndexPattern;
+  indexPattern?: IndexPattern;
   totalHitCount?: number;
   isLoading?: boolean;
-}
-
-export interface FilterManager {
-  generate: (
-    field: {
-      name: string;
-      scripted: boolean;
-    },
-    values: string | string[],
-    operation: string,
-    index: number
-  ) => Filter[];
 }
 
 interface SearchEmbeddableConfig {
@@ -86,12 +76,10 @@ interface SearchEmbeddableConfig {
   $compile: ng.ICompileService;
   savedSearch: SavedSearch;
   editUrl: string;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IndexPattern[];
   editable: boolean;
-  queryFilter: unknown;
+  filterManager: FilterManager;
 }
-
-export const SEARCH_EMBEDDABLE_TYPE = 'search';
 
 export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   implements ISearchEmbeddable {
@@ -101,15 +89,16 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
-  private filtersSearchSource: SearchSource;
+  private filtersSearchSource?: SearchSourceContract;
   private searchInstance?: JQLite;
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
-  private filterGen: FilterManager;
+  private filterManager: FilterManager;
+  private abortController?: AbortController;
 
   private prevTimeRange?: TimeRange;
-  private prevFilters?: Filter[];
+  private prevFilters?: esFilters.Filter[];
   private prevQuery?: Query;
 
   constructor(
@@ -120,10 +109,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       editUrl,
       indexPatterns,
       editable,
-      queryFilter,
+      filterManager,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
-    private readonly executeTriggerActions: ExecuteTriggerActions,
+    private readonly executeTriggerActions: TExecuteTriggerActions,
     parent?: Container
   ) {
     super(
@@ -132,7 +121,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       parent
     );
 
-    this.filterGen = getFilterGenerator(queryFilter);
+    this.filterManager = filterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
@@ -140,7 +129,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-    this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.fetch);
+
+    this.autoRefreshFetchSubscription = getServices()
+      .timefilter.getAutoRefreshFetch$()
+      .subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -162,7 +154,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   /**
    *
    * @param {Element} domNode
-   * @param {ContainerState} containerState
    */
   public render(domNode: HTMLElement) {
     if (!this.searchScope) {
@@ -191,7 +182,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
     }
-    this.savedSearch.searchSource.cancelQueued();
+    if (this.abortController) this.abortController.abort();
   }
 
   private initializeSearchScope() {
@@ -201,13 +192,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.inspectorAdapters = this.inspectorAdaptors;
 
     const { searchSource } = this.savedSearch;
-    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'));
+    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
 
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchScope || !this.input.timeRange) {
-        return;
-      }
+      if (!this.searchScope || !this.input.timeRange) return;
       return getTime(indexPattern, this.input.timeRange);
     });
 
@@ -248,17 +237,15 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = this.filterGen.generate(field, value, operator, indexPattern.id);
+      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id!);
       filters = filters.map(filter => ({
         ...filter,
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
       }));
 
       await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
         embeddable: this,
-        triggerContext: {
-          filters,
-        },
+        filters,
       });
     };
   }
@@ -273,10 +260,14 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     const { searchSource } = this.savedSearch;
 
     // Abort any in-progress requests
-    searchSource.cancelQueued();
+    if (this.abortController) this.abortController.abort();
+    this.abortController = new AbortController();
 
-    searchSource.setField('size', config.get('discover:sampleSize'));
-    searchSource.setField('sort', getSort(this.searchScope.sort, this.searchScope.indexPattern));
+    searchSource.setField('size', getServices().uiSettings.get('discover:sampleSize'));
+    searchSource.setField(
+      'sort',
+      getSortForSearchSource(this.searchScope.sort, this.searchScope.indexPattern)
+    );
 
     // Log request to inspector
     this.inspectorAdaptors.requests.reset();
@@ -288,16 +279,16 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
-    searchSource.getSearchRequestBody().then((body: any) => {
+    searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
-
     this.searchScope.isLoading = true;
 
     try {
       // Make the request
-      const resp = await searchSource.fetch();
-
+      const resp = await searchSource.fetch({
+        abortSignal: this.abortController.signal,
+      });
       this.searchScope.isLoading = false;
 
       // Log response to inspector
@@ -312,7 +303,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       // If the fetch was aborted, no need to surface this in the UI
       if (error.name === 'AbortError') return;
 
-      toastNotifications.addError(error, {
+      getServices().toastNotifications.addError(error, {
         title: i18n.translate('kbn.embeddable.errorTitle', {
           defaultMessage: 'Error fetching data',
         }),
@@ -334,8 +325,8 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.sharedItemTitle = this.panelTitle;
 
     if (isFetchRequired) {
-      this.filtersSearchSource.setField('filter', this.input.filters);
-      this.filtersSearchSource.setField('query', this.input.query);
+      this.filtersSearchSource!.setField('filter', this.input.filters);
+      this.filtersSearchSource!.setField('query', this.input.query);
 
       this.fetch();
 
