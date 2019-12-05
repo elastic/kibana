@@ -10,6 +10,8 @@ import {
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
   MachineLearningDataFrameAnalyticsProvider,
+  MachineLearningDataFrameAnalyticsCreationProvider,
+  MachineLearningDataFrameAnalyticsTableProvider,
   MachineLearningDataVisualizerProvider,
   MachineLearningDataVisualizerIndexBasedProvider,
   MachineLearningJobManagementProvider,
@@ -28,7 +30,9 @@ import {
 export function MachineLearningProvider(context: FtrProviderContext) {
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
-  const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context);
+  const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
+  const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(context);
+  const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
   const dataVisualizer = MachineLearningDataVisualizerProvider(context);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
@@ -47,6 +51,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     anomalyExplorer,
     api,
     dataFrameAnalytics,
+    dataFrameAnalyticsCreation,
+    dataFrameAnalyticsTable,
     dataVisualizer,
     dataVisualizerIndexBased,
     jobManagement,
