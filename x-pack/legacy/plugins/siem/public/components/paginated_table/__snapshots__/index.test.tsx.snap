@@ -249,7 +249,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         "euiFormControlPadding": "12px",
         "euiFormCustomControlBorderColor": "#66676d",
         "euiFormCustomControlDisabledIconColor": "#a6aab0",
-        "euiFormInputGroupBorder": "1px solid #313338",
+        "euiFormInputGroupBorder": "1px solid #282a30",
         "euiFormInputGroupLabelBackground": "#1f2127",
         "euiFormMaxWidth": "400px",
         "euiGradientMiddle": "#282a31",
