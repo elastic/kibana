@@ -19,6 +19,8 @@
 
 import _ from 'lodash';
 
+const pipe = _.flow;
+
 const utils = {};
 
 utils.textFromRequest = function (request) {
@@ -62,7 +64,7 @@ utils.reformatData = function (data, indent) {
 // this operation can probably bundle A -> B with the B -> A functionality.
 const collapseXLangMarkers = text => text.replace(`"""sql`, `"""`);
 
-utils.collapseLiteralStrings = _.pipe(
+utils.collapseLiteralStrings = pipe(
   collapseXLangMarkers,
   function (data) {
     const splitData = data.split(`"""`);

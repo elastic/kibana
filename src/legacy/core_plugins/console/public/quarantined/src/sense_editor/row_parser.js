@@ -48,7 +48,7 @@ function RowParser(editor) {
       return MODE.BETWEEN_REQUESTS;
     } // shouldn't really happen
 
-    if (mode !== 'start' && mode !== 'start-sql') {
+    if (mode !== 'start') {
       return MODE.IN_REQUEST;
     }
     let line = (session.getLine(row) || '').trim();
