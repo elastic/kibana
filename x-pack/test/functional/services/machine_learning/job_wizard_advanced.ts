@@ -7,10 +7,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningJobWizardAdvancedProvider({
-  getService,
-  getPageObjects,
-}: FtrProviderContext) {
+export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
