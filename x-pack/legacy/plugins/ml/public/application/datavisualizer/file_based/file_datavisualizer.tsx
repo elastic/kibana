@@ -10,7 +10,7 @@ import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/
 
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
-import { getFullIndexPatterns } from '../../util/index_utils';
+import { getIndexPatternsContract } from '../../util/index_utils';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
@@ -22,7 +22,7 @@ export interface FileDataVisualizerPageProps {
 export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({ kibanaConfig }) => {
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
-  const indexPatterns = getFullIndexPatterns();
+  const indexPatterns = getIndexPatternsContract();
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />

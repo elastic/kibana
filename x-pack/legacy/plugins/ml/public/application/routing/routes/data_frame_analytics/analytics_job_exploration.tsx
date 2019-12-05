@@ -34,7 +34,7 @@ export const analyticsJobExplorationRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { context } = useResolver('', config, basicResolvers(deps));
+  const { context } = useResolver('', undefined, config, basicResolvers(deps));
   const { _g } = queryString.parse(location.search);
   let globalState: any = null;
   try {

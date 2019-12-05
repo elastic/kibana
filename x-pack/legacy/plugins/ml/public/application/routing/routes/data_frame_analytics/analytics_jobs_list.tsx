@@ -29,7 +29,7 @@ export const analyticsJobsListRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { context } = useResolver('', config, basicResolvers(deps));
+  const { context } = useResolver('', undefined, config, basicResolvers(deps));
   return (
     <PageLoader context={context}>
       <Page />

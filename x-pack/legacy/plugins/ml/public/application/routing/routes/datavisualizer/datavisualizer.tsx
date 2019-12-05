@@ -29,8 +29,7 @@ export const selectorRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config }) => {
-  const { index } = queryString.parse(location.search);
-  const { context } = useResolver(index, config, {
+  const { context } = useResolver('', undefined, config, {
     checkBasicLicense,
     checkFindFileStructurePrivilege,
   });

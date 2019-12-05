@@ -36,8 +36,8 @@ export const indexBasedRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { index } = queryString.parse(location.search);
-  const { context } = useResolver(index, config, {
+  const { index, savedSearchId } = queryString.parse(location.search);
+  const { context } = useResolver(index, savedSearchId, config, {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
     checkGetJobsPrivilege,

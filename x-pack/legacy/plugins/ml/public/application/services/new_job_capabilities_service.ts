@@ -5,8 +5,6 @@
  */
 
 import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
-// import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/types';
-// import { start as data } from '../../../../../../../src/legacy/core_plugins/data/public/legacy';
 
 import {
   Field,
@@ -22,18 +20,15 @@ import {
   IndexPatternsContract,
 } from '../../../../../../../src/plugins/data/public';
 import { ml } from './ml_api_service';
+import { getIndexPatternAndSavedSearch } from '../util/index_utils';
 
 // called in the angular routing resolve block to initialize the
 // newJobCapsService with the currently selected index pattern
 export function loadNewJobCapabilities(
-  // savedSearches: SavedSearchLoader,
   indexPatternId: string,
   savedSearchId: string,
-  indexPatterns: IndexPatterns,
-  savedSearches: any
+  indexPatterns: IndexPatterns
 ) {
-  // const indexPatterns = data.indexPatterns.indexPatterns;
-  // const savedSearches = data.indexPatterns.indexPatterns;
   return new Promise(async (resolve, reject) => {
     if (indexPatternId !== undefined) {
       // index pattern is being used
@@ -43,8 +38,13 @@ export function loadNewJobCapabilities(
     } else if (savedSearchId !== undefined) {
       // saved search is being used
       // load the index pattern from the saved search
-      const savedSearch = await savedSearches.get(savedSearchId);
-      const indexPattern = savedSearch.searchSource.getField('index')!;
+      const { indexPattern } = await getIndexPatternAndSavedSearch(savedSearchId);
+      if (indexPattern === null) {
+        // eslint-disable-next-line no-console
+        console.error('Cannot retrieve index pattern from saved search');
+        reject();
+        return;
+      }
       await newJobCapsService.initializeFromIndexPattern(indexPattern);
       resolve(newJobCapsService.newJobCaps);
     } else {

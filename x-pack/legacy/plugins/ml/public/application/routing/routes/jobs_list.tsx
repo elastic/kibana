@@ -31,7 +31,7 @@ export const jobListRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ config, deps }) => {
-  const { context } = useResolver(undefined, config, basicResolvers(deps));
+  const { context } = useResolver(undefined, undefined, config, basicResolvers(deps));
 
   return (
     <PageLoader context={context}>

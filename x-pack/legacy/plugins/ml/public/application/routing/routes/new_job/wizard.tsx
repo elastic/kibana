@@ -97,11 +97,11 @@ export const advancedRoute: MlRoute = {
 };
 
 const PageWrapper: FC<WizardPageProps> = ({ location, config, jobType, deps }) => {
-  const { index } = queryString.parse(location.search);
-  const { context, results } = useResolver(index, config, {
+  const { index, savedSearchId } = queryString.parse(location.search);
+  const { context, results } = useResolver(index, savedSearchId, config, {
     ...basicResolvers(deps),
     privileges: checkCreateJobsPrivilege,
-    jobCaps: () => loadNewJobCapabilities(index, '', deps.indexPatterns, {}),
+    jobCaps: () => loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
 

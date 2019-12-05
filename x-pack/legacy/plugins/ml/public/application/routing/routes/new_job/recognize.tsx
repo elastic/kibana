@@ -42,8 +42,8 @@ export const checkViewOrCreateRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { id, index } = queryString.parse(location.search);
-  const { context, results } = useResolver(index, config, {
+  const { id, index, savedSearchId } = queryString.parse(location.search);
+  const { context, results } = useResolver(index, savedSearchId, config, {
     ...basicResolvers(deps),
     existingJobsAndGroups: mlJobService.getJobAndGroupIds,
   });
@@ -58,7 +58,7 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
 const CheckViewOrCreateWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { id: moduleId, index: indexPatternId } = queryString.parse(location.search);
   // the single resolver checkViewOrCreateJobs redirects only. so will always reject
-  useResolver(undefined, config, {
+  useResolver(undefined, undefined, config, {
     checkViewOrCreateJobs: () => checkViewOrCreateJobs(moduleId, indexPatternId),
   });
   return null;

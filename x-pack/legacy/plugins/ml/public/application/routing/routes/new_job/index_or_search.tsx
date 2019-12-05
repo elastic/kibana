@@ -44,7 +44,7 @@ const PageWrapper: FC<{
   nextStepPath: string;
   deps: PageDependencies;
 }> = ({ config, nextStepPath, deps }) => {
-  const { context } = useResolver(undefined, config, {
+  const { context } = useResolver(undefined, undefined, config, {
     ...basicResolvers(deps),
     preConfiguredJobRedirect,
   });

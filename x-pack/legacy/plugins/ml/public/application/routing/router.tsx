@@ -8,10 +8,15 @@ import React, { FC, useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 import { I18nContext } from 'ui/i18n';
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+// import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 
 import { IndexPatterns } from 'ui/index_patterns';
-import { getIndexPatternById, getFullIndexPatterns } from '../util/index_utils';
+// import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
+import {
+  getIndexPatternById,
+  getIndexPatternsContract,
+  getIndexPatternAndSavedSearch,
+} from '../util/index_utils';
 import { createSearchItems } from '../jobs/new_job/utils/new_job_utils';
 import { ResolverResults, Resolvers } from './resolvers';
 import { KibanaContext, KibanaConfigTypeFix, KibanaContextValue } from '../contexts/kibana';
@@ -74,7 +79,8 @@ export const MlRouter: FC<{
 };
 
 export const useResolver = (
-  index: string | undefined,
+  indexPatternId: string | undefined,
+  savedSearchId: string | undefined,
   config: KibanaConfigTypeFix,
   resolvers: Resolvers
 ): { context: KibanaContextValue; results: ResolverResults } => {
@@ -95,24 +101,19 @@ export const useResolver = (
         res.forEach((r, i) => (tempResults[funcNames[i]] = r));
         setResults(tempResults);
 
-        const stubbedSavedSearch = ({
-          searchSource: {
-            getField() {},
-          },
-        } as never) as SavedSearch;
+        if (indexPatternId !== undefined || savedSearchId !== undefined) {
+          const { indexPattern, savedSearch } =
+            savedSearchId !== undefined
+              ? await getIndexPatternAndSavedSearch(savedSearchId)
+              : { savedSearch: null, indexPattern: await getIndexPatternById(indexPatternId!) };
 
-        if (index !== undefined) {
-          const { indexPattern, savedSearch, combinedQuery } = createSearchItems(
-            config,
-            await getIndexPatternById(index),
-            stubbedSavedSearch
-          );
+          const { combinedQuery } = createSearchItems(config, indexPattern!, savedSearch);
 
           setContext({
             combinedQuery,
             currentIndexPattern: indexPattern,
             currentSavedSearch: savedSearch,
-            indexPatterns: getFullIndexPatterns()!,
+            indexPatterns: getIndexPatternsContract()!,
             kibanaConfig: config,
           });
         } else {

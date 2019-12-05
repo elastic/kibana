@@ -39,7 +39,7 @@ export const filterListRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ config }) => {
-  const { context } = useResolver(undefined, config, {
+  const { context } = useResolver(undefined, undefined, config, {
     checkFullLicense,
     checkGetJobsPrivilege,
     getMlNodeCount,

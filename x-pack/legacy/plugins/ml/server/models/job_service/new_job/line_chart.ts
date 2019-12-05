@@ -128,6 +128,10 @@ function getSearchJsonFromConfig(
     },
   };
 
+  if (query.bool.must === undefined) {
+    query.bool.must = [];
+  }
+
   query.bool.must.push({
     range: {
       [timeField]: {

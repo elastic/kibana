@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, SplitField } from '../../../../../../common/types/fields';
@@ -32,7 +32,11 @@ export class AdvancedJobCreator extends JobCreator {
   private _richDetectors: RichDetector[] = [];
   private _queryString: string;
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
+  constructor(
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
+  ) {
     super(indexPattern, savedSearch, query);
 
     this._queryString = JSON.stringify(this._datafeed_config.query);

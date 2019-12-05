@@ -25,7 +25,7 @@ export const accessDeniedRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ config }) => {
-  const { context } = useResolver(undefined, config, {});
+  const { context } = useResolver(undefined, undefined, config, {});
 
   return (
     <PageLoader context={context}>

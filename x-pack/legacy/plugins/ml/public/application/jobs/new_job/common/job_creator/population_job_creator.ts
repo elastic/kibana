@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import {
   Field,
@@ -25,7 +25,11 @@ export class PopulationJobCreator extends JobCreator {
   private _byFields: SplitField[] = [];
   protected _type: JOB_TYPE = JOB_TYPE.POPULATION;
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
+  constructor(
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
+  ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.POPULATION;
   }

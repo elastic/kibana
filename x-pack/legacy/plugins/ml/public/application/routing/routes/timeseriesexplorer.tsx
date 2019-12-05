@@ -39,7 +39,7 @@ export const timeSeriesExplorerRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
-  const { context } = useResolver('', config, {
+  const { context } = useResolver('', undefined, config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
   });

@@ -6,20 +6,17 @@
 
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
+import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import chrome from 'ui/chrome';
-import { npStart } from 'ui/new_platform';
-import { SavedSearchLoader } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
-import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
-
-type IndexPatternSavedObject = SimpleSavedObject<SavedObjectAttributes>;
+import { Query } from 'src/plugins/data/public';
+import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 
 let indexPatternCache: IndexPatternSavedObject[] = [];
-let fullIndexPatterns: IndexPatternsContract | null = null;
+let savedSearchesCache: SavedSearchSavedObject[] = [];
+let indexPatternsContract: IndexPatterns | null = null;
 
 export function loadIndexPatterns(indexPatterns: IndexPatterns) {
-  fullIndexPatterns =
-    indexPatterns !== undefined ? indexPatterns : data.indexPatterns.indexPatterns; // NP   TODO  - remove this check, indexPatterns should always be passed in
+  indexPatternsContract = indexPatterns;
   const savedObjectsClient = chrome.getSavedObjectsClient();
   return savedObjectsClient
     .find({
@@ -33,12 +30,31 @@ export function loadIndexPatterns(indexPatterns: IndexPatterns) {
     });
 }
 
+export function loadSavedSearches() {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  return savedObjectsClient
+    .find({
+      type: 'search',
+      perPage: 10000,
+    })
+    .then(response => {
+      savedSearchesCache = response.savedObjects;
+      return savedSearchesCache;
+    });
+}
+
+export async function loadSavedSearchById(id: string) {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  const ss = await savedObjectsClient.get('search', id);
+  return ss.error === undefined ? ss : null;
+}
+
 export function getIndexPatterns() {
   return indexPatternCache;
 }
 
-export function getFullIndexPatterns() {
-  return fullIndexPatterns;
+export function getIndexPatternsContract() {
+  return indexPatternsContract;
 }
 
 export function getIndexPatternNames() {
@@ -54,27 +70,44 @@ export function getIndexPatternIdFromName(name: string) {
   return null;
 }
 
-export function loadCurrentIndexPattern(
-  indexPatterns: IndexPatternsContract,
-  $route: Record<string, any>
-) {
-  fullIndexPatterns = indexPatterns;
-  return fullIndexPatterns.get($route.current.params.index);
+export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
+  const resp: { savedSearch: SavedSearchSavedObject | null; indexPattern: IndexPattern | null } = {
+    savedSearch: null,
+    indexPattern: null,
+  };
+
+  if (savedSearchId === undefined) {
+    return resp;
+  }
+
+  const ss = await loadSavedSearchById(savedSearchId);
+  if (ss === null) {
+    return resp;
+  }
+  const indexPatternId = ss.references.find(r => r.type === 'index-pattern')?.id;
+  resp.indexPattern = await getIndexPatternById(indexPatternId!);
+  resp.savedSearch = ss;
+  return resp;
+}
+
+export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
+  const search = savedSearch.attributes.kibanaSavedObjectMeta as { searchSourceJSON: string };
+  return JSON.parse(search.searchSourceJSON) as {
+    query: Query;
+    filter: any[];
+  };
 }
 
 export function getIndexPatternById(id: string): Promise<IndexPattern> {
-  if (fullIndexPatterns !== null) {
-    return fullIndexPatterns.get(id);
+  if (indexPatternsContract !== null) {
+    return indexPatternsContract.get(id);
   } else {
     throw new Error('Index patterns are not initialized!');
   }
 }
 
-export function loadCurrentSavedSearch(
-  savedSearches: SavedSearchLoader,
-  $route: Record<string, any>
-) {
-  return savedSearches.get($route.current.params.savedSearchId);
+export function getSavedSearchById(id: string): SavedSearchSavedObject | undefined {
+  return savedSearchesCache.find(s => s.id === id);
 }
 
 /**

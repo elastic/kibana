@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { SingleMetricJobCreator } from './single_metric_job_creator';
 import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
@@ -15,7 +15,7 @@ import { JOB_TYPE } from './util/constants';
 
 export const jobCreatorFactory = (jobType: JOB_TYPE) => (
   indexPattern: IndexPattern,
-  savedSearch: SavedSearch,
+  savedSearch: SavedSearchSavedObject | null,
   query: object
 ) => {
   let jc;

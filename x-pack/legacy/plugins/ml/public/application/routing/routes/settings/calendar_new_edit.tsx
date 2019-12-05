@@ -76,7 +76,7 @@ const PageWrapper: FC<NewCalendarPageProps> = ({ location, config, mode }) => {
     calendarId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
 
-  const { context } = useResolver(undefined, config, {
+  const { context } = useResolver(undefined, undefined, config, {
     checkFullLicense,
     checkGetJobsPrivilege,
     checkMlNodesAvailable,

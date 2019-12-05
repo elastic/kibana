@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { JobCreator } from './job_creator';
 import { Field, Aggregation, AggFieldPair } from '../../../../../../common/types/fields';
@@ -21,7 +21,11 @@ import { getRichDetectors } from './util/general';
 export class SingleMetricJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
+  constructor(
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
+  ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.SINGLE_METRIC;
   }

@@ -47,7 +47,7 @@ export const explorerRoute: MlRoute = {
 
 const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
   const { index } = queryString.parse(location.search);
-  const { context } = useResolver(index, config, {
+  const { context } = useResolver(index, undefined, config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
   });

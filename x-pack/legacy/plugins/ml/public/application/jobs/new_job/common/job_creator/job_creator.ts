@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { ML_JOB_AGGREGATION } from '../../../../../../common/constants/aggregation_types';
@@ -24,7 +24,7 @@ import { mlCalendarService } from '../../../../services/calendar_service';
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: IndexPattern;
-  protected _savedSearch: SavedSearch;
+  protected _savedSearch: SavedSearchSavedObject | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _job_config: Job;
   protected _calendars: Calendar[];
@@ -44,7 +44,11 @@ export class JobCreator {
     stop: boolean;
   } = { stop: false };
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
+  constructor(
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
+  ) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
     this._indexPatternTitle = indexPattern.title;

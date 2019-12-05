@@ -5,14 +5,22 @@
  */
 
 import { IndexPattern } from 'ui/index_patterns';
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import {
+  esQuery,
+  Query,
+  IIndexPattern,
+  esKuery,
+} from '../../../../../../../../../src/plugins/data/public';
+import { SavedSearch } from '../../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
-import { esQuery, Query, IIndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
+import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
+import { getQueryFromSavedSearch } from '../../../util/index_utils';
 
 export interface SearchItems {
   indexPattern: IIndexPattern;
   savedSearch: SavedSearch;
-  query: any;
+  query: Query;
   combinedQuery: any;
 }
 
@@ -22,7 +30,7 @@ export interface SearchItems {
 export function createSearchItems(
   kibanaConfig: KibanaConfigTypeFix,
   indexPattern: IndexPattern,
-  savedSearch: SavedSearch
+  savedSearch: SavedSearchSavedObject | null
 ) {
   // query is only used by the data visualizer as it needs
   // a lucene query_string.
@@ -43,22 +51,24 @@ export function createSearchItems(
     },
   };
 
-  if (indexPattern.id === undefined && savedSearch.id !== undefined) {
-    const searchSource = savedSearch.searchSource;
-    indexPattern = searchSource.getField('index')!;
+  if (savedSearch !== null) {
+    const data = getQueryFromSavedSearch(savedSearch);
 
-    query = searchSource.getField('query')!;
-    const fs = searchSource.getField('filter');
+    query = data.query;
+    const filter = data.filter;
 
-    const filters = Array.isArray(fs) ? fs : [];
+    const filters = Array.isArray(filter) ? filter : [];
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
-    combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
+      const ast = esKuery.fromKueryExpression(query.query);
+      combinedQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+    } else {
+      const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
+      combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    }
   }
 
   return {
-    indexPattern,
-    savedSearch,
     query,
     combinedQuery,
   };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadIndexPatterns } from '../util/index_utils';
+import { loadIndexPatterns, loadSavedSearches } from '../util/index_utils';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
@@ -24,5 +24,6 @@ export const basicResolvers = (deps: PageDependencies): Resolvers => ({
   loadMlServerInfo,
   loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
   checkGetJobsPrivilege,
+  loadSavedSearches,
   // getJobManagementBreadcrumbs(),
 });
