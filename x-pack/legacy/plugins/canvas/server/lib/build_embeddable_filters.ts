@@ -7,7 +7,8 @@
 import { Filter } from '../../types';
 // @ts-ignore Untyped Local
 import { buildBoolArray } from './build_bool_array';
-import { TimeRange, esFilters } from '../../../../../../src/plugins/data/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { TimeRange, esFilters } from '../../../../../../src/plugins/data/common';
 
 export interface EmbeddableFilterInput {
   filters: esFilters.Filter[];
