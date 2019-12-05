@@ -123,7 +123,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={editField}>
+          <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
               defaultMessage: 'Edit',
             })}
@@ -132,7 +132,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
             {deleteField => (
-              <EuiButtonEmpty onClick={() => deleteField(field)}>
+              <EuiButtonEmpty onClick={() => deleteField(field)} data-test-subj="removeFieldButton">
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.removeFieldButtonLabel', {
                   defaultMessage: 'Remove',
                 })}

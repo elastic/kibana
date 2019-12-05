@@ -18,6 +18,8 @@ export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
     clickNextButton: () => void;
     clickBackButton: () => void;
     clickSubmitButton: () => void;
+    clickEditFieldAtButton: (index: number) => void;
+    clickEditFieldUpdateButton: () => void;
     completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
     completeStepTwo: (settings: string) => void;
     completeStepThree: (mappingFields?: MappingField[]) => void;
@@ -43,6 +45,17 @@ export const formSetup = async (
 
   const clickSubmitButton = () => {
     testBed.find('submitButton').simulate('click');
+  };
+
+  const clickEditFieldAtButton = (index: number) => {
+    testBed
+      .find('editFieldButton')
+      .at(index)
+      .simulate('click');
+  };
+
+  const clickEditFieldUpdateButton = () => {
+    testBed.find('editFieldUpdateButton').simulate('click');
   };
 
   const completeStepOne = async ({ name, indexPatterns, order, version }: Partial<Template>) => {
@@ -155,6 +168,8 @@ export const formSetup = async (
       clickNextButton,
       clickBackButton,
       clickSubmitButton,
+      clickEditFieldAtButton,
+      clickEditFieldUpdateButton,
       completeStepOne,
       completeStepTwo,
       completeStepThree,
@@ -176,14 +191,18 @@ export type TestSubjects =
   | 'createFieldWrapper.addMultiFieldButton'
   | 'createFieldWrapper.input'
   | 'createFieldWrapper.select'
+  | 'editFieldButton'
+  | 'editFieldUpdateButton'
   | 'fieldsListItem'
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
+  | 'mappingsEditorFieldEdit'
   | 'mockCodeEditor'
   | 'mockComboBox'
   | 'nameField'
   | 'nameField.input'
+  | 'nameParameterInput'
   | 'nextButton'
   | 'orderField'
   | 'orderField.input'
