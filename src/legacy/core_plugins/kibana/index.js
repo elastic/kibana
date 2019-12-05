@@ -23,8 +23,6 @@ import { promisify } from 'util';
 
 import { migrations } from './migrations';
 import manageUuid from './server/lib/manage_uuid';
-import { searchApi } from './server/routes/api/search';
-import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
@@ -328,9 +326,7 @@ export default function (kibana) {
       // uuid
       await manageUuid(server);
       // routes
-      searchApi(server);
       scriptsApi(server);
-      scrollSearchApi(server);
       importApi(server);
       exportApi(server);
       homeApi(server);
