@@ -42,7 +42,7 @@ type RequestOptions = AxiosRequestConfig & {
 export class GithubApi {
   private readonly x = Axios.create({
     headers: {
-      Authorization: `token ${this.token}`,
+      ...(this.token ? { Authorization: `token ${this.token}` } : {}),
       'User-Agent': 'elastic/kibana#failed_test_reporter',
     },
   });
