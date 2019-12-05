@@ -201,8 +201,9 @@ const renderInEditModeAndOpenContextMenu = async (
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
         overlays={{} as any}
+        uiSettings={{} as any}
+        savedObjects={{} as any}
         inspector={inspector}
-        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );
