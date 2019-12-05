@@ -14,6 +14,7 @@ import 'uiExports/visResponseHandlers';
 import 'uiExports/savedObjectTypes';
 
 import React from 'react';
+import { map } from 'rxjs/operators';
 import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
 import { HashRouter, Switch, Route, RouteComponentProps } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
@@ -21,6 +22,7 @@ import { CoreSetup, CoreStart } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { npStart } from 'ui/new_platform';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
+import { BehaviorSubject } from 'rxjs';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
@@ -32,7 +34,7 @@ import {
   datatableVisualizationSetup,
   datatableVisualizationStop,
 } from '../datatable_visualization_plugin';
-import { App } from './app';
+import { App, Props } from './app';
 import {
   LensReportManager,
   setReportManager,
@@ -43,6 +45,11 @@ import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../../common';
 import { KibanaLegacySetup } from '../../../../../../src/plugins/kibana_legacy/public';
 import { Visualization, Datasource } from '../types';
 import { mergeTables } from './merge_tables';
+import { createAppStateManager } from './app_state_manager';
+import { observerComponent } from '../state_manager';
+import { filterUpdater } from './filter_updater';
+import { breadcrumbUpdater } from './breadcrumb_updater';
+import { routeChangeLoader } from './route_change_loader';
 
 export interface LensPluginSetupDependencies {
   kibana_legacy: KibanaLegacySetup;
@@ -88,6 +95,47 @@ export class AppPlugin {
           throw new Error('mounted before start phase');
         }
 
+        // An observable stream that changes on route change
+        const route$ = new BehaviorSubject<{ docId?: string; redirectTo: (id?: string) => void }>({
+          redirectTo() {},
+        });
+
+        const currentRange = startParams.startDeps.data.query.timefilter.timefilter.getTime();
+        const storage = new Storage(localStorage);
+        const docStorage = new SavedObjectIndexStore(startParams.core.savedObjects.client);
+        const stateManager = createAppStateManager({
+          dateRange: { fromDate: currentRange.from, toDate: currentRange.to },
+          language:
+            storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage'),
+        });
+
+        // A list of effects that respond to observable changes.
+        const subscriptions = [
+          filterUpdater({
+            filterManager: startParams.startDeps.data.query.filterManager,
+            setState: stateManager.setState,
+            trackDataEvent: trackUiEvent,
+          }),
+          breadcrumbUpdater({
+            state$: stateManager.state$,
+            http: startParams.core.http,
+            chrome: startParams.core.chrome,
+          }),
+          routeChangeLoader({
+            route$,
+            docStorage,
+            state$: stateManager.state$,
+            setState: stateManager.setState,
+            indexPatternsService: startParams.startDeps.data.indexPatterns.indexPatterns,
+            notifications: startParams.core.notifications,
+          }),
+        ];
+
+        const BoundApp = observerComponent<Omit<Props, 'state'>, Pick<Props, 'state'>>(
+          stateManager.state$.pipe(map(state => ({ state }))),
+          App
+        );
+
         addHelpMenuToAppChrome(context.core.chrome);
 
         setReportManager(
@@ -99,24 +147,29 @@ export class AppPlugin {
 
         const renderEditor = (routeProps: RouteComponentProps<{ id?: string }>) => {
           trackUiEvent('loaded');
+
+          const redirectTo = (id?: string) => {
+            if (!id) {
+              routeProps.history.push('/lens');
+            } else {
+              routeProps.history.push(`/lens/edit/${id}`);
+            }
+          };
+
+          route$.next({ docId: routeProps.match.params.id, redirectTo });
+
           return (
-            <App
+            <BoundApp
+              stateManager={stateManager}
               core={startParams.core}
               data={startParams.startDeps.data}
               visualizationMap={visualizationMap}
               datasourceMap={datasourceMap}
               dataShim={startParams.startDeps.dataShim}
-              storage={new Storage(localStorage)}
-              docId={routeProps.match.params.id}
+              storage={storage}
               ExpressionRenderer={npStart.plugins.expressions.ExpressionRenderer}
-              docStorage={new SavedObjectIndexStore(startParams.core.savedObjects.client)}
-              redirectTo={id => {
-                if (!id) {
-                  routeProps.history.push('/lens');
-                } else {
-                  routeProps.history.push(`/lens/edit/${id}`);
-                }
-              }}
+              docStorage={docStorage}
+              redirectTo={redirectTo}
             />
           );
         };
@@ -138,6 +191,7 @@ export class AppPlugin {
           params.element
         );
         return () => {
+          subscriptions.forEach(s => s.unsubscribe());
           unmountComponentAtNode(params.element);
         };
       },

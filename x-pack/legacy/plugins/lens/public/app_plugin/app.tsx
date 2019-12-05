@@ -5,161 +5,58 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { CoreStart } from 'src/core/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Query, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { NotificationsStart } from 'src/core/public';
 import {
   DataStart,
   IndexPattern as IndexPatternInstance,
   IndexPatterns as IndexPatternsService,
-  SavedQuery,
 } from 'src/legacy/core_plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { ExpressionRenderer } from 'src/plugins/expressions/public';
 import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { Document, SavedObjectStore } from '../persistence';
+import { SavedObjectStore } from '../persistence';
 import { Visualization, Datasource } from '../types';
 import { trackUiEvent } from '../lens_ui_telemetry';
-import { esFilters } from '../../../../../../src/plugins/data/public';
 import { EditorFrame } from '../editor_frame';
-
-interface State {
-  isLoading: boolean;
-  isSaveModalVisible: boolean;
-  indexPatternsForTopNav: IndexPatternInstance[];
-  persistedDoc?: Document;
-  lastKnownDoc?: Document;
-
-  // Properties needed to interface with TopNav
-  dateRange: {
-    fromDate: string;
-    toDate: string;
-  };
-  query: Query;
-  filters: esFilters.Filter[];
-  savedQuery?: SavedQuery;
-}
+import { StateManager } from '../state_manager';
+import { State } from './app_state_manager';
 
 export interface Props {
+  stateManager: StateManager<State>;
+  state: State;
   datasourceMap: Record<string, Datasource>;
   visualizationMap: Record<string, Visualization>;
   data: DataPublicPluginStart;
   core: CoreStart;
   dataShim: DataStart;
   storage: IStorageWrapper;
-  docId?: string;
   docStorage: SavedObjectStore;
   redirectTo: (id?: string) => void;
   ExpressionRenderer: ExpressionRenderer;
 }
 
 export function App({
+  stateManager,
+  state,
   datasourceMap,
   visualizationMap,
   data,
   dataShim,
   core,
   storage,
-  docId,
   docStorage,
   redirectTo,
   ExpressionRenderer: expressionRenderer,
 }: Props) {
-  const language =
-    storage.get('kibana.userQueryLanguage') || core.uiSettings.get('search:queryLanguage');
-
-  const [state, setState] = useState<State>(() => {
-    const currentRange = data.query.timefilter.timefilter.getTime();
-    return {
-      isLoading: !!docId,
-      isSaveModalVisible: false,
-      indexPatternsForTopNav: [],
-      query: { query: '', language },
-      dateRange: {
-        fromDate: currentRange.from,
-        toDate: currentRange.to,
-      },
-      filters: [],
-    };
-  });
-
+  const { setState } = stateManager;
   const { lastKnownDoc } = state;
-
-  useEffect(() => {
-    const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
-      next: () => {
-        setState(s => ({ ...s, filters: data.query.filterManager.getFilters() }));
-        trackUiEvent('app_filters_updated');
-      },
-    });
-    return () => {
-      filterSubscription.unsubscribe();
-    };
-  }, []);
-
-  // Sync Kibana breadcrumbs any time the saved document's title changes
-  const title = state.persistedDoc && state.persistedDoc.title;
-  useEffect(() => {
-    core.chrome.setBreadcrumbs([
-      {
-        href: core.http.basePath.prepend(`/app/kibana#/visualize`),
-        text: i18n.translate('xpack.lens.breadcrumbsTitle', {
-          defaultMessage: 'Visualize',
-        }),
-      },
-      {
-        text: title || i18n.translate('xpack.lens.breadcrumbsCreate', { defaultMessage: 'Create' }),
-      },
-    ]);
-  }, [core, title]);
-
-  useEffect(() => {
-    if (docId && (!state.persistedDoc || state.persistedDoc.id !== docId)) {
-      setState(s => ({ ...s, isLoading: true }));
-      docStorage
-        .load(docId)
-        .then(doc => {
-          getAllIndexPatterns(
-            doc.state.datasourceMetaData.filterableIndexPatterns,
-            dataShim.indexPatterns.indexPatterns,
-            core.notifications
-          )
-            .then(indexPatterns => {
-              setState(s => ({
-                ...s,
-                isLoading: false,
-                persistedDoc: doc,
-                lastKnownDoc: doc,
-                query: doc.state.query,
-                filters: doc.state.filters,
-                indexPatternsForTopNav: indexPatterns,
-              }));
-            })
-            .catch(() => {
-              setState(s => ({ ...s, isLoading: false }));
-
-              redirectTo();
-            });
-        })
-        .catch(() => {
-          setState(s => ({ ...s, isLoading: false }));
-
-          core.notifications.toasts.addDanger(
-            i18n.translate('xpack.lens.app.docLoadingError', {
-              defaultMessage: 'Error loading saved document',
-            })
-          );
-
-          redirectTo();
-        });
-    }
-  }, [docId]);
-
   const isSaveable = lastKnownDoc && core.application.capabilities.visualize.save;
 
   const onError = useCallback(
@@ -330,7 +227,7 @@ export function App({
                     lastKnownDoc: newDoc,
                   }));
 
-                  if (docId !== id) {
+                  if (doc.id !== id) {
                     redirectTo(id);
                   }
                 })
