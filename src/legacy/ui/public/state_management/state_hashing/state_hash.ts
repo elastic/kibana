@@ -18,7 +18,7 @@
  */
 
 import { Sha256 } from '../../../../../core/public/utils';
-import { HashedItemStoreSingleton } from '../state_storage';
+import { hashedItemStore } from '../../../../../plugins/kibana_utils/public';
 
 // This prefix is used to identify hash strings that have been encoded in the URL.
 const HASH_PREFIX = 'h@';
@@ -42,7 +42,7 @@ export function createStateHash(
     shortenedHash = hash.slice(0, i);
     const existingJson = existingJsonProvider
       ? existingJsonProvider(shortenedHash)
-      : HashedItemStoreSingleton.getItem(shortenedHash);
+      : hashedItemStore.getItem(shortenedHash);
     if (existingJson === null || existingJson === json) break;
   }
 
