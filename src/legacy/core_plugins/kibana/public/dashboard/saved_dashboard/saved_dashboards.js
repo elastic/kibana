@@ -29,9 +29,10 @@ const module = uiModules.get('app/dashboard');
 // edited by the object editor.
 savedObjectManagementRegistry.register({
   service: 'savedDashboards',
-  title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
-    defaultMessage: 'dashboards',
-  }),
+  title: 'dashboards',
+//   title: i18n.translate('kbn.dashboard.savedDashboardsTitle', {
+//     defaultMessage: 'dashboards',
+//   }),
 });
 
 // This is the only thing that gets injected into controllers
