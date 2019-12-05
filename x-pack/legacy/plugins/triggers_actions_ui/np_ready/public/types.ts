@@ -3,9 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ActionTypeRegistry } from './application/action_type_registry';
+import { AlertTypeRegistry } from './application/alert_type_registry';
 
 export type ActionTypeIndex = Record<string, ActionType>;
 export type AlertTypeIndex = Record<string, AlertType>;
+export type ActionTypeRegistryContract = PublicMethodsOf<ActionTypeRegistry>;
+export type AlertTypeRegistryContract = PublicMethodsOf<AlertTypeRegistry>;
 
 export interface ActionConnectorFieldsProps {
   action: ActionConnector;
