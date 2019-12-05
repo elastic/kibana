@@ -116,7 +116,9 @@ export class LogRotator {
       const usePollingTest$ = new Observable<boolean>(observer => {
         // observable complete function
         const completeFn = (completeStatus: boolean) => {
-          clearTimeout(this.stalkerUsePollingPolicyTestTimeout as NodeJS.Timeout);
+          if (this.stalkerUsePollingPolicyTestTimeout) {
+            clearTimeout(this.stalkerUsePollingPolicyTestTimeout);
+          }
           testWatcher.close();
 
           observer.next(completeStatus);
@@ -197,7 +199,10 @@ export class LogRotator {
     }
 
     this.stalker.close();
-    clearTimeout(this.stalkerUsePollingPolicyTestTimeout as NodeJS.Timeout);
+
+    if (this.stalkerUsePollingPolicyTestTimeout) {
+      clearTimeout(this.stalkerUsePollingPolicyTestTimeout);
+    }
   }
 
   _createExitListener() {
