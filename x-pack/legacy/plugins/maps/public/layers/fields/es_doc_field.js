@@ -34,24 +34,24 @@ export class ESDocField extends AbstractField {
   async getFieldMetaRequest(/* config */) {
     const field = await this._getField();
 
-    if (field.type === 'number' || field.type === 'date') {
-      const extendedStats = {};
-      if (field.scripted) {
-        extendedStats.script = {
-          source: field.script,
-          lang: field.lang
-        };
-      } else {
-        extendedStats.field = this._fieldName;
-      }
-      return {
-        [this._fieldName]: {
-          extended_stats: extendedStats
-        }
-      };
+    if (field.type !== 'number' && field.type !== 'date') {
+      return null;
     }
 
-    return null;
+    const extendedStats = {};
+    if (field.scripted) {
+      extendedStats.script = {
+        source: field.script,
+        lang: field.lang
+      };
+    } else {
+      extendedStats.field = this._fieldName;
+    }
+    return {
+      [this._fieldName]: {
+        extended_stats: extendedStats
+      }
+    };
   }
 
 }

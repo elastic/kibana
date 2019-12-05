@@ -77,9 +77,7 @@ export class StylePropertyLegendRow extends Component {
       return value;
     }
 
-    return this.props.style.isFieldMetaEnabled()
-      ? `${prefix} ${this._fieldValueFormatter(value)}`
-      : this._fieldValueFormatter(value);
+    return this.props.style.isFieldMetaEnabled() ? `${prefix} ${this._fieldValueFormatter(value)}` : this._fieldValueFormatter(value);
   }
 
   render() {

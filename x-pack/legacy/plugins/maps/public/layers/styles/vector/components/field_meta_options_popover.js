@@ -55,20 +55,16 @@ export class FieldMetaOptionsPopover extends Component {
     });
   }
 
-  _getFieldMetaOptions = () => {
-    return this.props.styleProperty.getFieldMetaOptions();
-  }
-
   _onIsEnabledChange = event => {
     this.props.onChange({
-      ...this._getFieldMetaOptions(),
+      ...this.props.styleProperty.getFieldMetaOptions(),
       isEnabled: event.target.checked,
     });
   };
 
   _onSigmaChange = event => {
     this.props.onChange({
-      ...this._getFieldMetaOptions(),
+      ...this.props.styleProperty.getFieldMetaOptions(),
       sigma: event.target.value,
     });
   }
@@ -94,7 +90,7 @@ export class FieldMetaOptionsPopover extends Component {
         >
           <EuiSwitch
             label={getIsEnableToggleLabel(this.props.styleProperty.getStyleName())}
-            checked={this._getFieldMetaOptions().isEnabled}
+            checked={this.props.styleProperty.getFieldMetaOptions().isEnabled}
             onChange={this._onIsEnabledChange}
             compressed
           />
@@ -110,9 +106,9 @@ export class FieldMetaOptionsPopover extends Component {
             min={1}
             max={5}
             step={0.25}
-            value={this._getFieldMetaOptions().sigma}
+            value={this.props.styleProperty.getFieldMetaOptions().sigma}
             onChange={this._onSigmaChange}
-            disabled={!this._getFieldMetaOptions().isEnabled}
+            disabled={!this.props.styleProperty.getFieldMetaOptions().isEnabled}
             showTicks
             tickInterval={1}
             compressed

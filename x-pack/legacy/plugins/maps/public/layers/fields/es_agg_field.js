@@ -4,14 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { AbstractField } from './field';
-import { COUNT_AGG_TYPE, METRIC_TYPE } from '../../../common/constants';
+import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
-
-function isMetricCountable(aggType) {
-  return [METRIC_TYPE.COUNT, METRIC_TYPE.SUM, METRIC_TYPE.UNIQUE_COUNT].includes(aggType);
-}
 
 export class ESAggMetricField extends AbstractField {
 
