@@ -12,6 +12,7 @@ import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
 import { installTemplates } from '../lib/elasticsearch/template/install';
 import * as Registry from '../registry';
+import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -22,6 +23,9 @@ export async function createDatasource(options: {
   const toSave = await installPipelines({ pkgkey, callCluster });
   // TODO: Clean up
   const info = await Registry.fetchInfo(pkgkey);
+
+  // TODO: This should be moved out of the initial data source creation in the end
+  await baseSetup(callCluster);
   await installTemplates(info, callCluster);
 
   await saveDatasourceReferences({
@@ -31,6 +35,19 @@ export async function createDatasource(options: {
   });
 
   return toSave;
+}
+
+/**
+ * Makes the basic setup of the assets like global ILM policies. Creates them if they do
+ * not exist yet but will not overwrite existing once.
+ */
+async function baseSetup(callCluster: CallESAsCurrentUser) {
+  if (!(await policyExists('logs-default', callCluster))) {
+    await installILMPolicy('logs-default', callCluster);
+  }
+  if (!(await policyExists('metrics-default', callCluster))) {
+    await installILMPolicy('metrics-default', callCluster);
+  }
 }
 
 export async function saveDatasourceReferences(options: {
