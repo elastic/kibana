@@ -14,5 +14,5 @@ test('getBaseName', () => {
     type: 'logs',
   } as Dataset;
   const name = getDatasetAssetBaseName(dataset);
-  expect(name).toStrictEqual('logs-default-bar-foo');
+  expect(name).toStrictEqual('logs-default-foo-bar');
 });
