@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useUrlParams } from '../../hooks';
+import { useUrlParams } from '../../../hooks';
 
 interface OverviewPageLinkProps {
   dataTestSubj: string;
@@ -23,7 +23,6 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
   const [, updateUrlParams] = useUrlParams();
   const icon = direction === 'prev' ? 'arrowLeft' : 'arrowRight';
 
-  const color = pagination ? 'primary' : 'ghost';
   const ariaLabel =
     direction === 'next'
       ? i18n.translate('xpack.uptime.overviewPageLink.next.ariaLabel', {
@@ -33,25 +32,21 @@ export const OverviewPageLink: FunctionComponent<OverviewPageLinkProps> = ({
           defaultMessage: 'Prev page of results',
         });
 
-  return !!pagination ? (
-    <EuiLink
-      aria-label={ariaLabel}
-      data-test-subj={dataTestSubj}
+  const disableLinkLabel = i18n.translate('xpack.uptime.overviewPageLink.disabled.ariaLabel', {
+    defaultMessage:
+      'A disabled pagination button indicating that there cannot be any further navigation in the monitors list.',
+  });
+
+  return (
+    <EuiButtonIcon
+      color={'text'}
       onClick={() => {
         updateUrlParams({ pagination });
       }}
-    >
-      <EuiIcon type={icon} color={color} />
-    </EuiLink>
-  ) : (
-    <EuiButtonIcon
-      aria-label={i18n.translate('xpack.uptime.overviewPageLink.disabled.ariaLabel', {
-        defaultMessage:
-          'A disabled pagination button indicating that there cannot be any further navigation in the monitors list.',
-      })}
-      color={color}
-      disabled={true}
+      data-test-subj={dataTestSubj}
       iconType={icon}
+      aria-label={!pagination ? disableLinkLabel : ariaLabel}
+      disabled={!pagination}
     />
   );
 };
