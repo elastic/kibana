@@ -14,6 +14,7 @@ import { KibanaTilemapSource } from './kibana_tilemap_source';
 import { ESGeoGridSource } from './es_geo_grid_source';
 import { ESSearchSource } from './es_search_source';
 import { ESPewPewSource } from './es_pew_pew_source/es_pew_pew_source';
+import {TiledVectorSource} from "./tiled_vector_source";
 
 export const ALL_SOURCES = [
   GeojsonFileSource,
@@ -26,4 +27,5 @@ export const ALL_SOURCES = [
   KibanaTilemapSource,
   XYZTMSSource,
   WMSSource,
+  TiledVectorSource
 ];
