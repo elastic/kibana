@@ -24,8 +24,8 @@ You'll provide the web developer with the access and privileges to get the job d
 
 To complete this tutorial, you'll need the following:
 
-*  You must have a role that grants privileges to create a space, role, and user. See the {ref}/built-in-roles.html[built-in] roles.
-*  A **space**: In this tutorial use `Dev Mortgage` as the space 
+*  **Administrative privileges**: You must have a role that grants privileges to create a space, role, and user. See the {ref}/built-in-roles.html[built-in] roles.
+*  **A space**: In this tutorial, use `Dev Mortgage` as the space 
 name. See <<spaces-managing, view, create, and delete spaces>> for 
 details on creating a space.
 *  **Data**:  You can use <<tutorial-sample-data, sample data>> or 
@@ -63,10 +63,10 @@ working on the bank's mortgage application.
 
 Stack monitoring is an important feature for system admins and developers.  
 Both of these groups use stack monitoring to look at 
-performance.  Developers also use stack monitoring to evaluate and tune ingest pipelines.  For more information on stack monitoring see the https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-overview.html[monitoring overview].
+performance.  Developers also use stack monitoring to evaluate and tune ingest pipelines.  For more information on stack monitoring, see the https://www.elastic.co/guide/en/elasticsearch/reference/current/monitoring-overview.html[monitoring overview].
 
 Stack monitoring is a cluster level privilege, so in *Cluster 
-privileges*, select  **monitor**
+privileges*, select  **monitor**.
 
 [role="screenshot"]
 image::security/images/role-monitor-privilege.png["Monitor privilege"]
@@ -76,9 +76,10 @@ image::security/images/role-monitor-privilege.png["Monitor privilege"]
 
 Access to data in indices is an index-level privilege, so in 
 *Index privileges*, add lines for the indices that contain the 
-data for this role.  Two privileges needed: `read` and 
+data for this role.  Two privileges are required: `read` and 
 `view_index_metadata`.  All privileges are detailed in the 
 https://www.elastic.co/guide/en/elasticsearch/reference/current/security-privileges.html[security privileges] documentation.
+
 In the screenshots, Filebeat and Metricbeat data is used, but you 
 should use the index patterns for your indices.
 
