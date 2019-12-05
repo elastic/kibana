@@ -28,9 +28,9 @@ export async function createDatasource(options: {
   callCluster: CallESAsCurrentUser;
 }) {
   const { savedObjectsClient, pkgkey, callCluster } = options;
-  const info = await getPackageInfo({ savedObjectsClient, pkgkey });
+  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
 
-  if (info.status !== InstallationStatus.installed) {
+  if (packageInfo.status !== InstallationStatus.installed) {
     throw new PackageNotInstalledError(pkgkey);
   }
 
