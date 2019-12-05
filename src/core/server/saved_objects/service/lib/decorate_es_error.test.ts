@@ -29,7 +29,10 @@ describe('savedObjectsClient/decorateEsError', () => {
   });
 
   it('makes es.ConnectionFault a SavedObjectsClient/EsUnavailable error', () => {
-    throw new Error('force failure');
+    const error = new esErrors.ConnectionFault();
+    expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
+    expect(decorateEsError(error)).toBe(error);
+    expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
   });
 
   it('makes es.ServiceUnavailable a SavedObjectsClient/EsUnavailable error', () => {

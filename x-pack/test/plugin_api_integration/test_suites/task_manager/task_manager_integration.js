@@ -109,7 +109,16 @@ export default function ({ getService }) {
     });
 
     it('should remove non-recurring tasks after they complete', async () => {
-      throw new Error('force failure');
+      await scheduleTask({
+        taskType: 'sampleTask',
+        params: { },
+      });
+
+      await retry.try(async () => {
+        const history = await historyDocs();
+        expect(history.length).to.eql(1);
+        expect((await currentTasks()).docs).to.eql([]);
+      });
     });
 
     it('should use a given ID as the task document ID', async () => {

@@ -25,9 +25,11 @@ export default function ({ getService }) {
     before(() => esArchiver.load('elasticsearch'));
     after(() => esArchiver.unload('elasticsearch'));
 
-    it('allows search to specific index', async () => {
-      throw new Error('force failure');
-    });
+    it('allows search to specific index', async () => (
+      await supertest
+        .post('/elasticsearch/elasticsearch/_search')
+        .expect(200)
+    ));
 
     it('allows msearch', async () => (
       await supertest
