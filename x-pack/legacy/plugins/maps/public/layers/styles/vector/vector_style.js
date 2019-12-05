@@ -321,8 +321,8 @@ export class VectorStyle extends AbstractStyle {
           const stats = data[realFieldName];
           if (stats) {
             const sigma = _.get(dynamicProp.getFieldMetaOptions(), 'sigma', 3);
-            const stdUpperBounds = (stats.std_deviation * sigma) + stats.avg;
-            const stdLowerBounds = (stats.std_deviation * sigma * -1) + stats.avg;
+            const stdLowerBounds = stats.avg - (stats.std_deviation * sigma);
+            const stdUpperBounds = stats.avg + (stats.std_deviation * sigma);
             const min = Math.max(stats.min, stdLowerBounds);
             const max = Math.min(stats.max, stdUpperBounds);
             return {
