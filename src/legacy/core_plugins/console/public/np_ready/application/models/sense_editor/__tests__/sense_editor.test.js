@@ -20,14 +20,10 @@ import '../sense_editor.test.mocks';
 
 import $ from 'jquery';
 import _ from 'lodash';
-import ace from 'brace';
-import 'brace/mode/json';
 
 import { create } from '../create';
 const editorInput1 = require('./editor_input1.txt');
 const utils = require('../../../../lib/utils/utils');
-
-const aceRange = ace.acequire('ace/range');
 
 describe('Editor', () => {
   let input;
@@ -55,12 +51,8 @@ describe('Editor', () => {
   let testCount = 0;
 
   const callWithEditorMethod = (editorMethod, fn) => async (done) => {
-    try {
-      const results = await input[editorMethod]();
-      fn(results, done);
-    } catch {
-      done();
-    }
+    const results = await input[editorMethod]();
+    fn(results, done);
   };
 
   function utilsTest(name, prefix, data, testToRun) {
@@ -126,8 +118,7 @@ describe('Editor', () => {
     simpleRequest.prefix,
     simpleRequest.data,
     callWithEditorMethod('getRequestRange', (range, done) => {
-      const expected = new aceRange.Range(0, 0, 3, 1);
-      compareRequest(range, expected);
+      compareRequest(range, { start: { lineNumber: 1, column: 1 }, end: { lineNumber: 4, column: 2 } });
       done();
     })
   );
@@ -152,8 +143,10 @@ describe('Editor', () => {
     '   ' + simpleRequest.prefix,
     simpleRequest.data,
     callWithEditorMethod('getRequestRange', (range, done) => {
-      const expected = new aceRange.Range(0, 0, 3, 1);
-      expect(range).toEqual(expected);
+      expect(range).toEqual({
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 4, column: 2 }
+      });
       done();
     })
   );
@@ -180,8 +173,10 @@ describe('Editor', () => {
     simpleRequest.prefix + '   ',
     simpleRequest.data + '  ',
     callWithEditorMethod('getRequestRange', (range, done) => {
-      const expected = new aceRange.Range(0, 0, 3, 1);
-      compareRequest(range, expected);
+      compareRequest(range, {
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 4, column: 2 }
+      });
       done();
     })
   );
@@ -208,8 +203,10 @@ describe('Editor', () => {
     singleLineRequest.prefix,
     singleLineRequest.data,
     callWithEditorMethod('getRequestRange', (range, done) => {
-      const expected = new aceRange.Range(0, 0, 1, 32);
-      compareRequest(range, expected);
+      compareRequest(range, {
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 2, column: 33 }
+      });
       done();
     })
   );
@@ -234,8 +231,10 @@ describe('Editor', () => {
     getRequestNoData.prefix,
     '\n',
     callWithEditorMethod('getRequestRange', (range, done) => {
-      const expected = new aceRange.Range(0, 0, 0, 10);
-      compareRequest(range, expected);
+      compareRequest(range, {
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 1, column: 11 },
+      });
       done();
     })
   );
@@ -260,8 +259,10 @@ describe('Editor', () => {
     getRequestNoData.prefix,
     getRequestNoData.data,
     callWithEditorMethod('getRequestRange', (range, done) => {
-      const expected = new aceRange.Range(0, 0, 0, 10);
-      expect(range).toEqual(expected);
+      expect(range).toEqual({
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 1, column: 11 },
+      });
       done();
     })
   );
@@ -286,8 +287,10 @@ describe('Editor', () => {
     multiDocRequest.prefix,
     multiDocRequest.data,
     callWithEditorMethod('getRequestRange', (range, done) => {
-      const expected = new aceRange.Range(0, 0, 2, 14);
-      expect(range).toEqual(expected);
+      expect(range).toEqual({
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 3, column: 15 },
+      });
       done();
     })
   );
@@ -323,8 +326,10 @@ describe('Editor', () => {
     scriptRequest.prefix,
     scriptRequest.data,
     callWithEditorMethod('getRequestRange', (range, done) => {
-      const expected = new aceRange.Range(0, 0, 5, 1);
-      compareRequest(range, expected);
+      compareRequest(range, {
+        start: { lineNumber: 1, column: 1 },
+        end: { lineNumber: 6, column: 2 },
+      });
       done();
     })
   );

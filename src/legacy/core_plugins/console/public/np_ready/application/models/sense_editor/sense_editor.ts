@@ -130,14 +130,14 @@ export class SenseEditor {
     }
   };
 
-  getRequestRange = async (row?: number): Promise<Range | null> => {
+  getRequestRange = async (lineNumber?: number): Promise<Range | null> => {
     await this.coreEditor.waitForLatestTokens();
 
-    if (this.parser.isInBetweenRequestsRow(row)) {
+    if (this.parser.isInBetweenRequestsRow(lineNumber)) {
       return null;
     }
 
-    const reqStart = this.prevRequestStart(row);
+    const reqStart = this.prevRequestStart(lineNumber);
     const reqEnd = this.nextRequestEnd(reqStart);
 
     return {
@@ -260,8 +260,7 @@ export class SenseEditor {
       // if the url row ends with some spaces, skip them.
       t = this.parser.nextNonEmptyToken(tokenIter);
     }
-
-    let bodyStartLineNumber = (t ? 0 : 1) + tokenIter.getCurrentTokenLineNumber()!; // artificially increase end of docs.
+    let bodyStartLineNumber = (t ? 0 : 1) + tokenIter.getCurrentPosition().lineNumber; // artificially increase end of docs.
     let dataEndPos: Position;
     while (
       bodyStartLineNumber < range.end.lineNumber ||
@@ -391,7 +390,7 @@ export class SenseEditor {
     pos = pos || this.coreEditor.getCurrentPosition();
     const maxLines = this.coreEditor.getLineCount();
     let curLineNumber = pos.lineNumber;
-    for (; curLineNumber < maxLines - 1; curLineNumber++) {
+    for (; curLineNumber <= maxLines; ++curLineNumber) {
       const curRowMode = this.parser.getRowParseMode(curLineNumber);
       // eslint-disable-next-line no-bitwise
       if ((curRowMode & this.parser.MODE.REQUEST_END) > 0) {

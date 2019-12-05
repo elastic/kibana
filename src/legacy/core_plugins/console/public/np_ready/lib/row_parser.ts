@@ -55,7 +55,7 @@ export default class RowParser {
     if (line.indexOf('}', line.length - 1) >= 0) {
       // check for a multi doc request (must start a new json doc immediately after this one end.
       lineNumber++;
-      if (lineNumber < linesCount) {
+      if (lineNumber < linesCount + 1) {
         line = (this.editor.getLineValue(lineNumber) || '').trim();
         if (line.indexOf('{') === 0) {
           // next line is another doc in a multi doc
@@ -69,7 +69,7 @@ export default class RowParser {
 
     // check for single line requests
     lineNumber++;
-    if (lineNumber >= linesCount) {
+    if (lineNumber >= linesCount + 1) {
       // eslint-disable-next-line no-bitwise
       return MODE.REQUEST_START | MODE.REQUEST_END;
     }
@@ -135,7 +135,9 @@ export default class RowParser {
 
   nextNonEmptyToken(tokenIter: TokenIterator) {
     let t = tokenIter.stepForward();
-    while (t && this.isEmptyToken(t)) t = tokenIter.stepForward();
+    while (t && this.isEmptyToken(t)) {
+      t = tokenIter.stepForward();
+    }
     return t;
   }
 
