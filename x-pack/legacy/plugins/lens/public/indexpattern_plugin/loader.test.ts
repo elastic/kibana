@@ -528,7 +528,7 @@ describe('loader', () => {
 
       await syncExistingFields({
         dateRange: { fromDate: '1900-01-01', toDate: '2000-01-01' },
-        fetchJson,
+        fetchJson as any,
         indexPatterns: [{ title: 'a' }, { title: 'b' }, { title: 'c' }],
         setState,
       });
