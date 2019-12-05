@@ -5,6 +5,13 @@
  */
 
 import { Vector2, CameraState, CameraStateWhenPanning, AABB } from '../../types';
+import { subtract, divide, add, applyMatrix3 } from '../../lib/vector2';
+import { multiply, add as addMatrix } from '../../lib/matrix3';
+import {
+  inverseOrthographicProjection,
+  scalingTransformation,
+  translationTransformation,
+} from '../../lib/transformation';
 
 interface RasterCameraProperties {
   renderWidth: number;
@@ -72,18 +79,18 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
 
 export function translation(state: CameraState): Vector2 {
   if (userIsPanning(state)) {
-    const panningDeltaX = state.currentPanningOffset[0] - state.panningOrigin[0];
-    const panningDeltaY = state.currentPanningOffset[1] - state.panningOrigin[1];
-    return [
-      state.translationNotCountingCurrentPanning[0] + panningDeltaX / state.scaling[0],
-      state.translationNotCountingCurrentPanning[1] + panningDeltaY / state.scaling[1],
-    ];
+    return add(
+      state.translationNotCountingCurrentPanning,
+      divide(subtract(state.currentPanningOffset, state.panningOrigin), state.scaling)
+    );
   } else {
     return state.translationNotCountingCurrentPanning;
   }
 }
 
-export const rasterToWorld: (state: CameraState) => (worldPosition: Vector2) => Vector2 = state => {
+export const rasterToWorld: (
+  state: CameraState
+) => (rasterPosition: Vector2) => Vector2 = state => {
   const {
     renderWidth,
     renderHeight,
@@ -92,23 +99,44 @@ export const rasterToWorld: (state: CameraState) => (worldPosition: Vector2) => 
     clippingPlaneLeft,
     clippingPlaneBottom,
   } = rasterCameraProperties(state);
+  const [translationX, translationY] = translation(state);
 
-  return ([rasterX, rasterY]) => {
-    const [translationX, translationY] = translation(state);
+  // Translate for the 'camera'
+  // prettier-ignore
+  const translationMatrix = [
+    0, 0, -translationX,
+    0, 0, -translationY,
+    0, 0, 0
+  ] as const;
 
-    // raster to ndc
-    const ndcX = (rasterX / renderWidth) * 2 - 1;
-    const ndcY = -1 * ((rasterY / renderHeight) * 2 - 1);
+  // TODO, define screen, raster, and world coordinates
 
-    const [panningTranslatedX, panningTranslatedY] = inverseOrthographicProjection(
-      ndcX,
-      ndcY,
-      clippingPlaneTop,
-      clippingPlaneRight,
-      clippingPlaneBottom,
-      clippingPlaneLeft
-    );
-    return [panningTranslatedX - translationX, panningTranslatedY - translationY];
+  // Convert a vector in screen space to NDC space
+  const screenToNDC = multiply(
+    scalingTransformation([1, -1, 1]),
+    // prettier-ignore
+    [
+      2 / renderWidth,  0, -1,
+      2 / renderHeight, 0, -1,
+      0,                0,  0
+    ] as const
+  );
+
+  const projection = addMatrix(
+    multiply(
+      inverseOrthographicProjection(
+        clippingPlaneTop,
+        clippingPlaneRight,
+        clippingPlaneBottom,
+        clippingPlaneLeft
+      ),
+      screenToNDC
+    ),
+    translationMatrix
+  );
+
+  return rasterPosition => {
+    return applyMatrix3(rasterPosition, projection);
   };
 };
 
@@ -136,26 +164,6 @@ function orthographicProjection(
 
   const m22 = 2 / (top - bottom); // adjust y scale to match ndc (-1, 1) bounds
   const m42 = -((top + bottom) / (top - bottom));
-
-  const xPrime = x * m11 + m41;
-  const yPrime = y * m22 + m42;
-
-  return [xPrime, yPrime];
-}
-
-function inverseOrthographicProjection(
-  x: number,
-  y: number,
-  top: number,
-  right: number,
-  bottom: number,
-  left: number
-): [number, number] {
-  const m11 = (right - left) / 2;
-  const m41 = (right + left) / (right - left);
-
-  const m22 = (top - bottom) / 2;
-  const m42 = (top + bottom) / (top - bottom);
 
   const xPrime = x * m11 + m41;
   const yPrime = y * m22 + m42;
