@@ -6,14 +6,13 @@
 
 import expect from '@kbn/expect';
 import { docCountQueryString } from '../../../../legacy/plugins/uptime/public/queries';
-import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PINGS_DATE_RANGE_END, PINGS_DATE_RANGE_START } from './constants';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
 
   const expect404 = (result: any) => {
     expect(result.error).to.be(undefined);

@@ -62,7 +62,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     this.loadFields(this.state.indexPatternId);
   }
 
-  componentWillReceiveProps(nextProps: FieldSelectUiProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: FieldSelectUiProps) {
     if (this.props.indexPatternId !== nextProps.indexPatternId) {
       this.loadFields(nextProps.indexPatternId ?? '');
     }
@@ -104,7 +104,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
 
     const fieldsByTypeMap = new Map<string, string[]>();
     const fields: Array<EuiComboBoxOptionProps<string>> = [];
-    indexPattern.fields.filter(this.props.filterField ?? (() => true)).forEach(field => {
+    indexPattern.fields.filter(this.props.filterField ?? (() => true)).forEach((field: Field) => {
       const fieldsList = fieldsByTypeMap.get(field.type) ?? [];
       fieldsList.push(field.name);
       fieldsByTypeMap.set(field.type, fieldsList);

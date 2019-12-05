@@ -24,7 +24,7 @@ import { Required } from '@kbn/utility-types';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
-import { getIndexPatternTitle } from '../../index_patterns/lib';
+import { getTitle } from '../../index_patterns/lib';
 
 export type IndexPatternSelectProps = Required<
   EuiComboBoxProps<any>,
@@ -91,7 +91,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
-  componentWillReceiveProps(nextProps: IndexPatternSelectProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectProps) {
     if (nextProps.indexPatternId !== this.props.indexPatternId) {
       this.fetchSelectedIndexPattern(nextProps.indexPatternId);
     }
@@ -107,7 +107,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
     let indexPatternTitle;
     try {
-      indexPatternTitle = await getIndexPatternTitle(this.props.savedObjectsClient, indexPatternId);
+      indexPatternTitle = await getTitle(this.props.savedObjectsClient, indexPatternId);
     } catch (err) {
       // index pattern no longer exists
       return;

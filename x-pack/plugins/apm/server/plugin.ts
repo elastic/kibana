@@ -29,7 +29,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
     this.legacySetup$ = new AsyncSubject();
   }
 
-  public setup(
+  public async setup(
     core: CoreSetup,
     plugins: {
       apm_oss: APMOSSPlugin extends Plugin<infer TSetup> ? TSetup : never;
@@ -46,14 +46,17 @@ export class APMPlugin implements Plugin<APMPluginContract> {
       createApmApi().init(core, { config$: mergedConfig$, logger, __LEGACY });
     });
 
-    combineLatest(mergedConfig$, core.elasticsearch.dataClient$).subscribe(
-      ([config, dataClient]) => {
-        createApmAgentConfigurationIndex({
-          esClient: dataClient,
-          config,
-        });
-      }
-    );
+    await new Promise(resolve => {
+      combineLatest(mergedConfig$, core.elasticsearch.dataClient$).subscribe(
+        async ([config, dataClient]) => {
+          await createApmAgentConfigurationIndex({
+            esClient: dataClient,
+            config,
+          });
+          resolve();
+        }
+      );
+    });
 
     return {
       config$: mergedConfig$,
