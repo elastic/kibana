@@ -153,6 +153,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                     options: isMultiField
                       ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
                       : FIELD_TYPES_OPTIONS,
+                    'data-test-subj': 'fieldTypeSelect',
                   },
                 }}
               />

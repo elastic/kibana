@@ -150,8 +150,8 @@ export const formSetup = async (
   const addMappingField = async (name: string, type: string) => {
     const { find, form, component } = testBed;
 
-    form.setInputValue('createFieldWrapper.input', name);
-    form.setInputValue('createFieldWrapper.select', type);
+    form.setInputValue('nameParameterInput', name);
+    form.setInputValue('fieldTypeSelect', type);
 
     await nextTick();
     component.update();
@@ -189,11 +189,10 @@ export type TestSubjects =
   | 'createFieldWrapper.addButton'
   | 'createFieldWrapper.addFieldButton'
   | 'createFieldWrapper.addMultiFieldButton'
-  | 'createFieldWrapper.input'
-  | 'createFieldWrapper.select'
   | 'editFieldButton'
   | 'editFieldUpdateButton'
   | 'fieldsListItem'
+  | 'fieldTypeSelect'
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
