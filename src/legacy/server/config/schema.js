@@ -20,9 +20,8 @@
 import Joi from 'joi';
 import os from 'os';
 
-import {
-  fromRoot
-} from '../../../core/server/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import {
   DEFAULT_CSP_RULES,
   DEFAULT_CSP_STRICT,
