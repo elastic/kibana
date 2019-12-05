@@ -37,10 +37,12 @@ import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
 
 import {
-  createStateHash,
   HashedItemStoreSingleton,
-  isStateHash,
 } from './state_storage';
+import {
+  createStateHash,
+  isStateHash
+} from './state_hashing';
 
 export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
@@ -293,9 +295,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
 
     // We need to strip out Angular-specific properties.
     const json = angular.toJson(state);
-    const hash = createStateHash(json, hash => {
-      return this._hashedItemStore.getItem(hash);
-    });
+    const hash = createStateHash(json);
     const isItemSet = this._hashedItemStore.setItem(hash, json);
 
     if (isItemSet) {

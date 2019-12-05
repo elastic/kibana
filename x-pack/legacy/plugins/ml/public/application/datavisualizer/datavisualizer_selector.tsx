@@ -113,7 +113,11 @@ export const DatavisualizerSelector: FC = () => {
                   />
                 }
                 footer={
-                  <EuiButton target="_self" href="#/filedatavisualizer">
+                  <EuiButton
+                    target="_self"
+                    href="#/filedatavisualizer"
+                    data-test-subj="mlDataVisualizerUploadFileButton"
+                  >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
                       defaultMessage="Upload file"
@@ -139,7 +143,11 @@ export const DatavisualizerSelector: FC = () => {
                   />
                 }
                 footer={
-                  <EuiButton target="_self" href="#datavisualizer_index_select">
+                  <EuiButton
+                    target="_self"
+                    href="#datavisualizer_index_select"
+                    data-test-subj="mlDataVisualizerSelectIndexButton"
+                  >
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.selectIndexButtonLabel"
                       defaultMessage="Select index"
