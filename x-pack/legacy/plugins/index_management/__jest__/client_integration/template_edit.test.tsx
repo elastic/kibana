@@ -9,15 +9,12 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
 import * as fixtures from '../../test/fixtures';
-import { TEMPLATE_NAME, SETTINGS, ALIASES } from './helpers/constants';
+import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './helpers/constants';
 
 const UPDATED_INDEX_PATTERN = ['updatedIndexPattern'];
 const UPDATED_MAPPING_TEXT_FIELD_NAME = 'updated_text_datatype';
 const MAPPING = {
-  dynamic: true,
-  date_detection: true,
-  numeric_detection: true,
-  dynamic_date_formats: [],
+  ...DEFAULT_MAPPING,
   properties: {
     text_datatype: {
       type: 'text',

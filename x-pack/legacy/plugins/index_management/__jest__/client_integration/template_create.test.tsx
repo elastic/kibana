@@ -157,6 +157,23 @@ describe('<TemplateCreate />', () => {
 
           expect(find('fieldsListItem').length).toBe(3);
         });
+
+        it('should allow the user to remove a document field from a mapping', async () => {
+          const { actions, find } = testBed;
+
+          await act(async () => {
+            await actions.addMappingField('field_1', 'text');
+            await actions.addMappingField('field_2', 'text');
+          });
+
+          expect(find('fieldsListItem').length).toBe(2);
+
+          actions.clickCancelCreateFieldButton();
+          // Remove first field
+          actions.clickRemoveFieldAtButton(0);
+
+          expect(find('fieldsListItem').length).toBe(1);
+        });
       });
 
       describe('aliases (step 4)', () => {

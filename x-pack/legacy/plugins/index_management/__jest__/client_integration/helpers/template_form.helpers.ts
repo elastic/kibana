@@ -20,6 +20,8 @@ export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
     clickSubmitButton: () => void;
     clickEditFieldAtButton: (index: number) => void;
     clickEditFieldUpdateButton: () => void;
+    clickRemoveFieldAtButton: (index: number) => void;
+    clickCancelCreateFieldButton: () => void;
     completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
     completeStepTwo: (settings: string) => void;
     completeStepThree: (mappingFields?: MappingField[]) => void;
@@ -56,6 +58,17 @@ export const formSetup = async (
 
   const clickEditFieldUpdateButton = () => {
     testBed.find('editFieldUpdateButton').simulate('click');
+  };
+
+  const clickRemoveFieldAtButton = (index: number) => {
+    testBed
+      .find('removeFieldButton')
+      .at(index)
+      .simulate('click');
+  };
+
+  const clickCancelCreateFieldButton = () => {
+    testBed.find('createFieldWrapper.cancelButton').simulate('click');
   };
 
   const completeStepOne = async ({ name, indexPatterns, order, version }: Partial<Template>) => {
@@ -170,6 +183,8 @@ export const formSetup = async (
       clickSubmitButton,
       clickEditFieldAtButton,
       clickEditFieldUpdateButton,
+      clickRemoveFieldAtButton,
+      clickCancelCreateFieldButton,
       completeStepOne,
       completeStepTwo,
       completeStepThree,
@@ -189,6 +204,7 @@ export type TestSubjects =
   | 'createFieldWrapper.addButton'
   | 'createFieldWrapper.addFieldButton'
   | 'createFieldWrapper.addMultiFieldButton'
+  | 'createFieldWrapper.cancelButton'
   | 'editFieldButton'
   | 'editFieldUpdateButton'
   | 'fieldsListItem'
@@ -206,6 +222,7 @@ export type TestSubjects =
   | 'orderField'
   | 'orderField.input'
   | 'pageTitle'
+  | 'removeFieldButton'
   | 'requestTab'
   | 'saveTemplateError'
   | 'settingsEditor'

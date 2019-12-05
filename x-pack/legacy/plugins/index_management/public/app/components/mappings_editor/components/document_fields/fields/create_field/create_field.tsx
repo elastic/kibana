@@ -190,7 +190,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {isCancelable !== false && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={cancel}>
+          <EuiButtonEmpty onClick={cancel} data-test-subj="cancelButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.createFieldCancelButtonLabel', {
               defaultMessage: 'Cancel',
             })}
