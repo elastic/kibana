@@ -17,4 +17,31 @@
  * under the License.
  */
 
-export * from './search_service';
+import { Plugin, CoreSetup, CoreStart } from '../../../../../core/public';
+import { SearchSource } from './search_source';
+
+export interface SearchSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+export interface SearchStart {
+  SearchSource: typeof SearchSource;
+}
+
+/**
+ * The contract provided here is a new platform shim for ui/courier.
+ *
+ * Once it has been refactored to work with new platform services,
+ * it will move into the existing search service in src/plugins/data/public/search
+ */
+export class SearchService implements Plugin<SearchSetup, SearchStart> {
+  public setup(core: CoreSetup): SearchSetup {
+    return {};
+  }
+
+  public start(core: CoreStart): SearchStart {
+    return {
+      SearchSource,
+    };
+  }
+
+  public stop() {}
+}
