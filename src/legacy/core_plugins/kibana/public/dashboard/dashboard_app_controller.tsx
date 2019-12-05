@@ -205,7 +205,6 @@ export class DashboardAppController {
       }
       const shouldShowEditHelp = $scope.getShouldShowEditHelp();
       const shouldShowViewHelp = $scope.getShouldShowViewHelp();
-      const emptyScreenProps = getEmptyScreenProps(shouldShowEditHelp);
       const isEmptyState = shouldShowEditHelp || shouldShowViewHelp;
       return {
         id: dashboardStateManager.savedDashboard.id || '',
@@ -220,9 +219,6 @@ export class DashboardAppController {
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
         isEmptyState,
-        renderEmpty: isEmptyState
-          ? () => <DashboardEmptyScreen {...emptyScreenProps} />
-          : undefined,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
@@ -262,6 +258,16 @@ export class DashboardAppController {
       .then((container: DashboardContainer | ErrorEmbeddable) => {
         if (!isErrorEmbeddable(container)) {
           dashboardContainer = container;
+
+          dashboardContainer.renderEmpty = () => {
+            const shouldShowEditHelp = $scope.getShouldShowEditHelp();
+            const shouldShowViewHelp = $scope.getShouldShowViewHelp();
+            const isEmptyState = shouldShowEditHelp || shouldShowViewHelp;
+            return isEmptyState ? (
+              <DashboardEmptyScreen {...getEmptyScreenProps(shouldShowEditHelp)} />
+            ) : null;
+          };
+
           updateIndexPatterns(dashboardContainer);
 
           outputSubscription = dashboardContainer.getOutput$().subscribe(() => {

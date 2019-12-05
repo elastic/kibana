@@ -135,10 +135,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   }
 
   public render() {
-    const { renderEmpty } = this.props;
     return (
       <React.Fragment>
-        {renderEmpty ? this.renderEmptyScreen() : null}
+        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
         {this.renderContainerScreen()}
       </React.Fragment>
     );
