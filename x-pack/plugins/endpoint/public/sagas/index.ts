@@ -22,7 +22,7 @@ export default function sagas(context: AppMountContext, history: History) {
       alertListSaga(sagaContext, context),
       alertDetailsSaga(sagaContext, context, history),
       endpointsListSaga(sagaContext, context),
-      homeSaga(sagaContext, context, history),
+      homeSaga(sagaContext, context),
     ]);
   };
 }

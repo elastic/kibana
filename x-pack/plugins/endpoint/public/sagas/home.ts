@@ -8,17 +8,15 @@ import { AppMountContext } from 'kibana/public';
 import { withPageNavigationStatus } from './common';
 import { hrefIsForPath } from '../concerns/routing';
 import { actions as homeActions } from '../actions/home';
+import { SagaContext } from '../lib/saga';
 
 // TODO: type this properly
-export async function homeSaga(...args: any[]) {
-  await Promise.all([resourceSaga(...args)]);
+export async function homeSaga(sagaContext: SagaContext, context: AppMountContext) {
+  await Promise.all([resourceSaga(sagaContext, context)]);
 }
 
 // TODO type actionsAndState, dispatch
-async function resourceSaga(
-  { actionsAndState, dispatch }: { actionsAndState: any; dispatch: any },
-  context: AppMountContext
-) {
+async function resourceSaga({ actionsAndState, dispatch }: SagaContext, context: AppMountContext) {
   function isOnPage(href: any) {
     return hrefIsForPath(href, `${context.core.http.basePath.get()}/app/endpoint/`);
   }
