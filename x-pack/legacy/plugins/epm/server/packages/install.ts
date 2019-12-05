@@ -10,6 +10,7 @@ import { AssetReference, InstallationAttributes, KibanaAssetType } from '../../c
 import * as Registry from '../registry';
 import { getObject } from './get_objects';
 import { getInstallationObject } from './index';
+import { installIndexPattern } from '../lib/kibana/index_pattern/install';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -21,6 +22,11 @@ export async function installPackage(options: {
     savedObjectsClient,
     pkgkey,
   });
+
+  // Setup basic index patterns
+  // TODO: This should be updated and not overwritten in the future
+  await installIndexPattern('metrics', savedObjectsClient);
+  await installIndexPattern('logs', savedObjectsClient);
 
   // Save those references in the package manager's state saved object
   await saveInstallationReferences({
