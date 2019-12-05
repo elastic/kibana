@@ -19,14 +19,15 @@
 
 import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
-import { Observable } from 'rxjs';
-import { distinctUntilChanged, first, map } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { distinctUntilChanged, first, map, shareReplay } from 'rxjs/operators';
 
 import { Config, ConfigPath, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
 import { hasConfigPathIntersection } from './config';
 import { RawConfigurationProvider } from './raw_config_service';
 import {
+  applyDeprecations,
   ConfigDeprecationWithContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
@@ -48,7 +49,7 @@ export class ConfigService {
    */
   private readonly handledPaths: ConfigPath[] = [];
   private readonly schemas = new Map<string, Type<unknown>>();
-  private readonly deprecations: ConfigDeprecationWithContext[] = [];
+  private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -56,9 +57,14 @@ export class ConfigService {
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
-    this.config$ = rawConfigProvider
-      .getConfig$()
-      .pipe(map(raw => new LegacyObjectToConfigAdapter(raw)));
+
+    this.config$ = combineLatest([rawConfigProvider.getConfig$(), this.deprecations]).pipe(
+      map(([rawConfig, deprecations]) => {
+        const migrated = applyDeprecations(rawConfig, deprecations);
+        return new LegacyObjectToConfigAdapter(migrated);
+      }),
+      shareReplay(1)
+    );
   }
 
   /**
@@ -82,13 +88,13 @@ export class ConfigService {
    */
   public addDeprecationProvider(path: ConfigPath, provider: ConfigDeprecationProvider) {
     const flatPath = pathToString(path);
-    const deprecations = provider(configDeprecationFactory);
-    this.deprecations.push(
-      ...deprecations.map(deprecation => ({
+    this.deprecations.next([
+      ...this.deprecations.value,
+      ...provider(configDeprecationFactory).map(deprecation => ({
         deprecation,
         path: flatPath,
-      }))
-    );
+      })),
+    ]);
   }
 
   /**

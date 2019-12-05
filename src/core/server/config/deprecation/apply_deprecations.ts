@@ -18,22 +18,18 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { ConfigDeprecationWithContext } from './types';
+import { ConfigDeprecationWithContext, ConfigDeprecationLogger } from './types';
+
+const noopLogger = (msg: string) => undefined;
 
 export const applyDeprecations = (
   config: Record<string, any>,
-  deprecations: ConfigDeprecationWithContext[]
+  deprecations: ConfigDeprecationWithContext[],
+  logger: ConfigDeprecationLogger = noopLogger
 ) => {
-  const deprecationMessages: string[] = [];
-  const logger = (msg: string) => deprecationMessages.push(msg);
-
   let processed = cloneDeep(config);
   deprecations.forEach(({ deprecation, path }) => {
     processed = deprecation(processed, path, logger);
   });
-
-  return {
-    config: processed,
-    messages: deprecationMessages,
-  };
+  return processed;
 };
