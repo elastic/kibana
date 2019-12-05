@@ -93,6 +93,7 @@ src/plugins
   "ui": true
 }
 ```
+More details about[manifest file format](/docs/development/core/server/kibana-plugin-server.pluginmanifest.md)
 
 Note that `package.json` files are irrelevant to and ignored by the new platform.
 
@@ -1140,7 +1141,6 @@ import { npStart: { core } } from 'ui/new_platform';
 | `chrome.getUiSettingsClient`                          | [`core.uiSettings`](/docs/development/core/public/kibana-plugin-public.uisettingsclient.md)                                                                                                |                                                                                                                                                |
 | `chrome.helpExtension.set`                            | [`core.chrome.setHelpExtension`](/docs/development/core/public/kibana-plugin-public.chromestart.sethelpextension.md)                                                                       |                                                                                                                                                |
 | `chrome.setVisible`                                   | [`core.chrome.setIsVisible`](/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md)                                                                               |                                                                                                                                                |
-| `chrome.getInjected`                                  | --                                                                                                                                                                                         | Not implemented yet, see [#41990](https://github.com/elastic/kibana/issues/41990)                                                              |
 | `chrome.setRootTemplate` / `chrome.setRootController` | --                                                                                                                                                                                         | Use application mounting via `core.application.register` (not available to legacy plugins at this time).                                       |
 | `import { recentlyAccessed } from 'ui/persisted_log'` | [`core.chrome.recentlyAccessed`](/docs/development/core/public/kibana-plugin-public.chromerecentlyaccessed.md)                                                                             |                                                                                                                                                |
 | `ui/capabilities`                                     | [`core.application.capabilities`](/docs/development/core/public/kibana-plugin-public.capabilities.md)                                                                                      |                                                                                                                                                |
@@ -1150,7 +1150,7 @@ import { npStart: { core } } from 'ui/new_platform';
 | `ui/routes`                                           | --                                                                                                                                                                                         | There is no global routing mechanism. Each app [configures its own routing](/rfcs/text/0004_application_service_mounting.md#complete-example). |
 | `ui/saved_objects`                                    | [`core.savedObjects`](/docs/development/core/public/kibana-plugin-public.savedobjectsstart.md)                                                                                             | Client API is the same                                                                                                                         |
 | `ui/doc_title`                                        | [`core.chrome.docTitle`](/docs/development/core/public/kibana-plugin-public.chromedoctitle.md)                                                                                             |                                                                                                                                                |
-| `uiExports/injectedVars`                              | [Configure plugin](#configure-plugin) and [`PluginConfigDescriptor.exposeToBrowser`](/docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md)         | Can only be used to expose configuration properties                                                                                            |
+| `uiExports/injectedVars` / `chrome.getInjected`       | [Configure plugin](#configure-plugin) and [`PluginConfigDescriptor.exposeToBrowser`](/docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.exposetobrowser.md)         | Can only be used to expose configuration properties                                                                                            |
 
 _See also: [Public's CoreStart API Docs](/docs/development/core/public/kibana-plugin-public.corestart.md)_
 
@@ -1350,6 +1350,13 @@ export class Plugin implements Plugin<PluginSetup, PluginStart> {
     const config = this.initializerContext.config.get<ClientConfigType>();
     // ...
   }
+```
+
+All plugins are considered enabled by default. If you want to disable your plugin by default, you could declare the `enabled` flag in plugin config. This is a special Kibana platform key. The platform reads its value and won't create a plugin instance if `enabled: false`.
+```js
+export const config = {
+  schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+};
 ```
 
 ### Mock new platform services in tests
