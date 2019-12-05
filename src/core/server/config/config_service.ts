@@ -25,11 +25,13 @@ import { distinctUntilChanged, first, map } from 'rxjs/operators';
 import { Config, ConfigPath, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
 import { hasConfigPathIntersection } from './config';
+import { RawConfigurationProvider } from './raw_config_service';
 import {
   ConfigDeprecationWithContext,
   ConfigDeprecationProvider,
   configDeprecationFactory,
 } from './deprecation';
+import { LegacyObjectToConfigAdapter } from '../legacy/config';
 
 /** @internal */
 export type IConfigService = PublicMethodsOf<ConfigService>;
@@ -37,6 +39,8 @@ export type IConfigService = PublicMethodsOf<ConfigService>;
 /** @internal */
 export class ConfigService {
   private readonly log: Logger;
+
+  private readonly config$: Observable<Config>;
 
   /**
    * Whenever a config if read at a path, we mark that path as 'handled'. We can
@@ -47,11 +51,14 @@ export class ConfigService {
   private readonly deprecations: ConfigDeprecationWithContext[] = [];
 
   constructor(
-    private readonly config$: Observable<Config>,
+    rawConfigProvider: RawConfigurationProvider,
     private readonly env: Env,
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
+    this.config$ = rawConfigProvider
+      .getConfig$()
+      .pipe(map(raw => new LegacyObjectToConfigAdapter(raw)));
   }
 
   /**

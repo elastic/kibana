@@ -17,16 +17,23 @@
  * under the License.
  */
 
-export { ConfigService, IConfigService } from './config_service';
-export { RawConfigService, RawConfigurationProvider } from './raw_config_service';
-export { Config, ConfigPath, isConfigPath, hasConfigPathIntersection } from './config';
-export { ObjectToConfigAdapter } from './object_to_config_adapter';
-export { CliArgs, Env } from './env';
-export {
-  ConfigDeprecation,
-  ConfigDeprecationLogger,
-  ConfigDeprecationProvider,
-  IConfigDeprecationFactory,
-} from './deprecation';
+import { RawConfigService } from './raw_config_service';
+import { Observable, of } from 'rxjs';
 
-export { EnvironmentMode, PackageInfo } from './types';
+const createRawConfigServiceMock = ({
+  rawConfig = {},
+  rawConfig$ = undefined,
+}: { rawConfig?: Record<string, any>; rawConfig$?: Observable<Record<string, any>> } = {}) => {
+  const mocked: jest.Mocked<PublicMethodsOf<RawConfigService>> = {
+    loadConfig: jest.fn(),
+    stop: jest.fn(),
+    reloadConfig: jest.fn(),
+    getConfig$: jest.fn().mockReturnValue(rawConfig$ || of(rawConfig)),
+  };
+
+  return mocked;
+};
+
+export const rawConfigServiceMock = {
+  create: createRawConfigServiceMock,
+};

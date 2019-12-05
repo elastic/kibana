@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Observable } from 'rxjs';
+
 import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
-import { ConfigService, Env, Config, ConfigPath } from './config';
+import { ConfigService, Env, ConfigPath, RawConfigurationProvider } from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService, ensureValidConfiguration } from './legacy';
@@ -58,12 +58,12 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
 
   constructor(
-    public readonly config$: Observable<Config>,
+    rawConfigProvider: RawConfigurationProvider,
     public readonly env: Env,
     private readonly logger: LoggerFactory
   ) {
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(config$, env, logger);
+    this.configService = new ConfigService(rawConfigProvider, env, logger);
 
     const core = { coreId, configService: this.configService, env, logger };
     this.context = new ContextService(core);
