@@ -60,12 +60,18 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   );
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={() => setIsPopoverOpen(false)}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      data-test-subj="collapsedItemActions"
+    >
       <EuiFormRow>
         <EuiSwitch
           name="enable"
           disabled={!canSave}
           checked={isEnabled}
+          data-test-subj="enableSwitch"
           onChange={async () => {
             if (isEnabled) {
               setIsEnabled(false);
@@ -89,6 +95,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           name="mute"
           checked={isMuted}
           disabled={!canSave || !isEnabled}
+          data-test-subj="muteSwitch"
           onChange={async () => {
             if (isMuted) {
               setIsMuted(false);
@@ -113,6 +120,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             isDisabled={!canDelete}
             iconType="trash"
             color="text"
+            data-test-subj="deleteAlert"
             onClick={async () => {
               await deleteAlerts({ http, ids: [item.id] });
               onAlertChanged();

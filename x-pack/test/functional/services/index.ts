@@ -56,6 +56,7 @@ import { SecurityServiceProvider, SpacesServiceProvider } from '../../common/ser
 // only the built-in services will be available
 export const services = {
   ...kibanaFunctionalServices,
+  supertest: kibanaApiIntegrationServices.supertest,
   esSupertest: kibanaApiIntegrationServices.esSupertest,
   monitoringNoData: MonitoringNoDataProvider,
   monitoringClusterList: MonitoringClusterListProvider,

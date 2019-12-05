@@ -210,12 +210,12 @@ export const AlertsList: React.FunctionComponent = () => {
             itemId="id"
             columns={alertsTableColumns}
             rowProps={() => ({
-              'data-test-subj': 'row',
+              'data-test-subj': 'alert-row',
             })}
             cellProps={() => ({
               'data-test-subj': 'cell',
             })}
-            data-test-subj="alertsTable"
+            data-test-subj="alertsList"
             pagination={{
               pageIndex: page.index,
               pageSize: page.size,

@@ -156,6 +156,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
     <EuiPopover
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      data-test-subj="bulkAction"
       button={
         <EuiButton
           iconType="arrowDown"
@@ -175,6 +176,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
             onClick={onmMuteAllClick}
             isLoading={isMutingAlerts}
             isDisabled={isPerformingAction}
+            data-test-subj="muteAll"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.muteAllTitle"
@@ -189,6 +191,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
             onClick={onUnmuteAllClick}
             isLoading={isUnmutingAlerts}
             isDisabled={isPerformingAction}
+            data-test-subj="unmuteAll"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.unmuteAllTitle"
@@ -203,6 +206,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
             onClick={onEnableAllClick}
             isLoading={isEnablingAlerts}
             isDisabled={isPerformingAction}
+            data-test-subj="enableAll"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.enableAllTitle"
@@ -217,6 +221,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
             onClick={onDisableAllClick}
             isLoading={isDisablingAlerts}
             isDisabled={isPerformingAction}
+            data-test-subj="disableAll"
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.disableAllTitle"
@@ -230,6 +235,7 @@ export const BulkActionPopover: React.FunctionComponent<ComponentOpts> = ({
           onClick={deleteSelectedItems}
           isLoading={isDeletingAlerts}
           isDisabled={isPerformingAction}
+          data-test-subj="deleteAll"
         >
           <FormattedMessage
             id="xpack.triggersActionsUI.sections.alertsList.bulkActionPopover.deleteAllTitle"
