@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getImportRouteHandler } from './routes/file_upload';
-import { MAX_BYTES } from '../common/constants/file_import';
+import { getImportRouteHandler, importRouteConfig } from './routes/file_upload';
 import { registerFileUploadUsageCollector } from './telemetry';
-import Joi from 'joi';
 
 export class FileUploadPlugin {
   setup(core, plugins, __LEGACY) {
@@ -19,31 +17,7 @@ export class FileUploadPlugin {
       method: 'POST',
       path: '/api/fileupload/import',
       handler: getImportRouteHandler(elasticsearchPlugin, getSavedObjectsRepository),
-      config: {
-        payload: { maxBytes: MAX_BYTES },
-        validate: {
-          query: Joi.object().keys({
-            id: Joi.string(),
-          }),
-          payload: Joi.object({
-            app: Joi.string(),
-            index: Joi.string().required(),
-            data: Joi.array().when(
-              Joi.ref('$query.id'), {
-                is: Joi.exist(),
-                then: Joi.array().min(1).required()
-              }),
-            fileType: Joi.string().required(),
-            ingestPipeline: Joi.object(),
-            settings: Joi.object().when(
-              Joi.ref('$query.id'), {
-                is: null,
-                then: Joi.required()
-              }),
-            mappings: Joi.object().required(),
-          }).required(),
-        }
-      }
+      config: importRouteConfig
     });
 
     registerFileUploadUsageCollector(plugins.usageCollection, {

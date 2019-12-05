@@ -8,6 +8,8 @@ import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { importDataProvider } from '../models/import_data';
 import { updateTelemetry } from '../telemetry/telemetry';
+import { MAX_BYTES } from '../../common/constants/file_import';
+import Joi from 'joi';
 
 
 function importData({
@@ -39,13 +41,40 @@ export function getImportRouteHandler(elasticsearchPlugin, getSavedObjectsReposi
     const requestContentWithDefaults = {
       id,
       callWithRequest: callWithRequestFactory(elasticsearchPlugin, requestObj),
-      index: undefined,
-      settings: {},
-      mappings: {},
-      ingestPipeline: {},
-      data: [],
       ...requestObj.payload
     };
     return importData(requestContentWithDefaults).catch(wrapError);
   };
 }
+
+export const importRouteConfig = {
+  payload: {
+    maxBytes: MAX_BYTES
+  },
+  validate: {
+    query: Joi.object().keys({
+      id: Joi.string(),
+    }),
+    payload: Joi.object({
+      app: Joi.string(),
+      index: Joi.string().min(1).required(),
+      data: Joi.array().when(
+        Joi.ref('$query.id'), {
+          is: Joi.exist(),
+          then: Joi.array().min(1).required()
+        }).default([]),
+      fileType: Joi.string().required(),
+      ingestPipeline: Joi.object().default({}),
+      settings: Joi.object().when(
+        Joi.ref('$query.id'), {
+          is: null,
+          then: Joi.required()
+        }).default({}),
+      mappings: Joi.object().when(
+        Joi.ref('$query.id'), {
+          is: null,
+          then: Joi.required()
+        }),
+    }).required(),
+  }
+};
