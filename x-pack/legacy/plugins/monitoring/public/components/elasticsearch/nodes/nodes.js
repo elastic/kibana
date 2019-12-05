@@ -23,10 +23,12 @@ import {
   EuiCallOut,
   EuiButton,
   EuiText,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
+import { FormattedMessage  } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
 const getNodeTooltip = node => {
@@ -399,6 +401,14 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.elasticsearch.nodes.header"
+              defaultMessage="Elasticsearch nodes"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         {renderClusterStatus()}
         {setupModeCallout}
         <EuiPageContent>
