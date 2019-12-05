@@ -8,7 +8,6 @@ import { safeLoad } from 'js-yaml';
 import { AssetReference, Dataset, RegistryPackage } from '../../../../common/types';
 import { CallESAsCurrentUser } from '../../../../server/lib/cluster_access';
 import { getAssetsData } from '../../../packages/assets';
-import * as Registry from '../../../registry';
 import { Field } from '../../fields/field';
 import { generateMappings, generateTemplateName, getTemplate } from './template';
 
@@ -22,19 +21,13 @@ const isFields = (path: string) => {
  * For each dataset, the fields.yml files are extracted. If there are multiple
  * in one datasets, they are merged together into 1 and then converted to a template
  * The template is currently loaded with the pkgey-package-dataset
- * @param callCluster
- * @param pkgkey
  */
-export async function installTemplates(p: RegistryPackage, callCluster: CallESAsCurrentUser) {
-  const pkgkey = p.name + '-' + p.version;
-  // TODO: Needs to be called to fill the cache but should not be required
-  await Registry.getArchiveInfo(pkgkey);
-
+export async function installTemplates(pkg: RegistryPackage, callCluster: CallESAsCurrentUser) {
   const promises: Array<Promise<AssetReference>> = [];
 
-  for (const dataset of p.datasets) {
+  for (const dataset of pkg.datasets) {
     // Fetch all assset entries for this dataset
-    const assetEntries = getAssetsData(p, isFields, dataset.name);
+    const assetEntries = await getAssetsData(pkg, isFields, dataset.name);
 
     // Merge all the fields of a dataset together and create an Elasticsearch index template
     let datasetFields: Field[] = [];
@@ -45,7 +38,7 @@ export async function installTemplates(p: RegistryPackage, callCluster: CallESAs
       }
     }
 
-    const promise = installTemplate({ callCluster, fields: datasetFields, p, dataset });
+    const promise = installTemplate({ callCluster, fields: datasetFields, pkg, dataset });
     promises.push(promise);
   }
 
@@ -55,16 +48,16 @@ export async function installTemplates(p: RegistryPackage, callCluster: CallESAs
 async function installTemplate({
   callCluster,
   fields,
-  p,
+  pkg,
   dataset,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
-  p: RegistryPackage;
+  pkg: RegistryPackage;
   dataset: Dataset;
 }): Promise<AssetReference> {
   const mappings = generateMappings(fields);
-  const templateName = generateTemplateName(p.name, dataset.name, dataset.type);
+  const templateName = generateTemplateName(pkg.name, dataset.name, dataset.type);
   const template = getTemplate(templateName + '-*', mappings);
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {
