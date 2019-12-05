@@ -74,11 +74,10 @@ export default function ({ getService, getPageObjects }) {
       expect(exists).to.be(true);
     });
 
-    it('exits when the text button is clicked on', async () => {
-      const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
-      await logoButton.moveMouseTo();
-      await PageObjects.dashboard.clickExitFullScreenTextButton();
-
+    it.skip('exits when the logo button is clicked on', async () => {
+      await PageObjects.dashboard.clickFullScreenMode();
+      await PageObjects.dashboard.waitForRenderComplete();
+      await PageObjects.dashboard.clickExitFullScreenLogoButton();
       await retry.try(async () => {
         const isChromeVisible = await PageObjects.common.isChromeVisible();
         expect(isChromeVisible).to.be(true);
