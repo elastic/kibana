@@ -17,17 +17,9 @@
  * under the License.
  */
 
-import { getConfig, getData } from './';
-import { accessSync, R_OK } from 'fs';
+const Fs = jest.requireActual('fs');
 
-describe('Default path finder', function () {
-  it('should find a kibana.yml', () => {
-    const configPath = getConfig();
-    expect(() => accessSync(configPath, R_OK)).not.toThrow();
-  });
-
-  it('should find a data directory', () => {
-    const dataPath = getData();
-    expect(() => accessSync(dataPath, R_OK)).not.toThrow();
-  });
-});
+export const FTR_REPORT = Fs.readFileSync(require.resolve('./ftr_report.xml'), 'utf8');
+export const JEST_REPORT = Fs.readFileSync(require.resolve('./jest_report.xml'), 'utf8');
+export const KARMA_REPORT = Fs.readFileSync(require.resolve('./karma_report.xml'), 'utf8');
+export const MOCHA_REPORT = Fs.readFileSync(require.resolve('./mocha_report.xml'), 'utf8');

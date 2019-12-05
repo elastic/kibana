@@ -17,6 +17,17 @@
  * under the License.
  */
 
-import { HashedItemStore } from './hashed_item_store';
+import { accessSync, constants } from 'fs';
+import { getConfigPath, getDataPath } from './';
 
-export const HashedItemStoreSingleton = new HashedItemStore(window.sessionStorage);
+describe('Default path finder', () => {
+  it('should find a kibana.yml', () => {
+    const configPath = getConfigPath();
+    expect(() => accessSync(configPath, constants.R_OK)).not.toThrow();
+  });
+
+  it('should find a data directory', () => {
+    const dataPath = getDataPath();
+    expect(() => accessSync(dataPath, constants.R_OK)).not.toThrow();
+  });
+});

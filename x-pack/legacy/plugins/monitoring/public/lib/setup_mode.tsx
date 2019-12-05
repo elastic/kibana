@@ -10,6 +10,7 @@ import { get, contains } from 'lodash';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
 
@@ -94,10 +95,10 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
   const oldData = setupModeState.data;
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
-
-  const isCloud = chrome.getInjected('isOnCloud');
+  const { cloud } = npSetup.plugins;
+  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
   const hasPermissions = get(data, '_meta.hasPermissions', false);
-  if (isCloud || !hasPermissions) {
+  if (isCloudEnabled || !hasPermissions) {
     let text: string = '';
     if (!hasPermissions) {
       text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
@@ -175,7 +176,9 @@ export const setSetupModeMenuItem = () => {
   }
 
   const globalState = angularState.injector.get('globalState');
-  const enabled = !globalState.inSetupMode && !chrome.getInjected('isOnCloud');
+  const { cloud } = npSetup.plugins;
+  const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
+  const enabled = !globalState.inSetupMode && !isCloudEnabled;
 
   render(
     <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />,
