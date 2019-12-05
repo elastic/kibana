@@ -30,7 +30,7 @@ interface SecureSavedObjectsClientWrapperOptions {
   savedObjectsPrivileges: SavedObjectsPrivileges;
 }
 
-interface EnsureAuthorizedResult {
+interface EnsureAuthorizedForTypeResult {
   predicates?: SavedObjectsPredicate[];
 }
 
@@ -62,7 +62,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    const { predicates } = await this.ensureAuthorized(type, 'create', options.namespace, {
+    const { predicates } = await this.ensureAuthorizedForType(type, 'create', options.namespace, {
       type,
       attributes,
       options,
@@ -158,45 +158,21 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     action: string,
     namespace?: string,
     args?: Record<string, unknown>
-  ): Promise<EnsureAuthorizedResult> {
+  ) {
     const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actionsMap = new Map<string, string | SavedObjectsPredicate>();
-    for (const type of types) {
-      if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
-        const conditions = this.savedObjectsPrivileges.getConditions(type);
-        for (const condition of conditions) {
-          actionsMap.set(this.actions.savedObject.get({ type, when: condition }, action), {
-            type,
-            when: condition,
-          });
-        }
-      } else {
-        actionsMap.set(this.actions.savedObject.get(type, action), type);
-      }
-    }
-    const actions = Array.from(actionsMap.keys());
-    const { username, privileges } = await this.checkPrivileges(actions, namespace);
+    const actionsToTypesMap = new Map(
+      types.map(type => [this.actions.savedObject.get(type, action), type])
+    );
+    const actions = Array.from(actionsToTypesMap.keys());
+    const { hasAllRequested, username, privileges } = await this.checkPrivileges(
+      actions,
+      namespace
+    );
 
-    const predicates: SavedObjectsPredicate[] = [];
-    let forbidden = false;
-    const missingPrivileges: string[] = [];
-    for (const [privilege, result] of Object.entries(privileges)) {
-      const typeOrCondition = actionsMap.get(privilege)!;
-      if (isString(typeOrCondition)) {
-        if (result === false) {
-          forbidden = true;
-          missingPrivileges.push(privilege);
-        }
-      } else {
-        if (result === true) {
-          predicates.push(typeOrCondition);
-        }
-      }
-    }
-
-    if (!forbidden) {
+    if (hasAllRequested) {
       this.auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
+      const missingPrivileges = this.getMissingPrivileges(privileges);
       this.auditLogger.savedObjectsAuthorizationFailure(
         username,
         action,
@@ -205,15 +181,63 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         args
       );
       const msg = `Unable to ${action} ${missingPrivileges
-        .map(privilege => actionsMap.get(privilege))
+        .map(privilege => actionsToTypesMap.get(privilege))
         .sort()
         .join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
     }
+  }
 
-    return {
-      predicates,
-    };
+  private async ensureAuthorizedForType(
+    type: string,
+    action: string,
+    namespace?: string,
+    args?: Record<string, unknown>
+  ): Promise<EnsureAuthorizedForTypeResult> {
+    const actions: string[] = [];
+    actions.push(this.actions.savedObject.get(type, action));
+    if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
+      const conditions = this.savedObjectsPrivileges.getConditions(type);
+      for (const condition of conditions) {
+        actions.push(this.actions.savedObject.get({ type, when: condition }, action));
+      }
+    }
+
+    const { username, privileges } = await this.checkPrivileges(actions, namespace);
+
+    if (privileges[this.actions.savedObject.get(type, action)] === true) {
+      this.auditLogger.savedObjectsAuthorizationSuccess(username, action, [type], args);
+      return {
+        predicates: [],
+      };
+    }
+
+    if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
+      const predicates: SavedObjectsPredicate[] = [];
+      const conditions = this.savedObjectsPrivileges.getConditions(type);
+      for (const condition of conditions) {
+        if (privileges[this.actions.savedObject.get({ type, when: condition }, action)] === true) {
+          predicates.push({ type, when: condition });
+        }
+      }
+      if (predicates.length > 0) {
+        this.auditLogger.savedObjectsAuthorizationSuccess(username, action, [type], args);
+        return {
+          predicates,
+        };
+      }
+    }
+
+    const missingPrivileges = Object.keys(privileges);
+    this.auditLogger.savedObjectsAuthorizationFailure(
+      username,
+      action,
+      [type],
+      missingPrivileges,
+      args
+    );
+    const msg = `Unable to ${action} ${missingPrivileges.join(',')}`;
+    throw this.errors.decorateForbiddenError(new Error(msg));
   }
 
   private getMissingPrivileges(privileges: Record<string, boolean>) {
