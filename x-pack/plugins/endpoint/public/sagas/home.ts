@@ -10,6 +10,8 @@ import { hrefIsForPath } from '../concerns/routing';
 import { actions as homeActions } from '../actions/home';
 import { SagaContext } from '../lib/saga';
 
+let hasBootstrapped = false;
+
 // TODO: type this properly
 export async function homeSaga(sagaContext: SagaContext, context: AppMountContext) {
   await Promise.all([resourceSaga(sagaContext, context)]);
@@ -31,9 +33,10 @@ async function resourceSaga({ actionsAndState, dispatch }: SagaContext, context:
     actionsAndState,
     isOnPage,
   })) {
-    if (userIsOnPageAndLoggedIn && shouldInitialize) {
+    if (userIsOnPageAndLoggedIn && shouldInitialize && !hasBootstrapped) {
       try {
         const data = await context.core.http.post('/endpoint/bootstrap', {});
+        hasBootstrapped = true;
         dispatch(homeActions.serverReturnedBootstrapData(data));
       } catch (error) {
         // TODO: dispatch an error action
