@@ -39,7 +39,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeIds.nodeId);
     if (!validNode) {
-      throw Boom.notFound(
+      throw new Error(
         i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {
@@ -98,7 +98,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   ) {
     const createTSVBModel = get(metrics, ['tsvb', metricId]) as TSVBMetricModelCreator | undefined;
     if (!createTSVBModel) {
-      throw Boom.badRequest(
+      throw new Error(
         i18n.translate('xpack.infra.metrics.missingTSVBModelError', {
           defaultMessage: 'The TSVB model for {metricId} does not exist for {nodeType}',
           values: {
@@ -136,7 +136,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     }
 
     if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
-      throw Boom.badRequest(
+      throw new Error(
         i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {
           defaultMessage:
             'Model for {metricId} requires a cloudId, but none was given for {nodeId}.',
