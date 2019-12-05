@@ -15,6 +15,7 @@ export enum InstallationStatus {
   notInstalled = 'not_installed',
 }
 
+export type ServiceName = 'kibana' | 'elasticsearch';
 export type AssetType = KibanaAssetType | ElasticsearchAssetType;
 
 export enum KibanaAssetType {
@@ -30,32 +31,47 @@ export enum ElasticsearchAssetType {
   ilmPolicy = 'ilm-policy',
 }
 
-// Registry's response types
-// from /search
-// https://github.com/elastic/package-registry/blob/master/docs/api/search.json
-export type RegistryList = RegistryListItem[];
-export interface RegistryListItem {
-  description: string;
-  download: string;
-  icon: string;
-  name: string;
-  version: string;
-  title?: string;
-}
-
-export interface ScreenshotItem {
-  src: string;
-  title?: string;
-}
-
-export type ServiceName = 'kibana' | 'elasticsearch';
-
 // from /package/{name}
+// type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
 // https://github.com/elastic/package-registry/blob/master/docs/api/package.json
+export interface RegistryPackage {
+  name: string;
+  title?: string;
+  version: string;
+  readme?: string;
+  description: string;
+  type: string;
+  categories: string[];
+  requirement: RequirementsByServiceName;
+  screenshots?: ScreenshotItem[];
+  icons?: string[];
+  assets?: string[];
+  internal?: boolean;
+  format_version: string;
+  datasets?: Dataset[];
+  download: string;
+  path: string;
+}
+
 export type RequirementVersion = string;
 export type RequirementVersionRange = string;
 export interface ServiceRequirements {
   versions: RequirementVersionRange;
+}
+
+// Registry's response types
+// from /search
+// https://github.com/elastic/package-registry/blob/master/docs/api/search.json
+export type RegistryList = RegistryListItem[];
+// from getPackageOutput at https://github.com/elastic/package-registry/blob/master/search.go
+export type RegistryListItem = Pick<
+  RegistryPackage,
+  'name' | 'title' | 'version' | 'description' | 'type' | 'icons' | 'internal' | 'download' | 'path'
+>;
+
+export interface ScreenshotItem {
+  src: string;
+  title?: string;
 }
 
 // from /categories
@@ -108,33 +124,19 @@ export interface Dataset {
   type: string;
 }
 
-export interface RegistryPackage {
-  name: string;
-  title?: string;
-  version: string;
-  readme?: string;
-  description: string;
-  categories: string[];
-  requirement: RequirementsByServiceName;
-  screenshots?: ScreenshotItem[];
-  icons?: string[];
-  assets?: string[];
-  internal?: boolean;
-  format_version: string;
-  datasets?: Dataset[];
-  download: string;
-  path: string;
+// some properties are optional in Registry responses but required in EPM
+// internal until we need them
+interface PackageAdditions {
+  title: string;
+  assets: AssetsGroupedByServiceByType;
 }
 
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
 
-export type PackageListItem = Installable<Required<RegistryListItem>>;
+export type PackageListItem = Installable<RegistryListItem & PackageAdditions>;
 export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
-
-export type PackageInfo = Installable<
-  Required<RegistryPackage> & { assets: AssetsGroupedByServiceByType }
->;
+export type PackageInfo = Installable<RegistryPackage & PackageAdditions>;
 
 export type Installation = SavedObject<InstallationAttributes>;
 export interface InstallationAttributes extends SavedObjectAttributes {

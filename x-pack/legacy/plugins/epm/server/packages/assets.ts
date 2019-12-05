@@ -19,6 +19,7 @@ export function getAssets(
   dataSet: string = ''
 ): string[] {
   const assets: string[] = [];
+  if (!packageInfo?.assets) return assets;
 
   // Skip directories
   for (const path of packageInfo.assets) {

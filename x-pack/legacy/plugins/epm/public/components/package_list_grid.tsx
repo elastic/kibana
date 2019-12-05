@@ -50,7 +50,7 @@ type GridColumnProps = {
   list: PackageList;
 } & BadgeProps;
 
-function GridColumn({ list, showInstalledBadge }: GridColumnProps) {
+function GridColumn({ list }: GridColumnProps) {
   return (
     <EuiFlexGrid gutterSize="l" columns={3}>
       {list.map(item => (
