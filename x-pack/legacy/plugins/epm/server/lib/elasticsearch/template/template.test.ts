@@ -10,6 +10,17 @@ import path from 'path';
 import { Field, processFields } from '../../fields/field';
 import { generateMappings, getTemplate } from './template';
 
+// Add our own serialiser to just do JSON.stringify
+expect.addSnapshotSerializer({
+  print(val) {
+    return JSON.stringify(val, null, 2);
+  },
+
+  test(val) {
+    return val;
+  },
+});
+
 test('get template', () => {
   const pattern = 'logs-nginx-access-abcd-*';
 
@@ -19,23 +30,13 @@ test('get template', () => {
 
 test('tests loading fields.yml', () => {
   // Load fields.yml file
-  const fieldsYML = readFileSync(path.join(__dirname, '../../fields/tests/base.yml'), 'utf-8');
+  const ymlPath = path.join(__dirname, '../../fields/tests/base.yml');
+  const fieldsYML = readFileSync(ymlPath, 'utf-8');
   const fields: Field[] = safeLoad(fieldsYML);
 
   processFields(fields);
   const mappings = generateMappings(fields);
   const template = getTemplate('foo', mappings);
 
-  const json = JSON.stringify(template, null, 2);
-  const generatedFile = path.join(__dirname, '../../fields/tests/base.template.generate.json');
-
-  // Regenerate the file if `-generate` flag is used
-  if (process.argv.includes('-generate')) {
-    writeFileSync(generatedFile, json);
-  }
-
-  const jsonData = readFileSync(generatedFile, 'utf-8');
-
-  // Check that content file and generated file are equal
-  expect(jsonData).toBe(json);
+  expect(template).toMatchSnapshot(ymlPath);
 });
