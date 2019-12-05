@@ -71,11 +71,11 @@
 
 import _ from 'lodash';
 import { npSetup } from 'ui/new_platform';
+import chrome from 'ui/chrome';
+import { fieldWildcardFilter } from 'ui/field_wildcard';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { fetchSoon } from '../fetch';
-import { fieldWildcardFilter } from '../../field_wildcard';
-import { getHighlightRequest, esFilters, esQuery } from '../../../../../plugins/data/public';
-import chrome from '../../chrome';
+import { getHighlightRequest, esFilters, esQuery } from '../../../../../../plugins/data/public';
 import { RequestFailure } from '../fetch/errors';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { SearchSourceOptions, SearchSourceFields, SearchRequest } from './types';

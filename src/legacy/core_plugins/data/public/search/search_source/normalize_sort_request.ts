@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../core_plugins/data/public';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 import { EsQuerySortValue, SortOptions } from './types';
 
 export function normalizeSortRequest(
   sortObject: EsQuerySortValue | EsQuerySortValue[],
-  indexPattern: IndexPattern | string | undefined,
+  indexPattern: IIndexPattern | string | undefined,
   defaultSortOptions: SortOptions = {}
 ) {
   const sortArray: EsQuerySortValue[] = Array.isArray(sortObject) ? sortObject : [sortObject];
@@ -38,7 +38,7 @@ export function normalizeSortRequest(
  */
 function normalize(
   sortable: EsQuerySortValue,
-  indexPattern: IndexPattern | string | undefined,
+  indexPattern: IIndexPattern | string | undefined,
   defaultSortOptions: any
 ) {
   const [[sortField, sortOrder]] = Object.entries(sortable);

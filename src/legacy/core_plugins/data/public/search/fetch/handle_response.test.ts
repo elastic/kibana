@@ -18,9 +18,9 @@
  */
 
 import { handleResponse } from './handle_response';
-import { toastNotifications } from '../../notify/toasts';
+import { toastNotifications } from 'ui/notify/toasts';
 
-jest.mock('../../notify/toasts', () => {
+jest.mock('ui/notify/toasts', () => {
   return {
     toastNotifications: {
       addWarning: jest.fn(),
