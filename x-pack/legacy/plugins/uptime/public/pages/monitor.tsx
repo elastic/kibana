@@ -4,30 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore No typings for EuiSpacer
-  EuiSpacer,
-  EuiPanel,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
-import {
-  MonitorCharts,
-  MonitorPageTitle,
-  MonitorStatusBar,
-  PingList,
-} from '../components/functional';
+import { MonitorCharts, MonitorPageTitle, PingList } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { useTrackPageview } from '../../../infra/public';
 import { getTitle } from '../lib/helper/get_title';
-import { LocationMap } from '../components/functional/location_map';
 import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 
 interface MonitorPageProps {

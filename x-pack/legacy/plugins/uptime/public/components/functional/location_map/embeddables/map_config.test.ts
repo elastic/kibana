@@ -6,6 +6,7 @@
 
 import { getLayerList } from './map_config';
 import { mockLayerList } from './__mocks__/mock';
+import { LocationPoint } from './embedded_map';
 
 jest.mock('uuid', () => {
   return {
@@ -14,9 +15,25 @@ jest.mock('uuid', () => {
 });
 
 describe('map_config', () => {
+  let upPoints: LocationPoint[];
+  let downPoints: LocationPoint[];
+
+  beforeEach(() => {
+    upPoints = [
+      { lat: '52.487239', lon: '13.399262' },
+      { lat: '55.487239', lon: '13.399262' },
+      { lat: '54.487239', lon: '14.399262' },
+    ];
+    downPoints = [
+      { lat: '52.487239', lon: '13.399262' },
+      { lat: '55.487239', lon: '13.399262' },
+      { lat: '54.487239', lon: '14.399262' },
+    ];
+  });
+
   describe('#getLayerList', () => {
     test('it returns the low poly layer', () => {
-      const layerList = getLayerList();
+      const layerList = getLayerList(upPoints, downPoints);
       expect(layerList).toStrictEqual(mockLayerList);
     });
   });

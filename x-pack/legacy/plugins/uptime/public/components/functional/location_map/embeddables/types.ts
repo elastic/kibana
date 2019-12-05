@@ -10,10 +10,9 @@ import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
-  EmbeddableFactory,
-} from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { inputsModel } from '../../store/inputs';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+} from '../../../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+
+import { esFilters } from '../../../../../../../../../src/plugins/data/public';
 
 export interface MapEmbeddableInput extends EmbeddableInput {
   filters: esFilters.Filter[];
@@ -26,52 +25,3 @@ export interface MapEmbeddableInput extends EmbeddableInput {
 }
 
 export type MapEmbeddable = IEmbeddable<MapEmbeddableInput, EmbeddableOutput>;
-
-export interface IndexPatternMapping {
-  title: string;
-  id: string;
-}
-
-export type SetQuery = (params: {
-  id: string;
-  inspect: inputsModel.InspectQuery | null;
-  loading: boolean;
-  refetch: inputsModel.Refetch;
-}) => void;
-
-export interface MapFeature {
-  id: number;
-  layerId: string;
-}
-
-export interface LoadFeatureProps {
-  layerId: string;
-  featureId: number;
-}
-
-export interface FeatureProperty {
-  _propertyKey: string;
-  _rawValue: string | string[];
-}
-
-export interface FeatureGeometry {
-  coordinates: [number];
-  type: string;
-}
-
-export interface RenderTooltipContentParams {
-  addFilters(filter: object): void;
-  closeTooltip(): void;
-  features: MapFeature[];
-  isLocked: boolean;
-  getLayerName(layerId: string): Promise<string>;
-  loadFeatureProperties({ layerId, featureId }: LoadFeatureProps): Promise<FeatureProperty[]>;
-  loadFeatureGeometry({ layerId, featureId }: LoadFeatureProps): FeatureGeometry;
-}
-
-export type MapToolTipProps = Partial<RenderTooltipContentParams>;
-
-export interface EmbeddableApi {
-  getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
-  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
-}

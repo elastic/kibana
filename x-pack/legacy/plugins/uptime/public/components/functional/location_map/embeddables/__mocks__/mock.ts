@@ -4,206 +4,182 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatternMapping } from '../types';
+import lowPolyLayerFeatures from '../low_poly_layer.json';
 
-export const mockIndexPatternIds: IndexPatternMapping[] = [
-  { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
-];
-
-export const mockSourceLayer = {
+export const mockDownPointsLayer = {
+  id: 'down_points',
+  label: 'Down Locations',
   sourceDescriptor: {
-    id: 'uuid.v4()',
-    type: 'ES_SEARCH',
-    geoField: 'source.geo.location',
-    filterByMapBounds: false,
-    tooltipProperties: [
-      'host.name',
-      'source.ip',
-      'source.domain',
-      'source.geo.country_iso_code',
-      'source.as.organization.name',
-    ],
-    useTopHits: false,
-    topHitsTimeField: '@timestamp',
-    topHitsSize: 1,
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
-  },
-  style: {
-    type: 'VECTOR',
-    properties: {
-      fillColor: {
-        type: 'STATIC',
-        options: { color: '#3185FC' },
-      },
-      lineColor: {
-        type: 'STATIC',
-        options: { color: '#FFFFFF' },
-      },
-      lineWidth: { type: 'STATIC', options: { size: 2 } },
-      iconSize: { type: 'STATIC', options: { size: 8 } },
-      iconOrientation: {
-        type: 'STATIC',
-        options: { orientation: 0 },
-      },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'home' },
-      },
-    },
-  },
-  id: 'uuid.v4()',
-  label: `filebeat-* | Source Point`,
-  minZoom: 0,
-  maxZoom: 24,
-  alpha: 1,
-  visible: true,
-  applyGlobalQuery: true,
-  type: 'VECTOR',
-  query: { query: '', language: 'kuery' },
-  joins: [],
-};
-
-export const mockDestinationLayer = {
-  sourceDescriptor: {
-    id: 'uuid.v4()',
-    type: 'ES_SEARCH',
-    geoField: 'destination.geo.location',
-    filterByMapBounds: true,
-    tooltipProperties: [
-      'host.name',
-      'destination.ip',
-      'destination.domain',
-      'destination.geo.country_iso_code',
-      'destination.as.organization.name',
-    ],
-    useTopHits: false,
-    topHitsTimeField: '@timestamp',
-    topHitsSize: 1,
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
-  },
-  style: {
-    type: 'VECTOR',
-    properties: {
-      fillColor: {
-        type: 'STATIC',
-        options: { color: '#DB1374' },
-      },
-      lineColor: {
-        type: 'STATIC',
-        options: { color: '#FFFFFF' },
-      },
-      lineWidth: { type: 'STATIC', options: { size: 2 } },
-      iconSize: { type: 'STATIC', options: { size: 8 } },
-      iconOrientation: {
-        type: 'STATIC',
-        options: { orientation: 0 },
-      },
-      symbol: {
-        options: { symbolizeAs: 'icon', symbolId: 'marker' },
-      },
-    },
-  },
-  id: 'uuid.v4()',
-  label: `filebeat-* | Destination Point`,
-  minZoom: 0,
-  maxZoom: 24,
-  alpha: 1,
-  visible: true,
-  applyGlobalQuery: true,
-  type: 'VECTOR',
-  query: { query: '', language: 'kuery' },
-};
-
-export const mockLineLayer = {
-  sourceDescriptor: {
-    type: 'ES_PEW_PEW',
-    id: 'uuid.v4()',
-    indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
-    sourceGeoField: 'source.geo.location',
-    destGeoField: 'destination.geo.location',
-    metrics: [
-      { type: 'sum', field: 'source.bytes', label: 'source.bytes' },
-      { type: 'sum', field: 'destination.bytes', label: 'destination.bytes' },
-    ],
-  },
-  style: {
-    type: 'VECTOR',
-    properties: {
-      fillColor: {
-        type: 'STATIC',
-        options: { color: '#1EA593' },
-      },
-      lineColor: {
-        type: 'STATIC',
-        options: { color: '#3185FC' },
-      },
-      lineWidth: {
-        type: 'DYNAMIC',
-        options: {
-          field: {
-            label: 'count',
-            name: 'doc_count',
-            origin: 'source',
+    type: 'GEOJSON_FILE',
+    __featureCollection: {
+      features: [
+        {
+          type: 'feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [13.399262, 52.487239],
           },
-          minSize: 1,
-          maxSize: 8,
+        },
+        {
+          type: 'feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [13.399262, 55.487239],
+          },
+        },
+        {
+          type: 'feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [14.399262, 54.487239],
+          },
+        },
+      ],
+      type: 'FeatureCollection',
+    },
+  },
+  visible: true,
+  style: {
+    type: 'VECTOR',
+    properties: {
+      fillColor: {
+        type: 'STATIC',
+        options: {
+          color: '#BC261E',
         },
       },
-      iconSize: { type: 'STATIC', options: { size: 10 } },
-      iconOrientation: {
+      lineColor: {
         type: 'STATIC',
-        options: { orientation: 0 },
+        options: {
+          color: '#fff',
+        },
       },
-      symbol: {
-        options: { symbolizeAs: 'circle', symbolId: 'airfield' },
+      lineWidth: {
+        type: 'STATIC',
+        options: {
+          size: 2,
+        },
+      },
+      iconSize: {
+        type: 'STATIC',
+        options: {
+          size: 6,
+        },
       },
     },
   },
-  id: 'uuid.v4()',
-  label: `filebeat-* | Line`,
-  minZoom: 0,
-  maxZoom: 24,
-  alpha: 0.5,
-  visible: true,
-  applyGlobalQuery: true,
   type: 'VECTOR',
-  query: { query: '', language: 'kuery' },
+};
+
+export const mockUpPointsLayer = {
+  id: 'up_points',
+  label: 'Up Locations',
+  sourceDescriptor: {
+    type: 'GEOJSON_FILE',
+    __featureCollection: {
+      features: [
+        {
+          type: 'feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [13.399262, 52.487239],
+          },
+        },
+        {
+          type: 'feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [13.399262, 55.487239],
+          },
+        },
+        {
+          type: 'feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [14.399262, 54.487239],
+          },
+        },
+      ],
+      type: 'FeatureCollection',
+    },
+  },
+  visible: true,
+  style: {
+    type: 'VECTOR',
+    properties: {
+      fillColor: {
+        type: 'STATIC',
+        options: {
+          color: '#98A2B2',
+        },
+      },
+      lineColor: {
+        type: 'STATIC',
+        options: {
+          color: '#fff',
+        },
+      },
+      lineWidth: {
+        type: 'STATIC',
+        options: {
+          size: 2,
+        },
+      },
+      iconSize: {
+        type: 'STATIC',
+        options: {
+          size: 6,
+        },
+      },
+    },
+  },
+  type: 'VECTOR',
 };
 
 export const mockLayerList = [
   {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuid.v4()',
-    label: null,
+    id: 'low_poly_layer',
+    label: 'World countries',
     minZoom: 0,
     maxZoom: 24,
     alpha: 1,
+    sourceDescriptor: {
+      id: 'b7486535-171b-4d3b-bb2e-33c1a0a2854c',
+      type: 'GEOJSON_FILE',
+      __featureCollection: lowPolyLayerFeatures,
+    },
     visible: true,
-    applyGlobalQuery: true,
-    style: null,
-    type: 'VECTOR_TILE',
+    style: {
+      type: 'VECTOR',
+      properties: {
+        fillColor: {
+          type: 'STATIC',
+          options: {
+            color: '#cad3e4',
+          },
+        },
+        lineColor: {
+          type: 'STATIC',
+          options: {
+            color: '#fff',
+          },
+        },
+        lineWidth: {
+          type: 'STATIC',
+          options: {
+            size: 0,
+          },
+        },
+        iconSize: {
+          type: 'STATIC',
+          options: {
+            size: 6,
+          },
+        },
+      },
+    },
+    type: 'VECTOR',
   },
-  mockLineLayer,
-  mockDestinationLayer,
-  mockSourceLayer,
-];
-
-export const mockLayerListDouble = [
-  {
-    sourceDescriptor: { type: 'EMS_TMS', isAutoSelect: true },
-    id: 'uuid.v4()',
-    label: null,
-    minZoom: 0,
-    maxZoom: 24,
-    alpha: 1,
-    visible: true,
-    applyGlobalQuery: true,
-    style: null,
-    type: 'VECTOR_TILE',
-  },
-  mockLineLayer,
-  mockDestinationLayer,
-  mockSourceLayer,
-  mockLineLayer,
-  mockDestinationLayer,
-  mockSourceLayer,
+  mockDownPointsLayer,
+  mockUpPointsLayer,
 ];
