@@ -17,29 +17,21 @@
  * under the License.
  */
 
-import { PromiseType } from 'utility-types';
-export { $Values } from 'utility-types';
+import { rangeControlFactory } from './range_control_factory';
+import { listControlFactory } from './list_control_factory';
+import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 
-/**
- * Returns wrapped type of a promise.
- */
-export type UnwrapPromise<T extends Promise<any>> = PromiseType<T>;
-
-/**
- * Minimal interface for an object resembling an `Observable`.
- */
-export interface ObservableLike<T> {
-  subscribe(observer: (value: T) => void): void;
+export function controlFactory(controlParams: ControlParams) {
+  let factory = null;
+  switch (controlParams.type) {
+    case CONTROL_TYPES.RANGE:
+      factory = rangeControlFactory;
+      break;
+    case CONTROL_TYPES.LIST:
+      factory = listControlFactory;
+      break;
+    default:
+      throw new Error(`Unhandled control type ${controlParams.type}`);
+  }
+  return factory;
 }
-
-/**
- * Returns wrapped type of an observable.
- */
-export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U>
-  ? U
-  : never;
-
-/**
- * Converts a type to a `Promise`, unless it is already a `Promise`. Useful when proxying the return value of a possibly async function.
- */
-export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;

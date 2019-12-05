@@ -25,7 +25,7 @@ import { LegacyPluginApi, LegacyPluginInitializer } from '../../../../src/legacy
 const inputControlVisPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPluginApi) =>
   new Plugin({
     id: 'input_control_vis',
-    require: ['kibana'],
+    require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),

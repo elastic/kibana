@@ -19,11 +19,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-// @ts-ignore
 import { VisController } from './vis_controller';
-// @ts-ignore
 import { ControlsTab } from './components/editor/controls_tab';
-// @ts-ignore
 import { OptionsTab } from './components/editor/options_tab';
 import { Status, defaultFeedbackMessage } from '../../visualizations/public';
 

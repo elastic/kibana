@@ -17,29 +17,19 @@
  * under the License.
  */
 
-import { PromiseType } from 'utility-types';
-export { $Values } from 'utility-types';
-
-/**
- * Returns wrapped type of a promise.
- */
-export type UnwrapPromise<T extends Promise<any>> = PromiseType<T>;
-
-/**
- * Minimal interface for an object resembling an `Observable`.
- */
-export interface ObservableLike<T> {
-  subscribe(observer: (value: T) => void): void;
-}
-
-/**
- * Returns wrapped type of an observable.
- */
-export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U>
-  ? U
-  : never;
-
-/**
- * Converts a type to a `Promise`, unless it is already a `Promise`. Useful when proxying the return value of a possibly async function.
- */
-export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
+export const getIndexPatternsMock = () => {
+  return Promise.resolve([
+    {
+      id: 'indexPattern1',
+      attributes: {
+        title: 'indexPattern1',
+      },
+    },
+    {
+      id: 'indexPattern2',
+      attributes: {
+        title: 'indexPattern2',
+      },
+    },
+  ]);
+};
