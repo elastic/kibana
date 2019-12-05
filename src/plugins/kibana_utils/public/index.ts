@@ -27,3 +27,4 @@ export * from './store';
 export * from './errors';
 export * from './field_mapping';
 export * from './storage';
+export * from './storage/hashed_item_store';

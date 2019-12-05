@@ -74,6 +74,8 @@ interface Props {
   transformsLoading: boolean;
 }
 
+const TransformTable = transformTableFactory<TransformListRow>();
+
 export const TransformList: FC<Props> = ({
   errorMessage,
   isInitialized,
@@ -374,8 +376,6 @@ export const TransformList: FC<Props> = ({
   const selection = {
     onSelectionChange: (selected: TransformListRow[]) => setTransformSelection(selected),
   };
-
-  const TransformTable = transformTableFactory<TransformListRow>();
 
   return (
     <div data-test-subj="transformListTableContainer">
