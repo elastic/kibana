@@ -8,15 +8,10 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { App, Props } from './app';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { Document, SavedObjectStore } from '../persistence';
+import { Document } from '../persistence';
 import { mount } from 'enzyme';
 import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-const dataStartMock = dataPluginMock.createStartContract();
-
 import { TopNavMenuData } from '../../../../../../src/legacy/core_plugins/navigation/public';
-import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
 
 jest.mock('../../../../../../src/legacy/core_plugins/navigation/public/legacy', () => ({

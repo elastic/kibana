@@ -5,17 +5,8 @@
  */
 
 import React from 'react';
-import {
-  ExpressionRendererProps,
-  ExpressionsSetup,
-  ExpressionsStart,
-} from '../../../../../../src/plugins/expressions/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { embeddablePluginMock } from '../../../../../../src/plugins/embeddable/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
+import { ExpressionRendererProps } from '../../../../../../src/plugins/expressions/public';
 import { DatasourcePublicAPI, FramePublicAPI, Visualization, Datasource } from '../types';
-import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './plugin';
 
 export function createMockVisualization(): jest.Mocked<Visualization> {
   return {
@@ -83,42 +74,9 @@ export function createMockFramePublicAPI(): FrameMock {
   };
 }
 
-type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
-
-export type MockedSetupDependencies = Omit<EditorFrameSetupPlugins, 'expressions'> & {
-  expressions: jest.Mocked<ExpressionsSetup>;
-};
-
-export type MockedStartDependencies = Omit<EditorFrameStartPlugins, 'expressions'> & {
-  expressions: jest.Mocked<ExpressionsStart>;
-};
-
 export function createExpressionRendererMock(): jest.Mock<
   React.ReactElement,
   [ExpressionRendererProps]
 > {
   return jest.fn(_ => <span />);
-}
-
-export function createMockSetupDependencies() {
-  return ({
-    data: {},
-    embeddable: embeddablePluginMock.createSetupContract(),
-    expressions: expressionsPluginMock.createSetupContract(),
-    chrome: {
-      getSavedObjectsClient: () => {},
-    },
-  } as unknown) as MockedSetupDependencies;
-}
-
-export function createMockStartDependencies() {
-  return ({
-    data: {
-      indexPatterns: {
-        indexPatterns: {},
-      },
-    },
-    embeddable: embeddablePluginMock.createStartContract(),
-    expressions: expressionsPluginMock.createStartContract(),
-  } as unknown) as MockedStartDependencies;
 }
