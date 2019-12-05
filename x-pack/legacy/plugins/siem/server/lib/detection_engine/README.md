@@ -50,7 +50,7 @@ Go to the scripts folder `cd kibana/x-pack/legacy/plugins/siem/server/lib/detect
 
 ```sh
 ./hard_reset.sh
-./post_signal.sh
+./post_rule.sh
 ```
 
 which will:
