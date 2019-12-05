@@ -24,7 +24,7 @@ import angular from 'angular';
 import { uniq, noop } from 'lodash';
 
 import { Subscription } from 'rxjs';
-import { DashboardEmptyScreen } from './dashboard_empty_screen';
+import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
   subscribeWithScope,
@@ -40,7 +40,6 @@ import {
   unhashUrl,
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
-import { DashboardEmptyScreenProps } from './dashboard_empty_screen';
 import { Query, SavedQuery, IndexPatterns } from '../../../../../plugins/data/public';
 
 import {

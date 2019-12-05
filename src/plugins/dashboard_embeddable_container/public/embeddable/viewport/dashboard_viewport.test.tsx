@@ -33,10 +33,6 @@ import {
   ContactCardEmbeddableFactory,
 } from '../../embeddable_plugin_test_samples';
 import { KibanaContextProvider } from '../../../../../plugins/kibana_react/public';
-import {
-  DashboardEmptyScreen,
-  DashboardEmptyScreenProps,
-} from '../../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -122,12 +118,9 @@ test('renders DashboardViewport with no visualizations', () => {
 });
 
 test('renders DashboardEmptyScreen', () => {
-  const { props, options } = getProps();
-  const emptyScreenProps: DashboardEmptyScreenProps = {
-    onLinkClick: jest.fn(),
-    showLinkToVisualize: true,
-  };
-  props.container.updateInput({ isEmptyState: true, emptyScreenProps });
+  const renderEmptyScreen = jest.fn();
+  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
+  props.container.updateInput({ isEmptyState: true });
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
@@ -135,8 +128,9 @@ test('renders DashboardEmptyScreen', () => {
       </KibanaContextProvider>
     </I18nProvider>
   );
-  const dashboardEmptyScreen = component.find(DashboardEmptyScreen);
-  expect(dashboardEmptyScreen.length).toBe(1);
+  const dashboardEmptyScreenDiv = component.find('.dshDashboardEmptyScreen');
+  expect(dashboardEmptyScreenDiv.length).toBe(1);
+  expect(renderEmptyScreen).toHaveBeenCalled();
 
   component.unmount();
 });
@@ -174,12 +168,10 @@ test('renders exit full screen button when in full screen mode', async () => {
 });
 
 test('renders exit full screen button when in full screen mode and empty screen', async () => {
-  const { props, options } = getProps();
-  const emptyScreenProps: DashboardEmptyScreenProps = {
-    onLinkClick: jest.fn(),
-    showLinkToVisualize: true,
-  };
-  props.container.updateInput({ isEmptyState: true, isFullScreenMode: true, emptyScreenProps });
+  const renderEmptyScreen = jest.fn();
+  renderEmptyScreen.mockReturnValue(React.createElement('div'));
+  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
+  props.container.updateInput({ isEmptyState: true, isFullScreenMode: true });
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
@@ -194,7 +186,7 @@ test('renders exit full screen button when in full screen mode and empty screen'
       .type() as any).name
   ).toBe('ExitFullScreenButton');
 
-  props.container.updateInput({ isFullScreenMode: false });
+  props.container.updateInput({ isEmptyState: true, isFullScreenMode: false });
   component.update();
   await nextTick();
 
