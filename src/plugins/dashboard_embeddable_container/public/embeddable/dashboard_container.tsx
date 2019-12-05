@@ -42,7 +42,6 @@ import {
   KibanaReactContext,
   KibanaReactContextValue,
 } from '../../../kibana_react/public';
-import { DashboardEmptyScreenProps } from '../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
@@ -58,8 +57,7 @@ export interface DashboardContainerInput extends ContainerInput {
   panels: {
     [panelId: string]: DashboardPanelState;
   };
-  isEmptyState?: boolean;
-  emptyScreenProps?: DashboardEmptyScreenProps;
+  renderEmpty?: () => React.ReactNode;
 }
 
 interface IndexSignature {
@@ -127,7 +125,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
-          <DashboardViewport container={this} />
+          <DashboardViewport renderEmpty={this.input.renderEmpty} container={this} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom
@@ -135,7 +133,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
-    const { viewMode, refreshConfig, timeRange, query, hidePanelTitles, filters } = this.input;
+    const {
+      viewMode,
+      refreshConfig,
+      timeRange,
+      query,
+      hidePanelTitles,
+      filters,
+      renderEmpty,
+    } = this.input;
     return {
       filters,
       hidePanelTitles,
@@ -144,6 +150,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       refreshConfig,
       viewMode,
       id,
+      renderEmpty,
     };
   }
 }

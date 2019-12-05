@@ -23,10 +23,10 @@ import { PanelState } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../kibana_react/public';
-import { DashboardEmptyScreen } from '../../../../../legacy/core_plugins/kibana/public/dashboard/dashboard_empty_screen';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
+  renderEmpty?: () => React.ReactNode;
 }
 
 interface State {
@@ -99,7 +99,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   };
 
   private renderEmptyScreen() {
-    const emptyScreenProps = this.props.container.getInput().emptyScreenProps;
+    const { renderEmpty } = this.props;
     const { isFullScreenMode } = this.state;
     return (
       <div className="dshDashboardEmptyScreen">
@@ -108,7 +108,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             onExitFullScreenMode={this.onExitFullScreenMode}
           />
         )}
-        {emptyScreenProps && <DashboardEmptyScreen {...emptyScreenProps} />}
+        {renderEmpty && renderEmpty()}
       </div>
     );
   }
@@ -135,10 +135,10 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   }
 
   public render() {
-    const { isEmptyState } = this.state;
+    const { renderEmpty } = this.props;
     return (
       <React.Fragment>
-        {isEmptyState ? this.renderEmptyScreen() : null}
+        {renderEmpty ? this.renderEmptyScreen() : null}
         {this.renderContainerScreen()}
       </React.Fragment>
     );

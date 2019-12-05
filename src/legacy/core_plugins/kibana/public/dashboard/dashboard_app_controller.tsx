@@ -24,6 +24,7 @@ import angular from 'angular';
 import { uniq, noop } from 'lodash';
 
 import { Subscription } from 'rxjs';
+import { DashboardEmptyScreen } from './dashboard_empty_screen';
 
 import {
   subscribeWithScope,
@@ -204,7 +205,8 @@ export class DashboardAppController {
       }
       const shouldShowEditHelp = $scope.getShouldShowEditHelp();
       const shouldShowViewHelp = $scope.getShouldShowViewHelp();
-
+      const emptyScreenProps = getEmptyScreenProps(shouldShowEditHelp);
+      const isEmptyState = shouldShowEditHelp || shouldShowViewHelp;
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -217,8 +219,10 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
-        isEmptyState: shouldShowEditHelp || shouldShowViewHelp,
-        emptyScreenProps: getEmptyScreenProps(shouldShowEditHelp),
+        isEmptyState,
+        renderEmpty: isEmptyState
+          ? () => <DashboardEmptyScreen {...emptyScreenProps} />
+          : undefined,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
