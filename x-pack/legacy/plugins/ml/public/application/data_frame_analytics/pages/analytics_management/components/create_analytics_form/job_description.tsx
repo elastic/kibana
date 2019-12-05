@@ -14,7 +14,7 @@ const helpText = i18n.translate('xpack.ml.dataframe.analytics.create.jobDescript
 
 interface Props {
   description: string;
-  setFormState: React.Dispatch<React.SetStateAction<object>>;
+  setFormState: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export const JobDescriptionInput: FC<Props> = ({ description, setFormState }) => (
