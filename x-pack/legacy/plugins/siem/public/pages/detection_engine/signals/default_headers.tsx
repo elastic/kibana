@@ -26,7 +26,6 @@ export const signalsHeaders: ColumnHeader[] = [
     label: i18n.SIGNALS_HEADERS_METHOD,
     width: 80,
   },
-
   {
     columnHeaderType: defaultColumnHeaderType,
     id: 'signal.rule.severity',
@@ -72,7 +71,6 @@ export const signalsHeaders: ColumnHeader[] = [
     id: 'destination.ip',
     width: 120,
   },
-
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',

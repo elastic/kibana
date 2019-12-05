@@ -51,7 +51,7 @@ export const SignalsTable = React.memo(() => {
 
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: string) => {
-      setFilterGroup(filterGroup);
+      setFilterGroup(newFilterGroup);
     },
     [setFilterGroup]
   );
