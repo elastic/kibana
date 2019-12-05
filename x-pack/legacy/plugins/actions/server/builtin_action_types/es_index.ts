@@ -24,7 +24,7 @@ const ConfigSchema = schema.object({
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-// see: https://www.elastic.co/guide/en/elastic-stack-overview/current/actions-index.html
+// see: https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-index.html
 // - timeout not added here, as this seems to be a generic thing we want to do
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
 const ParamsSchema = schema.object({
