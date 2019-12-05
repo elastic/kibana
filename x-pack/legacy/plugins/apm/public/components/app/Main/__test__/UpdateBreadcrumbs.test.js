@@ -11,8 +11,6 @@ import { UpdateBreadcrumbs } from '../UpdateBreadcrumbs';
 import * as kibanaCore from '../../../../../../observability/public/context/kibana_core';
 import { getRoutes } from '../route_config';
 
-jest.mock('ui/index_patterns');
-
 const coreMock = {
   chrome: {
     setBreadcrumbs: jest.fn()

@@ -17,6 +17,7 @@ import {
   getColumnWidthFromType,
   getPinTooltip,
   stringifyEvent,
+  SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from './helpers';
 
 describe('helpers', () => {
@@ -258,8 +259,20 @@ describe('helpers', () => {
       expect(getActionsColumnWidth(false)).toEqual(DEFAULT_ACTIONS_COLUMN_WIDTH);
     });
 
+    test('returns the default actions column width + checkbox width when isEventViewer is false and showCheckboxes is true', () => {
+      expect(getActionsColumnWidth(false, true)).toEqual(
+        DEFAULT_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
+      );
+    });
+
     test('returns the events viewer actions column width when isEventViewer is true', () => {
       expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
+    });
+
+    test('returns the events viewer actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {
+      expect(getActionsColumnWidth(true, true)).toEqual(
+        EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
+      );
     });
   });
 });
