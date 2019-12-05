@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
 import { EuiSpacer } from '@elastic/eui';
+import React, { Fragment } from 'react';
 import { PackageInfo } from '../../../common/types';
-import { Screenshots } from './screenshots';
 import { Readme } from './readme';
+import { Screenshots } from './screenshots';
 
 export function OverviewPanel(props: PackageInfo) {
   const { screenshots, readme, name, version } = props;

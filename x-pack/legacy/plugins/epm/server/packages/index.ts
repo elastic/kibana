@@ -14,9 +14,9 @@ import {
 } from '../../common/types';
 
 export * from './get';
+export * from './handlers';
 export * from './install';
 export * from './remove';
-export * from './handlers';
 
 // only Kibana Assets use Saved Objects at this point
 export const savedObjectTypes: AssetType[] = Object.values(KibanaAssetType);

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getAssets } from './assets';
 import { RegistryPackage } from '../../common/types';
+import { getAssets } from './assets';
 
 const tests = [
   {

@@ -7,13 +7,13 @@
 import { HttpHandler } from 'src/core/public';
 import {
   getCategoriesPath,
+  getFilePath,
   getInfoPath,
   getInstallDatasourcePath,
   getInstallPath,
   getListPath,
   getRemovePath,
   ListParams,
-  getFilePath,
 } from '../common/routes';
 import {
   AssetReference,

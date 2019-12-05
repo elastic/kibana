@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, ReactNode } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
+import React, { FunctionComponent, ReactNode } from 'react';
 
 interface ColumnProps {
   children?: ReactNode;

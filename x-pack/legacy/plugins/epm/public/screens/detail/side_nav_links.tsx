@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
 import { EuiButtonEmpty, EuiButtonEmptyProps } from '@elastic/eui';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { DetailViewPanelName } from '../../';
 import { PackageInfo } from '../../../common/types';
 import { entries } from '../../../common/type_utils';
-import { DetailViewPanelName } from '../../';
 import { useLinks } from '../../hooks';
 
 export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {

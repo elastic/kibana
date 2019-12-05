@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { EuiCallOut, EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import React from 'react';
-import { EuiConfirmModal, EuiOverlayMask, EuiCallOut } from '@elastic/eui';
 
 interface ConfirmPackageDeleteProps {
   onCancel: () => void;

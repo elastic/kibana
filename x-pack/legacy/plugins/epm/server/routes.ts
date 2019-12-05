@@ -5,9 +5,9 @@
  */
 import { PLUGIN } from '../common/constants';
 import * as CommonRoutes from '../common/routes';
-import { ServerRoute } from './types';
-import * as Packages from './packages/handlers';
 import * as Datasources from './datasources/handlers';
+import * as Packages from './packages/handlers';
+import { ServerRoute } from './types';
 
 // Manager public API paths
 export const routes: ServerRoute[] = [

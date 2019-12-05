@@ -4,22 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { URL } from 'url';
 import { Response } from 'node-fetch';
+import { URL } from 'url';
 import {
-  AssetsGroupedByServiceByType,
   AssetParts,
+  AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
   KibanaAssetType,
   RegistryList,
   RegistryPackage,
 } from '../../common/types';
+import { epmConfigStore } from '../config';
 import { cacheGet, cacheSet } from './cache';
 import { ArchiveEntry, untarBuffer } from './extract';
-import { fetchUrl, getResponseStream, getResponse } from './requests';
+import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
-import { epmConfigStore } from '../config';
 
 export { ArchiveEntry } from './extract';
 
