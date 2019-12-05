@@ -12,9 +12,7 @@ import styled from 'styled-components';
 import { ResolverState, ResolverAction, Vector2 } from '../types';
 import * as selectors from '../store/selectors';
 
-export const AppRoot: React.FC<{
-  store: Store<ResolverState, ResolverAction>;
-}> = React.memo(({ store }) => {
+export const AppRoot = React.memo(({ store }: { store: Store<ResolverState, ResolverAction> }) => {
   return (
     <Provider store={store}>
       <Diagnostic />
@@ -60,6 +58,7 @@ const Diagnostic = styled(
       (event: React.MouseEvent<HTMLDivElement>) => {
         dispatch({
           type: 'userStartedPanning',
+          // TODO why is this negative?
           payload: [event.clientX, -event.clientY],
         });
       },
@@ -71,6 +70,7 @@ const Diagnostic = styled(
         if (event.buttons === 1 && userIsPanning) {
           dispatch({
             type: 'userContinuedPanning',
+            // TODO why is this negative?
             payload: [event.clientX, -event.clientY],
           });
         }
@@ -148,22 +148,31 @@ const Diagnostic = styled(
     );
   })
 )`
+  /* TODO, this is not a concern of Resolver. its parent needs to do this probably? */
   display: flex;
   flex-grow: 1;
   position: relative;
 `;
 
-function useAutoUpdatingClientRect() {
+/**
+ * Returns a DOMRect sometimes, and a `ref` callback. Put the `ref` as the `ref` property of an element, and
+ * DOMRect will be the result of getBoundingClientRect on it.
+ * Updates automatically when the window resizes. TODO: better Englishe here
+ */
+function useAutoUpdatingClientRect(): [DOMRect | undefined, (node: Element | null) => void] {
   const [rect, setRect] = useState<DOMRect>();
   const nodeRef = useRef<Element>();
 
   const ref = useCallback((node: Element | null) => {
+    // why do we have to deal /w both null and undefined? TODO
     nodeRef.current = node === null ? undefined : node;
     if (node !== null) {
       setRect(node.getBoundingClientRect());
     }
   }, []);
 
+  // TODO, this isn't really a concern of Resolver.
+  // The parent should inform resolver that it needs to rerender
   useEffect(() => {
     window.addEventListener('resize', handler, { passive: true });
     return () => {
@@ -175,7 +184,7 @@ function useAutoUpdatingClientRect() {
       }
     }
   }, []);
-  return [rect, ref] as const;
+  return [rect, ref];
 }
 
 const DiagnosticDot = styled(

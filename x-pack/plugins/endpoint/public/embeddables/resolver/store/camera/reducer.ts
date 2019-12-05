@@ -76,7 +76,9 @@ export const cameraReducer: Reducer<CameraState, ResolverAction> = (
     // TODO make these offsets be in world coordinates as well
     if (userIsPanning(state)) {
       return {
+        // This logic means, if the user calls `userContinuedPanning` without starting panning first, we start automatically basically?
         ...state,
+        panningOrigin: state.panningOrigin === null ? action.payload : state.panningOrigin,
         currentPanningOffset: action.payload,
       };
     } else {

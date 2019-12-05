@@ -78,7 +78,10 @@ describe('zooming', () => {
         store.dispatch(action);
       });
       it('should have focused the world position 50, 50', () => {
-        expectVectorsToBeClose(store.getState().latestFocusedWorldCoordinates, [50, 50]);
+        const coords = store.getState().latestFocusedWorldCoordinates;
+        expect(coords).not.toBeNull();
+        // TODO, revisit this
+        expectVectorsToBeClose(coords!, [50, 50]);
       });
       describe('when the user zooms in by 0.5 zoom units', () => {
         beforeEach(() => {

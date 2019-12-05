@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Vector2, CameraState, CameraStateWhenPanning, AABB } from '../../types';
+import { Vector2, CameraState, AABB } from '../../types';
 import { subtract, divide, add, applyMatrix3 } from '../../lib/vector2';
 import { multiply, add as addMatrix } from '../../lib/matrix3';
 import {
@@ -92,7 +92,7 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
 };
 
 export function translation(state: CameraState): Vector2 {
-  if (userIsPanning(state)) {
+  if (state.currentPanningOffset !== null && state.panningOrigin !== null) {
     return add(
       state.translationNotCountingCurrentPanning,
       divide(subtract(state.currentPanningOffset, state.panningOrigin), state.scaling)
@@ -102,6 +102,7 @@ export function translation(state: CameraState): Vector2 {
   }
 }
 
+// TODO, can we generically invert this matrix from worldToRaster?
 export const rasterToWorld: (
   state: CameraState
 ) => (rasterPosition: Vector2) => Vector2 = state => {
@@ -157,5 +158,4 @@ export const rasterToWorld: (
 
 export const scale = (state: CameraState): Vector2 => state.scaling;
 
-export const userIsPanning = (state: CameraState): state is CameraStateWhenPanning =>
-  state.panningOrigin !== null;
+export const userIsPanning = (state: CameraState): boolean => state.panningOrigin !== null;
