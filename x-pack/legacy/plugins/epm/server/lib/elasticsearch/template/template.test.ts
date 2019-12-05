@@ -38,5 +38,5 @@ test('tests loading fields.yml', () => {
   const mappings = generateMappings(fields);
   const template = getTemplate('foo', mappings);
 
-  expect(template).toMatchSnapshot(ymlPath);
+  expect(template).toMatchSnapshot(path.basename(ymlPath));
 });

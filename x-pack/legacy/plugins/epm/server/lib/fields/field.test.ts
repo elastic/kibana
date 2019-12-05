@@ -30,6 +30,6 @@ test('tests loading fields.yml', () => {
     processFields(fields);
 
     // Check that content file and generated file are equal
-    expect(fields).toMatchSnapshot(file);
+    expect(fields).toMatchSnapshot(path.basename(file));
   }
 });

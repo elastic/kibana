@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`tests loading fields.yml: /Users/ruflin/Dev/elastic/kibana/x-pack/legacy/plugins/epm/server/lib/fields/tests/base.yml 1`] = `
+exports[`tests loading fields.yml: base.yml 1`] = `
 [
   {
     "name": "user",
@@ -41,7 +41,7 @@ exports[`tests loading fields.yml: /Users/ruflin/Dev/elastic/kibana/x-pack/legac
 ]
 `;
 
-exports[`tests loading fields.yml: /Users/ruflin/Dev/elastic/kibana/x-pack/legacy/plugins/epm/server/lib/fields/tests/coredns.logs.yml 1`] = `
+exports[`tests loading fields.yml: coredns.logs.yml 1`] = `
 [
   {
     "name": "coredns",
