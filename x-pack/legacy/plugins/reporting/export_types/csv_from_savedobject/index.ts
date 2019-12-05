@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../common/constants';
+import {
+  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+  LICENSE_TYPE_TRIAL,
+  LICENSE_TYPE_BASIC,
+  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+} from '../../common/constants';
 import { ExportTypeDefinition, ImmediateCreateJobFn, ImmediateExecuteFn } from '../../types';
 import { createJobFactory } from './server/create_job';
 import { executeJobFactory } from './server/execute_job';
@@ -29,5 +36,11 @@ export const getExportType = (): ExportTypeDefinition<
   jobContentExtension: 'csv',
   createJobFactory,
   executeJobFactory,
-  validLicenses: ['trial', 'basic', 'standard', 'gold', 'platinum'],
+  validLicenses: [
+    LICENSE_TYPE_TRIAL,
+    LICENSE_TYPE_BASIC,
+    LICENSE_TYPE_STANDARD,
+    LICENSE_TYPE_GOLD,
+    LICENSE_TYPE_PLATINUM,
+  ],
 });

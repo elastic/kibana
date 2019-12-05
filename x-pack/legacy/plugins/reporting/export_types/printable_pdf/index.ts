@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PDF_JOB_TYPE as jobType } from '../../common/constants';
+import {
+  PDF_JOB_TYPE as jobType,
+  LICENSE_TYPE_TRIAL,
+  LICENSE_TYPE_STANDARD,
+  LICENSE_TYPE_GOLD,
+  LICENSE_TYPE_PLATINUM,
+} from '../../common/constants';
 import { ExportTypeDefinition, ESQueueCreateJobFn, ESQueueWorkerExecuteFn } from '../../types';
 import { createJobFactory } from './server/create_job';
 import { executeJobFactory } from './server/execute_job';
@@ -23,5 +29,10 @@ export const getExportType = (): ExportTypeDefinition<
   jobContentExtension: 'pdf',
   createJobFactory,
   executeJobFactory,
-  validLicenses: ['trial', 'standard', 'gold', 'platinum'],
+  validLicenses: [
+    LICENSE_TYPE_TRIAL,
+    LICENSE_TYPE_STANDARD,
+    LICENSE_TYPE_GOLD,
+    LICENSE_TYPE_PLATINUM,
+  ],
 });
