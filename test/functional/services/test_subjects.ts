@@ -29,6 +29,7 @@ interface ExistsOptions {
 
 interface SetValueOptions {
   clearWithKeyboard?: boolean;
+  clearCharByChar?: boolean;
   typeCharByChar?: boolean;
 }
 
@@ -183,7 +184,11 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       options: SetValueOptions = {}
     ): Promise<void> {
       return await retry.try(async () => {
-        const { clearWithKeyboard = false, typeCharByChar = false } = options;
+        const {
+          clearWithKeyboard = false,
+          clearCharByChar = false,
+          typeCharByChar = false,
+        } = options;
         log.debug(`TestSubjects.setValue(${selector}, ${text})`);
         await this.click(selector);
         // in case the input element is actually a child of the testSubject, we
@@ -191,7 +196,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
         // clicking on the testSubject
         const input = await find.activeElement();
         if (clearWithKeyboard === true) {
-          await input.clearValueWithKeyboard();
+          await input.clearValueWithKeyboard({ charByChar: clearCharByChar });
         } else {
           await input.clearValue();
         }
