@@ -10,6 +10,7 @@ import { multiply, add as addMatrix } from '../../lib/matrix3';
 import {
   inverseOrthographicProjection,
   scalingTransformation,
+  orthographicProjection,
   translationTransformation,
 } from '../../lib/transformation';
 
@@ -60,20 +61,33 @@ export const worldToRaster: (state: CameraState) => (worldPosition: Vector2) => 
     clippingPlaneBottom,
   } = rasterCameraProperties(state);
 
-  return ([worldX, worldY]) => {
-    const [translationX, translationY] = translation(state);
+  const projection = multiply(
+    // 5. convert from 0->2 to 0->rasterWidth (or height)
+    scalingTransformation([renderWidth / 2, renderHeight / 2]),
+    addMatrix(
+      // 4. add one to change range from -1->1 to 0->2
+      [0, 0, 1, 0, 0, 1, 0, 0, 0],
+      multiply(
+        // 3. invert y since CSS has inverted y
+        scalingTransformation([1, -1]),
+        multiply(
+          // 2. scale to clipping plane
+          orthographicProjection(
+            clippingPlaneTop,
+            clippingPlaneRight,
+            clippingPlaneBottom,
+            clippingPlaneLeft
+          ),
+          // 1. adjust for camera
+          translationTransformation(translation(state))
+        )
+      )
+    )
+  );
 
-    const [xNdc, yNdc] = orthographicProjection(
-      worldX + translationX,
-      worldY + translationY,
-      clippingPlaneTop,
-      clippingPlaneRight,
-      clippingPlaneBottom,
-      clippingPlaneLeft
-    );
-
-    // ndc to raster
-    return [(renderWidth * (xNdc + 1)) / 2, (renderHeight * (-yNdc + 1)) / 2];
+  // TODO this no longer needs to be a function, just a matrix now
+  return worldPosition => {
+    return applyMatrix3(worldPosition, projection);
   };
 };
 
@@ -99,42 +113,43 @@ export const rasterToWorld: (
     clippingPlaneLeft,
     clippingPlaneBottom,
   } = rasterCameraProperties(state);
-  const [translationX, translationY] = translation(state);
-
-  // Translate for the 'camera'
-  // prettier-ignore
-  const translationMatrix = [
-    0, 0, -translationX,
-    0, 0, -translationY,
-    0, 0, 0
-  ] as const;
 
   // TODO, define screen, raster, and world coordinates
 
-  // Convert a vector in screen space to NDC space
-  const screenToNDC = multiply(
-    scalingTransformation([1, -1, 1]),
-    // prettier-ignore
-    [
-      2 / renderWidth,  0, -1,
-      2 / renderHeight, 0, -1,
-      0,                0,  0
-    ] as const
-  );
+  const [translationX, translationY] = translation(state);
 
   const projection = addMatrix(
+    // 4. Translate for the 'camera'
+    // prettier-ignore
+    [
+      0, 0, -translationX,
+      0, 0, -translationY,
+      0, 0, 0
+    ] as const,
     multiply(
+      // 3. make values in range of clipping planes
       inverseOrthographicProjection(
         clippingPlaneTop,
         clippingPlaneRight,
         clippingPlaneBottom,
         clippingPlaneLeft
       ),
-      screenToNDC
-    ),
-    translationMatrix
+      multiply(
+        // 2 Invert Y since CSS has inverted y
+        scalingTransformation([1, -1]),
+        // 1. convert screen coordinates to NDC
+        // e.g. for x-axis, divide by renderWidth then multiply by 2 and subtract by one so the value is in range of -1->1
+        // prettier-ignore
+        [
+          2 / renderWidth,  0, -1,
+          2 / renderHeight, 0, -1,
+          0,                0,  0
+        ] as const
+      )
+    )
   );
 
+  // TODO, this no longer needs to be a function, can just be a matrix
   return rasterPosition => {
     return applyMatrix3(rasterPosition, projection);
   };
@@ -144,29 +159,3 @@ export const scale = (state: CameraState): Vector2 => state.scaling;
 
 export const userIsPanning = (state: CameraState): state is CameraStateWhenPanning =>
   state.panningOrigin !== null;
-
-/**
- * Adjust x, y to be bounded, in scale, of a clipping plane defined by top, right, bottom, left
- *
- * See explanation:
- * https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix
- */
-function orthographicProjection(
-  x: number,
-  y: number,
-  top: number,
-  right: number,
-  bottom: number,
-  left: number
-): [number, number] {
-  const m11 = 2 / (right - left); // adjust x scale to match ndc (-1, 1) bounds
-  const m41 = -((right + left) / (right - left));
-
-  const m22 = 2 / (top - bottom); // adjust y scale to match ndc (-1, 1) bounds
-  const m42 = -((top + bottom) / (top - bottom));
-
-  const xPrime = x * m11 + m41;
-  const yPrime = y * m22 + m42;
-
-  return [xPrime, yPrime];
-}
