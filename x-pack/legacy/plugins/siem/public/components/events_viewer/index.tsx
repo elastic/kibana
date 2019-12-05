@@ -83,7 +83,6 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
-    defaultFilters = {},
     defaultModel,
     defaultIndices,
     deleteEventQuery,

@@ -25,7 +25,8 @@ export const mockEventViewerResponse = [
           'source.ip',
           'destination.ip',
         ],
-        filterQuery: '',
+        filterQuery:
+          '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"range":{"@timestamp":{"gte":1566943856794}}}],"minimum_should_match":1}},{"bool":{"should":[{"range":{"@timestamp":{"lte":1566857456791}}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
         sourceId: 'default',
         pagination: { limit: 25, cursor: null, tiebreaker: null },
         sortField: { sortFieldId: '@timestamp', direction: 'desc' },
