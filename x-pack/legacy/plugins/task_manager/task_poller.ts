@@ -8,101 +8,89 @@
  * This module contains the logic for polling the task manager index for new work.
  */
 
-import { Subject, Subscription, Observable, interval } from 'rxjs';
-import { buffer, throttle } from 'rxjs/operators';
-import { Result, asOk, asErr } from './lib/result_type';
-import { Logger } from './types';
+import { Subject, merge, partition, interval, of, Observable } from 'rxjs';
+import { mapTo, buffer, filter, mergeScan, concatMap } from 'rxjs/operators';
 
-type WorkFn<H, T> = (...params: H[]) => Promise<T>;
+import { pipe } from 'fp-ts/lib/pipeable';
+import { Option, map as mapOptional, isSome } from 'fp-ts/lib/Option';
+import { pullFromSet } from './lib/pull_from_set';
+import { Result, asOk, asErr } from './lib/result_type';
+
+type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
 interface Opts<T, H> {
   pollInterval: number;
-  logger: Logger;
-  work: WorkFn<H, T>;
+  getCapacity: () => number;
+  pollRequests$: Subject<Option<T>>;
+  work: WorkFn<T, H>;
 }
 
 /**
- * Performs work on a scheduled interval, logging any errors. This waits for work to complete
- * (or error) prior to attempting another run.
+ * constructs a new TaskPoller stream, which emits events on demand and on a scheduled interval, waiting for capacity to be available before emitting more events.
+ *
+ * @param opts
+ * @prop {number} pollInterval - How often, in milliseconds, we will an event be emnitted, assuming there's capacity to do so
+ * @prop {() => number} getCapacity - A function specifying whether there is capacity to emit new events
+ * @prop {Observable<Option<T>>} pollRequests$ - A stream of requests for polling which can provide an optional argument for the polling phase
+ *
+ * @returns {Observable<Set<T>>} - An observable which emits an event whenever a polling event is due to take place, providing access to a singleton Set representing a queue
+ *  of unique request argumets of type T. The queue holds all the buffered request arguments streamed in via pollRequests$
  */
-export class TaskPoller<T, H> {
-  private logger: Logger;
-  private work: WorkFn<H, T>;
-  private poller$: Observable<H[]>;
-  private pollPhaseResults$: Subject<Result<T, Error>>;
-  private claimRequestQueue$: Subject<H>;
-  private pollingSubscription: Subscription;
+export function createTaskPoller<T, H>({
+  pollRequests$,
+  pollInterval,
+  getCapacity,
+  work,
+}: Opts<T, H>): Observable<Result<H, string>> {
+  const [
+    // requests have arguments to be passed to polling events
+    requests$,
+    // nudge rquests try to cause a polling event early (prior to an interval expiring)
+    // but if there is no capacity, they are ignored
+    nudgeRequests$,
+  ] = partition(pollRequests$, req => isSome(req));
 
-  /**
-   * Constructs a new TaskPoller.
-   *
-   * @param opts
-   * @prop {number} pollInterval - How often, in milliseconds, we will run the work function
-   * @prop {Logger} logger - The task manager logger
-   * @prop {WorkFn} work - An empty, asynchronous function that performs the desired work
-   */
-  constructor(opts: Opts<T, H>) {
-    this.logger = opts.logger;
-    this.work = opts.work;
+  const hasCapacity = () => getCapacity() > 0;
 
-    this.pollingSubscription = Subscription.EMPTY;
-    this.pollPhaseResults$ = new Subject();
-    this.claimRequestQueue$ = new Subject<H>();
-    this.poller$ =
-      // queue of requests for work to be done, each request can provide a single
-      // argument of type `H`
-      this.claimRequestQueue$.pipe(
-        // buffer these requests (so that multiple requests get flattened into
-        // a single request which receives an array of arguments of type `H`)
-        buffer(
-          // flush this buffer at the fixed interval specified under `pollInterval`
-          interval(opts.pollInterval).pipe(
-            throttle(
-              // only emit one interval event and then ignore every subsequent interval
-              // event until a corresponding completion of `attemptWork`. This prevents
-              // us from flushing the request buffer until the work has been completed
-              // the previous calls to `attemptWork`
-              () => this.pollPhaseResults$
-            )
-          )
-        )
-      );
-  }
+  // emit an event on a fixed interval, but only if there's capacity
+  const pollOnInterval$ = interval(pollInterval).pipe(filter(hasCapacity));
+  return merge(
+    // buffer all requests, releasing them whenever an interval expires & there's capacity
+    requests$.pipe(buffer(pollOnInterval$)),
+    // emit an event when we're nudged to poll for work, as long as there's capacity
+    nudgeRequests$.pipe(filter(hasCapacity), mapTo([]))
+  ).pipe(
+    // buffer all requests in a single set (to remove duplicates) as we don't want
+    // work to take place in parallel (it could cause Task Manager to pull in the same
+    // task twice)
+    mergeScan((queue, requests) => of(pushOptionalValuesIntoSet(queue, requests)), new Set<T>()),
+    // take as many argumented calls as we have capacity for and call `work` with
+    // those arguments. If the queue is empty this will still trigger work to be done
+    concatMap(async (set: Set<T>) => {
+      const workArguments = pullFromSet(set, getCapacity());
+      try {
+        const workResult = await work(...workArguments);
+        return asOk(workResult);
+      } catch (err) {
+        return asErr(
+          `Failed to poll for work${
+            workArguments.length ? ` [${workArguments.join()}]` : ``
+          }: ${err}`
+        );
+      }
+    })
+  );
+}
 
-  /**
-   * Starts the poller. If the poller is already running, this has no effect.
-   */
-  public async start() {
-    if (this.pollingSubscription && !this.pollingSubscription.closed) {
-      return;
-    }
-
-    this.pollingSubscription = this.poller$.subscribe(requests => {
-      this.attemptWork(...requests);
-    });
-  }
-
-  /**
-   * Stops the poller.
-   */
-  public stop() {
-    this.pollingSubscription.unsubscribe();
-  }
-
-  public queueWork(request: H) {
-    this.claimRequestQueue$.next(request);
-  }
-
-  /**
-   * Runs the work function, this is called in respose to the polling stream
-   */
-  private attemptWork = async (...requests: H[]) => {
-    try {
-      const workResult = await this.work(...requests);
-      this.pollPhaseResults$.next(asOk(workResult));
-    } catch (err) {
-      this.logger.error(`Failed to poll for work: ${err}`);
-      this.pollPhaseResults$.next(asErr(err));
-    }
-  };
+function pushOptionalValuesIntoSet<T>(set: Set<T>, values: Array<Option<T>>): Set<T> {
+  values.forEach(optionalValue => {
+    pipe(
+      optionalValue,
+      mapOptional<T, T>(req => {
+        set.add(req);
+        return req;
+      })
+    );
+  });
+  return set;
 }

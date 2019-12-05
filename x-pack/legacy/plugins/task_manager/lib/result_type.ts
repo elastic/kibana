@@ -51,14 +51,14 @@ export function unwrap<T, E>(result: Result<T, E>): T | E {
   return isOk(result) ? result.value : result.error;
 }
 
-export function either<T, E>(
+export const either = curry(function<T, E>(
   onOk: (value: T) => void,
   onErr: (error: E) => void,
   result: Result<T, E>
 ): Result<T, E> {
   resolve<T, E, void>(onOk, onErr, result);
   return result;
-}
+});
 
 export async function eitherAsync<T, E>(
   onOk: (value: T) => Promise<void>,

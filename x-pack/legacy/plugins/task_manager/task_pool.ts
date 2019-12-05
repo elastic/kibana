@@ -60,6 +60,13 @@ export class TaskPool {
   }
 
   /**
+   * Gets how many workers are currently available.
+   */
+  public get hasAvailableWorkers() {
+    return this.availableWorkers > 0;
+  }
+
+  /**
    * Attempts to run the specified list of tasks. Returns true if it was able
    * to start every task in the list, false if there was not enough capacity
    * to run every task.

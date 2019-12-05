@@ -5,130 +5,281 @@
  */
 
 import _ from 'lodash';
-import { TaskPoller } from './task_poller';
-import { mockLogger, resolvable, sleep } from './test_utils';
+import { Subject } from 'rxjs';
+import { Option, none, some } from 'fp-ts/lib/Option';
+import { createTaskPoller } from './task_poller';
+import { fakeSchedulers } from 'rxjs-marbles/jest';
+import { sleep, resolvable } from './test_utils';
+import { asOk, asErr } from './lib/result_type';
 
 describe('TaskPoller', () => {
-  describe('lifecycle', () => {
-    test('logs, but does not crash if the work function fails', async done => {
-      const logger = mockLogger();
+  beforeEach(() => jest.useFakeTimers());
 
-      let count = 0;
-      const work = jest.fn(async () => {
-        ++count;
-        if (count === 1) {
-          throw new Error('Dang it!');
-        } else if (count > 1) {
-          poller.stop();
+  test(
+    'intializes the poller with the provided interval',
+    fakeSchedulers(async advance => {
+      const pollInterval = 100;
+      const halfInterval = Math.floor(pollInterval / 2);
 
-          expect(work).toHaveBeenCalledTimes(2);
-          expect(logger.error.mock.calls[0][0]).toMatchInlineSnapshot(
-            `"Failed to poll for work: Error: Dang it!"`
-          );
-
-          done();
-        }
-      });
-
-      const poller = new TaskPoller<void, void>({
-        logger,
-        pollInterval: 1,
+      const work = jest.fn(async () => true);
+      createTaskPoller<void, boolean>({
+        pollInterval,
+        getCapacity: () => 1,
         work,
-      });
+        pollRequests$: new Subject<Option<void>>(),
+      }).subscribe(() => {});
 
-      poller.start();
-    });
+      // `work` is async, we have to force a node `tick`
+      await sleep(0);
+      advance(halfInterval);
+      expect(work).toHaveBeenCalledTimes(0);
+      advance(halfInterval);
 
-    test('is stoppable', async () => {
-      const doneWorking = resolvable();
-      const work = jest.fn(async () => {
-        poller.stop();
-        doneWorking.resolve();
-      });
+      await sleep(0);
+      expect(work).toHaveBeenCalledTimes(1);
 
-      const poller = new TaskPoller<void, void>({
-        logger: mockLogger(),
-        pollInterval: 1,
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(2);
+    })
+  );
+
+  test(
+    'filters interval polling on capacity',
+    fakeSchedulers(async advance => {
+      const pollInterval = 100;
+
+      const work = jest.fn(async () => true);
+
+      let hasCapacity = true;
+      createTaskPoller<void, boolean>({
+        pollInterval,
         work,
-      });
+        getCapacity: () => (hasCapacity ? 1 : 0),
+        pollRequests$: new Subject<Option<void>>(),
+      }).subscribe(() => {});
 
-      poller.start();
-      await doneWorking;
-      expect(work).toHaveBeenCalledTimes(1);
-      await sleep(100);
-      expect(work).toHaveBeenCalledTimes(1);
-    });
+      expect(work).toHaveBeenCalledTimes(0);
 
-    test('disregards duplicate calls to "start"', async () => {
-      const doneWorking = resolvable();
-      const work = jest.fn(async () => {
-        await doneWorking;
-      });
-      const poller = new TaskPoller<void, void>({
-        pollInterval: 1,
-        logger: mockLogger(),
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(1);
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(2);
+
+      hasCapacity = false;
+
+      await sleep(0);
+      advance(pollInterval);
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(2);
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(2);
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(2);
+
+      hasCapacity = true;
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(3);
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(4);
+    })
+  );
+
+  test(
+    'requests with no arguments (nudge requests) are queued on-demand in between intervals',
+    fakeSchedulers(async advance => {
+      const pollInterval = 100;
+      const querterInterval = Math.floor(pollInterval / 4);
+      const halfInterval = querterInterval * 2;
+
+      const work = jest.fn(async () => true);
+      const pollRequests$ = new Subject<Option<void>>();
+      createTaskPoller<void, boolean>({
+        pollInterval,
         work,
-      });
+        getCapacity: () => 1,
+        pollRequests$,
+      }).subscribe(jest.fn());
 
-      poller.start();
-      await sleep(10);
-      poller.start();
-      poller.start();
-      await sleep(10);
-      poller.start();
-      await sleep(10);
+      expect(work).toHaveBeenCalledTimes(0);
 
-      poller.stop();
-
-      doneWorking.resolve();
-
-      await sleep(10);
-
+      await sleep(0);
+      advance(pollInterval);
       expect(work).toHaveBeenCalledTimes(1);
-    });
 
-    test('waits for work before polling', async () => {
-      const doneWorking = resolvable();
-      const work = jest.fn(async () => {
-        await sleep(10);
-        poller.stop();
-        doneWorking.resolve();
-      });
-      const poller = new TaskPoller<void, void>({
-        pollInterval: 1,
-        logger: mockLogger(),
+      advance(querterInterval);
+      await sleep(0);
+      expect(work).toHaveBeenCalledTimes(1);
+
+      pollRequests$.next(none);
+
+      expect(work).toHaveBeenCalledTimes(2);
+      expect(work).toHaveBeenNthCalledWith(2);
+
+      await sleep(0);
+      advance(querterInterval);
+      expect(work).toHaveBeenCalledTimes(2);
+
+      await sleep(0);
+      advance(halfInterval);
+      expect(work).toHaveBeenCalledTimes(3);
+    })
+  );
+
+  test(
+    'requests with no arguments (nudge requests) are dropped when there is no capacity',
+    fakeSchedulers(async advance => {
+      const pollInterval = 100;
+      const querterInterval = Math.floor(pollInterval / 4);
+      const halfInterval = querterInterval * 2;
+
+      let hasCapacity = true;
+      const work = jest.fn(async () => true);
+      const pollRequests$ = new Subject<Option<void>>();
+      createTaskPoller<void, boolean>({
+        pollInterval,
         work,
-      });
+        getCapacity: () => (hasCapacity ? 1 : 0),
+        pollRequests$,
+      }).subscribe(() => {});
 
-      poller.start();
-      await doneWorking;
+      expect(work).toHaveBeenCalledTimes(0);
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(1);
+      hasCapacity = false;
+
+      await sleep(0);
+      advance(querterInterval);
+
+      pollRequests$.next(none);
 
       expect(work).toHaveBeenCalledTimes(1);
-    });
 
-    test('queues claim requests while working', async done => {
-      let count = 0;
+      await sleep(0);
+      advance(querterInterval);
 
-      const poller = new TaskPoller<void, string>({
-        pollInterval: 1,
-        logger: mockLogger(),
-        work: jest.fn(async (first, second) => {
-          count++;
-          if (count === 1) {
-            poller.queueWork('asd');
-            poller.queueWork('123');
-          } else if (count === 2) {
-            expect(first).toEqual('asd');
-            expect(second).toEqual('123');
+      hasCapacity = true;
+      advance(halfInterval);
+      expect(work).toHaveBeenCalledTimes(2);
 
-            done();
-          } else {
-            poller.stop();
-          }
-        }),
-      });
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledTimes(3);
+    })
+  );
 
-      poller.start();
-    });
-  });
+  test(
+    'requests with arguments are emitted',
+    fakeSchedulers(async advance => {
+      const pollInterval = 100;
+
+      const work = jest.fn(async () => true);
+      const pollRequests$ = new Subject<Option<string>>();
+      createTaskPoller<string, boolean>({
+        pollInterval,
+        work,
+        getCapacity: () => 1,
+        pollRequests$,
+      }).subscribe(() => {});
+
+      advance(pollInterval);
+
+      pollRequests$.next(some('one'));
+
+      await sleep(0);
+      advance(pollInterval);
+      expect(work).toHaveBeenCalledWith('one');
+
+      pollRequests$.next(some('two'));
+
+      await sleep(0);
+      advance(pollInterval);
+
+      expect(work).toHaveBeenCalledWith('two');
+    })
+  );
+
+  test(
+    'waits for work to complete before emitting the next event',
+    fakeSchedulers(async advance => {
+      const pollInterval = 100;
+
+      const worker = resolvable();
+
+      const handler = jest.fn();
+      const pollRequests$ = new Subject<Option<string>>();
+      createTaskPoller<string, string[]>({
+        pollInterval,
+        work: async (...args) => {
+          await worker;
+          return args;
+        },
+        getCapacity: () => 5,
+        pollRequests$,
+      }).subscribe(handler);
+
+      pollRequests$.next(some('one'));
+
+      advance(pollInterval);
+
+      // work should now be in progress
+      pollRequests$.next(none);
+      pollRequests$.next(some('two'));
+      pollRequests$.next(some('three'));
+
+      advance(pollInterval);
+      await sleep(pollInterval);
+
+      expect(handler).toHaveBeenCalledTimes(0);
+
+      worker.resolve();
+
+      advance(pollInterval);
+      await sleep(pollInterval);
+
+      expect(handler).toHaveBeenCalledWith(asOk(['one']));
+
+      advance(pollInterval);
+
+      expect(handler).toHaveBeenCalledWith(asOk(['two', 'three']));
+    })
+  );
+
+  test(
+    'returns an error when polling for work fails',
+    fakeSchedulers(async advance => {
+      const pollInterval = 100;
+
+      const handler = jest.fn();
+      const pollRequests$ = new Subject<Option<string>>();
+      createTaskPoller<string, string[]>({
+        pollInterval,
+        work: async (...args) => {
+          throw new Error('failed to work');
+        },
+        getCapacity: () => 5,
+        pollRequests$,
+      }).subscribe(handler);
+
+      advance(pollInterval);
+      await sleep(0);
+
+      expect(handler).toHaveBeenCalledWith(asErr('Failed to poll for work: Error: failed to work'));
+    })
+  );
 });

@@ -933,8 +933,8 @@ if (doc['task.runAt'].size()!=0) {
       };
 
       const callCluster = jest.fn();
-      savedObjectsClient.get.mockImplementation(async (type: string) => ({
-        id,
+      savedObjectsClient.get.mockImplementation(async (type: string, objectId: string) => ({
+        id: objectId,
         type,
         attributes: {
           ..._.omit(task, 'id'),
@@ -984,8 +984,8 @@ if (doc['task.runAt'].size()!=0) {
           };
 
           const callCluster = jest.fn();
-          savedObjectsClient.get.mockImplementation(async (type: string) => ({
-            id,
+          savedObjectsClient.get.mockImplementation(async (type: string, objectId: string) => ({
+            id: objectId,
             type,
             attributes: {
               ..._.omit(task, 'id'),

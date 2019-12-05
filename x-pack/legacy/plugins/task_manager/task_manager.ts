@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Subject, merge } from 'rxjs';
+import { Subject, Observable, Subscription, merge } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { uniq } from 'lodash';
+
 import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 
-import { Option, none, some, Some, isSome } from 'fp-ts/lib/Option';
-import { either } from './lib/result_type';
+import { Option, none, some } from 'fp-ts/lib/Option';
+import { Result, either, mapErr } from './lib/result_type';
 
 import { Logger } from './types';
 import {
@@ -34,7 +34,7 @@ import {
   TaskLifecycle,
   TaskStatus,
 } from './task';
-import { TaskPoller } from './task_poller';
+import { createTaskPoller } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_runner';
 import {
@@ -77,15 +77,15 @@ type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim;
  * The public interface into the task manager system.
  */
 export class TaskManager {
-  private isStarted = false;
   private maxWorkers: number;
   private definitions: TaskDictionary<TaskDefinition>;
   private store: TaskStore;
   private logger: Logger;
   private pool: TaskPool;
   private events$: Subject<TaskLifecycleEvent>;
-
-  private poller: TaskPoller<FillPoolResult, Option<string>>;
+  private claimRequests$: Subject<Option<string>>;
+  private pollingSubscription: Subscription;
+  private poller$: Observable<Result<FillPoolResult, string>>;
 
   private startQueue: Array<() => void> = [];
   private middleware = {
@@ -130,12 +130,15 @@ export class TaskManager {
     });
 
     this.events$ = new Subject();
+    this.claimRequests$ = new Subject();
     // if we end up with only one stream, remove merge
     merge<TaskLifecycleEvent>(this.store.events).subscribe(event => this.events$.next(event));
 
-    this.poller = new TaskPoller<FillPoolResult, Option<string>>({
-      logger: this.logger,
+    this.pollingSubscription = Subscription.EMPTY;
+    this.poller$ = createTaskPoller<string, FillPoolResult>({
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
+      getCapacity: () => this.pool.availableWorkers,
+      pollRequests$: this.claimRequests$,
       work: this.pollForWork,
     });
   }
@@ -144,27 +147,8 @@ export class TaskManager {
     this.events$.next(event);
   };
 
-  private pollForWork = async (
-    ...optionalTasksToClaim: Array<Option<string>>
-  ): Promise<FillPoolResult> => {
-    return fillPool(
-      // claim available tasks
-      () =>
-        claimAvailableTasks(
-          rejectDuplicateAndEmptyValues(optionalTasksToClaim),
-          this.store.claimAvailableTasks,
-          this.pool.availableWorkers,
-          this.logger
-        ),
-      // wrap each task in a Task Runner
-      this.createTaskRunnerForTask,
-      // place tasks in the Task Pool
-      async (tasks: TaskRunner[]) => await this.pool.run(tasks)
-    );
-  };
-
   private attemptToRun(task: Option<string> = none) {
-    this.poller.queueWork(task);
+    this.claimRequests$.next(task);
   }
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
@@ -179,20 +163,40 @@ export class TaskManager {
     });
   };
 
+  public get isStarted() {
+    return this.pollingSubscription && !this.pollingSubscription.closed;
+  }
+
+  private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
+    return fillPool(
+      // claim available tasks
+      () =>
+        claimAvailableTasks(
+          tasksToClaim.splice(0, this.pool.availableWorkers),
+          this.store.claimAvailableTasks,
+          this.pool.availableWorkers,
+          this.logger
+        ),
+      // wrap each task in a Task Runner
+      this.createTaskRunnerForTask,
+      // place tasks in the Task Pool
+      async (tasks: TaskRunner[]) => await this.pool.run(tasks)
+    );
+  };
+
   /**
    * Starts up the task manager and starts picking up tasks.
    */
   public start() {
-    if (this.isStarted) {
-      return;
+    if (!this.isStarted) {
+      // Some calls are waiting until task manager is started
+      this.startQueue.forEach(fn => fn());
+      this.startQueue = [];
+
+      this.pollingSubscription = this.poller$.subscribe(
+        mapErr((error: string) => this.logger.error(error))
+      );
     }
-    this.isStarted = true;
-
-    // Some calls are waiting until task manager is started
-    this.startQueue.forEach(fn => fn());
-    this.startQueue = [];
-
-    this.poller.start();
   }
 
   private async waitUntilStarted() {
@@ -207,8 +211,10 @@ export class TaskManager {
    * Stops the task manager and cancels running tasks.
    */
   public stop() {
-    this.poller.stop();
-    this.pool.cancelRunningTasks();
+    if (this.isStarted) {
+      this.pollingSubscription.unsubscribe();
+      this.pool.cancelRunningTasks();
+    }
   }
 
   /**
@@ -272,8 +278,7 @@ export class TaskManager {
         .pipe(filter(({ id }: TaskLifecycleEvent) => id === task))
         .subscribe((taskEvent: TaskLifecycleEvent) => {
           const { id, event } = taskEvent;
-
-          either<ConcreteTaskInstance, Error>(
+          either(
             (taskInstance: ConcreteTaskInstance) => {
               if (isTaskRunEvent(taskEvent)) {
                 subscription.unsubscribe();
@@ -366,10 +371,6 @@ export class TaskManager {
   }
 }
 
-function rejectDuplicateAndEmptyValues(values: Array<Option<string>>) {
-  return uniq(values.filter(isSome).map((optional: Some<string>) => optional.value));
-}
-
 export async function claimAvailableTasks(
   claimTasksById: string[],
   claim: (opts: OwnershipClaimingOpts) => Promise<ClaimOwnershipResult>,
@@ -383,7 +384,7 @@ export async function claimAvailableTasks(
       const { docs, claimedTasks } = await claim({
         size: availableWorkers,
         claimOwnershipUntil: intervalFromNow('30s')!,
-        claimTasksById: claimTasksById.splice(0, availableWorkers),
+        claimTasksById,
       });
 
       if (claimedTasks === 0) {
