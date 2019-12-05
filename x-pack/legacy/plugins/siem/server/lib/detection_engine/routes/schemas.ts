@@ -219,5 +219,5 @@ export const findRulesSchema = Joi.object({
 export const setSignalsStatusSchema = Joi.object({
   signal_ids,
   query,
-  status,
+  status: status.required(),
 }).xor('signal_ids', 'query');

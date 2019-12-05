@@ -6,6 +6,8 @@
 
 import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
 import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
@@ -20,6 +22,13 @@ const isKibanaConfig = (config: unknown): config is KibanaConfig =>
 
 const assertNever = (): never => {
   throw new Error('Unexpected object');
+};
+
+const mockEsPlugins = {
+  // eslint-disable-next-line
+  getCluster: jest.fn((): any => ({
+    callWithRequest: jest.fn((): any => true), // eslint-disable-line
+  })),
 };
 
 const createMockKibanaConfig = (config: Record<string, string>): KibanaConfig => {

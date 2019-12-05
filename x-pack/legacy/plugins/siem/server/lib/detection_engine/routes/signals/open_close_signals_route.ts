@@ -32,7 +32,7 @@ export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
     if (status) {
       let queryObject;
       if (signalIds) {
-        queryObject = { ids: { valuess: signalIds } };
+        queryObject = { ids: { values: signalIds } };
       }
       if (query) {
         queryObject = JSON.parse(query);
@@ -53,7 +53,6 @@ export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
         return transformError(exc);
       }
     }
-    return true;
   },
 };
 
