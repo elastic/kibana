@@ -27,7 +27,8 @@ describe('hashedItemStore', () => {
         const sessionStorage = new StubBrowserStorage();
         const spy = jest.spyOn(sessionStorage, 'getItem');
 
-        new HashedItemStore(sessionStorage);
+        const hashedItemStore = new HashedItemStore(sessionStorage);
+        (hashedItemStore as any).getIndexedItems(); // trigger retrieving of indexedItems array from HashedItemStore.PERSISTED_INDEX_KEY
         expect(spy).toBeCalledWith(HashedItemStore.PERSISTED_INDEX_KEY);
         spy.mockReset();
       });
@@ -54,7 +55,7 @@ describe('hashedItemStore', () => {
         sessionStorage.setItem(HashedItemStore.PERSISTED_INDEX_KEY, JSON.stringify({ a, b, c }));
 
         const hashedItemStore = new HashedItemStore(sessionStorage);
-        expect((hashedItemStore as any).indexedItems).toEqual([a, c, b]);
+        expect((hashedItemStore as any).getIndexedItems()).toEqual([a, c, b]);
       });
     });
 
@@ -257,6 +258,86 @@ describe('hashedItemStore', () => {
         it('returns null', () => {
           const retrievedItem = hashedItemStore.getItem(hash);
           expect(retrievedItem).toBe(null);
+        });
+      });
+    });
+
+    describe('#removeItem', () => {
+      describe('if the item exists in sessionStorage', () => {
+        let sessionStorage: Storage;
+        let hashedItemStore: HashedItemStore;
+
+        beforeEach(() => {
+          sessionStorage = new StubBrowserStorage();
+          hashedItemStore = new HashedItemStore(sessionStorage);
+          hashedItemStore.setItem('1', 'a');
+          hashedItemStore.setItem('2', 'b');
+        });
+
+        it('removes and returns an item', () => {
+          const removedItem1 = hashedItemStore.removeItem('1');
+          expect(removedItem1).toBe('a');
+          expect(hashedItemStore.getItem('1')).toBeNull();
+          expect(hashedItemStore.getItem('2')).not.toBeNull();
+          expect((hashedItemStore as any).getIndexedItems()).toHaveLength(1);
+
+          const removedItem2 = hashedItemStore.removeItem('2');
+          expect(removedItem2).toBe('b');
+          expect(hashedItemStore.getItem('1')).toBeNull();
+          expect(hashedItemStore.getItem('2')).toBeNull();
+          expect((hashedItemStore as any).getIndexedItems()).toHaveLength(0);
+        });
+      });
+
+      describe(`if the item doesn't exist in sessionStorage`, () => {
+        let sessionStorage: Storage;
+        let hashedItemStore: HashedItemStore;
+        const hash = 'a';
+
+        beforeEach(() => {
+          sessionStorage = new StubBrowserStorage();
+          hashedItemStore = new HashedItemStore(sessionStorage);
+        });
+
+        it('returns null', () => {
+          const removedItem = hashedItemStore.removeItem(hash);
+          expect(removedItem).toBe(null);
+        });
+      });
+    });
+
+    describe('#clear', () => {
+      describe('if the items exist in sessionStorage', () => {
+        let sessionStorage: Storage;
+        let hashedItemStore: HashedItemStore;
+
+        beforeEach(() => {
+          sessionStorage = new StubBrowserStorage();
+          hashedItemStore = new HashedItemStore(sessionStorage);
+          hashedItemStore.setItem('1', 'a');
+          hashedItemStore.setItem('2', 'b');
+        });
+
+        it('removes all items', () => {
+          hashedItemStore.clear();
+
+          expect(hashedItemStore.getItem('1')).toBeNull();
+          expect(hashedItemStore.getItem('2')).toBeNull();
+          expect((hashedItemStore as any).getIndexedItems()).toHaveLength(0);
+        });
+      });
+
+      describe(`if items don't exist in sessionStorage`, () => {
+        let sessionStorage: Storage;
+        let hashedItemStore: HashedItemStore;
+
+        beforeEach(() => {
+          sessionStorage = new StubBrowserStorage();
+          hashedItemStore = new HashedItemStore(sessionStorage);
+        });
+
+        it("doesn't throw", () => {
+          expect(() => hashedItemStore.clear()).not.toThrowError();
         });
       });
     });

@@ -28,10 +28,11 @@ import { HashedItemStore } from './hashed_item_store';
  * And all tests in the test file will use HashedItemStoreSingleton
  * with underlying mockSessionStorage we have access to
  */
-export const mockSessionStorage = new StubBrowserStorage();
-const mockHashedItemStore = new HashedItemStore(mockSessionStorage);
-jest.mock('../state_storage', () => {
+export const mockStorage = new StubBrowserStorage();
+const mockHashedItemStore = new HashedItemStore(mockStorage);
+jest.mock('./', () => {
   return {
-    HashedItemStoreSingleton: mockHashedItemStore,
+    HashedItemStore: require('./hashed_item_store').HashedItemStore,
+    hashedItemStore: mockHashedItemStore,
   };
 });
