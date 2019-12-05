@@ -37,12 +37,7 @@ import * as senseEditor from '../../../../models/sense_editor';
 import mappings from '../../../../../lib/mappings/mappings';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { loadRemoteState } from './load_remote_editor_state';
 import { SenseEditor } from '../../../../models/sense_editor';
-
-export interface EditorProps {
-  previousStateLocation?: 'stored' | string;
-}
 
 const abs: CSSProperties = {
   position: 'absolute',
@@ -59,7 +54,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
-function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
+function EditorUI() {
   const {
     services: { history, notifications },
     docLinkVersion,
@@ -87,14 +82,10 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
   useEffect(() => {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
 
-    if (previousStateLocation === 'stored') {
-      const { content } = history.getSavedEditorState() || {
-        content: DEFAULT_INPUT_VALUE,
-      };
-      editorInstanceRef.current.update(content);
-    } else {
-      loadRemoteState({ url: previousStateLocation, input: editorInstanceRef.current });
-    }
+    const { content: text } = history.getSavedEditorState() || {
+      content: DEFAULT_INPUT_VALUE,
+    };
+    editorInstanceRef.current.update(text);
 
     function setupAutosave() {
       let timer: number;
@@ -132,7 +123,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
       unsubscribeResizer();
       mappings.clearSubscriptions();
     };
-  }, [history, previousStateLocation, setInputEditor]);
+  }, [history, setInputEditor]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!.getCoreEditor(), settings);
