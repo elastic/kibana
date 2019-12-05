@@ -110,15 +110,20 @@ export interface Dataset {
 
 export interface RegistryPackage {
   name: string;
-  version: string;
-  description: string;
-  readme?: string;
-  icon: string;
-  requirement: RequirementsByServiceName;
   title?: string;
+  version: string;
+  readme?: string;
+  description: string;
+  categories: string[];
+  requirement: RequirementsByServiceName;
   screenshots?: ScreenshotItem[];
-  assets: string[];
-  datasets: Dataset[];
+  icons?: string[];
+  assets?: string[];
+  internal?: boolean;
+  format_version: string;
+  datasets?: Dataset[];
+  download: string;
+  path: string;
 }
 
 // Managers public HTTP response types
