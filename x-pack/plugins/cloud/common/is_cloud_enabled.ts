@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface CloudPlugin {
-  config: {
-    isCloudEnabled: boolean;
-  };
+export function getIsCloudEnabled(cloudId?: string) {
+  return typeof cloudId === 'string';
 }

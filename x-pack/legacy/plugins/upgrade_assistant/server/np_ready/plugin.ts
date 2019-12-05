@@ -9,16 +9,23 @@ import { credentialStoreFactory } from './lib/reindexing/credential_store';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { registerClusterCheckupRoutes } from './routes/cluster_checkup';
 import { registerDeprecationLoggingRoutes } from './routes/deprecation_logging';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { registerReindexIndicesRoutes, registerReindexWorker } from './routes/reindex_indices';
+import { CloudSetup } from '../../../../../plugins/cloud/server';
+import { registerTelemetryRoutes } from './routes/telemetry';
 import { registerQueryDefaultFieldRoutes } from './routes/query_default_field';
 
-import { registerTelemetryRoutes } from './routes/telemetry';
+interface PluginsSetup {
+  __LEGACY: ServerShim;
+  usageCollection: UsageCollectionSetup;
+  cloud?: CloudSetup;
+}
 
 export class UpgradeAssistantServerPlugin implements Plugin<void, void, object, object> {
-  setup({ http }: CoreSetup, { __LEGACY }: { __LEGACY: ServerShim }) {
+  setup({ http }: CoreSetup, { __LEGACY, usageCollection, cloud }: PluginsSetup) {
     const router = http.createRouter();
     const shimWithRouter: ServerShimWithRouter = { ...__LEGACY, router };
-    registerClusterCheckupRoutes(shimWithRouter);
+    registerClusterCheckupRoutes(shimWithRouter, { cloud });
     registerDeprecationLoggingRoutes(shimWithRouter);
     registerQueryDefaultFieldRoutes(shimWithRouter);
 
@@ -35,7 +42,7 @@ export class UpgradeAssistantServerPlugin implements Plugin<void, void, object, 
 
     // Bootstrap the needed routes and the collector for the telemetry
     registerTelemetryRoutes(shimWithRouter);
-    registerUpgradeAssistantUsageCollector(__LEGACY.plugins.usage, __LEGACY);
+    registerUpgradeAssistantUsageCollector(usageCollection, __LEGACY);
   }
 
   start(core: CoreStart, plugins: any) {}

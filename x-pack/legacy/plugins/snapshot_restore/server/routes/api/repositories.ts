@@ -28,7 +28,7 @@ let isCloudEnabled: boolean = false;
 let callWithInternalUser: any;
 
 export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
-  isCloudEnabled = plugins.cloud.config.isCloudEnabled;
+  isCloudEnabled = plugins.cloud && plugins.cloud.isCloudEnabled;
   callWithInternalUser = plugins.elasticsearch.getCluster('data').callWithInternalUser;
   router.get('repository_types', getTypesHandler);
   router.get('repositories', getAllHandler);
