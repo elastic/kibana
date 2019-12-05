@@ -212,5 +212,41 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests',
     },
+    //security: {
+      //roles: [ { name: 'role1', definition: {test: 'test'} }, { name: 'role2', definition: {test: 'test'} } ]
+      //   {
+      //     name: 'data_reader',
+      //     definition: {
+      //       'cluster': [ ],
+      //       'indices': [
+      //         {
+      //           'names': [
+      //             'logstash*'
+      //           ],
+      //           'privileges': [
+      //             'view_index_metadata',
+      //             'read',
+      //             'read_cross_cluster'
+      //           ],
+      //           'field_security': {
+      //             'grant': [
+      //               '*'
+      //             ],
+      //             'except': [ ]
+      //           },
+      //           'allow_restricted_indices': false
+      //         }
+      //       ],
+      //       'applications': [ ],
+      //       'run_as': [ ],
+      //       'metadata': { },
+      //       'transient_metadata': {
+      //         'enabled': true
+      //       }
+      //     }
+      //
+      //   }
+      // ]
+    //}
   };
 }
