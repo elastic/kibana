@@ -12,8 +12,7 @@ import {
   EuiButton,
   EuiIcon,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -331,27 +330,29 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             />
           ) : (
             <EuiEmptyPrompt
-              iconType="editorStrike"
               title={
-                <h2>
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyTitle"
-                    defaultMessage="Create your first connector"
-                  />
-                </h2>
-              }
-              body={
                 <Fragment>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyBody"
-                      defaultMessage="Use connectors to link services such as Webhooks, Email, Slack or even your ES indices. Users can then link these approved connectors to triggered actions, like alerts, you create within Kibana."
-                    />
-                  </p>
                   <EuiIcon type="logoSlack" size="xl" className="actConnectorsList__logo" />
                   <EuiIcon type="logoGmail" size="xl" className="actConnectorsList__logo" />
                   <EuiIcon type="logoWebhook" size="xl" className="actConnectorsList__logo" />
+                  <EuiSpacer size="s" />
+                  <EuiTitle size="m">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyTitle"
+                        defaultMessage="Create your first connector"
+                      />
+                    </h2>
+                  </EuiTitle>
                 </Fragment>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.actionsConnectorsList.addActionEmptyBody"
+                    defaultMessage="Use connectors to set up reusable configurations for your Email, Slack, Elasticsearch and third party services that Kibana can trigger"
+                  />
+                </p>
               }
               actions={
                 <EuiButton
