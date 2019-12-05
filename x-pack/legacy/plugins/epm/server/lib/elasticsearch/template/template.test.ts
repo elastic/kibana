@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { safeLoad } from 'js-yaml';
+import { getTemplate, generateMappings } from './template';
+import { readFileSync } from 'fs';
 import path from 'path';
+import { safeLoad } from 'js-yaml';
 import { Field, processFields } from '../../fields/field';
 import { generateMappings, getTemplate } from './template';
 
