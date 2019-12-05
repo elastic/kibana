@@ -17,4 +17,11 @@
  * under the License.
  */
 
-export { HashedItemStoreSingleton } from './hashed_item_store_singleton';
+import { dirname } from 'path';
+
+export const pkg = {
+  __filename: require.resolve('../../../../package.json'),
+  __dirname: dirname(require.resolve('../../../../package.json')),
+  // eslint-disable no-var-requires
+  ...require('../../../../package.json'),
+};

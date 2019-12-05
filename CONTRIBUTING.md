@@ -387,6 +387,14 @@ To activate the APM agent, use the [`active`](https://www.elastic.co/guide/en/ap
 All config options can be set either via environment variables, or by creating an appropriate config file under `config/apm.dev.js`.
 For more information about configuring the APM agent, please refer to [the documentation](https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuring-the-agent.html).
 
+Example `config/apm.dev.js` file:
+
+```js
+module.exports = {
+  active: true,
+};
+```
+
 Once the agent is active, it will trace all incoming HTTP requests to Kibana, monitor for errors, and collect process-level metrics.
 The collected data will be sent to the APM Server and is viewable in the APM UI in Kibana.
 
