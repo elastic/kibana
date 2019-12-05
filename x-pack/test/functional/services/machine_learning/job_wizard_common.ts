@@ -181,6 +181,17 @@ export function MachineLearningJobWizardCommonProvider(
       expect(await this.getSelectedJobGroups()).to.contain(jobGroup);
     },
 
+    async getSelectedCalendars(): Promise<string[]> {
+      return await comboBox.getComboBoxSelectedOptions(
+        'mlJobWizardComboBoxCalendars > comboBoxInput'
+      );
+    },
+
+    async addCalendar(calendarId: string) {
+      await comboBox.setCustom('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
+      expect(await this.getSelectedCalendars()).to.contain(calendarId);
+    },
+
     async assertModelPlotSwitchExists(
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ) {
@@ -399,6 +410,11 @@ export function MachineLearningJobWizardCommonProvider(
       await customUrls.addCustomUrl();
 
       await customUrls.assertCustomUrlItem(0);
+    },
+
+    async assignCalendar(calendarId: string) {
+      await this.ensureAdditionalSettingsSectionOpen();
+      await this.addCalendar(calendarId);
     },
 
     async ensureAdvancedSectionOpen() {

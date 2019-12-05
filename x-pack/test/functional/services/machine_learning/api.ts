@@ -186,5 +186,16 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         }
       );
     },
+
+    async createCalendar(calendarId: string, body = { description: '', job_ids: [] }) {
+      await esSupertest
+        .put(`/_ml/calendars/${calendarId}`)
+        .send(body)
+        .expect(200);
+    },
+
+    async deleteCalendar(calendarId: string) {
+      await esSupertest.delete(`/_ml/calendars/${calendarId}`).expect(200);
+    },
   };
 }

@@ -75,6 +75,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/farequote');
+      await ml.api.createCalendar('wizard-test-calendar');
     });
 
     after(async () => {
@@ -176,6 +177,10 @@ export default function({ getService }: FtrProviderContext) {
 
     it('job creation adds a new custom url', async () => {
       await ml.jobWizardCommon.addCustomUrl();
+    });
+
+    it('job creation assigns calendars', async () => {
+      await ml.jobWizardCommon.assignCalendar('wizard-test-calendar');
     });
 
     it('job creation opens the advanced section', async () => {
