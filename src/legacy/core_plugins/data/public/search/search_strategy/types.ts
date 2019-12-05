@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../core_plugins/data/public';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 import { FetchHandlers } from '../fetch/types';
 import { SearchRequest, SearchResponse } from '../types';
 
 export interface SearchStrategyProvider {
   id: string;
   search: (params: SearchStrategySearchParams) => SearchStrategyResponse;
-  isViable: (indexPattern: IndexPattern) => boolean;
+  isViable: (indexPattern: IIndexPattern) => boolean;
 }
 
 export interface SearchStrategyResponse {

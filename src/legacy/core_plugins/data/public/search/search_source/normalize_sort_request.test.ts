@@ -19,7 +19,7 @@
 
 import { normalizeSortRequest } from './normalize_sort_request';
 import { SortDirection } from './types';
-import { IndexPattern } from '../../../../core_plugins/data/public/index_patterns';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -40,7 +40,7 @@ describe('SearchSource#normalizeSortRequest', function() {
   };
   const indexPattern = {
     fields: [scriptedField, murmurScriptedField],
-  } as IndexPattern;
+  } as IIndexPattern;
 
   it('should return an array', function() {
     const sortable = { someField: SortDirection.desc };

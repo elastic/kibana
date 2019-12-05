@@ -19,7 +19,7 @@
 import React from 'react';
 import { EuiCodeBlock, EuiDescriptionList, EuiSpacer } from '@elastic/eui';
 import { ShardFailure } from './shard_failure_types';
-import { getFlattenedObject } from '../../../../../../legacy/utils/get_flattened_object';
+import { getFlattenedObject } from '../../../../../../../legacy/utils/get_flattened_object';
 import { ShardFailureDescriptionHeader } from './shard_failure_description_header';
 
 /**

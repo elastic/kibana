@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { SearchError } from '../../courier';
-import { KbnError } from '../../../../../plugins/kibana_utils/public';
+import { SearchError } from '../search_strategy';
+import { KbnError } from '../../../../../../plugins/kibana_utils/public';
 import { SearchResponse } from '../types';
+
 /**
  * Request Failure - When an entire multi request fails
  * @param {Error} err - the Error that came back

@@ -18,7 +18,7 @@
  */
 
 import { getMSearchParams, getSearchParams } from './get_search_params';
-import { IUiSettingsClient } from '../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../../core/public';
 
 function getConfigStub(config: any = {}) {
   return {

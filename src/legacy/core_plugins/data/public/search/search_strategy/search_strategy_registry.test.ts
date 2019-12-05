@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../../core_plugins/data/public';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 import { noOpSearchStrategy } from './no_op_search_strategy';
 import {
   searchStrategies,
@@ -32,7 +32,7 @@ import { SearchStrategyProvider } from './types';
 const mockSearchStrategies: SearchStrategyProvider[] = [
   {
     id: '0',
-    isViable: (index: IndexPattern) => index.id === '0',
+    isViable: (index: IIndexPattern) => index.id === '0',
     search: () => ({
       searching: Promise.resolve([]),
       abort: () => void 0,
@@ -40,7 +40,7 @@ const mockSearchStrategies: SearchStrategyProvider[] = [
   },
   {
     id: '1',
-    isViable: (index: IndexPattern) => index.id === '1',
+    isViable: (index: IIndexPattern) => index.id === '1',
     search: () => ({
       searching: Promise.resolve([]),
       abort: () => void 0,
@@ -72,16 +72,16 @@ describe('Search strategy registry', () => {
     });
 
     it('returns the viable strategy', () => {
-      expect(getSearchStrategyByViability({ id: '0' } as IndexPattern)).toBe(
+      expect(getSearchStrategyByViability({ id: '0' } as IIndexPattern)).toBe(
         mockSearchStrategies[0]
       );
-      expect(getSearchStrategyByViability({ id: '1' } as IndexPattern)).toBe(
+      expect(getSearchStrategyByViability({ id: '1' } as IIndexPattern)).toBe(
         mockSearchStrategies[1]
       );
     });
 
     it('returns undefined if there is no viable strategy', () => {
-      expect(getSearchStrategyByViability({ id: '-1' } as IndexPattern)).toBe(undefined);
+      expect(getSearchStrategyByViability({ id: '-1' } as IIndexPattern)).toBe(undefined);
     });
   });
 
@@ -142,8 +142,8 @@ describe('Search strategy registry', () => {
     });
 
     it('returns whether there is a search strategy for this index pattern', () => {
-      expect(hasSearchStategyForIndexPattern({ id: '0' } as IndexPattern)).toBe(true);
-      expect(hasSearchStategyForIndexPattern({ id: '-1' } as IndexPattern)).toBe(false);
+      expect(hasSearchStategyForIndexPattern({ id: '0' } as IIndexPattern)).toBe(true);
+      expect(hasSearchStategyForIndexPattern({ id: '-1' } as IIndexPattern)).toBe(false);
     });
   });
 });

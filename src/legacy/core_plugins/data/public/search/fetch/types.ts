@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from '../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../../core/public';
 import { SearchRequest, SearchResponse } from '../types';
 
 export interface ApiCaller {

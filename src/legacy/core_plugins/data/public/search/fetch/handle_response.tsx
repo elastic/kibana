@@ -20,11 +20,11 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
-import { toastNotifications } from '../../notify/toasts';
+import { toastNotifications } from 'ui/notify/toasts';
 import { ShardFailureOpenModalButton } from './components/shard_failure_open_modal_button';
 import { Request, ResponseWithShardFailure } from './components/shard_failure_types';
 import { SearchRequest, SearchResponse } from '../types';
-import { toMountPoint } from '../../../../../plugins/kibana_react/public';
+import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 
 export function handleResponse(request: SearchRequest, response: SearchResponse) {
   if (response.timed_out) {
