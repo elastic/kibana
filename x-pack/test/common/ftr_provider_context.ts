@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { services as kibanaCommonServices } from '../../../../test/common/services';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
 
-import { SpacesServiceProvider } from './spaces';
+import { services } from './services';
 
-export const services = {
-  ...kibanaCommonServices,
-
-  spaces: SpacesServiceProvider,
-};
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

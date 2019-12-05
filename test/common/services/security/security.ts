@@ -17,20 +17,19 @@
  * under the License.
  */
 
-import { LegacyEsProvider } from './legacy_es';
-import { ElasticsearchProvider } from './elasticsearch';
-import { EsArchiverProvider } from './es_archiver';
-import { KibanaServerProvider } from './kibana_server';
-import { RetryProvider } from './retry';
-import { RandomnessProvider } from './randomness';
-import { SecurityServiceProvider } from './security';
+import { format as formatUrl } from 'url';
 
-export const services = {
-  legacyEs: LegacyEsProvider,
-  es: ElasticsearchProvider,
-  esArchiver: EsArchiverProvider,
-  kibanaServer: KibanaServerProvider,
-  retry: RetryProvider,
-  randomness: RandomnessProvider,
-  security: SecurityServiceProvider,
-};
+import { Role } from './role';
+import { User } from './user';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export function SecurityServiceProvider({ getService }: FtrProviderContext) {
+  const log = getService('log');
+  const config = getService('config');
+  const url = formatUrl(config.get('servers.kibana'));
+
+  return new (class SecurityService {
+    role = new Role(url, log);
+    user = new User(url, log);
+  })();
+}
