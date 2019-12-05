@@ -91,10 +91,9 @@ image::security/images/role-index-privilege.png["Index privilege"]
 By default, roles do not give Kibana privileges.  Click **Add space 
 privilege** and associate this role with the `Dev Mortgage` space.
 
-To create new visualizations and dashboards users with 
-the `dev-mortgage` role need read and write (All) access to 
-**Visualize** and **Dashboard**.  **Discover** has also 
-been given read and write access because it is common for developers 
+To enable users with the `dev-mortgage` role to create visualizations 
+and dashboards, click *All* for *Visualize* and *Dashboard*. Also 
+assign *All* for *Discover* because it is common for developers 
 to create saved searches while designing visualizations.
 
 [role="screenshot"]
