@@ -17,20 +17,6 @@
  * under the License.
  */
 
-export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
-export {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  ISavedObjectsClientProvider,
-  SavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-} from './scoped_client_provider';
-
-export {
-  PropertyEqualsSavedObjectsPredicate,
-  SavedObjectsPredicate,
-  SavedObjectsPredicates,
-  SavedObjectsPredicatesOperator,
-} from './predicates';
-
-export { SavedObjectsErrorHelpers } from './errors';
+export { SavedObjectsPredicate } from './predicate';
+export { SavedObjectsPredicatesOperator, SavedObjectsPredicates } from './predicates';
+export { PropertyEqualsSavedObjectsPredicate } from './property_equals';

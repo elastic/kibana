@@ -16,21 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsPredicate } from './predicate';
 
-export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
-export {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  ISavedObjectsClientProvider,
-  SavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-} from './scoped_client_provider';
+export type SavedObjectsPredicatesOperator = 'AND' | 'OR';
 
-export {
-  PropertyEqualsSavedObjectsPredicate,
-  SavedObjectsPredicate,
-  SavedObjectsPredicates,
-  SavedObjectsPredicatesOperator,
-} from './predicates';
+export class SavedObjectsPredicates implements SavedObjectsPredicate {
+  constructor(
+    public readonly operator: SavedObjectsPredicatesOperator,
+    public readonly predicates: SavedObjectsPredicate[]
+  ) {}
 
-export { SavedObjectsErrorHelpers } from './errors';
+  exec(obj: any): boolean {
+    switch (this.operator) {
+      case 'AND':
+        return this.predicates.every(predicate => predicate.exec(obj));
+      case 'OR':
+        return this.predicates.some(predicate => predicate.exec(obj));
+    }
+  }
+}

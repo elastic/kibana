@@ -165,6 +165,10 @@ export {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
   SavedObjectsDeleteOptions,
+  PropertyEqualsSavedObjectsPredicate,
+  SavedObjectsPredicate,
+  SavedObjectsPredicates,
+  SavedObjectsPredicatesOperator,
 } from './saved_objects';
 
 export {

@@ -43,7 +43,6 @@ import {
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
   SavedObjectsDeleteByNamespaceOptions,
-  SavedObjectsPredicate,
 } from '../saved_objects_client';
 import {
   SavedObject,
@@ -93,20 +92,6 @@ export interface IncrementCounterOptions extends SavedObjectsBaseOptions {
 }
 
 const DEFAULT_REFRESH_SETTING = 'wait_for';
-
-const doesAPredicateMatch = (
-  predicates: SavedObjectsPredicate[],
-  savedObject: SavedObject<any>
-): boolean => {
-  for (const predicate of predicates) {
-    const conditions = Array.isArray(predicate.when) ? predicate.when : [predicate.when];
-    if (conditions.every(condition => savedObject.attributes[condition.key] === condition.value)) {
-      return true;
-    }
-  }
-
-  return false;
-};
 
 export class SavedObjectsRepository {
   private _migrator: KibanaMigrator;
@@ -185,7 +170,7 @@ export class SavedObjectsRepository {
       namespace,
       references = [],
       refresh = DEFAULT_REFRESH_SETTING,
-      predicates,
+      predicate,
     } = options;
 
     if (!this._allowedTypes.includes(type)) {
@@ -195,9 +180,9 @@ export class SavedObjectsRepository {
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
 
-    if (predicates && predicates.length > 0) {
+    if (predicate != null) {
       if (
-        !doesAPredicateMatch(predicates, {
+        !predicate.exec({
           id: id || '',
           type,
           attributes,
@@ -217,11 +202,7 @@ export class SavedObjectsRepository {
       });
       const indexFound = response.status !== 404;
       const documentFound = indexFound && response.found === true;
-      if (
-        indexFound &&
-        documentFound &&
-        !doesAPredicateMatch(predicates, this._rawToSavedObject(response))
-      ) {
+      if (indexFound && documentFound && !predicate.exec(this._rawToSavedObject(response))) {
         throw SavedObjectsErrorHelpers.decorateBadRequestError(
           new Error('GET OUTTA HERE YA TURKEY')
         );

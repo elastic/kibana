@@ -17,20 +17,12 @@
  * under the License.
  */
 
-export { SavedObjectsRepository, SavedObjectsRepositoryOptions } from './repository';
-export {
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  ISavedObjectsClientProvider,
-  SavedObjectsClientProvider,
-  SavedObjectsClientProviderOptions,
-} from './scoped_client_provider';
+import { SavedObjectsPredicate } from './predicate';
 
-export {
-  PropertyEqualsSavedObjectsPredicate,
-  SavedObjectsPredicate,
-  SavedObjectsPredicates,
-  SavedObjectsPredicatesOperator,
-} from './predicates';
+export class PropertyEqualsSavedObjectsPredicate implements SavedObjectsPredicate {
+  constructor(public readonly key: string, public readonly value: string) {}
 
-export { SavedObjectsErrorHelpers } from './errors';
+  exec(obj: any): boolean {
+    return obj.attributes[this.key] === this.value;
+  }
+}

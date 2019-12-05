@@ -28,16 +28,7 @@ import {
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
-
-interface SavedObjectsPredicateCondition {
-  key: string;
-  value: string;
-}
-
-export interface SavedObjectsPredicate {
-  type: string;
-  when: SavedObjectsPredicateCondition | SavedObjectsPredicateCondition[];
-}
+import { SavedObjectsPredicate } from './lib/predicates';
 
 /**
  *
@@ -53,7 +44,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
-  predicates?: SavedObjectsPredicate[];
+  predicate?: SavedObjectsPredicate;
 }
 
 /**

@@ -3,9 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { SavedObjectsPredicate } from 'src/core/server/saved_objects';
-import { isString } from 'util';
 import {
   SavedObjectAttributes,
   SavedObjectsBaseOptions,
@@ -16,10 +13,12 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
+  SavedObjectsPredicate,
+  SavedObjectsPredicates,
+  PropertyEqualsSavedObjectsPredicate,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import { SavedObjectsPrivileges } from './saved_objects_privileges';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -31,7 +30,7 @@ interface SecureSavedObjectsClientWrapperOptions {
 }
 
 interface EnsureAuthorizedForTypeResult {
-  predicates?: SavedObjectsPredicate[];
+  predicate?: SavedObjectsPredicate;
 }
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
@@ -62,12 +61,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    const { predicates } = await this.ensureAuthorizedForType(type, 'create', options.namespace, {
+    const { predicate } = await this.ensureAuthorizedForType(type, 'create', options.namespace, {
       type,
       attributes,
       options,
     });
-    options.predicates = predicates;
+    options.predicate = this.andPredicates(options.predicate, predicate);
     return await this.baseClient.create(type, attributes, options);
   }
 
@@ -207,9 +206,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     if (privileges[this.actions.savedObject.get(type, action)] === true) {
       this.auditLogger.savedObjectsAuthorizationSuccess(username, action, [type], args);
-      return {
-        predicates: [],
-      };
+      return {};
     }
 
     if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
@@ -217,13 +214,26 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       const conditions = this.savedObjectsPrivileges.getConditions(type);
       for (const condition of conditions) {
         if (privileges[this.actions.savedObject.get({ type, when: condition }, action)] === true) {
-          predicates.push({ type, when: condition });
+          if (!Array.isArray(condition)) {
+            predicates.push(
+              new PropertyEqualsSavedObjectsPredicate(condition.key, condition.value)
+            );
+          } else {
+            predicates.push(
+              new SavedObjectsPredicates(
+                'AND',
+                condition.map(
+                  ({ key, value }) => new PropertyEqualsSavedObjectsPredicate(key, value)
+                )
+              )
+            );
+          }
         }
       }
       if (predicates.length > 0) {
         this.auditLogger.savedObjectsAuthorizationSuccess(username, action, [type], args);
         return {
-          predicates,
+          predicate: new SavedObjectsPredicates('OR', predicates),
         };
       }
     }
@@ -246,5 +256,24 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private getUniqueObjectTypes(objects: Array<{ type: string }>) {
     return [...new Set(objects.map(o => o.type))];
+  }
+
+  private andPredicates(
+    predicate1: SavedObjectsPredicate | undefined,
+    predicate2: SavedObjectsPredicate | undefined
+  ): SavedObjectsPredicate | undefined {
+    if (predicate1 == null && predicate2 == null) {
+      return undefined;
+    }
+
+    if (predicate2 == null) {
+      return predicate1;
+    }
+
+    if (predicate1 == null) {
+      return predicate2;
+    }
+
+    return new SavedObjectsPredicates('AND', [predicate1, predicate2]);
   }
 }
