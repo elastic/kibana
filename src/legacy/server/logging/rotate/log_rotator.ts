@@ -20,12 +20,14 @@
 import * as chokidar from 'chokidar';
 import { isMaster } from 'cluster';
 import fs from 'fs';
+import { Server } from 'hapi';
 import { throttle } from 'lodash';
 import { tmpdir } from 'os';
 import { basename, dirname, join, sep } from 'path';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { promisify } from 'util';
+import { KibanaConfig } from '../../kbn_server';
 
 const mkdirAsync = promisify(fs.mkdir);
 const readdirAsync = promisify(fs.readdir);
@@ -35,17 +37,30 @@ const unlinkAsync = promisify(fs.unlink);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class LogRotator {
-  constructor(config, server) {
+  private readonly config: KibanaConfig;
+  private readonly log: Server['log'];
+  public logFilePath: string;
+  public everyBytes: number;
+  public keepFiles: number;
+  public running: boolean;
+  private logFileSize: number;
+  public isRotating: boolean;
+  public throttledRotate: () => void;
+  public stalker: chokidar.FSWatcher | null;
+  public usePolling: boolean;
+  public pollingInterval: number;
+  private stalkerUsePollingPolicyTestTimeout: NodeJS.Timeout | null;
+
+  constructor(config: KibanaConfig, server: Server) {
     this.config = config;
-    this.log = server.logWithMetadata;
+    this.log = server.log.bind(server);
     this.logFilePath = config.get('logging.dest');
-    this.interval = 1;
     this.everyBytes = config.get('logging.rotate.everyBytes');
     this.keepFiles = config.get('logging.rotate.keepFiles');
     this.running = false;
     this.logFileSize = 0;
     this.isRotating = false;
-    this.throttledRotate = throttle(async () => { await this._rotate(); }, 5000);
+    this.throttledRotate = throttle(async () => await this._rotate(), 5000);
     this.stalker = null;
     this.usePolling = config.get('logging.rotate.usePolling');
     this.pollingInterval = config.get('logging.rotate.pollingInterval');
@@ -96,10 +111,12 @@ export class LogRotator {
       // setup fs.watch for the temp test file
       const testWatcher = fs.watch(tempFile, { persistent: false });
 
-      const usePollingTest$ = new Observable(async (observer) => {
+      // await writeFileAsync(tempFile, 'test');
+
+      const usePollingTest$ = new Observable<boolean>(observer => {
         // observable complete function
-        const completeFn = (fallbackTimeout, completeStatus) => {
-          clearTimeout(fallbackTimeout);
+        const completeFn = (completeStatus: boolean) => {
+          clearTimeout(this.stalkerUsePollingPolicyTestTimeout as NodeJS.Timeout);
           testWatcher.close();
 
           observer.next(completeStatus);
@@ -107,13 +124,18 @@ export class LogRotator {
         };
 
         // setup conditions that would fire the observable
-        const fallbackTimeout = setTimeout(() => completeFn(fallbackTimeout, true), 15000);
-        testWatcher.on('change', () => completeFn(fallbackTimeout, false));
-        testWatcher.on('error', () => completeFn(fallbackTimeout, true));
+        this.stalkerUsePollingPolicyTestTimeout = setTimeout(() => completeFn(true), 15000);
+        testWatcher.on('change', () => completeFn(false));
+        testWatcher.on('error', () => completeFn(true));
 
         // fire test watcher events
-        await writeFileAsync(tempFile, 'test');
+        setTimeout(() => {
+          fs.writeFileSync(tempFile, 'test');
+        }, 0);
       });
+
+      // fs.writeFileSync(tempFile, 'test');
+      // await writeFileAsync(tempFile, 'test');
 
       // wait for the first observable result and consider it as the result
       // for our use polling test
@@ -128,7 +150,7 @@ export class LogRotator {
     }
   }
 
-  _buildWatchCfg(usePolling = false) {
+  _buildWatchCfg(usePolling: boolean = false) {
     return {
       ignoreInitial: true,
       awaitWriteFinish: false,
@@ -137,7 +159,7 @@ export class LogRotator {
       interval: this.pollingInterval,
       binaryInterval: this.pollingInterval,
       alwaysStat: true,
-      atomic: false
+      atomic: false,
     };
   }
 
@@ -151,11 +173,16 @@ export class LogRotator {
       );
     }
 
+    this.log(
+      ['warning', 'logging:rotate'],
+      'The current environment does not support `fs.watch`. Falling back to polling using `fs.watchFile`'
+    );
+
     this.stalker = chokidar.watch(this.logFilePath, this._buildWatchCfg(this.usePolling));
     this.stalker.on('change', this._logFileSizeMonitorHandler);
   }
 
-  _logFileSizeMonitorHandler = async (filename, stats) => {
+  _logFileSizeMonitorHandler = async (filename: string, stats: fs.Stats) => {
     if (!filename || !stats) {
       return;
     }
@@ -170,7 +197,7 @@ export class LogRotator {
     }
 
     this.stalker.close();
-    clearTimeout(this.stalkerUsePollingPolicyTestTimeout);
+    clearTimeout(this.stalkerUsePollingPolicyTestTimeout as NodeJS.Timeout);
   }
 
   _createExitListener() {
@@ -234,7 +261,9 @@ export class LogRotator {
     const foundRotatedFiles = await this._readRotatedFilesMetadata();
 
     // delete number of rotated files exceeding the keepFiles limit setting
-    const rotatedFiles = await this._deleteFoundRotatedFilesAboveKeepFilesLimit(foundRotatedFiles);
+    const rotatedFiles: string[] = await this._deleteFoundRotatedFilesAboveKeepFilesLimit(
+      foundRotatedFiles
+    );
 
     // delete last file
     await this._deleteLastRotatedFile(rotatedFiles);
@@ -259,39 +288,46 @@ export class LogRotator {
   async _readRotatedFilesMetadata() {
     const logFileBaseName = basename(this.logFilePath);
     const logFilesFolder = dirname(this.logFilePath);
+    const foundLogFiles: string[] = await readdirAsync(logFilesFolder);
 
-    return (await readdirAsync(logFilesFolder))
-      .filter(file => new RegExp(`${logFileBaseName}\\.\\d`).test(file))
-      // we use .slice(-1) here in order to retrieve the last number match in the read filenames
-      .sort((a, b) => Number(a.match(/(\d+)/g).slice(-1)) - Number(b.match(/(\d+)/g).slice(-1)))
-      .map(filename => `${logFilesFolder}${sep}${filename}`);
+    return (
+      foundLogFiles
+        .filter(file => new RegExp(`${logFileBaseName}\\.\\d`).test(file))
+        // we use .slice(-1) here in order to retrieve the last number match in the read filenames
+        // @ts-ignore here as the warning is not too important
+        .sort((a, b) => Number(a.match(/(\d+)/g).slice(-1)) - Number(b.match(/(\d+)/g).slice(-1)))
+        .map(filename => `${logFilesFolder}${sep}${filename}`)
+    );
   }
 
-  async _deleteFoundRotatedFilesAboveKeepFilesLimit(foundRotatedFiles) {
+  async _deleteFoundRotatedFilesAboveKeepFilesLimit(foundRotatedFiles: string[]) {
     if (foundRotatedFiles.length <= this.keepFiles) {
       return foundRotatedFiles;
     }
 
     const finalRotatedFiles = foundRotatedFiles.slice(0, this.keepFiles);
-    const rotatedFilesToDelete = foundRotatedFiles.slice(finalRotatedFiles.length, foundRotatedFiles.length);
+    const rotatedFilesToDelete = foundRotatedFiles.slice(
+      finalRotatedFiles.length,
+      foundRotatedFiles.length
+    );
 
     await Promise.all(
-      rotatedFilesToDelete.map(rotatedFilePath => unlinkAsync(rotatedFilePath))
+      rotatedFilesToDelete.map((rotatedFilePath: string) => unlinkAsync(rotatedFilePath))
     );
 
     return finalRotatedFiles;
   }
 
-  async _deleteLastRotatedFile(rotatedFiles) {
+  async _deleteLastRotatedFile(rotatedFiles: string[]) {
     if (rotatedFiles.length < this.keepFiles) {
       return;
     }
 
-    const lastFilePath = rotatedFiles.pop();
+    const lastFilePath: string = rotatedFiles.pop() as string;
     await unlinkAsync(lastFilePath);
   }
 
-  async _renameRotatedFilesByOne(rotatedFiles) {
+  async _renameRotatedFilesByOne(rotatedFiles: string[]) {
     const logFileBaseName = basename(this.logFilePath);
     const logFilesFolder = dirname(this.logFilePath);
 
@@ -309,6 +345,7 @@ export class LogRotator {
 
   _sendReloadLogConfigSignal() {
     if (isMaster) {
+      // @ts-ignore
       process.emit('SIGHUP');
       return;
     }
@@ -316,6 +353,7 @@ export class LogRotator {
     // Send a special message to the cluster manager
     // so it can forward it correctly
     // It will only run when we are under cluster mode (not under a production environment)
+    // @ts-ignore
     process.send(['RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER']);
   }
 }

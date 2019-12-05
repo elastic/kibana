@@ -18,43 +18,42 @@
  */
 
 import del from 'del';
-import fs, {  existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
+import fs, { existsSync, mkdirSync, statSync, writeFileSync } from 'fs';
 import { LogRotator } from './log_rotator';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
-
 
 const mockOn = jest.fn();
 jest.mock('chokidar', () => ({
   watch: jest.fn(() => ({
     on: mockOn,
-    close: jest.fn()
+    close: jest.fn(),
   })),
 }));
 
 jest.mock('lodash', () => ({
   ...require.requireActual('lodash'),
-  throttle: fn => fn
+  throttle: (fn: any) => fn,
 }));
 
 const tempDir = join(tmpdir(), 'kbn_log_rotator_test');
 const testFilePath = join(tempDir, 'log_rotator_test_log_file.log');
 
-const createLogRotatorConfig = (logFilePath) => {
+const createLogRotatorConfig: any = (logFilePath: string) => {
   return new Map([
     ['logging.dest', logFilePath],
     ['logging.rotate.everyBytes', 2],
     ['logging.rotate.keepFiles', 2],
     ['logging.rotate.usePolling', false],
-    ['logging.rotate.pollingInterval', 10000]
-  ]);
+    ['logging.rotate.pollingInterval', 10000],
+  ] as any);
 };
 
-const mockServer = {
-  logWithMetadata: jest.fn()
+const mockServer: any = {
+  log: jest.fn(),
 };
 
-const writeBytesToFile = (filePath, numberOfBytes) => {
+const writeBytesToFile = (filePath: string, numberOfBytes: number) => {
   writeFileSync(filePath, 'a'.repeat(numberOfBytes), { flag: 'a' });
 };
 
@@ -183,7 +182,6 @@ describe('LogRotator', () => {
     expect(existsSync(join(testLogFileDir, 'log_rotator_test_log_file.log.2'))).toBeFalsy();
     expect(statSync(join(testLogFileDir, 'log_rotator_test_log_file.log.0')).size).toBe(5);
 
-
     logRotator.keepFiles = 1;
     await logRotator.start();
 
@@ -212,21 +210,23 @@ describe('LogRotator', () => {
     await logRotator.stop();
   });
 
-
   it('rotates log file service correctly detects usePolling when it should be true', async () => {
     writeBytesToFile(testFilePath, 1);
 
     const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
 
-    jest.spyOn(fs, 'watch').mockImplementation(() => ({
-      on: jest.fn((eventType, cb) => {
-        if (eventType === 'error') {
-          cb();
-        }
-      }),
-      close: jest.fn()
-    }));
+    jest.spyOn(fs, 'watch').mockImplementation(
+      () =>
+        ({
+          on: jest.fn((eventType, cb) => {
+            if (eventType === 'error') {
+              cb();
+            }
+          }),
+          close: jest.fn(),
+        } as any)
+    );
 
     await logRotator.start();
 
@@ -242,14 +242,17 @@ describe('LogRotator', () => {
 
     const logRotator = new LogRotator(createLogRotatorConfig(testFilePath), mockServer);
     jest.spyOn(logRotator, '_sendReloadLogConfigSignal').mockImplementation(() => {});
-    jest.spyOn(fs, 'watch').mockImplementation(() => ({
-      on: jest.fn((ev) => {
-        if (ev === 'error') {
-          jest.runTimersToTime(15000);
-        }
-      }),
-      close: jest.fn()
-    }));
+    jest.spyOn(fs, 'watch').mockImplementation(
+      () =>
+        ({
+          on: jest.fn((ev: string) => {
+            if (ev === 'error') {
+              jest.runTimersToTime(15000);
+            }
+          }),
+          close: jest.fn(),
+        } as any)
+    );
 
     await logRotator.start();
 
