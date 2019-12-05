@@ -41,7 +41,7 @@ export const boot = (deps: AppDependencies) => {
   const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
   const securityDocumentationLink = `${esBase}/security-settings.html`;
 
-  const initialState = { license: xpackInfo.get('license') };
+  const initialState = { license: legacy.xpackInfo.get('license') };
 
   setDocLinks({ securityDocumentationLink });
 
@@ -50,6 +50,7 @@ export const boot = (deps: AppDependencies) => {
       autoLogout: restLegacy.autoLogout,
       kbnUrl: restLegacy.kbnUrlWrapper,
       refreshXpack: restLegacy.refreshXpack,
+      xPackInfo: legacy.xpackInfo,
     },
     toasts,
     http,
