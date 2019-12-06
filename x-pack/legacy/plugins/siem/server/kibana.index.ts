@@ -18,11 +18,14 @@ import {
 import { rulesAlertType } from './lib/detection_engine/alerts/rules_alert_type';
 import { isAlertExecutor } from './lib/detection_engine/alerts/types';
 import { createRulesRoute } from './lib/detection_engine/routes/create_rules_route';
+import { createIndexRoute } from './lib/detection_engine/routes/index/create_index_route';
+import { readIndexRoute } from './lib/detection_engine/routes/index/read_index_route';
 import { readRulesRoute } from './lib/detection_engine/routes/read_rules_route';
 import { findRulesRoute } from './lib/detection_engine/routes/find_rules_route';
 import { deleteRulesRoute } from './lib/detection_engine/routes/delete_rules_route';
 import { updateRulesRoute } from './lib/detection_engine/routes/update_rules_route';
 import { ServerFacade } from './types';
+import { deleteIndexRoute } from './lib/detection_engine/routes/index/delete_index_route';
 
 const APP_ID = 'siem';
 
@@ -43,14 +46,19 @@ export const initServerWithKibana = (
   const libs = compose(kbnServer, mode);
   initServer(libs);
 
-  // Signals/Alerting Rules routes for
-  // routes such as ${DETECTION_ENGINE_RULES_URL}
-  // that have the REST endpoints of /api/detection_engine/rules
+  // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
+  // All REST rule creation, deletion, updating, etc...
   createRulesRoute(kbnServer);
   readRulesRoute(kbnServer);
   updateRulesRoute(kbnServer);
   deleteRulesRoute(kbnServer);
   findRulesRoute(kbnServer);
+
+  // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
+  // All REST index creation, policy management for spaces
+  createIndexRoute(kbnServer);
+  readIndexRoute(kbnServer);
+  deleteIndexRoute(kbnServer);
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
