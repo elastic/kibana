@@ -5,7 +5,7 @@
  */
 
 import React, { FC, useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, RouteProps } from 'react-router-dom';
+import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 import { I18nContext } from 'ui/i18n';
 
@@ -52,13 +52,12 @@ export const PageLoader: FC<{ context: KibanaContextValue }> = ({ context, child
 };
 
 export const MlRouter: FC<{
-  basename: string;
   config: KibanaConfigTypeFix;
   setBreadCrumbs: any;
   indexPatterns: IndexPatterns;
-}> = ({ basename, config, setBreadCrumbs, indexPatterns }) => {
+}> = ({ config, setBreadCrumbs, indexPatterns }) => {
   return (
-    <Router basename={basename}>
+    <HashRouter>
       <div>
         {Object.entries(routes).map(([name, route]) => (
           <Route
@@ -74,7 +73,7 @@ export const MlRouter: FC<{
           />
         ))}
       </div>
-    </Router>
+    </HashRouter>
   );
 };
 
