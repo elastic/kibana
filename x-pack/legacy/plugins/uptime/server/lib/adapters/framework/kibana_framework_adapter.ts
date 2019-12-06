@@ -76,10 +76,9 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
           },
         } = context;
         const options = {
-          graphQLOptions: (req: any) => {
-            const c = { ...context, callAsCurrentUser };
+          graphQLOptions: (_req: any) => {
             return {
-              context: c,
+              context: { ...context, callAsCurrentUser },
               schema,
             };
           },
