@@ -23,6 +23,8 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { take } from 'rxjs/operators';
 import { IConfigService } from '../config';
+import { PathConfigType } from '../path';
+import { HttpConfigType } from '../http';
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';
@@ -31,14 +33,21 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
 export async function manageInstanceUuid(configService: IConfigService): Promise<string> {
-  const config = await configService
-    .getConfig$()
-    .pipe(take(1))
-    .toPromise();
-  const uuidFilePath = join(config.get('path.data'), FILE_NAME);
+  const [pathConfig, serverConfig] = await Promise.all([
+    configService
+      .atPath<PathConfigType>('path')
+      .pipe(take(1))
+      .toPromise(),
+    configService
+      .atPath<HttpConfigType>('server')
+      .pipe(take(1))
+      .toPromise(),
+  ]);
+
+  const uuidFilePath = join(pathConfig.data, FILE_NAME);
 
   const uuidFromFile = await readUUIDFromFile(uuidFilePath);
-  const uuidFromConfig = config.get('server.uuid');
+  const uuidFromConfig = serverConfig.uuid;
 
   if (uuidFromConfig) {
     if (uuidFromConfig === uuidFromFile) {

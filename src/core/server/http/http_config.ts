@@ -91,6 +91,7 @@ export const config = {
           )
         ),
       }),
+      uuid: schema.maybe(schema.string()),
     },
     {
       validate: rawConfig => {

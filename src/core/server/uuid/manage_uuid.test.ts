@@ -21,6 +21,7 @@ import { readFile, writeFile } from 'fs';
 import { join } from 'path';
 import { manageInstanceUuid } from './manage_uuid';
 import { configServiceMock } from '../config/config_service.mock';
+import { BehaviorSubject } from 'rxjs';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
@@ -52,16 +53,21 @@ const mockReadFile = ({
 };
 
 const getConfigService = (serverUUID: string | undefined) => {
-  return configServiceMock.create({
-    getConfig$: {
-      path: {
+  const configService = configServiceMock.create();
+  configService.atPath.mockImplementation(path => {
+    if (path === 'path') {
+      return new BehaviorSubject({
         data: 'data-folder',
-      },
-      server: {
+      });
+    }
+    if (path === 'server') {
+      return new BehaviorSubject({
         uuid: serverUUID,
-      },
-    },
+      });
+    }
+    return new BehaviorSubject({});
   });
+  return configService;
 };
 
 describe('manageInstanceUUID', () => {
