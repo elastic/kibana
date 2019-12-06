@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // press the enter key
       await endpointSearchBar.pressKeys(browser.keys.ENTER);
       // find all the endpoint operating systems
-      const endpointList = await testSubjects.findAll('indexTableCell-os');
+      const endpointList = await testSubjects.findAll('indexTableCellOs');
       for (let i = 0; i < endpointList.length; i++) {
         expect(await endpointList[i].getVisibleText()).to.be('Windows Server 2016');
       }
