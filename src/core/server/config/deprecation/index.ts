@@ -21,7 +21,7 @@ export {
   ConfigDeprecation,
   ConfigDeprecationWithContext,
   ConfigDeprecationLogger,
-  IConfigDeprecationFactory,
+  ConfigDeprecationFactory,
   ConfigDeprecationProvider,
 } from './types';
 export { configDeprecationFactory } from './deprecation_factory';

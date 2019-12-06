@@ -18,7 +18,7 @@
  */
 
 import { get, set } from 'lodash';
-import { ConfigDeprecation, ConfigDeprecationLogger, IConfigDeprecationFactory } from './types';
+import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
 import { unset } from './utils';
 
 const _rename = (
@@ -82,11 +82,11 @@ const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPa
 const getPath = (rootPath: string, subPath: string) => `${rootPath}.${subPath}`;
 
 /**
- * The actual platform implementation of {@link IConfigDeprecationFactory}
+ * The actual platform implementation of {@link ConfigDeprecationFactory}
  *
  * @internal
  */
-export const configDeprecationFactory: IConfigDeprecationFactory = {
+export const configDeprecationFactory: ConfigDeprecationFactory = {
   rename,
   renameFromRoot,
   unused,

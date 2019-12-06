@@ -28,7 +28,7 @@ export type ConfigDeprecationLogger = (message: string) => void;
  * Configuration deprecation returned from {@link ConfigDeprecationProvider} that handles a single deprecation from the configuration.
  *
  * @remarks
- * This should only be manually implemented if {@link IConfigDeprecationFactory} does not provide the proper helpers for a specific
+ * This should only be manually implemented if {@link ConfigDeprecationFactory} does not provide the proper helpers for a specific
  * deprecation need.
  *
  * @public
@@ -42,7 +42,7 @@ export type ConfigDeprecation = (
 /**
  * A provider that should returns a list of {@link ConfigDeprecation}.
  *
- * See {@link IConfigDeprecationFactory} for more usage examples.
+ * See {@link ConfigDeprecationFactory} for more usage examples.
  *
  * @example
  * ```typescript
@@ -55,7 +55,7 @@ export type ConfigDeprecation = (
  *
  * @public
  */
-export type ConfigDeprecationProvider = (factory: IConfigDeprecationFactory) => ConfigDeprecation[];
+export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => ConfigDeprecation[];
 
 /**
  * Provides helpers to generates the most commonly used {@link ConfigDeprecation}
@@ -73,7 +73,7 @@ export type ConfigDeprecationProvider = (factory: IConfigDeprecationFactory) => 
  *
  * @public
  */
-export interface IConfigDeprecationFactory {
+export interface ConfigDeprecationFactory {
   /**
    * Rename a configuration property from inside a plugin's configuration path.
    * Will log a deprecation warning if the oldKey was found and deprecation applied.
