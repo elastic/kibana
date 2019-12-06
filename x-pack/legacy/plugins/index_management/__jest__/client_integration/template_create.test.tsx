@@ -170,7 +170,7 @@ describe('<TemplateCreate />', () => {
 
           actions.clickCancelCreateFieldButton();
           // Remove first field
-          actions.clickRemoveFieldAtButton(0);
+          actions.clickRemoveButtonAtField(0);
 
           expect(find('fieldsListItem').length).toBe(1);
         });

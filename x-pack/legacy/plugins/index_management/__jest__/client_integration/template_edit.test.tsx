@@ -105,7 +105,7 @@ describe('<TemplateEdit />', () => {
 
         // Step 3 (mappings)
         // Select the first field to edit
-        actions.clickEditFieldAtButton(0);
+        actions.clickEditButtonAtField(0);
         await nextTick();
         component.update();
         // verify edit field flyout

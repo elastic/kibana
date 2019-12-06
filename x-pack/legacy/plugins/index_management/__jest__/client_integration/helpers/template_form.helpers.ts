@@ -18,9 +18,9 @@ export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
     clickNextButton: () => void;
     clickBackButton: () => void;
     clickSubmitButton: () => void;
-    clickEditFieldAtButton: (index: number) => void;
+    clickEditButtonAtField: (index: number) => void;
     clickEditFieldUpdateButton: () => void;
-    clickRemoveFieldAtButton: (index: number) => void;
+    clickRemoveButtonAtField: (index: number) => void;
     clickCancelCreateFieldButton: () => void;
     completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
     completeStepTwo: (settings: string) => void;
@@ -49,7 +49,7 @@ export const formSetup = async (
     testBed.find('submitButton').simulate('click');
   };
 
-  const clickEditFieldAtButton = (index: number) => {
+  const clickEditButtonAtField = (index: number) => {
     testBed
       .find('editFieldButton')
       .at(index)
@@ -60,7 +60,7 @@ export const formSetup = async (
     testBed.find('editFieldUpdateButton').simulate('click');
   };
 
-  const clickRemoveFieldAtButton = (index: number) => {
+  const clickRemoveButtonAtField = (index: number) => {
     testBed
       .find('removeFieldButton')
       .at(index)
@@ -181,9 +181,9 @@ export const formSetup = async (
       clickNextButton,
       clickBackButton,
       clickSubmitButton,
-      clickEditFieldAtButton,
+      clickEditButtonAtField,
       clickEditFieldUpdateButton,
-      clickRemoveFieldAtButton,
+      clickRemoveButtonAtField,
       clickCancelCreateFieldButton,
       completeStepOne,
       completeStepTwo,
