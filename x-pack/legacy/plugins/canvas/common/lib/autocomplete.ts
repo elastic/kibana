@@ -297,7 +297,7 @@ function getFnNameSuggestions(
   });
 
   return fnDefs.map(fnDef => {
-    return { type: 'function', text: fnDef.name, start, end: end - MARKER.length, fnDef };
+    return { type: 'function', text: fnDef.name + ' ', start, end: end - MARKER.length, fnDef };
   });
 }
 
