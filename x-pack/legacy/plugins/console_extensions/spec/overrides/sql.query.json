@@ -4,7 +4,7 @@
       "query": {
         "__template": {
           "__raw": true,
-          "value": "\"\"\"sql\nSELECT * FROM \"TABLE\"\n\"\"\""
+          "value": "\"\"\"\nSELECT * FROM \"TABLE\"\n\"\"\""
         }
       }
     },
@@ -19,6 +19,6 @@
         "smile"
       ]
     },
-    "template": "_sql?format=json\n{\n  \"query\": \"\"\"sql\n  SELECT * FROM \"${1:TABLE}\"\n  \"\"\"\n}\n"
+    "template": "_sql?format=json\n{\n  \"query\": \"\"\"\n  SELECT * FROM \"${1:TABLE}\"\n  \"\"\"\n}\n"
   }
 }
