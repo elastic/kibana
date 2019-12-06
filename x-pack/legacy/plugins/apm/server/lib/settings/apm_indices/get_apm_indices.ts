@@ -58,10 +58,13 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
 //   return _getApmIndices(context.core, context.config);
 // }
 
-export async function getApmIndices(
-  savedObjectsClient: SavedObjectsClientContract,
-  config: APMRequestHandlerContext['config']
-) {
+export async function getApmIndices({
+  config,
+  savedObjectsClient
+}: {
+  config: APMConfig;
+  savedObjectsClient: SavedObjectsClientContract;
+}) {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(
       savedObjectsClient

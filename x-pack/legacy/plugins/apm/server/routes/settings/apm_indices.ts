@@ -26,10 +26,10 @@ export const apmIndicesRoute = createRoute(() => ({
   method: 'GET',
   path: '/api/apm/settings/apm-indices',
   handler: async ({ context }) => {
-    return await getApmIndices(
-      context.core.savedObjects.client,
-      context.config
-    );
+    return await getApmIndices({
+      savedObjectsClient: context.core.savedObjects.client,
+      config: context.config
+    });
   }
 }));
 

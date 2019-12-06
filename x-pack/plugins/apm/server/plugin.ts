@@ -77,7 +77,7 @@ export class APMPlugin implements Plugin<APMPluginContract> {
         this.legacySetup$.complete();
       }),
       getApmIndices: async (savedObjectsClient: SavedObjectsClientContract) => {
-        return getApmIndices(savedObjectsClient, this.currentConfig);
+        return getApmIndices({ savedObjectsClient, config: this.currentConfig });
       },
     };
   }
