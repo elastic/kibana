@@ -38,7 +38,8 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
       { monitorId, sort, size, status, dateRangeStart, dateRangeEnd, location },
       { callAsCurrentUser }
     ): Promise<PingResults> {
-      return await libs.pings.getAll(callAsCurrentUser, {
+      return await libs.pings.getAll({
+        callES: callAsCurrentUser,
         dateRangeStart,
         dateRangeEnd,
         monitorId,
@@ -49,7 +50,7 @@ export const createPingsResolvers: CreateUMGraphQLResolvers = (
       });
     },
     async getDocCount(_resolver, _args, { callAsCurrentUser }): Promise<DocCount> {
-      return libs.pings.getDocCount(callAsCurrentUser, undefined);
+      return libs.pings.getDocCount({ callES: callAsCurrentUser });
     },
   },
 });

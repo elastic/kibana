@@ -75,7 +75,8 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { dateRangeStart, dateRangeEnd, filters, monitorId, statusFilter },
       { callAsCurrentUser }
     ): Promise<HistogramResult> {
-      return await libs.pings.getPingHistogram(callAsCurrentUser, {
+      return await libs.pings.getPingHistogram({
+        callES: callAsCurrentUser,
         dateRangeStart,
         dateRangeEnd,
         filters,
@@ -88,7 +89,8 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { monitorId, dateRangeStart, dateRangeEnd, location },
       { callAsCurrentUser }
     ): Promise<MonitorChart> {
-      return await libs.monitors.getMonitorChartsData(callAsCurrentUser, {
+      return await libs.monitors.getMonitorChartsData({
+        callES: callAsCurrentUser,
         monitorId,
         dateRangeStart,
         dateRangeEnd,
@@ -100,7 +102,8 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { dateRangeStart, dateRangeEnd, monitorId, location },
       { callAsCurrentUser }
     ): Promise<Ping[]> {
-      return await libs.pings.getLatestMonitorDocs(callAsCurrentUser, {
+      return await libs.pings.getLatestMonitorDocs({
+        callES: callAsCurrentUser,
         dateRangeStart,
         dateRangeEnd,
         monitorId,
@@ -112,14 +115,18 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { dateRangeStart, dateRangeEnd },
       { callAsCurrentUser }
     ): Promise<FilterBar> {
-      return await libs.monitors.getFilterBar(callAsCurrentUser, { dateRangeStart, dateRangeEnd });
+      return await libs.monitors.getFilterBar({
+        callES: callAsCurrentUser,
+        dateRangeStart,
+        dateRangeEnd,
+      });
     },
     async getMonitorPageTitle(
       _resolver: any,
       { monitorId },
       { callAsCurrentUser }
     ): Promise<MonitorPageTitle | null> {
-      return await libs.monitors.getMonitorPageTitle(callAsCurrentUser, { monitorId });
+      return await libs.monitors.getMonitorPageTitle({ callES: callAsCurrentUser, monitorId });
     },
   },
 });
