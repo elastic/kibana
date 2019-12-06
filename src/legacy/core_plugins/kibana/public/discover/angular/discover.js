@@ -42,7 +42,6 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
   intervalOptions,
   isDefaultTypeIndexPattern,
@@ -80,7 +79,7 @@ import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
 import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
 
-const { savedQueryService } = data.query.savedQueries;
+const { getSavedQuery } = data.query.savedQueries;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -195,9 +194,7 @@ function discoverController(
   globalState,
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
-
 
   const inspectorAdapters = {
     requests: new RequestAdapter()
@@ -333,7 +330,7 @@ function discoverController(
           anchorElement,
           allowEmbed: false,
           allowShortUrl: uiCapabilities.discover.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+          shareableUrl: unhashUrl(window.location.href),
           objectId: savedSearch.id,
           objectType: 'search',
           sharingData: {
@@ -975,7 +972,7 @@ function discoverController(
       return;
     }
     if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
-      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;
           updateStateFromSavedQuery(savedQuery);

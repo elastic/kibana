@@ -27,6 +27,7 @@ import { OnChangeItemsPerPage, OnLoadMore } from '../events';
 
 import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
+import { useTimelineTypeContext } from '../timeline_context';
 
 const FixedWidthLastUpdated = styled.div<{ compact: boolean }>`
   width: ${({ compact }) => (!compact ? 200 : 25)}px;
@@ -92,43 +93,49 @@ export const EventsCountComponent = ({
   itemsCount: number;
   onClick: () => void;
   serverSideEventCount: number;
-}) => (
-  <h5>
-    <PopoverRowItems
-      className="footer-popover"
-      id="customizablePagination"
-      data-test-subj="timelineSizeRowPopover"
-      button={
-        <>
-          <EuiBadge data-test-subj="local-events-count" color="hollow">
-            {itemsCount}
-            <EuiButtonEmpty
-              size="s"
-              color="text"
-              iconType="arrowDown"
-              iconSide="right"
-              onClick={onClick}
-            />
-          </EuiBadge>
-          {` ${i18n.OF} `}
-        </>
-      }
-      isOpen={isOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-    >
-      <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
-    </PopoverRowItems>
-    <EuiToolTip content={`${serverSideEventCount} ${i18n.TOTAL_COUNT_OF_EVENTS}`}>
-      <ServerSideEventCount>
-        <EuiBadge color="hollow" data-test-subj="server-side-event-count">
-          {serverSideEventCount}
-        </EuiBadge>{' '}
-        {i18n.EVENTS}
-      </ServerSideEventCount>
-    </EuiToolTip>
-  </h5>
-);
+}) => {
+  const timelineTypeContext = useTimelineTypeContext();
+  return (
+    <h5>
+      <PopoverRowItems
+        className="footer-popover"
+        id="customizablePagination"
+        data-test-subj="timelineSizeRowPopover"
+        button={
+          <>
+            <EuiBadge data-test-subj="local-events-count" color="hollow">
+              {itemsCount}
+              <EuiButtonEmpty
+                size="s"
+                color="text"
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={onClick}
+              />
+            </EuiBadge>
+            {` ${i18n.OF} `}
+          </>
+        }
+        isOpen={isOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel items={items} data-test-subj="timelinePickSizeRow" />
+      </PopoverRowItems>
+      <EuiToolTip
+        content={`${serverSideEventCount} ${timelineTypeContext.footerText ??
+          i18n.TOTAL_COUNT_OF_EVENTS}`}
+      >
+        <ServerSideEventCount>
+          <EuiBadge color="hollow" data-test-subj="server-side-event-count">
+            {serverSideEventCount}
+          </EuiBadge>{' '}
+          {timelineTypeContext.documentType ?? i18n.EVENTS}
+        </ServerSideEventCount>
+      </EuiToolTip>
+    </h5>
+  );
+};
 
 EventsCountComponent.displayName = 'EventsCountComponent';
 
