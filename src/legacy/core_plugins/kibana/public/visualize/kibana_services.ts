@@ -103,7 +103,7 @@ export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { unhashUrl } from 'ui/state_management/state_hashing';
+export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export {
   Container,
   Embeddable,

@@ -17,25 +17,23 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { hashUrl } from '../../../../plugins/kibana_utils/public';
-import uiRoutes from 'ui/routes';
-import { fatalError } from 'ui/notify';
+declare module 'rison-node' {
+  export type RisonValue = null | boolean | number | string | RisonObject | RisonArray;
 
-uiRoutes.enable();
-uiRoutes
-  .when('/', {
-    resolve: {
-      url: function (AppState, globalState, $window) {
-        const redirectUrl = chrome.getInjected('redirectUrl');
-        try {
-          const hashedUrl = hashUrl(redirectUrl);
-          const url = chrome.addBasePath(hashedUrl);
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  export interface RisonArray extends Array<RisonValue> {}
 
-          $window.location = url;
-        } catch (e) {
-          fatalError(e);
-        }
-      }
-    }
-  });
+  export interface RisonObject {
+    [key: string]: RisonValue;
+  }
+
+  export const decode: (input: string) => RisonValue;
+
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  export const decode_object: (input: string) => RisonObject;
+
+  export const encode: <Input extends RisonValue>(input: Input) => string;
+
+  // eslint-disable-next-line @typescript-eslint/camelcase
+  export const encode_object: <Input extends RisonObject>(input: Input) => string;
+}
