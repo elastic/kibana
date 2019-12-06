@@ -1,8 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CustomUrlList renders a list of custom URLs 1`] = `
-<Fragment>
+<div
+  data-test-subj="mlJobEditCustomUrlsList"
+>
   <EuiFlexGroup
+    data-test-subj="mlJobEditCustomUrlItem_0"
     key="url_0"
   >
     <EuiFlexItem
@@ -159,6 +162,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
+    data-test-subj="mlJobEditCustomUrlItem_1"
     key="url_1"
   >
     <EuiFlexItem
@@ -315,6 +319,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup
+    data-test-subj="mlJobEditCustomUrlItem_2"
     key="url_2"
   >
     <EuiFlexItem
@@ -470,5 +475,5 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       </EuiFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
-</Fragment>
+</div>
 `;
