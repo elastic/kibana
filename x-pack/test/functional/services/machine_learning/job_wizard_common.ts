@@ -26,16 +26,6 @@ export function MachineLearningJobWizardCommonProvider(
     return !subSelector ? subj : `${subj} > ${subSelector}`;
   }
 
-  function additionalSettingsSectionSelector(subSelector?: string) {
-    const subj = 'mlJobWizardAdditionalSettingsSection';
-    return !subSelector ? subj : `${subj} > ${subSelector}`;
-  }
-
-  function newCustomUrlFormModal(subSelector?: string) {
-    const subj = 'mlJobNewCustomUrlFormModal';
-    return !subSelector ? subj : `${subj} > ${subSelector}`;
-  }
-
   return {
     async clickNextButton() {
       await testSubjects.existOrFail('mlJobWizardNavButtonNext');
@@ -390,18 +380,18 @@ export function MachineLearningJobWizardCommonProvider(
 
     async ensureAdditionalSettingsSectionOpen() {
       await retry.tryForTime(5000, async () => {
-        if ((await testSubjects.exists(additionalSettingsSectionSelector())) === false) {
+        if ((await testSubjects.exists('mlJobWizardAdditionalSettingsSection')) === false) {
           await testSubjects.click('mlJobWizardToggleAdditionalSettingsSection');
-          await testSubjects.existOrFail(additionalSettingsSectionSelector(), { timeout: 1000 });
+          await testSubjects.existOrFail('mlJobWizardAdditionalSettingsSection', { timeout: 1000 });
         }
       });
     },
 
     async ensureNewCustomUrlFormModalOpen() {
       await retry.tryForTime(5000, async () => {
-        if ((await testSubjects.exists(newCustomUrlFormModal())) === false) {
+        if ((await testSubjects.exists('mlJobNewCustomUrlFormModal')) === false) {
           await testSubjects.click('mlJobOpenCustomUrlFormButton');
-          await testSubjects.existOrFail(newCustomUrlFormModal(), { timeout: 1000 });
+          await testSubjects.existOrFail('mlJobNewCustomUrlFormModal', { timeout: 1000 });
         }
       });
     },
