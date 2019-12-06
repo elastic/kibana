@@ -32,7 +32,10 @@ import {
 import { setFieldFormats } from '../../plugins/data/public/services';
 
 setFieldFormats({
-  getDefaultInstance: () => {},
+  getDefaultInstance: () => ({
+    getConverterFor: () => value => value,
+    convert: value => JSON.stringify(value)
+  }),
 });
 
 import { getFieldFormatsRegistry } from './stub_field_formats';
