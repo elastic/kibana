@@ -3,15 +3,85 @@
 
 [partintro]
 --
-*Discover* enables you to explore your data with {kib}'s data discovery functions. 
-You have access to every document in every index that matches the selected <<index-patterns, index pattern>>.
-You can submit search queries, filter the search results, and view document data.
-You can also see the number of documents that match the search query and get field value statistics. 
-If a time field is configured for the selected index pattern, the distribution of 
-documents over time is displayed in a histogram at the top of the page.
+Use *Discover* to drill down into and understand your data, so you can determine the best way 
+to visualize it. This saves you time
+in creating your visualizations and helps you build better dashboards.
 
 [role="screenshot"]
 image::images/Discover-Start.png[Discover]
+
+With *Discover*, you can:
+
+* Access every document in every index that matches the selected index pattern
+* Submit search queries and filter the search results
+* Get field-level details about the documents that match your search
+* View what occurred just before and after an event
+
+
+[float]
+=== Set up your index pattern 
+
+The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>
+to define the data to work with. The current index pattern and options for 
+changing it are in the upper left.
+If you haven't yet created an index pattern, try downloading a <<add-sample-data, sample data set>>, 
+which has pre-built index patterns. 
+
+[float]
+=== Set a time filter
+
+By default, *Discover* shows data for the last 15 minutes.
+If you have a time-based index, and no data displays,
+you might need to increase the time range. Use the <<set-time-filter, time filter>> in the upper right
+to specify a common or recently-used time range, a relative time
+from now, or an absolute time range.
+
+[float]
+=== Search your data
+
+To search your data,
+enter your search criteria in the query bar.
+By default, you'll use the <<kuery-query, Kibana Query language>>,
+which offers a simplified query syntax and autocomplete. 
+For example, if 
+you search for `day_of_week : Friday`, you'll get a list of all documents 
+in which `day_of_week` is set to `Friday`. 
+
+To save a search, so you can use it in visualizations and dashboards,
+click *Save* in the menu bar. You can open the search at a later date by clicking *Open*.
+
+[float]
+=== Filter by field
+
+If you click on a name in the field list, you'll see 
+the top five values for the field, the number of documents that contain the field, 
+and the percentage of documents that contain each value. From this view, you can
+use the (+) magnifier icon to quickly filter for all 
+documents that have that value or (-) to exclude all 
+documents with that value. See <<field-filter, filtering by field>> for more filter options.
+
+[role="screenshot"]
+image::images/filter-field.png[height=317]
+
+
+[float]
+=== Modify the document table
+
+Most likely, you're only interested in some of the fields of each document. 
+You can add fields add and remove fields from the document table
+by clicking *add* or *remove* next to the field 
+name in field list. 
+See <<document-data, Viewing document data>> for details.
+
+[float]
+=== View a document in context
+
+Suppose you're troubleshooting your data, and you've narrowed down your results to a single document.  
+Now you want to to see all the documents that occurred just before and after the 
+document that you are looking at. You can do that by expanding the document and 
+clicking <<document-context, View surrounding documents>>.
+
+
 --
 
 include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
