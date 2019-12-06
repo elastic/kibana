@@ -52,5 +52,6 @@ export function restoreRequestFromHistory(editor: SenseEditor, req: any) {
 
   coreEditor.insert(pos, s);
   coreEditor.moveCursorToPosition({ lineNumber: pos.lineNumber + prefix.length, column: 1 });
+  coreEditor.clearSelection();
   coreEditor.getContainer().focus();
 }

@@ -37,7 +37,6 @@ import * as senseEditor from '../../../../models/sense_editor';
 import mappings from '../../../../../lib/mappings/mappings';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { SenseEditor } from '../../../../models/sense_editor';
 
 const abs: CSSProperties = {
   position: 'absolute',
@@ -66,7 +65,7 @@ function EditorUI() {
   const sendCurrentRequestToES = useSendCurrentRequestToES();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
-  const editorInstanceRef = useRef<SenseEditor | null>(null);
+  const editorInstanceRef = useRef<senseEditor.SenseEditor | null>(null);
 
   const [textArea, setTextArea] = useState<HTMLTextAreaElement | null>(null);
   useUIAceKeyboardMode(textArea);

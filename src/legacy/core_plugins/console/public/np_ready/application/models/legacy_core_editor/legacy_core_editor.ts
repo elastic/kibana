@@ -30,6 +30,9 @@ import * as InputMode from './mode/input';
 
 const _AceRange = ace.acequire('ace/range').Range;
 
+const rangeToAceRange = ({ start, end }: Range) =>
+  new _AceRange(start.lineNumber - 1, start.column - 1, end.lineNumber - 1, end.column - 1);
+
 export class LegacyCoreEditor implements CoreEditor {
   private _aceOnPaste: any;
   $actions: any;
@@ -89,14 +92,8 @@ export class LegacyCoreEditor implements CoreEditor {
     return session.getState(lineNumber - 1);
   }
 
-  getValueInRange({ start, end }: Range): string {
-    const aceRange = new _AceRange(
-      start.lineNumber - 1,
-      start.column - 1,
-      end.lineNumber - 1,
-      end.column - 1
-    );
-    return this.editor.getSession().getTextRange(aceRange);
+  getValueInRange(range: Range): string {
+    return this.editor.getSession().getTextRange(rangeToAceRange(range));
   }
 
   getTokenProvider(): TokensProvider {
@@ -169,15 +166,9 @@ export class LegacyCoreEditor implements CoreEditor {
     this.editor.moveCursorToPosition({ row: pos.lineNumber - 1, column: pos.column - 1 });
   }
 
-  replace({ start, end }: Range, value: string): void {
-    const aceRange = new _AceRange(
-      start.lineNumber - 1,
-      start.column - 1,
-      end.lineNumber - 1,
-      end.column - 1
-    );
+  replace(range: Range, value: string): void {
     const session = this.editor.getSession();
-    session.replace(aceRange, value);
+    session.replace(rangeToAceRange(range), value);
   }
 
   getLines(startLine: number, endLine: number): string[] {
@@ -187,17 +178,7 @@ export class LegacyCoreEditor implements CoreEditor {
 
   replaceRange(range: Range, value: string) {
     const pos = this.editor.getCursorPosition();
-    this.editor
-      .getSession()
-      .replace(
-        new _AceRange(
-          range.start.lineNumber - 1,
-          range.start.column - 1,
-          range.end.lineNumber - 1,
-          range.end.column - 1
-        ),
-        value
-      );
+    this.editor.getSession().replace(rangeToAceRange(range), value);
 
     const maxRow = Math.max(range.start.lineNumber - 1 + value.split('\n').length - 1, 1);
     pos.row = Math.min(pos.row, maxRow);
@@ -228,17 +209,7 @@ export class LegacyCoreEditor implements CoreEditor {
   addMarker(range: Range) {
     return this.editor
       .getSession()
-      .addMarker(
-        new _AceRange(
-          range.start.lineNumber - 1,
-          range.start.column - 1,
-          range.end.lineNumber - 1,
-          range.end.column - 1
-        ),
-        'ace_snippet-marker',
-        'fullLine',
-        false
-      );
+      .addMarker(rangeToAceRange(range), 'ace_snippet-marker', 'fullLine', false);
   }
 
   removeMarker(ref: any) {

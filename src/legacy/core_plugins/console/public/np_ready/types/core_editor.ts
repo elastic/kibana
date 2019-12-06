@@ -137,7 +137,7 @@ export interface CoreEditor {
   clearSelection(): void;
 
   /**
-   * TODO: Document
+   * Returns the {@link Range} for currently selected text
    */
   getSelectionRange(): Range;
 

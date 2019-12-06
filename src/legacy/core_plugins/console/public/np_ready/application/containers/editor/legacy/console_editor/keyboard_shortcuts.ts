@@ -38,7 +38,7 @@ export function registerCommands({
 
   coreEditor.registerKeyboardShortcut({
     keys: { win: 'Ctrl-Enter', mac: 'Command-Enter' },
-    name: 'send to elasticsearch',
+    name: 'send to Elasticsearch',
     fn: () => sendCurrentRequestToES(),
   });
 

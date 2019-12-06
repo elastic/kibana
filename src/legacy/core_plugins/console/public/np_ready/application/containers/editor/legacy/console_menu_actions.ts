@@ -21,7 +21,7 @@
 import { getEndpointFromPosition } from '../../../../lib/autocomplete/autocomplete';
 import { SenseEditor } from '../../../models/sense_editor';
 
-export async function autoIndent(editor: SenseEditor, event: any) {
+export async function autoIndent(editor: SenseEditor, event: Event) {
   event.preventDefault();
   await editor.autoIndent();
   editor

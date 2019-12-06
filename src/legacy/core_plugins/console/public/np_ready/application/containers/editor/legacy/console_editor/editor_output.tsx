@@ -18,8 +18,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import ace from 'brace';
-import { createReadOnlyAceEditor } from '../../../../models/legacy_core_editor';
+import { createReadOnlyAceEditor, CustomAceEditor } from '../../../../models/legacy_core_editor';
 import {
   useServicesContext,
   useEditorReadContext,
@@ -43,7 +42,7 @@ function modeForContentType(contentType: string) {
 
 function EditorOutputUI() {
   const editorRef = useRef<null | HTMLDivElement>(null);
-  const editorInstanceRef = useRef<null | ace.Editor>(null);
+  const editorInstanceRef = useRef<null | CustomAceEditor>(null);
   const { services } = useServicesContext();
 
   const { settings: readOnlySettings } = useEditorReadContext();
@@ -61,25 +60,26 @@ function EditorOutputUI() {
   }, [services.settings]);
 
   useEffect(() => {
+    const editor = editorInstanceRef.current!;
     if (data) {
       const mode = modeForContentType(data[0].response.contentType);
-      editorInstanceRef.current!.session.setMode(mode);
-      (editorInstanceRef.current! as any).update(
+      editor.session.setMode(mode);
+      editor.update(
         data
           .map(d => d.response.value)
           .map(readOnlySettings.tripleQuotes ? utils.expandLiteralStrings : a => a)
           .join('\n')
       );
     } else if (error) {
-      editorInstanceRef.current!.session.setMode(modeForContentType(error.contentType));
-      (editorInstanceRef.current! as any).update(error.value);
+      editor.session.setMode(modeForContentType(error.contentType));
+      editor.update(error.value);
     } else {
-      (editorInstanceRef.current! as any).update('');
+      editor.update('');
     }
   }, [readOnlySettings, data, error]);
 
   useEffect(() => {
-    applyCurrentSettings(editorInstanceRef.current, readOnlySettings);
+    applyCurrentSettings(editorInstanceRef.current!, readOnlySettings);
   }, [readOnlySettings]);
 
   return (

@@ -72,7 +72,7 @@ describe('Input Tokenization', () => {
       data = prefix;
     }
 
-    test('Token test ' + testCount++ + ' prefix: ' + prefix, async function (done) {
+    test('Token test ' + testCount++ + ' prefix: ' + prefix, async function () {
       await coreEditor.setValue(data, true);
       const tokens = tokensAsList();
       const normTokenList = [];
@@ -81,7 +81,6 @@ describe('Input Tokenization', () => {
       }
 
       expect(tokens).toEqual(normTokenList);
-      done();
     });
   }
 
@@ -277,11 +276,10 @@ describe('Input Tokenization', () => {
       data = prefix;
     }
 
-    test('States test ' + testCount++ + ' prefix: ' + prefix, async function (done) {
+    test('States test ' + testCount++ + ' prefix: ' + prefix, async function () {
       await coreEditor.setValue(data, true);
       const modes = statesAsList();
       expect(modes).toEqual(statesList);
-      done();
     });
   }
 

@@ -33,13 +33,13 @@ export interface CustomAceEditor extends ace.Editor {
  * create an interface for it so that we don't rely directly on vendor APIs.
  */
 export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
-  const output = ace.acequire('ace/ace').edit(element);
+  const output: CustomAceEditor = ace.acequire('ace/ace').edit(element);
 
   const outputMode = new OutputMode.Mode();
 
   output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
-  output.update = (val: string, mode?: any, cb?: any) => {
+  output.update = (val: string, mode?: any, cb?: () => void) => {
     if (typeof mode === 'function') {
       cb = mode;
       mode = void 0;
@@ -54,7 +54,7 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
     }
   };
 
-  output.append = (val: any, foldPrevious?: any, cb?: any) => {
+  output.append = (val: string, foldPrevious?: boolean, cb?: () => void) => {
     if (typeof foldPrevious === 'function') {
       cb = foldPrevious;
       foldPrevious = true;
@@ -77,7 +77,7 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
   // eslint-disable-next-line
   (function setupSession(session) {
     session.setMode('ace/mode/text');
-    session.setFoldStyle('markbeginend');
+    (session as any).setFoldStyle('markbeginend');
     session.setTabSize(2);
     session.setUseWrapMode(true);
   })(output.getSession());

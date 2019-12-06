@@ -20,9 +20,7 @@
 import React, { useEffect } from 'react';
 // @ts-ignore
 import exampleText from 'raw-loader!../constants/help_example.txt';
-import $ from 'jquery';
-
-import { createReadOnlyAceEditor } from '../models/legacy_core_editor/create_readonly';
+import { createReadOnlyAceEditor } from '../models/legacy_core_editor';
 
 interface EditorExampleProps {
   panel: string;
@@ -33,7 +31,7 @@ export function EditorExample(props: EditorExampleProps) {
 
   useEffect(() => {
     const el = document.querySelector<HTMLElement>(`#${elemId}`)!;
-    $(el).text(exampleText.trim());
+    el.textContent = exampleText.trim();
     const editor = createReadOnlyAceEditor(el);
 
     return () => {
