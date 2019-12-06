@@ -67,12 +67,13 @@ const threat_technique = Joi.object({
   name: threat_technique_name.required(),
   reference: threat_technique_reference.required(),
 });
+const threat_techniques = Joi.array().items(threat_technique.required());
 
 const threats = Joi.array().items(
   Joi.object({
     framework: threat_framework.required(),
     tactic: threat_tactic.required(),
-    technique: threat_technique.required(),
+    techniques: threat_techniques.required(),
   })
 );
 /* eslint-enable @typescript-eslint/camelcase */
