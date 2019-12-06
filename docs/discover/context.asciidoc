@@ -23,13 +23,13 @@ image::images/Discover-ContextView.png[Context View]
 === Filter the context
 
 The 
-filters applied in *Discover* are carried over to the Context view. Pinned filters remain active, while normal
-filters are copied in a disabled state. You can selectively re-enabled these filters to
+filters you applied in *Discover* are carried over to the Context view. Pinned filters remain active, while normal
+filters are copied in a disabled state. You can re-enabled these filters to
 refine your context view.
 
 If the Context view contains a large number of documents not related to the event under
 investigation, you can use filters to restrict the documents to
-display. See filtering for more information.
+display.
 
 [float]
 [[change-context-size]]

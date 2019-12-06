@@ -9,36 +9,37 @@ and helps improve the quality of your dashboards.
 
 [float]
 [[sorting]]
-=== Add, sort, move, and remove field columns
+=== Add, sort, and remove fields from the document table
 
 By default, the document table includes columns for two fields: the 
 localized version of the time field for the selected index 
 pattern and the document _source. Use the following commands to 
-tailor the documents table to meet your use case.
+tailor the documents table to meet your needs.
 
 [horizontal]
 Add a field column:: 
-Hover over the list of *Available fields* and then click *add* next to each field you want include.
-The first column you add replaces the _source column in the Documents table. All added fields also appear in the *Selected Fields* list.
+Hover over the list of *Available fields* and then click *add* next to each field you want include in the table.
+The first column you add replaces the _source column. 
 Change sort order:: By default, columns are sorted by the values in the field.  
 If a time field is configured for the current index pattern, 
-the documents are sorted in reverse chronological order.  To change the sort order, hover over the column and click ... 
-Move a field column:: Hover over the column header and click move left or move right. 
+the documents are sorted in reverse chronological order.  To change the sort order, hover over the column 
+and click image:images/sort-icon.png[] 
+Move a field column:: Hover over the column header and click the move left or move right icon image:images/move-icon.png[]. 
 Remove&nbsp;a&nbsp;field&nbsp;column&nbsp;:: Hover over the list of *Specified fields* 
 and then click *remove* next to each. 
 Or, use the control in the column header.
 
 [float]
 === Drill down into field-level details
+To view the field data for a document, click the Expand icon.
+You can view field data in either Table or JSON format. 
 
-From the expanded view of the document table, you can 
-view field data in either Table or JSON format. For filtering options, hover
-over a row in the Table view.
+The expanded view provides these options for viewing your document:
 
-The expanded document view also provides these options for viewing your document:
+* For filtering options, hover over a row in the Table view.
 
-* Open a <<document-context, Context view>> that lists the events that
-surround your document.  For example, you might want to see the 10 documents that occurred 
+* View the events that surround your document, click <<document-context, Context view>>
+For example, you might want to see the 10 documents that occurred 
 immediately before and after your event.  
 
 * View the document data as a separate page. You can bookmark and 
@@ -51,8 +52,8 @@ image::images/Expanded-Document.png[]
 [float]
 === Configure the number of documents to show
 
-You can configure the number of documents shown
-in the table by setting the `discover:sampleSize` property in <<advanced-options,
+To configure the number of documents shown
+in the table, set the `discover:sampleSize` property in <<advanced-options,
 Advanced Settings>>.
 
 
