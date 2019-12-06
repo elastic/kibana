@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../plugins/data/public';
 
-export const isDefaultTypeIndexPattern = (indexPattern: IIndexPattern) => {
+export const isDefaultTypeIndexPattern = (indexPattern: IndexPattern) => {
   // Default index patterns don't have `type` defined.
   return !indexPattern.type;
 };

@@ -18,7 +18,7 @@
  */
 
 import { SearchSource } from '../search_source';
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
 
@@ -43,12 +43,12 @@ const indexPattern = ({
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown) as IIndexPattern;
+} as unknown) as IndexPattern;
 const indexPattern2 = ({
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
-} as unknown) as IIndexPattern;
+} as unknown) as IndexPattern;
 
 describe('SearchSource', function() {
   describe('#setField()', function() {

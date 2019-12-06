@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IndexPattern } from '../../../../../../plugins/data/public';
 import { SearchStrategyProvider } from './types';
 import { noOpSearchStrategy } from './no_op_search_strategy';
 import { SearchResponse } from '../types';
@@ -32,7 +32,7 @@ export const addSearchStrategy = (searchStrategy: SearchStrategyProvider) => {
   searchStrategies.push(searchStrategy);
 };
 
-export const getSearchStrategyByViability = (indexPattern: IIndexPattern) => {
+export const getSearchStrategyByViability = (indexPattern: IndexPattern) => {
   return searchStrategies.find(searchStrategy => {
     return searchStrategy.isViable(indexPattern);
   });
@@ -66,6 +66,6 @@ export const getSearchStrategyForSearchRequest = (
   return noOpSearchStrategy;
 };
 
-export const hasSearchStategyForIndexPattern = (indexPattern: IIndexPattern) => {
+export const hasSearchStategyForIndexPattern = (indexPattern: IndexPattern) => {
   return Boolean(getSearchStrategyByViability(indexPattern));
 };
