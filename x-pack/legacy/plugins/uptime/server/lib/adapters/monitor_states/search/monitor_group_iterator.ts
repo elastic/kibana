@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QueryContext } from './query_context';
 import { CursorPagination } from '../adapter_types';
 import { fetchChunk } from './fetch_chunk';
 import { CursorDirection } from '../../../../../common/graphql/types';

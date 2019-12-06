@@ -6,7 +6,7 @@
 
 import { flatten } from 'lodash';
 import { CursorPagination } from '../adapter_types';
-import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QueryContext } from './query_context';
 import { QUERY } from '../../../../../common/constants';
 import { CursorDirection, MonitorSummary, SortOrder } from '../../../../../common/graphql/types';
 import { enrichMonitorGroups } from './enrich_monitor_groups';

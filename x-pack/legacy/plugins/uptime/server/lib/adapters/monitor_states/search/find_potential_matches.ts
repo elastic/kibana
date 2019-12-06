@@ -67,6 +67,8 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
 const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {
   const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
 
+  console.log("R QC ", queryContext);
+  console.log("QC IS", queryContext.dateAndCustomFilters);
   const filters = await queryContext.dateAndCustomFilters();
 
   if (queryContext.statusFilter) {
@@ -117,7 +119,6 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
       },
     },
   };
-  console.log("THE Q", JSON.stringify(body.query, null, 2));
 
   if (searchAfter) {
     set(body, 'aggs.monitors.composite.after', searchAfter);

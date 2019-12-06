@@ -43,7 +43,11 @@ export class QueryContext {
   }
 
   async dateAndCustomFilters(): Promise<any[]> {
-    return [this.filterClause, await this.dateRangeFilter()];
+    const clauses = [await this.dateRangeFilter()];
+    if (this.filterClause) {
+      clauses.push(this.filterClause);
+    }
+    return clauses;
   }
 
   async dateRangeFilter(forceTimespan?: boolean): Promise<any> {
@@ -93,7 +97,7 @@ export class QueryContext {
         query: {
           bool: {
             filter: [
-              this.dateRangeFilter(true),
+              await this.dateRangeFilter(true),
               {exists: {field: "monitor.timespan"}},
             ],
           },

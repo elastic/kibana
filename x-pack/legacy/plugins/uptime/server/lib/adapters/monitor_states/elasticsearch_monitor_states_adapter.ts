@@ -11,8 +11,6 @@ import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { fetchPage } from './search';
 import { MonitorGroupIterator } from './search/monitor_group_iterator';
 import { Snapshot } from '../../../../common/runtime_types';
-import { getSnapshotCountHelper } from './get_snapshot_helper';
-import {makeDateRangeFilter} from "../../helper/make_date_rate_filter";
 import {QueryContext} from "./search/query_context";
 
 
@@ -70,12 +68,14 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       statusFilter,
     );
 
+    console.log("SNAP COUNT");
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         size: 0,
         query: {
-          bool: { filter: context.dateAndCustomFilters() },
+          bool: { filter: (await context.dateAndCustomFilters()) },
         },
         aggs: {
           by_status: {
@@ -96,6 +96,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
         }
       }
     };
+
+    console.log("Q IS", JSON.stringify(params.body.query));
+
     const roughCount = await context.database.search(context.request, params);
     const uniqueUp = roughCount.aggregations.by_status.buckets.down.unique.value;
     const uniqueDown = roughCount.aggregations.by_status.buckets.down.unique.value;

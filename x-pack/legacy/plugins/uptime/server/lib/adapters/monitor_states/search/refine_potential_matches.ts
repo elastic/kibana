@@ -5,7 +5,7 @@
  */
 
 import { INDEX_NAMES } from '../../../../../common/constants';
-import { QueryContext } from '../elasticsearch_monitor_states_adapter';
+import { QueryContext } from './query_context';
 import { CursorDirection } from '../../../../../common/graphql/types';
 import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 import { makeDateRangeFilter } from '../../../helper/make_date_rate_filter';

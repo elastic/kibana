@@ -6,7 +6,7 @@
 
 import { CursorPagination } from '../../adapter_types';
 import { CursorDirection, SortOrder } from '../../../../../../common/graphql/types';
-import { QueryContext } from '../../elasticsearch_monitor_states_adapter';
+import {QueryContext} from "../query_context";
 
 export const prevPagination = (key: any): CursorPagination => {
   return {
