@@ -25,4 +25,12 @@ export class PropertyEqualsSavedObjectsPredicate implements SavedObjectsPredicat
   exec(obj: any): boolean {
     return obj.attributes[this.key] === this.value;
   }
+
+  getQuery(type: string): Record<string, any> {
+    return {
+      term: {
+        [`${type}.${this.key}`]: this.value,
+      },
+    };
+  }
 }

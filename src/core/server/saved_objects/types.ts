@@ -22,6 +22,7 @@ import { SavedObjectsMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
+import { SavedObjectsPredicate } from './service';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.
@@ -108,12 +109,15 @@ export interface SavedObjectReference {
   id: string;
 }
 
+export type SavedObjectsTypesPredicate = Map<string, SavedObjectsPredicate>;
+
 /**
  *
  * @public
  */
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   type: string | string[];
+  typesPredicate: SavedObjectsTypesPredicate;
   page?: number;
   perPage?: number;
   sortField?: string;

@@ -192,6 +192,7 @@ export {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsMigrationVersion,
+  SavedObjectsTypesPredicate,
 } from './types';
 
 export { LegacyServiceSetupDeps, LegacyServiceStartDeps } from './legacy';

@@ -20,6 +20,8 @@ import { toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
+import { SavedObjectsTypesPredicate } from '../../../types';
+import { SavedObjectsPredicate } from '../predicates';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -60,18 +62,27 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  *  Gets the clause that will filter for the type in the namespace.
  *  Some types are namespace agnostic, so they must be treated differently.
  */
-function getClauseForType(schema: SavedObjectsSchema, namespace: string | undefined, type: string) {
+function getClauseForType(
+  schema: SavedObjectsSchema,
+  namespace: string | undefined,
+  type: string,
+  predicate: SavedObjectsPredicate | undefined
+) {
   if (namespace && !schema.isNamespaceAgnostic(type)) {
     return {
       bool: {
-        must: [{ term: { type } }, { term: { namespace } }],
+        must: [
+          { term: { type } },
+          { term: { namespace } },
+          ...(predicate ? [predicate.getQuery(type)] : []),
+        ],
       },
     };
   }
 
   return {
     bool: {
-      must: [{ term: { type } }],
+      must: [{ term: { type } }, ...(predicate ? [predicate.getQuery(type)] : [])],
       must_not: [{ exists: { field: 'namespace' } }],
     },
   };
@@ -87,6 +98,7 @@ interface QueryParams {
   schema: SavedObjectsSchema;
   namespace?: string;
   type?: string | string[];
+  typesPredicate?: SavedObjectsTypesPredicate;
   search?: string;
   searchFields?: string[];
   defaultSearchOperator?: string;
@@ -102,6 +114,7 @@ export function getQueryParams({
   schema,
   namespace,
   type,
+  typesPredicate,
   search,
   searchFields,
   defaultSearchOperator,
@@ -139,7 +152,14 @@ export function getQueryParams({
                 },
               ]
             : undefined,
-          should: types.map(shouldType => getClauseForType(schema, namespace, shouldType)),
+          should: types.map(shouldType =>
+            getClauseForType(
+              schema,
+              namespace,
+              shouldType,
+              typesPredicate && typesPredicate.get(shouldType)
+            )
+          ),
           minimum_should_match: 1,
         },
       },

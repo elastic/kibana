@@ -19,4 +19,5 @@
 
 export interface SavedObjectsPredicate {
   exec(obj: any): boolean;
+  getQuery(type: string): Record<string, any>;
 }

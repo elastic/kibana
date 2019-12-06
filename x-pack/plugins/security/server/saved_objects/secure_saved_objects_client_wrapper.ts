@@ -16,6 +16,7 @@ import {
   SavedObjectsPredicate,
   SavedObjectsPredicates,
   PropertyEqualsSavedObjectsPredicate,
+  SavedObjectsTypesPredicate,
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
@@ -31,6 +32,11 @@ interface SecureSavedObjectsClientWrapperOptions {
 
 interface EnsureAuthorizedForTypeResult {
   predicate?: SavedObjectsPredicate;
+}
+
+interface EnsureAuthorizedForTypesResult {
+  type: string[];
+  typesPredicate?: SavedObjectsTypesPredicate;
 }
 
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
@@ -91,7 +97,17 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   public async find(options: SavedObjectsFindOptions) {
-    await this.ensureAuthorized(options.type, 'find', options.namespace, { options });
+    const authorizedResult = await this.ensureAuthorizedForTypes(
+      Array.isArray(options.type) ? options.type : [options.type],
+      'find',
+      options.namespace,
+      { options }
+    );
+
+    options.type = authorizedResult.type;
+    if (authorizedResult.typesPredicate != null) {
+      options.typesPredicate = authorizedResult.typesPredicate;
+    }
 
     return this.baseClient.find(options);
   }
@@ -243,6 +259,79 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       username,
       action,
       [type],
+      missingPrivileges,
+      args
+    );
+    const msg = `Unable to ${action} ${missingPrivileges.join(',')}`;
+    throw this.errors.decorateForbiddenError(new Error(msg));
+  }
+
+  private async ensureAuthorizedForTypes(
+    types: string[],
+    action: string,
+    namespace?: string,
+    args?: Record<string, unknown>
+  ): Promise<EnsureAuthorizedForTypesResult> {
+    const actions: string[] = [];
+    for (const type of types) {
+      actions.push(this.actions.savedObject.get(type, action));
+      if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
+        const conditions = this.savedObjectsPrivileges.getConditions(type);
+        for (const condition of conditions) {
+          actions.push(this.actions.savedObject.get({ type, when: condition }, action));
+        }
+      }
+    }
+
+    const { username, privileges } = await this.checkPrivileges(actions, namespace);
+    const authorizedTypes: string[] = [];
+    const typesPredicate: SavedObjectsTypesPredicate = new Map<string, SavedObjectsPredicate>();
+    for (const type of types) {
+      if (privileges[this.actions.savedObject.get(type, action)] === true) {
+        authorizedTypes.push(type);
+      } else if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
+        const predicates: SavedObjectsPredicate[] = [];
+        const conditions = this.savedObjectsPrivileges.getConditions(type);
+        for (const condition of conditions) {
+          if (
+            privileges[this.actions.savedObject.get({ type, when: condition }, action)] === true
+          ) {
+            if (!Array.isArray(condition)) {
+              predicates.push(
+                new PropertyEqualsSavedObjectsPredicate(condition.key, condition.value)
+              );
+            } else {
+              predicates.push(
+                new SavedObjectsPredicates(
+                  'AND',
+                  condition.map(
+                    ({ key, value }) => new PropertyEqualsSavedObjectsPredicate(key, value)
+                  )
+                )
+              );
+            }
+          }
+        }
+        if (predicates.length > 0) {
+          authorizedTypes.push(type);
+          typesPredicate.set(type, new SavedObjectsPredicates('OR', predicates));
+        }
+      }
+    }
+
+    if (authorizedTypes.length > 0) {
+      this.auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, args);
+      return {
+        type: authorizedTypes,
+        typesPredicate,
+      };
+    }
+
+    const missingPrivileges = Object.keys(privileges);
+    this.auditLogger.savedObjectsAuthorizationFailure(
+      username,
+      action,
+      types,
       missingPrivileges,
       args
     );

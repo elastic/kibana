@@ -24,9 +24,11 @@ import { IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { getQueryParams } from './query_params';
 import { getSortingParams } from './sorting_params';
+import { SavedObjectsTypesPredicate } from '../../../types';
 
 interface GetSearchDslOptions {
   type: string | string[];
+  typesPredicate?: SavedObjectsTypesPredicate;
   search?: string;
   defaultSearchOperator?: string;
   searchFields?: string[];
@@ -47,6 +49,7 @@ export function getSearchDsl(
 ) {
   const {
     type,
+    typesPredicate,
     search,
     defaultSearchOperator,
     searchFields,
@@ -71,6 +74,7 @@ export function getSearchDsl(
       schema,
       namespace,
       type,
+      typesPredicate,
       search,
       searchFields,
       defaultSearchOperator,

@@ -451,6 +451,7 @@ export class SavedObjectsRepository {
     fields,
     namespace,
     type,
+    typesPredicate,
     filter,
   }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>> {
     if (!type) {
@@ -506,6 +507,7 @@ export class SavedObjectsRepository {
           defaultSearchOperator,
           searchFields,
           type: allowedTypes,
+          typesPredicate,
           sortField,
           sortOrder,
           namespace,

@@ -34,4 +34,22 @@ export class SavedObjectsPredicates implements SavedObjectsPredicate {
         return this.predicates.some(predicate => predicate.exec(obj));
     }
   }
+
+  getQuery(type: string): Record<string, any> {
+    switch (this.operator) {
+      case 'AND':
+        return {
+          bool: {
+            must: [this.predicates.map(predicate => predicate.getQuery(type))],
+          },
+        };
+      case 'OR':
+        return {
+          bool: {
+            should: [this.predicates.map(predicate => predicate.getQuery(type))],
+            minimum_should_match: 1,
+          },
+        };
+    }
+  }
 }
