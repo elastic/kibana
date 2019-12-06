@@ -17,9 +17,16 @@
  * under the License.
  */
 
-import { createStateContainer, createStateContainerReactHelpers } from '.';
+import { createStateContainer } from '../../public/state_containers';
 
-test('exports store methods', () => {
-  expect(typeof createStateContainer).toBe('function');
-  expect(typeof createStateContainerReactHelpers).toBe('function');
+const container = createStateContainer(0, {
+  increment: (cnt: number) => (by: number) => cnt + by,
+  double: (cnt: number) => () => cnt * 2,
 });
+
+container.transitions.increment(5);
+container.transitions.double();
+
+console.log(container.get()); // eslint-disable-line
+
+export const result = container.get();

@@ -17,5 +17,6 @@
  * under the License.
  */
 
-export * from './create_store';
-export * from './react';
+export * from './types';
+export * from './create_state_container';
+export * from './create_state_container_react_helpers';
