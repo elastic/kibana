@@ -14,6 +14,8 @@ interface MonitorStatusBarProps {
   variables: any;
   loadMonitorLocations: any;
   monitorLocations: any;
+  dateStart: any;
+  dateEnd: any;
 }
 
 export const MonitorStatusDetailsComponent = ({
@@ -21,10 +23,12 @@ export const MonitorStatusDetailsComponent = ({
   variables,
   loadMonitorLocations,
   monitorLocations,
+  dateStart,
+  dateEnd,
 }: MonitorStatusBarProps) => {
   useEffect(() => {
     loadMonitorLocations(monitorId);
-  }, []);
+  }, [monitorId, dateStart, dateEnd]);
 
   return (
     <EuiPanel>

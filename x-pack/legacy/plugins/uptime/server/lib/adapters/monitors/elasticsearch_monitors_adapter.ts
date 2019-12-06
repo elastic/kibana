@@ -336,7 +336,12 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
    * @param request Kibana server request
    * @param monitorId the ID to query
    */
-  public async getMonitorLocations(request: any, monitorId: string): Promise<MonitorLocations> {
+  public async getMonitorLocations(
+    request: any,
+    monitorId: string,
+    dateStart: string,
+    dateEnd: string
+  ): Promise<MonitorLocations> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -352,6 +357,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               {
                 exists: {
                   field: 'summary',
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: dateStart,
+                    lte: dateEnd,
+                  },
                 },
               },
             ],
