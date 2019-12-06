@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Dispatch } from 'redux';
 import { userNavigated } from '../concerns/routing';
+import { SagaContext } from '../lib/saga';
 
 /**
  * This must be used for `withPageNavigationStatus`
  */
-// TODO: type actionsAndState
-export async function routingSaga({
-  dispatch,
-  actionsAndState,
-}: {
-  dispatch: Dispatch;
-  actionsAndState: any;
-}) {
+export async function routingSaga({ dispatch, actionsAndState }: SagaContext) {
+  // FIXME: this event listener needs to be removed when plugin unmount's
   window.addEventListener('popstate', emit);
   emit();
 
   for await (const { action } of actionsAndState()) {
-    if (action.type === 'LOCATION_CHANGE' && action.payload.action !== 'POP') {
+    if (
+      action.type === 'LOCATION_CHANGE' &&
+      ((action.payload as unknown) as { action: string }).action !== 'POP'
+    ) {
       emit();
     }
   }
@@ -39,7 +36,7 @@ export async function* withPageNavigationStatus({
     return false;
   },
 }: {
-  actionsAndState: any;
+  actionsAndState: SagaContext['actionsAndState'];
   isOnPage: (href: any) => boolean;
 }) {
   // TODO: do we need userIsLoggedIn?
