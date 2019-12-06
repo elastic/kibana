@@ -18,19 +18,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, RouteValidator } from '../../../../core/server';
+import { IRouter } from '../../../../core/server';
 
 export function registerSearchRoute(router: IRouter): void {
   router.post(
     {
       path: '/internal/search/{strategy}',
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({ strategy: schema.string() }),
 
         query: schema.object({}, { allowUnknowns: true }),
 
         body: schema.object({}, { allowUnknowns: true }),
-      }),
+      },
     },
     async (context, request, res) => {
       const searchRequest = request.body;

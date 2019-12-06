@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteValidator } from 'kibana/server';
 import { SAMLLoginStep } from '../../authentication';
 import { RouteDefinitionParams } from '..';
 
@@ -76,9 +75,9 @@ export function defineSAMLRoutes({
   router.get(
     {
       path: '/api/security/saml/start',
-      validate: new RouteValidator({
+      validate: {
         query: schema.object({ redirectURLFragment: schema.string() }),
-      }),
+      },
       options: { authRequired: false },
     },
     async (context, request, response) => {
@@ -107,12 +106,12 @@ export function defineSAMLRoutes({
   router.post(
     {
       path: '/api/security/saml/callback',
-      validate: new RouteValidator({
+      validate: {
         body: schema.object({
           SAMLResponse: schema.string(),
           RelayState: schema.maybe(schema.string()),
         }),
-      }),
+      },
       options: { authRequired: false },
     },
     async (context, request, response) => {

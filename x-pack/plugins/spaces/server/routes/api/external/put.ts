@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteValidator } from 'kibana/server';
 import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
@@ -18,12 +17,12 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
   externalRouter.put(
     {
       path: '/api/spaces/space/{id}',
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           id: schema.string(),
         }),
         body: spaceSchema,
-      }),
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { SavedObjectsClient } = getSavedObjects();

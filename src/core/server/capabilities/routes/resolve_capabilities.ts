@@ -18,7 +18,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, RouteValidator } from '../../http';
+import { IRouter } from '../../http';
 import { CapabilitiesResolver } from '../resolve_capabilities';
 
 export function registerCapabilitiesRoutes(router: IRouter, resolver: CapabilitiesResolver) {
@@ -33,11 +33,11 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
         options: {
           authRequired,
         },
-        validate: new RouteValidator({
+        validate: {
           body: schema.object({
             applications: schema.arrayOf(schema.string()),
           }),
-        }),
+        },
       },
       async (ctx, req, res) => {
         const { applications } = req.body;

@@ -102,21 +102,13 @@ export interface RouteValidatorOptions {
 /**
  * Route validator class to define the validation logic for each new route.
  *
- * @public
+ * @private
  */
 export class RouteValidator<P = {}, Q = {}, B = {}> {
   constructor(
     private readonly config: RouteValidatorConfig<P, Q, B>,
     private readonly options: RouteValidatorOptions = {}
-  ) {
-    Object.entries(this.config).forEach(([key, validationSpec]) => {
-      if (!(validationSpec instanceof Type || typeof validationSpec === 'function')) {
-        throw new Error(
-          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidateFunction at key: [${key}].`
-        );
-      }
-    });
-  }
+  ) {}
 
   /**
    * Get validated URL params

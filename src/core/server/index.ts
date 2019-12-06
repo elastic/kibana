@@ -122,7 +122,6 @@ export {
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
-  RouteValidator,
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidateFunction,

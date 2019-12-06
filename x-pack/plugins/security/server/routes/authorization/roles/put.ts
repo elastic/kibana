@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteValidator } from 'kibana/server';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import { wrapError } from '../../../errors';
@@ -19,7 +18,7 @@ export function definePutRolesRoutes({ router, authz, clusterClient }: RouteDefi
   router.put(
     {
       path: '/api/security/role/{name}',
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),
         body: getPutPayloadSchema(() => {
           const privileges = authz.privileges.get();
@@ -28,7 +27,7 @@ export function definePutRolesRoutes({ router, authz, clusterClient }: RouteDefi
             space: Object.keys(privileges.space),
           };
         }),
-      }),
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { name } = request.params;

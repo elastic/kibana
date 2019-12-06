@@ -18,18 +18,18 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { IRouter, RouteValidator } from '../../http';
+import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { CannotOverrideError } from '../ui_settings_errors';
 
-const validate = new RouteValidator({
+const validate = {
   params: schema.object({
     key: schema.string(),
   }),
   body: schema.object({
     value: schema.any(),
   }),
-});
+};
 
 export function registerSetRoute(router: IRouter) {
   router.post(

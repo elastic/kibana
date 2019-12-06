@@ -20,6 +20,7 @@
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Boom from 'boom';
 
+import { Type } from '@kbn/config-schema';
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
@@ -136,11 +137,20 @@ function routeSchemasFromRouteConfig<P, Q, B>(
     );
   }
 
-  if (route.validate !== false && !(route.validate instanceof RouteValidator)) {
-    throw new Error(`[${routeMethod.toUpperCase()} ${route.path}] expects a valid RouteValidator.`);
+  if (route.validate !== false) {
+    Object.entries(route.validate).forEach(([key, schema]) => {
+      if (!(schema instanceof Type || typeof schema === 'function')) {
+        throw new Error(
+          `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidateFunction at key: [${key}].`
+        );
+      }
+    });
   }
 
-  return route.validate ? route.validate : undefined;
+  if (route.validate) {
+    const { params, query, body, ...validationOptions } = route.validate;
+    return new RouteValidator({ params, query, body }, validationOptions);
+  }
 }
 
 /**
@@ -155,7 +165,7 @@ function validOptions(
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = (validate && validate.hasBody()) || !!options.body;
+  const shouldValidateBody = (validate && !!validate.body) || !!options.body;
 
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {

@@ -29,8 +29,8 @@ import {
   LifecycleResponseFactory,
   RouteMethod,
   KibanaResponseFactory,
-  RouteValidator,
 } from './router';
+import { RouteValidator } from './router/validator';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;

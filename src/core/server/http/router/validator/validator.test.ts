@@ -21,17 +21,6 @@ import { RouteValidationError, RouteValidator } from './';
 import { schema, Type } from '@kbn/config-schema';
 
 describe('Router validator', () => {
-  it(`should throw an error if any of the properties' validation logics is not valid`, () => {
-    expect(
-      () =>
-        new RouteValidator({
-          body: { validate: () => 'anything' } as any,
-        })
-    ).toThrowError(
-      `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidateFunction at key: [body].`
-    );
-  });
-
   it('should validate and infer the type from a function', () => {
     const validator = new RouteValidator({
       params: data => {

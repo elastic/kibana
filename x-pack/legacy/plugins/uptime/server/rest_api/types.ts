@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ObjectType } from '@kbn/config-schema';
 import { RequestHandler, RouteConfig, RouteMethod } from 'kibana/server';
 import { UMServerLibs } from '../lib/lib';
 
-export interface UMServerRoute {
+export interface UMServerRoute<P, Q, B> {
   method: string;
-  handler: RequestHandler<ObjectType, ObjectType, ObjectType>;
+  handler: RequestHandler<P, Q, B>;
 }
 
-export type UMRouteDefinition = UMServerRoute &
-  RouteConfig<ObjectType, ObjectType, ObjectType, RouteMethod>;
+export type UMRouteDefinition<P = any, Q = any, B = any> = UMServerRoute<P, Q, B> &
+  RouteConfig<P, Q, B, RouteMethod>;
 
-export type UMRestApiRouteCreator = (libs: UMServerLibs) => UMRouteDefinition;
+// The current master version assumes 'any' anyway
+export type UMRestApiRouteCreator<P = any, Q = any, B = any> = (
+  libs: UMServerLibs
+) => UMRouteDefinition<P, Q, B>;

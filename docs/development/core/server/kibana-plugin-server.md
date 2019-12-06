@@ -21,7 +21,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ElasticsearchErrorHelpers](./kibana-plugin-server.elasticsearcherrorhelpers.md) | Helpers for working with errors returned from the Elasticsearch service.Since the internal data of errors are subject to change, consumers of the Elasticsearch service should always use these helpers to classify errors instead of checking error internals such as <code>body.error.header[WWW-Authenticate]</code> |
 |  [KibanaRequest](./kibana-plugin-server.kibanarequest.md) | Kibana specific abstraction for an incoming request. |
 |  [RouteValidationError](./kibana-plugin-server.routevalidationerror.md) | Error to return when the validation is not successful. |
-|  [RouteValidator](./kibana-plugin-server.routevalidator.md) | Route validator class to define the validation logic for each new route. |
 |  [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-server.savedobjectsrepository.md) |  |

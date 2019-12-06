@@ -792,6 +792,8 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
+    // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
+    // 
     // @internal
     static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
@@ -1132,7 +1134,7 @@ export type ResponseHeaders = {
 export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
-    validate: RouteValidator<P, Q, B> | false;
+    validate: (RouteValidatorConfig<P, Q, B> & RouteValidatorOptions) | false;
 }
 
 // @public
@@ -1178,15 +1180,6 @@ export class RouteValidationError extends SchemaTypeError {
 
 // @public
 export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidateFunction<T>;
-
-// @public
-export class RouteValidator<P = {}, Q = {}, B = {}> {
-    constructor(config: RouteValidatorConfig<P, Q, B>, options?: RouteValidatorOptions);
-    getBody(data: unknown, namespace?: string): Readonly<B>;
-    getParams(data: unknown, namespace?: string): Readonly<P>;
-    getQuery(data: unknown, namespace?: string): Readonly<Q>;
-    hasBody(): boolean;
-    }
 
 // @public
 export interface RouteValidatorConfig<P, Q, B> {

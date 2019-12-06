@@ -12,7 +12,7 @@ import {
   mockRouteContext,
   mockRouteContextWithInvalidLicense,
 } from '../__fixtures__';
-import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidator } from 'src/core/server';
+import { CoreSetup, IRouter, kibanaResponseFactory, RouteValidatorConfig } from 'src/core/server';
 import {
   loggingServiceMock,
   elasticsearchServiceMock,
@@ -25,6 +25,7 @@ import { SpacesClient } from '../../../lib/spaces_client';
 import { initPutSpacesApi } from './put';
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { securityMock } from '../../../../../security/server/mocks';
+import { ObjectType } from '@kbn/config-schema';
 
 describe('PUT /api/spaces/space', () => {
   const spacesSavedObjects = createSpaces();
@@ -73,7 +74,7 @@ describe('PUT /api/spaces/space', () => {
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];
 
     return {
-      routeValidation: routeDefinition.validate as RouteValidator,
+      routeValidation: routeDefinition.validate as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
       savedObjectsRepositoryMock,
     };
@@ -154,7 +155,7 @@ describe('PUT /api/spaces/space', () => {
       params: {
         id: payload.id,
       },
-      body: routeValidation.getBody(payload),
+      body: (routeValidation.body as ObjectType).validate(payload),
       method: 'post',
     });
 

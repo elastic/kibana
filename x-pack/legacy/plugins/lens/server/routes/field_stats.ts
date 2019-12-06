@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import DateMath from '@elastic/datemath';
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, RouteValidator } from 'src/core/server';
+import { CoreSetup } from 'src/core/server';
 import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { FieldStatsResponse, BASE_API_URL } from '../../common';
 
@@ -18,7 +18,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
   router.post(
     {
       path: `${BASE_API_URL}/index_stats/{indexPatternTitle}/field`,
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           indexPatternTitle: schema.string(),
         }),
@@ -39,7 +39,7 @@ export async function initFieldsRoute(setup: CoreSetup) {
           },
           { allowUnknowns: true }
         ),
-      }),
+      },
     },
     async (context, req, res) => {
       const requestClient = context.core.elasticsearch.dataClient;

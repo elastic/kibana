@@ -56,7 +56,6 @@ export {
 export { IKibanaSocket } from './socket';
 
 export {
-  RouteValidator,
   RouteValidatorConfig,
   RouteValidationSpec,
   RouteValidateFunction,

@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteValidator } from 'kibana/server';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { ExternalRouteDeps } from '.';
@@ -17,11 +16,11 @@ export function initDeleteSpacesApi(deps: ExternalRouteDeps) {
   externalRouter.delete(
     {
       path: '/api/spaces/space/{id}',
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           id: schema.string(),
         }),
-      }),
+      },
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { SavedObjectsClient } = getSavedObjects();

@@ -6,7 +6,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { omit } from 'lodash';
-import { KibanaResponseFactory, RouteValidator } from 'src/core/server';
+import { KibanaResponseFactory } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { RouteInitializerDeps } from '../';
 import {
@@ -63,12 +63,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
   router.put(
     {
       path: `${API_ROUTE_WORKPAD}/{id}`,
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           id: schema.string(),
         }),
         body: WorkpadSchema,
-      }),
+      },
     },
     catchErrorHandler(async (context, request, response) => {
       return workpadUpdateHandler(
@@ -83,12 +83,12 @@ export function initializeUpdateWorkpadRoute(deps: RouteInitializerDeps) {
   router.put(
     {
       path: `${API_ROUTE_WORKPAD_STRUCTURES}/{id}`,
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           id: schema.string(),
         }),
         body: WorkpadSchema,
-      }),
+      },
     },
     catchErrorHandler(async (context, request, response) => {
       return workpadUpdateHandler(
@@ -107,7 +107,7 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
   router.put(
     {
       path: `${API_ROUTE_WORKPAD_ASSETS}/{id}`,
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           id: schema.string(),
         }),
@@ -115,7 +115,7 @@ export function initializeUpdateWorkpadAssetsRoute(deps: RouteInitializerDeps) {
         // Because we don't know what keys the assets will have, we have to allow
         // unknowns and then validate in the handler
         body: schema.object({}, { allowUnknowns: true }),
-      }),
+      },
     },
     async (context, request, response) => {
       return workpadUpdateHandler(

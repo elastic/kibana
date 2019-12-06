@@ -26,7 +26,6 @@ import { HttpService } from '../http_service';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
 import { createHttpServer } from '../test_utils';
-import { RouteValidator } from 'kibana/server';
 
 let server: HttpService;
 
@@ -122,11 +121,11 @@ describe('Handler', () => {
     router.get(
       {
         path: '/',
-        validate: new RouteValidator({
+        validate: {
           query: schema.object({
             page: schema.number(),
           }),
-        }),
+        },
       },
       (context, req, res) => res.noContent()
     );

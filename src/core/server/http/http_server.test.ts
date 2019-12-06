@@ -30,7 +30,6 @@ import { HttpConfig } from './http_config';
 import {
   Router,
   RouteValidationError,
-  RouteValidator,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
@@ -138,11 +137,11 @@ test('valid params', async () => {
   router.get(
     {
       path: '/{test}',
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           test: schema.string(),
         }),
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.params.test });
@@ -168,11 +167,11 @@ test('invalid params', async () => {
   router.get(
     {
       path: '/{test}',
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           test: schema.number(),
         }),
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: String(req.params.test) });
@@ -202,12 +201,12 @@ test('valid query', async () => {
   router.get(
     {
       path: '/',
-      validate: new RouteValidator({
+      validate: {
         query: schema.object({
           bar: schema.string(),
           quux: schema.number(),
         }),
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.query });
@@ -233,11 +232,11 @@ test('invalid query', async () => {
   router.get(
     {
       path: '/',
-      validate: new RouteValidator({
+      validate: {
         query: schema.object({
           bar: schema.number(),
         }),
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.query });
@@ -267,12 +266,12 @@ test('valid body', async () => {
   router.post(
     {
       path: '/',
-      validate: new RouteValidator({
+      validate: {
         body: schema.object({
           bar: schema.string(),
           baz: schema.number(),
         }),
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.body });
@@ -302,7 +301,7 @@ test('valid body with validate function', async () => {
   router.post(
     {
       path: '/',
-      validate: new RouteValidator({
+      validate: {
         body: ({ bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return { value: { bar, baz } };
@@ -310,7 +309,7 @@ test('valid body with validate function', async () => {
             return { error: new RouteValidationError('Wrong payload', ['body']) };
           }
         },
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.body });
@@ -354,7 +353,7 @@ test('not inline handler - KibanaRequest', async () => {
   router.post(
     {
       path: '/',
-      validate: new RouteValidator({
+      validate: {
         body: ({ bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return { value: { bar, baz } };
@@ -362,7 +361,7 @@ test('not inline handler - KibanaRequest', async () => {
             return { error: new RouteValidationError('Wrong payload', ['body']) };
           }
         },
-      }),
+      },
     },
     handler
   );
@@ -403,7 +402,7 @@ test('not inline handler - RequestHandler', async () => {
   router.post(
     {
       path: '/',
-      validate: new RouteValidator({
+      validate: {
         body: ({ bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return { value: { bar, baz } };
@@ -411,7 +410,7 @@ test('not inline handler - RequestHandler', async () => {
             return { error: new RouteValidationError('Wrong payload', ['body']) };
           }
         },
-      }),
+      },
     },
     handler
   );
@@ -439,11 +438,11 @@ test('invalid body', async () => {
   router.post(
     {
       path: '/',
-      validate: new RouteValidator({
+      validate: {
         body: schema.object({
           bar: schema.number(),
         }),
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.body });
@@ -474,11 +473,11 @@ test('handles putting', async () => {
   router.put(
     {
       path: '/',
-      validate: new RouteValidator({
+      validate: {
         body: schema.object({
           key: schema.string(),
         }),
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: req.body });
@@ -505,11 +504,11 @@ test('handles deleting', async () => {
   router.delete(
     {
       path: '/{id}',
-      validate: new RouteValidator({
+      validate: {
         params: schema.object({
           id: schema.number(),
         }),
-      }),
+      },
     },
     (context, req, res) => {
       return res.ok({ body: { key: req.params.id } });
@@ -815,7 +814,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
   router.post(
     {
       path: '/',
-      validate: new RouteValidator({ body: schema.object({ test: schema.number() }) }),
+      validate: { body: schema.object({ test: schema.number() }) },
       options: { body: { accepts: 'application/json' } },
     },
     (context, req, res) => res.ok({ body: req.route })
@@ -850,7 +849,7 @@ describe('body options', () => {
     router.post(
       {
         path: '/',
-        validate: new RouteValidator({ body: schema.object({ test: schema.number() }) }),
+        validate: { body: schema.object({ test: schema.number() }) },
         options: { body: { accepts: 'multipart/form-data' } }, // supertest sends 'application/json'
       },
       (context, req, res) => res.ok({ body: req.route })
@@ -875,7 +874,7 @@ describe('body options', () => {
     router.post(
       {
         path: '/',
-        validate: new RouteValidator({ body: schema.object({ test: schema.number() }) }),
+        validate: { body: schema.object({ test: schema.number() }) },
         options: { body: { maxBytes: 1 } },
       },
       (context, req, res) => res.ok({ body: req.route })
@@ -900,7 +899,7 @@ describe('body options', () => {
     router.post(
       {
         path: '/',
-        validate: new RouteValidator({ body: schema.buffer() }),
+        validate: { body: schema.buffer() },
         options: { body: { parse: false } },
       },
       (context, req, res) => {
@@ -934,7 +933,7 @@ test('should return a stream in the body', async () => {
   router.put(
     {
       path: '/',
-      validate: new RouteValidator({ body: schema.stream() }),
+      validate: { body: schema.stream() },
       options: { body: { output: 'stream' } },
     },
     (context, req, res) => {

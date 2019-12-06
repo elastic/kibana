@@ -5,7 +5,6 @@
  */
 
 import { RequestHandler } from 'kibana/server';
-import { ObjectType } from '@kbn/config-schema';
 import { UMServerLibs } from '../lib/lib';
 import { UMRestApiRouteCreator, UMRouteDefinition } from './types';
 
@@ -15,11 +14,7 @@ export const createRouteWithAuth = (
 ): UMRouteDefinition => {
   const restRoute = routeCreator(libs);
   const { handler, method, path, options, ...rest } = restRoute;
-  const authHandler: RequestHandler<ObjectType, ObjectType, ObjectType> = async (
-    context,
-    request,
-    response
-  ) => {
+  const authHandler: RequestHandler = async (context, request, response) => {
     if (libs.license(context.licensing.license)) {
       return await handler(context, request, response);
     }
