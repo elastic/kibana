@@ -62,7 +62,6 @@ export async function getNextTransactionSamples({
           aggs: {
             smpl: {
               diversified_sampler: {
-                composite: [] as never[], // TODO remove this
                 shard_size: 20,
                 script: {
                   lang: 'painless',
@@ -91,7 +90,7 @@ export async function getNextTransactionSamples({
     return bucket.smpl.tracesample.hits.hits.map(hit => {
       const transactionDoc = hit._source as Transaction;
       const traceId = transactionDoc.trace.id;
-      const timestamp = parseInt(transactionDoc['@timestamp'], 10);
+      const timestamp = Date.parse(transactionDoc['@timestamp']);
       return { traceId, timestamp };
     });
   });
