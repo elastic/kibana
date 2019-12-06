@@ -132,7 +132,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     }
   }, [jobIsCompleted]);
 
-  const stateValues = { ...item.stats };
+  const stateValues: any = { ...item.stats };
+
+  if (item.config?.description) {
+    stateValues.description = item.config.description;
+  }
   delete stateValues.progress;
 
   const state: SectionConfig = {
