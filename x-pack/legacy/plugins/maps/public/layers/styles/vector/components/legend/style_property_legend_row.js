@@ -81,18 +81,24 @@ export class StylePropertyLegendRow extends Component {
   }
 
   render() {
-
     const { range, style } = this.props;
     if (this._excludeFromHeader()) {
       return null;
     }
 
     const header = style.renderHeader();
+
+    const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
+    const minLabel = this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange ? `< ${min}` : min;
+
+    const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
+    const maxLabel = this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange ? `> ${max}` : max;
+
     return (
       <StyleLegendRow
         header={header}
-        minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE))}
-        maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE))}
+        minLabel={minLabel}
+        maxLabel={maxLabel}
         propertyLabel={getVectorStyleLabel(style.getStyleName())}
         fieldLabel={this.state.label}
       />
