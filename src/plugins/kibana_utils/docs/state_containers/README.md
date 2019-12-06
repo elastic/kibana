@@ -36,8 +36,8 @@ See demos [here](../../demos/state_containers/).
 You can run them with
 
 ```
-ts-node src/plugins/kibana_utils/demos/state_containers/counter.ts
-ts-node src/plugins/kibana_utils/demos/state_containers/todomvc.ts
+npx -q ts-node src/plugins/kibana_utils/demos/state_containers/counter.ts
+npx -q ts-node src/plugins/kibana_utils/demos/state_containers/todomvc.ts
 ```
 
 
