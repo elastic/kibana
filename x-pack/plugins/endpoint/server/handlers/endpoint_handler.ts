@@ -43,7 +43,7 @@ export class EndpointHandler implements EndpointRequestContext {
         ],
         size: 1,
       },
-      index: 'endpoint*',
+      index: 'endpoint-agent*',
     };
     return await this.search(searchParams, request);
   }
@@ -76,7 +76,7 @@ export class EndpointHandler implements EndpointRequestContext {
           },
         },
       },
-      index: 'endpoint*',
+      index: 'endpoint-agent*',
     };
     return await this.search(searchParams, request);
   }

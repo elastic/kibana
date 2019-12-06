@@ -9,7 +9,11 @@ import { IClusterClient, IScopedClusterClient } from 'kibana/server';
 import { EndpointHandler } from './endpoint_handler';
 import { SearchResponse } from 'elasticsearch';
 import { EndpointData } from '../types';
-import { elasticsearchServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  loggingServiceMock,
+} from '../../../../../src/core/server/mocks';
 import { ResponseToEndpointMapper } from './response_to_endpoint_mapper';
 import { EndpointConfigSchema } from '../config';
 
@@ -33,6 +37,7 @@ describe('test endpoint handler', () => {
       );
       const testHandler = new EndpointHandler({
         clusterClient: mockClusterClient,
+        logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
       const response = await testHandler.findEndpoint(
@@ -56,7 +61,7 @@ describe('test endpoint handler', () => {
           ],
           size: 1,
         },
-        index: 'endpoint*',
+        index: 'endpoint-agent*',
       });
       expect(result).toHaveLength(1);
       expect(result[0].machine_id).toEqual('9b28b63f-68d8-44ee-b8c0-49ba057a53ec');
@@ -71,6 +76,7 @@ describe('test endpoint handler', () => {
 
       const testHandler = new EndpointHandler({
         clusterClient: mockClusterClient,
+        logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
       const response = await testHandler.findLatestOfAllEndpoints(
@@ -100,7 +106,7 @@ describe('test endpoint handler', () => {
             },
           },
         },
-        index: 'endpoint*',
+        index: 'endpoint-agent*',
       });
       expect(result).toHaveLength(3);
       const actualMachineIds = new Set(result.map(endpointData => endpointData.machine_id));
@@ -118,6 +124,7 @@ describe('test endpoint handler', () => {
       );
       const testHandler = new EndpointHandler({
         clusterClient: mockClusterClient,
+        logFactory: loggingServiceMock.create(),
         config: () => Promise.resolve(EndpointConfigSchema.validate({})),
       });
       const response = await testHandler.findLatestOfAllEndpoints(
@@ -152,7 +159,7 @@ describe('test endpoint handler', () => {
             },
           },
         },
-        index: 'endpoint*',
+        index: 'endpoint-agent*',
       });
       expect(result).toHaveLength(3);
       const actualMachineIds = new Set(result.map(endpointData => endpointData.machine_id));
