@@ -9,11 +9,12 @@
 set -e
 ./check_env_variables.sh
 
+SIGNALS_INDEX=$(./get_signal_index.sh | jq ".name" -j)
 
 # Example: ./put_signal_doc.sh
 curl -s -k \
   -H "Content-Type: application/json" \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -d @./sample_signal.json \
-  -X PUT ${ELASTICSEARCH_URL}/${SIGNALS_INDEX}/_doc/45562a28e0dFakeSignalId \
+  -d @./signals/sample_signal.json \
+  -X PUT ${ELASTICSEARCH_URL}/$SIGNALS_INDEX/_doc/45562a28e0dFakeSignalId \
   | jq .

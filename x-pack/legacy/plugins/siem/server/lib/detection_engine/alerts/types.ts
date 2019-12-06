@@ -73,7 +73,7 @@ export type RuleAlertParamsRest = Omit<
 export interface SignalsParams {
   signalIds: string[] | undefined | null;
   query: string | undefined | null;
-  status: 'open' | 'closed' | undefined | null;
+  status: 'open' | 'closed';
 }
 
 export type SignalsRestParams = Omit<SignalsParams, 'signalIds'> & {

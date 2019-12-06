@@ -9,27 +9,28 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/const
 import { SignalsRequest } from '../../alerts/types';
 import { setSignalsStatusSchema } from '../schemas';
 import { ServerFacade } from '../../../../types';
-import { transformError } from '../utils';
+import { transformError, getIndex } from '../utils';
 
-export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
-  method: 'POST',
-  path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
-  options: {
-    tags: ['access:siem'],
-    validate: {
-      options: {
-        abortEarly: false,
+export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute => {
+  return {
+    method: 'POST',
+    path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+    options: {
+      tags: ['access:siem'],
+      validate: {
+        options: {
+          abortEarly: false,
+        },
+        payload: setSignalsStatusSchema,
       },
-      payload: setSignalsStatusSchema,
     },
-  },
-  async handler(request: SignalsRequest, headers) {
-    const { signal_ids: signalIds, query, status } = request.payload;
-    const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
-    if (!callWithRequest) {
-      return headers.response().code(404);
-    }
-    if (status) {
+    async handler(request: SignalsRequest, headers) {
+      const { signal_ids: signalIds, query, status } = request.payload;
+      const index = getIndex(request, server);
+      const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+      if (!callWithRequest) {
+        return headers.response().code(404);
+      }
       let queryObject;
       if (signalIds) {
         queryObject = { ids: { values: signalIds } };
@@ -39,7 +40,7 @@ export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
       }
       try {
         return callWithRequest(request, 'updateByQuery', {
-          index: '.siem-signals-devin-hurley',
+          index,
           body: {
             script: {
               source: `ctx._source.signal.status = '${status}'`,
@@ -52,10 +53,10 @@ export const setSignalsStatusRouteDef: Hapi.ServerRoute = {
         // error while getting or updating signal with id: id in signal index .siem-signals
         return transformError(exc);
       }
-    }
-  },
+    },
+  };
 };
 
 export const setSignalsStatusRoute = (server: ServerFacade) => {
-  server.route(setSignalsStatusRouteDef);
+  server.route(setSignalsStatusRouteDef(server));
 };

@@ -6,6 +6,7 @@
 
 import { createMockServer } from '../__mocks__/_mock_server';
 import { setSignalsStatusRoute } from './open_close_signals_route';
+import * as myUtils from '../utils';
 import { ServerInjectOptions } from 'hapi';
 import {
   getSetSignalStatusByIdsRequest,
@@ -21,6 +22,7 @@ describe('set signal status', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(myUtils, 'getIndex').mockReturnValue('fakeindex');
     ({ server, elasticsearch } = createMockServer());
     elasticsearch.getCluster = jest.fn(() => ({
       callWithRequest: jest.fn(() => true),
@@ -32,6 +34,7 @@ describe('set signal status', () => {
     test('returns 200 when setting a status on a signal by ids', async () => {
       const { statusCode } = await server.inject(getSetSignalStatusByIdsRequest());
       expect(statusCode).toBe(200);
+      expect(myUtils.getIndex).toHaveReturnedWith('fakeindex');
     });
 
     test('returns 200 when setting a status on a signal by query', async () => {
