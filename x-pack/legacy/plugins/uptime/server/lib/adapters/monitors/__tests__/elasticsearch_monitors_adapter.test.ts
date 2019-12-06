@@ -15,7 +15,8 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
-    await adapter.getMonitorChartsData(search, {
+    await adapter.getMonitorChartsData({
+      callES: search,
       monitorId: 'fooID',
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
@@ -49,7 +50,8 @@ describe('ElasticsearchMonitorsAdapter', () => {
     expect.assertions(3);
     const searchMock = jest.fn();
     const search = searchMock.bind({});
-    await adapter.getMonitorChartsData(search, {
+    await adapter.getMonitorChartsData({
+      callES: search,
       monitorId: 'fooID',
       dateRangeStart: 'now-15m',
       dateRangeEnd: 'now',
@@ -85,7 +87,8 @@ describe('ElasticsearchMonitorsAdapter', () => {
     searchMock.mockReturnValue(mockChartsData);
     const search = searchMock.bind({});
     expect(
-      await adapter.getMonitorChartsData(search, {
+      await adapter.getMonitorChartsData({
+        callES: search,
         monitorId: 'id',
         dateRangeStart: 'now-15m',
         dateRangeEnd: 'now',

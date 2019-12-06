@@ -96,7 +96,8 @@ describe('ElasticsearchPingsAdapter class', () => {
           },
         },
       });
-      const result = await adapter.getPingHistogram(mockEsClient, {
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
         dateRangeStart: 'now-15m',
         dateRangeEnd: 'now',
         filters: null,
@@ -113,7 +114,8 @@ describe('ElasticsearchPingsAdapter class', () => {
 
       mockEsClient.mockReturnValue(standardMockResponse);
 
-      const result = await adapter.getPingHistogram(mockEsClient, {
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
         dateRangeStart: 'now-15m',
         dateRangeEnd: 'now',
         filters: null,
@@ -171,7 +173,8 @@ describe('ElasticsearchPingsAdapter class', () => {
           ],
         },
       };
-      const result = await adapter.getPingHistogram(mockEsClient, {
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
         dateRangeStart: '1234',
         dateRangeEnd: '5678',
         filters: JSON.stringify(searchFilter),
@@ -224,7 +227,8 @@ describe('ElasticsearchPingsAdapter class', () => {
         },
       });
       const filters = `{"bool":{"must":[{"simple_query_string":{"query":"http"}}]}}`;
-      const result = await adapter.getPingHistogram(mockEsClient, {
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
         dateRangeStart: 'now-15m',
         dateRangeEnd: 'now',
         filters,
@@ -240,7 +244,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       expect.assertions(2);
       const mockEsClient = jest.fn();
       mockEsClient.mockReturnValue(standardMockResponse);
-      const result = await adapter.getPingHistogram(mockEsClient, {
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
         dateRangeStart: '1234',
         dateRangeEnd: '5678',
         filters: '',
@@ -260,7 +265,8 @@ describe('ElasticsearchPingsAdapter class', () => {
 
       mockEsClient.mockReturnValue(standardMockResponse);
 
-      const result = await adapter.getPingHistogram(mockEsClient, {
+      const result = await adapter.getPingHistogram({
+        callES: mockEsClient,
         dateRangeStart: '1234',
         dateRangeEnd: '5678',
         filters: '',
@@ -277,7 +283,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('returns data in appropriate shape', async () => {
       const mockEsClient = jest.fn();
       mockEsClient.mockReturnValue(mockEsCountResult);
-      const { count } = await adapter.getDocCount(mockEsClient, undefined);
+      const { count } = await adapter.getDocCount({ callES: mockEsClient });
       expect(count).toEqual(3);
     });
   });
@@ -311,7 +317,8 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('returns data in the appropriate shape', async () => {
       const mockEsClient = jest.fn();
       mockEsClient.mockReturnValue(mockEsSearchResult);
-      const result = await adapter.getAll(mockEsClient, {
+      const result = await adapter.getAll({
+        callES: mockEsClient,
         dateRangeStart: 'now-1h',
         dateRangeEnd: 'now',
         sort: 'asc',
@@ -332,7 +339,8 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('creates appropriate sort and size parameters', async () => {
       const mockEsClient = jest.fn();
       mockEsClient.mockReturnValue(mockEsSearchResult);
-      await adapter.getAll(mockEsClient, {
+      await adapter.getAll({
+        callES: mockEsClient,
         dateRangeStart: 'now-1h',
         dateRangeEnd: 'now',
         sort: 'asc',
@@ -347,7 +355,8 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('omits the sort param when no sort passed', async () => {
       const mockEsClient = jest.fn();
       mockEsClient.mockReturnValue(mockEsSearchResult);
-      await adapter.getAll(mockEsClient, {
+      await adapter.getAll({
+        callES: mockEsClient,
         dateRangeStart: 'now-1h',
         dateRangeEnd: 'now',
         size: 12,
@@ -359,7 +368,8 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('omits the size param when no size passed', async () => {
       const mockEsClient = jest.fn();
       mockEsClient.mockReturnValue(mockEsSearchResult);
-      await adapter.getAll(mockEsClient, {
+      await adapter.getAll({
+        callES: mockEsClient,
         dateRangeStart: 'now-1h',
         dateRangeEnd: 'now',
         sort: 'desc',
@@ -373,7 +383,8 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('adds a filter for monitor ID', async () => {
       const mockEsClient = jest.fn();
       mockEsClient.mockReturnValue(mockEsSearchResult);
-      await adapter.getAll(mockEsClient, {
+      await adapter.getAll({
+        callES: mockEsClient,
         dateRangeStart: 'now-1h',
         dateRangeEnd: 'now',
         monitorId: 'testmonitorid',
@@ -387,7 +398,8 @@ describe('ElasticsearchPingsAdapter class', () => {
     it('adds a filter for monitor status', async () => {
       const mockEsClient = jest.fn();
       mockEsClient.mockReturnValue(mockEsSearchResult);
-      await adapter.getAll(mockEsClient, {
+      await adapter.getAll({
+        callES: mockEsClient,
         dateRangeStart: 'now-1h',
         dateRangeEnd: 'now',
         status: 'down',
@@ -471,7 +483,8 @@ describe('ElasticsearchPingsAdapter class', () => {
 
     it('returns data in expected shape', async () => {
       const mockEsClient = jest.fn(async (request: any, params: any) => mockEsSearchResult);
-      const result = await adapter.getLatestMonitorDocs(mockEsClient, {
+      const result = await adapter.getLatestMonitorDocs({
+        callES: mockEsClient,
         dateRangeStart: 'now-1h',
         dateRangeEnd: 'now',
         monitorId: 'testmonitor',
