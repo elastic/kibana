@@ -39,7 +39,7 @@ async function putScriptMapServiceConns(callCluster: CallCluster) {
             s.destination = doc['destination.address'].value;
           }
 
-          if (!doc['_index'].empty) {
+          if (!doc['_index'].empty) { // TODO is this ever empty?
             s._index = doc['_index'].value;
           }
 
@@ -281,7 +281,7 @@ async function applyExtractDestinationToApm(callCluster: CallCluster) {
 }
 
 export async function setupRequiredScripts(server: Legacy.Server) {
-  const callCluster = server.plugins.elasticsearch.getCluster('data')
+  const callCluster = server.plugins.elasticsearch.getCluster('admin')
     .callWithInternalUser;
 
   const putRequiredScriptsResults = await Promise.all([

@@ -5,246 +5,124 @@
  */
 
 import { Server } from 'hapi';
+import { uniq } from 'lodash';
+import { BulkIndexDocumentsParams } from 'elasticsearch';
+import { getSearchClient, SearchClient } from '../helpers/es_client';
+import { Span } from '../../../typings/es_schemas/ui/Span';
+import { getNextTransactionSamples } from './get_next_transaction_samples';
+import { getServiceConnections } from './get_service_connections';
+import { mapServiceConnectionToBulkIndex } from './map_service_connection_to_bulk_index';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 
-function interestingTransactions(since?: string, afterKey?: any) {
-  if (!since) {
-    since = 'now-1h';
+interface MappedSpan {
+  transaction?: boolean;
+  id: string; // span or transaction id
+  parent?: string; // parent.id
+  environment?: string; // service.environment
+  destination?: string; // destination.address
+  _index?: string; // _index // TODO should this be required?
+  span_type?: Span['span']['type'];
+  span_subtype?: Span['span']['subtype'];
+  timestamp: Span['@timestamp'];
+  service_name: Span['service']['name'];
+}
+
+export interface ServiceConnection {
+  caller: MappedSpan;
+  callee?: MappedSpan;
+  upstream: string[]; // [`${service_name}/${environment}`]
+}
+
+async function indexLatestConnections(
+  config: ReturnType<Server['config']>,
+  searchClient: SearchClient,
+  bulkClient: (params: BulkIndexDocumentsParams) => Promise<any>,
+  startTimeInterval = 'now-1h',
+  latestTransactionTime = 0,
+  afterKey?: object
+): Promise<{ latestTransactionTime: number }> {
+  const apmIdxPattern = config.get<string>('apm_oss.indexPattern');
+  const serviceConnsDestinationIndex = config.get<string>(
+    'xpack.apm.serviceMapDestinationIndex'
+  );
+  const serviceConnsDestinationPipeline = config.get<string>(
+    'xpack.apm.serviceMapDestinationPipeline'
+  );
+
+  const {
+    after_key: nextAfterKey,
+    latestTransactionTime: latestSampleTransactionTime,
+    traceIds
+  } = await getNextTransactionSamples({
+    apmIdxPattern,
+    startTimeInterval,
+    afterKey,
+    searchClient
+  });
+
+  if (traceIds.length === 0) {
+    return { latestTransactionTime };
   }
-  const query = {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          { exists: { field: 'destination.address' } },
-          { exists: { field: 'trace.id' } },
-          { exists: { field: 'span.duration.us' } },
-          { range: { '@timestamp': { gt: since } } }
-        ]
-      }
-    },
-    aggs: {
-      'ext-conns': {
-        composite: {
-          sources: [
-            { 'service.name': { terms: { field: 'service.name' } } },
-            { 'span.type': { terms: { field: 'span.type' } } },
-            {
-              'span.subtype': {
-                terms: { field: 'span.subtype', missing_bucket: true }
-              }
-            },
-            {
-              'service.environment': {
-                terms: { field: 'service.environment', missing_bucket: true }
-              }
-            },
-            {
-              'destination.address': { terms: { field: 'destination.address' } }
-            }
-          ],
-          // TODO: needs to be balanced with the 20 below
-          size: 200,
-          after: undefined
-        },
-        aggs: {
-          smpl: {
-            diversified_sampler: {
-              shard_size: 20,
-              script: {
-                lang: 'painless',
-                source: "(int)doc['span.duration.us'].value/100000"
-              }
-            },
-            aggs: {
-              tracesample: {
-                top_hits: {
-                  size: 20,
-                  _source: ['trace.id', '@timestamp']
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  };
 
-  if (afterKey) {
-    query.aggs['ext-conns'].composite.after = afterKey;
-  }
-  return query;
-}
+  const nextLatestTransactionTime = Math.max(
+    latestTransactionTime,
+    latestSampleTransactionTime
+  );
 
-function findConns(traceIds: string[]) {
-  const query = {
-    size: 0,
-    query: {
-      bool: {
-        should: [
-          { exists: { field: 'span.id' } },
-          { exists: { field: 'transaction.type' } }
-        ] as any[],
-        minimum_should_match: 2
-      }
-    },
-    aggs: {
-      trace_id: {
-        terms: {
-          field: 'trace.id',
-          order: { _key: 'asc' },
-          size: traceIds.length
-        },
-        aggs: {
-          connections: {
-            scripted_metric: {
-              init_script: 'state.spans = new HashMap();',
-              map_script: { id: 'map-service-conns' },
-              combine_script: { id: 'combine-service-conns' },
-              reduce_script: { id: 'reduce-service-conns' }
-            }
-          }
-        }
-      }
-    }
-  };
+  const traceConnectionsBuckets = await getServiceConnections({
+    apmIdxPattern,
+    traceIds,
+    searchClient
+  });
 
-  for (const tid of traceIds) {
-    query.query.bool.should.push({ term: { 'trace.id': tid } });
-  }
-  return query;
-}
+  const bulkIndexConnectionDocs = traceConnectionsBuckets.flatMap(bucket => {
+    const serviceConnections = bucket.connections.value as ServiceConnection[];
+    const servicesInTrace = uniq(
+      serviceConnections.map(
+        serviceConnection =>
+          `${serviceConnection.caller.service_name}/${serviceConnection.caller
+            .environment || ENVIRONMENT_NOT_DEFINED}`
+      )
+    );
+    return serviceConnections.flatMap(
+      mapServiceConnectionToBulkIndex({
+        serviceConnsDestinationIndex,
+        serviceConnsDestinationPipeline,
+        servicesInTrace
+      })
+    );
+  });
 
-interface Service {
-  name: string;
-  environment?: string;
-}
-
-interface ConnectionDoc {
-  '@timestamp': string;
-  observer: { version_major: number }; // TODO: make this dynamic
-  service: Service;
-  callee?: Service;
-  connection: Connection;
-  destination?: { address: string };
-}
-
-interface Connection {
-  upstream: { list: string[]; keyword: string };
-  in_trace: string[];
-  type: string;
-  subtype?: string;
+  await bulkClient({
+    body: bulkIndexConnectionDocs
+      .map(bulkObject => JSON.stringify(bulkObject))
+      .join('\n')
+  });
+  return await indexLatestConnections(
+    config,
+    searchClient,
+    bulkClient,
+    startTimeInterval,
+    nextLatestTransactionTime,
+    nextAfterKey
+  );
 }
 
 export async function runServiceMapTask(
   server: Server,
-  config: any,
-  lastRun?: string
+  config: ReturnType<Server['config']>,
+  startTimeInterval?: string
 ) {
-  const apmIdxPattern = config.get('apm_oss.indexPattern');
-  const serviceConnsDestinationIndex = config.get(
-    'xpack.apm.serviceMapDestinationIndex'
-  );
-  const serviceConnsDestinationPipeline = config.get(
-    'xpack.apm.serviceMapDestinationPipeline'
-  );
-
   const callCluster = server.plugins.elasticsearch.getCluster('data')
     .callWithInternalUser;
+  const searchClient = getSearchClient(callCluster);
+  const bulkClient = (params: BulkIndexDocumentsParams) =>
+    callCluster('bulk', params);
 
-  let mostRecent = '';
-  let afterKey = null;
-  while (true) {
-    const q = interestingTransactions(lastRun, afterKey);
-    const txs = await callCluster('search', {
-      index: apmIdxPattern,
-      body: q
-    });
-
-    if (txs.aggregations['ext-conns'].buckets.length < 1) {
-      return { mostRecent };
-    }
-    afterKey = txs.aggregations['ext-conns'].after_key;
-
-    const traces = new Set<string>();
-
-    txs.aggregations['ext-conns'].buckets.forEach((bucket: any) => {
-      bucket.smpl.tracesample.hits.hits.forEach((hit: any) => {
-        traces.add(hit._source.trace.id);
-        mostRecent =
-          mostRecent > hit._source['@timestamp']
-            ? mostRecent
-            : hit._source['@timestamp'];
-      });
-    });
-
-    const traceIds = Array.from(traces.values());
-    if (traceIds.length < 1) {
-      return { mostRecent: null };
-    }
-
-    const findConnsQ = findConns(traceIds);
-
-    const connsResult = await callCluster('search', {
-      index: apmIdxPattern,
-      body: findConnsQ
-    });
-
-    const connDocs: Array<{ index: { _index: any } } | ConnectionDoc> = [];
-
-    connsResult.aggregations.trace_id.buckets.forEach((bucket: any) => {
-      const allServices = new Set<string>(
-        bucket.connections.value.map(
-          (conn: any) =>
-            `${conn.caller.service_name}/${conn.caller.environment || 'null'}`
-        )
-      );
-
-      bucket.connections.value.forEach((conn: any) => {
-        const index = serviceConnsDestinationIndex
-          ? serviceConnsDestinationIndex
-          : conn.caller._index;
-        const bulkOpts = { index: { _index: index }, pipeline: undefined };
-
-        if (serviceConnsDestinationPipeline) {
-          bulkOpts.pipeline = serviceConnsDestinationPipeline;
-        }
-        connDocs.push(bulkOpts);
-        const doc: ConnectionDoc = {
-          '@timestamp': conn.caller.timestamp,
-          observer: { version_major: 7 }, // TODO: make this dynamic
-          service: {
-            name: conn.caller.service_name,
-            environment: conn.caller.environment
-          },
-          callee: conn.callee
-            ? {
-                name: conn.callee.service_name,
-                environment: conn.callee.environment
-              }
-            : undefined,
-          connection: {
-            upstream: {
-              list: conn.upstream,
-              keyword: conn.upstream.join('->')
-            },
-            in_trace: Array.from(allServices),
-            type: conn.caller.span_type,
-            subtype: conn.caller.span_substype
-          },
-          destination: conn.caller.destination
-            ? { address: conn.caller.destination }
-            : undefined
-        };
-
-        connDocs.push(doc);
-      });
-    });
-
-    const body = connDocs
-      .map((connDoc: any) => JSON.stringify(connDoc))
-      .join('\n');
-    await callCluster('bulk', {
-      body
-    });
-  }
+  return await indexLatestConnections(
+    config,
+    searchClient,
+    bulkClient,
+    startTimeInterval
+  );
 }

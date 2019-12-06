@@ -38,17 +38,13 @@ export async function initializeServiceMaps(server: Server) {
             async run() {
               const { state } = taskInstance;
 
-              const { mostRecent } = await runServiceMapTask(
+              const { latestTransactionTime } = await runServiceMapTask(
                 server,
                 config,
-                state.lastRun
+                state.latestTransactionTime
               );
 
-              return {
-                state: {
-                  lastRun: mostRecent
-                }
-              };
+              return { state: { latestTransactionTime } };
             }
           };
         }

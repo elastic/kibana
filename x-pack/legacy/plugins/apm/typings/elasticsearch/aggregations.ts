@@ -29,7 +29,7 @@ type MetricsAggregationOptions =
       missing?: number;
     }
   | {
-      script?: Script;
+      script?: Script; // TODO should this be required?
     };
 
 interface MetricsAggregationResponsePart {
@@ -97,7 +97,6 @@ export interface AggregationOptionsByType {
     buckets_path: BucketsPath;
     script?: Script;
   };
-
   composite: {
     sources: Array<{
       [name: string]:
@@ -110,6 +109,18 @@ export interface AggregationOptionsByType {
         | undefined;
     }>;
     size?: number;
+    after?: object;
+  };
+  diversified_sampler: {
+    shard_size?: number;
+    max_docs_per_value?: number;
+  } & ({ script: Script } | { field: string }); // TODO use MetricsAggregationOptions if possible
+  scripted_metric: {
+    params?: Record<string, any>;
+    init_script?: Script;
+    map_script: Script;
+    combine_script: Script;
+    reduce_script: Script;
   };
 }
 
@@ -255,6 +266,13 @@ interface AggregationResponsePart<
         TDocument
       >
     >;
+    after_key?: object;
+  };
+  diversified_sampler: {
+    doc_count: number;
+  } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>;
+  scripted_metric: {
+    value: unknown;
   };
 }
 

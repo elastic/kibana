@@ -14,6 +14,7 @@ import {
 import { merge } from 'lodash';
 import { cloneDeep, isString } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import {
   ESSearchResponse,
@@ -164,4 +165,19 @@ export function getESClient(
       return callMethod('indices.create', params);
     }
   };
+}
+
+export type SearchClient = ReturnType<typeof getSearchClient>;
+export function getSearchClient(callCluster: CallCluster) {
+  async function search<
+    TDocument = unknown,
+    TSearchRequest extends ESSearchRequest = {}
+  >(
+    params: TSearchRequest
+  ): Promise<ESSearchResponse<TDocument, TSearchRequest>> {
+    return (callCluster('search', params) as unknown) as Promise<
+      ESSearchResponse<TDocument, TSearchRequest>
+    >;
+  }
+  return search;
 }

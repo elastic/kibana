@@ -10,7 +10,6 @@ import {
   SetupTimeRange,
   SetupUIFilters
 } from '../helpers/setup_request';
-import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
@@ -109,11 +108,7 @@ export async function getServiceMap({
 
   if (serviceName || environment) {
     const upstreamServiceName = serviceName || '*';
-    const upstreamEnvironment = environment
-      ? environment === ENVIRONMENT_NOT_DEFINED
-        ? 'null'
-        : environment
-      : '*';
+    const upstreamEnvironment = environment || '*';
 
     params.body.query.bool.filter.push({
       wildcard: {
