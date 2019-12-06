@@ -64,4 +64,4 @@ container.transitions.add({
 container.transitions.complete(0);
 container.transitions.complete(1);
 
-console.log(container.get()); // eslint-disable-line
+console.log(JSON.stringify(container.get())); // eslint-disable-line
