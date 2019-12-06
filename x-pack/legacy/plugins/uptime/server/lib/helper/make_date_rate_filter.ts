@@ -6,9 +6,41 @@
 
 export const makeDateRangeFilter = (
   dateRangeStart: string | number,
-  dateRangeEnd: string | number
+  dateRangeEnd: string | number,
+  filterTimespan: boolean,
 ) => {
-  return {
-    range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } },
+  const timestampClause = {
+    range: {'@timestamp': {gte: dateRangeStart, lte: dateRangeEnd}},
   };
-};
+
+  if (true || !filterTimespan) {
+    return timestampClause;
+  }
+
+  return {
+    bool: {
+      filter: [
+        timestampClause,
+        {
+          bool: {
+            should: [
+              {
+                range: {
+                  "monitor.timespan": {
+                    "gte": `${dateRangeEnd}-10s`,
+                    "lte": dateRangeEnd,
+                  }
+                }
+              },
+              {
+                bool: {
+                  must_not: { exists: { field: "monitor.timespan" } }
+                }
+              }
+            ]
+          },
+        }
+      ]
+    }
+  };
+}

@@ -12,17 +12,9 @@ import { fetchPage } from './search';
 import { MonitorGroupIterator } from './search/monitor_group_iterator';
 import { Snapshot } from '../../../../common/runtime_types';
 import { getSnapshotCountHelper } from './get_snapshot_helper';
+import {makeDateRangeFilter} from "../../helper/make_date_rate_filter";
+import {QueryContext} from "./search/query_context";
 
-export interface QueryContext {
-  database: any;
-  request: any;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  pagination: CursorPagination;
-  filterClause: any | null;
-  size: number;
-  statusFilter?: string;
-}
 
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
@@ -40,16 +32,16 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
   ): Promise<GetMonitorStatesResult> {
     const size = 10;
 
-    const queryContext: QueryContext = {
-      database: this.database,
+    const queryContext = new QueryContext(
+      this.database,
       request,
       dateRangeStart,
       dateRangeEnd,
       pagination,
-      filterClause: filters && filters !== '' ? JSON.parse(filters) : null,
+      filters && filters !== '' ? JSON.parse(filters) : null,
       size,
       statusFilter,
-    };
+    );
 
     const page = await fetchPage(queryContext);
 
@@ -67,17 +59,58 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     filters?: string,
     statusFilter?: string
   ): Promise<Snapshot> {
-    const context: QueryContext = {
-      database: this.database,
+    const context = new QueryContext(
+      this.database,
       request,
       dateRangeStart,
       dateRangeEnd,
-      pagination: CONTEXT_DEFAULTS.CURSOR_PAGINATION,
-      filterClause: filters && filters !== '' ? JSON.parse(filters) : null,
-      size: CONTEXT_DEFAULTS.MAX_MONITORS_FOR_SNAPSHOT_COUNT,
+      CONTEXT_DEFAULTS.CURSOR_PAGINATION,
+      filters && filters !== '' ? JSON.parse(filters) : null,
+      CONTEXT_DEFAULTS.MAX_MONITORS_FOR_SNAPSHOT_COUNT,
       statusFilter,
+    );
+
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        size: 0,
+        query: {
+          bool: { filter: context.dateAndCustomFilters() },
+        },
+        aggs: {
+          by_status: {
+            filters: {
+              filters: {
+                up: {match: {"monitor.status": "up"}},
+                down: {match: {"monitor.status": "down"}},
+              }
+            },
+            aggs: {
+              unique: {
+                cardinality: {
+                  field: "monitor.id",
+                }
+              }
+            }
+          }
+        }
+      }
     };
-    return getSnapshotCountHelper(new MonitorGroupIterator(context));
+    const roughCount = await context.database.search(context.request, params);
+    const uniqueUp = roughCount.aggregations.by_status.buckets.down.unique.value;
+    const uniqueDown = roughCount.aggregations.by_status.buckets.down.unique.value;
+
+    console.log("ROUGH U/D", uniqueUp, uniqueDown);
+
+    const iteratorStatusFilter = uniqueUp < uniqueDown ? 'up' : 'down';
+
+    // It's much faster to calculate the total number of monitors via a simple aggregation,
+    // then subtract the down monitors which have been accurately counted by the iterator.
+    // Since the iterator is slower, and it is almost always the case that there are more up
+    // than down items this is a reasonable plan of attack.
+    context.statusFilter = 'down';
+    const downIterator = new MonitorGroupIterator(context)
+
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {

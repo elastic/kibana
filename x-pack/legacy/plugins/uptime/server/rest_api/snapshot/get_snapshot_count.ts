@@ -24,6 +24,7 @@ export const createGetSnapshotCount = (libs: UMServerLibs) => ({
   },
   handler: async (request: any): Promise<Snapshot> => {
     const { dateRangeStart, dateRangeEnd, filters, statusFilter } = request.query;
+
     return await libs.monitorStates.getSnapshotCount(
       request,
       dateRangeStart,

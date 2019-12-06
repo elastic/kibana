@@ -29,7 +29,7 @@ export const fetchChunk: ChunkFetcher = async (
   const { monitorIds, checkGroups, searchAfter: foundSearchAfter } = await findPotentialMatches(
     queryContext,
     searchAfter,
-    size
+    size,
   );
   const matching = await refinePotentialMatches(queryContext, monitorIds, checkGroups);
 

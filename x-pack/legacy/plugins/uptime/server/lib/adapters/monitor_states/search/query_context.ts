@@ -1,0 +1,107 @@
+import {CursorPagination} from "../adapter_types";
+import {INDEX_NAMES} from "../../../../../common/constants";
+
+export class QueryContext {
+  database: any;
+  request: any;
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  pagination: CursorPagination;
+  filterClause: any | null;
+  size: number;
+  statusFilter?: string;
+  hasTimespanCache?: boolean;
+
+  constructor(
+    database: any,
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    pagination: CursorPagination,
+    filterClause: any | null,
+    size: number,
+    statusFilter?: string,
+  ) {
+    this.database = database;
+    this.request = request;
+    this.dateRangeStart = dateRangeStart;
+    this.dateRangeEnd = dateRangeEnd;
+    this.pagination = pagination;
+    this.filterClause = filterClause;
+    this.size = size;
+    this.statusFilter = statusFilter;
+  }
+
+  async search(params: any): Promise<any> {
+    params.index = INDEX_NAMES.HEARTBEAT;
+    return this.database.search(this.request, params)
+  }
+
+  async count(params: any): Promise<any> {
+    params.index = INDEX_NAMES.HEARTBEAT;
+    return this.database.count(this.request, params)
+  }
+
+  async dateAndCustomFilters(): Promise<any[]> {
+    return [this.filterClause, await this.dateRangeFilter()];
+  }
+
+  async dateRangeFilter(forceTimespan?: boolean): Promise<any> {
+    const timestampClause = {
+      range: {'@timestamp': {gte: this.dateRangeStart, lte: this.dateRangeEnd}},
+    };
+
+    if (forceTimespan === true || await this.hasTimespan()) {
+      return timestampClause;
+    }
+
+    return {
+      bool: {
+        filter: [
+          timestampClause,
+          {
+            bool: {
+              should: [
+                {
+                  range: {
+                    "monitor.timespan": {
+                      "gte": `${this.dateRangeEnd}-10s`,
+                      "lte": this.dateRangeEnd,
+                    }
+                  }
+                },
+                {
+                  bool: {
+                    must_not: { exists: { field: "monitor.timespan" } }
+                  }
+                }
+              ]
+            },
+          }
+        ]
+      }
+    };
+  }
+
+  async hasTimespan(): Promise<boolean> {
+    if (this.hasTimespanCache) {
+      return this.hasTimespanCache;
+    }
+
+    this.hasTimespanCache = (await this.count({
+      body: {
+        query: {
+          bool: {
+            filter: [
+              this.dateRangeFilter(true),
+              {exists: {field: "monitor.timespan"}},
+            ],
+          },
+        },
+      },
+      terminate_after: 1,
+    })).count > 0;
+
+    return this.hasTimespanCache;
+  }
+}
