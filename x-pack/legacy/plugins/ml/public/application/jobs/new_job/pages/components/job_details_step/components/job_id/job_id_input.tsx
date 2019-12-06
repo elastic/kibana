@@ -10,13 +10,15 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const JobIdInput: FC = () => {
-  const { jobCreator, jobValidator, jobValidatorUpdated } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
+    JobCreatorContext
+  );
   const [jobId, setJobId] = useState(jobCreator.jobId);
   const [validation, setValidation] = useState(jobValidator.jobId);
 
   useEffect(() => {
     jobCreator.jobId = jobId;
-    // jobCreatorUpdate();
+    jobCreatorUpdate();
   }, [jobId]);
 
   useEffect(() => {
