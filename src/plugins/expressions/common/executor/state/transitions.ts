@@ -17,20 +17,13 @@
  * under the License.
  */
 
-import { createStateContainer } from '../../../kibana_utils/public';
-import { ExpressionsState, ExpressionsPureTransitions } from './types';
-import { pureTransitions } from './mutators';
+import { ExecutorPureTransitions } from './types';
 
-const defaultState: ExpressionsState = {
-  functions: {},
-  renderers: {},
-  types: {},
-};
-
-export const createExpressionsStateContainer = () => {
-  const container = createStateContainer<ExpressionsState, ExpressionsPureTransitions>(
-    defaultState,
-    pureTransitions
-  );
-  return container;
+export const pureTransitions: ExecutorPureTransitions = {
+  addFunction: state => fn => ({ ...state, functions: { ...state.functions, [fn.name]: fn } }),
+  addType: state => type => ({ ...state, types: { ...state.types, [type.name]: type } }),
+  addRenderer: state => renderer => ({
+    ...state,
+    renderers: { ...state.renderers, [renderer.name]: renderer },
+  }),
 };

@@ -16,20 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Function, ExpressionRenderFunction } from '../registries';
-import { Type } from '../type';
-
-export interface ExpressionsState {
-  functions: Record<string, Function>;
-  types: Record<string, Type>;
-  renderers: Record<string, ExpressionRenderFunction>;
-}
-
-export interface ExpressionsPureTransitions {
-  addFunction: (state: ExpressionsState) => (fn: Function) => ExpressionsState;
-  addType: (state: ExpressionsState) => (type: Type) => ExpressionsState;
-  addRenderer: (
-    state: ExpressionsState
-  ) => (renderer: ExpressionRenderFunction) => ExpressionsState;
-}
