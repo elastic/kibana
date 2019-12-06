@@ -36,7 +36,7 @@ import { CoreSetup, CoreStart } from '..';
 export type PluginConfigSchema<T> = Type<T>;
 
 /**
- * Describes a plugin configuration schema and capabilities.
+ * Describes a plugin configuration properties.
  *
  * @example
  * ```typescript
@@ -56,6 +56,10 @@ export type PluginConfigSchema<T> = Type<T>;
  *     uiProp: true,
  *   },
  *   schema: configSchema,
+ *   deprecations: ({ rename, unused }) => [
+ *     rename('securityKey', 'secret'),
+ *     unused('deprecatedProperty'),
+ *   ],
  * };
  * ```
  *
@@ -63,7 +67,7 @@ export type PluginConfigSchema<T> = Type<T>;
  */
 export interface PluginConfigDescriptor<T = any> {
   /**
-   * List of {@link ConfigDeprecation} to apply to the plugin configuration.
+   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
    */
   deprecations?: ConfigDeprecationProvider;
   /**

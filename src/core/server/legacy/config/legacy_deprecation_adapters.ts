@@ -41,6 +41,11 @@ const legacyRename = (oldKey: string, newKey: string): LegacyConfigDeprecation =
   deprecation(settings, '', log);
 };
 
+/**
+ * Async deprecation provider converter for legacy deprecation implementation
+ *
+ * @internal
+ */
 export const convertLegacyDeprecationProvider = async (
   legacyProvider: LegacyConfigDeprecationProvider
 ): Promise<ConfigDeprecationProvider> => {

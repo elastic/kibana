@@ -388,6 +388,40 @@ describe('PluginsService', () => {
       await pluginsService.discover();
       expect(configService.setSchema).toBeCalledWith('path', configSchema);
     });
+
+    it('registers plugin config deprecation provider in config service', async () => {
+      const configSchema = schema.string();
+      jest.spyOn(configService, 'setSchema').mockImplementation(() => Promise.resolve());
+      jest.spyOn(configService, 'addDeprecationProvider');
+
+      const deprecationProvider = () => [];
+      jest.doMock(
+        join('path-with-provider', 'server'),
+        () => ({
+          config: {
+            schema: configSchema,
+            deprecations: deprecationProvider,
+          },
+        }),
+        {
+          virtual: true,
+        }
+      );
+      mockDiscover.mockReturnValue({
+        error$: from([]),
+        plugin$: from([
+          createPlugin('some-id', {
+            path: 'path-with-provider',
+            configPath: 'config-path',
+          }),
+        ]),
+      });
+      await pluginsService.discover();
+      expect(configService.addDeprecationProvider).toBeCalledWith(
+        'config-path',
+        deprecationProvider
+      );
+    });
   });
 
   describe('#generateUiPluginsConfigs()', () => {

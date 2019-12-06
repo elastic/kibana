@@ -81,7 +81,11 @@ const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPa
 
 const getPath = (rootPath: string, subPath: string) => `${rootPath}.${subPath}`;
 
-/** @internal */
+/**
+ * The actual platform implementation of {@link IConfigDeprecationFactory}
+ *
+ * @internal
+ */
 export const configDeprecationFactory: IConfigDeprecationFactory = {
   rename,
   renameFromRoot,
