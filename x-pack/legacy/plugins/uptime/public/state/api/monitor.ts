@@ -12,6 +12,7 @@ import {
   MonitorLocations,
   MonitorLocationsType,
 } from '../../../common/runtime_types';
+import { QueryParams } from '../actions/types';
 
 interface ApiRequest {
   monitorId: string;
@@ -33,12 +34,24 @@ export const fetchMonitorDetails = async ({
   });
 };
 
+type ApiParams = QueryParams & ApiRequest;
+
 export const fetchMonitorLocations = async ({
   monitorId,
   basePath,
-}: ApiRequest): Promise<MonitorLocations> => {
-  const url = getApiPath(`/api/uptime/monitor/locations?monitorId=${monitorId}`, basePath);
-  const response = await fetch(url);
+  dateStart,
+  dateEnd,
+}: ApiParams): Promise<MonitorLocations> => {
+  const url = getApiPath(`/api/uptime/monitor/locations`, basePath);
+
+  const params = {
+    dateStart,
+    dateEnd,
+    monitorId,
+  };
+  const urlParams = new URLSearchParams(params).toString();
+  const response = await fetch(`${url}?${urlParams}`);
+
   if (!response.ok) {
     throw new Error(response.statusText);
   }

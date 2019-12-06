@@ -29,10 +29,10 @@ function* monitorDetailsEffect(action: Action<any>) {
 }
 
 function* monitorLocationsEffect(action: Action<any>) {
-  const monitorId: string = action.payload;
+  const payload = action.payload;
   try {
     const basePath = yield select(getBasePath);
-    const response = yield call(fetchMonitorLocations, { monitorId, basePath });
+    const response = yield call(fetchMonitorLocations, { basePath, ...payload });
     yield put({ type: FETCH_MONITOR_LOCATIONS_SUCCESS, payload: response });
   } catch (error) {
     yield put({ type: FETCH_MONITOR_LOCATIONS_FAIL, payload: error.message });

@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import { connect } from 'react-redux';
 import { EmbeddedMap, LocationPoint } from './embeddables/embedded_map';
-import { fetchMonitorLocations } from '../../../state/actions/monitor';
-import { AppState } from '../../../state';
-import { getMonitorLocations } from '../../../state/selectors';
 
 const MapPanel = styled.div`
   height: 400px;
@@ -18,20 +14,10 @@ const MapPanel = styled.div`
 `;
 
 interface LocationMapProps {
-  monitorId: string;
-  loadMonitorLocations: any;
   monitorLocations: any;
 }
 
-export const LocationMapComponent = ({
-  monitorId,
-  loadMonitorLocations,
-  monitorLocations,
-}: LocationMapProps) => {
-  useEffect(() => {
-    loadMonitorLocations(monitorId);
-  }, []);
-
+export const LocationMap = ({ monitorLocations }: LocationMapProps) => {
   const upPoints: LocationPoint[] = [];
   const downPoints: LocationPoint[] = [];
 
@@ -50,13 +36,3 @@ export const LocationMapComponent = ({
     </MapPanel>
   );
 };
-
-const mapStateToProps = (state: AppState, { monitorId }: any) => ({
-  monitorLocations: getMonitorLocations(state, monitorId),
-});
-
-const mapDispatchToProps = (dispatch: any) => ({
-  loadMonitorLocations: (monitorId: string) => dispatch(fetchMonitorLocations(monitorId)),
-});
-
-export const LocationMap = connect(mapStateToProps, mapDispatchToProps)(LocationMapComponent);

@@ -14,6 +14,8 @@ export const createGetMonitorLocationsRoute = (libs: UMServerLibs) => ({
     validate: {
       query: Joi.object({
         monitorId: Joi.string(),
+        dateStart: Joi.string(),
+        dateEnd: Joi.string(),
       }),
     },
     tags: ['access:uptime'],

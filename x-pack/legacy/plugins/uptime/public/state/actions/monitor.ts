@@ -5,6 +5,7 @@
  */
 
 import { MonitorLocations } from '../../../common/runtime_types';
+import { QueryParams } from './types';
 
 export const FETCH_MONITOR_DETAILS = 'FETCH_MONITOR_DETAILS';
 export const FETCH_MONITOR_DETAILS_SUCCESS = 'FETCH_MONITOR_DETAILS_SUCCESS';
@@ -34,9 +35,13 @@ interface GetMonitorDetailsFailAction {
   payload: any;
 }
 
+export interface MonitorLocationsPayload extends QueryParams {
+  monitorId: string;
+}
+
 interface GetMonitorLocationsAction {
   type: typeof FETCH_MONITOR_LOCATIONS;
-  payload: string;
+  payload: MonitorLocationsPayload;
 }
 
 interface GetMonitorLocationsSuccessAction {
@@ -72,10 +77,10 @@ export function fetchMonitorDetailsFail(error: any): GetMonitorDetailsFailAction
   };
 }
 
-export function fetchMonitorLocations(monitorId: string): GetMonitorLocationsAction {
+export function fetchMonitorLocations(payload: MonitorLocationsPayload): GetMonitorLocationsAction {
   return {
     type: FETCH_MONITOR_LOCATIONS,
-    payload: monitorId,
+    payload,
   };
 }
 

@@ -85,7 +85,12 @@ export const MonitorPage = ({
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
       <EuiSpacer size="s" />
-      <MonitorStatusDetails monitorId={monitorId} variables={sharedVariables} />
+      <MonitorStatusDetails
+        monitorId={monitorId}
+        variables={sharedVariables}
+        dateStart={absoluteDateRangeStart}
+        dateEnd={absoluteDateRangeEnd}
+      />
       <EuiSpacer size="s" />
       <MonitorCharts
         {...colors}
