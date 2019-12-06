@@ -22,9 +22,12 @@ import { LegacyServiceDiscoverPlugins } from './legacy_service';
 const createDiscoverMock = () => {
   const setupContract: DeeplyMockedKeys<LegacyServiceDiscoverPlugins> = {
     pluginSpecs: [],
+    disabledPluginSpecs: [],
     uiExports: {} as any,
+    settings: {},
     pluginExtendedConfig: {
       get: jest.fn(),
+      has: jest.fn(),
       set: jest.fn(),
     } as any,
   };
