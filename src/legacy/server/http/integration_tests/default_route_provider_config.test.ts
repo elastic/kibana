@@ -40,6 +40,7 @@ describe('default route provider', () => {
     kbnServer.server.decorate('request', 'getSavedObjectsClient', function() {
       return {
         get: (type: string, id: string) => ({ attributes: {} }),
+        errors: {},
       };
     });
 
