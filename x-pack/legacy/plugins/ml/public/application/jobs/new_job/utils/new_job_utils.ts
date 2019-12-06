@@ -12,7 +12,6 @@ import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearch } from '../../../util/index_utils';
 
 // Provider for creating the items used for searching and job creation.
-// Uses the $route object to retrieve the indexPattern and savedSearch from the url
 
 export function createSearchItems(
   kibanaConfig: KibanaConfigTypeFix,
