@@ -9,9 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./get_signal_mapping.sh
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-mapping.html
-curl -s -k \
-  -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET ${ELASTICSEARCH_URL}/${SIGNALS_INDEX}/_mapping \
-  | jq .
+# Example: ./signal_index_exists.sh
+curl -s -k --head \
+ -H 'Content-Type: application/json' \
+ -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+ ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createIsValidRoute } from './is_valid';
+export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;
