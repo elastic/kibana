@@ -11,6 +11,10 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
           nextWorker++
 
           return {
+            // This delay helps smooth out CPU load caused by ES/Kibana instances starting up at the same time
+            def delay = (workerNumber-1)*20
+            sleep(delay)
+
             workerClosure(workerNumber)
           }
         }
@@ -27,15 +31,15 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
         }
 
         catchError {
+          runErrorReporter()
+        }
+
+        catchError {
           runbld.junit()
         }
 
         catchError {
           publishJunit()
-        }
-
-        catchError {
-          runErrorReporter()
         }
       }
     }
@@ -99,10 +103,10 @@ def legacyJobRunner(name) {
                 uploadAllGcsArtifacts(name)
               }
               catchError {
-                publishJunit()
+                runErrorReporter()
               }
               catchError {
-                runErrorReporter()
+                publishJunit()
               }
             }
           }
