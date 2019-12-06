@@ -41,7 +41,7 @@ export const uptime = (kibana: any) =>
 
       plugin(initializerContext).setup(
         {
-          route: (arg: any) => server.route(arg),
+          route: server.newPlatform.setup.core.http.createRouter(),
         },
         {
           elasticsearch,
