@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
+import { RouteValidator } from 'kibana/server';
 import { RouteDefinitionParams } from '../..';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
 
@@ -11,7 +12,7 @@ export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionPara
   router.get(
     {
       path: '/api/security/privileges',
-      validate: {
+      validate: new RouteValidator({
         query: schema.object({
           // We don't use `schema.boolean` here, because all query string parameters are treated as
           // strings and @kbn/config-schema doesn't coerce strings to booleans.
@@ -19,7 +20,7 @@ export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionPara
             schema.oneOf([schema.literal('true'), schema.literal('false')])
           ),
         }),
-      },
+      }),
     },
     createLicensedRouteHandler((context, request, response) => {
       const privileges = authz.privileges.get();

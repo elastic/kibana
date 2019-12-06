@@ -4,23 +4,26 @@
 
 ## RouteValidator class
 
-Custom validator class. If @<!-- -->kbn/config-schema is not a valid option in your plugin, you can use this class to define your own validation logic.
+Route validator class to define the validation logic for each new route.
 
 <b>Signature:</b>
 
 ```typescript
-export declare class RouteValidator<T> 
+export declare class RouteValidator<P = {}, Q = {}, B = {}> 
 ```
 
 ## Constructors
 
 |  Constructor | Modifiers | Description |
 |  --- | --- | --- |
-|  [(constructor)(validationRule)](./kibana-plugin-server.routevalidator._constructor_.md) |  | Constructs a new instance of the <code>RouteValidator</code> class |
+|  [(constructor)(config, options)](./kibana-plugin-server.routevalidator._constructor_.md) |  | Constructs a new instance of the <code>RouteValidator</code> class |
 
 ## Methods
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [validate(data, namespace)](./kibana-plugin-server.routevalidator.validate.md) |  |  |
+|  [getBody(data, namespace)](./kibana-plugin-server.routevalidator.getbody.md) |  | Get validated body  |
+|  [getParams(data, namespace)](./kibana-plugin-server.routevalidator.getparams.md) |  | Get validated URL params  |
+|  [getQuery(data, namespace)](./kibana-plugin-server.routevalidator.getquery.md) |  | Get validated query params  |
+|  [hasBody()](./kibana-plugin-server.routevalidator.hasbody.md) |  | Has body validation  |
 

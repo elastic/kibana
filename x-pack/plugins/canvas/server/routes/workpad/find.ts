@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SavedObjectAttributes } from 'src/core/server';
+import { SavedObjectAttributes, RouteValidator } from 'src/core/server';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -17,13 +17,13 @@ export function initializeFindWorkpadsRoute(deps: RouteInitializerDeps) {
   router.get(
     {
       path: `${API_ROUTE_WORKPAD}/find`,
-      validate: {
+      validate: new RouteValidator({
         query: schema.object({
           name: schema.string(),
           page: schema.maybe(schema.number()),
           perPage: schema.number(),
         }),
-      },
+      }),
     },
     async (context, request, response) => {
       const savedObjectsClient = context.core.savedObjects.client;

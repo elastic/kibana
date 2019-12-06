@@ -6,6 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { RouteValidator } from 'kibana/server';
 import {
   getDeprecationLoggingStatus,
   setDeprecationLogging,
@@ -36,11 +37,11 @@ export function registerDeprecationLoggingRoutes(server: ServerShimWithRouter) {
   server.router.put(
     {
       path: '/api/upgrade_assistant/deprecation_logging',
-      validate: {
+      validate: new RouteValidator({
         body: schema.object({
           isEnabled: schema.boolean(),
         }),
-      },
+      }),
     },
     versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);

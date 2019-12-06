@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RouteValidator } from 'kibana/server';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -18,11 +19,11 @@ export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {
   router.delete(
     {
       path: `${API_ROUTE_WORKPAD}/{id}`,
-      validate: {
+      validate: new RouteValidator({
         params: schema.object({
           id: schema.string(),
         }),
-      },
+      }),
     },
     catchErrorHandler(async (context, request, response) => {
       context.core.savedObjects.client.delete(CANVAS_TYPE, request.params.id);

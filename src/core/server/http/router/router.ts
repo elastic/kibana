@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import { Type } from '@kbn/config-schema';
 import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 import Boom from 'boom';
 
 import { Logger } from '../../logging';
 import { KibanaRequest } from './request';
 import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
-import {
-  RouteConfig,
-  RouteConfigOptions,
-  RouteMethod,
-  RouteSchemas,
-  validBodyOutput,
-} from './route';
+import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
 import { wrapErrors } from './error_wrapper';
-import { RouteValidatedType, RouteValidator, RouteValidateSpecs } from './validator';
+import { RouteValidator } from './validator';
 
 interface RouterRoute {
   method: RouteMethod;
@@ -48,18 +41,9 @@ interface RouterRoute {
  *
  * @public
  */
-export type RouteRegistrar<Method extends RouteMethod> = <
-  P extends RouteValidateSpecs,
-  Q extends RouteValidateSpecs,
-  B extends RouteValidateSpecs
->(
+export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(
   route: RouteConfig<P, Q, B, Method>,
-  handler: RequestHandler<
-    RouteValidatedType<P>,
-    RouteValidatedType<Q>,
-    RouteValidatedType<B>,
-    Method
-  >
+  handler: RequestHandler<P, Q, B, Method>
 ) => void;
 
 /**
@@ -140,11 +124,10 @@ function getRouteFullPath(routerPath: string, routePath: string) {
  * @returns Route schemas if `validate` is specified on the route, otherwise
  * undefined.
  */
-function routeSchemasFromRouteConfig<
-  P extends RouteValidateSpecs,
-  Q extends RouteValidateSpecs,
-  B extends RouteValidateSpecs
->(route: RouteConfig<P, Q, B, typeof routeMethod>, routeMethod: RouteMethod) {
+function routeSchemasFromRouteConfig<P, Q, B>(
+  route: RouteConfig<P, Q, B, typeof routeMethod>,
+  routeMethod: RouteMethod
+) {
   // The type doesn't allow `validate` to be undefined, but it can still
   // happen when it's used from JavaScript.
   if (route.validate === undefined) {
@@ -153,14 +136,8 @@ function routeSchemasFromRouteConfig<
     );
   }
 
-  if (route.validate !== false) {
-    Object.entries(route.validate).forEach(([key, schema]) => {
-      if (!(schema instanceof Type || schema instanceof RouteValidator)) {
-        throw new Error(
-          `Expected a valid schema declared with '@kbn/config-schema' package at key: [${key}].`
-        );
-      }
-    });
+  if (route.validate !== false && !(route.validate instanceof RouteValidator)) {
+    throw new Error(`[${routeMethod.toUpperCase()} ${route.path}] expects a valid RouteValidator.`);
   }
 
   return route.validate ? route.validate : undefined;
@@ -174,16 +151,11 @@ function routeSchemasFromRouteConfig<
  */
 function validOptions(
   method: RouteMethod,
-  routeConfig: RouteConfig<
-    RouteValidateSpecs,
-    RouteValidateSpecs,
-    RouteValidateSpecs,
-    typeof method
-  >
+  routeConfig: RouteConfig<unknown, unknown, unknown, typeof method>
 ) {
   const shouldNotHavePayload = ['head', 'get'].includes(method);
   const { options = {}, validate } = routeConfig;
-  const shouldValidateBody = (validate && !!validate.body) || !!options.body;
+  const shouldValidateBody = (validate && validate.hasBody()) || !!options.body;
 
   const { output } = options.body || {};
   if (typeof output === 'string' && !validBodyOutput.includes(output)) {
@@ -225,18 +197,9 @@ export class Router implements IRouter {
     private readonly log: Logger,
     private readonly enhanceWithContext: ContextEnhancer<any, any, any, any>
   ) {
-    const buildMethod = <Method extends RouteMethod>(method: Method) => <
-      P extends RouteValidateSpecs,
-      Q extends RouteValidateSpecs,
-      B extends RouteValidateSpecs
-    >(
+    const buildMethod = <Method extends RouteMethod>(method: Method) => <P, Q, B>(
       route: RouteConfig<P, Q, B, Method>,
-      handler: RequestHandler<
-        RouteValidatedType<P>,
-        RouteValidatedType<Q>,
-        RouteValidatedType<B>,
-        Method
-      >
+      handler: RequestHandler<P, Q, B, Method>
     ) => {
       const routeSchemas = routeSchemasFromRouteConfig(route, method);
 
@@ -278,11 +241,7 @@ export class Router implements IRouter {
     request: Request;
     responseToolkit: ResponseToolkit;
     handler: RequestHandlerEnhanced<P, Q, B, typeof request.method>;
-    routeSchemas?: RouteSchemas<
-      RouteValidateSpecs<P>,
-      RouteValidateSpecs<Q>,
-      RouteValidateSpecs<B>
-    >;
+    routeSchemas?: RouteValidator<P, Q, B>;
   }) {
     let kibanaRequest: KibanaRequest<P, Q, B, typeof request.method>;
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);

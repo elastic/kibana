@@ -18,15 +18,15 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from '../../http';
+import { IRouter, RouteValidator } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { CannotOverrideError } from '../ui_settings_errors';
 
-const validate = {
+const validate = new RouteValidator({
   params: schema.object({
     key: schema.string(),
   }),
-};
+});
 
 export function registerDeleteRoute(router: IRouter) {
   router.delete(

@@ -8,7 +8,7 @@ import Boom from 'boom';
 import { schema } from '@kbn/config-schema';
 import { SearchResponse } from 'elasticsearch';
 import _ from 'lodash';
-import { IScopedClusterClient } from 'src/core/server';
+import { IScopedClusterClient, RouteValidator } from 'src/core/server';
 import { CoreSetup } from 'src/core/server';
 import { BASE_API_URL } from '../../common';
 import { FieldDescriptor, IndexPatternsFetcher } from '../../../../../../src/plugins/data/server';
@@ -25,7 +25,7 @@ export async function existingFieldsRoute(setup: CoreSetup) {
   router.get(
     {
       path: `${BASE_API_URL}/existing_fields/{indexPatternTitle}`,
-      validate: {
+      validate: new RouteValidator({
         params: schema.object({
           indexPatternTitle: schema.string(),
         }),
@@ -34,7 +34,7 @@ export async function existingFieldsRoute(setup: CoreSetup) {
           toDate: schema.maybe(schema.string()),
           timeFieldName: schema.maybe(schema.string()),
         }),
-      },
+      }),
     },
     async (context, req, res) => {
       const { indexPatternTitle } = req.params;

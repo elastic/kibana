@@ -13,6 +13,7 @@ import {
   CoreSetup,
   IBasePath,
   IRouter,
+  RouteValidator,
 } from '../../../../../../src/core/server';
 
 import * as kbnTestServer from '../../../../../../src/test_utils/kbn_server';
@@ -78,13 +79,13 @@ describe('onRequestInterceptor', () => {
       router.get(
         {
           path: '/i/love/np_spaces',
-          validate: {
+          validate: new RouteValidator({
             query: schema.object({
               queryParam: schema.string({
                 defaultValue: 'oh noes, this was not set on the request correctly',
               }),
             }),
-          },
+          }),
         },
         (context: unknown, req: KibanaRequest, h: KibanaResponseFactory) => {
           return h.ok({

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RouteValidator } from 'kibana/server';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -25,9 +26,9 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
   router.post(
     {
       path: `${API_ROUTE_WORKPAD}`,
-      validate: {
+      validate: new RouteValidator({
         body: WorkpadSchema,
-      },
+      }),
     },
     catchErrorHandler(async (context, request, response) => {
       if (!request.body) {

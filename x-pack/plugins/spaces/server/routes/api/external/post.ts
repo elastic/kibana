@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
+import { RouteValidator } from 'kibana/server';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { ExternalRouteDeps } from '.';
@@ -15,9 +16,9 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
   externalRouter.post(
     {
       path: '/api/spaces/space',
-      validate: {
+      validate: new RouteValidator({
         body: spaceSchema,
-      },
+      }),
     },
     createLicensedRouteHandler(async (context, request, response) => {
       log.debug(`Inside POST /api/spaces/space`);

@@ -6,7 +6,7 @@
 
 import Boom from 'boom';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
+import { CoreSetup, SavedObjectsLegacyService, RouteValidator } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { BASE_API_URL } from '../../common';
 
@@ -32,7 +32,7 @@ export async function initLensUsageRoute(
   router.post(
     {
       path: `${BASE_API_URL}/telemetry`,
-      validate: {
+      validate: new RouteValidator({
         body: schema.object({
           events: schema.mapOf(schema.string(), schema.mapOf(schema.string(), schema.number())),
           suggestionEvents: schema.mapOf(
@@ -40,7 +40,7 @@ export async function initLensUsageRoute(
             schema.mapOf(schema.string(), schema.number())
           ),
         }),
-      },
+      }),
     },
     async (context, req, res) => {
       const { dataClient } = context.core.elasticsearch;

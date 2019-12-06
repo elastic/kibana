@@ -18,15 +18,15 @@
  */
 import { schema } from '@kbn/config-schema';
 
-import { IRouter } from '../../http';
+import { IRouter, RouteValidator } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { CannotOverrideError } from '../ui_settings_errors';
 
-const validate = {
+const validate = new RouteValidator({
   body: schema.object({
     changes: schema.object({}, { allowUnknowns: true }),
   }),
-};
+});
 
 export function registerSetManyRoute(router: IRouter) {
   router.post({ path: '/api/kibana/settings', validate }, async (context, request, response) => {

@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, RouteValidator } from 'kibana/server';
 import { ReindexStatus } from '../../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { reindexServiceFactory, ReindexWorker } from '../lib/reindexing';
@@ -63,11 +63,11 @@ export function registerReindexIndicesRoutes(
   server.router.post(
     {
       path: `${BASE_PATH}/{indexName}`,
-      validate: {
+      validate: new RouteValidator({
         params: schema.object({
           indexName: schema.string(),
         }),
-      },
+      }),
     },
     versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
@@ -114,11 +114,11 @@ export function registerReindexIndicesRoutes(
   server.router.get(
     {
       path: `${BASE_PATH}/{indexName}`,
-      validate: {
+      validate: new RouteValidator({
         params: schema.object({
           indexName: schema.string(),
         }),
-      },
+      }),
     },
     versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
@@ -168,11 +168,11 @@ export function registerReindexIndicesRoutes(
   server.router.post(
     {
       path: `${BASE_PATH}/{indexName}/cancel`,
-      validate: {
+      validate: new RouteValidator({
         params: schema.object({
           indexName: schema.string(),
         }),
-      },
+      }),
     },
     versionCheckHandlerWrapper(async (ctx, request, response) => {
       const reqShim = createRequestShim(request);

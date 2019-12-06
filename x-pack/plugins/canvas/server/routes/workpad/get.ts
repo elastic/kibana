@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RouteValidator } from 'kibana/server';
 import { RouteInitializerDeps } from '../';
 import {
   CANVAS_TYPE,
@@ -23,11 +24,11 @@ export function initializeGetWorkpadRoute(deps: RouteInitializerDeps) {
   router.get(
     {
       path: `${API_ROUTE_WORKPAD}/{id}`,
-      validate: {
+      validate: new RouteValidator({
         params: schema.object({
           id: schema.string(),
         }),
-      },
+      }),
     },
     catchErrorHandler(async (context, request, response) => {
       const workpad = await context.core.savedObjects.client.get<WorkpadAttributes>(

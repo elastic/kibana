@@ -77,11 +77,14 @@ describe('KibanaRequest', () => {
         }),
         payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
       } as any;
-      const kibanaRequest = KibanaRequest.from(request, {
-        params: schema.object({ id: schema.string() }),
-        query: schema.object({ search: schema.string() }),
-        body: schema.buffer(),
-      });
+      const kibanaRequest = KibanaRequest.from(
+        request,
+        new RouteValidator({
+          params: schema.object({ id: schema.string() }),
+          query: schema.object({ search: schema.string() }),
+          body: schema.buffer(),
+        })
+      );
       expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
       expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
       expect(kibanaRequest.query).toStrictEqual({ search: 'query' });
@@ -99,17 +102,20 @@ describe('KibanaRequest', () => {
         }),
         payload: body, // Set outside because the mock is using `merge` by lodash and breaks the Buffer into arrays
       } as any;
-      const kibanaRequest = KibanaRequest.from(request, {
-        params: schema.object({ id: schema.string() }),
-        query: schema.object({ search: schema.string() }),
-        body: new RouteValidator(data => {
-          if (Buffer.isBuffer(data)) {
-            return { value: data };
-          } else {
-            return { error: new RouteValidationError('It should be a Buffer', []) };
-          }
-        }),
-      });
+      const kibanaRequest = KibanaRequest.from(
+        request,
+        new RouteValidator({
+          params: schema.object({ id: schema.string() }),
+          query: schema.object({ search: schema.string() }),
+          body: data => {
+            if (Buffer.isBuffer(data)) {
+              return { value: data };
+            } else {
+              return { error: new RouteValidationError('It should be a Buffer', []) };
+            }
+          },
+        })
+      );
       expect(kibanaRequest.params).toStrictEqual({ id: 'params' });
       expect(kibanaRequest.params.id.toUpperCase()).toEqual('PARAMS'); // infers it's a string
       expect(kibanaRequest.query).toStrictEqual({ search: 'query' });

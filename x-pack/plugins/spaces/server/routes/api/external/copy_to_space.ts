@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 import _ from 'lodash';
-import { SavedObject } from 'src/core/server';
+import { SavedObject, RouteValidator } from 'src/core/server';
 import {
   copySavedObjectsToSpacesFactory,
   resolveCopySavedObjectsToSpacesConflictsFactory,
@@ -30,7 +30,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       options: {
         tags: ['access:copySavedObjectsToSpaces'],
       },
-      validate: {
+      validate: new RouteValidator({
         body: schema.object({
           spaces: schema.arrayOf(
             schema.string({
@@ -64,7 +64,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
           includeReferences: schema.boolean({ defaultValue: false }),
           overwrite: schema.boolean({ defaultValue: false }),
         }),
-      },
+      }),
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const savedObjectsClient = getSavedObjects().getScopedSavedObjectsClient(
@@ -92,7 +92,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
       options: {
         tags: ['access:copySavedObjectsToSpaces'],
       },
-      validate: {
+      validate: new RouteValidator({
         body: schema.object({
           retries: schema.recordOf(
             schema.string({
@@ -125,7 +125,7 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
           ),
           includeReferences: schema.boolean({ defaultValue: false }),
         }),
-      },
+      }),
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const savedObjectsClient = getSavedObjects().getScopedSavedObjectsClient(

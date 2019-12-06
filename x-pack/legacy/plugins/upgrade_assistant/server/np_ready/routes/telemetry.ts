@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RouteValidator } from 'kibana/server';
 import { upsertUIOpenOption } from '../lib/telemetry/es_ui_open_apis';
 import { upsertUIReindexOption } from '../lib/telemetry/es_ui_reindex_apis';
 import { ServerShimWithRouter } from '../types';
@@ -14,13 +15,13 @@ export function registerTelemetryRoutes(server: ServerShimWithRouter) {
   server.router.put(
     {
       path: '/api/upgrade_assistant/telemetry/ui_open',
-      validate: {
+      validate: new RouteValidator({
         body: schema.object({
           overview: schema.boolean({ defaultValue: false }),
           cluster: schema.boolean({ defaultValue: false }),
           indices: schema.boolean({ defaultValue: false }),
         }),
-      },
+      }),
     },
     async (ctx, request, response) => {
       const reqShim = createRequestShim(request);
@@ -35,14 +36,14 @@ export function registerTelemetryRoutes(server: ServerShimWithRouter) {
   server.router.put(
     {
       path: '/api/upgrade_assistant/telemetry/ui_reindex',
-      validate: {
+      validate: new RouteValidator({
         body: schema.object({
           close: schema.boolean({ defaultValue: false }),
           open: schema.boolean({ defaultValue: false }),
           start: schema.boolean({ defaultValue: false }),
           stop: schema.boolean({ defaultValue: false }),
         }),
-      },
+      }),
     },
     async (ctx, request, response) => {
       const reqShim = createRequestShim(request);

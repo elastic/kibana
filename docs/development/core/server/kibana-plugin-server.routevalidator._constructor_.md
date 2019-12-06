@@ -9,12 +9,13 @@ Constructs a new instance of the `RouteValidator` class
 <b>Signature:</b>
 
 ```typescript
-constructor(validationRule: (data: any) => RouteValidateFunctionReturn<T>);
+constructor(config: RouteValidatorConfig<P, Q, B>, options?: RouteValidatorOptions);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  validationRule | <code>(data: any) =&gt; RouteValidateFunctionReturn&lt;T&gt;</code> |  |
+|  config | <code>RouteValidatorConfig&lt;P, Q, B&gt;</code> |  |
+|  options | <code>RouteValidatorOptions</code> |  |
 

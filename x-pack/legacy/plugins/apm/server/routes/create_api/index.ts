@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
-import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
+import {
+  KibanaResponseFactory,
+  RouteRegistrar,
+  RouteValidator
+} from 'src/core/server';
 import { APMConfig } from '../../../../../../plugins/apm/server';
 import {
   ServerAPI,
@@ -77,7 +81,7 @@ export function createApi() {
           {
             path,
             options,
-            validate: {
+            validate: new RouteValidator({
               // `body` can be null, but `validate` expects non-nullable types
               // if any validation is defined. Not having validation currently
               // means we don't get the payload. See
@@ -85,7 +89,7 @@ export function createApi() {
               body: schema.nullable(anyObject) as typeof anyObject,
               params: anyObject,
               query: anyObject
-            }
+            })
           },
           async (context, request, response) => {
             try {

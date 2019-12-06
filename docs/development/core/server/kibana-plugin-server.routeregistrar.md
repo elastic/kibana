@@ -9,5 +9,5 @@ Route handler common definition
 <b>Signature:</b>
 
 ```typescript
-export declare type RouteRegistrar<Method extends RouteMethod> = <P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>) => void;
+export declare type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 ```

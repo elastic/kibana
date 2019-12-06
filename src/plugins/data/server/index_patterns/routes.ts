@@ -25,6 +25,7 @@ import {
   RequestHandlerContext,
   APICaller,
   CallAPIOptions,
+  RouteValidator,
 } from '../../../../core/server';
 import { IndexPatternsFetcher } from './fetcher';
 
@@ -53,14 +54,14 @@ export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup
   router.get(
     {
       path: '/api/index_patterns/_fields_for_wildcard',
-      validate: {
+      validate: new RouteValidator({
         query: schema.object({
           pattern: schema.string(),
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
         }),
-      },
+      }),
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
       const indexPatterns = await getIndexPatternsService(request);
@@ -94,7 +95,7 @@ export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup
   router.get(
     {
       path: '/api/index_patterns/_fields_for_time_pattern',
-      validate: {
+      validate: new RouteValidator({
         query: schema.object({
           pattern: schema.string(),
           interval: schema.maybe(schema.string()),
@@ -103,7 +104,7 @@ export function registerRoutes(http: CoreSetup['http'], elasticsearch: CoreSetup
             defaultValue: [],
           }),
         }),
-      },
+      }),
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
       const indexPatterns = await getIndexPatternsService(request);

@@ -47,12 +47,15 @@ export {
   RouteMethod,
   RouteRegistrar,
   RouteConfigOptions,
-  RouteSchemas,
   RouteConfigOptionsBody,
   RouteContentType,
   validBodyOutput,
-  RouteValidateFunctionReturn,
   RouteValidator,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidateFunction,
+  RouteValidateFunctionReturn,
+  RouteValidatorOptions,
   RouteValidationError,
 } from './router';
 export { BasePathProxyServer } from './base_path_proxy_server';

@@ -17,85 +17,105 @@
  * under the License.
  */
 
-import { validate, RouteValidator, RouteValidationError } from './';
-import { schema } from '@kbn/config-schema';
+import { RouteValidationError, RouteValidator } from './';
+import { schema, Type } from '@kbn/config-schema';
 
 describe('Router validator', () => {
+  it(`should throw an error if any of the properties' validation logics is not valid`, () => {
+    expect(
+      () =>
+        new RouteValidator({
+          body: { validate: () => 'anything' } as any,
+        })
+    ).toThrowError(
+      `Expected a valid validation logic declared with '@kbn/config-schema' package or a RouteValidateFunction at key: [body].`
+    );
+  });
+
   it('should validate and infer the type from a function', () => {
-    const validator = new RouteValidator(data => {
-      if (typeof data.foo === 'string') {
-        return { value: { foo: data.foo as string } };
-      }
-      return { error: new RouteValidationError('Not a string', ['foo']) };
+    const validator = new RouteValidator({
+      params: data => {
+        if (typeof data.foo === 'string') {
+          return { value: { foo: data.foo as string } };
+        }
+        return { error: new RouteValidationError('Not a string', ['foo']) };
+      },
     });
-    expect(validate(validator, { foo: 'bar' })).toStrictEqual({ foo: 'bar' });
-    expect(validate(validator, { foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
-    expect(() => validate(validator, { foo: 1 })).toThrowError('[foo]: Not a string');
-    expect(() => validate(validator, {})).toThrowError('[foo]: Not a string');
+    expect(validator.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
+    expect(validator.getParams({ foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
+    expect(() => validator.getParams({ foo: 1 })).toThrowError('[foo]: Not a string');
+    expect(() => validator.getParams({})).toThrowError('[foo]: Not a string');
 
     // Despite the undefined, the pre-validation enforces an empty object
-    expect(() => validate(validator, undefined)).toThrowError('[foo]: Not a string');
-    expect(() => validate(validator, {}, 'myField')).toThrowError('[myField.foo]: Not a string');
+    expect(() => validator.getParams(undefined)).toThrowError('[foo]: Not a string');
+    expect(() => validator.getParams({}, 'myField')).toThrowError('[myField.foo]: Not a string');
+
+    expect(validator.getBody(undefined)).toStrictEqual({});
+    expect(validator.getQuery(undefined)).toStrictEqual({});
   });
 
   it('should validate and infer the type from a config-schema ObjectType', () => {
-    const schemaValidation = schema.object({
-      foo: schema.string(),
+    const schemaValidation = new RouteValidator({
+      params: schema.object({
+        foo: schema.string(),
+      }),
     });
 
-    expect(validate(schemaValidation, { foo: 'bar' })).toStrictEqual({ foo: 'bar' });
-    expect(validate(schemaValidation, { foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
-    expect(() => validate(schemaValidation, { foo: 1 })).toThrowError(
+    expect(schemaValidation.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
+    expect(schemaValidation.getParams({ foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
+    expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
       '[foo]: expected value of type [string] but got [number]'
     );
-    expect(() => validate(schemaValidation, {})).toThrowError(
+    expect(() => schemaValidation.getParams({})).toThrowError(
       '[foo]: expected value of type [string] but got [undefined]'
     );
-    expect(() => validate(schemaValidation, undefined)).toThrowError(
+    expect(() => schemaValidation.getParams(undefined)).toThrowError(
       '[foo]: expected value of type [string] but got [undefined]'
     );
-    expect(() => validate(schemaValidation, {}, 'myField')).toThrowError(
+    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(
       '[myField.foo]: expected value of type [string] but got [undefined]'
     );
   });
 
   it('should validate and infer the type from a config-schema non-ObjectType', () => {
-    const schemaValidation = schema.buffer();
+    const schemaValidation = new RouteValidator({ params: schema.buffer() });
 
     const foo = new Buffer('hi!');
-    expect(validate(schemaValidation, foo)).toStrictEqual(foo);
-    expect(validate(schemaValidation, foo).byteLength).toBeGreaterThan(0); // It knows it's a buffer! :)
-    expect(() => validate(schemaValidation, { foo: 1 })).toThrowError(
+    expect(schemaValidation.getParams(foo)).toStrictEqual(foo);
+    expect(schemaValidation.getParams(foo).byteLength).toBeGreaterThan(0); // It knows it's a buffer! :)
+    expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
       'expected value of type [Buffer] but got [Object]'
     );
-    expect(() => validate(schemaValidation, {})).toThrowError(
+    expect(() => schemaValidation.getParams({})).toThrowError(
       'expected value of type [Buffer] but got [Object]'
     );
-    expect(() => validate(schemaValidation, undefined)).toThrowError(
-      `expected value of type [Buffer] but got [undefined]`
+    expect(() => schemaValidation.getParams(undefined)).toThrowError(
+      `expected value of type [Buffer] but got [Object]` // Because of the initial "safe-ish" validation it cannot be undefined
     );
-    expect(() => validate(schemaValidation, {}, 'myField')).toThrowError(
+    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(
       '[myField]: expected value of type [Buffer] but got [Object]'
     );
   });
 
   it('should catch the errors thrown by the validate function', () => {
-    const validator = new RouteValidator(data => {
-      throw new Error('Something went terribly wrong');
+    const validator = new RouteValidator({
+      params: data => {
+        throw new Error('Something went terribly wrong');
+      },
     });
 
-    expect(() => validate(validator, { foo: 1 })).toThrowError('Something went terribly wrong');
-    expect(() => validate(validator, {}, 'myField')).toThrowError(
+    expect(() => validator.getParams({ foo: 1 })).toThrowError('Something went terribly wrong');
+    expect(() => validator.getParams({}, 'myField')).toThrowError(
       '[myField]: Something went terribly wrong'
     );
   });
 
   it('should not accept invalid validation options', () => {
-    const wrongValidateSpec = {
-      validate: <T>(data: T): T => data,
-    };
+    const wrongValidateSpec = new RouteValidator({
+      params: { validate: <T>(data: T): T => data } as Type<any>,
+    });
 
-    expect(() => validate(wrongValidateSpec as any, { foo: 1 })).toThrowError(
+    expect(() => wrongValidateSpec.getParams({ foo: 1 })).toThrowError(
       'The validation rule provided in the handler is not valid'
     );
   });
