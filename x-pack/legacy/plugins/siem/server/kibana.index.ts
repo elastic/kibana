@@ -15,14 +15,17 @@ import {
   timelineSavedObjectType,
 } from './saved_objects';
 
-import { signalsAlertType } from './lib/detection_engine/alerts/signals_alert_type';
+import { rulesAlertType } from './lib/detection_engine/alerts/rules_alert_type';
 import { isAlertExecutor } from './lib/detection_engine/alerts/types';
-import { createSignalsRoute } from './lib/detection_engine/routes/create_signals_route';
-import { readSignalsRoute } from './lib/detection_engine/routes/read_signals_route';
-import { findSignalsRoute } from './lib/detection_engine/routes/find_signals_route';
-import { deleteSignalsRoute } from './lib/detection_engine/routes/delete_signals_route';
-import { updateSignalsRoute } from './lib/detection_engine/routes/update_signals_route';
+import { createRulesRoute } from './lib/detection_engine/routes/create_rules_route';
+import { createIndexRoute } from './lib/detection_engine/routes/index/create_index_route';
+import { readIndexRoute } from './lib/detection_engine/routes/index/read_index_route';
+import { readRulesRoute } from './lib/detection_engine/routes/read_rules_route';
+import { findRulesRoute } from './lib/detection_engine/routes/find_rules_route';
+import { deleteRulesRoute } from './lib/detection_engine/routes/delete_rules_route';
+import { updateRulesRoute } from './lib/detection_engine/routes/update_rules_route';
 import { ServerFacade } from './types';
+import { deleteIndexRoute } from './lib/detection_engine/routes/index/delete_index_route';
 
 const APP_ID = 'siem';
 
@@ -32,7 +35,8 @@ export const initServerWithKibana = (
   mode: EnvironmentMode
 ) => {
   if (kbnServer.plugins.alerting != null) {
-    const type = signalsAlertType({ logger });
+    const version = kbnServer.config().get<string>('pkg.version');
+    const type = rulesAlertType({ logger, version });
     if (isAlertExecutor(type)) {
       kbnServer.plugins.alerting.setup.registerType(type);
     }
@@ -41,21 +45,20 @@ export const initServerWithKibana = (
 
   const libs = compose(kbnServer, mode);
   initServer(libs);
-  if (
-    kbnServer.config().has('xpack.actions.enabled') &&
-    kbnServer.config().get('xpack.actions.enabled') === true &&
-    kbnServer.config().has('xpack.alerting.enabled') &&
-    kbnServer.config().has('xpack.alerting.enabled') === true
-  ) {
-    logger.info(
-      'Detected feature flags for actions and alerting and enabling signals API endpoints'
-    );
-    createSignalsRoute(kbnServer);
-    readSignalsRoute(kbnServer);
-    updateSignalsRoute(kbnServer);
-    deleteSignalsRoute(kbnServer);
-    findSignalsRoute(kbnServer);
-  }
+
+  // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
+  // All REST rule creation, deletion, updating, etc...
+  createRulesRoute(kbnServer);
+  readRulesRoute(kbnServer);
+  updateRulesRoute(kbnServer);
+  deleteRulesRoute(kbnServer);
+  findRulesRoute(kbnServer);
+
+  // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
+  // All REST index creation, policy management for spaces
+  createIndexRoute(kbnServer);
+  readIndexRoute(kbnServer);
+  deleteIndexRoute(kbnServer);
 
   const xpackMainPlugin = kbnServer.plugins.xpack_main;
   xpackMainPlugin.registerFeature({
