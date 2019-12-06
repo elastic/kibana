@@ -22,8 +22,8 @@ import rison, { RisonObject } from 'rison-node';
 import { stringify as stringifyQueryString } from 'querystring';
 import encodeUriQuery from 'encode-uri-query';
 import { format as formatUrl, parse as parseUrl } from 'url';
-import { hashedItemStore } from '../../../../../plugins/kibana_utils/public';
-import { createStateHash, isStateHash } from './state_hash';
+import { hashedItemStore } from '../../storage/hashed_item_store';
+import { createStateHash, isStateHash } from '../state_hash';
 
 export type IParsedUrlQuery = Record<string, any>;
 
@@ -98,7 +98,7 @@ export function retrieveState(stateHash: string): RisonObject {
   const json = hashedItemStore.getItem(stateHash);
   const throwUnableToRestoreUrlError = () => {
     throw new Error(
-      i18n.translate('common.ui.stateManagement.unableToRestoreUrlErrorMessage', {
+      i18n.translate('kibana_utils.stateManagement.url.unableToRestoreUrlErrorMessage', {
         defaultMessage:
           'Unable to completely restore the URL, be sure to use the share functionality.',
       })
@@ -125,7 +125,7 @@ export function persistState(state: RisonObject): string {
   if (isItemSet) return hash;
   // If we ran out of space trying to persist the state, notify the user.
   const message = i18n.translate(
-    'common.ui.stateManagement.unableToStoreHistoryInSessionErrorMessage',
+    'kibana_utils.stateManagement.url.unableToStoreHistoryInSessionErrorMessage',
     {
       defaultMessage:
         'Kibana is unable to store history items in your session ' +

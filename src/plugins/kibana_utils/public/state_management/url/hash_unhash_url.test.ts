@@ -17,9 +17,8 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { mockStorage } from '../../../../../plugins/kibana_utils/public/storage/hashed_item_store/mock';
-import { HashedItemStore } from '../../../../../plugins/kibana_utils/public';
+import { mockStorage } from '../../storage/hashed_item_store/mock';
+import { HashedItemStore } from '../../storage/hashed_item_store';
 import { hashUrl, unhashUrl } from './hash_unhash_url';
 
 describe('hash unhash url', () => {
