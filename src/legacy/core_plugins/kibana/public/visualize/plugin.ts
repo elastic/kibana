@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  App,
   CoreSetup,
   CoreStart,
   LegacyCoreStart,
@@ -86,8 +85,8 @@ export class VisualizePlugin implements Plugin {
     core: CoreSetup,
     { home, kibana_legacy, __LEGACY: { getAngularDependencies } }: VisualizePluginSetupDependencies
   ) {
-    const app: App = {
-      id: '',
+    kibana_legacy.registerLegacyApp({
+      id: 'visualize',
       title: 'Visualize',
       mount: async ({ core: contextCore }, params) => {
         if (this.startDependencies === null) {
@@ -130,9 +129,7 @@ export class VisualizePlugin implements Plugin {
         const { renderApp } = await import('./application');
         return renderApp(params.element, params.appBasePath, deps);
       },
-    };
-
-    kibana_legacy.registerLegacyApp({ ...app, id: 'visualize' });
+    });
 
     home.featureCatalogue.register({
       id: 'visualize',

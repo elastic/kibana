@@ -54,7 +54,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   };
 }
 
-(async () => {
+(() => {
   const instance = new VisualizePlugin();
   instance.setup(npSetup.core, {
     ...npSetup.plugins,
