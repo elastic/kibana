@@ -33,9 +33,13 @@ export function MachineLearningCustomUrlsProvider({ getService }: FtrProviderCon
       ).to.eql(label);
     },
 
-    async saveCustomUrl() {
+    /**
+     * Submits the custom url form and adds it to the list.
+     * @param formContainerSelector - selector for the element that wraps the custom url creation form.
+     */
+    async saveCustomUrl(formContainerSelector: string) {
       await testSubjects.click('mlJobAddCustomUrl');
-      await testSubjects.missingOrFail('mlJobNewCustomUrlFormModal', { timeout: 10 * 1000 });
+      await testSubjects.missingOrFail(formContainerSelector, { timeout: 10 * 1000 });
     },
   };
 }

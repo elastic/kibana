@@ -407,7 +407,7 @@ export function MachineLearningJobWizardCommonProvider(
       // Fill-in the form
       await customUrls.setCustomUrlLabel(customUrl.label);
       // Save custom URL
-      await customUrls.saveCustomUrl();
+      await customUrls.saveCustomUrl('mlJobNewCustomUrlFormModal');
 
       const expectedIndex = existingCustomUrls.length;
 

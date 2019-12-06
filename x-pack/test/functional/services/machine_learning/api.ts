@@ -253,6 +253,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     },
 
     async createCalendar(calendarId: string, body = { description: '', job_ids: [] }) {
+      log.debug(`Creating calendar with id '${calendarId}'...`);
       await esSupertest
         .put(`/_ml/calendars/${calendarId}`)
         .send(body)
@@ -263,17 +264,6 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           return true;
         } else {
           throw new Error(`expected calendar '${calendarId}' to be created`);
-        }
-      });
-    },
-
-    async deleteCalendar(calendarId: string) {
-      await esSupertest.delete(`/_ml/calendars/${calendarId}`).expect(200);
-      await retry.waitForWithTimeout(`'${calendarId}' to be deleted`, 30 * 1000, async () => {
-        if (await this.getCalendar(calendarId)) {
-          throw new Error(`expected calendar '${calendarId}' to be deleted`);
-        } else {
-          return true;
         }
       });
     },
