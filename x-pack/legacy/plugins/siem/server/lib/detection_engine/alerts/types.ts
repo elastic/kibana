@@ -21,18 +21,15 @@ import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
+export interface IMitreAttack {
+  id: string;
+  name: string;
+  reference: string;
+}
 export interface ThreatParams {
   framework: string;
-  tactic: {
-    id: string;
-    name: string;
-    reference: string;
-  };
-  technique: {
-    id: string;
-    name: string;
-    reference: string;
-  };
+  tactic: IMitreAttack;
+  techniques: IMitreAttack[];
 }
 export interface RuleAlertParams {
   description: string;

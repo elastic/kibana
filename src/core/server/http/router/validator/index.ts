@@ -19,9 +19,10 @@
 
 export {
   RouteValidator,
+  RouteValidatorConfig,
+  RouteValidationSpec,
+  RouteValidateFunction,
   RouteValidateFunctionReturn,
-  RouteValidateSpecs,
-  RouteValidatedType,
-  validate,
+  RouteValidatorOptions,
 } from './validator';
 export { RouteValidationError } from './validator_error';

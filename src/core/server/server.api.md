@@ -101,12 +101,14 @@ import { MTermVectorsParams } from 'elasticsearch';
 import { NodesHotThreadsParams } from 'elasticsearch';
 import { NodesInfoParams } from 'elasticsearch';
 import { NodesStatsParams } from 'elasticsearch';
+import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { PeerCertificate } from 'tls';
 import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
+import { RecursiveReadonly as RecursiveReadonly_2 } from 'kibana/public';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -790,10 +792,10 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     constructor(request: Request, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
     // (undocumented)
     readonly body: Body;
-    // Warning: (ae-forgotten-export) The symbol "RouteValidateSpecs" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
     // 
     // @internal
-    static from<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(req: Request, routeSchemas?: RouteSchemas<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<ReturnType<P["validate"]>, ReturnType<Q["validate"]>, ReturnType<B["validate"]>, any>;
+    static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -1019,6 +1021,9 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 export interface PluginInitializerContext<ConfigSchema = unknown> {
     // (undocumented)
     config: {
+        legacy: {
+            globalConfig$: Observable<SharedGlobalConfig>;
+        };
         create: <T = ConfigSchema>() => Observable<T>;
         createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };
@@ -1126,10 +1131,10 @@ export type ResponseHeaders = {
 };
 
 // @public
-export interface RouteConfig<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs, Method extends RouteMethod> {
+export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
-    validate: RouteSchemas<P, Q, B> | false;
+    validate: (RouteValidatorConfig<P, Q, B> & RouteValidatorOptions) | false;
 }
 
 // @public
@@ -1153,20 +1158,11 @@ export type RouteContentType = 'application/json' | 'application/*+json' | 'appl
 // @public
 export type RouteMethod = 'get' | 'post' | 'put' | 'delete' | 'patch' | 'options';
 
-// Warning: (ae-forgotten-export) The symbol "RouteValidatedType" needs to be exported by the entry point index.d.ts
-// 
 // @public
-export type RouteRegistrar<Method extends RouteMethod> = <P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<RouteValidatedType<P>, RouteValidatedType<Q>, RouteValidatedType<B>, Method>) => void;
+export type RouteRegistrar<Method extends RouteMethod> = <P, Q, B>(route: RouteConfig<P, Q, B, Method>, handler: RequestHandler<P, Q, B, Method>) => void;
 
 // @public
-export interface RouteSchemas<P extends RouteValidateSpecs, Q extends RouteValidateSpecs, B extends RouteValidateSpecs> {
-    // (undocumented)
-    body?: B;
-    // (undocumented)
-    params?: P;
-    // (undocumented)
-    query?: Q;
-}
+export type RouteValidateFunction<T> = (data: any) => RouteValidateFunctionReturn<T>;
 
 // @public
 export type RouteValidateFunctionReturn<T> = {
@@ -1183,11 +1179,23 @@ export class RouteValidationError extends SchemaTypeError {
 }
 
 // @public
-export class RouteValidator<T> {
-    constructor(validationRule: (data: any) => RouteValidateFunctionReturn<T>);
-    // (undocumented)
-    validate(data: any, namespace?: string): T;
-    }
+export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidateFunction<T>;
+
+// @public
+export interface RouteValidatorConfig<P, Q, B> {
+    body?: RouteValidationSpec<B>;
+    params?: RouteValidationSpec<P>;
+    query?: RouteValidationSpec<Q>;
+}
+
+// @public
+export interface RouteValidatorOptions {
+    unsafe?: {
+        params?: boolean;
+        query?: boolean;
+        body?: boolean;
+    };
+}
 
 // @public (undocumented)
 export interface SavedObject<T extends SavedObjectAttributes = any> {
@@ -1784,5 +1792,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:228:15 - (ae-forgotten-export) The symbol "SharedGlobalConfig" needs to be exported by the entry point index.d.ts
 
 ```

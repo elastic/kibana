@@ -4,26 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import { RequestHandler } from 'kibana/server';
 import { UMServerLibs } from '../lib/lib';
-import { UMRestApiRouteCreator, UMServerRoute } from './types';
+import { UMRestApiRouteCreator, UMRouteDefinition } from './types';
 
 export const createRouteWithAuth = (
   libs: UMServerLibs,
   routeCreator: UMRestApiRouteCreator
-): UMServerRoute => {
+): UMRouteDefinition => {
   const restRoute = routeCreator(libs);
-  const { handler, method, path, options } = restRoute;
-  const authHandler = async (request: any, h: any) => {
-    if (libs.auth.requestIsValid(request)) {
-      return await handler(request, h);
+  const { handler, method, path, options, ...rest } = restRoute;
+  const authHandler: RequestHandler = async (context, request, response) => {
+    if (libs.license(context.licensing.license)) {
+      return await handler(context, request, response);
     }
-    return Boom.badRequest();
+    return response.badRequest();
   };
   return {
     method,
     path,
     options,
     handler: authHandler,
+    ...rest,
   };
 };

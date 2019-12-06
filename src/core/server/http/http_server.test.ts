@@ -30,7 +30,6 @@ import { HttpConfig } from './http_config';
 import {
   Router,
   RouteValidationError,
-  RouteValidator,
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandler,
@@ -303,13 +302,13 @@ test('valid body with validate function', async () => {
     {
       path: '/',
       validate: {
-        body: new RouteValidator(({ bar, baz } = {}) => {
+        body: ({ bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return { value: { bar, baz } };
           } else {
             return { error: new RouteValidationError('Wrong payload', ['body']) };
           }
-        }),
+        },
       },
     },
     (context, req, res) => {
@@ -355,13 +354,13 @@ test('not inline handler - KibanaRequest', async () => {
     {
       path: '/',
       validate: {
-        body: new RouteValidator(({ bar, baz } = {}) => {
+        body: ({ bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return { value: { bar, baz } };
           } else {
             return { error: new RouteValidationError('Wrong payload', ['body']) };
           }
-        }),
+        },
       },
     },
     handler
@@ -404,13 +403,13 @@ test('not inline handler - RequestHandler', async () => {
     {
       path: '/',
       validate: {
-        body: new RouteValidator(({ bar, baz } = {}) => {
+        body: ({ bar, baz } = {}) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return { value: { bar, baz } };
           } else {
             return { error: new RouteValidationError('Wrong payload', ['body']) };
           }
-        }),
+        },
       },
     },
     handler

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RouteValidateSpecs } from './validator';
+import { RouteValidatorConfig, RouteValidatorOptions } from './validator';
 
 /**
  * The set of common HTTP methods supported by Kibana routing.
@@ -123,12 +123,7 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
  * Route specific configuration.
  * @public
  */
-export interface RouteConfig<
-  P extends RouteValidateSpecs,
-  Q extends RouteValidateSpecs,
-  B extends RouteValidateSpecs,
-  Method extends RouteMethod
-> {
+export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * The endpoint _within_ the router path to register the route.
    *
@@ -200,25 +195,10 @@ export interface RouteConfig<
    * });
    * ```
    */
-  validate: RouteSchemas<P, Q, B> | false;
+  validate: (RouteValidatorConfig<P, Q, B> & RouteValidatorOptions) | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.
    */
   options?: RouteConfigOptions<Method>;
-}
-
-/**
- * RouteSchemas contains the schemas for validating the different parts of a
- * request.
- * @public
- */
-export interface RouteSchemas<
-  P extends RouteValidateSpecs,
-  Q extends RouteValidateSpecs,
-  B extends RouteValidateSpecs
-> {
-  params?: P;
-  query?: Q;
-  body?: B;
 }

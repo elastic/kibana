@@ -30,6 +30,7 @@ import {
   RouteMethod,
   KibanaResponseFactory,
 } from './router';
+import { RouteValidator } from './router/validator';
 
 interface RequestFixtureOptions {
   headers?: Record<string, string>;
@@ -72,12 +73,12 @@ function createKibanaRequestMock({
         req: { socket },
       },
     }),
-    {
+    new RouteValidator({
       params: schema.object({}, { allowUnknowns: true }),
       body: schema.object({}, { allowUnknowns: true }),
       query: schema.object({}, { allowUnknowns: true }),
-    }
-  ) as KibanaRequest<Readonly<{}>, Readonly<{}>, Readonly<{}>>;
+    })
+  );
 }
 
 type DeepPartial<T> = T extends any[]
