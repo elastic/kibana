@@ -72,14 +72,11 @@ export function initRoutes(server, taskTestingEvents) {
       },
     },
     async handler(request) {
+      const { task: { id } } = request.payload;
       try {
-        const { task } = request.payload;
-
-        const taskResult = await (taskManager.runNow(task.id));
-
-        return taskResult;
+        return await (taskManager.runNow(id));
       } catch (err) {
-        return err;
+        return { id, error: `${err}` };
       }
     },
   });

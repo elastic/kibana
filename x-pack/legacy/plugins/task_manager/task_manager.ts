@@ -10,7 +10,7 @@ import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { Result, either, mapErr } from './lib/result_type';
+import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
 
 import { Logger } from './types';
 import {
@@ -32,6 +32,7 @@ import {
   TaskInstanceWithId,
   TaskInstance,
   TaskLifecycle,
+  TaskLifecycleResult,
   TaskStatus,
 } from './task';
 import { createTaskPoller } from './task_poller';
@@ -58,7 +59,6 @@ export interface TaskManagerOpts {
 
 interface RunNowResult {
   id: string;
-  error?: string;
 }
 
 type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim;
@@ -268,51 +268,56 @@ export class TaskManager {
   /**
    * Run  task.
    *
-   * @param task - The task being scheduled.
+   * @param taskId - The task being scheduled.
    * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async runNow(task: string): Promise<RunNowResult> {
+  public async runNow(taskId: string): Promise<RunNowResult> {
     await this.waitUntilStarted();
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       const subscription = this.events$
-        .pipe(filter(({ id }: TaskLifecycleEvent) => id === task))
+        // listen for all events related to the current task
+        .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
         .subscribe((taskEvent: TaskLifecycleEvent) => {
-          const { id, event } = taskEvent;
           either(
+            taskEvent.event,
             (taskInstance: ConcreteTaskInstance) => {
+              // resolve if the task has run sucessfully
               if (isTaskRunEvent(taskEvent)) {
                 subscription.unsubscribe();
-                resolve({ id });
+                resolve({ id: taskInstance.id });
               }
             },
             async (error: Error) => {
+              // reject if any error event takes place for the requested task
               subscription.unsubscribe();
-
-              try {
-                if (isTaskClaimEvent(taskEvent)) {
-                  const taskLifecycleStatus = await this.store.getLifecycle(id);
-                  if (taskLifecycleStatus === TaskLifecycle.NotFound) {
-                    resolve({
-                      id,
-                      error: `Error: failed to run task "${id}" as it does not exist`,
-                    });
-                  } else if (taskLifecycleStatus !== TaskStatus.Idle) {
-                    resolve({
-                      id,
-                      error: `Error: failed to run task "${id}" as it is currently running`,
-                    });
+              reject(
+                map(
+                  // if the error happened in the Claim phase - we try to provide better insight
+                  // into why we failed to claim by getting the task's current lifecycle status
+                  isTaskClaimEvent(taskEvent)
+                    ? await promiseResult<TaskLifecycle, Error>(this.store.getLifecycle(taskId))
+                    : asErr(error),
+                  (taskLifecycleStatus: TaskLifecycle) => {
+                    if (taskLifecycleStatus === TaskLifecycleResult.NotFound) {
+                      return new Error(`Failed to run task "${taskId}" as it does not exist`);
+                    } else if (
+                      taskLifecycleStatus === TaskStatus.Running ||
+                      taskLifecycleStatus === TaskStatus.Claiming
+                    ) {
+                      return new Error(`Failed to run task "${taskId}" as it is currently running`);
+                    }
+                  },
+                  (err: Error) => {
+                    this.logger.error(`Failed to get Task "${taskId}" as part of runNow: ${err}`);
+                    return err;
                   }
-                }
-              } catch (err) {
-                this.logger.error(`Failed to get Task "${id}" as part of runNow: ${err}`);
-              }
-              resolve({ id, error: `${error}` });
-            },
-            event
+                )
+              );
+            }
           );
         });
 
-      this.attemptToRun(some(task));
+      this.attemptToRun(some(taskId));
     });
   }
 

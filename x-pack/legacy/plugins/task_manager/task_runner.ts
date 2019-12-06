@@ -357,6 +357,7 @@ export class TaskManagerRunner implements TaskRunner {
     result: Result<SuccessfulRunResult, FailedRunResult>
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     await eitherAsync(
+      result,
       async ({ runAt }: SuccessfulRunResult) => {
         if (runAt || this.instance.interval) {
           await this.processResultForRecurringTask(result);
@@ -368,8 +369,7 @@ export class TaskManagerRunner implements TaskRunner {
       async ({ error }: FailedRunResult) => {
         await this.processResultForRecurringTask(result);
         this.onTaskEvent(asTaskRunEvent(this.id, asErr(error)));
-      },
-      result
+      }
     );
     return result;
   }

@@ -169,9 +169,12 @@ export enum TaskStatus {
   Running = 'running',
   Failed = 'failed',
 }
-export enum TaskLifecycle {
+
+export enum TaskLifecycleResult {
   NotFound = 'notFound',
 }
+
+export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
 
 /*
  * A task instance represents all of the data required to store, fetch,

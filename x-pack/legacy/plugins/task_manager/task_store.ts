@@ -27,7 +27,7 @@ import {
   TaskDictionary,
   TaskInstance,
   TaskLifecycle,
-  TaskStatus,
+  TaskLifecycleResult,
 } from './task';
 
 import { TaskClaim, asTaskClaimEvent } from './task_events';
@@ -366,13 +366,13 @@ export class TaskStore {
    * @param {string} id
    * @returns {Promise<void>}
    */
-  public async getLifecycle(id: string): Promise<TaskLifecycle | TaskStatus> {
+  public async getLifecycle(id: string): Promise<TaskLifecycle> {
     try {
       const task = await this.get(id);
       return task.status;
     } catch (err) {
       if (err.output && err.output.statusCode === 404) {
-        return TaskLifecycle.NotFound;
+        return TaskLifecycleResult.NotFound;
       }
       throw err;
     }

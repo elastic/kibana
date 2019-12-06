@@ -51,31 +51,38 @@ export function unwrap<T, E>(result: Result<T, E>): T | E {
   return isOk(result) ? result.value : result.error;
 }
 
-export const either = curry(function<T, E>(
+export function either<T, E>(
+  result: Result<T, E>,
   onOk: (value: T) => void,
-  onErr: (error: E) => void,
-  result: Result<T, E>
+  onErr: (error: E) => void
 ): Result<T, E> {
-  resolve<T, E, void>(onOk, onErr, result);
-  return result;
-});
-
-export async function eitherAsync<T, E>(
-  onOk: (value: T) => Promise<void>,
-  onErr: (error: E) => Promise<void>,
-  result: Result<T, E>
-): Promise<Result<T, E> | void> {
-  await resolve<T, E, Promise<void>>(onOk, onErr, result);
+  map<T, E, void>(result, onOk, onErr);
   return result;
 }
 
-export function resolve<T, E, Resolution>(
+export async function eitherAsync<T, E>(
+  result: Result<T, E>,
+  onOk: (value: T) => Promise<void>,
+  onErr: (error: E) => Promise<void>
+): Promise<Result<T, E> | void> {
+  return await map<T, E, Promise<void>>(result, onOk, onErr);
+}
+
+export function map<T, E, Resolution>(
+  result: Result<T, E>,
+  onOk: (value: T) => Resolution,
+  onErr: (error: E) => Resolution
+): Resolution {
+  return isOk(result) ? onOk(result.value) : onErr(result.error);
+}
+
+export const mapR = curry(function<T, E, Resolution>(
   onOk: (value: T) => Resolution,
   onErr: (error: E) => Resolution,
   result: Result<T, E>
 ): Resolution {
-  return isOk(result) ? onOk(result.value) : onErr(result.error);
-}
+  return map(result, onOk, onErr);
+});
 
 export const mapOk = curry(function<T, T2, E>(
   onOk: (value: T) => Result<T2, E>,

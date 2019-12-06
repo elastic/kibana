@@ -322,7 +322,7 @@ export default function ({ getService }) {
       const failedRunNowResult  = await runTaskNow({
         id: 'i-dont-exist'
       });
-      expect(failedRunNowResult).to.eql({ error: `Error: failed to run task "i-dont-exist" as it does not exist`, id: 'i-dont-exist' });
+      expect(failedRunNowResult).to.eql({ error: `Error: Failed to run task "i-dont-exist" as it does not exist`, id: 'i-dont-exist' });
     });
 
     it('should return a task run error result when trying to run a task now which is already running', async () => {
@@ -352,7 +352,7 @@ export default function ({ getService }) {
       expect(
         failedRunNowResult
       ).to.eql(
-        { error: `Error: failed to run task "${longRunningTask.id}" as it is currently running`, id: longRunningTask.id }
+        { error: `Error: Failed to run task "${longRunningTask.id}" as it is currently running`, id: longRunningTask.id }
       );
 
       // finish first run by emitting 'runNowHasBeenAttempted' event
