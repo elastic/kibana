@@ -42,3 +42,8 @@ export type UnwrapObservable<T extends ObservableLike<any>> = T extends Observab
  * Converts a type to a `Promise`, unless it is already a `Promise`. Useful when proxying the return value of a possibly async function.
  */
 export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
+
+/**
+ * Ensures T is of type X.
+ */
+export type Ensure<T, X> = T extends X ? T : never;
