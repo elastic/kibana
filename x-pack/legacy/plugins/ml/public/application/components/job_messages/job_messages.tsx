@@ -31,7 +31,7 @@ export const JobMessages: FC<JobMessagesProps> = ({ messages, loading, error }) 
   const columns = [
     {
       name: '',
-      render: (msg: JobMessage) => <JobIcon message={msg} />,
+      render: (message: JobMessage) => <JobIcon message={message} />,
       width: `${theme.euiSizeL}`,
     },
     {
