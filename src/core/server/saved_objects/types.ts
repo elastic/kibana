@@ -117,7 +117,7 @@ export type SavedObjectsTypesPredicate = Map<string, SavedObjectsPredicate>;
  */
 export interface SavedObjectsFindOptions extends SavedObjectsBaseOptions {
   type: string | string[];
-  typesPredicate: SavedObjectsTypesPredicate;
+  typesPredicate?: SavedObjectsTypesPredicate;
   page?: number;
   perPage?: number;
   sortField?: string;

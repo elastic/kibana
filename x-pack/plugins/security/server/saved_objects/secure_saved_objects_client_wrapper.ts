@@ -20,6 +20,7 @@ import {
 } from '../../../../../src/core/server';
 import { SecurityAuditLogger } from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
+import { SavedObjectsPrivileges } from './saved_objects_privileges';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -35,7 +36,7 @@ interface EnsureAuthorizedForTypeResult {
 }
 
 interface EnsureAuthorizedForTypesResult {
-  type: string[];
+  types: string[];
   typesPredicate?: SavedObjectsTypesPredicate;
 }
 
@@ -67,13 +68,15 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     attributes: T = {} as T,
     options: SavedObjectsCreateOptions = {}
   ) {
-    const { predicate } = await this.ensureAuthorizedForType(type, 'create', options.namespace, {
+    const authorizedResult = await this.ensureAuthorizedForType(type, 'create', options.namespace, {
       type,
       attributes,
       options,
     });
-    options.predicate = this.andPredicates(options.predicate, predicate);
-    return await this.baseClient.create(type, attributes, options);
+    return await this.baseClient.create(type, attributes, {
+      ...options,
+      predicate: this.andPredicates(options.predicate, authorizedResult.predicate),
+    });
   }
 
   public async bulkCreate(
@@ -104,12 +107,14 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       { options }
     );
 
-    options.type = authorizedResult.type;
-    if (authorizedResult.typesPredicate != null) {
-      options.typesPredicate = authorizedResult.typesPredicate;
-    }
-
-    return this.baseClient.find(options);
+    return this.baseClient.find({
+      ...options,
+      type: authorizedResult.types,
+      typesPredicate: this.andTypesPredicate(
+        authorizedResult.typesPredicate,
+        options.typesPredicate
+      ),
+    });
   }
 
   public async bulkGet(
@@ -209,61 +214,10 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     namespace?: string,
     args?: Record<string, unknown>
   ): Promise<EnsureAuthorizedForTypeResult> {
-    const actions: string[] = [];
-    actions.push(this.actions.savedObject.get(type, action));
-    if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
-      const conditions = this.savedObjectsPrivileges.getConditions(type);
-      for (const condition of conditions) {
-        actions.push(this.actions.savedObject.get({ type, when: condition }, action));
-      }
-    }
-
-    const { username, privileges } = await this.checkPrivileges(actions, namespace);
-
-    if (privileges[this.actions.savedObject.get(type, action)] === true) {
-      this.auditLogger.savedObjectsAuthorizationSuccess(username, action, [type], args);
-      return {};
-    }
-
-    if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
-      const predicates: SavedObjectsPredicate[] = [];
-      const conditions = this.savedObjectsPrivileges.getConditions(type);
-      for (const condition of conditions) {
-        if (privileges[this.actions.savedObject.get({ type, when: condition }, action)] === true) {
-          if (!Array.isArray(condition)) {
-            predicates.push(
-              new PropertyEqualsSavedObjectsPredicate(condition.key, condition.value)
-            );
-          } else {
-            predicates.push(
-              new SavedObjectsPredicates(
-                'AND',
-                condition.map(
-                  ({ key, value }) => new PropertyEqualsSavedObjectsPredicate(key, value)
-                )
-              )
-            );
-          }
-        }
-      }
-      if (predicates.length > 0) {
-        this.auditLogger.savedObjectsAuthorizationSuccess(username, action, [type], args);
-        return {
-          predicate: new SavedObjectsPredicates('OR', predicates),
-        };
-      }
-    }
-
-    const missingPrivileges = Object.keys(privileges);
-    this.auditLogger.savedObjectsAuthorizationFailure(
-      username,
-      action,
-      [type],
-      missingPrivileges,
-      args
-    );
-    const msg = `Unable to ${action} ${missingPrivileges.join(',')}`;
-    throw this.errors.decorateForbiddenError(new Error(msg));
+    const { typesPredicate } = await this.ensureAuthorizedForTypes([type], action, namespace, args);
+    return {
+      predicate: typesPredicate && typesPredicate.get(type),
+    };
   }
 
   private async ensureAuthorizedForTypes(
@@ -322,7 +276,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     if (authorizedTypes.length > 0) {
       this.auditLogger.savedObjectsAuthorizationSuccess(username, action, authorizedTypes, args);
       return {
-        type: authorizedTypes,
+        types: authorizedTypes,
         typesPredicate,
       };
     }
@@ -364,5 +318,32 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
 
     return new SavedObjectsPredicates('AND', [predicate1, predicate2]);
+  }
+
+  private andTypesPredicate(
+    typesPredicate1: SavedObjectsTypesPredicate | undefined,
+    typesPredicate2: SavedObjectsTypesPredicate | undefined
+  ): SavedObjectsTypesPredicate | undefined {
+    if (typesPredicate1 == null && typesPredicate2 == null) {
+      return undefined;
+    }
+
+    if (typesPredicate2 == null) {
+      return typesPredicate1;
+    }
+
+    if (typesPredicate1 == null) {
+      return typesPredicate2;
+    }
+
+    const allTypes = new Set([...typesPredicate1.keys(), ...typesPredicate2.keys()]);
+    const typesPredicate = new Map<string, SavedObjectsPredicate>();
+    for (const type of allTypes) {
+      const predicate = this.andPredicates(typesPredicate1.get(type), typesPredicate2.get(type));
+      if (predicate != null) {
+        typesPredicate.set(type, predicate);
+      }
+    }
+    return typesPredicate;
   }
 }
