@@ -73,7 +73,7 @@ it('rewrites ftr reports with minimal changes', async () => {
     ===================================================================
     --- ftr.xml	[object Object]
     +++ ftr.xml
-    @@ -2,52 +2,56 @@
+    @@ -2,44 +2,48 @@
      ‹testsuites›
        ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71"›
          ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378"›
@@ -130,17 +130,6 @@ it('rewrites ftr reports with minimal changes', async () => {
     +
            ‹/system-out›
            ‹skipped/›
-         ‹/testcase›
-         ‹testcase name="machine learning anomaly detection saved search  with lucene query job creation opens the advanced section" classname="Firefox XPack UI Functional Tests.x-pack/test/functional/apps/machine_learning/anomaly_detection/saved_search_job·ts" time="6.040"›
-    -      ‹system-out›‹![CDATA[[00:21:57]         └-: machine learning...]]›‹/system-out›
-    -      ‹failure›‹![CDATA[{ NoSuchSessionError: Tried to run command without establishing a connection
-    +      ‹system-out›[00:21:57]         └-: machine learning...‹/system-out›
-    +      ‹failure›{ NoSuchSessionError: Tried to run command without establishing a connection
-         at Object.throwDecodedError (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/error.js:550:15)
-         at parseHttpResponse (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:563:13)
-         at Executor.execute (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:489:26)
-    -    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }]]›‹/failure›
-    +    at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }‹/failure›
          ‹/testcase›
        ‹/testsuite›
     -‹/testsuites›
