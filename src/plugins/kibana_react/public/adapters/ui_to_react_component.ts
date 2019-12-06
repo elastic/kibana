@@ -17,15 +17,27 @@
  * under the License.
  */
 
-export * from './adapters';
-export * from './code_editor';
-export * from './saved_objects';
-export * from './exit_full_screen_button';
-export * from './context';
-export * from './overlays';
-export * from './ui_settings';
-export * from './field_icon';
-export * from './table_list_view';
-export * from './split_panel';
-export { useUrlTracker } from './use_url_tracker';
-export { toMountPoint } from './util';
+import * as React from 'react';
+import { UiComponent } from '../../../kibana_utils/public';
+
+const { createElement: h, useRef, useEffect } = React;
+
+export const uiToReactComponent = <Props extends object>(
+  uiComp: UiComponent<Props>
+): React.ComponentType<Props> => {
+  const reactComp: React.FC<Props> = props => {
+    const ref = useRef<HTMLDivElement>();
+    useEffect(() => {
+      if (ref.current) {
+        uiComp.render(ref.current, props);
+      }
+      return () => {
+        uiComp.unmount();
+      };
+    });
+
+    return h('div', { ref });
+  };
+
+  return reactComp;
+};

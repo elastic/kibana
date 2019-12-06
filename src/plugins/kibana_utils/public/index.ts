@@ -18,6 +18,7 @@
  */
 
 export { defer, Defer, of, createGetterSetter, Get, Set } from '../common';
+export * from './types';
 export * from './core';
 export * from './errors';
 export * from './field_mapping';

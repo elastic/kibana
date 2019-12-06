@@ -27,13 +27,13 @@
  * Although Kibana wants to be library agnostic, Kibana itself is written in React
  * and this interface maps easily to a React component.
  */
-export interface UiComponent {
+export interface UiComponent<Props extends object> {
   /**
    * Call this method on initial render and on all subsequent updates.
    * @param el DOM element.
    * @param props Component props, same as props in React.
    */
-  render(el: HTMLElement, props: object): void;
+  render(el: HTMLElement, props: Props): void;
 
   /**
    * Un-mount UI component. Call it to remove view from DOM. Implementers of this
