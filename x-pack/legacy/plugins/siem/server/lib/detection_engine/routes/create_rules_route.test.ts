@@ -9,7 +9,6 @@ import {
   createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
-  getBoundRoute,
 } from './__mocks__/_mock_server';
 import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
@@ -23,12 +22,16 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('create_rules', () => {
-  let { server, alertsClient, actionsClient } = createMockServer();
+  let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient } = createMockServer());
-    createRulesRoute(getBoundRoute(server));
+    ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
+    elasticsearch.getCluster = jest.fn().mockImplementation(() => ({
+      callWithRequest: jest.fn().mockImplementation(() => true),
+    }));
+
+    createRulesRoute(server);
   });
 
   describe('status codes with actionClient and alertClient', () => {
@@ -43,14 +46,14 @@ describe('create_rules', () => {
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      createRulesRoute(getBoundRoute(serverWithoutActionClient));
+      createRulesRoute(serverWithoutActionClient);
       const { statusCode } = await serverWithoutActionClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      createRulesRoute(getBoundRoute(serverWithoutAlertClient));
+      createRulesRoute(serverWithoutAlertClient);
       const { statusCode } = await serverWithoutAlertClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });
@@ -59,7 +62,7 @@ describe('create_rules', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      createRulesRoute(getBoundRoute(serverWithoutActionOrAlertClient));
+      createRulesRoute(serverWithoutActionOrAlertClient);
       const { statusCode } = await serverWithoutActionOrAlertClient.inject(getCreateRequest());
       expect(statusCode).toBe(404);
     });

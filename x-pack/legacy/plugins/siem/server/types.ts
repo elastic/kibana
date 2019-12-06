@@ -9,6 +9,7 @@ import { Legacy } from 'kibana';
 export interface ServerFacade {
   plugins: {
     alerting?: Legacy.Server['plugins']['alerting'];
+    spaces: Legacy.Server['plugins']['spaces'];
   };
   route: Legacy.Server['route'];
 }

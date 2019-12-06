@@ -9,34 +9,39 @@ import { PluginInitializerContext } from 'src/core/server';
 import { rulesAlertType } from './lib/detection_engine/alerts/rules_alert_type';
 import { isAlertExecutor } from './lib/detection_engine/alerts/types';
 import { createRulesRoute } from './lib/detection_engine/routes/create_rules_route';
+import { createIndexRoute } from './lib/detection_engine/routes/index/create_index_route';
+import { readIndexRoute } from './lib/detection_engine/routes/index/read_index_route';
 import { readRulesRoute } from './lib/detection_engine/routes/read_rules_route';
 import { findRulesRoute } from './lib/detection_engine/routes/find_rules_route';
 import { deleteRulesRoute } from './lib/detection_engine/routes/delete_rules_route';
 import { updateRulesRoute } from './lib/detection_engine/routes/update_rules_route';
 import { ServerFacade } from './types';
+import { deleteIndexRoute } from './lib/detection_engine/routes/index/delete_index_route';
 
 const APP_ID = 'siem';
 
-export const initServerWithKibana = (
-  context: PluginInitializerContext,
-  { plugins: { alerting }, route }: ServerFacade
-) => {
+export const initServerWithKibana = (context: PluginInitializerContext, __legacy: ServerFacade) => {
   const logger = context.logger.get('plugins', APP_ID);
   const version = context.env.packageInfo.version;
 
-  if (alerting != null) {
+  if (__legacy.plugins.alerting != null) {
     const type = rulesAlertType({ logger, version });
     if (isAlertExecutor(type)) {
-      alerting.setup.registerType(type);
+      __legacy.plugins.alerting.setup.registerType(type);
     }
   }
 
-  // Signals/Alerting Rules routes for
-  // routes such as ${DETECTION_ENGINE_RULES_URL}
-  // that have the REST endpoints of /api/detection_engine/rules
-  createRulesRoute(route);
-  readRulesRoute(route);
-  updateRulesRoute(route);
-  deleteRulesRoute(route);
-  findRulesRoute(route);
+  // Detection Engine Rule routes that have the REST endpoints of /api/detection_engine/rules
+  // All REST rule creation, deletion, updating, etc...
+  createRulesRoute(__legacy);
+  readRulesRoute(__legacy);
+  updateRulesRoute(__legacy);
+  deleteRulesRoute(__legacy);
+  findRulesRoute(__legacy);
+
+  // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
+  // All REST index creation, policy management for spaces
+  createIndexRoute(__legacy);
+  readIndexRoute(__legacy);
+  deleteIndexRoute(__legacy);
 };
