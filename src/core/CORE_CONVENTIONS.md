@@ -1,3 +1,8 @@
+- [Core Conventions](#core-conventions)
+  - [1. Exposing API Types](#1-exposing-api-types)
+  - [2. API Structure and nesting](#2-api-structure-and-nesting)
+  - [3. Tests and mocks](#3-tests-and-mocks)
+
 # Core Conventions
 
 This document contains conventions for development inside `src/core`. Although
@@ -85,3 +90,26 @@ area of Core API's and does not apply to internal types.
    > hides the method under an additional layer without improving the
    > organization. However, introducing namespaces early on can avoid API
    > churn when we know related API methods will be introduced.
+
+## 3. Tests and mocks
+ - 3.1 Declary Jest mocks with a temporary variable to ensure types are
+   correctly inferred
+
+   ```ts
+   // -- good --
+   const createMock => {
+     const mocked: jest.Mocked<IContextService> = {
+       start: jest.fn(),
+     };
+     mocked.start.mockReturnValue(createStartContractMock());
+     return mocked;
+   };
+   // -- bad --
+   const createMock = (): jest.Mocked<ContextServiceContract> => ({
+     start: jest.fn().mockReturnValue(createSetupContractMock()),
+   });
+   ```
+
+   > Why? Without the temporary variable, Jest types the `start` function as
+   > `jest<any, any>` and, as a result, doesn't typecheck the mock return
+   > value.
