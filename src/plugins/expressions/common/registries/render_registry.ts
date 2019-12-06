@@ -30,7 +30,7 @@ export interface ExpressionRenderDefinition<Config = any> {
   render: (domNode: HTMLElement, config: Config, handlers: any) => Promise<void>;
 }
 
-class ExpressionRenderFunction {
+export class ExpressionRenderFunction {
   /**
    * This must match the name of the function that is used to create the `type: render` object.
    */

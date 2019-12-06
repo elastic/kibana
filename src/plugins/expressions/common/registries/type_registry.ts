@@ -18,7 +18,7 @@
  */
 
 import { Registry } from './registry';
-import { Type } from '../../common/type';
+import { Type } from '../type';
 import { AnyExpressionType } from '../../common/types';
 
 export class TypesRegistry extends Registry<Type> {
