@@ -17,13 +17,9 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
   return new kibana.Plugin({
-    uiExports: {
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
+    uiExports: {},
   });
 }
