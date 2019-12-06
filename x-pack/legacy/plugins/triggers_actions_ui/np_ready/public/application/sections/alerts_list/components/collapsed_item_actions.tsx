@@ -65,6 +65,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      ownFocus
       data-test-subj="collapsedItemActions"
     >
       <EuiFormRow>
