@@ -19,7 +19,9 @@
 
 import { RequestHandlerContext } from 'src/core/server';
 import _ from 'lodash';
+import { first, map } from 'rxjs/operators';
 import { getPanelData } from './vis_data/get_panel_data';
+import { Framework } from '../../../../../plugins/vis_type_timeseries/server';
 
 interface GetVisDataResponse {
   [key: string]: GetVisDataPanel;
@@ -48,12 +50,14 @@ export interface GetVisDataOptions {
 
 export type GetVisData = (
   requestContext: RequestHandlerContext,
-  options: GetVisDataOptions
+  options: GetVisDataOptions,
+  framework: Framework
 ) => Promise<GetVisDataResponse>;
 
 export function getVisData(
   requestContext: RequestHandlerContext,
-  options: GetVisDataOptions
+  options: GetVisDataOptions,
+  framework: Framework
 ): Promise<GetVisDataResponse> {
   // NOTE / TODO: This facade has been put in place to make migrating to the New Platform easier. It
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
@@ -78,6 +82,14 @@ export function getVisData(
           },
         },
       },
+    },
+    getEsShardTimeout: async () => {
+      return await framework.globalConfig$
+        .pipe(
+          first(),
+          map(config => config.elasticsearch.shardTimeout.asMilliseconds())
+        )
+        .toPromise();
     },
   };
   const promises = reqFacade.payload.panels.map(getPanelData(reqFacade));

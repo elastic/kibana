@@ -22,7 +22,7 @@ import { getVisData } from '../lib/get_vis_data';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 
-export const visDataRoutes = router => {
+export const visDataRoutes = (router, framework) => {
   router.post(
     {
       path: '/api/metrics/vis/data',
@@ -32,7 +32,7 @@ export const visDataRoutes = router => {
     },
     async (requestContext, request, response) => {
       try {
-        const results = await getVisData(requestContext, request);
+        const results = await getVisData(requestContext, request, framework);
         return response.ok({ body: results });
       } catch (error) {
         return response.internalError({

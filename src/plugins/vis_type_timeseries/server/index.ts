@@ -20,8 +20,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext } from 'src/core/server';
 import { VisTypeTimeseriesPlugin } from './plugin';
-
-export { VisTypeTimeseriesSetup } from './plugin';
+export { VisTypeTimeseriesSetup, Framework } from './plugin';
 
 export const config = {
   schema: schema.object({

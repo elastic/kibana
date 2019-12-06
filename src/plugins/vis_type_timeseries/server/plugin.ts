@@ -23,6 +23,7 @@ import {
   CoreStart,
   Plugin,
   RequestHandlerContext,
+  Logger,
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from 'hapi';
@@ -45,7 +46,18 @@ export interface VisTypeTimeseriesSetup {
     config$: Observable<VisTypeTimeseriesConfig>;
     registerLegacyAPI: (__LEGACY: LegacySetup) => void;
   };
-  getVisData: GetVisData;
+  getVisData: (
+    requestContext: RequestHandlerContext,
+    options: GetVisDataOptions
+  ) => ReturnType<GetVisData>;
+}
+
+export interface Framework {
+  core: CoreSetup;
+  plugins: any;
+  config$: Observable<VisTypeTimeseriesConfig>;
+  globalConfig$: PluginInitializerContext['config']['legacy']['globalConfig$'];
+  logger: Logger;
 }
 
 export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
@@ -56,16 +68,26 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
   public setup(core: CoreSetup, plugins: any) {
     const logger = this.initializerContext.logger.get('visTypeTimeseries');
     const config$ = this.initializerContext.config.create<VisTypeTimeseriesConfig>();
+    // Global config contains things like the ES shard timeout
+    const globalConfig$ = this.initializerContext.config.legacy.globalConfig$;
+
+    const framework: Framework = {
+      core,
+      plugins,
+      config$,
+      globalConfig$,
+      logger,
+    };
 
     return {
       __legacy: {
         config$,
         registerLegacyAPI: once((__LEGACY: LegacySetup) => {
-          init(core, plugins, config$, logger, __LEGACY);
+          init(framework, __LEGACY);
         }),
       },
       getVisData: async (requestContext: RequestHandlerContext, options: GetVisDataOptions) => {
-        return await getVisData(requestContext, options);
+        return await getVisData(requestContext, options, framework);
       },
     };
   }

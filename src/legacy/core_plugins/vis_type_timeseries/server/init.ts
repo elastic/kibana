@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { CoreSetup } from 'src/core/server';
-
 // @ts-ignore
 import { fieldsRoutes } from './routes/fields';
 // @ts-ignore
@@ -27,16 +25,13 @@ import { visDataRoutes } from './routes/vis';
 import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
 // @ts-ignore
 import { getVisData } from './lib/get_vis_data';
+import { Framework } from '../../../../plugins/vis_type_timeseries/server';
 
-export const init = async (
-  core: CoreSetup,
-  plugins: any,
-  config$: any,
-  logger: any,
-  __LEGACY: any
-) => {
+export const init = async (framework: Framework, __LEGACY: any) => {
+  const { core } = framework;
   const router = core.http.createRouter();
-  visDataRoutes(router);
+
+  visDataRoutes(router, framework);
 
   // [LEGACY_TODO]
   fieldsRoutes(__LEGACY.server);
