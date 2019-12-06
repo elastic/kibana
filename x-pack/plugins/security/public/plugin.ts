@@ -63,7 +63,11 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
         !this.isAnonymousPath(core.http.anonymousPaths) && showSecurityLinks;
 
       if (shouldRegisterNavControl && !this.navControlRegistered) {
-        const user = core.http.get('/api/security/v1/me') as Promise<AuthenticatedUser>;
+        const user = core.http.get('/api/security/v1/me', {
+          headers: {
+            'kbn-system-api': true,
+          },
+        }) as Promise<AuthenticatedUser>;
         registerSecurityNavControl(core, user);
         this.navControlRegistered = true;
       }

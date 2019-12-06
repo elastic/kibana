@@ -17,23 +17,21 @@ export function registerSecurityNavControl(
   user: Promise<AuthenticatedUser>
 ) {
   core.chrome.navControls.registerRight({
-    order: 1000,
+    order: 2000,
     mount: (el: HTMLElement) => {
       const I18nContext = core.i18n.Context;
 
-      user.then(authenticatedUser => {
-        const props = {
-          user: authenticatedUser,
-          editProfileUrl: core.http.basePath.prepend('/app/kibana/#account'),
-          logoutUrl: core.http.basePath.prepend(`/logout`),
-        };
-        ReactDOM.render(
-          <I18nContext>
-            <SecurityNavControl {...props} />
-          </I18nContext>,
-          el
-        );
-      });
+      const props = {
+        user,
+        editProfileUrl: core.http.basePath.prepend('/app/kibana/#account'),
+        logoutUrl: core.http.basePath.prepend(`/logout`),
+      };
+      ReactDOM.render(
+        <I18nContext>
+          <SecurityNavControl {...props} />
+        </I18nContext>,
+        el
+      );
 
       return () => ReactDOM.unmountComponentAtNode(el);
     },
