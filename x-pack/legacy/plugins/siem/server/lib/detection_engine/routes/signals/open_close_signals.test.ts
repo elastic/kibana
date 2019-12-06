@@ -17,13 +17,13 @@ import {
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
 
 describe('set signal status', () => {
-  let { server, mockEsPlugins } = createMockServer();
+  let { server, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, mockEsPlugins } = createMockServer());
+    ({ server, elasticsearch } = createMockServer());
     // eslint-disable-next-line
-    mockEsPlugins.getCluster = jest.fn((): any => ({
+    elasticsearch.getCluster = jest.fn((): any => ({
       // eslint-disable-next-line
       callWithRequest: jest.fn((): any => true),
     }));
@@ -42,7 +42,7 @@ describe('set signal status', () => {
     });
 
     test('returns 404 if callWithRequest is not available on the route', async () => {
-      mockEsPlugins.getCluster.mockImplementation(() => ({}));
+      elasticsearch.getCluster.mockImplementation(() => ({}));
       const { statusCode } = await server.inject(getSetSignalStatusByIdsRequest());
       expect(statusCode).toBe(404);
     });
