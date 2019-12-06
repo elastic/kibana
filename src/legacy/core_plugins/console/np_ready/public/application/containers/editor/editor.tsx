@@ -23,7 +23,7 @@ import { debounce } from 'lodash';
 import { Panel, PanelsContainer } from '../../components/split_panel';
 import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { StorageKeys } from '../../../services';
-import { useServicesContext } from '../../contexts';
+import { useEditorReadContext, useServicesContext } from '../../contexts';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
@@ -32,6 +32,8 @@ export const Editor = () => {
   const {
     services: { storage },
   } = useServicesContext();
+
+  const { currentTextObject } = useEditorReadContext();
 
   const [firstPanelWidth, secondPanelWidth] = storage.get(StorageKeys.WIDTH, [
     INITIAL_PANEL_WIDTH,
@@ -45,13 +47,15 @@ export const Editor = () => {
     []
   );
 
+  if (!currentTextObject) return null;
+
   return (
     <PanelsContainer onPanelWidthChange={onPanelWidthChange}>
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
         initialWidth={firstPanelWidth + '%'}
       >
-        <EditorUI />
+        <EditorUI initialTextValue={currentTextObject.text} />
       </Panel>
       <Panel
         style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}

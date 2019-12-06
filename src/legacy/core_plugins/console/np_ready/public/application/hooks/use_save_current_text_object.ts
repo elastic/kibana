@@ -17,8 +17,24 @@
  * under the License.
  */
 
-export { useSetInputEditor } from './use_set_input_editor';
-export { useRestoreRequestFromHistory } from './use_restore_request_from_history';
-export { useSendCurrentRequestToES } from './use_send_current_request_to_es';
-export { useSaveCurrentTextObject } from './use_save_current_text_object';
-export { useDataInit } from './use_data_init';
+import { useRef, useCallback } from 'react';
+import { useEditorReadContext, useServicesContext } from '../contexts';
+
+export const useSaveCurrentTextObject = () => {
+  const promiseChainRef = useRef(Promise.resolve());
+
+  const {
+    services: { db },
+  } = useServicesContext();
+
+  const { currentTextObject } = useEditorReadContext();
+
+  return useCallback(
+    (text: string) => {
+      const { current: promise } = promiseChainRef;
+      if (!currentTextObject) return;
+      promise.then(() => db.text.update({ ...currentTextObject, text }));
+    },
+    [db, currentTextObject]
+  );
+};

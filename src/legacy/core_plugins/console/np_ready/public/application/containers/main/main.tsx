@@ -27,6 +27,7 @@ import { Settings } from '../settings';
 import { TopNavMenu, WelcomePanel, HelpPanel } from '../../components';
 
 import { useServicesContext, useEditorReadContext } from '../../contexts';
+import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
 
@@ -48,6 +49,16 @@ export function Main() {
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
   };
+
+  const { done, error } = useDataInit();
+
+  if (!done) {
+    return <p>Migrating...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   return (
     <div id="consoleRoot">

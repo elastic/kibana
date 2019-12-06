@@ -32,7 +32,11 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { registerCommands } from './keyboard_shortcuts';
 import { applyCurrentSettings } from './apply_editor_settings';
 
-import { useSendCurrentRequestToES, useSetInputEditor } from '../../../../hooks';
+import {
+  useSendCurrentRequestToES,
+  useSetInputEditor,
+  useSaveCurrentTextObject,
+} from '../../../../hooks';
 
 // @ts-ignore
 import { initializeEditor } from '../../../../../../../public/quarantined/src/input';
@@ -40,10 +44,10 @@ import { initializeEditor } from '../../../../../../../public/quarantined/src/in
 import mappings from '../../../../../../../public/quarantined/src/mappings';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { loadRemoteState } from './load_remote_editor_state';
 
 export interface EditorProps {
   previousStateLocation?: 'stored' | string;
+  initialTextValue: string;
 }
 
 const abs: CSSProperties = {
@@ -61,7 +65,7 @@ const DEFAULT_INPUT_VALUE = `GET _search
   }
 }`;
 
-function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
+function EditorUI({ initialTextValue, previousStateLocation = 'stored' }: EditorProps) {
   const {
     services: { history, notifications },
     docLinkVersion,
@@ -70,6 +74,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
   const sendCurrentRequestToES = useSendCurrentRequestToES();
+  const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
   const actionsRef = useRef<HTMLDivElement | null>(null);
@@ -90,15 +95,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
     editorInstanceRef.current = initializeEditor($editor, $actions);
-
-    if (previousStateLocation === 'stored') {
-      const { content } = history.getSavedEditorState() || {
-        content: DEFAULT_INPUT_VALUE,
-      };
-      editorInstanceRef.current.update(content);
-    } else {
-      loadRemoteState({ url: previousStateLocation, input: editorInstanceRef.current });
-    }
+    editorInstanceRef.current.update(initialTextValue || DEFAULT_INPUT_VALUE);
 
     function setupAutosave() {
       let timer: number;
@@ -115,7 +112,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
     function saveCurrentState() {
       try {
         const content = editorInstanceRef.current.getValue();
-        history.updateCurrentState(content);
+        saveCurrentTextObject(content);
       } catch (e) {
         // Ignoring saving error
       }
@@ -136,7 +133,7 @@ function EditorUI({ previousStateLocation = 'stored' }: EditorProps) {
       unsubscribeResizer();
       mappings.clearSubscriptions();
     };
-  }, [history, previousStateLocation, setInputEditor]);
+  }, [saveCurrentTextObject, initialTextValue, history, previousStateLocation, setInputEditor]);
 
   useEffect(() => {
     applyCurrentSettings(editorInstanceRef.current!, settings);
