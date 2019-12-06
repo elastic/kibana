@@ -15,4 +15,5 @@ export const defaultValue: AboutStepRule = {
   references: [''],
   falsePositives: [''],
   tags: [],
+  threats: [],
 };

@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { MitreTacticsOptions, MitreTechniquesOptions } from './types';
+
 export const tactics = [
   {
     name: 'Collection',
@@ -69,7 +71,7 @@ export const tactics = [
   },
 ];
 
-export const tacticsOptions = [
+export const tacticsOptions: MitreTacticsOptions[] = [
   {
     id: 'TA0009',
     name: 'Collection',
@@ -1784,7 +1786,7 @@ export const techniques = [
   },
 ];
 
-export const techniquesOptions = [
+export const techniquesOptions: MitreTechniquesOptions[] = [
   {
     label: i18n.translate(
       'xpack.siem.detectionEngine.mitreAttackTechniques.bashProfileAndBashrcDescription',

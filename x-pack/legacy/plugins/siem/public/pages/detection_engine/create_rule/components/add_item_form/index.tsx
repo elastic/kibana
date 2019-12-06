@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React, { ChangeEvent, useCallback, useEffect, useState, useRef } from 'react';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../shared_imports';
-import * as I18n from './translations';
+import * as CreateRuleI18n from '../../translations';
 
 interface AddItemProps {
   addText: string;
@@ -127,7 +127,7 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
                     iconType="trash"
                     isDisabled={isDisabled}
                     onClick={() => removeItem(index)}
-                    aria-label={I18n.DELETE}
+                    aria-label={CreateRuleI18n.DELETE}
                   />
                 }
                 onChange={e => updateItem(e, index)}

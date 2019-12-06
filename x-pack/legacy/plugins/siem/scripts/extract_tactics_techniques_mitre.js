@@ -37,7 +37,7 @@ const getTechniquesOptions = techniques => techniques.map(t => `{
   id: '${t.id}',
   name: '${t.name}',
   reference: '${t.reference}',
-  tactics: '${t.tactics}',
+  tactics: '${t.tactics.join()}',
   value: '${camelCase(t.name)}'
 }`.replace(/(\r\n|\n|\r)/gm, ' '));
 
@@ -90,13 +90,16 @@ async function main() {
 
           import { i18n } from '@kbn/i18n';
 
+          import { MitreTacticsOptions, MitreTechniquesOptions } from './types';
+
           export const tactics = ${JSON.stringify(tactics, null, 2)};
 
-          export const tacticsOptions = ${JSON.stringify(getTacticsOptions(tactics), null, 2).replace(/}"/g, '}').replace(/"{/g, '{')};
+          export const tacticsOptions: MitreTacticsOptions[] =
+            ${JSON.stringify(getTacticsOptions(tactics), null, 2).replace(/}"/g, '}').replace(/"{/g, '{')};
 
           export const techniques = ${JSON.stringify(techniques, null, 2)};
 
-          export const techniquesOptions =
+          export const techniquesOptions: MitreTechniquesOptions[] =
             ${JSON.stringify(getTechniquesOptions(techniques), null, 2).replace(/}"/g, '}').replace(/"{/g, '{')};
       `;
 

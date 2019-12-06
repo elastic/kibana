@@ -23,18 +23,15 @@ import * as I18n from './translations';
 const CommonUseField = getUseField({ component: Field });
 
 export const StepDefineRule = memo<RuleStepProps>(({ isEditView, isLoading, setStepData }) => {
-  const [initializeOutputIndex, setInitializeOutputIndex] = useState(true);
   const [localUseIndicesConfig, setLocalUseIndicesConfig] = useState('');
   const [
     { indexPatterns: indexPatternQueryBar, isLoading: indexPatternLoadingQueryBar },
     setIndices,
   ] = useFetchIndexPatterns();
   const [indicesConfig] = useKibanaUiSetting(DEFAULT_INDEX_KEY);
-  const [signalIndexConfig] = useKibanaUiSetting(DEFAULT_SIGNALS_INDEX_KEY);
   const [myStepData, setMyStepData] = useState<DefineStepRule>({
     index: indicesConfig || [],
     isNew: true,
-    outputIndex: signalIndexConfig,
     queryBar: {
       query: { query: '', language: 'kuery' },
       filters: [],
@@ -56,14 +53,6 @@ export const StepDefineRule = memo<RuleStepProps>(({ isEditView, isLoading, setS
     }
   }, [form]);
 
-  useEffect(() => {
-    if (signalIndexConfig != null && initializeOutputIndex) {
-      const outputIndexField = form.getFields().outputIndex;
-      outputIndexField.setValue(signalIndexConfig);
-      setInitializeOutputIndex(false);
-    }
-  }, [initializeOutputIndex, signalIndexConfig, form]);
-
   return isEditView && myStepData != null ? (
     <StepRuleDescription
       indexPatterns={indexPatternQueryBar as IIndexPattern}
@@ -73,6 +62,19 @@ export const StepDefineRule = memo<RuleStepProps>(({ isEditView, isLoading, setS
   ) : (
     <>
       <Form form={form} data-test-subj="stepDefineRule">
+        <UseField
+          path="queryBar"
+          component={QueryBarDefineRule}
+          componentProps={{
+            compressed: true,
+            loading: indexPatternLoadingQueryBar,
+            idAria: 'detectionEngineStepDefineRuleQueryBar',
+            indexPattern: indexPatternQueryBar,
+            isDisabled: isLoading,
+            isLoading: indexPatternLoadingQueryBar,
+            dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
+          }}
+        />
         <CommonUseField
           path="useIndicesConfig"
           componentProps={{
@@ -102,31 +104,6 @@ export const StepDefineRule = memo<RuleStepProps>(({ isEditView, isLoading, setS
               compressed: true,
               fullWidth: true,
               isDisabled: isLoading,
-            },
-          }}
-        />
-        <UseField
-          path="queryBar"
-          component={QueryBarDefineRule}
-          componentProps={{
-            compressed: true,
-            loading: indexPatternLoadingQueryBar,
-            idAria: 'detectionEngineStepDefineRuleQueryBar',
-            indexPattern: indexPatternQueryBar,
-            isDisabled: isLoading,
-            isLoading: indexPatternLoadingQueryBar,
-            dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
-          }}
-        />
-        <CommonUseField
-          path="outputIndex"
-          componentProps={{
-            idAria: 'detectionEngineStepDefineRuleOutputIndex',
-            'data-test-subj': 'detectionEngineStepDefineRuleOutputIndex',
-            euiFieldProps: {
-              compressed: true,
-              fullWidth: false,
-              disabled: isLoading,
             },
           }}
         />

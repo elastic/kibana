@@ -36,10 +36,10 @@ export interface AboutStepRule extends StepRuleData {
   references: string[];
   falsePositives: string[];
   tags: string[];
+  threats: IMitreEnterpriseAttack[];
 }
 
 export interface DefineStepRule extends StepRuleData {
-  outputIndex: string;
   useIndicesConfig: string;
   index: string[];
   queryBar: FieldValueQueryBar;
@@ -53,7 +53,6 @@ export interface ScheduleStepRule extends StepRuleData {
 }
 
 export interface DefineStepRuleJson {
-  output_index: string;
   index: string[];
   filters: esFilters.Filter[];
   saved_id?: string;
@@ -69,8 +68,20 @@ export interface AboutStepRuleJson {
   references: string[];
   false_positives: string[];
   tags: string[];
+  threats: IMitreEnterpriseAttack[];
 }
 
 export type ScheduleStepRuleJson = ScheduleStepRule;
 
 export type FormatRuleType = 'query' | 'saved_query';
+
+export interface IMitreAttack {
+  id: string;
+  name: string;
+  reference: string;
+}
+export interface IMitreEnterpriseAttack {
+  framework: string;
+  tactic: IMitreAttack;
+  techniques: IMitreAttack[];
+}
