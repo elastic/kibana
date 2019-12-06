@@ -16,7 +16,7 @@ import { buildEventsSearchQuery } from './build_events_query';
 import { searchAfterAndBulkCreate } from './utils';
 import { RuleAlertTypeDefinition } from './types';
 import { getFilter } from './get_filter';
-import { getInputOutputIndex } from './get_input_output_index';
+import { getInputIndex } from './get_input_output_index';
 
 export const rulesAlertType = ({
   logger,
@@ -84,12 +84,7 @@ export const rulesAlertType = ({
           ? DEFAULT_SEARCH_AFTER_PAGE_SIZE
           : params.maxSignals;
 
-      const { inputIndex, outputIndex: signalsIndex } = await getInputOutputIndex(
-        services,
-        version,
-        index,
-        outputIndex
-      );
+      const inputIndex = await getInputIndex(services, version, index);
       const esFilter = await getFilter({
         type,
         filter,
@@ -122,7 +117,7 @@ export const rulesAlertType = ({
               noReIndexResult.hits.total.value
             } signals from the indexes of "${inputIndex.join(
               ', '
-            )}" using signal rule "id: ${alertId}", "ruleId: ${ruleId}", pushing signals to index ${signalsIndex}`
+            )}" using signal rule "id: ${alertId}", "ruleId: ${ruleId}", pushing signals to index ${outputIndex}`
           );
         }
 
@@ -132,7 +127,7 @@ export const rulesAlertType = ({
           services,
           logger,
           id: alertId,
-          signalsIndex,
+          signalsIndex: outputIndex,
           name,
           createdBy,
           updatedBy,
