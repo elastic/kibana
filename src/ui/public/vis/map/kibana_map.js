@@ -562,6 +562,7 @@ export class KibanaMap extends EventEmitter {
 
     let baseLayer;
     if (settings.baseLayerType === 'wms') {
+      this._baseLayerSettings.options.attribution = _.escape(settings.options.attribution);
       baseLayer = this._getWMSBaseLayer(settings.options);
     } else if (settings.baseLayerType === 'tms') {
       baseLayer = this._getTMSBaseLayer((settings.options));
