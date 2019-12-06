@@ -8,7 +8,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { get, contains } from 'lodash';
-import chrome from 'ui/chrome';
+import chrome from '../np_imports/ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';

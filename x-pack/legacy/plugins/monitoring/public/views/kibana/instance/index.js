@@ -9,20 +9,12 @@
  */
 import React from 'react';
 import { get } from 'lodash';
-import uiRoutes from 'ui/routes';
+import uiRoutes from'plugins/monitoring/np_imports/ui/routes';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer, EuiFlexGrid, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { DetailStatus } from 'plugins/monitoring/components/kibana/detail_status';
 import { I18nContext } from 'ui/i18n';

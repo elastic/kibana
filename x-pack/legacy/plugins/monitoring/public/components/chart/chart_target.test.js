@@ -8,6 +8,7 @@ import React from 'react';
 import expect from '@kbn/expect';
 import { shallow } from 'enzyme';
 import { ChartTarget } from './chart_target';
+import { coreMock, notificationServiceMock } from 'src/core/public/mocks'; // eslint-disable-line import/no-unresolved
 
 const props = {
   seriesToShow: ['Max Heap', 'Max Heap Used'],
@@ -43,25 +44,47 @@ const props = {
   updateLegend: () => void 0,
 };
 
+jest.mock('../../np_imports/ui/chrome', () => {
+  return {
+    getBasePath: () => ''
+  };
+});
+
 describe('Test legends to toggle series: ', () => {
-  const ids = props.series.map(item => item.id);
 
-  it('should toggle based on seriesToShow array', () => {
-    const component = shallow(<ChartTarget {...props} />);
+  beforeEach(async () => {
+    jest.doMock('ui/new_platform', () => ({
+      npSetup: {
+        core: {
+          ...coreMock.createSetup(),
+          notifications: notificationServiceMock.createStartContract()
+        }
+      }
+    }));
+  });
 
-    const componentClass = component.instance();
+  const ids = props.series.map((item) => item.id);
 
-    const seriesA = componentClass.filterData(props.series, [ids[0]]);
-    expect(seriesA.length).to.be(1);
-    expect(seriesA[0].id).to.be(ids[0]);
+  describe('props.series: ', () => {
+    it('should toggle based on seriesToShow array', () => {
+      const component = shallow(
+        <ChartTarget {...props} />
+      );
 
-    const seriesB = componentClass.filterData(props.series, [ids[1]]);
-    expect(seriesB.length).to.be(1);
-    expect(seriesB[0].id).to.be(ids[1]);
+      const componentClass = component.instance();
 
-    const seriesAB = componentClass.filterData(props.series, ids);
-    expect(seriesAB.length).to.be(2);
-    expect(seriesAB[0].id).to.be(ids[0]);
-    expect(seriesAB[1].id).to.be(ids[1]);
+      const seriesA = componentClass.filterData(props.series, [ids[0]]);
+      expect(seriesA.length).to.be(1);
+      expect(seriesA[0].id).to.be(ids[0]);
+
+      const seriesB = componentClass.filterData(props.series, [ids[1]]);
+      expect(seriesB.length).to.be(1);
+      expect(seriesB[0].id).to.be(ids[1]);
+
+      const seriesAB = componentClass.filterData(props.series, ids);
+      expect(seriesAB.length).to.be(2);
+      expect(seriesAB[0].id).to.be(ids[0]);
+      expect(seriesAB[1].id).to.be(ids[1]);
+    });
   });
 });

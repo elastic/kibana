@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 import { Subscription } from 'rxjs';
 export function executorProvider(Promise, $timeout) {

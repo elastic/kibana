@@ -7,8 +7,8 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import uiRoutes from 'ui/routes';
-import { timefilter } from 'ui/timefilter';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import template from './index.html';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';

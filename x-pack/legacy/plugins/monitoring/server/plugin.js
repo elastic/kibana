@@ -14,11 +14,11 @@ import { registerMonitoringCollection } from './telemetry_collection';
 import { parseElasticsearchConfig } from './es_client/parse_elasticsearch_config';
 
 export class Plugin {
-  setup(core, plugins) {
-    const kbnServer = core._kbnServer;
-    const config = core.config();
-    const usageCollection = plugins.usageCollection;
-    const licensing = plugins.licensing;
+  setup(_coreSetup, pluginsSetup, __LEGACY) {
+    const { plugins, _kbnServer: kbnServer, log, getOSInfo, _hapi: hapiServer, events, expose, config: monitoringConfig } = __LEGACY;
+    const config = monitoringConfig();
+
+    const { usageCollection } = pluginsSetup;
     registerMonitoringCollection();
     /*
      * Register collector objects for stats to show up in the APIs
@@ -26,10 +26,10 @@ export class Plugin {
     registerCollectors(usageCollection, {
       elasticsearchPlugin: plugins.elasticsearch,
       kbnServerConfig: kbnServer.config,
-      log: core.log,
+      log,
       config,
-      getOSInfo: core.getOSInfo,
-      hapiServer: core._hapi,
+      getOSInfo,
+      hapiServer,
     });
 
     /*
@@ -52,18 +52,18 @@ export class Plugin {
 
       if (uiEnabled) {
         await instantiateClient({
-          log: core.log,
-          events: core.events,
-          elasticsearchConfig,
+          log,
+          events,
+          config,
           elasticsearchPlugin: plugins.elasticsearch,
         }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({
           config,
-          log: core.log,
+          log,
           xpackMainPlugin: plugins.xpack_main,
-          expose: core.expose,
+          expose
         }); // Route handlers depend on this for xpackInfo
-        await requireUIRoutes(core);
+        await requireUIRoutes(__LEGACY);
       }
     });
 
@@ -94,7 +94,7 @@ export class Plugin {
     const bulkUploader = initBulkUploader({
       elasticsearchPlugin: plugins.elasticsearch,
       config,
-      log: core.log,
+      log,
       kbnServerStatus: kbnServer.status,
       kbnServerVersion: kbnServer.version,
     });
@@ -116,24 +116,10 @@ export class Plugin {
         }
       });
     } else if (!kibanaCollectionEnabled) {
-      core.log(
+      log(
         ['info', LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG],
         'Internal collection for Kibana monitoring is disabled per configuration.'
       );
     }
-
-    core.injectUiAppVars('monitoring', () => {
-      const config = core.config();
-      return {
-        maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),
-        minIntervalSeconds: config.get('xpack.monitoring.min_interval_seconds'),
-        kbnIndex: config.get('kibana.index'),
-        showLicenseExpiration: config.get('xpack.monitoring.show_license_expiration'),
-        showCgroupMetricsElasticsearch: config.get(
-          'xpack.monitoring.ui.container.elasticsearch.enabled'
-        ),
-        showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
-      };
-    });
   }
 }

@@ -8,11 +8,11 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { uiModules } from 'ui/modules';
+import { uiModules } from 'plugins/monitoring/np_imports/ui/modules';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { shortenPipelineHash } from '../../../common/formatting';
-import 'ui/directives/kbn_href';
+//import 'ui/directives/kbn_href';
 import { getSetupModeState, initSetupModeState } from '../../lib/setup_mode';
 
 const setOptions = controller => {
@@ -175,7 +175,7 @@ export class MonitoringMainController {
   }
 }
 
-const uiModule = uiModules.get('plugins/monitoring/directives', []);
+const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, $injector) => {
   const $executor = $injector.get('$executor');
 

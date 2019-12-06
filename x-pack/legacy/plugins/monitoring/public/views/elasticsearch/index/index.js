@@ -9,11 +9,11 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import uiRoutes from 'ui/routes';
+import uiRoutes from 'plugins/monitoring/np_imports/ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import template from './index.html';
-import { timefilter } from 'ui/timefilter';
+import { timefilter } from 'plugins/monitoring/np_imports/ui/timefilter';
 import { I18nContext } from 'ui/i18n';
 import { labels } from '../../../components/elasticsearch/shard_allocation/lib/labels';
 import { indicesByNodes } from '../../../components/elasticsearch/shard_allocation/transformers/indices_by_nodes';

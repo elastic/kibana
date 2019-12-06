@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { coreMock, overlayServiceMock, notificationServiceMock } from 'src/core/public/mocks'; // eslint-disable-line import/no-unresolved
+
 let toggleSetupMode;
 let initSetupModeState;
 let getSetupModeState;
@@ -55,9 +57,68 @@ function waitForSetupModeData(action) {
   process.nextTick(action);
 }
 
-function setModules() {
-  jest.resetModules();
+function mockFilterManager() {
+  let subscriber;
+  let filters = [];
+  return {
+    getUpdates$: () => ({
+      subscribe: ({ next }) => {
+        subscriber = next;
+        return jest.fn();
+      },
+    }),
+    setFilters: (newFilters) => {
+      filters = newFilters;
+      subscriber();
+    },
+    getFilters: () => filters,
+    removeAll: () => {
+      filters = [];
+      subscriber();
+    },
+  };
+}
+
+const pluginData = {
+  query: {
+    filterManager: mockFilterManager(),
+    timefilter: {
+      timefilter: {
+        getTime: jest.fn(() => ({ from: 'now-1h', to: 'now' })),
+        setTime: jest.fn(),
+      },
+    },
+  },
+};
+
+function setModulesAndMocks(isOnCloud = false) {
+  jest.clearAllMocks().resetModules();
   injectorModulesMock.globalState.inSetupMode = false;
+
+  jest.doMock('ui/new_platform', () => ({
+    npSetup: {
+      plugins: {
+        cloud: isOnCloud ? { cloudId: 'test', isCloudEnabled: true } : { },
+        uiActions: {
+          registerAction: jest.fn(),
+          attachAction: jest.fn()
+        }
+      },
+      core: {
+        ...coreMock.createSetup(),
+        notifications: notificationServiceMock.createStartContract()
+      }
+    },
+    npStart: {
+      plugins: {
+        data: pluginData
+      },
+      core: {
+        ...coreMock.createStart(),
+        overlays: overlayServiceMock.createStartContract(),
+      }
+    }
+  }));
 
   const setupMode = require('./setup_mode');
   toggleSetupMode = setupMode.toggleSetupMode;
@@ -69,17 +130,7 @@ function setModules() {
 
 describe('setup_mode', () => {
   beforeEach(async () => {
-    jest.doMock('ui/new_platform', () => ({
-      npSetup: {
-        plugins: {
-          cloud: {
-            cloudId: undefined,
-            isCloudEnabled: false,
-          },
-        },
-      },
-    }));
-    setModules();
+    setModulesAndMocks();
   });
 
   describe('setup', () => {
@@ -92,8 +143,8 @@ describe('setup_mode', () => {
       }
       expect(error).toEqual(
         'Unable to interact with setup ' +
-          'mode because the angular injector was not previously set. This needs to be ' +
-          'set by calling `initSetupModeState`.'
+        'mode because the angular injector was not previously set. This needs to be ' +
+        'set by calling `initSetupModeState`.'
       );
     });
 
@@ -125,16 +176,6 @@ describe('setup_mode', () => {
 
     it('should not fetch data if on cloud', async done => {
       const addDanger = jest.fn();
-      jest.doMock('ui/new_platform', () => ({
-        npSetup: {
-          plugins: {
-            cloud: {
-              cloudId: 'test',
-              isCloudEnabled: true,
-            },
-          },
-        },
-      }));
       data = {
         _meta: {
           hasPermissions: true,
@@ -145,7 +186,7 @@ describe('setup_mode', () => {
           addDanger,
         },
       }));
-      setModules();
+      setModulesAndMocks(true);
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
       await toggleSetupMode(true);
       waitForSetupModeData(() => {
@@ -171,7 +212,7 @@ describe('setup_mode', () => {
           hasPermissions: false,
         },
       };
-      setModules();
+      setModulesAndMocks();
       initSetupModeState(angularStateMock.scope, angularStateMock.injector);
       await toggleSetupMode(true);
       waitForSetupModeData(() => {
