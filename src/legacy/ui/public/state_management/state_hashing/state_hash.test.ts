@@ -18,12 +18,13 @@
  */
 
 import { encode as encodeRison } from 'rison-node';
-import { mockSessionStorage } from '../state_storage/mock';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { mockStorage } from '../../../../../plugins/kibana_utils/public/storage/hashed_item_store/mock';
 import { createStateHash, isStateHash } from '../state_hashing';
 
 describe('stateHash', () => {
   beforeEach(() => {
-    mockSessionStorage.clear();
+    mockStorage.clear();
   });
 
   describe('#createStateHash', () => {
