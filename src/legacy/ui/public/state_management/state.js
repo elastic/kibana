@@ -35,10 +35,7 @@ import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
-
-import {
-  HashedItemStoreSingleton,
-} from './state_storage';
+import { hashedItemStore } from '../../../../plugins/kibana_utils/public';
 import {
   createStateHash,
   isStateHash
@@ -56,13 +53,13 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
   function State(
     urlParam,
     defaults,
-    hashedItemStore = HashedItemStoreSingleton
+    _hashedItemStore = hashedItemStore
   ) {
     State.Super.call(this);
 
     this.setDefaults(defaults);
     this._urlParam = urlParam || '_s';
-    this._hashedItemStore = hashedItemStore;
+    this._hashedItemStore = _hashedItemStore;
 
     // When the URL updates we need to fetch the values from the URL
     this._cleanUpListeners = _.partial(callEach, [
