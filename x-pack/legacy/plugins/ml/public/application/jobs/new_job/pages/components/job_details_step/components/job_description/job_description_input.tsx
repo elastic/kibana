@@ -10,12 +10,12 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const JobDescriptionInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator } = useContext(JobCreatorContext);
   const [jobDescription, setJobDescription] = useState(jobCreator.description);
 
   useEffect(() => {
     jobCreator.description = jobDescription;
-    jobCreatorUpdate();
+    // jobCreatorUpdate();
   }, [jobDescription]);
 
   return (
