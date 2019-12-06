@@ -7,11 +7,11 @@
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
 
+import Boom from 'boom';
 import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
-import { InvalidNodeError } from './lib/errors';
 import { metrics } from '../../../../common/inventory_models';
 import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
@@ -39,7 +39,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeIds.nodeId);
     if (!validNode) {
-      throw new InvalidNodeError(
+      throw Boom.notFound(
         i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {
@@ -97,7 +97,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   ) {
     const createTSVBModel = get(metrics, ['tsvb', metricId]) as TSVBMetricModelCreator | undefined;
     if (!createTSVBModel) {
-      throw new Error(
+      throw Boom.badRequest(
         i18n.translate('xpack.infra.metrics.missingTSVBModelError', {
           defaultMessage: 'The TSVB model for {metricId} does not exist for {nodeType}',
           values: {
@@ -135,7 +135,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     }
 
     if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
-      throw new InvalidNodeError(
+      throw Boom.badRequest(
         i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {
           defaultMessage:
             'Model for {metricId} requires a cloudId, but none was given for {nodeId}.',

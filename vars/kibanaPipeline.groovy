@@ -31,15 +31,15 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
         }
 
         catchError {
+          runErrorReporter()
+        }
+
+        catchError {
           runbld.junit()
         }
 
         catchError {
           publishJunit()
-        }
-
-        catchError {
-          runErrorReporter()
         }
       }
     }
@@ -103,10 +103,10 @@ def legacyJobRunner(name) {
                 uploadAllGcsArtifacts(name)
               }
               catchError {
-                publishJunit()
+                runErrorReporter()
               }
               catchError {
-                runErrorReporter()
+                publishJunit()
               }
             }
           }
