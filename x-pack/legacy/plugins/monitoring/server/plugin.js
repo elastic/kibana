@@ -79,7 +79,8 @@ export class Plugin {
             ],
             read: []
           },
-          ui: [],
+          ui: ['showAlerts', 'showActions'],
+          api: ['actions-read', 'actions-all', 'alerting-read', 'alerting-all']
         },
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'

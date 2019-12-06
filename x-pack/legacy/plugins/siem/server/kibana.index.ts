@@ -72,7 +72,7 @@ export const initServerWithKibana = (
     catalogue: ['siem'],
     privileges: {
       all: {
-        api: ['siem'],
+        api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
         savedObject: {
           all: [
             'alert',
@@ -84,7 +84,7 @@ export const initServerWithKibana = (
           ],
           read: ['config'],
         },
-        ui: ['show'],
+        ui: ['show', 'showAlerts', 'showActions'],
       },
       read: {
         api: ['siem'],
