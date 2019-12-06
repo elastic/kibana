@@ -37,7 +37,6 @@
     "@mattapperson/slapshot": "1.4.0",
     "@storybook/addon-actions": "^5.2.6",
     "@storybook/addon-console": "^1.2.1",
-    "@storybook/addon-info": "^5.2.6",
     "@storybook/addon-knobs": "^5.2.6",
     "@storybook/addon-storyshots": "^5.2.6",
     "@storybook/react": "^5.2.6",
