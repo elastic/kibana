@@ -464,6 +464,8 @@ export interface Source {
   Alerts: AlertsData;
 
   AlertsHistogram: AlertsOverTimeData;
+
+  AnomaliesOverTime: AnomaliesOverTimeData;
   /** Gets Authentication success and failures based on a timerange */
   Authentications: AuthenticationsData;
 
@@ -1228,6 +1230,14 @@ export interface MatrixOverTimeHistogramData {
   y: number;
 
   g: string;
+}
+
+export interface AnomaliesOverTimeData {
+  inspect?: Maybe<Inspect>;
+
+  anomaliesOverTime: MatrixOverTimeHistogramData[];
+
+  totalCount: number;
 }
 
 export interface AuthenticationsData {
@@ -2172,6 +2182,13 @@ export interface AlertsHistogramSourceArgs {
   defaultIndex: string[];
 
   timerange: TimerangeInput;
+}
+export interface AnomaliesOverTimeSourceArgs {
+  timerange: TimerangeInput;
+
+  filterQuery?: Maybe<string>;
+
+  defaultIndex: string[];
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -3282,6 +3299,58 @@ export namespace GetAlertsQuery {
     resumed: Maybe<boolean[]>;
 
     version: Maybe<string[]>;
+  };
+}
+
+export namespace GetAnomaliesOverTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: TimerangeInput;
+    defaultIndex: string[];
+    filterQuery?: Maybe<string>;
+    inspect: boolean;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    AnomaliesOverTime: AnomaliesOverTime;
+  };
+
+  export type AnomaliesOverTime = {
+    __typename?: 'AnomaliesOverTimeData';
+
+    anomaliesOverTime: _AnomaliesOverTime[];
+
+    totalCount: number;
+
+    inspect: Maybe<Inspect>;
+  };
+
+  export type _AnomaliesOverTime = {
+    __typename?: 'MatrixOverTimeHistogramData';
+
+    x: number;
+
+    y: number;
+
+    g: string;
+  };
+
+  export type Inspect = {
+    __typename?: 'Inspect';
+
+    dsl: string[];
+
+    response: string[];
   };
 }
 

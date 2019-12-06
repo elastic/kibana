@@ -7,8 +7,9 @@
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
+import { timelineDefaults, SubsetTimelineModel } from '../../store/timeline/model';
 
-export const defaultHeaders: ColumnHeader[] = [
+export const alertsHeaders: ColumnHeader[] = [
   {
     columnHeaderType: defaultColumnHeaderType,
     id: '@timestamp',
@@ -31,7 +32,7 @@ export const defaultHeaders: ColumnHeader[] = [
   },
   {
     columnHeaderType: defaultColumnHeaderType,
-    id: 'event.serverity',
+    id: 'event.severity',
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
   {
@@ -60,3 +61,8 @@ export const defaultHeaders: ColumnHeader[] = [
     width: DEFAULT_COLUMN_MIN_WIDTH,
   },
 ];
+
+export const alertsDefaultModel: SubsetTimelineModel = {
+  ...timelineDefaults,
+  columns: alertsHeaders,
+};

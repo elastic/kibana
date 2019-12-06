@@ -11,12 +11,13 @@ import { HostsTabsProps } from './types';
 import { scoreIntervalToDateTime } from '../../components/ml/score/score_interval_to_datetime';
 import { Anomaly } from '../../components/ml/types';
 import { HostsTableType } from '../../store/hosts/model';
+import { AnomaliesQueryTabBody } from '../../containers/anomalies/anomalies_query_tab_body';
+import { AnomaliesHostTable } from '../../components/ml/tables/anomalies_host_table';
 
 import {
   HostsQueryTabBody,
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
-  AnomaliesQueryTabBody,
   EventsQueryTabBody,
 } from './navigation';
 import { AlertsQueryTabBody } from './navigation/alerts_query_tab_body';
@@ -72,7 +73,9 @@ const HostsTabs = memo<HostsTabsProps>(
         />
         <Route
           path={`${hostsPagePath}/:tabName(${HostsTableType.anomalies})`}
-          render={() => <AnomaliesQueryTabBody {...tabProps} />}
+          render={() => (
+            <AnomaliesQueryTabBody {...tabProps} AnomaliesTableComponent={AnomaliesHostTable} />
+          )}
         />
         <Route
           path={`${hostsPagePath}/:tabName(${HostsTableType.events})`}

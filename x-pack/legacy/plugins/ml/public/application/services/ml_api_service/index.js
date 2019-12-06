@@ -9,7 +9,7 @@
 import { pick } from 'lodash';
 import chrome from 'ui/chrome';
 
-import { http } from '../http_service';
+import { http, http$ } from '../http_service';
 
 import { annotations } from './annotations';
 import { dataFrameAnalytics } from './data_frame_analytics';
@@ -95,11 +95,10 @@ export const ml = {
     });
   },
 
-  validateCardinality(obj) {
-    return http({
-      url: `${basePath}/validate/cardinality`,
+  validateCardinality$(obj) {
+    return http$(`${basePath}/validate/cardinality`, {
       method: 'POST',
-      data: obj
+      body: obj
     });
   },
 
@@ -340,10 +339,21 @@ export const ml = {
     });
   },
 
-  calendars(obj) {
-    const calendarId = (obj && obj.calendarId) ? `/${obj.calendarId}` : '';
+  /**
+   * Gets a list of calendars
+   * @param obj
+   * @returns {Promise<unknown>}
+   */
+  calendars(obj = {}) {
+    const { calendarId, calendarIds } = obj;
+    let calendarIdsPathComponent = '';
+    if (calendarId) {
+      calendarIdsPathComponent = `/${calendarId}`;
+    } else if (calendarIds) {
+      calendarIdsPathComponent = `/${calendarIds.join(',')}`;
+    }
     return http({
-      url: `${basePath}/calendars${calendarId}`,
+      url: `${basePath}/calendars${calendarIdsPathComponent}`,
       method: 'GET'
     });
   },
@@ -441,6 +451,13 @@ export const ml = {
       url: `${basePath}/es_search`,
       method: 'POST',
       data: obj
+    });
+  },
+
+  esSearch$(obj) {
+    return http$(`${basePath}/es_search`, {
+      method: 'POST',
+      body: obj
     });
   },
 
