@@ -482,7 +482,7 @@ describe('ElasticsearchPingsAdapter class', () => {
     });
 
     it('returns data in expected shape', async () => {
-      const mockEsClient = jest.fn(async (request: any, params: any) => mockEsSearchResult);
+      const mockEsClient = jest.fn(async (_request: any, _params: any) => mockEsSearchResult);
       const result = await adapter.getLatestMonitorDocs({
         callES: mockEsClient,
         dateRangeStart: 'now-1h',
