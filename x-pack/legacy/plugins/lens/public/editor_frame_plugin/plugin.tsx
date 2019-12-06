@@ -57,8 +57,8 @@ export class EditorFramePlugin {
     plugins.expressions.registerFunction(() => mergeTables);
 
     return {
-      registerDatasource: (name, datasource) => {
-        this.datasources[name] = datasource as Datasource<unknown, unknown>;
+      registerDatasource: datasource => {
+        this.datasources[datasource.id] = datasource as Datasource<unknown, unknown>;
       },
       registerVisualization: visualization => {
         this.visualizations[visualization.id] = visualization as Visualization<unknown, unknown>;

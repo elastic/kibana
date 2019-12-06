@@ -11,10 +11,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
-
-interface ApmIndices {
-  'apm_oss.transactionIndices': string | undefined;
-}
+import { APMPluginContract } from '../../../../../../../plugins/apm/server/plugin';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
@@ -27,9 +24,7 @@ export interface InfraServerPluginDeps {
     indexPatternsServiceFactory: any;
   };
   features: FeaturesPluginSetup;
-  apm: {
-    getIndices: (savedObjectsClient: any) => Promise<ApmIndices>;
-  };
+  apm: APMPluginContract;
   ___legacy: any;
 }
 

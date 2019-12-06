@@ -14,9 +14,9 @@ import { getConfigSchema } from './server/kibana.index';
 import { savedObjectMappings } from './server/saved_objects';
 import { plugin, InfraServerPluginDeps } from './server/new_platform_index';
 import { InfraSetup } from '../../../plugins/infra/server';
-import { getApmIndices } from '../apm/server/lib/settings/apm_indices/get_apm_indices';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
+import { APMPluginContract } from '../../../plugins/apm/server/plugin';
 
 const APP_ID = 'infra';
 const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
@@ -105,12 +105,7 @@ export function infra(kibana: any) {
             __internals: legacyServer.newPlatform.__internals,
           },
         },
-        apm: {
-          // NP_NOTE: This needs migrating once APM's getApmIndices() has been ported to NP.
-          // On our side we're using the NP savedObjectsClient, but legacyServer.config() needs to go.
-          getIndices: savedObjectsClient =>
-            getApmIndices({ savedObjectsClient, config: legacyServer.config() }),
-        },
+        apm: plugins.apm as APMPluginContract,
       };
 
       const infraPluginInstance = plugin(initContext);
