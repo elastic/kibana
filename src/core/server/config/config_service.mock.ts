@@ -35,6 +35,7 @@ const createConfigServiceMock = ({
     isEnabledAtPath: jest.fn(),
     setSchema: jest.fn(),
     addDeprecationProvider: jest.fn(),
+    validate: jest.fn(),
   };
   mocked.atPath.mockReturnValue(new BehaviorSubject(atPath));
   mocked.getConfig$.mockReturnValue(new BehaviorSubject(new ObjectToConfigAdapter(getConfig$)));

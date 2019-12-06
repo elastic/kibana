@@ -20,7 +20,7 @@
 import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, first, map, shareReplay } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, shareReplay, take } from 'rxjs/operators';
 
 import { Config, ConfigPath, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
@@ -52,13 +52,13 @@ export class ConfigService {
   private readonly deprecations = new BehaviorSubject<ConfigDeprecationWithContext[]>([]);
 
   constructor(
-    rawConfigProvider: RawConfigurationProvider,
+    private readonly rawConfigProvider: RawConfigurationProvider,
     private readonly env: Env,
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
 
-    this.config$ = combineLatest([rawConfigProvider.getConfig$(), this.deprecations]).pipe(
+    this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
       map(([rawConfig, deprecations]) => {
         const migrated = applyDeprecations(rawConfig, deprecations);
         return new LegacyObjectToConfigAdapter(migrated);
@@ -77,10 +77,7 @@ export class ConfigService {
     }
 
     this.schemas.set(namespace, schema);
-
-    await this.validateConfig(path)
-      .pipe(first())
-      .toPromise();
+    this.markAsHandled(path);
   }
 
   /**
@@ -98,6 +95,22 @@ export class ConfigService {
   }
 
   /**
+   * Validate the whole configuration and log the deprecation warnings.
+   *
+   * This must be done after every schemas and deprecation providers have been registered.
+   */
+  public async validate() {
+    const namespaces = [...this.schemas.keys()];
+    for (let i = 0; i < namespaces.length; i++) {
+      await this.validateConfigAtPath(namespaces[i])
+        .pipe(first())
+        .toPromise();
+    }
+
+    await this.logDeprecation();
+  }
+
+  /**
    * Returns the full config object observable. This is not intended for
    * "normal use", but for features that _need_ access to the full object.
    */
@@ -112,7 +125,7 @@ export class ConfigService {
    * @param path - The path to the desired subset of the config.
    */
   public atPath<TSchema>(path: ConfigPath) {
-    return this.validateConfig(path) as Observable<TSchema>;
+    return this.validateConfigAtPath(path) as Observable<TSchema>;
   }
 
   /**
@@ -125,7 +138,7 @@ export class ConfigService {
     return this.getDistinctConfig(path).pipe(
       map(config => {
         if (config === undefined) return undefined;
-        return this.validate(path, config) as TSchema;
+        return this.validateAtPath(path, config) as TSchema;
       })
     );
   }
@@ -181,7 +194,21 @@ export class ConfigService {
     return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
-  private validate(path: ConfigPath, config: Record<string, unknown>) {
+  private async logDeprecation() {
+    const rawConfig = await this.rawConfigProvider
+      .getConfig$()
+      .pipe(take(1))
+      .toPromise();
+    const deprecations = await this.deprecations.pipe(take(1)).toPromise();
+    const deprecationMessages: string[] = [];
+    const logger = (msg: string) => deprecationMessages.push(msg);
+    applyDeprecations(rawConfig, deprecations, logger);
+    deprecationMessages.forEach(msg => {
+      this.log.warn(msg);
+    });
+  }
+
+  private validateAtPath(path: ConfigPath, config: Record<string, unknown>) {
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {
@@ -198,8 +225,8 @@ export class ConfigService {
     );
   }
 
-  private validateConfig(path: ConfigPath) {
-    return this.getDistinctConfig(path).pipe(map(config => this.validate(path, config)));
+  private validateConfigAtPath(path: ConfigPath) {
+    return this.getDistinctConfig(path).pipe(map(config => this.validateAtPath(path, config)));
   }
 
   private getDistinctConfig(path: ConfigPath) {

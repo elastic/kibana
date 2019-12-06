@@ -135,21 +135,20 @@ test('stops services on "stop"', async () => {
   expect(mockSavedObjectsService.stop).toHaveBeenCalledTimes(1);
 });
 
-test(`doesn't setup core services if services config validation fails`, async () => {
-  mockConfigService.setSchema.mockImplementation(() => {
-    throw new Error('invalid config');
+test(`doesn't setup core services if config validation fails`, async () => {
+  mockConfigService.validate.mockImplementationOnce(() => {
+    return Promise.reject(new Error('invalid config'));
   });
   const server = new Server(rawConfigService, env, logger);
-  await expect(server.setupConfigSchemas()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"invalid config"`
-  );
+  await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
+
   expect(mockHttpService.setup).not.toHaveBeenCalled();
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
 });
 
-test(`doesn't setup core services if config validation fails`, async () => {
+test(`doesn't setup core services if legacy config validation fails`, async () => {
   mockEnsureValidConfiguration.mockImplementation(() => {
     throw new Error('Unknown configuration keys');
   });

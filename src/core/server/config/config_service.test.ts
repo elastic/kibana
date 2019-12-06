@@ -20,9 +20,9 @@
 /* eslint-disable max-classes-per-file */
 
 import { BehaviorSubject, Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
 
-import { mockPackage } from './config_service.test.mocks';
+import { mockPackage, mockApplyDeprecations } from './config_service.test.mocks';
 import { rawConfigServiceMock } from './raw_config_service.mock';
 
 import { schema } from '@kbn/config-schema';
@@ -55,12 +55,26 @@ test('throws if config at path does not match schema', async () => {
   const rawConfig = getRawConfigProvider({ key: 123 });
 
   const configService = new ConfigService(rawConfig, defaultEnv, logger);
+  await configService.setSchema('key', schema.string());
 
-  await expect(
-    configService.setSchema('key', schema.string())
-  ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[config validation of [key]]: expected value of type [string] but got [number]"`
-  );
+  const valuesReceived: any[] = [];
+  await configService
+    .atPath('key')
+    .pipe(take(1))
+    .subscribe(
+      value => {
+        valuesReceived.push(value);
+      },
+      error => {
+        valuesReceived.push(error);
+      }
+    );
+
+  await expect(valuesReceived).toMatchInlineSnapshot(`
+      Array [
+        [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+      ]
+  `);
 });
 
 test('re-validate config when updated', async () => {
@@ -83,10 +97,10 @@ test('re-validate config when updated', async () => {
   rawConfig$.next({ key: 123 });
 
   await expect(valuesReceived).toMatchInlineSnapshot(`
-    Array [
-      "value",
-      [Error: [config validation of [key]]: expected value of type [string] but got [number]],
-    ]
+        Array [
+          "value",
+          [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+        ]
   `);
 });
 
@@ -164,6 +178,32 @@ test("throws error if 'setSchema' called several times for the same key", async 
   await expect(addSchema()).rejects.toMatchInlineSnapshot(
     `[Error: Validation schema for [key] was already registered.]`
   );
+});
+
+test('flags schema paths as handled when registering a schema', async () => {
+  const rawConfigProvider = rawConfigServiceMock.create({
+    rawConfig: {
+      service: {
+        string: 'str',
+        number: 42,
+      },
+    },
+  });
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+  await configService.setSchema(
+    'service',
+    schema.object({
+      string: schema.string(),
+      number: schema.number(),
+    })
+  );
+
+  expect(await configService.getUsedPaths()).toMatchInlineSnapshot(`
+    Array [
+      "service.string",
+      "service.number",
+    ]
+  `);
 });
 
 test('tracks unhandled paths', async () => {
@@ -298,7 +338,7 @@ test('does not throw if schema does not define "enabled" schema', async () => {
 
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
-  expect(
+  await expect(
     configService.setSchema(
       'pid',
       schema.object({
@@ -369,4 +409,50 @@ test('allows plugins to specify "enabled" flag via validation schema', async () 
   );
 
   expect(await configService.isEnabledAtPath('baz')).toBe(true);
+});
+
+test('does not throw during validation is every schema is valid', async () => {
+  const rawConfig = getRawConfigProvider({ stringKey: 'foo', numberKey: 42 });
+
+  const configService = new ConfigService(rawConfig, defaultEnv, logger);
+  await configService.setSchema('stringKey', schema.string());
+  await configService.setSchema('numberKey', schema.number());
+
+  await expect(configService.validate()).resolves.toBeUndefined();
+});
+
+test('throws during validation is any schema is invalid', async () => {
+  const rawConfig = getRawConfigProvider({ stringKey: 123, numberKey: 42 });
+
+  const configService = new ConfigService(rawConfig, defaultEnv, logger);
+  await configService.setSchema('stringKey', schema.string());
+  await configService.setSchema('numberKey', schema.number());
+
+  await expect(configService.validate()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"[config validation of [stringKey]]: expected value of type [string] but got [number]"`
+  );
+});
+
+test('logs deprecation warning during validation', async () => {
+  const rawConfig = getRawConfigProvider({});
+  const configService = new ConfigService(rawConfig, defaultEnv, logger);
+
+  mockApplyDeprecations.mockImplementationOnce((config, deprecations, log) => {
+    log('some deprecation message');
+    log('another deprecation message');
+    return config;
+  });
+
+  loggingServiceMock.clear(logger);
+  await configService.validate();
+  expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "some deprecation message",
+      ],
+      Array [
+        "another deprecation message",
+      ],
+    ]
+  `);
 });

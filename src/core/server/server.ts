@@ -84,6 +84,7 @@ export class Server {
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
+    await this.configService.validate();
     await ensureValidConfiguration(this.configService, legacyPlugins);
 
     const contextServiceSetup = this.context.setup({
