@@ -98,7 +98,7 @@ describe('actions_connectors_list', () => {
 
   it('select item for edit should render ConnectorEditFlyout', () => {
     wrapper
-      .find('[data-test-subj="edit"]')
+      .find('[data-test-subj="edit1"]')
       .first()
       .simulate('click');
     expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);
@@ -106,7 +106,7 @@ describe('actions_connectors_list', () => {
 
   it('change capability', () => {
     wrapper
-      .find('[data-test-subj="edit"]')
+      .find('[data-test-subj="edit1"]')
       .first()
       .simulate('click');
     expect(wrapper.find('ConnectorEditFlyout')).toHaveLength(1);

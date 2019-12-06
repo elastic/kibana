@@ -162,10 +162,10 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
-      render: (item: ActionConnectorTableItem) => {
+      render: (value: string, item: ActionConnectorTableItem) => {
         return (
-          <EuiLink onClick={() => editItem(item)} key={item.id}>
-            {item}
+          <EuiLink data-test-subj={`edit${item.id}`} onClick={() => editItem(item)} key={item.id}>
+            {value}
           </EuiLink>
         );
       },
@@ -202,26 +202,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
     {
       name: '',
       actions: [
-        {
-          enabled: () => canSave,
-          name: i18n.translate(
-            'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionName',
-            { defaultMessage: 'Edit' }
-          ),
-          description: canSave
-            ? i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionDescription',
-                { defaultMessage: 'Edit this action' }
-              )
-            : i18n.translate(
-                'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.editActionDisabledDescription',
-                { defaultMessage: 'Unable to edit actions' }
-              ),
-          type: 'icon',
-          icon: 'pencil',
-          'data-test-subj': 'edit',
-          onClick: (item: ActionConnectorTableItem) => editItem(item),
-        },
         {
           enabled: () => canDelete,
           'data-test-subj': 'deleteConnector',

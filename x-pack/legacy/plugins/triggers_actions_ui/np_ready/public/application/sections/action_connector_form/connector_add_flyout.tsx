@@ -63,7 +63,7 @@ export const ConnectorAddFlyout = () => {
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>
-            {actionTypeModel ? (
+            {actionTypeModel && actionType ? (
               <Fragment>
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
