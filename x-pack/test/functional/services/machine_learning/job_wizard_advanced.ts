@@ -46,7 +46,6 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     async setQueryDelay(queryDelay: string) {
       await testSubjects.setValue('mlJobWizardInputQueryDelay', queryDelay, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertQueryDelayValue(queryDelay);
@@ -64,7 +63,6 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     async setFrequency(frequency: string) {
       await testSubjects.setValue('mlJobWizardInputFrequency', frequency, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertFrequencyValue(frequency);
@@ -82,7 +80,6 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     async setScrollSize(scrollSize: string) {
       await testSubjects.setValue('mlJobWizardInputScrollSize', scrollSize, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertScrollSizeValue(scrollSize);
@@ -262,7 +259,6 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     async setDetectorDescription(description: string) {
       await testSubjects.setValue('mlAdvancedDetectorDescriptionInput', description, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertDetectorDescriptionValue(description);

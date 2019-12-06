@@ -110,7 +110,6 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async setBucketSpan(bucketSpan: string) {
       await testSubjects.setValue('mlJobWizardInputBucketSpan', bucketSpan, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertBucketSpanValue(bucketSpan);
@@ -128,7 +127,6 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async setJobId(jobId: string) {
       await testSubjects.setValue('mlJobWizardInputJobId', jobId, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertJobIdValue(jobId);
@@ -148,7 +146,6 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async setJobDescription(jobDescription: string) {
       await testSubjects.setValue('mlJobWizardInputJobDescription', jobDescription, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
@@ -294,7 +291,6 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       }
       await testSubjects.setValue(subj, modelMemoryLimit, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertModelMemoryLimitValue(modelMemoryLimit, {

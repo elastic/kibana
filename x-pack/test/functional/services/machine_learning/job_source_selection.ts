@@ -18,7 +18,6 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
     async filterSourceSelection(sourceName: string) {
       await testSubjects.setValue('savedObjectFinderSearchInput', sourceName, {
         clearWithKeyboard: true,
-        clearCharByChar: true,
         typeCharByChar: true,
       });
       await this.assertSourceListContainsEntry(sourceName);
