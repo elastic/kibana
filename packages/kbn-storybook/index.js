@@ -19,7 +19,7 @@
 
 const fs = require('fs');
 const { join } = require('path');
-const mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp'); // eslint-disable-line
 const { promisify } = require('util');
 const Rx = require('rxjs');
 const { first } = require('rxjs/operators');

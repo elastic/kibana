@@ -25,7 +25,7 @@ const normalize = require('normalize-path');
 const { promisify } = require('util');
 
 const watch = require('glob-watcher');
-const mkdirp = require('mkdirp');
+const mkdirp = require('mkdirp'); // eslint-disable-line
 const glob = require('fast-glob');
 
 const mkdirpAsync = promisify(mkdirp);
