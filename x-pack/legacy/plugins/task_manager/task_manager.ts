@@ -10,7 +10,7 @@ import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 
 import { Option, none, some } from 'fp-ts/lib/Option';
-import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
+import { Result, either, map, mapErr, promiseResult } from './lib/result_type';
 
 import { Logger } from './types';
 import {
@@ -61,7 +61,7 @@ interface RunNowResult {
   id: string;
 }
 
-type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim;
+export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim;
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
@@ -273,49 +273,10 @@ export class TaskManager {
    */
   public async runNow(taskId: string): Promise<RunNowResult> {
     await this.waitUntilStarted();
-    return new Promise((resolve, reject) => {
-      const subscription = this.events$
-        // listen for all events related to the current task
-        .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
-        .subscribe((taskEvent: TaskLifecycleEvent) => {
-          either(
-            taskEvent.event,
-            (taskInstance: ConcreteTaskInstance) => {
-              // resolve if the task has run sucessfully
-              if (isTaskRunEvent(taskEvent)) {
-                subscription.unsubscribe();
-                resolve({ id: taskInstance.id });
-              }
-            },
-            async (error: Error) => {
-              // reject if any error event takes place for the requested task
-              subscription.unsubscribe();
-              reject(
-                map(
-                  // if the error happened in the Claim phase - we try to provide better insight
-                  // into why we failed to claim by getting the task's current lifecycle status
-                  isTaskClaimEvent(taskEvent)
-                    ? await promiseResult<TaskLifecycle, Error>(this.store.getLifecycle(taskId))
-                    : asErr(error),
-                  (taskLifecycleStatus: TaskLifecycle) => {
-                    if (taskLifecycleStatus === TaskLifecycleResult.NotFound) {
-                      return new Error(`Failed to run task "${taskId}" as it does not exist`);
-                    } else if (
-                      taskLifecycleStatus === TaskStatus.Running ||
-                      taskLifecycleStatus === TaskStatus.Claiming
-                    ) {
-                      return new Error(`Failed to run task "${taskId}" as it is currently running`);
-                    }
-                  },
-                  (err: Error) => {
-                    this.logger.error(`Failed to get Task "${taskId}" as part of runNow: ${err}`);
-                    return err;
-                  }
-                )
-              );
-            }
-          );
-        });
+    return new Promise(async (resolve, reject) => {
+      awaitTaskRunResult(taskId, this.events$, this.store.getLifecycle.bind(this.store))
+        .then(resolve)
+        .catch(reject);
 
       this.attemptToRun(some(taskId));
     });
@@ -424,4 +385,55 @@ export async function claimAvailableTasks(
     );
   }
   return [];
+}
+
+export async function awaitTaskRunResult(
+  taskId: string,
+  events$: Subject<TaskLifecycleEvent>,
+  getLifecycle: (id: string) => Promise<TaskLifecycle>
+): Promise<RunNowResult> {
+  return new Promise((resolve, reject) => {
+    const subscription = events$
+      // listen for all events related to the current task
+      .pipe(filter(({ id }: TaskLifecycleEvent) => id === taskId))
+      .subscribe((taskEvent: TaskLifecycleEvent) => {
+        either(
+          taskEvent.event,
+          (taskInstance: ConcreteTaskInstance) => {
+            // resolve if the task has run sucessfully
+            if (isTaskRunEvent(taskEvent)) {
+              subscription.unsubscribe();
+              resolve({ id: taskInstance.id });
+            }
+          },
+          async (error: Error) => {
+            // reject if any error event takes place for the requested task
+            subscription.unsubscribe();
+            return reject(
+              isTaskClaimEvent(taskEvent)
+                ? map(
+                    // if the error happened in the Claim phase - we try to provide better insight
+                    // into why we failed to claim by getting the task's current lifecycle status
+                    await promiseResult<TaskLifecycle, Error>(getLifecycle(taskId)),
+                    (taskLifecycleStatus: TaskLifecycle) => {
+                      if (taskLifecycleStatus === TaskLifecycleResult.NotFound) {
+                        return new Error(`Failed to run task "${taskId}" as it does not exist`);
+                      } else if (
+                        taskLifecycleStatus === TaskStatus.Running ||
+                        taskLifecycleStatus === TaskStatus.Claiming
+                      ) {
+                        return new Error(
+                          `Failed to run task "${taskId}" as it is currently running`
+                        );
+                      }
+                      return error;
+                    },
+                    () => error
+                  )
+                : error
+            );
+          }
+        );
+      });
+  });
 }
