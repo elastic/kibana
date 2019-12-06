@@ -212,5 +212,14 @@ export default async function ({ readConfigFile }) {
     junit: {
       reportName: 'Chrome X-Pack UI Functional Tests',
     },
+    security: {
+      roles: {
+        test_logstash_reader: {
+          elasticsearch: { cluster: [], indices: [{ names: ['logstash*'],
+            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
+              except: [] } }], run_as: [] }, kibana: [] }
+      },
+      defaultRoles: ['test_logstash_reader', 'kibana_user'],
+    }
   };
 }

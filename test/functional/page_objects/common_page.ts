@@ -100,8 +100,10 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
           `Found login page.  Logging in with username = ${config.get('servers.kibana.username')}`
         );
         await PageObjects.shield.login(
-          config.get('servers.kibana.username'),
-          config.get('servers.kibana.password')
+          // config.get('servers.kibana.username'),
+          // config.get('servers.kibana.password')
+          'test_user',
+          'changeme'
         );
         await find.byCssSelector(
           '[data-test-subj="kibanaChrome"] nav:not(.ng-hide)',

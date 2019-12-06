@@ -253,5 +253,13 @@ export const schema = Joi.object()
         fixedHeaderHeight: Joi.number().default(50),
       })
       .default(),
+
+    // settings for the security service
+    security: Joi.object()
+      .keys({
+        roles: Joi.object().default(),
+        defaultRoles: Joi.array().items(Joi.string()),
+      })
+      .default(),
   })
   .default();
