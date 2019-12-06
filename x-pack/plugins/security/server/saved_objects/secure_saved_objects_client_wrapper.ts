@@ -14,7 +14,8 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
   ISavedObjectsPredicate,
-  SavedObjectsPredicates,
+  OrSavedObjectsPredicates,
+  AndSavedObjectsPredicates,
   PropertyEqualsSavedObjectsPredicate,
   SavedObjectsTypesPredicate,
 } from '../../../../../src/core/server';
@@ -254,8 +255,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
               );
             } else {
               predicates.push(
-                new SavedObjectsPredicates(
-                  'AND',
+                new AndSavedObjectsPredicates(
                   condition.map(
                     ({ key, value }) => new PropertyEqualsSavedObjectsPredicate(key, value)
                   )
@@ -266,7 +266,13 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         }
         if (predicates.length > 0) {
           authorizedTypes.push(type);
-          typesPredicate.set(type, new SavedObjectsPredicates('OR', predicates));
+          typesPredicate.set(
+            type,
+            new OrSavedObjectsPredicates(
+              predicates,
+              this.errors.decorateForbiddenError(new Error(''))
+            )
+          );
         }
       }
     }
@@ -315,7 +321,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return predicate2;
     }
 
-    return new SavedObjectsPredicates('AND', [predicate1, predicate2]);
+    return new AndSavedObjectsPredicates([predicate1, predicate2]);
   }
 
   private andTypesPredicate(

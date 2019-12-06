@@ -60,8 +60,8 @@ export {
   SavedObjectsErrorHelpers,
   PropertyEqualsSavedObjectsPredicate,
   ISavedObjectsPredicate,
-  SavedObjectsPredicates,
-  SavedObjectsPredicatesOperator,
+  AndSavedObjectsPredicates,
+  OrSavedObjectsPredicates,
 } from './lib';
 
 export * from './saved_objects_client';

@@ -16,33 +16,34 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { ISavedObjectsPredicate, ISavedObjectsPredicateExecResult } from './predicate';
 
-export class PropertyEqualsSavedObjectsPredicate implements ISavedObjectsPredicate {
+export class OrSavedObjectsPredicates implements ISavedObjectsPredicate {
   constructor(
-    public readonly key: string,
-    public readonly value: string,
+    public readonly predicates: ISavedObjectsPredicate[],
     private readonly error?: Error
   ) {}
 
   exec(obj: any): ISavedObjectsPredicateExecResult {
-    if (obj.attributes[this.key] === this.value) {
+    const predicateResults = this.predicates.map(predicate => predicate.exec(obj));
+    const isValid = predicateResults.some(result => result.isValid);
+    if (isValid) {
       return {
-        isValid: true,
+        isValid,
       };
     }
 
     return {
-      isValid: false,
+      isValid,
       error: this.error,
     };
   }
 
   getQuery(type: string): Record<string, any> {
     return {
-      term: {
-        [`${type}.${this.key}`]: this.value,
+      bool: {
+        should: [this.predicates.map(predicate => predicate.getQuery(type))],
+        minimum_should_match: 1,
       },
     };
   }

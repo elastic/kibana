@@ -53,6 +53,7 @@ import {
   MutatingOperationRefreshSetting,
 } from '../../types';
 import { validateConvertFilterToKueryNode } from './filter_utils';
+import { ISavedObjectsPredicate } from './predicates';
 
 // BEWARE: The SavedObjectClient depends on the implementation details of the SavedObjectsRepository
 // so any breaking changes to this repository are considered breaking changes to the SavedObjectsClient.
@@ -181,19 +182,13 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
 
     if (predicate != null) {
-      if (
-        !predicate.exec({
-          id: id || '',
-          type,
-          attributes,
-          references,
-          migrationVersion,
-        })
-      ) {
-        throw SavedObjectsErrorHelpers.decorateBadRequestError(
-          new Error('GET OUTTA HERE YA TURKEY')
-        );
-      }
+      this._ensurePredicateIsValid(predicate, {
+        id: id || '',
+        type,
+        attributes,
+        references,
+        migrationVersion,
+      });
 
       const response = await this._callCluster('get', {
         id: this._serializer.generateRawId(options.namespace, type, id),
@@ -202,10 +197,8 @@ export class SavedObjectsRepository {
       });
       const indexFound = response.status !== 404;
       const documentFound = indexFound && response.found === true;
-      if (indexFound && documentFound && !predicate.exec(this._rawToSavedObject(response))) {
-        throw SavedObjectsErrorHelpers.decorateBadRequestError(
-          new Error('GET OUTTA HERE YA TURKEY')
-        );
+      if (indexFound && documentFound) {
+        this._ensurePredicateIsValid(predicate, this._rawToSavedObject(response));
       }
     }
 
@@ -951,6 +944,13 @@ export class SavedObjectsRepository {
   private _rawToSavedObject(raw: RawDoc): SavedObject {
     const savedObject = this._serializer.rawToSavedObject(raw);
     return omit(savedObject, 'namespace');
+  }
+
+  private _ensurePredicateIsValid(predicate: ISavedObjectsPredicate, savedObject: any): void {
+    const { isValid, error } = predicate.exec(savedObject);
+    if (!isValid) {
+      throw error || SavedObjectsErrorHelpers.createBadRequestError(`predicates don't match`);
+    }
   }
 }
 

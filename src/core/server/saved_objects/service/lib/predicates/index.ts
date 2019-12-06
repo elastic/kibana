@@ -17,6 +17,7 @@
  * under the License.
  */
 
+export { AndSavedObjectsPredicates } from './and_predicates';
 export { ISavedObjectsPredicate } from './predicate';
-export { SavedObjectsPredicatesOperator, SavedObjectsPredicates } from './predicates';
+export { OrSavedObjectsPredicates } from './or_predicates';
 export { PropertyEqualsSavedObjectsPredicate } from './property_equals';

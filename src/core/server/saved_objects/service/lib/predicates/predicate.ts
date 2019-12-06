@@ -16,8 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export interface ISavedObjectsPredicateExecResult {
+  isValid: boolean;
+  error?: Error;
+}
 
 export interface ISavedObjectsPredicate {
-  exec(obj: any): boolean;
+  exec(obj: any): ISavedObjectsPredicateExecResult;
   getQuery(type: string): Record<string, any>;
 }

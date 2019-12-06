@@ -27,10 +27,10 @@ export {
 } from './scoped_client_provider';
 
 export {
-  PropertyEqualsSavedObjectsPredicate,
+  AndSavedObjectsPredicates,
   ISavedObjectsPredicate,
-  SavedObjectsPredicates,
-  SavedObjectsPredicatesOperator,
+  OrSavedObjectsPredicates,
+  PropertyEqualsSavedObjectsPredicate,
 } from './predicates';
 
 export { SavedObjectsErrorHelpers } from './errors';
