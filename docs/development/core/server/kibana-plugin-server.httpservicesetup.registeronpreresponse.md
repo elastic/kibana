@@ -14,5 +14,5 @@ registerOnPreResponse: (handler: OnPreResponseHandler) => void;
 
 ## Remarks
 
-Doesn't provide the whole response object. Allows to extend response with custom headers. See [OnPreResponseHandler](./kibana-plugin-server.onpreresponsehandler.md)<!-- -->.
+Doesn't provide the whole response object. Supports extending response with custom headers. See [OnPreResponseHandler](./kibana-plugin-server.onpreresponsehandler.md)<!-- -->.
 

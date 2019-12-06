@@ -77,6 +77,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
 |  [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
+|  [OnPreResponseExtensions](./kibana-plugin-server.onpreresponseextensions.md) | Additional data to extend a response. |
+|  [OnPreResponseInfo](./kibana-plugin-server.onpreresponseinfo.md) | Response status code. |
 |  [OnPreResponseToolkit](./kibana-plugin-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [PackageInfo](./kibana-plugin-server.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |

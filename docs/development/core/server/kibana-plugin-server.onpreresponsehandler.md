@@ -9,5 +9,5 @@ See [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md)<!-- -->.
 <b>Signature:</b>
 
 ```typescript
-export declare type OnPreResponseHandler = (request: KibanaRequest, response: ResponseInfo, toolkit: OnPreResponseToolkit) => OnPreResponseResult | Promise<OnPreResponseResult>;
+export declare type OnPreResponseHandler = (request: KibanaRequest, preResponse: OnPreResponseInfo, toolkit: OnPreResponseToolkit) => OnPreResponseResult | Promise<OnPreResponseResult>;
 ```

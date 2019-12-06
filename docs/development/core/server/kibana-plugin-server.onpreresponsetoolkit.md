@@ -16,5 +16,5 @@ export interface OnPreResponseToolkit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [next](./kibana-plugin-server.onpreresponsetoolkit.next.md) | <code>(responseExtensions?: ResponseExtensions) =&gt; OnPreResponseResult</code> | To pass request to the next handler |
+|  [next](./kibana-plugin-server.onpreresponsetoolkit.next.md) | <code>(responseExtensions?: OnPreResponseExtensions) =&gt; OnPreResponseResult</code> | To pass request to the next handler |
 

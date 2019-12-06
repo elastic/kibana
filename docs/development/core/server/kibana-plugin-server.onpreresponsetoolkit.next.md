@@ -9,5 +9,5 @@ To pass request to the next handler
 <b>Signature:</b>
 
 ```typescript
-next: (responseExtensions?: ResponseExtensions) => OnPreResponseResult;
+next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
 ```

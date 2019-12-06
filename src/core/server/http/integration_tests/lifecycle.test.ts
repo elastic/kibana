@@ -161,7 +161,7 @@ describe('OnPreAuth', () => {
     expect(result.header['www-authenticate']).toBe('challenge');
   });
 
-  it("doesn't expose error details if interceptor throws", async () => {
+  it('does not expose error details if interceptor throws', async () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -734,7 +734,7 @@ describe('Auth', () => {
     expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Server rewrites a response header [www-authenticate].",
+          "onPreResponseHandler rewrote a response header [www-authenticate].",
         ],
       ]
     `);
@@ -769,7 +769,7 @@ describe('Auth', () => {
     expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Server rewrites a response header [www-authenticate].",
+          "onPreResponseHandler rewrote a response header [www-authenticate].",
         ],
       ]
     `);
@@ -928,7 +928,13 @@ describe('OnPreResponse', () => {
     );
     const router = createRouter('/');
 
-    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({
+        headers: {
+          'x-my-header': 'foo',
+        },
+      })
+    );
 
     registerOnPreResponse((req, res, t) =>
       t.next({
@@ -944,6 +950,7 @@ describe('OnPreResponse', () => {
       .expect(200);
 
     expect(result.header['x-kibana-header']).toBe('value');
+    expect(result.header['x-my-header']).toBe('foo');
   });
 
   it('logs a warning if interceptor rewrites response header', async () => {
@@ -971,7 +978,7 @@ describe('OnPreResponse', () => {
     expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Server rewrites a response header [x-kibana-header].",
+          "onPreResponseHandler rewrote a response header [x-kibana-header].",
         ],
       ]
     `);

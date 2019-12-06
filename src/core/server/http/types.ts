@@ -169,7 +169,7 @@ export interface HttpServiceSetup {
    *
    * @remarks
    * Doesn't provide the whole response object.
-   * Allows to extend response with custom headers.
+   * Supports extending response with custom headers.
    * See {@link OnPreResponseHandler}.
    *
    * @param handler {@link OnPreResponseHandler} - function to call.
