@@ -106,6 +106,7 @@ export interface Dataset {
   ingeset_pipeline: string;
   vars: object[];
   type: string;
+  package: string;
 }
 
 export interface RegistryPackage {
