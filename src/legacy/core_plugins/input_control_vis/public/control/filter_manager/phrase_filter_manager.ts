@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import { IndexPattern } from 'ui/index_patterns';
-import { PhraseFilter } from 'src/plugins/data/common/es_query/filters/index.js';
-import { FilterManager } from './filter_manager.js';
+import { PhraseFilter } from 'src/plugins/data/common/es_query/filters';
+import { FilterManager } from './filter_manager';
 import {
   FilterManager as QueryFilterManager,
   esFilters,

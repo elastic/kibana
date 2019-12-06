@@ -28,8 +28,8 @@ export interface ControlParamsOptions {
   decimalPlaces?: number;
   step?: number;
   type?: string;
-  multiselect: boolean;
-  dynamicOptions: boolean;
+  multiselect?: boolean;
+  dynamicOptions?: boolean;
   size?: number;
   order?: string;
 }
@@ -93,10 +93,7 @@ export const removeControl = (controls: ControlParams[], controlIndex: number): 
 ];
 
 export const getDefaultOptions = (type: CONTROL_TYPES): ControlParamsOptions => {
-  const defaultOptions: ControlParamsOptions = {
-    multiselect: false,
-    dynamicOptions: false,
-  };
+  const defaultOptions: ControlParamsOptions = {};
   switch (type) {
     case CONTROL_TYPES.RANGE:
       defaultOptions.decimalPlaces = 0;

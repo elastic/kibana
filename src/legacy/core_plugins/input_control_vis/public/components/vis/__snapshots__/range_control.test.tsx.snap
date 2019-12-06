@@ -20,7 +20,6 @@ exports[`disabled 1`] = `
 exports[`renders RangeControl 1`] = `
 <FormRow
   controlIndex={0}
-  disableMsg={null}
   id="mock-range-control"
   label="range control"
 >

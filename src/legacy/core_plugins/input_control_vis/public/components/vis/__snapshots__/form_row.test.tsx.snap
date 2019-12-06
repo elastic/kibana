@@ -47,7 +47,6 @@ exports[`renders disabled control with tooltip 1`] = `
     anchorClassName="eui-displayBlock"
     content="I am disabled for testing purposes"
     delay="regular"
-    placement="top"
     position="top"
   >
     <div>

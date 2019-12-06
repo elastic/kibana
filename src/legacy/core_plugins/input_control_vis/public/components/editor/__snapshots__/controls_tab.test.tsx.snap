@@ -11,11 +11,13 @@ exports[`renders ControlsTab 1`] = `
         "indexPattern": "indexPattern1",
         "label": "custom label",
         "options": Object {
+          "dynamicOptions": false,
           "multiselect": true,
           "order": "desc",
           "size": 5,
           "type": "terms",
         },
+        "parent": "parent",
         "type": "list",
       }
     }
@@ -47,8 +49,11 @@ exports[`renders ControlsTab 1`] = `
         "indexPattern": "indexPattern1",
         "label": "",
         "options": Object {
+          "dynamicOptions": false,
+          "multiselect": false,
           "step": 1,
         },
+        "parent": "parent",
         "type": "range",
       }
     }

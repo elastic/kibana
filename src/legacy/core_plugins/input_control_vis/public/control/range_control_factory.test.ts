@@ -78,10 +78,7 @@ describe('fetch', () => {
   const controlParams: ControlParams = {
     id: '1',
     fieldName: 'myNumberField',
-    options: {
-      multiselect: false,
-      dynamicOptions: false,
-    },
+    options: {},
     type: CONTROL_TYPES.RANGE,
     label: 'test',
     indexPattern: {} as any,

@@ -52,8 +52,6 @@ const controlParams: ControlParams = {
   options: {
     decimalPlaces: 0,
     step: 1,
-    dynamicOptions: false,
-    multiselect: false,
   },
   parent: '',
 };

@@ -29,8 +29,6 @@ const control: RangeControlClass = {
     return true;
   },
   options: {
-    multiselect: false,
-    dynamicOptions: false,
     decimalPlaces: 0,
     step: 1,
   },
@@ -58,8 +56,6 @@ test('disabled', () => {
       return false;
     },
     options: {
-      multiselect: false,
-      dynamicOptions: false,
       decimalPlaces: 0,
       step: 1,
     },

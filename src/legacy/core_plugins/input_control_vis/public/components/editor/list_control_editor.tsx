@@ -112,7 +112,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    let indexPattern;
+    let indexPattern: IndexPattern;
     try {
       indexPattern = await this.props.getIndexPattern(this.props.controlParams.indexPattern);
     } catch (err) {
@@ -124,7 +124,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    const field = indexPattern.fields.find(
+    const field = (indexPattern.fields as Field[]).find(
       ({ name }) => name === this.props.controlParams.fieldName
     );
     if (!field) {
@@ -190,7 +190,7 @@ export class ListControlEditor extends PureComponent<
               defaultMessage="Multiselect"
             />
           }
-          checked={this.props.controlParams.options.multiselect}
+          checked={this.props.controlParams.options.multiselect ?? true}
           onChange={event => {
             this.props.handleCheckboxOptionChange(this.props.controlIndex, 'multiselect', event);
           }}
@@ -223,7 +223,7 @@ export class ListControlEditor extends PureComponent<
               defaultMessage="Dynamic Options"
             />
           }
-          checked={this.props.controlParams.options.dynamicOptions}
+          checked={this.props.controlParams.options.dynamicOptions ?? false}
           onChange={event => {
             this.props.handleCheckboxOptionChange(this.props.controlIndex, 'dynamicOptions', event);
           }}

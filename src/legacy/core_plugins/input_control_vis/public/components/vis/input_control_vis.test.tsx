@@ -36,7 +36,6 @@ const mockListControl: ListControl = {
   options: {
     type: 'terms',
     multiselect: true,
-    dynamicOptions: false,
   },
   type: 'list',
   label: 'list control',
@@ -50,8 +49,6 @@ const mockRangeControl: RangeControl = {
     return true;
   },
   options: {
-    multiselect: false,
-    dynamicOptions: false,
     decimalPlaces: 0,
     step: 1,
   },

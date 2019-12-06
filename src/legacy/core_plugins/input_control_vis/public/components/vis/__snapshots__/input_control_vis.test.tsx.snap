@@ -18,7 +18,6 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
     >
       <InjectIntl(ListControlUi)
         controlIndex={0}
-        disableMsg={null}
         fetchOptions={[Function]}
         formatOptionLabel={[Function]}
         id="mock-list-control"
@@ -106,7 +105,6 @@ exports[`Clear btns enabled when there are values 1`] = `
     >
       <InjectIntl(ListControlUi)
         controlIndex={0}
-        disableMsg={null}
         fetchOptions={[Function]}
         formatOptionLabel={[Function]}
         id="mock-list-control"
@@ -194,7 +192,6 @@ exports[`Renders list control 1`] = `
     >
       <InjectIntl(ListControlUi)
         controlIndex={0}
-        disableMsg={null}
         fetchOptions={[Function]}
         formatOptionLabel={[Function]}
         id="mock-list-control"

@@ -79,7 +79,6 @@ beforeEach(() => {
           options: {
             type: 'terms',
             multiselect: true,
-            dynamicOptions: false,
             size: 5,
             order: 'desc',
           },
@@ -93,8 +92,6 @@ beforeEach(() => {
           type: 'range',
           options: {
             step: 1,
-            multiselect: false,
-            dynamicOptions: false,
           },
           parent: 'parent',
         },

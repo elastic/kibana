@@ -366,6 +366,7 @@ exports[`renders should display chaining input when parents are provided 1`] = `
           },
         ]
       }
+      value=""
     />
   </EuiFormRow>
   <EuiFormRow

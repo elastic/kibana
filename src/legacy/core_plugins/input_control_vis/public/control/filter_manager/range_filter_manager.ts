@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import { RangeFilterParams, RangeFilter } from 'src/plugins/data/common/es_query/filters/index.js';
-import { FilterManager } from './filter_manager.js';
+import { RangeFilterParams, RangeFilter } from 'src/plugins/data/common/es_query/filters/index';
+import { FilterManager } from './filter_manager';
 import { esFilters, IFieldType } from '../../../../../../plugins/data/public';
 
 interface SliderValue {
