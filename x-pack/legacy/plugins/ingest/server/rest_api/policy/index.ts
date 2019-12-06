@@ -118,3 +118,65 @@ export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
     return { item: policy, success: true, action: 'updated' };
   }) as FrameworkRouteHandler,
 });
+
+export const createAddPolicyDatasourceRoute = (libs: ServerLibs) => ({
+  method: 'POST',
+  path: '/api/ingest/policy/{policyId}/addDatasources',
+  config: {
+    validate: {
+      payload: {
+        datasources: Joi.array()
+          .items(Joi.string())
+          .required(),
+      },
+    },
+  },
+  handler: (async (
+    request: FrameworkRequest<{
+      params: { policyId: string };
+      payload: { datasources: string[] };
+    }>
+  ): Promise<ReturnTypeUpdate<any>> => {
+    if (!request.user || request.user.kind !== 'authenticated') {
+      throw Boom.unauthorized('Only authenticated users can create a policy');
+    }
+    const policy = await libs.policy.assignDatasource(
+      request.user,
+      request.params.policyId,
+      request.payload.datasources
+    );
+
+    return { item: policy, success: true, action: 'updated' };
+  }) as FrameworkRouteHandler,
+});
+
+export const createRemovePolicyDatasourceRoute = (libs: ServerLibs) => ({
+  method: 'POST',
+  path: '/api/ingest/policy/{policyId}/removeDatasources',
+  config: {
+    validate: {
+      payload: {
+        datasources: Joi.array()
+          .items(Joi.string())
+          .required(),
+      },
+    },
+  },
+  handler: (async (
+    request: FrameworkRequest<{
+      params: { policyId: string };
+      payload: { datasources: string[] };
+    }>
+  ): Promise<ReturnTypeUpdate<any>> => {
+    if (!request.user || request.user.kind !== 'authenticated') {
+      throw Boom.unauthorized('Only authenticated users can create a policy');
+    }
+    const policy = await libs.policy.unassignDatasource(
+      request.user,
+      request.params.policyId,
+      request.payload.datasources
+    );
+
+    return { item: policy, success: true, action: 'updated' };
+  }) as FrameworkRouteHandler,
+});

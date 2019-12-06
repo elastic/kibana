@@ -65,7 +65,7 @@ export class DatasourceAdapter {
       user,
       ids.map(id => ({
         id,
-        type: 'datasource',
+        type: 'datasources',
       }))
     );
     if (!datasourceSO) {

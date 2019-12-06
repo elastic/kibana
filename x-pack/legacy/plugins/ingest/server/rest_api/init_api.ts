@@ -12,6 +12,8 @@ import {
   createGETPolicyRoute,
   createPOSTPoliciesRoute,
   createPUTPoliciesRoute,
+  createAddPolicyDatasourceRoute,
+  createRemovePolicyDatasourceRoute,
 } from './policy';
 import {
   createGETDatasourcesRoute,
@@ -28,6 +30,8 @@ export function initRestApi(server: Server, libs: ServerLibs) {
   frameworkAdapter.registerRoute(createGETPoliciesRoute(libs));
   frameworkAdapter.registerRoute(createPOSTPoliciesRoute(libs));
   frameworkAdapter.registerRoute(createPUTPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createAddPolicyDatasourceRoute(libs));
+  frameworkAdapter.registerRoute(createRemovePolicyDatasourceRoute(libs));
 
   // Datasources routes
   frameworkAdapter.registerRoute(createGETDatasourceRoute(libs));
