@@ -36,7 +36,7 @@
  * under the License.
  */
 
-import { SearchSourceContract } from './search_source';
+import { SearchSourceContract } from '../index';
 
 export const searchSourceMock: MockedKeys<SearchSourceContract> = {
   setPreferredSearchStrategyId: jest.fn(),
