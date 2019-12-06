@@ -41,7 +41,7 @@ export interface ActionTypeExecutorOptions {
 export interface ActionResult {
   id: string;
   actionTypeId: string;
-  description: string;
+  name: string;
   config: Record<string, any>;
 }
 
@@ -81,7 +81,7 @@ export interface ActionType {
 
 export interface RawAction extends SavedObjectAttributes {
   actionTypeId: string;
-  description: string;
+  name: string;
   config: SavedObjectAttributes;
   secrets: SavedObjectAttributes;
 }

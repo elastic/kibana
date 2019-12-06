@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
+import { Root } from 'joi';
 
 import { PluginInitializerContext } from 'src/core/server';
 import { plugin } from './server';
@@ -24,32 +25,10 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
   DEFAULT_SIGNALS_INDEX,
+  SIGNALS_INDEX_KEY,
   DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
-
-// This is VERY TEMPORARY as we need a way to turn on alerting and actions
-// for the server without having to manually edit this file. Once alerting
-// and actions has their enabled true by default this can be removed.
-// 'alerting', 'actions' are hidden behind feature flags at the moment so if you turn
-// these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-// and legacy plugins cannot have optional requirements.
-// This returns ['alerting', 'actions', 'kibana', 'elasticsearch'] iff alertingFeatureEnabled is true
-// or if the developer signalsIndex is setup. Otherwise this returns ['kibana', 'elasticsearch']
-export const getRequiredPlugins = (
-  alertingFeatureEnabled: string | null | undefined,
-  signalsIndex: string | null | undefined
-) => {
-  const baseRequire = ['kibana', 'elasticsearch'];
-  if (
-    (signalsIndex != null && signalsIndex.trim() !== '') ||
-    (alertingFeatureEnabled && alertingFeatureEnabled.toLowerCase() === 'true')
-  ) {
-    return [...baseRequire, 'alerting', 'actions'];
-  } else {
-    return baseRequire;
-  }
-};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -57,7 +36,7 @@ export const siem = (kibana: any) => {
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: getRequiredPlugins(process.env.ALERTING_FEATURE_ENABLED, process.env.SIGNALS_INDEX),
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
@@ -126,6 +105,8 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
+        // DEPRECATED: This should be removed once the front end is no longer using any parts of it.
+        // TODO: Remove this as soon as no code is left that is pulling data from it.
         [DEFAULT_SIGNALS_INDEX_KEY]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
             defaultMessage: 'Elasticsearch signals index',
@@ -178,7 +159,11 @@ export const siem = (kibana: any) => {
         getInjectedUiAppVars,
         indexPatternsServiceFactory,
         injectUiAppVars,
-        plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
+        plugins: {
+          alerting: plugins.alerting,
+          xpack_main: plugins.xpack_main,
+          spaces: plugins.spaces,
+        },
         route: route.bind(server),
         savedObjects,
       };
@@ -188,6 +173,14 @@ export const siem = (kibana: any) => {
         setup.plugins,
         serverFacade
       );
+    },
+    config(Joi: Root) {
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
+        })
+        .default();
     },
   });
 };

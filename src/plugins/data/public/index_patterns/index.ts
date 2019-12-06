@@ -17,15 +17,16 @@
  * under the License.
  */
 
-import { IndexPatternMissingIndices } from './errors';
 import {
   ILLEGAL_CHARACTERS_KEY,
   CONTAINS_SPACES_KEY,
   ILLEGAL_CHARACTERS_VISIBLE,
   ILLEGAL_CHARACTERS,
+  IndexPatternMissingIndices,
   validateIndexPattern,
+  getFromSavedObject,
 } from './lib';
-import { getRoutes, getFromSavedObject } from './utils';
+import { getRoutes } from './utils';
 import { flattenHitWrapper, formatHitProvider } from './index_patterns';
 
 export const indexPatterns = {
