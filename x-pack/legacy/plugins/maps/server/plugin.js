@@ -60,9 +60,9 @@ export class MapPlugin {
       defaultMessage: 'Map'
     });
     if (home) {
-      home.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
+      home.sampleData.addSavedObjectsToSampleDataset('ecommerce', getEcommerceSavedObjects());
 
-      home.addAppLinksToSampleDataset('ecommerce', [
+      home.sampleData.addAppLinksToSampleDataset('ecommerce', [
         {
           path: createMapPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
@@ -70,7 +70,7 @@ export class MapPlugin {
         }
       ]);
 
-      home.replacePanelInSampleDatasetDashboard({
+      home.sampleData.replacePanelInSampleDatasetDashboard({
         sampleDataId: 'ecommerce',
         dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
         oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
@@ -81,9 +81,9 @@ export class MapPlugin {
         },
       });
 
-      home.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
+      home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
-      home.addAppLinksToSampleDataset('flights', [
+      home.sampleData.addAppLinksToSampleDataset('flights', [
         {
           path: createMapPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
@@ -91,7 +91,7 @@ export class MapPlugin {
         }
       ]);
 
-      home.replacePanelInSampleDatasetDashboard({
+      home.sampleData.replacePanelInSampleDatasetDashboard({
         sampleDataId: 'flights',
         dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
         oldEmbeddableId: '334084f0-52fd-11e8-a160-89cc2ad9e8e2',
@@ -102,15 +102,15 @@ export class MapPlugin {
         },
       });
 
-      home.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
-      home.addAppLinksToSampleDataset('logs', [
+      home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
+      home.sampleData.addAppLinksToSampleDataset('logs', [
         {
           path: createMapPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
           label: sampleDataLinkLabel,
           icon: APP_ICON
         }
       ]);
-      home.replacePanelInSampleDatasetDashboard({
+      home.sampleData.replacePanelInSampleDatasetDashboard({
         sampleDataId: 'logs',
         dashboardId: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
         oldEmbeddableId: '06cf9c40-9ee8-11e7-8711-e7a007dcef99',

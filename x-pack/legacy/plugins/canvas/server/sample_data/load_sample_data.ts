@@ -7,9 +7,12 @@
 import { CANVAS as label } from '../../i18n';
 // @ts-ignore Untyped local
 import { ecommerceSavedObjects, flightsSavedObjects, webLogsSavedObjects } from './index';
+import { SampleDataRegistrySetup } from '../../../../../../src/plugins/home/server';
 
-// @ts-ignore: Untyped in Kibana
-export function loadSampleData(addSavedObjectsToSampleDataset, addAppLinksToSampleDataset) {
+export function loadSampleData(
+  addSavedObjectsToSampleDataset: SampleDataRegistrySetup['addSavedObjectsToSampleDataset'],
+  addAppLinksToSampleDataset: SampleDataRegistrySetup['addAppLinksToSampleDataset']
+) {
   const now = new Date();
   const nowTimestamp = now.toISOString();
 

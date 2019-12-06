@@ -83,7 +83,7 @@ export interface SampleDatasetSchema {
 
   // Kibana saved objects (index patter, visualizations, dashboard, ...)
   // Should provide a nice demo of Kibana's functionality with the sample data set
-  savedObjects: SavedObject[] | any[];
+  savedObjects: SavedObject[];
   dataIndices: DataIndexSchema[];
   status?: string | undefined;
   statusMsg?: unknown;

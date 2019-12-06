@@ -72,7 +72,7 @@ export function infra(kibana: any) {
     },
     init(server: any) {
       initServerWithKibana(server);
-      server.addAppLinksToSampleDataset('logs', [
+      server.newPlatform.setup.plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
         {
           path: `/app/${APP_ID}#/logs`,
           label: logsSampleDataLinkLabel,

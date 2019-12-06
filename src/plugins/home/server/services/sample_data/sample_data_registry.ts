@@ -47,6 +47,9 @@ import { sampleDataSchema } from './lib/sample_dataset_schema';
 
 import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
 import { createListRoute, createInstallRoute } from './routes';
+import { UsageCollectionSetup } from '../../../../usage_collection/server';
+import { makeSampleDataUsageCollector, usage } from './usage';
+import { createUninstallRoute } from './routes/uninstall';
 
 const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();
@@ -60,10 +63,19 @@ export class SampleDataRegistry {
     ecommerceSampleDataset,
   ];
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup, usageCollections: UsageCollectionSetup | undefined) {
+    if (usageCollections) {
+      makeSampleDataUsageCollector(usageCollections, this.initContext);
+    }
+    const usageTracker = usage(
+      core.savedObjects,
+      this.initContext.logger.get('sample_data', 'telemetry')
+    );
     const router = core.http.createRouter();
     createListRoute(router, this.sampleDatasets);
-    createInstallRoute(router, this.sampleDatasets, this.initContext);
+    createInstallRoute(router, this.sampleDatasets, this.initContext, usageTracker);
+    createUninstallRoute(router, this.sampleDatasets, usageTracker);
+
     return {
       registerSampleDataset: (specProvider: SampleDatasetProvider) => {
         const { error, value } = Joi.validate(specProvider(), sampleDataSchema);

@@ -28,6 +28,7 @@ import {
   translateTimeRelativeToWeek,
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
+import { SampleDataUsageTracker } from '../usage/usage';
 
 const querySchema = {
   query: Joi.object().keys({ now: Joi.date().iso() }),
@@ -38,6 +39,7 @@ const insertDataIntoIndex = (
   index: string,
   nowReference: string,
   context: RequestHandlerContext,
+  // TODO don't pass init context but an initialized logger
   initContext: PluginInitializerContext
 ) => {
   const bulkInsert = async (docs: any) => {
@@ -87,7 +89,9 @@ const insertDataIntoIndex = (
 export function createInstallRoute(
   router: IRouter,
   sampleDatasets: SampleDatasetSchema[],
-  initContext: PluginInitializerContext
+  // TODO don't pass init context but an initialized logger
+  initContext: PluginInitializerContext,
+  usageTracker: SampleDataUsageTracker
 ): void {
   router.post(
     {
@@ -194,7 +198,7 @@ export function createInstallRoute(
         initContext.logger.get().debug(errMsg, ['warning']);
         return res.customError({ body: errMsg, statusCode: 403 });
       }
-      // track the usage operation in a non-blocking way -> cannot move this to the NP yet
+      usageTracker.addInstall(params.id);
 
       // FINALLY
       return res.ok({
