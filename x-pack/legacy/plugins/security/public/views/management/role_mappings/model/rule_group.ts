@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BaseRule } from './base_rule';
+import { Rule } from './rule';
 
-export abstract class BaseRuleGroup extends BaseRule {
-  abstract getRules(): BaseRule[];
+export abstract class RuleGroup extends Rule {
+  abstract getRules(): Rule[];
 
-  abstract replaceRule(ruleIndex: number, rule: BaseRule): void;
+  abstract replaceRule(ruleIndex: number, rule: Rule): void;
 
   abstract removeRule(ruleIndex: number): void;
 
-  abstract addRule(rule: BaseRule): void;
+  abstract addRule(rule: Rule): void;
 
-  abstract canContainRule(rule: BaseRule): boolean;
+  abstract canContainRule(rule: Rule): boolean;
 
   public canAddRule(): boolean {
     return true;

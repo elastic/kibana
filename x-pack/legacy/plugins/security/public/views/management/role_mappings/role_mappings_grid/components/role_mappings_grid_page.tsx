@@ -28,11 +28,14 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { RoleMapping } from '../../../../../../common/model';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SectionLoading } from '../../../../../../../../../../src/plugins/es_ui_shared/public/components/section_loading';
 import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
 import { EmptyPrompt } from './empty_prompt';
-import { NoCompatibleRealms, DeleteProvider, PermissionDenied } from '../../components';
+import {
+  NoCompatibleRealms,
+  DeleteProvider,
+  PermissionDenied,
+  SectionLoading,
+} from '../../components';
 
 interface State {
   isLoadingApp: boolean;

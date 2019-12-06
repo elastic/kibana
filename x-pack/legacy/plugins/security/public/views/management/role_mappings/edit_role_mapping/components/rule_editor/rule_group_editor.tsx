@@ -9,21 +9,20 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
   EuiHorizontalRule,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { AddRuleButton } from './add_rule_button';
 import { RuleGroupTitle } from './rule_group_title';
 import { FieldRuleEditor } from './field_rule_editor';
-import { BaseRuleGroup, BaseRule, FieldRule } from '../../../model';
+import { RuleGroup, Rule, FieldRule } from '../../../model';
 
 interface Props {
-  rule: BaseRuleGroup;
+  rule: RuleGroup;
   allowAdd: boolean;
-  parentRule?: BaseRule;
+  parentRule?: Rule;
   ruleDepth: number;
-  onChange: (rule: BaseRuleGroup) => void;
+  onChange: (rule: RuleGroup) => void;
   onDelete: () => void;
 }
 export class RuleGroupEditor extends Component<Props, {}> {
@@ -80,14 +79,14 @@ export class RuleGroupEditor extends Component<Props, {}> {
                 <FieldRuleEditor
                   rule={subRule as FieldRule}
                   onChange={updatedSubRule => {
-                    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+                    const updatedRule = this.props.rule.clone() as RuleGroup;
                     updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                     this.props.onChange(updatedRule);
                   }}
                   allowAdd={this.props.allowAdd}
                   allowDelete={this.props.rule.canRemoveRule()}
                   onDelete={() => {
-                    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+                    const updatedRule = this.props.rule.clone() as RuleGroup;
                     updatedRule.removeRule(subRuleIndex);
                     this.props.onChange(updatedRule);
                   }}
@@ -103,17 +102,17 @@ export class RuleGroupEditor extends Component<Props, {}> {
             <Fragment>
               <EuiFlexItem key={subRuleIndex}>
                 <RuleGroupEditor
-                  rule={subRule as BaseRuleGroup}
+                  rule={subRule as RuleGroup}
                   parentRule={this.props.rule}
                   allowAdd={this.props.allowAdd}
                   ruleDepth={this.props.ruleDepth + 1}
                   onChange={updatedSubRule => {
-                    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+                    const updatedRule = this.props.rule.clone() as RuleGroup;
                     updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                     this.props.onChange(updatedRule);
                   }}
                   onDelete={() => {
-                    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+                    const updatedRule = this.props.rule.clone() as RuleGroup;
                     updatedRule.removeRule(subRuleIndex);
                     this.props.onChange(updatedRule);
                   }}
@@ -128,8 +127,8 @@ export class RuleGroupEditor extends Component<Props, {}> {
     });
   };
 
-  private onAddRuleClick = (newRule: BaseRule) => {
-    const updatedRule = this.props.rule.clone() as BaseRuleGroup;
+  private onAddRuleClick = (newRule: Rule) => {
+    const updatedRule = this.props.rule.clone() as RuleGroup;
     updatedRule.addRule(newRule);
     this.props.onChange(updatedRule);
   };

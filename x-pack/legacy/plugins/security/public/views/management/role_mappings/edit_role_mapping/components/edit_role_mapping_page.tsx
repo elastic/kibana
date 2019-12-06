@@ -8,11 +8,9 @@ import React, { Component, ChangeEvent, Fragment } from 'react';
 import {
   EuiCallOut,
   EuiDescribedFormGroup,
-  EuiEmptyPrompt,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiLoadingSpinner,
   EuiPageContent,
   EuiPanel,
   EuiSpacer,
@@ -34,7 +32,12 @@ import { RoleMapping } from '../../../../../../common/model';
 import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
 import { RuleEditor } from './rule_editor';
 import { RoleSelector } from './role_selector';
-import { NoCompatibleRealms, PermissionDenied, DeleteProvider } from '../../components';
+import {
+  NoCompatibleRealms,
+  PermissionDenied,
+  DeleteProvider,
+  SectionLoading,
+} from '../../components';
 import { ROLE_MAPPINGS_PATH } from '../../../management_urls';
 import {
   validateRoleMappingName,
@@ -101,18 +104,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
     if (isLoadingApp) {
       return (
         <EuiPageContent>
-          <EuiEmptyPrompt
-            title={<EuiLoadingSpinner size="xl" />}
-            body={
-              <EuiText color="subdued">
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.table.loadingRoleMappingDescription"
-                  defaultMessage="Loading…"
-                />
-              </EuiText>
-            }
-            data-test-subj="sectionLoading"
-          />
+          <SectionLoading />
         </EuiPageContent>
       );
     }

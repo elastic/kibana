@@ -5,11 +5,11 @@
  */
 
 import _ from 'lodash';
-import { BaseRule } from './base_rule';
+import { Rule } from './rule';
 
 export type FieldRuleValue = string | number | null | Array<string | number | null>;
 
-export class FieldRule extends BaseRule {
+export class FieldRule extends Rule {
   constructor(public readonly field: string, public readonly value: FieldRuleValue) {
     super();
   }

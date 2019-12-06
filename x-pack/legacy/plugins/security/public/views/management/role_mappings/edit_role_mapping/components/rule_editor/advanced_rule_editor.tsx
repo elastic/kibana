@@ -9,11 +9,11 @@ import React, { useState, Fragment } from 'react';
 import 'brace/mode/json';
 import 'brace/theme/github';
 import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer } from '@elastic/eui';
-import { BaseRule, RuleBuilderError, generateRulesFromRaw } from '../../../model';
+import { Rule, RuleBuilderError, generateRulesFromRaw } from '../../../model';
 
 interface Props {
-  rules: BaseRule | null;
-  onChange: (updatedRules: BaseRule | null) => void;
+  rules: Rule | null;
+  onChange: (updatedRules: Rule | null) => void;
   onValidityChange: (isValid: boolean) => void;
 }
 

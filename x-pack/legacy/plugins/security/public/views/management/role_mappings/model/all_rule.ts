@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BaseRuleGroup } from './base_rule_group';
-import { BaseRule } from './base_rule';
+import { RuleGroup } from './rule_group';
+import { Rule } from './rule';
 
-export class AllRule extends BaseRuleGroup {
-  constructor(private rules: BaseRule[] = []) {
+export class AllRule extends RuleGroup {
+  constructor(private rules: Rule[] = []) {
     super();
   }
 
@@ -24,7 +24,7 @@ export class AllRule extends BaseRuleGroup {
     return `All of the following are true`;
   }
 
-  public replaceRule(ruleIndex: number, rule: BaseRule) {
+  public replaceRule(ruleIndex: number, rule: Rule) {
     this.rules.splice(ruleIndex, 1, rule);
   }
 
@@ -32,7 +32,7 @@ export class AllRule extends BaseRuleGroup {
     this.rules.splice(ruleIndex, 1);
   }
 
-  public addRule(rule: BaseRule) {
+  public addRule(rule: Rule) {
     this.rules.push(rule);
   }
 

@@ -7,7 +7,7 @@
 import { FieldRule, FieldRuleValue } from './field_rule';
 import { AllRule } from './all_rule';
 import { AnyRule } from './any_rule';
-import { BaseRule } from './base_rule';
+import { Rule } from './rule';
 import { ExceptFieldRule } from './except_field_rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
@@ -24,17 +24,43 @@ export class RuleBuilderError extends Error {
 
 interface RuleBuilderResult {
   maxDepth: number;
-  rules: BaseRule | null;
+  rules: Rule | null;
 }
 
-function createResult(rules: BaseRule | null, ...depths: number[]) {
+export function generateRulesFromRaw(rawRules: Record<string, any> = {}): RuleBuilderResult {
+  return parseRawRules(rawRules, null, [], 0);
+}
+
+function parseRawRules(
+  rawRules: Record<string, any>,
+  parentRuleType: string | null,
+  ruleTrace: string[],
+  depth: number
+): RuleBuilderResult {
+  const entries = Object.entries(rawRules) as Array<[string, any]>;
+  if (!entries.length) {
+    return createResult(null, depth);
+  }
+  if (entries.length > 1) {
+    throw new RuleBuilderError(
+      `Expected a single rule definition, but found ${entries.length}`,
+      ruleTrace
+    );
+  }
+
+  const rule = entries[0];
+  const [ruleType, ruleDefinition] = rule;
+  return createRuleForType(ruleType, ruleDefinition, parentRuleType, ruleTrace, depth + 1);
+}
+
+function createResult(rules: Rule | null, ...depths: number[]) {
   return {
     rules,
     maxDepth: Math.max(...depths),
   };
 }
 
-export function createRuleForType(
+function createRuleForType(
   ruleType: string,
   ruleDefinition: any | undefined,
   parentRuleType: string | null,
@@ -89,7 +115,7 @@ export function createRuleForType(
             maxDepth: Math.max(acc.maxDepth, result.maxDepth),
           };
         },
-        { subRules: [] as BaseRule[], maxDepth: 0 }
+        { subRules: [] as Rule[], maxDepth: 0 }
       );
 
       return createResult(
@@ -115,7 +141,7 @@ export function createRuleForType(
             maxDepth: Math.max(acc.maxDepth, result.maxDepth),
           };
         },
-        { subRules: [] as BaseRule[], maxDepth: 0 }
+        { subRules: [] as Rule[], maxDepth: 0 }
       );
 
       return createResult(
@@ -141,30 +167,4 @@ export function createRuleForType(
     default:
       throw new RuleBuilderError(`Unknown rule type: ${ruleType}`, [...ruleTrace, ruleType]);
   }
-}
-
-export function generateRulesFromRaw(rawRules: Record<string, any> = {}): RuleBuilderResult {
-  return parseRawRules(rawRules, null, [], 0);
-}
-
-function parseRawRules(
-  rawRules: Record<string, any>,
-  parentRuleType: string | null,
-  ruleTrace: string[],
-  depth: number
-): RuleBuilderResult {
-  const entries = Object.entries(rawRules) as Array<[string, any]>;
-  if (!entries.length) {
-    return createResult(null, depth);
-  }
-  if (entries.length > 1) {
-    throw new RuleBuilderError(
-      `Expected a single rule definition, but found ${entries.length}`,
-      ruleTrace
-    );
-  }
-
-  const rule = entries[0];
-  const [ruleType, ruleDefinition] = rule;
-  return createRuleForType(ruleType, ruleDefinition, parentRuleType, ruleTrace, depth + 1);
 }

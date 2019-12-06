@@ -9,7 +9,6 @@ import {
   EuiSpacer,
   EuiConfirmModal,
   EuiOverlayMask,
-  EuiText,
   EuiCallOut,
   EuiIcon,
   EuiLink,
@@ -21,7 +20,7 @@ import {
   DEFAULT_VISUAL_EDITOR_RULE_DEPTH_CUTOFF,
   VISUAL_MAX_RULE_DEPTH,
 } from '../../services/role_mapping_constants';
-import { BaseRule, generateRulesFromRaw } from '../../../model';
+import { Rule, generateRulesFromRaw } from '../../../model';
 
 interface Props {
   rawRules: RoleMapping['rules'];
@@ -30,7 +29,7 @@ interface Props {
 }
 
 interface State {
-  rules: BaseRule | null;
+  rules: Rule | null;
   maxDepth: number;
   isRuleValid: boolean;
   showConfirmModeChange: boolean;
@@ -48,15 +47,6 @@ export class RuleEditor extends Component<Props, State> {
       showVisualEditorDisabledAlert: false,
     };
   }
-
-  // public componentWillReceiveProps(nextProps: Props) {
-  //   if (!this.state.rules) {
-  //     const nextState = this.initializeFromRawRules(nextProps.rawRules);
-  //     if (nextState.rules) {
-  //       this.setState({ ...nextState });
-  //     }
-  //   }
-  // }
 
   public render() {
     return (
@@ -166,7 +156,7 @@ export class RuleEditor extends Component<Props, State> {
     );
   };
 
-  private onRuleChange = (updatedRule: BaseRule | null) => {
+  private onRuleChange = (updatedRule: Rule | null) => {
     const raw = updatedRule ? updatedRule.toRaw() : {};
     this.props.onChange(raw);
     this.setState({

@@ -5,14 +5,14 @@
  */
 
 import _ from 'lodash';
-import { BaseRuleGroup } from './base_rule_group';
+import { RuleGroup } from './rule_group';
 import { FieldRule } from './field_rule';
-import { BaseRule } from './base_rule';
+import { Rule } from './rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptAnyRule } from './except_any_rule';
 
-export class ExceptFieldRule extends BaseRuleGroup {
-  constructor(private fieldRule: FieldRule) {
+export class ExceptFieldRule extends RuleGroup {
+  constructor(private fieldRule: FieldRule = new FieldRule('username', '*')) {
     super();
   }
 
@@ -44,7 +44,7 @@ export class ExceptFieldRule extends BaseRuleGroup {
     return false;
   }
 
-  public canContainRule(rule: BaseRule) {
+  public canContainRule(rule: Rule) {
     const forbiddenRules = [ExceptAllRule, ExceptAnyRule, ExceptFieldRule];
     return forbiddenRules.every(forbiddenRule => !(rule instanceof forbiddenRule));
   }

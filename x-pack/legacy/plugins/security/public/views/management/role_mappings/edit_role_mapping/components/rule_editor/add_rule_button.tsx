@@ -6,11 +6,11 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
-import { BaseRule, FieldRule, AllRule } from '../../../model';
+import { Rule, FieldRule, AllRule } from '../../../model';
 
 interface Props {
   autoAdd?: boolean;
-  onClick: (newRule: BaseRule) => void;
+  onClick: (newRule: Rule) => void;
 }
 
 export const AddRuleButton = (props: Props) => {

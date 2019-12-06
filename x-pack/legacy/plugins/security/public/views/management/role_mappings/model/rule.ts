@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export abstract class BaseRule {
+export abstract class Rule {
   abstract toRaw(): Record<string, any>;
 
   abstract getType(): string;
 
   abstract getDisplayTitle(): string;
 
-  abstract clone(): BaseRule;
+  abstract clone(): Rule;
 }

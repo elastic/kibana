@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BaseRuleGroup } from './base_rule_group';
-import { BaseRule } from './base_rule';
+import { RuleGroup } from './rule_group';
+import { Rule } from './rule';
 import { ExceptAllRule } from './except_all_rule';
 import { ExceptFieldRule } from './except_field_rule';
 
-export class ExceptAnyRule extends BaseRuleGroup {
-  constructor(private rules: BaseRule[] = []) {
+export class ExceptAnyRule extends RuleGroup {
+  constructor(private rules: Rule[] = []) {
     super();
   }
 
@@ -26,7 +26,7 @@ export class ExceptAnyRule extends BaseRuleGroup {
     return `None of the following are true`;
   }
 
-  public replaceRule(ruleIndex: number, rule: BaseRule) {
+  public replaceRule(ruleIndex: number, rule: Rule) {
     this.rules.splice(ruleIndex, 1, rule);
   }
 
@@ -34,11 +34,11 @@ export class ExceptAnyRule extends BaseRuleGroup {
     this.rules.splice(ruleIndex, 1);
   }
 
-  public addRule(rule: BaseRule) {
+  public addRule(rule: Rule) {
     this.rules.push(rule);
   }
 
-  public canContainRule(rule: BaseRule) {
+  public canContainRule(rule: Rule) {
     const forbiddenRules = [ExceptAllRule, ExceptAnyRule, ExceptFieldRule];
     return forbiddenRules.every(forbiddenRule => !(rule instanceof forbiddenRule));
   }

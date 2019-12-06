@@ -14,39 +14,41 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
 } from '@elastic/eui';
-import { BaseRuleGroup, BaseRule, createRuleForType } from '../../../model';
+import {
+  RuleGroup,
+  Rule,
+  AllRule,
+  AnyRule,
+  ExceptAllRule,
+  ExceptAnyRule,
+  ExceptFieldRule,
+} from '../../../model';
 
 interface Props {
-  rule: BaseRuleGroup;
+  rule: RuleGroup;
   readonly?: boolean;
-  parentRule?: BaseRule;
-  onChange: (rule: BaseRuleGroup) => void;
+  parentRule?: Rule;
+  onChange: (rule: RuleGroup) => void;
 }
 
-// TODO: Cleanup
-const rules = ['all', 'any'].map(
-  type => createRuleForType(type, undefined, null, [], 0).rules
-) as BaseRule[];
-
-const exceptRules = ['all', 'any', 'field'].map(
-  type => createRuleForType(type, undefined, 'except', [], 0).rules
-) as BaseRule[];
+const rules = [new AllRule(), new AnyRule()];
+const exceptRules = [new ExceptAllRule(), new ExceptAnyRule(), new ExceptFieldRule()];
 
 export const RuleGroupTitle = (props: Props) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const [showConfirmChangeModal, setShowConfirmChangeModal] = useState(false);
-  const [pendingNewRule, setPendingNewRule] = useState<BaseRuleGroup | null>(null);
+  const [pendingNewRule, setPendingNewRule] = useState<RuleGroup | null>(null);
 
   const canUseExcept = props.parentRule && props.parentRule.getType() === 'all';
 
   const availableRuleTypes = [...rules, ...(canUseExcept ? exceptRules : [])];
 
-  const onChange = (newRule: BaseRuleGroup) => {
+  const onChange = (newRule: RuleGroup) => {
     const currentSubRules = props.rule.getRules();
     const areSubRulesValid = currentSubRules.every(subRule => newRule.canContainRule(subRule));
     if (areSubRulesValid) {
-      const clone = newRule.clone() as BaseRuleGroup;
+      const clone = newRule.clone() as RuleGroup;
       currentSubRules.forEach(subRule => clone.addRule(subRule));
 
       props.onChange(clone);
@@ -57,8 +59,8 @@ export const RuleGroupTitle = (props: Props) => {
     }
   };
 
-  const changeRuleDiscardingSubRules = (newRule: BaseRuleGroup) => {
-    props.onChange(newRule.clone() as BaseRuleGroup);
+  const changeRuleDiscardingSubRules = (newRule: RuleGroup) => {
+    props.onChange(newRule.clone() as RuleGroup);
     setIsMenuOpen(false);
   };
 
@@ -75,11 +77,7 @@ export const RuleGroupTitle = (props: Props) => {
           const isSelected = rt.getDisplayTitle() === props.rule.getDisplayTitle();
           const icon = isSelected ? 'check' : undefined;
           return (
-            <EuiContextMenuItem
-              key={index}
-              icon={icon}
-              onClick={() => onChange(rt as BaseRuleGroup)}
-            >
+            <EuiContextMenuItem key={index} icon={icon} onClick={() => onChange(rt as RuleGroup)}>
               {rt.getDisplayTitle()}
             </EuiContextMenuItem>
           );

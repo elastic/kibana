@@ -5,14 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import {
-  EuiComboBox,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import { RoleMapping, Role } from '../../../../../../../common/model';
 import { RolesApi } from '../../../../../../lib/roles_api';
 import { AddRoleTemplateButton } from './add_role_template_button';

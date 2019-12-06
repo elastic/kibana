@@ -10,12 +10,12 @@ import { FieldRuleEditor } from './field_rule_editor';
 import { AddRuleButton } from './add_rule_button';
 import { RuleGroupEditor } from './rule_group_editor';
 import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
-import { BaseRule, FieldRule, BaseRuleGroup } from '../../../model';
+import { Rule, FieldRule, RuleGroup } from '../../../model';
 
 interface Props {
-  rules: BaseRule | null;
+  rules: Rule | null;
   maxDepth: number;
-  onChange: (rules: BaseRule | null) => void;
+  onChange: (rules: Rule | null) => void;
   onSwitchEditorMode: () => void;
 }
 
@@ -70,7 +70,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
     );
   };
 
-  private onRuleChange = (updatedRule: BaseRule) => {
+  private onRuleChange = (updatedRule: Rule) => {
     this.props.onChange(updatedRule);
   };
 
@@ -78,11 +78,11 @@ export class VisualRuleEditor extends Component<Props, {}> {
     this.props.onChange(null);
   };
 
-  private renderRule = (rule: BaseRule, onChange: (updatedRule: BaseRule) => void) => {
+  private renderRule = (rule: Rule, onChange: (updatedRule: Rule) => void) => {
     return this.getEditorForRuleType(rule, onChange);
   };
 
-  private getEditorForRuleType(rule: BaseRule, onChange: (updatedRule: BaseRule) => void) {
+  private getEditorForRuleType(rule: Rule, onChange: (updatedRule: Rule) => void) {
     switch (rule.getType()) {
       case 'field':
         return (
@@ -99,7 +99,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
       case 'all':
         return (
           <RuleGroupEditor
-            rule={rule as BaseRuleGroup}
+            rule={rule as RuleGroup}
             ruleDepth={0}
             allowAdd={this.canUseVisualEditor()}
             onChange={value => onChange(value)}
