@@ -9,11 +9,11 @@ import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/i
 import { CombinedJob } from '../../common/job_creator/configs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../common/job_creator/util/constants';
 
-export async function preConfiguredJobRedirect() {
+export async function preConfiguredJobRedirect(indexPatterns: IndexPatterns) {
   const { job } = mlJobService.tempJobCloningObjects;
   if (job) {
     try {
-      await loadIndexPatterns();
+      await loadIndexPatterns(indexPatterns);
       const redirectUrl = getWizardUrlFromCloningJob(job);
       window.location.href = `#/${redirectUrl}`;
       return Promise.reject();

@@ -46,7 +46,7 @@ const PageWrapper: FC<{
 }> = ({ config, nextStepPath, deps }) => {
   const { context } = useResolver(undefined, undefined, config, {
     ...basicResolvers(deps),
-    preConfiguredJobRedirect,
+    preConfiguredJobRedirect: () => preConfiguredJobRedirect(deps.indexPatterns),
   });
   return (
     <PageLoader context={context}>

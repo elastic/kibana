@@ -11,17 +11,7 @@ import { start as navigation } from '../../../../../src/legacy/core_plugins/navi
 import { PluginInitializerContext } from '../../../../../src/core/public';
 import { plugin } from '.';
 
-// import { setup as fooSetup, start as fooStart } from '../../foo/public/legacy'; // assumes `foo` lives in `legacy/core_plugins`
-
 const pluginInstance = plugin({} as PluginInitializerContext);
-// const __LEGACYSetup = {
-//   bar: {}, // shim for a core service that hasn't migrated yet
-//   foo: fooSetup, // dependency on a legacy plugin
-// };
-// const __LEGACYStart = {
-//   bar: {}, // shim for a core service that hasn't migrated yet
-//   foo: fooStart, // dependency on a legacy plugin
-// };
 
 export const setup = pluginInstance.setup(npSetup.core, {
   data,
@@ -29,5 +19,3 @@ export const setup = pluginInstance.setup(npSetup.core, {
   npData: npStart.plugins.data,
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);
-// export const setup = pluginInstance.setup(npSetup.core, npSetup.plugins, __LEGACYSetup);
-// export const start = pluginInstance.start(npStart.core, npStart.plugins, __LEGACYStart);

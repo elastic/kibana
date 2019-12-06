@@ -20,7 +20,7 @@ const breadcrumbs = [
   ML_BREADCRUMB,
   ANOMALY_DETECTION_BREADCRUMB,
   {
-    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabelRecognize', {
       defaultMessage: 'Select index or search',
     }),
     href: '',

@@ -12,23 +12,8 @@ import 'uiExports/savedObjectTypes';
 import 'ui/autoload/all';
 import { IndexPatterns } from 'ui/index_patterns';
 
-// import { UiSettingsClientContract } from 'src/core/public';
 // needed to make syntax highlighting work in ace editors
 import 'ace';
-
-// import {
-//   EuiPage,
-//   EuiPageBody,
-//   EuiPageContent,
-//   EuiPageContentBody,
-//   EuiPageContentHeader,
-//   EuiPageContentHeaderSection,
-//   EuiPageHeader,
-//   EuiPageHeaderSection,
-//   EuiPageSideBar,
-//   EuiTitle,
-//   EuiSideNav,
-// } from '@elastic/eui';
 
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 import { DataStart } from 'src/legacy/core_plugins/data/public';
