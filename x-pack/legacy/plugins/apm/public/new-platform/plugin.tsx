@@ -42,6 +42,7 @@ export const REACT_APP_ROOT_ID = 'react-apm-root';
 const MainContainer = styled.main`
   min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
+  height: 100%;
 `;
 
 const App = ({ routes }: { routes: BreadcrumbRoute[] }) => {
@@ -70,9 +71,11 @@ export interface ApmPluginStartDeps {
 }
 
 export interface ConfigSchema {
-  apmIndexPatternTitle: string;
-  apmServiceMapEnabled: boolean;
-  apmUiEnabled: boolean;
+  indexPatternTitle: string;
+  serviceMapEnabled: boolean;
+  ui: {
+    enabled: boolean;
+  };
 }
 
 // These are to be used until we switch over all our context handling to
