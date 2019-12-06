@@ -9,8 +9,9 @@
 set -e
 ./check_env_variables.sh
 
-./delete_all_actions.sh
-./delete_all_alerts.sh
-./delete_all_alert_tasks.sh
-./delete_signal_index.sh
-./post_signal_index.sh
+# Example: ./post_signal_index.sh
+curl -s -k \
+ -H 'Content-Type: application/json' \
+ -H 'kbn-xsrf: 123' \
+ -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
+ -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/index | jq .
