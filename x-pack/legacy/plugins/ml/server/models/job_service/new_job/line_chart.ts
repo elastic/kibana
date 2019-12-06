@@ -128,7 +128,11 @@ function getSearchJsonFromConfig(
     },
   };
 
-  if (query.bool.must === undefined) {
+  if (query.bool === undefined) {
+    query.bool = {
+      must: [],
+    };
+  } else if (query.bool.must === undefined) {
     query.bool.must = [];
   }
 
