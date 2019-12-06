@@ -30,8 +30,8 @@ export const createStateContainerReactHelpers = <Container extends StateContaine
   const useContainer = (): Container => useContext(context);
 
   const useState = (): UnboxState<Container> => {
-    const { state$, state } = useContainer();
-    const value = useObservable(state$, state);
+    const { state$, get } = useContainer();
+    const value = useObservable(state$, get());
     return value;
   };
 
@@ -41,10 +41,10 @@ export const createStateContainerReactHelpers = <Container extends StateContaine
     selector: (state: UnboxState<Container>) => Result,
     comparator: Comparator<Result> = defaultComparator
   ): Result => {
-    const { state$, state } = useContainer();
-    const lastValueRef = useRef<Result>(state);
+    const { state$, get } = useContainer();
+    const lastValueRef = useRef<Result>(get());
     const [value, setValue] = React.useState<Result>(() => {
-      const newValue = selector(state);
+      const newValue = selector(get());
       lastValueRef.current = newValue;
       return newValue;
     });

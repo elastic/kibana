@@ -35,7 +35,6 @@ export type PureTransitionsToTransitions<T extends object> = {
 };
 
 export interface BaseStateContainer<State> {
-  state: RecursiveReadonly<State>;
   get: () => RecursiveReadonly<State>;
   set: (state: State) => void;
   state$: Observable<RecursiveReadonly<State>>;
