@@ -9,7 +9,7 @@ const getLicensePath = (acknowledge: boolean) =>
   `/_license${acknowledge ? '?acknowledge=true' : ''}`;
 
 export async function putLicense(
-  req: KibanaRequest<any, { acknowledge: string }, string>,
+  req: KibanaRequest<any, { acknowledge: string }, any>,
   elasticsearch: ElasticsearchPlugin,
   xpackInfo: any
 ) {
