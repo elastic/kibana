@@ -8,7 +8,21 @@ import { Plugin, CoreSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { IEmbeddable, IEmbeddableStart } from '../../../../../../src/plugins/embeddable/public';
 
-export class ResolverTestPlugin implements Plugin {
+export type ResolverTestPluginSetup = void;
+export type ResolverTestPluginStart = void;
+export interface ResolverTestPluginSetupDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
+export interface ResolverTestPluginStartDependencies {
+  embeddable: IEmbeddableStart;
+}
+
+export class ResolverTestPlugin
+  implements
+    Plugin<
+      ResolverTestPluginSetup,
+      ResolverTestPluginStart,
+      ResolverTestPluginSetupDependencies,
+      ResolverTestPluginStartDependencies
+    > {
   private resolveEmbeddable!: (
     value: IEmbeddable | undefined | PromiseLike<IEmbeddable | undefined> | undefined
   ) => void;

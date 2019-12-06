@@ -30,34 +30,34 @@ export function renderApp(
   };
 }
 
-const AppRoot: React.FC<{
-  embeddable: Promise<IEmbeddable | undefined>;
-}> = React.memo(({ embeddable: embeddablePromise }) => {
-  const [embeddable, setEmbeddable] = React.useState<IEmbeddable | undefined>(undefined);
-  const [renderTarget, setRenderTarget] = React.useState<HTMLDivElement | null>(null);
+const AppRoot = React.memo(
+  ({ embeddable: embeddablePromise }: { embeddable: Promise<IEmbeddable | undefined> }) => {
+    const [embeddable, setEmbeddable] = React.useState<IEmbeddable | undefined>(undefined);
+    const [renderTarget, setRenderTarget] = React.useState<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    let reject;
-    Promise.race([
-      new Promise<never>((...args) => {
-        reject = args[1];
-      }),
-      embeddablePromise,
-    ]).then(value => {
-      setEmbeddable(value);
-    });
+    useEffect(() => {
+      let cleanUp;
+      Promise.race([
+        new Promise<never>((_resolve, reject) => {
+          cleanUp = reject;
+        }),
+        embeddablePromise,
+      ]).then(value => {
+        setEmbeddable(value);
+      });
 
-    return reject;
-  }, [embeddablePromise]);
+      return cleanUp;
+    }, [embeddablePromise]);
 
-  useEffect(() => {
-    if (embeddable && renderTarget) {
-      embeddable.render(renderTarget);
-      return () => {
-        embeddable.destroy();
-      };
-    }
-  }, [embeddable, renderTarget]);
+    useEffect(() => {
+      if (embeddable && renderTarget) {
+        embeddable.render(renderTarget);
+        return () => {
+          embeddable.destroy();
+        };
+      }
+    }, [embeddable, renderTarget]);
 
-  return <div data-test-subj="resolverEmbeddableContainer" ref={setRenderTarget} />;
-});
+    return <div data-test-subj="resolverEmbeddableContainer" ref={setRenderTarget} />;
+  }
+);

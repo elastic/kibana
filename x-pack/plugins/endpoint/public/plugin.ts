@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreStart } from 'kibana/public';
-import { IEmbeddableStart } from 'src/plugins/embeddable/public';
+import { Plugin, CoreSetup } from 'kibana/public';
+import { IEmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ResolverEmbeddableFactory } from './embeddables/resolver';
 
 export type EndpointPluginStart = void;
 export type EndpointPluginSetup = void;
-export interface EndpointPluginSetupDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
-export interface EndpointPluginStartDependencies {
-  embeddable: IEmbeddableStart;
+export interface EndpointPluginSetupDependencies {
+  embeddable: IEmbeddableSetup;
 }
+
+export interface EndpointPluginStartDependencies {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export class EndpointPlugin
   implements
@@ -24,15 +24,15 @@ export class EndpointPlugin
       EndpointPluginSetupDependencies,
       EndpointPluginStartDependencies
     > {
-  public setup() {}
-
-  public start(_core: CoreStart, plugins: EndpointPluginStartDependencies) {
+  public setup(_core: CoreSetup, plugins: EndpointPluginSetupDependencies) {
     const resolverEmbeddableFactory = new ResolverEmbeddableFactory();
     plugins.embeddable.registerEmbeddableFactory(
       resolverEmbeddableFactory.type,
       resolverEmbeddableFactory
     );
   }
+
+  public start() {}
 
   public stop() {}
 }
