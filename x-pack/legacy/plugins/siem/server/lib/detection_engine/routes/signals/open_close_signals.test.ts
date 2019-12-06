@@ -41,12 +41,6 @@ describe('set signal status', () => {
       const { statusCode } = await server.inject(getSetSignalStatusByQueryRequest());
       expect(statusCode).toBe(200);
     });
-
-    test('returns 404 if callWithRequest is not available on the route', async () => {
-      elasticsearch.getCluster.mockImplementation(() => ({}));
-      const { statusCode } = await server.inject(getSetSignalStatusByIdsRequest());
-      expect(statusCode).toBe(404);
-    });
   });
 
   describe('validation', () => {
