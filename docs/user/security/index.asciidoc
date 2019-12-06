@@ -29,10 +29,11 @@ see {stack-ov}/authorization.html[Configuring role-based access control].
 
 [NOTE]
 ============================================================================
-Managing roles that grant <<kibana-privileges>> using the {es} 
+Managing roles that grant <<kibana-privileges>> using the {es}
 {ref}/security-api.html#security-role-apis[role management APIs] is not supported. Doing so will likely
 cause Kibana's authorization to behave unexpectedly.
 ============================================================================
 
 include::authorization/index.asciidoc[]
 include::authorization/kibana-privileges.asciidoc[]
+include::rbac_tutorial.asciidoc[]
