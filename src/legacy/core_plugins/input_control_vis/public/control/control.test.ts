@@ -19,34 +19,50 @@
 
 import expect from '@kbn/expect';
 import { Control } from './control';
+import { ControlParams } from '../editor_utils';
+import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
+import { SearchSource } from 'ui/courier';
 
-function createControlParams(id, label) {
+function createControlParams(id: string, label: string): ControlParams {
   return {
     id,
     options: {},
     label,
-  };
+  } as ControlParams;
 }
 
-let valueFromFilterBar;
-const mockFilterManager = {
+let valueFromFilterBar: any;
+const mockFilterManager: BaseFilterManager = {
   getValueFromFilterBar: () => {
     return valueFromFilterBar;
   },
-  createFilter: value => {
-    return `mockKbnFilter:${value}`;
+  createFilter: (value: any) => {
+    return `mockKbnFilter:${value}` as any;
   },
   getIndexPattern: () => {
     return 'mockIndexPattern';
   },
-};
-const mockKbnApi = {};
+} as BaseFilterManager;
+
+class ControlMock extends Control<BaseFilterManager> {
+  fetch() {
+    return Promise.resolve();
+  }
+
+  destroy() {}
+}
+const mockKbnApi: SearchSource = {} as SearchSource;
 
 describe('hasChanged', () => {
-  let control;
+  let control: ControlMock;
 
   beforeEach(() => {
-    control = new Control(createControlParams(3, 'control'), mockFilterManager, mockKbnApi);
+    control = new ControlMock(
+      createControlParams('3', 'control'),
+      mockFilterManager,
+      false,
+      mockKbnApi
+    );
   });
 
   afterEach(() => {
@@ -70,23 +86,26 @@ describe('hasChanged', () => {
 });
 
 describe('ancestors', () => {
-  let grandParentControl;
-  let parentControl;
-  let childControl;
+  let grandParentControl: any;
+  let parentControl: any;
+  let childControl: any;
   beforeEach(() => {
-    grandParentControl = new Control(
-      createControlParams(1, 'grandparent control'),
+    grandParentControl = new ControlMock(
+      createControlParams('1', 'grandparent control'),
       mockFilterManager,
+      false,
       mockKbnApi
     );
-    parentControl = new Control(
-      createControlParams(2, 'parent control'),
+    parentControl = new ControlMock(
+      createControlParams('2', 'parent control'),
       mockFilterManager,
+      false,
       mockKbnApi
     );
-    childControl = new Control(
-      createControlParams(3, 'child control'),
+    childControl = new ControlMock(
+      createControlParams('3', 'child control'),
       mockFilterManager,
+      false,
       mockKbnApi
     );
   });
@@ -122,7 +141,7 @@ describe('ancestors', () => {
   });
 
   describe('getAncestorValues', () => {
-    let lastAncestorValues;
+    let lastAncestorValues: any[];
     beforeEach(() => {
       grandParentControl.set('myGrandParentValue');
       parentControl.set('myParentValue');
