@@ -24,11 +24,13 @@ const useResolverDispatch = () => useDispatch<Dispatch<ResolverAction>>();
 
 const Diagnostic = styled(
   React.memo(({ className }: { className?: string }) => {
+    const dispatch = useResolverDispatch();
+
+    const [ref, setRef] = useState<null | HTMLDivElement>(null);
+
     const userIsPanning = useSelector(selectors.userIsPanning);
 
-    const [elementBoundingClientRect, clientRectCallbackFunction] = useAutoUpdatingClientRect();
-
-    const dispatch = useResolverDispatch();
+    const [elementBoundingClientRect, clientRectCallback] = useAutoUpdatingClientRect();
 
     const rasterToWorld = useSelector(selectors.rasterToWorld);
 
@@ -98,7 +100,7 @@ const Diagnostic = styled(
     }, [dispatch, userIsPanning]);
 
     const handleWheel = useCallback(
-      (event: React.WheelEvent<HTMLDivElement>) => {
+      (event: WheelEvent) => {
         // we use elementBoundingClientRect to interpret pixel deltas as a fraction of the element's height
         if (
           elementBoundingClientRect !== undefined &&
@@ -106,6 +108,7 @@ const Diagnostic = styled(
           event.deltaY !== 0 &&
           event.deltaMode === 0
         ) {
+          event.preventDefault();
           dispatch({
             type: 'userZoomed',
             payload: event.deltaY / elementBoundingClientRect.height,
@@ -146,13 +149,27 @@ const Diagnostic = styled(
       []
     );
 
+    const refCallback = useCallback(
+      (node: null | HTMLDivElement) => {
+        setRef(node);
+        clientRectCallback(node);
+      },
+      [clientRectCallback]
+    );
+
+    useEffect(() => {
+      // Set the 'wheel' event listener directly on the element
+      // React sets event listeners on the window and routes them back via event propagation. As of Chrome 73 or something, 'wheel' events on the 'window' are automatically treated as 'passive'. Seems weird, but whatever
+      if (ref !== null) {
+        ref.addEventListener('wheel', handleWheel);
+        return () => {
+          ref.removeEventListener('wheel', handleWheel);
+        };
+      }
+    }, [handleWheel, ref]);
+
     return (
-      <div
-        className={className}
-        ref={clientRectCallbackFunction}
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-      >
+      <div className={className} ref={refCallback} onMouseDown={handleMouseDown}>
         {dotPositions.map((worldPosition, index) => (
           <DiagnosticDot key={index} worldPosition={worldPosition} />
         ))}
