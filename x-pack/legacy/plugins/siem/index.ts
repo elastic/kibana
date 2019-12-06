@@ -137,12 +137,17 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const { newPlatform, plugins, route } = server;
+      const { config, newPlatform, plugins, route } = server;
       const { coreContext, env, setup } = newPlatform;
       const initializerContext = { ...coreContext, env } as PluginInitializerContext;
 
       const serverFacade = {
-        plugins: { alerting: plugins.alerting, spaces: plugins.spaces },
+        config,
+        plugins: {
+          alerting: plugins.alerting,
+          elasticsearch: plugins.elasticsearch,
+          spaces: plugins.spaces,
+        },
         route: route.bind(server),
       };
 
