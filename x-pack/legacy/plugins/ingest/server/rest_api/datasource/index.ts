@@ -16,24 +16,24 @@ import {
   FrameworkRequest,
   FrameworkRouteHandler,
 } from '../../libs/adapters/framework/adapter_types';
-import { ServerLibs, Policy } from '../../libs/types';
+import { ServerLibs, Datasource } from '../../libs/types';
 
-export const createGETPolicyRoute = (libs: ServerLibs) => ({
+export const createGETDatasourceRoute = (libs: ServerLibs) => ({
   method: 'GET',
-  path: '/api/ingest/policy/{policyId}',
+  path: '/api/ingest/datasource/{datasourceId}',
   config: {},
   handler: (async (
-    request: FrameworkRequest<{ params: { policyId: string } }>
+    request: FrameworkRequest<{ params: { datasourceId: string } }>
   ): Promise<ReturnTypeGet<any>> => {
-    const policy = await libs.policy.get(request.user, request.params.policyId);
+    const datasource = await libs.datasources.get(request.user, request.params.datasourceId);
 
-    return { item: policy, success: true };
+    return { item: datasource, success: true };
   }) as FrameworkRouteHandler,
 });
 
-export const createGETPoliciesRoute = (libs: ServerLibs) => ({
+export const createGETDatasourcesRoute = (libs: ServerLibs) => ({
   method: 'GET',
-  path: '/api/ingest/policies',
+  path: '/api/ingest/datasources',
   config: {
     validate: {
       query: {
@@ -45,7 +45,7 @@ export const createGETPoliciesRoute = (libs: ServerLibs) => ({
       },
     },
   },
-  handler: async (request: FrameworkRequest<any>): Promise<ReturnTypeList<Policy>> => {
+  handler: async (request: FrameworkRequest<any>): Promise<ReturnTypeList<Datasource>> => {
     // TODO fix for types that broke in TS 3.7
     const query: {
       page: string;
@@ -53,7 +53,7 @@ export const createGETPoliciesRoute = (libs: ServerLibs) => ({
       kuery: string;
       showInactive: string;
     } = request.query as any;
-    const { items, total, page, perPage } = await libs.policy.list(request.user, {
+    const { items, total, page, perPage } = await libs.datasources.list(request.user, {
       page: parseInt(query.page, 10),
       perPage: parseInt(query.perPage, 10),
       kuery: query.kuery,
@@ -63,58 +63,53 @@ export const createGETPoliciesRoute = (libs: ServerLibs) => ({
   },
 });
 
-export const createPOSTPoliciesRoute = (libs: ServerLibs) => ({
+export const createPOSTDatasourcesRoute = (libs: ServerLibs) => ({
   method: 'POST',
-  path: '/api/ingest/policies',
+  path: '/api/ingest/datasources',
   config: {
     validate: {
       payload: {
-        name: Joi.string().required(),
-        description: Joi.string().optional(),
+        datasource: Joi.object().required(),
       },
     },
   },
   handler: (async (
-    request: FrameworkRequest<{ payload: { name: string; description?: string } }>
+    request: FrameworkRequest<{ payload: { datasource: any } }>
   ): Promise<ReturnTypeCreate<any>> => {
     if (!request.user || request.user.kind !== 'authenticated') {
-      throw Boom.unauthorized('Only authenticated users can create a policy');
+      throw Boom.unauthorized('Only authenticated users can create a datasource');
     }
-    const policy = await libs.policy.create(
-      request.user,
-      request.payload.name,
-      request.payload.description
-    );
+    const datasource = await libs.datasources.create(request.user, request.payload.datasource);
 
-    return { item: policy, success: true, action: 'created' };
+    return { item: datasource, success: true, action: 'created' };
   }) as FrameworkRouteHandler,
 });
 
-export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
+export const createPUTDatasourcesRoute = (libs: ServerLibs) => ({
   method: 'PUT',
-  path: '/api/ingest/policy/{policyId}',
+  path: '/api/ingest/datasource/{datasourceId}',
   config: {
     validate: {
       payload: {
-        name: Joi.string().required(),
-        description: Joi.string().optional(),
+        datasource: Joi.object().required(),
       },
     },
   },
   handler: (async (
     request: FrameworkRequest<{
-      params: { policyId: string };
-      payload: { name: string; description?: string };
+      params: { datasourceId: string };
+      payload: { datasource: any };
     }>
   ): Promise<ReturnTypeUpdate<any>> => {
     if (!request.user || request.user.kind !== 'authenticated') {
       throw Boom.unauthorized('Only authenticated users can create a policy');
     }
-    const policy = await libs.policy.update(request.user, request.params.policyId, {
-      name: request.payload.name,
-      description: request.payload.description,
-    });
+    const datasource = await libs.datasources.update(
+      request.user,
+      request.params.datasourceId,
+      request.payload.datasource
+    );
 
-    return { item: policy, success: true, action: 'updated' };
+    return { item: datasource, success: true, action: 'updated' };
   }) as FrameworkRouteHandler,
 });
