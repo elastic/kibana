@@ -12,6 +12,48 @@ import {
 } from '../../../components/timeline/body/helpers';
 
 import * as i18n from './translations';
+import { SubsetTimelineModel, timelineDefaults } from '../../../store/timeline/model';
+import { esFilters } from '../../../../../../../../src/plugins/data/common/es_query';
+
+export const signalsOpenFilters: esFilters.Filter[] = [
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: 'signal.status',
+      params: {
+        query: 'open',
+      },
+    },
+    query: {
+      match_phrase: {
+        'signal.status': 'open',
+      },
+    },
+  },
+];
+
+export const signalsClosedFilters: esFilters.Filter[] = [
+  {
+    meta: {
+      alias: null,
+      negate: false,
+      disabled: false,
+      type: 'phrase',
+      key: 'signal.status',
+      params: {
+        query: 'closed',
+      },
+    },
+    query: {
+      match_phrase: {
+        'signal.status': 'closed',
+      },
+    },
+  },
+];
 
 export const signalsHeaders: ColumnHeader[] = [
   {
@@ -77,3 +119,8 @@ export const signalsHeaders: ColumnHeader[] = [
     width: DEFAULT_DATE_COLUMN_MIN_WIDTH,
   },
 ];
+
+export const signalsDefaultModel: SubsetTimelineModel = {
+  ...timelineDefaults,
+  columns: signalsHeaders,
+};
