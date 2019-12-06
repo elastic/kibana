@@ -65,7 +65,6 @@ const {
   data,
   docTitle,
   filterManager,
-  State,
   share,
   timefilter,
   toastNotifications,
@@ -122,7 +121,7 @@ app.config($routeProvider => {
     template: indexTemplate,
     reloadOnSearch: false,
     resolve: {
-      savedObjects: function (redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
+      savedObjects: function (redirectWhenMissing, $route, kbnUrl, Promise, $rootScope, State) {
         const indexPatterns = dataLP.indexPatterns.indexPatterns;
         const savedSearchId = $route.current.params.id;
         return ensureDefaultIndexPattern(core, dataLP, $rootScope, kbnUrl).then(() => {
@@ -138,7 +137,6 @@ app.config($routeProvider => {
                *  @type {State}
                */
               const state = new State('_a', {});
-
               const id = getIndexPatternId(state.index, indexPatternList, uiSettings.get('defaultIndex'));
               state.destroy();
               return Promise.props({
