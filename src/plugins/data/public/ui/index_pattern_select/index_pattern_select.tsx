@@ -27,7 +27,7 @@ import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../co
 import { getTitle } from '../../index_patterns/lib';
 
 export type IndexPatternSelectProps = Required<
-  EuiComboBoxProps<any>,
+  Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,
   'onChange' | 'placeholder'
 > & {
   indexPatternId: string;
@@ -200,6 +200,7 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
 
     return (
       <EuiComboBox
+        {...rest}
         placeholder={placeholder}
         singleSelection={true}
         isLoading={this.state.isLoading}
@@ -207,7 +208,6 @@ export class IndexPatternSelect extends Component<IndexPatternSelectProps> {
         options={this.state.options}
         selectedOptions={this.state.selectedIndexPattern ? [this.state.selectedIndexPattern] : []}
         onChange={this.onChange}
-        {...rest}
       />
     );
   }

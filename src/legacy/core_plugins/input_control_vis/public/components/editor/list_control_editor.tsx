@@ -69,7 +69,8 @@ export class ListControlEditor extends PureComponent<
   ListControlEditorProps,
   ListControlEditorState
 > {
-  _isMounted: boolean = false;
+  private isMounted: boolean = false;
+
   state = {
     isLoadingFieldType: true,
     isStringField: false,
@@ -77,12 +78,12 @@ export class ListControlEditor extends PureComponent<
   };
 
   componentDidMount() {
-    this._isMounted = true;
+    this.isMounted = true;
     this.loadIsStringField();
   }
 
   componentWillUnmount() {
-    this._isMounted = false;
+    this.isMounted = false;
   }
 
   static getDerivedStateFromProps = (
@@ -120,7 +121,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    if (!this._isMounted) {
+    if (!this.isMounted) {
       return;
     }
 

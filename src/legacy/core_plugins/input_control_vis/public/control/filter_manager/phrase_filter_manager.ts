@@ -24,7 +24,6 @@ import { FilterManager } from './filter_manager';
 import {
   FilterManager as QueryFilterManager,
   esFilters,
-  IFieldType,
 } from '../../../../../../plugins/data/public';
 
 export class PhraseFilterManager extends FilterManager {

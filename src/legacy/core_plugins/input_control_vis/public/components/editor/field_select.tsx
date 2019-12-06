@@ -32,7 +32,7 @@ interface FieldSelectUiState {
 
 export type FieldSelectUiProps = InjectedIntlProps & {
   getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
-  indexPatternId?: string;
+  indexPatternId: string;
   onChange: (value: any) => void;
   fieldName?: string;
   filterField?: (field: Field) => boolean;
@@ -50,7 +50,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
     this.state = {
       isLoading: false,
       fields: [],
-      indexPatternId: props.indexPatternId ?? '',
+      indexPatternId: props.indexPatternId,
     };
   }
 

@@ -26,7 +26,7 @@ import { InjectedIntlProps } from 'react-intl';
 
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   onChange: (opt: any) => void;
-  indexPatternId?: string;
+  indexPatternId: string;
   controlIndex: number;
 };
 
@@ -49,7 +49,7 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
           id: 'inputControl.editor.indexPatternSelect.patternPlaceholder',
           defaultMessage: 'Select index pattern...',
         })}
-        indexPatternId={indexPatternId ?? ''}
+        indexPatternId={indexPatternId}
         onChange={onChange}
         data-test-subj={selectId}
         // TODO: supply actual savedObjectsClient here

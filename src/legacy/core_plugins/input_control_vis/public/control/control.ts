@@ -21,7 +21,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SearchSource } from 'ui/courier';
+import { SearchSource as SearchSourceClass } from 'ui/courier';
 import { PhraseFilter } from 'src/plugins/data/common/es_query/filters';
 import { ControlParams, ControlParamsOptions, CONTROL_TYPES } from '../editor_utils';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
@@ -58,14 +58,14 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
   label: string;
   useTimeFilter: boolean;
   filterManager: FilterManager;
-  SearchSource: SearchSource;
+  SearchSource: SearchSourceClass;
   ancestors: Array<Control<PhraseFilterManager | RangeFilterManager>> = [];
 
   constructor(
     controlParams: ControlParams,
     filterManager: FilterManager,
     useTimeFilter: boolean,
-    searchSource: SearchSource
+    SearchSource: SearchSourceClass
   ) {
     this.id = controlParams.id;
     this.controlParams = controlParams;
@@ -74,7 +74,7 @@ export abstract class Control<FilterManager extends BaseFilterManager> {
     this.label = controlParams.label ? controlParams.label : controlParams.fieldName;
     this.useTimeFilter = useTimeFilter;
     this.filterManager = filterManager;
-    this.SearchSource = searchSource;
+    this.SearchSource = SearchSource;
 
     // restore state from kibana filter context
     this.reset();
