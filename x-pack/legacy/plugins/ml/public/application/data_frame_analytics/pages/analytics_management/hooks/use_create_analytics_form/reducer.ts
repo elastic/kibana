@@ -75,7 +75,7 @@ export const validateAdvancedEditor = (state: State): State => {
       sourceIndexNameValid = !sourceIndex.includes(',');
     }
     if (Array.isArray(sourceIndex)) {
-      sourceIndexNameValid = !sourceIndex.some(d => d.includes(','));
+      sourceIndexNameValid = !sourceIndex.some(d => d?.includes(','));
     }
   }
 
