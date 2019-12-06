@@ -7,14 +7,10 @@
 #
 
 set -e
-#./check_env_variables.sh
+./check_env_variables.sh
 
-# Uses a default if no argument is specified
-# RULES=(${@:-./rules/root_or_admin_1.json})
-
-# Example: ./post_rule.sh
-# Example: ./post_rule.sh ./rules/root_or_admin_1.json
-# Example glob: ./post_rule.sh ./rules/*
+# Example: ./set_status_with_id.sh closed
+# Example: ./set_status_with_id.sh open
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \

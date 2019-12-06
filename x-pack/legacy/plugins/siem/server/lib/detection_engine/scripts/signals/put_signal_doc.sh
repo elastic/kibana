@@ -7,10 +7,10 @@
 #
 
 set -e
-#./check_env_variables.sh
+./check_env_variables.sh
 
 
-# Example: ./put_signal_index.sh
+# Example: ./put_signal_doc.sh
 curl -s -k \
   -H "Content-Type: application/json" \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \

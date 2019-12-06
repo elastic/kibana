@@ -22,10 +22,8 @@ describe('set signal status', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     ({ server, elasticsearch } = createMockServer());
-    // eslint-disable-next-line
-    elasticsearch.getCluster = jest.fn((): any => ({
-      // eslint-disable-next-line
-      callWithRequest: jest.fn((): any => true),
+    elasticsearch.getCluster = jest.fn(() => ({
+      callWithRequest: jest.fn(() => true),
     }));
     setSignalsStatusRoute(server);
   });
