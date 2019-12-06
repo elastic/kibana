@@ -414,11 +414,6 @@ export function MachineLearningJobWizardCommonProvider(
       await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
     },
 
-    async assignCalendar(calendarId: string) {
-      await this.ensureAdditionalSettingsSectionOpen();
-      await this.addCalendar(calendarId);
-    },
-
     async ensureAdvancedSectionOpen() {
       await retry.tryForTime(5000, async () => {
         if ((await testSubjects.exists(advancedSectionSelector())) === false) {

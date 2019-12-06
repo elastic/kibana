@@ -161,7 +161,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation assigns calendars', async () => {
-      await ml.jobWizardCommon.assignCalendar('wizard-test-calendar');
+      await ml.jobWizardCommon.addCalendar('wizard-test-calendar');
     });
 
     it('job creation opens the advanced section', async () => {
