@@ -177,13 +177,14 @@ export const PARAMETERS_DEFINITION = {
   },
   null_value_numeric: {
     fieldConfig: {
+      defaultValue: '',
       label: nullValueLabel,
       formatters: [toInt],
     },
   },
   null_value_boolean: {
     fieldConfig: {
-      defaultValue: 'true',
+      defaultValue: '',
       label: nullValueLabel,
       deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
       serializer: (value: number) => mapIndexToValue[value],
@@ -191,6 +192,7 @@ export const PARAMETERS_DEFINITION = {
   },
   null_value_geo_point: {
     fieldConfig: {
+      defaultValue: '',
       label: nullValueLabel,
       deserializer: (value: any) => {
         if (value === '') {

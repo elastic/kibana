@@ -14,7 +14,6 @@ import {
   Field,
   FieldHook,
   FormDataProvider,
-  CheckBoxField,
   RangeField,
 } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';

@@ -7,10 +7,9 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer } from '@elastic/eui';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, Field, CheckBoxField, FormDataProvider } from '../../../../shared_imports';
+import { UseField, Field } from '../../../../shared_imports';
 import { AnalyzersParameter } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 

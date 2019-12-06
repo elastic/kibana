@@ -9,12 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import {
-  UseField,
-  FormDataProvider,
-  NumericField,
-  fieldFormatters,
-} from '../../../../shared_imports';
+import { UseField, FormDataProvider, NumericField } from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,

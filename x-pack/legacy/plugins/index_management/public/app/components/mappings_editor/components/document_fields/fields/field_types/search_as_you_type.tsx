@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiSpacer, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
-import { UseField, Field, FormDataProvider, CheckBoxField } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,
