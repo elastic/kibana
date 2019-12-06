@@ -88,8 +88,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginsServiceSetup](./kibana-plugin-server.pluginsservicesetup.md) |  |
 |  [PluginsServiceStart](./kibana-plugin-server.pluginsservicestart.md) |  |
 |  [RequestHandlerContext](./kibana-plugin-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients: - [savedObjects.client](./kibana-plugin-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [elasticsearch.dataClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.adminClient](./kibana-plugin-server.scopedclusterclient.md) - Elasticsearch admin client which uses the credentials of the incoming request |
-|  [ResponseExtensions](./kibana-plugin-server.responseextensions.md) | Additional data to extend a response. |
-|  [ResponseInfo](./kibana-plugin-server.responseinfo.md) | Response status code. |
 |  [RouteConfig](./kibana-plugin-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-server.routeconfigoptionsbody.md) | Additional body options for a route |
