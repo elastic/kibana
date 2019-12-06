@@ -9,7 +9,13 @@ import sinon from 'sinon';
 import uuid from 'uuid';
 import { filter } from 'rxjs/operators';
 
-import { TaskDictionary, TaskDefinition, TaskInstance, TaskStatus, TaskLifecycle } from './task';
+import {
+  TaskDictionary,
+  TaskDefinition,
+  TaskInstance,
+  TaskStatus,
+  TaskLifecycleResult,
+} from './task';
 import { FetchOpts, StoreOpts, OwnershipClaimingOpts, TaskStore } from './task_store';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
 import { SavedObjectsSerializer, SavedObjectsSchema, SavedObjectAttributes } from 'src/core/server';
@@ -1027,7 +1033,7 @@ if (doc['task.runAt'].size()!=0) {
         savedObjectsRepository: savedObjectsClient,
       });
 
-      expect(await store.getLifecycle(id)).toEqual(TaskLifecycle.NotFound);
+      expect(await store.getLifecycle(id)).toEqual(TaskLifecycleResult.NotFound);
     });
 
     test('throws if an unknown error takes place ', async () => {
