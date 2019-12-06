@@ -5,24 +5,22 @@
  */
 
 import { union } from 'lodash';
-import {
-  InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
-} from '../../../lib/adapters/framework';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import {
   MetricsExplorerColumnType,
-  MetricsExplorerRequest,
   MetricsExplorerRow,
   MetricsExplorerSeries,
-  MetricsExplorerWrappedRequest,
+  MetricsExplorerRequestBody,
 } from '../types';
 import { createMetricModel } from './create_metrics_model';
 import { JsonObject } from '../../../../common/typed_json';
 
 export const populateSeriesWithTSVBData = (
-  req: InfraFrameworkRequest<MetricsExplorerWrappedRequest>,
-  options: MetricsExplorerRequest,
-  framework: InfraBackendFrameworkAdapter
+  request: KibanaRequest,
+  options: MetricsExplorerRequestBody,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext
 ) => async (series: MetricsExplorerSeries) => {
   // IF there are no metrics selected then we should return an empty result.
   if (options.metrics.length === 0) {
@@ -54,9 +52,36 @@ export const populateSeriesWithTSVBData = (
 
   // Create the TSVB model based on the request options
   const model = createMetricModel(options);
+  const calculatedInterval = await calculateMetricInterval(
+    framework,
+    requestContext,
+    {
+      indexPattern: options.indexPattern,
+      timestampField: options.timerange.field,
+      timerange: options.timerange,
+    },
+    options.metrics
+      .filter(metric => metric.field)
+      .map(metric => {
+        return metric
+          .field!.split(/\./)
+          .slice(0, 2)
+          .join('.');
+      })
+  );
+
+  if (calculatedInterval) {
+    model.interval = `>=${calculatedInterval}s`;
+  }
 
   // Get TSVB results using the model, timerange and filters
-  const tsvbResults = await framework.makeTSVBRequest(req, model, timerange, filters);
+  const tsvbResults = await framework.makeTSVBRequest(
+    request,
+    model,
+    timerange,
+    filters,
+    requestContext
+  );
 
   // If there is no data `custom` will not exist.
   if (!tsvbResults.custom) {
