@@ -31,7 +31,6 @@ const create = <S, T extends object>(state: S, transitions: T = {} as T) => {
 test('can create store', () => {
   const { store } = create({});
   expect(store).toMatchObject({
-    state: expect.any(Object),
     getState: expect.any(Function),
     state$: expect.any(Object),
     transitions: expect.any(Object),
@@ -47,7 +46,7 @@ test('can set default state', () => {
     foo: 'bar',
   };
   const { store } = create(defaultState);
-  expect(store.state).toEqual(defaultState);
+  expect(store.get()).toEqual(defaultState);
   expect(store.getState()).toEqual(defaultState);
 });
 
@@ -62,7 +61,7 @@ test('can set state', () => {
 
   mutators.set(newState);
 
-  expect(store.state).toEqual(newState);
+  expect(store.get()).toEqual(newState);
   expect(store.getState()).toEqual(newState);
 });
 
@@ -77,7 +76,7 @@ test('does not shallow merge states', () => {
 
   mutators.set(newState as any);
 
-  expect(store.state).toEqual(newState);
+  expect(store.get()).toEqual(newState);
   expect(store.getState()).toEqual(newState);
 });
 
@@ -137,7 +136,7 @@ test('mutators can update state', () => {
     }
   );
 
-  expect(store.state).toEqual({
+  expect(store.get()).toEqual({
     value: 0,
     foo: 'bar',
   });
@@ -145,7 +144,7 @@ test('mutators can update state', () => {
   mutators.add(11);
   mutators.setFoo('baz');
 
-  expect(store.state).toEqual({
+  expect(store.get()).toEqual({
     value: 11,
     foo: 'baz',
   });
@@ -153,7 +152,7 @@ test('mutators can update state', () => {
   mutators.add(-20);
   mutators.setFoo('bazooka');
 
-  expect(store.state).toEqual({
+  expect(store.get()).toEqual({
     value: -9,
     foo: 'bazooka',
   });
@@ -170,9 +169,9 @@ test('mutators methods are not bound', () => {
     }
   );
 
-  expect(store.state).toEqual({ value: -3 });
+  expect(store.get()).toEqual({ value: -3 });
   mutators.add(4);
-  expect(store.state).toEqual({ value: 1 });
+  expect(store.get()).toEqual({ value: 1 });
 });
 
 test('created mutators are saved in store object', () => {
@@ -188,7 +187,7 @@ test('created mutators are saved in store object', () => {
 
   expect(typeof store.transitions.add).toBe('function');
   mutators.add(5);
-  expect(store.state).toEqual({ value: 2 });
+  expect(store.get()).toEqual({ value: 2 });
 });
 
 test('throws when state is modified inline - 1', () => {
@@ -196,7 +195,7 @@ test('throws when state is modified inline - 1', () => {
 
   let error: TypeError | null = null;
   try {
-    (container.state.a as any) = 'c';
+    (container.get().a as any) = 'c';
   } catch (err) {
     error = err;
   }
@@ -209,12 +208,28 @@ test('throws when state is modified inline - 2', () => {
 
   let error: TypeError | null = null;
   try {
-    (container.get().a as any) = 'c';
+    (container.getState().a as any) = 'c';
   } catch (err) {
     error = err;
   }
 
   expect(error).toBeInstanceOf(TypeError);
+});
+
+test('throws when state is modified inline in subscription', done => {
+  const container = createStateContainer({ a: 'b' }, { set: () => (newState: any) => newState });
+
+  container.subscribe(value => {
+    let error: TypeError | null = null;
+    try {
+      (value.a as any) = 'd';
+    } catch (err) {
+      error = err;
+    }
+    expect(error).toBeInstanceOf(TypeError);
+    done();
+  });
+  container.transitions.set({ a: 'c' });
 });
 
 describe('selectors', () => {

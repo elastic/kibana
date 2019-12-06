@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { skip } from 'rxjs/operators';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import {
   PureTransitionsToTransitions,
@@ -47,15 +48,16 @@ export const createStateContainer = <
   pureTransitions: PureTransitions,
   pureSelectors: PureSelectors = {} as PureSelectors
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> => {
-  const state$ = new Subject<RecursiveReadonly<State>>();
+  const data$ = new BehaviorSubject<RecursiveReadonly<State>>(freeze(defaultState));
+  const state$ = data$.pipe(skip(1));
+  const get = () => data$.getValue();
   const container: ReduxLikeStateContainer<State, PureTransitions, PureSelectors> = {
-    state: freeze(defaultState),
-    get: () => container.state,
-    getState: () => container.state,
-    set: (state: State) => {
-      state$.next((container.state = freeze(state)));
-    },
+    get,
     state$,
+    getState: () => data$.getValue(),
+    set: (state: State) => {
+      data$.next(freeze(state));
+    },
     reducer: (state, action) => {
       const pureTransition = (pureTransitions as Record<string, PureTransition<State, any[]>>)[
         action.type
@@ -63,7 +65,7 @@ export const createStateContainer = <
       return pureTransition ? freeze(pureTransition(state)(...action.args)) : state;
     },
     replaceReducer: nextReducer => (container.reducer = nextReducer),
-    dispatch: action => state$.next((container.state = container.reducer(container.state, action))),
+    dispatch: action => data$.next(container.reducer(get(), action)),
     transitions: Object.keys(pureTransitions).reduce<PureTransitionsToTransitions<PureTransitions>>(
       (acc, type) => ({ ...acc, [type]: (...args: any) => container.dispatch({ type, args }) }),
       {} as PureTransitionsToTransitions<PureTransitions>
@@ -71,7 +73,7 @@ export const createStateContainer = <
     selectors: Object.keys(pureSelectors).reduce<PureSelectorsToSelectors<PureSelectors>>(
       (acc, selector) => ({
         ...acc,
-        [selector]: (...args: any) => (pureSelectors as any)[selector](container.state)(...args),
+        [selector]: (...args: any) => (pureSelectors as any)[selector](get())(...args),
       }),
       {} as PureSelectorsToSelectors<PureSelectors>
     ),

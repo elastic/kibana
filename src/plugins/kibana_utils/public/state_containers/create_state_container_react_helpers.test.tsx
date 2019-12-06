@@ -61,7 +61,7 @@ test('<Provider> passes state to <Consumer>', () => {
 
   ReactDOM.render(
     <Provider value={store}>
-      <Consumer>{(s: any) => s.state.hello}</Consumer>
+      <Consumer>{(s: typeof store) => s.get().hello}</Consumer>
     </Provider>,
     container
   );
@@ -108,7 +108,7 @@ test('context receives Redux store', () => {
   ReactDOM.render(
     /* eslint-disable no-shadow */
     <Provider value={store}>
-      <context.Consumer>{store => store.state.foo}</context.Consumer>
+      <context.Consumer>{store => store.get().foo}</context.Consumer>
     </Provider>,
     /* eslint-enable no-shadow */
     container
@@ -127,7 +127,7 @@ describe('hooks', () => {
       const Demo: React.FC<{}> = () => {
         // eslint-disable-next-line no-shadow
         const store = useContainer();
-        return <>{store.state.foo}</>;
+        return <>{store.get().foo}</>;
       };
 
       ReactDOM.render(
