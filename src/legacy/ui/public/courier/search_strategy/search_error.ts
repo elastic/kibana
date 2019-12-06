@@ -17,9 +17,4 @@
  * under the License.
  */
 
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  isDefaultTypeIndexPattern,
-  SearchError,
-} from '../index';
+export { SearchError } from '../index';
