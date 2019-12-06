@@ -633,6 +633,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             ownFocus
             withTitle
             anchorPosition="downLeft"
+            zIndex={8000}
           >
             <div>
               <EuiPopoverTitle>
