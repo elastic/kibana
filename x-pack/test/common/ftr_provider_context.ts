@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UMAuthAdapter, UMAuthContainer } from './adapter_types';
-export { UMXPackAuthAdapter } from './xpack_auth_adapter';
+import { GenericFtrProviderContext } from '@kbn/test/types/ftr';
+
+import { services } from './services';
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

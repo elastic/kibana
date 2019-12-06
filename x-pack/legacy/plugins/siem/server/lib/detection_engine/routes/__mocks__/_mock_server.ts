@@ -8,6 +8,7 @@ import Hapi from 'hapi';
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { alertsClientMock } from '../../../../../../alerting/server/alerts_client.mock';
 import { actionsClientMock } from '../../../../../../actions/server/actions_client.mock';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 
 const defaultConfig = {
   'kibana.index': '.kibana',
@@ -46,11 +47,17 @@ export const createMockServer = (config: Record<string, string> = defaultConfig)
 
   const actionsClient = actionsClientMock.create();
   const alertsClient = alertsClientMock.create();
+  const elasticsearch = {
+    getCluster: jest.fn().mockImplementation(() => ({
+      callWithRequest: jest.fn(),
+    })),
+  };
   server.decorate('request', 'getAlertsClient', () => alertsClient);
   server.decorate('request', 'getBasePath', () => '/s/default');
   server.decorate('request', 'getActionsClient', () => actionsClient);
+  server.plugins.elasticsearch = (elasticsearch as unknown) as ElasticsearchPlugin;
 
-  return { server, alertsClient, actionsClient };
+  return { server, alertsClient, actionsClient, elasticsearch };
 };
 
 export const createMockServerWithoutAlertClientDecoration = (
