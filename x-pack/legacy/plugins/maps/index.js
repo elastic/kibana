@@ -100,7 +100,6 @@ export function maps(kibana) {
         server.log(['info', 'maps'], 'Maps app disabled by configuration');
         return;
       }
-      initTelemetryCollection(usageCollection, server);
 
       const coreSetup = server.newPlatform.setup.core;
       const newPlatformPlugins = server.newPlatform.setup.plugins;
@@ -131,6 +130,19 @@ export function maps(kibana) {
 
       const mapPluginSetup = new MapPlugin().setup(coreSetup, pluginsSetup, __LEGACY);
       server.expose('getMapConfig', mapPluginSetup.getMapConfig);
+
+      const { kbnServer } = server.plugins.xpack_main.status.plugin;
+      kbnServer.afterPluginsInit(() => {
+        // The code block below can't await directly within "afterPluginsInit"
+        // callback due to circular dependency. The server isn't "ready" until
+        // this code block finishes. Migrations wait for server to be ready before
+        // executing. Saved objects repository waits for migrations to finish before
+        // finishing the request. To avoid this, we'll await within a separate
+        // function block.
+        (() => {
+          initTelemetryCollection(usageCollection, server);
+        })();
+      });
     }
   });
 }

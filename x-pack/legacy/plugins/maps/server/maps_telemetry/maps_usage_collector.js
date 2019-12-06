@@ -7,9 +7,9 @@
 import _ from 'lodash';
 import { TASK_ID, scheduleTask, registerMapsTelemetryTask } from './telemetry_task';
 
-export function initTelemetryCollection(usageCollection, server) {
+export async function initTelemetryCollection(usageCollection, server) {
   registerMapsTelemetryTask(server);
-  scheduleTask(server);
+  await scheduleTask(server);
   registerMapsUsageCollector(usageCollection, server);
 }
 

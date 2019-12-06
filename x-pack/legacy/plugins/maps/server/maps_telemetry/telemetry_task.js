@@ -10,7 +10,7 @@ const TELEMETRY_TASK_TYPE = 'maps_telemetry';
 
 export const TASK_ID = `Maps-${TELEMETRY_TASK_TYPE}`;
 
-export function scheduleTask(server) {
+export async function scheduleTask(server) {
   const taskManager = server.plugins.task_manager;
 
   if (!taskManager) {
@@ -18,27 +18,15 @@ export function scheduleTask(server) {
     return;
   }
 
-  const { kbnServer } = server.plugins.xpack_main.status.plugin;
-
-  kbnServer.afterPluginsInit(() => {
-    // The code block below can't await directly within "afterPluginsInit"
-    // callback due to circular dependency. The server isn't "ready" until
-    // this code block finishes. Migrations wait for server to be ready before
-    // executing. Saved objects repository waits for migrations to finish before
-    // finishing the request. To avoid this, we'll await within a separate
-    // function block.
-    (async () => {
-      try {
-        await taskManager.ensureScheduled({
-          id: TASK_ID,
-          taskType: TELEMETRY_TASK_TYPE,
-          state: { stats: {}, runs: 0 },
-        });
-      } catch(e) {
-        server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
-      }
-    })();
-  });
+  try {
+    await taskManager.ensureScheduled({
+      id: TASK_ID,
+      taskType: TELEMETRY_TASK_TYPE,
+      state: { stats: {}, runs: 0 },
+    });
+  } catch(e) {
+    server.log(['warning', 'maps'], `Error scheduling telemetry task, received ${e.message}`);
+  }
 }
 
 export function registerMapsTelemetryTask(server) {
