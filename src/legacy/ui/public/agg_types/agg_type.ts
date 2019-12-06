@@ -24,7 +24,7 @@ import { initParams } from './agg_params';
 
 import { AggConfig } from '../vis';
 import { AggConfigs } from './agg_configs';
-import { SearchSource } from '../courier';
+import { SearchSourceContract } from '../courier';
 import { Adapters } from '../inspector';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from '../agg_types/param_types/agg';
@@ -51,7 +51,7 @@ export interface AggTypeConfig<
     resp: any,
     aggConfigs: AggConfigs,
     aggConfig: TAggConfig,
-    searchSource: SearchSource,
+    searchSource: SearchSourceContract,
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
@@ -180,7 +180,7 @@ export class AggType<
     resp: any,
     aggConfigs: AggConfigs,
     aggConfig: TAggConfig,
-    searchSource: SearchSource,
+    searchSource: SearchSourceContract,
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => Promise<any>;
