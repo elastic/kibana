@@ -75,8 +75,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('exits when the text button is clicked on', async () => {
-      await PageObjects.dashboard.clickFullScreenMode();
-      await PageObjects.dashboard.waitForRenderComplete();
       const logoButton = await PageObjects.dashboard.getExitFullScreenLogoButton();
       await logoButton.moveMouseTo();
       await PageObjects.dashboard.clickExitFullScreenTextButton();
