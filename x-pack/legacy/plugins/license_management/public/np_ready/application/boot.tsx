@@ -8,7 +8,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
-
+import * as history from 'history';
 import { DocLinksStart, HttpSetup, ToastsSetup } from 'src/core/public';
 
 // @ts-ignore
@@ -17,6 +17,7 @@ import { App } from './app.container';
 import { licenseManagementStore } from './store';
 
 import { setDocLinks } from './lib/docs_links';
+import { BASE_PATH } from '../../../common/constants';
 
 interface AppDependencies {
   element: HTMLElement;
@@ -24,8 +25,6 @@ interface AppDependencies {
   legacy: {
     I18nContext: any;
     xpackInfo: any;
-    autoLogout: () => void;
-    kbnUrlWrapper: { change: (url: string) => void };
     refreshXpack: () => void;
   };
 
@@ -47,11 +46,11 @@ export const boot = (deps: AppDependencies) => {
 
   const services = {
     legacy: {
-      autoLogout: restLegacy.autoLogout,
-      kbnUrl: restLegacy.kbnUrlWrapper,
       refreshXpack: restLegacy.refreshXpack,
       xPackInfo: legacy.xpackInfo,
     },
+    // So we can imperatively control the hash route
+    history: history.createHashHistory({ basename: BASE_PATH }),
     toasts,
     http,
   };
@@ -60,7 +59,7 @@ export const boot = (deps: AppDependencies) => {
   render(
     <I18nContext>
       <Provider store={store}>
-        <HashRouter>
+        <HashRouter basename={BASE_PATH}>
           <App />
         </HashRouter>
       </Provider>

@@ -10,10 +10,8 @@ import { PLUGIN } from '../../common/constants';
 
 export interface Plugins {
   __LEGACY: {
-    autoLogout: () => void;
     xpackInfo: XPackMainPlugin;
     I18nContext: any;
-    kbnUrlWrapper: { change: (url: string) => void };
     refreshXpack: () => void;
   };
 }

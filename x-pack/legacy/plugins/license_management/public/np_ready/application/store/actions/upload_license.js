@@ -6,7 +6,6 @@
 
 import { createAction } from 'redux-actions';
 import { addLicense } from './add_license';
-import { BASE_PATH } from '../../../../../common/constants/base_path';
 import { putLicense } from '../../lib/es';
 import { addUploadErrorMessage } from './add_error_message';
 import { i18n } from '@kbn/i18n';
@@ -23,9 +22,9 @@ const dispatchFromResponse = async (
   currentLicenseType,
   newLicenseType,
   {
+    history,
     legacy: {
       xPackInfo,
-      kbnUrl,
       refreshXpack,
     },
   },
@@ -49,7 +48,7 @@ const dispatchFromResponse = async (
       await refreshXpack();
       dispatch(addLicense(xPackInfo.get('license')));
       dispatch(uploadLicenseStatus({}));
-      kbnUrl.change(BASE_PATH);
+      history.replace('/home');
       // reload necessary to get left nav to refresh with proper links
       window.location.reload();
     }

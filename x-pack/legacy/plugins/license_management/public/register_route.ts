@@ -77,26 +77,11 @@ routes.when(`${BASE_PATH}:view?`, {
   },
   controllerAs: 'licenseManagement',
   controller: class LicenseManagementController {
-    constructor($injector: any, $rootScope: any, $scope: any, $route: any, kbnUrl: any) {
+    constructor($injector: any, $rootScope: any, $scope: any, $route: any) {
       initializeTelemetry($injector);
-      let autoLogout: () => void;
-      /* if security is disabled, there will be no autoLogout service,
-         so just substitute noop function in that case */
-      try {
-        autoLogout = $injector.get('autoLogout');
-      } catch (e) {
-        autoLogout = () => {};
-      }
 
       $scope.$$postDigest(() => {
         const element = document.getElementById('licenseReactRoot')!;
-
-        const kbnUrlWrapper = {
-          change(url: string) {
-            kbnUrl.change(url);
-            $rootScope.$digest();
-          },
-        };
 
         const refreshXpack = async () => {
           await xpackInfo.refresh($injector);
@@ -117,7 +102,7 @@ routes.when(`${BASE_PATH}:view?`, {
             },
           },
           {
-            __LEGACY: { autoLogout, xpackInfo, I18nContext, kbnUrlWrapper, refreshXpack },
+            __LEGACY: { xpackInfo, I18nContext, refreshXpack },
           }
         );
       });
