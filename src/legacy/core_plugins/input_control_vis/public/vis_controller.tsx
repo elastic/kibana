@@ -32,7 +32,7 @@ import { ControlParams } from './editor_utils';
 import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 
-class VisController {
+export class InputControlVisController {
   el: Element;
   vis: Vis;
   controls: Array<RangeControl | ListControl>;
@@ -224,5 +224,3 @@ class VisController {
     this.drawVis();
   };
 }
-
-export { VisController };

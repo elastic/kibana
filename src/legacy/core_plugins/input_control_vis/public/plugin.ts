@@ -25,13 +25,13 @@ import { createInputControlVisFn } from './input_control_fn';
 import { inputControlVisTypeDefinition } from './input_control_vis_type';
 
 /** @internal */
-export interface InputControlPluginSetupDependencies {
+export interface InputControlVisPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
 }
 
 /** @internal */
-export class TableVisPlugin implements Plugin<Promise<void>, void> {
+export class InputControlVisPlugin implements Plugin<Promise<void>, void> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -40,7 +40,7 @@ export class TableVisPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations }: InputControlPluginSetupDependencies
+    { expressions, visualizations }: InputControlVisPluginSetupDependencies
   ) {
     expressions.registerFunction(createInputControlVisFn);
     visualizations.types.createBaseVisualization(inputControlVisTypeDefinition);

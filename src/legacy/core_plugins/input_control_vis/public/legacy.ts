@@ -21,10 +21,10 @@ import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
 
-import { InputControlPluginSetupDependencies } from './plugin';
+import { InputControlVisPluginSetupDependencies } from './plugin';
 import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 
-const plugins: Readonly<InputControlPluginSetupDependencies> = {
+const plugins: Readonly<InputControlVisPluginSetupDependencies> = {
   expressions: npSetup.plugins.expressions,
   visualizations: visualizationsSetup,
 };

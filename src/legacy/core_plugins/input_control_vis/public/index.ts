@@ -18,7 +18,7 @@
  */
 
 import { PluginInitializerContext } from '../../../../core/public';
-import { TableVisPlugin as Plugin } from './plugin';
+import { InputControlVisPlugin as Plugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new Plugin(initializerContext);

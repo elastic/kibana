@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { VisController } from './vis_controller';
+import { InputControlVisController } from './vis_controller';
 import { ControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
 import { Status, defaultFeedbackMessage } from '../../visualizations/public';
@@ -36,7 +36,7 @@ export const inputControlVisTypeDefinition = {
   stage: 'experimental',
   requiresUpdateStatus: [Status.PARAMS, Status.TIME],
   feedbackMessage: defaultFeedbackMessage,
-  visualization: VisController,
+  visualization: InputControlVisController,
   visConfig: {
     defaults: {
       controls: [],
