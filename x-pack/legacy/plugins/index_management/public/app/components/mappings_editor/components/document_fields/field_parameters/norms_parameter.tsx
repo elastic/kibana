@@ -23,6 +23,5 @@ export const NormsParameter = () => (
       defaultMessage: 'Whether field-length should be taken into account when scoring queries.',
     })}
     formFieldPath="norms"
-    direction="column"
   />
 );

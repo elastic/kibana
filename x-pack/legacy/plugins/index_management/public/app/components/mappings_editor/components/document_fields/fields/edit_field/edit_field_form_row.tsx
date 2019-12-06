@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch, EuiSpacer } from '@elastic/eui';
 
 import {
   ToggleField,
@@ -24,7 +24,6 @@ interface Props {
   title: JSX.Element;
   withToggle?: boolean;
   toggleDefaultValue?: boolean;
-  direction?: 'row' | 'column';
   sizeTitle?: 's' | 'xs' | 'xxs';
   ariaId?: string;
   description?: string | JSX.Element;
@@ -32,15 +31,12 @@ interface Props {
   children?: React.ReactNode | ChildrenFunc;
 }
 
-const PADDING_LEFT_NO_TOGGLE = '66px';
-
 export const EditFieldFormRow = React.memo(
   ({
     title,
     description,
     withToggle = true,
     toggleDefaultValue,
-    direction = 'row',
     sizeTitle = 'xs',
     formFieldPath,
     ariaId = formFieldPath,
@@ -51,7 +47,9 @@ export const EditFieldFormRow = React.memo(
     const switchLabel = title.props.children;
 
     const initialVisibleState =
-      toggleDefaultValue !== undefined
+      withToggle === false
+        ? true
+        : toggleDefaultValue !== undefined
         ? toggleDefaultValue
         : formFieldPath !== undefined
         ? (getFieldConfig(formFieldPath).defaultValue! as boolean)
@@ -103,56 +101,70 @@ export const EditFieldFormRow = React.memo(
         </UseField>
       );
 
-    const renderContent = () => (
-      <EuiFlexGroup className="mappingsEditor__editField__formRow">
-        {withToggle && (
-          <EuiFlexItem grow={false} className="mappingsEditor__editFieldFormRow__toggle">
-            {renderToggleInput()}
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <EuiFlexGroup direction={direction} gutterSize="s">
-            {(title || description) && (
-              <EuiFlexItem
-                style={{
-                  paddingLeft: withToggle === false ? PADDING_LEFT_NO_TOGGLE : undefined,
-                }}
-              >
-                {title && (
-                  <button
-                    onClick={onClickTitle}
-                    type="button"
-                    className="mappingsEditor__editField__formRow__btnTitle"
-                  >
-                    <EuiTitle
-                      id={`${ariaId}-title`}
-                      size={sizeTitle}
-                      className="mappingsEditor__editField__formRow__title"
-                    >
-                      {title}
-                    </EuiTitle>
-                  </button>
-                )}
-                {description && (
-                  <EuiText id={ariaId} size="s" color="subdued">
-                    {description}
-                  </EuiText>
-                )}
-              </EuiFlexItem>
-            )}
-            {((isContentVisible && children !== undefined) || isChildrenFunction) && (
-              <EuiFlexItem
-                style={{
-                  paddingLeft: withToggle === false ? PADDING_LEFT_NO_TOGGLE : undefined,
-                }}
-              >
-                {isChildrenFunction ? (children as ChildrenFunc)(isContentVisible) : children}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+    const renderContent = () => {
+      const toggle = withToggle && (
+        <EuiFlexItem grow={false} className="mappingsEditor__editFieldFormRow__toggle">
+          {renderToggleInput()}
         </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+      );
+
+      const controlsTitle = title && (
+        <button
+          onClick={onClickTitle}
+          type="button"
+          className="mappingsEditor__editField__formRow__btnTitle"
+        >
+          <EuiTitle
+            id={`${ariaId}-title`}
+            size={sizeTitle}
+            className="mappingsEditor__editField__formRow__title"
+          >
+            {title}
+          </EuiTitle>
+        </button>
+      );
+
+      const controlsDescription = description && (
+        <EuiText id={ariaId} size="s" color="subdued">
+          {description}
+        </EuiText>
+      );
+
+      const controlsHeader = (controlsTitle || controlsDescription) && (
+        <div
+          style={{
+            paddingLeft: withToggle === false ? '0' : undefined,
+          }}
+        >
+          {controlsTitle}
+          {controlsDescription}
+        </div>
+      );
+
+      const controls = ((isContentVisible && children !== undefined) || isChildrenFunction) && (
+        <div
+          style={{
+            paddingLeft: withToggle === false ? '0' : undefined,
+          }}
+        >
+          <EuiSpacer size="m" />
+          {isChildrenFunction ? (children as ChildrenFunc)(isContentVisible) : children}
+        </div>
+      );
+
+      return (
+        <EuiFlexGroup className="mappingsEditor__editField__formRow">
+          {toggle}
+
+          <EuiFlexItem>
+            <div>
+              {controlsHeader}
+              {controls}
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    };
 
     return formFieldPath ? (
       <FormDataProvider pathsToWatch={formFieldPath}>

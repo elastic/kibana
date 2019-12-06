@@ -5,38 +5,39 @@
  */
 
 export {
-  useForm,
-  UseField,
-  UseMultiFields,
-  getUseField,
-  Form,
-  FormHook,
-  useFormContext,
-  FormDataProvider,
-  FormSchema,
-  FieldHook,
   FIELD_TYPES,
-  VALIDATION_TYPES,
+  FieldConfig,
+  FieldHook,
+  Form,
+  FormDataProvider,
+  FormHook,
+  FormSchema,
+  getUseField,
   OnFormUpdateArg,
+  SerializerFunc,
+  UseField,
+  useForm,
+  useFormContext,
+  UseMultiFields,
+  VALIDATION_TYPES,
   ValidationFunc,
   ValidationFuncArg,
-  SerializerFunc,
-  FieldConfig,
 } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
 
 export {
-  FormRow,
+  CheckBoxField,
   Field,
-  TextField,
+  FormRow,
+  NumericField,
+  RangeField,
   SelectField,
   SuperSelectField,
-  ToggleField,
-  NumericField,
-  CheckBoxField,
   TextAreaField,
+  TextField,
+  ToggleField,
 } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/components';
 
 export {
-  fieldValidators,
   fieldFormatters,
+  fieldValidators,
 } from '../../../../../../../../src/plugins/es_ui_shared/static/forms/helpers';

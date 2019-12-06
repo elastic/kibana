@@ -42,6 +42,12 @@ const commonErrorMessages = {
   ),
 };
 
+const nullValueLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldLabel', {
+  defaultMessage: 'Null value',
+});
+
+const mapIndexToValue = ['true', true, 'false', false];
+
 export const PARAMETERS_DEFINITION = {
   name: {
     fieldConfig: {
@@ -154,6 +160,7 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
+      label: nullValueLabel,
       validations: [
         {
           validator: emptyField(
@@ -168,10 +175,48 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  null_value_numeric: {
+    fieldConfig: {
+      defaultValue: '',
+      label: nullValueLabel,
+      formatters: [toInt],
+    },
+  },
+  null_value_boolean: {
+    fieldConfig: {
+      defaultValue: '',
+      label: nullValueLabel,
+      deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
+      serializer: (value: number) => mapIndexToValue[value],
+    },
+  },
+  null_value_geo_point: {
+    fieldConfig: {
+      defaultValue: '',
+      label: nullValueLabel,
+      deserializer: (value: any) => {
+        if (value === '') {
+          return value;
+        }
+        return JSON.stringify(value);
+      },
+      serializer: (value: string) => {
+        try {
+          return JSON.parse(value);
+        } catch (error) {
+          // swallow error and return non-parsed value;
+          return value;
+        }
+      },
+    },
+  },
   copy_to: {
     fieldConfig: {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.copyToLabel', {
+        defaultMessage: 'Destination field name',
+      }),
       validations: [
         {
           validator: emptyField(
@@ -190,6 +235,9 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 50,
       type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.maxInputLengthLabel', {
+        defaultMessage: 'Max input length',
+      }),
       formatters: [toInt],
       validations: [
         {
@@ -209,6 +257,9 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 'ROOT',
       type: FIELD_TYPES.TEXT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.localeLabel', {
+        defaultMessage: 'Locale',
+      }),
       validations: [
         {
           validator: emptyField(
@@ -227,12 +278,18 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 'ccw',
       type: FIELD_TYPES.SUPER_SELECT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.orientationLabel', {
+        defaultMessage: 'Orientation',
+      }),
     },
   },
   boost: {
     fieldConfig: {
       defaultValue: 1.0,
       type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.boostLabel', {
+        defaultMessage: 'Boost level',
+      }),
       formatters: [toInt],
       validations: [
         {
@@ -417,6 +474,9 @@ export const PARAMETERS_DEFINITION = {
   term_vector: {
     fieldConfig: {
       type: FIELD_TYPES.SUPER_SELECT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.termVectorLabel', {
+        defaultMessage: 'Set term vector',
+      }),
       defaultValue: 'no',
     },
   },
@@ -448,6 +508,9 @@ export const PARAMETERS_DEFINITION = {
   position_increment_gap: {
     fieldConfig: {
       type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.positionIncrementGapLabel', {
+        defaultMessage: 'Position increment gap',
+      }),
       defaultValue: 100,
       formatters: [toInt],
       validations: [
@@ -494,6 +557,9 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 'BM25',
       type: FIELD_TYPES.SUPER_SELECT,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityLabel', {
+        defaultMessage: 'Similarity algorithm',
+      }),
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.similarityHelpText', {
         defaultMessage: 'Defaults to BM25.',
       }),
@@ -508,6 +574,9 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 2147483647,
       type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldLabel', {
+        defaultMessage: 'String length limit',
+      }),
       formatters: [toInt],
       validations: [
         {
@@ -529,6 +598,9 @@ export const PARAMETERS_DEFINITION = {
     fieldConfig: {
       defaultValue: 20,
       type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitFieldLabel', {
+        defaultMessage: 'Nested object depth limit',
+      }),
       formatters: [toInt],
       validations: [
         {

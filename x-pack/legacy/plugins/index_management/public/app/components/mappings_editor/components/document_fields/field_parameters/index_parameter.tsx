@@ -36,10 +36,9 @@ export const IndexParameter = ({
       defaultMessage: 'Allow the field to be searchable.',
     })}
     formFieldPath="index"
-    direction="column"
   >
     {/* index_options */}
-    {hasIndexOptions && (
+    {hasIndexOptions ? (
       <UseField
         path="index_options"
         config={config}
@@ -50,6 +49,8 @@ export const IndexParameter = ({
           },
         }}
       />
+    ) : (
+      undefined
     )}
   </EditFieldFormRow>
 );

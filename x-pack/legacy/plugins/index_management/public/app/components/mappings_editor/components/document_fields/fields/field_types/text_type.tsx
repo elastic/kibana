@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import {
-  EuiSpacer,
-  EuiRange,
-  EuiDualRange,
-  EuiFormRow,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiSpacer, EuiDualRange, EuiFormRow, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
@@ -22,19 +14,19 @@ import {
   Field,
   FieldHook,
   FormDataProvider,
-  CheckBoxField,
+  RangeField,
 } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
-import { PARAMETERS_OPTIONS } from '../../../../constants';
 import {
   StoreParameter,
   IndexParameter,
   BoostParameter,
-  AnalyzerParameter,
+  AnalyzersParameter,
   EagerGlobalOrdinalsParameter,
   NormsParameter,
   SimilarityParameter,
   CopyToParameter,
+  TermVectorParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
@@ -75,8 +67,14 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
 
 const i18nTexts = {
   rangeFieldLabel: i18n.translate('xpack.idxMgmt.mappingsEditor.rangeFieldLabel', {
-    defaultMessage: 'Range (Min / Max %)',
+    defaultMessage: 'Min/max frequency percentage',
   }),
+  indexPrefixesRangeFieldLabel: i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.indexPrefixesRangeFieldLabel',
+    {
+      defaultMessage: 'Min/max prefix length',
+    }
+  ),
 };
 
 export const TextType = React.memo(({ field }: Props) => {
@@ -108,70 +106,7 @@ export const TextType = React.memo(({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         {/* Analyzers */}
-        <EditFieldSection
-          title={i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersSectionTitle', {
-            defaultMessage: 'Analyzers',
-          })}
-        >
-          <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
-            {({ useSameAnalyzerForSearch }) => {
-              const label = useSameAnalyzerForSearch
-                ? i18n.translate('xpack.idxMgmt.mappingsEditor.indexSearchAnalyzerFieldLabel', {
-                    defaultMessage: 'Index + search analyzer',
-                  })
-                : i18n.translate('xpack.idxMgmt.mappingsEditor.indexAnalyzerFieldLabel', {
-                    defaultMessage: 'Index analyzer',
-                  });
-
-              return (
-                <AnalyzerParameter
-                  path="analyzer"
-                  label={label}
-                  defaultValue={field.source.analyzer}
-                />
-              );
-            }}
-          </FormDataProvider>
-
-          <EuiSpacer size="s" />
-
-          <UseField
-            path="useSameAnalyzerForSearch"
-            component={CheckBoxField}
-            config={{
-              label: i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.analyzers.useSameAnalyzerIndexAnSearch',
-                {
-                  defaultMessage: 'Use the same analyzers for index and searching',
-                }
-              ),
-              defaultValue: true,
-            }}
-          />
-
-          <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
-            {({ useSameAnalyzerForSearch }) =>
-              useSameAnalyzerForSearch ? null : (
-                <>
-                  <EuiSpacer />
-                  <AnalyzerParameter
-                    path="search_analyzer"
-                    defaultValue={field.source.search_analyzer}
-                    config={getFieldConfig('search_analyzer')}
-                  />
-                </>
-              )
-            }
-          </FormDataProvider>
-
-          <EuiSpacer />
-
-          <AnalyzerParameter
-            path="search_quote_analyzer"
-            defaultValue={field.source.search_quote_analyzer}
-            config={getFieldConfig('search_quote_analyzer')}
-          />
-        </EditFieldSection>
+        <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
 
         <EditFieldSection>
           {/* fielddata */}
@@ -190,7 +125,7 @@ export const TextType = React.memo(({ field }: Props) => {
             formFieldPath="fielddata"
           >
             {/* fielddata_frequency_filter */}
-            <EuiFormRow label={i18nTexts.rangeFieldLabel}>
+            <EuiFormRow label={i18nTexts.rangeFieldLabel} fullWidth>
               <UseMultiFields
                 fields={{
                   min: {
@@ -211,6 +146,7 @@ export const TextType = React.memo(({ field }: Props) => {
                       value={[min.value as number, max.value as number]}
                       onChange={onFrequencyFilterChange(min, max)}
                       showInput
+                      fullWidth
                     />
                   );
                 }}
@@ -265,7 +201,7 @@ export const TextType = React.memo(({ field }: Props) => {
             )}
             toggleDefaultValue={getDefaultValueToggle('indexPrefixes', field.source)}
           >
-            <EuiFormRow label={i18nTexts.rangeFieldLabel}>
+            <EuiFormRow label={i18nTexts.indexPrefixesRangeFieldLabel} fullWidth>
               <UseMultiFields
                 fields={{
                   min: {
@@ -285,6 +221,7 @@ export const TextType = React.memo(({ field }: Props) => {
                     value={[min.value as number, max.value as number]}
                     onChange={onIndexPrefixesChanage(min, max)}
                     showInput
+                    fullWidth
                   />
                 )}
               </UseMultiFields>
@@ -319,17 +256,16 @@ export const TextType = React.memo(({ field }: Props) => {
                     <UseField
                       path="position_increment_gap"
                       config={getFieldConfig('position_increment_gap')}
-                    >
-                      {positionIncrementGapField => (
-                        <EuiRange
-                          min={0}
-                          max={200}
-                          value={positionIncrementGapField.value as string}
-                          onChange={positionIncrementGapField.onChange as any}
-                          showInput
-                        />
-                      )}
-                    </UseField>
+                      component={RangeField}
+                      componentProps={{
+                        euiFieldProps: {
+                          min: 0,
+                          max: 200,
+                          showInput: true,
+                          fullWidth: true,
+                        },
+                      }}
+                    />
                     {formData.index_options !== 'positions' &&
                       formData.index_options !== 'offsets' && (
                         <>
@@ -370,59 +306,10 @@ export const TextType = React.memo(({ field }: Props) => {
           />
 
           {/* term vector */}
-          <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldTitle', {
-                  defaultMessage: 'Set term vector',
-                })}
-              </h3>
-            }
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldDescription', {
-              defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
-            })}
-            direction="column"
-            toggleDefaultValue={getDefaultValueToggle('term_vector', field.source)}
-          >
-            <FormDataProvider pathsToWatch="term_vector">
-              {formData => (
-                <>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <UseField
-                        path="term_vector"
-                        config={getFieldConfig('term_vector')}
-                        component={Field}
-                        componentProps={{
-                          euiFieldProps: {
-                            options: PARAMETERS_OPTIONS.term_vector,
-                            style: { minWidth: 300 },
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-
-                  {formData.term_vector === 'with_positions_offsets' && (
-                    <>
-                      <EuiSpacer size="s" />
-                      <EuiCallOut color="warning">
-                        <p>
-                          {i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.termVectorFieldWarningMessage',
-                            {
-                              defaultMessage:
-                                'Setting "With positions offsets" will double the size of a field’s index.',
-                            }
-                          )}
-                        </p>
-                      </EuiCallOut>
-                    </>
-                  )}
-                </>
-              )}
-            </FormDataProvider>
-          </EditFieldFormRow>
+          <TermVectorParameter
+            field={field}
+            defaultToggleValue={getDefaultValueToggle('term_vector', field.source)}
+          />
 
           {/* copy_to */}
           <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
