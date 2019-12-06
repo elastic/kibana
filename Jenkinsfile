@@ -9,7 +9,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
       ansiColor('xterm') {
         githubPr.withDefaultPrComments {
           catchError {
-            print "Hello World"
+            error "Hello world"
           }
         }
       }
