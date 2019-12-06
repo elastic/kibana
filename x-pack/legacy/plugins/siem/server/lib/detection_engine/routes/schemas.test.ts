@@ -134,7 +134,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[rule_id, description, from, to, name, severity, type, query, index, interval] does not validate', () => {
+    test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
       expect(
         createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -149,7 +149,7 @@ describe('schemas', () => {
           index: ['index-1'],
           interval: '5m',
         }).error
-      ).toBeTruthy();
+      ).toBeFalsy();
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
@@ -337,26 +337,6 @@ describe('schemas', () => {
           type: 'filter',
           filter: {},
           query: 'some query value',
-        }).error
-      ).toBeTruthy();
-    });
-
-    test('If filter type is set then language is not allowed', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-          filter: {},
-          language: 'kuery',
         }).error
       ).toBeTruthy();
     });
@@ -1602,24 +1582,6 @@ describe('schemas', () => {
           type: 'filter',
           filter: {},
           query: 'some query value',
-        }).error
-      ).toBeTruthy();
-    });
-
-    test('If filter type is set then language is not allowed', () => {
-      expect(
-        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-          id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-          filter: {},
-          language: 'kuery',
         }).error
       ).toBeTruthy();
     });

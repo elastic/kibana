@@ -113,15 +113,7 @@ export const createRulesSchema = Joi.object({
       otherwise: Joi.forbidden(),
     }),
   }),
-  language: Joi.when('type', {
-    is: 'query',
-    then: language.required(),
-    otherwise: Joi.when('type', {
-      is: 'saved_query',
-      then: language.optional(),
-      otherwise: Joi.forbidden(),
-    }),
-  }),
+  language: language.default('kuery'),
   output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
@@ -169,15 +161,7 @@ export const updateRulesSchema = Joi.object({
       otherwise: Joi.forbidden(),
     }),
   }),
-  language: Joi.when('type', {
-    is: 'query',
-    then: language.optional(),
-    otherwise: Joi.when('type', {
-      is: 'saved_query',
-      then: language.optional(),
-      otherwise: Joi.forbidden(),
-    }),
-  }),
+  language,
   output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
