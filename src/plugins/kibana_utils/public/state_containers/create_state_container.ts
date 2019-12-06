@@ -18,6 +18,7 @@
  */
 
 import { Subject } from 'rxjs';
+import { RecursiveReadonly } from '@kbn/utility-types';
 import {
   PureTransitionsToTransitions,
   PureTransition,
@@ -26,6 +27,15 @@ import {
 } from './types';
 
 const $$observable = (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable';
+
+const freeze: <T>(value: T) => RecursiveReadonly<T> =
+  process.env.NODE_ENV !== 'production'
+    ? <T>(value: T): RecursiveReadonly<T> => {
+        if (!value) return value as RecursiveReadonly<T>;
+        if (typeof value === 'object') return Object.freeze({ ...value }) as RecursiveReadonly<T>;
+        else return value as RecursiveReadonly<T>;
+      }
+    : <T>(value: T) => value as RecursiveReadonly<T>;
 
 export const createStateContainer = <
   State,
@@ -36,21 +46,20 @@ export const createStateContainer = <
   pureTransitions: PureTransitions,
   pureSelectors: PureSelectors = {} as PureSelectors
 ): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> => {
-  const state$ = new Subject<State>();
+  const state$ = new Subject<RecursiveReadonly<State>>();
   const container: ReduxLikeStateContainer<State, PureTransitions, PureSelectors> = {
-    state: defaultState,
+    state: freeze(defaultState),
     get: () => container.state,
     getState: () => container.state,
     set: (state: State) => {
-      container.state = state;
-      state$.next(state);
+      state$.next((container.state = freeze(state)));
     },
     state$,
     reducer: (state, action) => {
       const pureTransition = (pureTransitions as Record<string, PureTransition<State, any[]>>)[
         action.type
       ];
-      return pureTransition ? pureTransition(state)(...action.args) : state;
+      return pureTransition ? freeze(pureTransition(state)(...action.args)) : state;
     },
     replaceReducer: nextReducer => (container.reducer = nextReducer),
     dispatch: action => state$.next((container.state = container.reducer(container.state, action))),
@@ -65,8 +74,9 @@ export const createStateContainer = <
       }),
       {} as PureSelectorsToSelectors<PureSelectors>
     ),
-    addMiddleware: middleware => (container.dispatch = middleware(container)(container.dispatch)),
-    subscribe: (listener: (state: State) => void) => {
+    addMiddleware: middleware =>
+      (container.dispatch = middleware(container as any)(container.dispatch)),
+    subscribe: (listener: (state: RecursiveReadonly<State>) => void) => {
       const subscription = state$.subscribe(listener);
       return () => subscription.unsubscribe();
     },

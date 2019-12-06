@@ -191,6 +191,32 @@ test('created mutators are saved in store object', () => {
   expect(store.state).toEqual({ value: 2 });
 });
 
+test('throws when state is modified inline - 1', () => {
+  const container = createStateContainer({ a: 'b' }, {});
+
+  let error: TypeError | null = null;
+  try {
+    (container.state.a as any) = 'c';
+  } catch (err) {
+    error = err;
+  }
+
+  expect(error).toBeInstanceOf(TypeError);
+});
+
+test('throws when state is modified inline - 2', () => {
+  const container = createStateContainer({ a: 'b' }, {});
+
+  let error: TypeError | null = null;
+  try {
+    (container.get().a as any) = 'c';
+  } catch (err) {
+    error = err;
+  }
+
+  expect(error).toBeInstanceOf(TypeError);
+});
+
 describe('selectors', () => {
   test('can specify no selectors, or can skip them', () => {
     createStateContainer({}, {});
