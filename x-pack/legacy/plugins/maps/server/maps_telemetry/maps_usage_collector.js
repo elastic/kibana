@@ -15,7 +15,8 @@ export function initTelemetryCollection(usageCollection, server) {
 
 async function isTaskManagerReady(server) {
   const result = await fetch(server);
-  return result !== null;
+  const runs = _.get(result, '[0].state.runs', 0);
+  return runs > 0;
 }
 
 async function fetch(server) {

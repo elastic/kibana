@@ -74,7 +74,9 @@ function addEvents(prevEvents: Record<string, number>, newEvents: Record<string,
 }
 
 async function isTaskManagerReady(server: Server) {
-  return (await getLatestTaskState(server)) !== null;
+  const result = await getLatestTaskState(server);
+  const runs = get(result, '[0].state.runs', 0);
+  return runs > 0;
 }
 
 async function getLatestTaskState(server: Server) {

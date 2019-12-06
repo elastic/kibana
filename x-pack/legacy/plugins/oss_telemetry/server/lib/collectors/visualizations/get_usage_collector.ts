@@ -10,7 +10,8 @@ import { PLUGIN_ID, VIS_TELEMETRY_TASK, VIS_USAGE_TYPE } from '../../../../const
 
 async function isTaskManagerReady(server: HapiServer) {
   const result = await fetch(server);
-  return result !== null;
+  const runs = get(result, '[0].state.runs', 0);
+  return runs > 0;
 }
 
 async function fetch(server: HapiServer) {
