@@ -114,6 +114,7 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
+      'data-test-subj': 'alertsTableCell-name',
     },
     {
       field: 'tagsText',
@@ -122,6 +123,7 @@ export const AlertsList: React.FunctionComponent = () => {
         { defaultMessage: 'Tags' }
       ),
       sortable: false,
+      'data-test-subj': 'alertsTableCell-tagsText',
     },
     {
       field: 'alertType',
@@ -131,6 +133,7 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: true,
+      'data-test-subj': 'alertsTableCell-alertType',
     },
     {
       field: 'interval',
@@ -140,6 +143,7 @@ export const AlertsList: React.FunctionComponent = () => {
       ),
       sortable: false,
       truncateText: false,
+      'data-test-subj': 'alertsTableCell-interval',
     },
     {
       name: '',

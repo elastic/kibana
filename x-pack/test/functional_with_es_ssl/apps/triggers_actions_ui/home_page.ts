@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('Loads the app', async () => {
       await log.debug('Checking for section heading to say Triggers and Actions.');
 
-      const headingText = await pageObjects.triggersActionsUI.sectionHeadingText();
+      const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
       expect(headingText).to.be('Alerts and actions');
 
       await testSubjects.existOrFail('createActionButton');

@@ -8,8 +8,6 @@ import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const ENTER_KEY = '\uE007';
-
 function generateUniqueKey() {
   return uuid.v4().replace(/-/g, '');
 }
@@ -27,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should create a connector', async () => {
       const connectorName = generateUniqueKey();
 
-      await pageObjects.triggersActionsUI.createActionConnector();
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
       const serverLogCard = await testSubjects.find('.server-log-card');
       await serverLogCard.click();
@@ -42,32 +40,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await saveButton.click();
 
-      const toastMessage = await find.byCssSelector(
-        '[data-test-subj="euiToastHeader"] .euiToastHeader__title'
-      );
-      expect(await toastMessage.getVisibleText()).to.eql(`Created '${connectorName}'`);
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
-      const closeButton = await testSubjects.find('toastCloseButton');
-      await closeButton.click();
-      await testSubjects.waitForHidden('toastCloseButton');
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-      const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(connectorName);
-      await searchBox.pressKeys(ENTER_KEY);
-
-      const textShownInConnectorsList = await testSubjects.getVisibleText(
-        'connectorsTableCell-name'
-      );
-      expect(textShownInConnectorsList).to.eql(connectorName);
+      const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResults).to.eql([
+        {
+          name: connectorName,
+          actionType: 'Server Log',
+          referencedByCount: '0',
+        },
+      ]);
     });
 
     it('should edit a connector', async () => {
       const connectorName = generateUniqueKey();
       const updatedConnectorName = `${connectorName}updated`;
 
-      await pageObjects.triggersActionsUI.createActionConnector();
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
       const serverLogCard = await testSubjects.find('.server-log-card');
       await serverLogCard.click();
@@ -82,21 +74,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await saveButton.click();
 
-      const closeToastButton = await testSubjects.find('toastCloseButton');
-      await closeToastButton.click();
-      await testSubjects.waitForHidden('toastCloseButton');
+      await pageObjects.common.closeToast();
 
-      const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(connectorName);
-      await searchBox.pressKeys(ENTER_KEY);
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-      const rowsBeforeDelete = await testSubjects.findAll('connectors-row');
-      expect(rowsBeforeDelete.length).to.eql(1);
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
 
-      const deleteConnectorBtn = await testSubjects.find('edit');
-      await deleteConnectorBtn.click();
+      const editConnectorBtn = await testSubjects.find('edit');
+      await editConnectorBtn.click();
 
       const nameInputToUpdate = await testSubjects.find('nameInput');
       await nameInputToUpdate.click();
@@ -108,30 +94,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await saveEditButton.click();
 
-      const toastMessage = await find.byCssSelector(
-        '[data-test-subj="euiToastHeader"] .euiToastHeader__title'
-      );
-      expect(await toastMessage.getVisibleText()).to.eql(`Updated '${updatedConnectorName}'`);
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
 
-      const closeToastUpdatedButton = await testSubjects.find('toastCloseButton');
-      await closeToastUpdatedButton.click();
-      await testSubjects.waitForHidden('toastCloseButton');
+      await pageObjects.triggersActionsUI.searchConnectors(updatedConnectorName);
 
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(updatedConnectorName);
-      await searchBox.pressKeys(ENTER_KEY);
-
-      const textShownInConnectorsList = await testSubjects.getVisibleText(
-        'connectorsTableCell-name'
-      );
-      expect(textShownInConnectorsList).to.eql(updatedConnectorName);
+      const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsAfterEdit).to.eql([
+        {
+          name: updatedConnectorName,
+          actionType: 'Server Log',
+          referencedByCount: '0',
+        },
+      ]);
     });
 
     it('should delete a connector', async () => {
       const connectorName = generateUniqueKey();
 
-      await pageObjects.triggersActionsUI.createActionConnector();
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
       const serverLogCard = await testSubjects.find('.server-log-card');
       await serverLogCard.click();
@@ -146,34 +127,26 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await saveButton.click();
 
-      await testSubjects.existOrFail('euiToastHeader');
+      await pageObjects.common.closeToast();
 
-      const closeButton = await testSubjects.find('toastCloseButton');
-      await closeButton.click();
-      await testSubjects.waitForHidden('toastCloseButton');
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-      const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(connectorName);
-      await searchBox.pressKeys(ENTER_KEY);
-
-      const rowsBeforeDelete = await testSubjects.findAll('connectors-row');
-      expect(rowsBeforeDelete.length).to.eql(1);
+      const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeDelete.length).to.eql(1);
 
       const deleteConnectorBtn = await testSubjects.find('deleteConnector');
       await deleteConnectorBtn.click();
 
       await find.byCssSelector('[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)');
 
-      const rowsAfterDelete = await testSubjects.findAll('connectors-row', 0);
-      expect(rowsAfterDelete.length).to.eql(0);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsAfterDelete.length).to.eql(0);
     });
 
     it('should bulk delete connectors', async () => {
       const connectorName = generateUniqueKey();
 
-      await pageObjects.triggersActionsUI.createActionConnector();
+      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
 
       const serverLogCard = await testSubjects.find('.server-log-card');
       await serverLogCard.click();
@@ -188,20 +161,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await saveButton.click();
 
-      await testSubjects.existOrFail('euiToastHeader');
+      await pageObjects.common.closeToast();
 
-      const closeButton = await testSubjects.find('toastCloseButton');
-      await closeButton.click();
-      await testSubjects.waitForHidden('toastCloseButton');
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-      const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(connectorName);
-      await searchBox.pressKeys(ENTER_KEY);
-
-      const rowsBeforeDelete = await testSubjects.findAll('connectors-row');
-      expect(rowsBeforeDelete.length).to.eql(1);
+      const searchResultsBeforeDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeDelete.length).to.eql(1);
 
       const deleteCheckbox = await find.byCssSelector(
         '.euiTableRowCellCheckbox .euiCheckbox__input'
@@ -213,8 +178,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await find.byCssSelector('[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)');
 
-      const rowsAfterDelete = await testSubjects.findAll('connectors-row', 0);
-      expect(rowsAfterDelete.length).to.eql(0);
+      const searchResultsAfterDelete = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsAfterDelete.length).to.eql(0);
     });
   });
 };

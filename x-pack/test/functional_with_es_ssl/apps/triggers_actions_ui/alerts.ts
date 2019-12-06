@@ -8,8 +8,6 @@ import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const ENTER_KEY = '\uE007';
-
 function generateUniqueKey() {
   return uuid.v4().replace(/-/g, '');
 }
@@ -17,7 +15,6 @@ function generateUniqueKey() {
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
-  const find = getService('find');
   const supertest = getService('supertest');
 
   async function createAlert() {
@@ -27,7 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .send({
         enabled: true,
         name: generateUniqueKey(),
-        tags: ['foo'],
+        tags: ['foo', 'bar'],
         alertTypeId: 'test',
         interval: '1m',
         throttle: '1m',
@@ -47,23 +44,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should search for alert', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
 
-      const rows = await testSubjects.findAll('alert-row');
-      expect(rows.length).to.eql(1);
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'test',
+          interval: '1m',
+        },
+      ]);
     });
 
     it('should disable single alert', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const collapsedItemActions = await testSubjects.find('collapsedItemActions');
       await collapsedItemActions.click();
@@ -71,25 +69,49 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const enableSwitch = await testSubjects.find('enableSwitch');
       await enableSwitch.click();
 
-      const searchBoxAfterUpdate = await find.byCssSelector(
-        '[data-test-subj="alertsList"] .euiFieldSearch'
-      );
-      await searchBoxAfterUpdate.click();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      // TODO: More assertions
+      const collapsedItemActionsAfterDisable = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActionsAfterDisable.click();
+
+      const enableSwitchAfterDisable = await testSubjects.find('enableSwitch');
+      const isChecked = await enableSwitchAfterDisable.getAttribute('aria-checked');
+      expect(isChecked).to.eql('false');
     });
 
     it('should re-enable single alert', async () => {
-      // TODO
+      const createdAlert = await createAlert();
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActions.click();
+
+      const enableSwitch = await testSubjects.find('enableSwitch');
+      await enableSwitch.click();
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActionsAfterDisable = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActionsAfterDisable.click();
+
+      const enableSwitchAfterDisable = await testSubjects.find('enableSwitch');
+      await enableSwitchAfterDisable.click();
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActionsAfterReEnable = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActionsAfterReEnable.click();
+
+      const enableSwitchAfterReEnable = await testSubjects.find('enableSwitch');
+      const isChecked = await enableSwitchAfterReEnable.getAttribute('aria-checked');
+      expect(isChecked).to.eql('true');
     });
 
     it('should mute single alert', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const collapsedItemActions = await testSubjects.find('collapsedItemActions');
       await collapsedItemActions.click();
@@ -97,25 +119,50 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const muteSwitch = await testSubjects.find('muteSwitch');
       await muteSwitch.click();
 
-      const searchBoxAfterUpdate = await find.byCssSelector(
-        '[data-test-subj="alertsList"] .euiFieldSearch'
-      );
-      await searchBoxAfterUpdate.click();
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      // TODO: More assertions
+      const collapsedItemActionsAfterMute = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActionsAfterMute.click();
+
+      const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
+      const isChecked = await muteSwitchAfterMute.getAttribute('aria-checked');
+      expect(isChecked).to.eql('true');
     });
 
     it('should unmute single alert', async () => {
-      // TODO
+      const createdAlert = await createAlert();
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActions.click();
+
+      const muteSwitch = await testSubjects.find('muteSwitch');
+      await muteSwitch.click();
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActionsAfterMute = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActionsAfterMute.click();
+
+      const muteSwitchAfterMute = await testSubjects.find('muteSwitch');
+      await muteSwitchAfterMute.click();
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActionsAfterUnmute = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActionsAfterUnmute.click();
+
+      const muteSwitchAfterUnmute = await testSubjects.find('muteSwitch');
+      const isChecked = await muteSwitchAfterUnmute.getAttribute('aria-checked');
+      expect(isChecked).to.eql('false');
     });
 
+    // TODO: wait for delete to finish
     it('should delete single alert', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const collapsedItemActions = await testSubjects.find('collapsedItemActions');
       await collapsedItemActions.click();
@@ -123,16 +170,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const deleteBtn = await testSubjects.find('deleteAlert');
       await deleteBtn.click();
 
-      // TODO: More assertions
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults.length).to.eql(0);
     });
 
     it('should mute all selection', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
       await checkbox.click();
@@ -146,16 +193,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Unmute all button shows after clicking mute all
       await testSubjects.existOrFail('unmuteAll');
 
-      // TODO: More assertions
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActions.click();
+
+      const muteSwitch = await testSubjects.find('muteSwitch');
+      const isChecked = await muteSwitch.getAttribute('aria-checked');
+      expect(isChecked).to.eql('true');
     });
 
     it('should unmute all selection', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
       await checkbox.click();
@@ -172,16 +223,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Mute all button shows after clicking unmute all
       await testSubjects.existOrFail('muteAll');
 
-      // TODO: More assertions
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActions.click();
+
+      const muteSwitch = await testSubjects.find('muteSwitch');
+      const isChecked = await muteSwitch.getAttribute('aria-checked');
+      expect(isChecked).to.eql('false');
     });
 
     it('should disable all selection', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
       await checkbox.click();
@@ -195,16 +250,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Enable all button shows after clicking disable all
       await testSubjects.existOrFail('enableAll');
 
-      // TODO: More assertions
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActions.click();
+
+      const enableSwitch = await testSubjects.find('enableSwitch');
+      const isChecked = await enableSwitch.getAttribute('aria-checked');
+      expect(isChecked).to.eql('false');
     });
 
     it('should enable all selection', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
       await checkbox.click();
@@ -221,16 +280,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Disable all button shows after clicking enable all
       await testSubjects.existOrFail('disableAll');
 
-      // TODO: More assertions
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const collapsedItemActions = await testSubjects.find('collapsedItemActions');
+      await collapsedItemActions.click();
+
+      const enableSwitch = await testSubjects.find('enableSwitch');
+      const isChecked = await enableSwitch.getAttribute('aria-checked');
+      expect(isChecked).to.eql('true');
     });
 
+    // TODO: wait for delete to finish
     it('should delete all selection', async () => {
       const createdAlert = await createAlert();
-      const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
-      await searchBox.click();
-      await searchBox.clearValue();
-      await searchBox.type(createdAlert.name);
-      await searchBox.pressKeys(ENTER_KEY);
+
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
       const checkbox = await testSubjects.find(`checkboxSelectRow-${createdAlert.id}`);
       await checkbox.click();
@@ -241,7 +305,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const deleteAllBtn = await testSubjects.find('deleteAll');
       await deleteAllBtn.click();
 
-      // TODO: More assertions
+      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults.length).to.eql(0);
     });
   });
 };
