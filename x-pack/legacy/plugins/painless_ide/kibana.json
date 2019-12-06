@@ -1,0 +1,6 @@
+{
+  "id": "painless_ide",
+  "version": "kibana",
+  "server": true,
+  "ui": true
+}
