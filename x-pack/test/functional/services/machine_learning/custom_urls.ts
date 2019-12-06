@@ -35,6 +35,7 @@ export function MachineLearningCustomUrlsProvider({ getService }: FtrProviderCon
 
     async saveCustomUrl() {
       await testSubjects.click('mlJobAddCustomUrl');
+      await testSubjects.missingOrFail('mlJobNewCustomUrlFormModal', { timeout: 10 * 1000 });
     },
   };
 }
