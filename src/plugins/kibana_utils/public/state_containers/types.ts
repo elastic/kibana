@@ -18,14 +18,16 @@
  */
 
 import { Observable } from 'rxjs';
-import { Ensure } from '@kbn/utility-types';
+import { Ensure, RecursiveReadonly } from '@kbn/utility-types';
 
 export interface TransitionDescription<Type extends string = string, Args extends any[] = any[]> {
   type: Type;
   args: Args;
 }
 export type Transition<State, Args extends any[]> = (...args: Args) => State;
-export type PureTransition<State, Args extends any[]> = (state: State) => Transition<State, Args>;
+export type PureTransition<State, Args extends any[]> = (
+  state: RecursiveReadonly<State>
+) => Transition<State, Args>;
 export type EnsurePureTransition<T> = Ensure<T, PureTransition<any, any>>;
 export type PureTransitionToTransition<T extends PureTransition<any, any>> = ReturnType<T>;
 export type PureTransitionsToTransitions<T extends object> = {
@@ -33,10 +35,10 @@ export type PureTransitionsToTransitions<T extends object> = {
 };
 
 export interface BaseStateContainer<State> {
-  state: State;
-  get: () => State;
+  state: RecursiveReadonly<State>;
+  get: () => RecursiveReadonly<State>;
   set: (state: State) => void;
-  state$: Observable<State>;
+  state$: Observable<RecursiveReadonly<State>>;
 }
 
 export interface StateContainer<
@@ -44,8 +46,8 @@ export interface StateContainer<
   PureTransitions extends object,
   PureSelectors extends object = {}
 > extends BaseStateContainer<State> {
-  transitions: PureTransitionsToTransitions<PureTransitions>;
-  selectors: PureSelectorsToSelectors<PureSelectors>;
+  transitions: Readonly<PureTransitionsToTransitions<PureTransitions>>;
+  selectors: Readonly<PureSelectorsToSelectors<PureSelectors>>;
 }
 
 export interface ReduxLikeStateContainer<
@@ -53,12 +55,12 @@ export interface ReduxLikeStateContainer<
   PureTransitions extends object,
   PureSelectors extends object = {}
 > extends StateContainer<State, PureTransitions, PureSelectors> {
-  getState: () => State;
-  reducer: Reducer<State>;
-  replaceReducer: (nextReducer: Reducer<State>) => void;
+  getState: () => RecursiveReadonly<State>;
+  reducer: Reducer<RecursiveReadonly<State>>;
+  replaceReducer: (nextReducer: Reducer<RecursiveReadonly<State>>) => void;
   dispatch: (action: TransitionDescription) => void;
-  addMiddleware: (middleware: Middleware<State>) => void;
-  subscribe: (listener: (state: State) => void) => () => void;
+  addMiddleware: (middleware: Middleware<RecursiveReadonly<State>>) => void;
+  subscribe: (listener: (state: RecursiveReadonly<State>) => void) => () => void;
 }
 
 export type Dispatch<T> = (action: T) => void;

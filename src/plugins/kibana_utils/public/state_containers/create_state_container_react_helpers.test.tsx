@@ -191,8 +191,8 @@ describe('hooks', () => {
     });
   });
 
-  describe('useMutations', () => {
-    test('useMutations hook returns mutations that can update state', () => {
+  describe('useTransitions', () => {
+    test('useTransitions hook returns mutations that can update state', () => {
       const { store } = create<
         {
           cnt: number;
