@@ -502,15 +502,34 @@ export class ClusterClient implements IClusterClient {
     close(): void;
     }
 
+// @public
+export type ConfigDeprecation = (config: Record<string, any>, fromPath: string, logger: ConfigDeprecationLogger) => Record<string, any>;
+
+// @public
+export interface ConfigDeprecationFactory {
+    rename(oldKey: string, newKey: string): ConfigDeprecation;
+    renameFromRoot(oldKey: string, newKey: string): ConfigDeprecation;
+    unused(unusedKey: string): ConfigDeprecation;
+    unusedFromRoot(unusedKey: string): ConfigDeprecation;
+}
+
+// @public
+export type ConfigDeprecationLogger = (message: string) => void;
+
+// @public
+export type ConfigDeprecationProvider = (factory: ConfigDeprecationFactory) => ConfigDeprecation[];
+
 // @public (undocumented)
 export type ConfigPath = string | string[];
 
 // @internal (undocumented)
 export class ConfigService {
-    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "RawConfigurationProvider" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "Env" needs to be exported by the entry point index.d.ts
-    constructor(config$: Observable<Config>, env: Env, logger: LoggerFactory);
+    constructor(rawConfigProvider: RawConfigurationProvider, env: Env, logger: LoggerFactory);
+    addDeprecationProvider(path: ConfigPath, provider: ConfigDeprecationProvider): void;
     atPath<TSchema>(path: ConfigPath): Observable<TSchema>;
+    // Warning: (ae-forgotten-export) The symbol "Config" needs to be exported by the entry point index.d.ts
     getConfig$(): Observable<Config>;
     // (undocumented)
     getUnusedPaths(): Promise<string[]>;
@@ -520,6 +539,7 @@ export class ConfigService {
     isEnabledAtPath(path: ConfigPath): Promise<boolean>;
     optionalAtPath<TSchema>(path: ConfigPath): Observable<TSchema | undefined>;
     setSchema(path: ConfigPath, schema: Type<unknown>): Promise<void>;
+    validate(): Promise<void>;
     }
 
 // @public
@@ -1002,6 +1022,7 @@ export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends obje
 
 // @public
 export interface PluginConfigDescriptor<T = any> {
+    deprecations?: ConfigDeprecationProvider;
     exposeToBrowser?: {
         [P in keyof T]?: boolean;
     };
@@ -1763,6 +1784,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:228:15 - (ae-forgotten-export) The symbol "SharedGlobalConfig" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:236:15 - (ae-forgotten-export) The symbol "SharedGlobalConfig" needs to be exported by the entry point index.d.ts
 
 ```
