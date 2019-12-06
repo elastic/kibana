@@ -17,15 +17,25 @@ import {
   EuiIcon,
   EuiComboBox,
   EuiFormRow,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 
+import { documentationService } from '../../../../../../services/documentation';
 import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
 
 import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
 
 import { useDispatch } from '../../../../mappings_state';
 import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
+import {
+  Field,
+  MainType,
+  SubType,
+  NormalizedFields,
+  ComboBoxOption,
+  DataType,
+} from '../../../../types';
 import { NameParameter, TypeParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
@@ -133,8 +143,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
   };
 
   const renderFormFields = useCallback(
-    ({ type }) => {
+    ({ type, subType }) => {
       const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
+
+      const docLink =
+        (documentationService.getTypeDocLink(subType) as string) ||
+        (documentationService.getTypeDocLink(type) as string);
 
       return (
         <EuiFlexItem>
@@ -143,12 +157,14 @@ export const CreateField = React.memo(function CreateFieldComponent({
             <EuiFlexItem>
               <NameParameter />
             </EuiFlexItem>
-
             {/* Field type */}
             <EuiFlexItem>
-              <TypeParameter isMultiField={isMultiField} onTypeChange={onTypeChange} />
+              <TypeParameter
+                isMultiField={isMultiField}
+                onTypeChange={onTypeChange}
+                docLink={subTypeOptions ? undefined : docLink} // if subType, docLink will render under the subType select and not here
+              />
             </EuiFlexItem>
-
             {/* Field sub type (if any) */}
             {subTypeOptions && (
               <EuiFlexItem>
@@ -165,7 +181,23 @@ export const CreateField = React.memo(function CreateFieldComponent({
                     const isInvalid = error ? Boolean(error.length) : false;
 
                     return (
-                      <EuiFormRow label={subTypeField.label} error={error} isInvalid={isInvalid}>
+                      <EuiFormRow
+                        label={subTypeField.label}
+                        error={error}
+                        isInvalid={isInvalid}
+                        labelAppend={
+                          <EuiText size="xs">
+                            <EuiLink href={docLink} target="_blank">
+                              {i18n.translate(
+                                'xpack.idxMgmt.mappingsEditor.createField.typeDocumentation',
+                                {
+                                  defaultMessage: 'Learn more',
+                                }
+                              )}
+                            </EuiLink>
+                          </EuiText>
+                        }
+                      >
                         <EuiComboBox
                           placeholder={i18n.translate(
                             'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',
@@ -176,7 +208,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                           singleSelection={{ asPlainText: true }}
                           options={subTypeOptions}
                           selectedOptions={subTypeField.value as ComboBoxOption[]}
-                          onChange={subType => subTypeField.setValue(subType)}
+                          onChange={newSubType => subTypeField.setValue(newSubType)}
                           isClearable={false}
                         />
                       </EuiFormRow>

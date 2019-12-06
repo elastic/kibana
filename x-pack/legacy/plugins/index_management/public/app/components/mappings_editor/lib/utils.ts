@@ -16,7 +16,6 @@ import {
   SubType,
   ChildFieldName,
   ParameterName,
-  SelectOption,
   ComboBoxOption,
 } from '../types';
 

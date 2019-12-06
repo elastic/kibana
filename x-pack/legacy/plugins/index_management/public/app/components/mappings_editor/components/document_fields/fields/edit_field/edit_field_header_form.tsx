@@ -39,9 +39,9 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
     : undefined;
 
   const onTypeChange = (value: ComboBoxOption[]) => {
-    form.setFieldValue('type', value);
-
     if (value.length) {
+      form.setFieldValue('type', value);
+
       const nextTypeDefinition = TYPE_DEFINITION[value[0].value as MainType];
 
       if (nextTypeDefinition.subTypes !== undefined) {
@@ -69,7 +69,7 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
 
       {/* Field sub type (if any) */}
       {hasSubType && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <UseField
             path="subType"
             config={{

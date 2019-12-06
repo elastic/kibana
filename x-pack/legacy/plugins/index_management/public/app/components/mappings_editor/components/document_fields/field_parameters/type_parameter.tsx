@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiComboBox } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { getFieldConfig, filterTypesForMultiField } from '../../../lib';
@@ -15,17 +15,33 @@ import { FIELD_TYPES_OPTIONS } from '../../../constants';
 
 interface Props {
   onTypeChange: (nextType: ComboBoxOption[]) => void;
-  isMultiField?: boolean;
+  isMultiField?: boolean | null;
+  docLink?: string;
 }
 
-export const TypeParameter = ({ onTypeChange, isMultiField }: Props) => (
+export const TypeParameter = ({ onTypeChange, isMultiField, docLink }: Props) => (
   <UseField path="type" config={getFieldConfig('type')}>
     {typeField => {
       const error = typeField.getErrorsMessages();
       const isInvalid = error ? Boolean(error.length) : false;
 
       return (
-        <EuiFormRow label={typeField.label} error={error} isInvalid={isInvalid}>
+        <EuiFormRow
+          label={typeField.label}
+          error={error}
+          isInvalid={isInvalid}
+          labelAppend={
+            docLink ? (
+              <EuiText size="xs">
+                <EuiLink href={docLink} target="_blank">
+                  {i18n.translate('xpack.idxMgmt.mappingsEditor.editField.typeDocumentation', {
+                    defaultMessage: 'Learn more',
+                  })}
+                </EuiLink>
+              </EuiText>
+            ) : null
+          }
+        >
           <EuiComboBox
             placeholder={i18n.translate('xpack.idxMgmt.mappingsEditor.typeField.placeholderLabel', {
               defaultMessage: 'Select a type',
