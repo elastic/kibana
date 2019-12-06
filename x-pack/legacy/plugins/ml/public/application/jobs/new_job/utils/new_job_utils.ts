@@ -47,7 +47,19 @@ export function createSearchItems(
 
     if (query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
       const ast = esKuery.fromKueryExpression(query.query);
-      combinedQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+      if (query.query !== '') {
+        combinedQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
+      }
+      const filterQuery = esQuery.buildQueryFromFilters(filters, indexPattern);
+
+      if (combinedQuery.bool.filter === undefined) {
+        combinedQuery.bool.filter = [];
+      }
+      if (combinedQuery.bool.must_not === undefined) {
+        combinedQuery.bool.must_not = [];
+      }
+      combinedQuery.bool.filter = [...combinedQuery.bool.filter, ...filterQuery.filter];
+      combinedQuery.bool.must_not = [...combinedQuery.bool.must_not, ...filterQuery.must_not];
     } else {
       const esQueryConfigs = esQuery.getEsQueryConfig(kibanaConfig);
       combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
