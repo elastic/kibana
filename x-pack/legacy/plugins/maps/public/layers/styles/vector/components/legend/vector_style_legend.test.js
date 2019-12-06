@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 
 import { VectorStyleLegend } from './vector_style_legend';
 import { DynamicStyleProperty } from '../../properties/dynamic_style_property';
-import { vectorStyles } from '../../vector_style_defaults';
+import { VECTOR_STYLES } from '../../vector_style_defaults';
 
 let isLinesOnly = false;
 let isPolygonsOnly = false;
@@ -23,23 +23,23 @@ const defaultProps = {
   },
   styleProperties: [
     {
-      style: new DynamicStyleProperty({}, vectorStyles.FILL_COLOR),
+      style: new DynamicStyleProperty({}, VECTOR_STYLES.FILL_COLOR),
       range,
     },
     {
-      style: new DynamicStyleProperty({}, vectorStyles.LINE_COLOR),
+      style: new DynamicStyleProperty({}, VECTOR_STYLES.LINE_COLOR),
       range,
     },
     {
-      style: new DynamicStyleProperty({}, vectorStyles.LINE_WIDTH),
+      style: new DynamicStyleProperty({}, VECTOR_STYLES.LINE_WIDTH),
       range,
     },
     {
-      style: new DynamicStyleProperty({}, vectorStyles.ICON_SIZE),
+      style: new DynamicStyleProperty({}, VECTOR_STYLES.ICON_SIZE),
       range,
     },
     {
-      style: new DynamicStyleProperty({}, vectorStyles.ICON_ORIENTATION),
+      style: new DynamicStyleProperty({}, VECTOR_STYLES.ICON_ORIENTATION),
       range,
     }
   ]

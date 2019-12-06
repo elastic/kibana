@@ -261,7 +261,13 @@ export class ESSearchSource extends AbstractESSource {
       }
     });
 
-    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
+    const resp = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: 'Elasticsearch document top hits request',
+    });
 
     const allHits = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
@@ -322,7 +328,13 @@ export class ESSearchSource extends AbstractESSource {
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document request');
+    const resp = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: 'Elasticsearch document request',
+    });
 
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
