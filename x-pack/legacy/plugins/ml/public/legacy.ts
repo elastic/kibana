@@ -5,8 +5,6 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
-import { start as navigation } from '../../../../../src/legacy/core_plugins/navigation/public/legacy';
 
 import { PluginInitializerContext } from '../../../../../src/core/public';
 import { plugin } from '.';
@@ -14,8 +12,6 @@ import { plugin } from '.';
 const pluginInstance = plugin({} as PluginInitializerContext);
 
 export const setup = pluginInstance.setup(npSetup.core, {
-  data,
-  navigation,
   npData: npStart.plugins.data,
 });
 export const start = pluginInstance.start(npStart.core, npStart.plugins);

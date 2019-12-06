@@ -17,7 +17,6 @@ import 'ace';
 
 import { AppMountContext, AppMountParameters } from 'kibana/public';
 import { DataStart } from 'src/legacy/core_plugins/data/public';
-// import { ANOMALY_DETECTION_BREADCRUMB } from './breadcrumbs';
 
 import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 import { KibanaConfigTypeFix } from './contexts/kibana';
@@ -25,7 +24,6 @@ import { KibanaConfigTypeFix } from './contexts/kibana';
 import { MlRouter } from './routing';
 
 export interface MlDependencies extends AppMountParameters {
-  // data: DataStart;
   npData: ReturnType<DataPlugin['start']>;
   indexPatterns: DataStart['indexPatterns']['indexPatterns'];
 }

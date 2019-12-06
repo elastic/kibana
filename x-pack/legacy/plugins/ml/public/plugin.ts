@@ -4,18 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import { DataStart } from 'src/legacy/core_plugins/data/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
-import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
 import { Plugin, CoreStart, CoreSetup } from '../../../../../src/core/public';
 
 export interface MlSetupDependencies {
-  // data: DataStart;
   npData: ReturnType<DataPlugin['start']>;
-  navigation: NavigationStart;
-  __LEGACY?: {
-    // angularDependencies: LegacyAngularInjectedDependencies;
-  };
 }
 
 export interface MlStartDependencies {
@@ -25,22 +18,8 @@ export interface MlStartDependencies {
   };
 }
 
-// export interface Dependencies {
-//   uiSettings: UiSettingsClientContract;
-//   // savedObjectsClient: SavedObjectsClientContract;
-//   // http: HttpServiceBase;
-//   // notifications: NotificationsStart;
-//   // fieldFormats: FieldFormatsStart;
-// }
-
 export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
-  // private dataStart: DataStart | null = null;
-  // private npDataStart: ReturnType<DataPlugin['start']> | null = null;
-
-  setup(core: CoreSetup, { /* data,*/ npData, navigation }: MlSetupDependencies) {
-    // this.dataStart = data;
-    // this.npDataStart = npData;
-
+  setup(core: CoreSetup, { npData }: MlSetupDependencies) {
     core.application.register({
       id: 'ml',
       title: 'Machine learning',
@@ -50,7 +29,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           ...params,
           indexPatterns: npData.indexPatterns.indexPatterns,
           npData,
-          // data,
         });
       },
     });
@@ -59,8 +37,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   }
 
   start(core: CoreStart, deps: {}) {
-    // this.dataStart = data;
-    // this.npDataStart = npData;
     return {};
   }
   public stop() {}

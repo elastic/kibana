@@ -5,24 +5,11 @@
  */
 
 import { IndexPattern } from 'ui/index_patterns';
-import {
-  esQuery,
-  Query,
-  IIndexPattern,
-  esKuery,
-} from '../../../../../../../../../src/plugins/data/public';
-import { SavedSearch } from '../../../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+import { esQuery, Query, esKuery } from '../../../../../../../../../src/plugins/data/public';
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { getQueryFromSavedSearch } from '../../../util/index_utils';
-
-export interface SearchItems {
-  indexPattern: IIndexPattern;
-  savedSearch: SavedSearch;
-  query: Query;
-  combinedQuery: any;
-}
 
 // Provider for creating the items used for searching and job creation.
 // Uses the $route object to retrieve the indexPattern and savedSearch from the url
