@@ -331,9 +331,13 @@ export const loadEvalData = async ({
 }) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
-  const predictedField = `${resultsField}.${
+  let predictedField = `${resultsField}.${
     predictionFieldName ? predictionFieldName : defaultPredictionField
   }`;
+
+  if (jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION) {
+    predictedField = `${predictedField}.keyword`;
+  }
 
   const query = getEvalQueryBody({ resultsField, isTraining, searchQuery, ignoreDefaultQuery });
   const metrics = {

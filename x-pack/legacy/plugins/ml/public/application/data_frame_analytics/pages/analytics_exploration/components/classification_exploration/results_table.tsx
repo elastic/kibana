@@ -131,7 +131,7 @@ export const ResultsTable: FC<Props> = React.memo(
               return (
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.ml.dataframe.analytics.regressionExploration.indexArrayToolTipContent',
+                    'xpack.ml.dataframe.analytics.classificationExploration.indexArrayToolTipContent',
                     {
                       defaultMessage:
                         'The full content of this array based column cannot be displayed.',
@@ -140,7 +140,7 @@ export const ResultsTable: FC<Props> = React.memo(
                 >
                   <EuiBadge>
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.regressionExploration.indexArrayBadgeContent',
+                      'xpack.ml.dataframe.analytics.classificationExploration.indexArrayBadgeContent',
                       {
                         defaultMessage: 'array',
                       }
@@ -154,7 +154,7 @@ export const ResultsTable: FC<Props> = React.memo(
               return (
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.ml.dataframe.analytics.regressionExploration.indexObjectToolTipContent',
+                    'xpack.ml.dataframe.analytics.classificationExploration.indexObjectToolTipContent',
                     {
                       defaultMessage:
                         'The full content of this object based column cannot be displayed.',
@@ -163,7 +163,7 @@ export const ResultsTable: FC<Props> = React.memo(
                 >
                   <EuiBadge>
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.regressionExploration.indexObjectBadgeContent',
+                      'xpack.ml.dataframe.analytics.classificationExploration.indexObjectBadgeContent',
                       {
                         defaultMessage: 'object',
                       }
@@ -449,7 +449,7 @@ export const ResultsTable: FC<Props> = React.memo(
             {tableItems.length === SEARCH_SIZE && (
               <EuiFormRow
                 helpText={i18n.translate(
-                  'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
+                  'xpack.ml.dataframe.analytics.classificationExploration.documentsShownHelpText',
                   {
                     defaultMessage: 'Showing first {searchSize} documents',
                     values: { searchSize: SEARCH_SIZE },

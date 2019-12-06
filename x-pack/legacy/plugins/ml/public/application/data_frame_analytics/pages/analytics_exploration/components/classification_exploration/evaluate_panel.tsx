@@ -4,10 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC, useState, useEffect, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 // import { ErrorCallout } from './error_callout';
 import {
   getDependentVar,
@@ -27,6 +35,45 @@ import {
   // SearchQuery,
 } from '../../../../common/analytics';
 
+function getColumnData(confusionMatrixData: any) {
+  const colData: any = [];
+
+  confusionMatrixData.forEach((classData: any) => {
+    const correctlyPredictedClass = classData.predicted_classes.find(
+      (pc: any) => pc.predicted_class === classData.actual_class
+    );
+    const incorrectlyPredictedClass = classData.predicted_classes.find(
+      (pc: any) => pc.predicted_class !== classData.actual_class
+    );
+    const accuracy = (correctlyPredictedClass.count / classData.actual_class_doc_count).toFixed(3);
+    const error = (incorrectlyPredictedClass.count / classData.actual_class_doc_count).toFixed(3);
+
+    colData.push({
+      [correctlyPredictedClass.predicted_class]: accuracy,
+      [incorrectlyPredictedClass.predicted_class]: error,
+      actual_class: classData.actual_class,
+      predicted_class: correctlyPredictedClass.predicted_class,
+      actual_class_doc_count: classData.actual_class_doc_count,
+      count: correctlyPredictedClass.count,
+      error_count: incorrectlyPredictedClass.count,
+      accuracy,
+    });
+  });
+
+  const columns: any = [
+    {
+      id: 'actual_class',
+      display: <span />,
+    },
+  ];
+
+  colData.forEach((data: any) => {
+    columns.push({ id: data.predicted_class });
+  });
+
+  return { columns, columnData: colData };
+}
+
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
@@ -35,7 +82,15 @@ interface Props {
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [cofusionMatrixData, setConfusionMatrixData] = useState<any>({}); // TODO: update type
+  const [confusionMatrixData, setConfusionMatrixData] = useState<any>([]); // TODO: update type
+  const [columns, setColumns] = useState<any>([]);
+  const [columnsData, setColumnsData] = useState<any>([]);
+  const [popoverContents, setPopoverContents] = useState<any>([]);
+
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState(() =>
+    columns.map(({ id }: { id: string }) => id)
+  );
 
   const index = jobConfig.dest.index;
   const dependentVariable = getDependentVar(jobConfig.analysis);
@@ -51,7 +106,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     ignoreDefaultQuery?: boolean;
   }) => {
     setIsLoading(true);
-
+    // TODO: need some error handling here
     const evalData = await loadEvalData({
       isTraining: false,
       index,
@@ -68,13 +123,41 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       const confusionMatrix =
         // @ts-ignore
         evalData.eval?.classification?.multiclass_confusion_matrix?.confusion_matrix;
-      setConfusionMatrixData(confusionMatrix || {});
+
+      setConfusionMatrixData(confusionMatrix || []);
+
       setIsLoading(false);
     } else {
       setIsLoading(false);
-      setConfusionMatrixData({});
+      setConfusionMatrixData([]);
     }
   };
+
+  useEffect(() => {
+    if (confusionMatrixData.length > 0) {
+      const { columns: derivedColumns, columnData } = getColumnData(confusionMatrixData);
+      // Initialize all columns as visible
+      setVisibleColumns(() => derivedColumns.map(({ id }: { id: string }) => id));
+      setColumns(derivedColumns);
+      setColumnsData(columnData);
+      setPopoverContents({
+        numeric: ({
+          cellContentsElement,
+          children,
+        }: {
+          cellContentsElement: any;
+          children: any;
+        }) => {
+          const rowIndex = children?.props?.rowIndex;
+          const colId = children?.props?.columnId;
+          const gridItem = columnData[rowIndex];
+          const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
+
+          return `Calculated by dividing predicted label count ${count} by actual label count ${gridItem.actual_class_doc_count}`;
+        },
+      });
+    }
+  }, [confusionMatrixData]);
 
   useEffect(() => {
     const hasIsTrainingClause =
@@ -89,6 +172,10 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
 
     loadData({ isTrainingClause });
   }, [JSON.stringify(searchQuery)]);
+
+  const renderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+    return <span>{columnsData[rowIndex][columnId]}</span>;
+  };
 
   if (isLoading === true) {
     // TODO: update this to proper loading
@@ -116,10 +203,54 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             <EuiFlexItem grow={false}>
               <span>{getTaskStateBadge(jobStatus)}</span>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSpacer />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                helpText={i18n.translate(
+                  'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixHelpText',
+                  {
+                    defaultMessage: 'Normalized confusion matrix',
+                  }
+                )}
+              >
+                <Fragment />
+              </EuiFormRow>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <span>{JSON.stringify(cofusionMatrixData, null, 2)}</span>
+        <EuiFlexItem grow={false}>
+          {columns.length > 0 && (
+            <Fragment>
+              <EuiFlexGroup direction="column" justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiDataGrid
+                    aria-label="Data grid demo"
+                    columns={columns}
+                    columnVisibility={{ visibleColumns, setVisibleColumns }}
+                    rowCount={columnsData.length}
+                    renderCellValue={renderCellValue}
+                    inMemory={{ level: 'sorting' }}
+                    toolbarVisibility={false}
+                    popoverContents={popoverContents}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow
+                    helpText={i18n.translate(
+                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixPredictionLabel',
+                      {
+                        defaultMessage: 'Predicted label',
+                      }
+                    )}
+                  >
+                    <Fragment />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Fragment>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

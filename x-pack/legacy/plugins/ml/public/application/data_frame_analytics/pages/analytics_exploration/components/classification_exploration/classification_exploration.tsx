@@ -19,6 +19,7 @@ interface GetDataFrameAnalyticsResponse {
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
+// TODO: move to shared components
 const LoadingPanel: FC = () => (
   <EuiPanel className="eui-textCenter">
     <EuiLoadingSpinner size="xl" />
@@ -28,8 +29,8 @@ const LoadingPanel: FC = () => (
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-        defaultMessage: 'Regression job ID {jobId}',
+      {i18n.translate('xpack.ml.dataframe.analytics.classificationExploration.jobIdTitle', {
+        defaultMessage: 'Classification job ID {jobId}',
         values: { jobId },
       })}
     </span>
