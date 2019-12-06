@@ -109,8 +109,8 @@ export function getDefaultDynamicProperties() {
     [VECTOR_STYLES.LINE_WIDTH]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
-        minSize: DEFAULT_MIN_SIZE,
-        maxSize: DEFAULT_MAX_SIZE,
+        minSize: 1,
+        maxSize: 10,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
@@ -121,8 +121,8 @@ export function getDefaultDynamicProperties() {
     [VECTOR_STYLES.ICON_SIZE]: {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options: {
-        minSize: DEFAULT_MIN_SIZE,
-        maxSize: DEFAULT_MAX_SIZE,
+        minSize: 4,
+        maxSize: 32,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
