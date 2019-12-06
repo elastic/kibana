@@ -192,7 +192,7 @@ export function parseCURL(text: string) {
       state = 'BODY';
     }
 
-    // Nothing else matches, so output with a prefix of !!! for debugging purposes
+    // Nothing else matches, so output with a prefix of ### for debugging purposes
     else {
       out.push('### ' + line);
       line = '';
