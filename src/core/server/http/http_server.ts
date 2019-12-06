@@ -299,7 +299,7 @@ export class HttpServer {
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
 
-    this.registerOnPreResponse((request, responseInfo, t) => {
+    this.registerOnPreResponse((request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
     });

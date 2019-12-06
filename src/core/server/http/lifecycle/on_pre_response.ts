@@ -22,6 +22,7 @@ import Boom from 'boom';
 import { Logger } from '../../logging';
 
 import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';
+
 enum ResultType {
   next = 'next',
 }
@@ -31,18 +32,30 @@ interface Next {
   headers?: ResponseHeaders;
 }
 
+/**
+ * @internal
+ */
 type OnPreResponseResult = Next;
 
 /**
  * Additional data to extend a response.
  * @public
  */
-export interface ResponseExtensions {
+export interface OnPreResponseExtensions {
+  /** additional headers to attach to the response */
   headers?: ResponseHeaders;
 }
 
+/**
+ * Response status code.
+ * @public
+ */
+export interface OnPreResponseInfo {
+  statusCode: number;
+}
+
 const preResponseResult = {
-  next(responseExtensions?: ResponseExtensions): OnPreResponseResult {
+  next(responseExtensions?: OnPreResponseExtensions): OnPreResponseResult {
     return { type: ResultType.next, headers: responseExtensions?.headers };
   },
   isNext(result: OnPreResponseResult): result is Next {
@@ -56,23 +69,20 @@ const preResponseResult = {
  */
 export interface OnPreResponseToolkit {
   /** To pass request to the next handler */
-  next: (responseExtensions?: ResponseExtensions) => OnPreResponseResult;
+  next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
 }
 
 const toolkit: OnPreResponseToolkit = {
   next: preResponseResult.next,
 };
 
-interface ResponseInfo {
-  statusCode: number; // body? header?
-}
 /**
  * See {@link OnPreAuthToolkit}.
  * @public
  */
 export type OnPreResponseHandler = (
   request: KibanaRequest,
-  response: ResponseInfo,
+  preResponse: OnPreResponseInfo,
   toolkit: OnPreResponseToolkit
 ) => OnPreResponseResult | Promise<OnPreResponseResult>;
 
@@ -131,7 +141,7 @@ function isBoom(response: any): response is Boom {
 }
 
 // NOTE: responseHeaders contains not a full list of response headers, but only explicitly set on a response object.
-// any headers added by hapi internally, like `content-type`, `content-length`, etc. do not present here.
+// any headers added by hapi internally, like `content-type`, `content-length`, etc. are not present here.
 function findHeadersIntersection(
   responseHeaders: ResponseHeaders,
   headers: ResponseHeaders,
@@ -139,7 +149,7 @@ function findHeadersIntersection(
 ) {
   Object.keys(headers).forEach(headerName => {
     if (responseHeaders[headerName] !== undefined) {
-      log.warn(`Server rewrites a response header [${headerName}].`);
+      log.warn(`onPreResponseHandler rewrote a response header [${headerName}].`);
     }
   });
 }
