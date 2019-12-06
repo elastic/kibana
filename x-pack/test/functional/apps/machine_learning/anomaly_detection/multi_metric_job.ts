@@ -176,7 +176,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation adds a new custom url', async () => {
-      await ml.jobWizardCommon.addCustomUrl();
+      await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
     });
 
     it('job creation assigns calendars', async () => {
@@ -324,7 +324,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job cloning persists custom urls', async () => {
-      await ml.customUrls.assertCustomUrlItem(0);
+      await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
     });
 
     it('job cloning persists assigned calendars', async () => {

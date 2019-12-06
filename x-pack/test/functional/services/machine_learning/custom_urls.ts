@@ -26,11 +26,14 @@ export function MachineLearningCustomUrlsProvider({ getService }: FtrProviderCon
       await this.assertCustomUrlLabelValue(customUrlsLabel);
     },
 
-    async assertCustomUrlItem(index: number) {
-      await testSubjects.existOrFail(`mlJobEditCustomUrlInput_${index}`);
+    async assertCustomUrlItem(index: number, label: string) {
+      await testSubjects.existOrFail(`mlJobEditCustomUrlItem_${index}`);
+      expect(await testSubjects.getAttribute(`mlJobEditCustomUrlInput_${index}`, 'value')).to.eql(
+        label
+      );
     },
 
-    async addCustomUrl() {
+    async saveCustomUrl() {
       await testSubjects.click('mlJobAddCustomUrl');
     },
   };

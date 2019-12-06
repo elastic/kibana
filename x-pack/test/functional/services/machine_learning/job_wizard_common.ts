@@ -406,14 +406,18 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
-    async addCustomUrl() {
+    async addCustomUrl(customUrl: { label: string }) {
+      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlsList > *');
+
       await this.ensureNewCustomUrlFormModalOpen();
       // Fill-in the form
-      await customUrls.setCustomUrlLabel('check-kibana-dashboard');
-      // Add custom URL
-      await customUrls.addCustomUrl();
+      await customUrls.setCustomUrlLabel(customUrl.label);
+      // Save custom URL
+      await customUrls.saveCustomUrl();
 
-      await customUrls.assertCustomUrlItem(0);
+      const expectedIndex = existingCustomUrls.length;
+
+      await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
     },
 
     async assignCalendar(calendarId: string) {
