@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
-import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const introspectionQuery = gql`
@@ -20,8 +19,8 @@ const introspectionQuery = gql`
 `;
 
 export default function({ getService }: FtrProviderContext) {
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
   const clientFactory = getService('infraOpsGraphQLClientFactory');
 
   const expectGraphQL404 = (result: any) => {

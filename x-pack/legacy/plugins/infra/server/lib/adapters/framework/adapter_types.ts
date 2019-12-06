@@ -12,10 +12,7 @@ import { RouteMethod, RouteConfig } from '../../../../../../../../src/core/serve
 import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../../plugins/features/server';
 import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
 import { VisTypeTimeseriesSetup } from '../../../../../../../../src/plugins/vis_type_timeseries/server';
-
-interface ApmIndices {
-  'apm_oss.transactionIndices': string | undefined;
-}
+import { APMPluginContract } from '../../../../../../../plugins/apm/server/plugin';
 
 // NP_TODO: Compose real types from plugins we depend on, no "any"
 export interface InfraServerPluginDeps {
@@ -26,10 +23,7 @@ export interface InfraServerPluginDeps {
     indexPatternsServiceFactory: any;
   };
   features: FeaturesPluginSetup;
-  apm: {
-    getIndices: (savedObjectsClient: any) => Promise<ApmIndices>;
-  };
-  ___legacy: any;
+  apm: APMPluginContract;
 }
 
 export interface CallWithRequestParams extends GenericParams {

@@ -251,6 +251,7 @@ describe('SavedObjectsFinder', () => {
     it('should include additional fields in search if listed in meta data', async () => {
       const core = coreMock.createStart();
       core.uiSettings.get.mockImplementation(() => 10);
+      (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
 
       const wrapper = shallow(
         <SavedObjectFinder
@@ -631,6 +632,7 @@ describe('SavedObjectsFinder', () => {
   describe('loading state', () => {
     it('should display a spinner during initial loading', () => {
       const core = coreMock.createStart();
+      (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
 
       const wrapper = shallow(
         <SavedObjectFinder

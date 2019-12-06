@@ -11,7 +11,6 @@ import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/ty
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
-import { InvalidNodeError } from './lib/errors';
 import { metrics } from '../../../../common/inventory_models';
 import { TSVBMetricModelCreator } from '../../../../common/inventory_models/types';
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
@@ -40,7 +39,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeIds.nodeId);
     if (!validNode) {
-      throw new InvalidNodeError(
+      throw new Error(
         i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {
@@ -136,7 +135,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     }
 
     if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
-      throw new InvalidNodeError(
+      throw new Error(
         i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {
           defaultMessage:
             'Model for {metricId} requires a cloudId, but none was given for {nodeId}.',
