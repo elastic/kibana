@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { UiSettingsClient } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import {
   AnnotationDomainTypes,
   Axis,
@@ -44,25 +44,7 @@ const customTheme = () => {
   };
 };
 
-const getTimezone = (
-  uiSettings: Pick<
-    UiSettingsClient,
-    | 'getAll'
-    | 'get'
-    | 'get$'
-    | 'set'
-    | 'remove'
-    | 'isDeclared'
-    | 'isDefault'
-    | 'isCustom'
-    | 'isOverridden'
-    | 'overrideLocalDefault'
-    | 'getUpdate$'
-    | 'getSaved$'
-    | 'getUpdateErrors$'
-    | 'stop'
-  >
-) => {
+const getTimezone = (uiSettings: IUiSettingsClient) => {
   const config = uiSettings;
   const DATE_FORMAT_CONFIG_KEY = 'dateFormat:tz';
   const isCustomTimezone = !config.isDefault(DATE_FORMAT_CONFIG_KEY);
