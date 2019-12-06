@@ -64,7 +64,7 @@ describe('saga', () => {
     store.dispatch({ type: DELAYED_INCREMENT_COUNTER });
     expect(store.getState()).toEqual({ count: 0 });
 
-    await sleep(5);
+    await sleep(100);
 
     expect(store.getState()).toEqual({ count: 1 });
   });
