@@ -48,6 +48,9 @@ function RowParser(editor) {
       return MODE.BETWEEN_REQUESTS;
     } // shouldn't really happen
 
+    // If another "start" mode is added here because we want to allow for new language highlighting
+    // please see https://github.com/elastic/kibana/pull/51446 for a discussion on why
+    // should consider a different approach.
     if (mode !== 'start' && mode !== 'start-sql') {
       return MODE.IN_REQUEST;
     }
