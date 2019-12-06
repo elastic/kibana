@@ -160,6 +160,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
               value={label}
               isInvalid={isInvalidLabel}
               onChange={e => onLabelChange(e, index)}
+              data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
             />
           </EuiFormRow>
         </EuiFlexItem>

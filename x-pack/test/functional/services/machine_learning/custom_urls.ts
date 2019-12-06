@@ -28,9 +28,9 @@ export function MachineLearningCustomUrlsProvider({ getService }: FtrProviderCon
 
     async assertCustomUrlItem(index: number, label: string) {
       await testSubjects.existOrFail(`mlJobEditCustomUrlItem_${index}`);
-      expect(await testSubjects.getAttribute(`mlJobEditCustomUrlInput_${index}`, 'value')).to.eql(
-        label
-      );
+      expect(
+        await testSubjects.getAttribute(`mlJobEditCustomUrlLabelInput_${index}`, 'value')
+      ).to.eql(label);
     },
 
     async saveCustomUrl() {
