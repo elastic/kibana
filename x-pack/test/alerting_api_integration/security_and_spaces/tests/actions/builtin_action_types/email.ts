@@ -159,7 +159,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'An email action',
+          name: 'An email action',
           actionTypeId: '.email',
           config: {
             service: 'gmail', // not whitelisted in the config for this test
@@ -184,7 +184,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'An email action',
+          name: 'An email action',
           actionTypeId: '.email',
           config: {
             host: 'stmp.gmail.com', // not whitelisted in the config for this test
@@ -212,7 +212,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'An email action',
+          name: 'An email action',
           actionTypeId: '.email',
           config: {
             host: 'some.non.existent.com', // whitelisted in the config for this test

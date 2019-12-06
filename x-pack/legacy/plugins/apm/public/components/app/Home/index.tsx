@@ -28,9 +28,9 @@ import { ServiceMap } from '../ServiceMap';
 import { usePlugins } from '../../../new-platform/plugin';
 
 function getHomeTabs({
-  apmServiceMapEnabled = false
+  serviceMapEnabled = false
 }: {
-  apmServiceMapEnabled: boolean;
+  serviceMapEnabled: boolean;
 }) {
   const homeTabs = [
     {
@@ -57,7 +57,7 @@ function getHomeTabs({
     }
   ];
 
-  if (apmServiceMapEnabled) {
+  if (serviceMapEnabled) {
     homeTabs.push({
       link: (
         <ServiceMapLink>
@@ -83,8 +83,8 @@ interface Props {
 
 export function Home({ tab }: Props) {
   const { apm } = usePlugins();
-  const { apmServiceMapEnabled } = apm.config;
-  const homeTabs = getHomeTabs({ apmServiceMapEnabled });
+  const { serviceMapEnabled } = apm.config;
+  const homeTabs = getHomeTabs({ serviceMapEnabled });
   const selectedTab = homeTabs.find(
     homeTab => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;
