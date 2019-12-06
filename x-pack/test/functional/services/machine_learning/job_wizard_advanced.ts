@@ -259,7 +259,6 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     async setDetectorDescription(description: string) {
       await testSubjects.setValue('mlAdvancedDetectorDescriptionInput', description, {
         clearWithKeyboard: true,
-        typeCharByChar: true,
       });
       await this.assertDetectorDescriptionValue(description);
     },

@@ -300,10 +300,7 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     },
 
     async setTransformId(transformId: string) {
-      await testSubjects.setValue('transformIdInput', transformId, {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
-      });
+      await testSubjects.setValue('transformIdInput', transformId, { clearWithKeyboard: true });
       await this.assertTransformIdValue(transformId);
     },
 
@@ -325,7 +322,6 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     async setTransformDescription(transformDescription: string) {
       await testSubjects.setValue('transformDescriptionInput', transformDescription, {
         clearWithKeyboard: true,
-        typeCharByChar: true,
       });
       await this.assertTransformDescriptionValue(transformDescription);
     },
@@ -348,7 +344,6 @@ export function TransformWizardProvider({ getService }: FtrProviderContext) {
     async setDestinationIndex(destinationIndex: string) {
       await testSubjects.setValue('transformDestinationIndexInput', destinationIndex, {
         clearWithKeyboard: true,
-        typeCharByChar: true,
       });
       await this.assertDestinationIndexValue(destinationIndex);
     },

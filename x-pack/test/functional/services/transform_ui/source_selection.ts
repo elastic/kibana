@@ -17,7 +17,6 @@ export function TransformSourceSelectionProvider({ getService }: FtrProviderCont
     async filterSourceSelection(sourceName: string) {
       await testSubjects.setValue('savedObjectFinderSearchInput', sourceName, {
         clearWithKeyboard: true,
-        typeCharByChar: true,
       });
       await this.assertSourceListContainsEntry(sourceName);
     },
