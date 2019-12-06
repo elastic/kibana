@@ -32,6 +32,12 @@ export { DataStart };
 export { Field, FieldType, IFieldList, IndexPattern } from './index_patterns';
 export { SearchBar, SearchBarProps } from './search';
 export {
+  EsQuerySortValue,
+  FetchOptions,
+  SearchSourceContract,
+  SortDirection,
+} from './search/types';
+export {
   SavedQueryAttributes,
   SavedQuery,
   SavedQueryTimeFilter,
@@ -41,3 +47,4 @@ export {
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
 export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';
+export { getRequestInspectorStats, getResponseInspectorStats } from './search';

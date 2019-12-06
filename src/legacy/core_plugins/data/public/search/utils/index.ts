@@ -17,6 +17,4 @@
  * under the License.
  */
 
-export * from './search_bar';
-export * from './search_service';
-export * from './utils';
+export * from './courier_inspector_utils';
