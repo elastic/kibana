@@ -17,25 +17,8 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { hashUrl } from '../../../../plugins/kibana_utils/public';
-import uiRoutes from 'ui/routes';
-import { fatalError } from 'ui/notify';
-
-uiRoutes.enable();
-uiRoutes
-  .when('/', {
-    resolve: {
-      url: function (AppState, globalState, $window) {
-        const redirectUrl = chrome.getInjected('redirectUrl');
-        try {
-          const hashedUrl = hashUrl(redirectUrl);
-          const url = chrome.addBasePath(hashedUrl);
-
-          $window.location = url;
-        } catch (e) {
-          fatalError(e);
-        }
-      }
-    }
-  });
+declare module 'encode-uri-query' {
+  function encodeUriQuery(query: string, usePercentageSpace?: boolean): string;
+  // eslint-disable-next-line import/no-default-export
+  export default encodeUriQuery;
+}

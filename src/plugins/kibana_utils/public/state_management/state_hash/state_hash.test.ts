@@ -18,9 +18,8 @@
  */
 
 import { encode as encodeRison } from 'rison-node';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { mockStorage } from '../../../../../plugins/kibana_utils/public/storage/hashed_item_store/mock';
-import { createStateHash, isStateHash } from '../state_hashing';
+import { mockStorage } from '../../storage/hashed_item_store/mock';
+import { createStateHash, isStateHash } from './state_hash';
 
 describe('stateHash', () => {
   beforeEach(() => {
