@@ -46,6 +46,7 @@ const page = Joi.number()
   .min(1)
   .default(1);
 const signal_ids = Joi.array().items(Joi.string());
+const signal_status_query = Joi.object();
 const sort_field = Joi.string();
 const sort_order = Joi.string().valid('asc', 'desc');
 const tags = Joi.array().items(Joi.string());
@@ -218,6 +219,6 @@ export const findRulesSchema = Joi.object({
 
 export const setSignalsStatusSchema = Joi.object({
   signal_ids,
-  query,
+  query: signal_status_query,
   status: status.required(),
 }).xor('signal_ids', 'query');

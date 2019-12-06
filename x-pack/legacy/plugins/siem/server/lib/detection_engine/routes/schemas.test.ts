@@ -2362,7 +2362,7 @@ describe('schemas', () => {
     test('query and status is valid', () => {
       expect(
         setSignalsStatusSchema.validate<Partial<SignalsRestParams>>({
-          query: 'some fake query string',
+          query: {},
           status: 'open',
         }).error
       ).toBeFalsy();
@@ -2379,7 +2379,7 @@ describe('schemas', () => {
     test('query and missing status is invalid', () => {
       expect(
         setSignalsStatusSchema.validate<Partial<SignalsRestParams>>({
-          query: 'some fake query string',
+          query: {},
         }).error
       ).toBeTruthy();
     });

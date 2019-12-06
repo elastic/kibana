@@ -33,7 +33,7 @@ export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute
         queryObject = { ids: { values: signalIds } };
       }
       if (query) {
-        queryObject = JSON.parse(query);
+        queryObject = query;
       }
       try {
         return callWithRequest(request, 'updateByQuery', {

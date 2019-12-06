@@ -58,7 +58,7 @@ export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams>
 });
 
 export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsRestParams> => ({
-  query: '{"range":{"@timestamp":{"gte":"now-2M","lte":"now/M"}}}',
+  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
   status: 'closed',
 });
 

@@ -9,8 +9,8 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./set_status_with_query.sh closed
-# Example: ./set_status_with_query.sh open
+# Example: ./sigsnals/set_status_with_query.sh closed
+# Example: ./sigsnals/set_status_with_query.sh open
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
@@ -18,5 +18,5 @@ set -e
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/status \
   -d '{
   "status": "'$1'",
-  "query": "{\"range\":{\"@timestamp\":{\"gte\":\"now-2M\",\"lte\":\"now/M\"}}}"}' \
+  "query": {"range":{"@timestamp":{"gte":"now-2M","lte":"now/M"}}}}' \
   | jq .
