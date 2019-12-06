@@ -154,6 +154,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
       <div
         style={{ paddingLeft: `${indent}px` }}
         className={classNames('mappingsEditor__fieldsListItem__field', {
+          'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
           'mappingsEditor__fieldsListItem__field--selected': isHighlighted,
           'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
