@@ -124,6 +124,7 @@ test('renders DashboardViewport with no visualizations', () => {
 test('renders DashboardEmptyScreen', () => {
   const renderEmptyScreen = jest.fn();
   const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
+  props.container.updateInput({ isEmptyState: true });
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
@@ -174,7 +175,7 @@ test('renders exit full screen button when in full screen mode and empty screen'
   const renderEmptyScreen = jest.fn();
   renderEmptyScreen.mockReturnValue(React.createElement('div'));
   const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
-  props.container.updateInput({ isFullScreenMode: true });
+  props.container.updateInput({ isEmptyState: true, isFullScreenMode: true });
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>

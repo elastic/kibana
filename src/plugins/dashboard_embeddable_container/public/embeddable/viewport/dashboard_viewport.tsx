@@ -35,6 +35,7 @@ interface State {
   title: string;
   description?: string;
   panels: { [key: string]: PanelState };
+  isEmptyState?: boolean;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
@@ -45,26 +46,40 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   private mounted: boolean = false;
   constructor(props: DashboardViewportProps) {
     super(props);
-    const { isFullScreenMode, panels, useMargins, title } = this.props.container.getInput();
+    const {
+      isFullScreenMode,
+      panels,
+      useMargins,
+      title,
+      isEmptyState,
+    } = this.props.container.getInput();
 
     this.state = {
       isFullScreenMode,
       panels,
       useMargins,
       title,
+      isEmptyState,
     };
   }
 
   public componentDidMount() {
     this.mounted = true;
     this.subscription = this.props.container.getInput$().subscribe(() => {
-      const { isFullScreenMode, useMargins, title, description } = this.props.container.getInput();
+      const {
+        isFullScreenMode,
+        useMargins,
+        title,
+        description,
+        isEmptyState,
+      } = this.props.container.getInput();
       if (this.mounted) {
         this.setState({
           isFullScreenMode,
           description,
           useMargins,
           title,
+          isEmptyState,
         });
       }
     });
@@ -122,7 +137,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public render() {
     return (
       <React.Fragment>
-        {this.props.renderEmpty ? this.renderEmptyScreen() : null}
+        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
         {this.renderContainerScreen()}
       </React.Fragment>
     );

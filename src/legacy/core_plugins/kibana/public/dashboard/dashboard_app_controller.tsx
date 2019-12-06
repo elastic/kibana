@@ -202,6 +202,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         expandedPanelId = dashboardContainer.getInput().expandedPanelId;
       }
+      const shouldShowEditHelp = $scope.getShouldShowEditHelp();
+      const shouldShowViewHelp = $scope.getShouldShowViewHelp();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -214,6 +216,7 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        isEmptyState: shouldShowEditHelp || shouldShowViewHelp,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
