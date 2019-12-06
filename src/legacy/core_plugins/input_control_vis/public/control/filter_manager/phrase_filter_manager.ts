@@ -38,11 +38,21 @@ export class PhraseFilterManager extends FilterManager {
   }
 
   createFilter(phrases: any): PhraseFilter {
-    const newFilter = esFilters.buildPhrasesFilter(
-      this.indexPattern.fields.getByName(this.fieldName) as IFieldType,
-      phrases.length === 1 ? phrases[0] : phrases,
-      this.indexPattern
-    );
+    let newFilter: PhraseFilter;
+    if (phrases.length === 1) {
+      newFilter = esFilters.buildPhraseFilter(
+        this.indexPattern.fields.getByName(this.fieldName),
+        phrases[0],
+        this.indexPattern
+      );
+    } else {
+      newFilter = esFilters.buildPhrasesFilter(
+        this.indexPattern.fields.getByName(this.fieldName),
+        phrases,
+        this.indexPattern
+      );
+    }
+
     newFilter.meta.key = this.fieldName;
     newFilter.meta.controlledBy = this.controlId;
     return newFilter;
