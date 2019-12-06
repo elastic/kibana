@@ -33,7 +33,9 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteCreator = (libs: UMServ
     const { monitorId } = request.query;
 
     return response.ok({
-      body: { ...(await libs.monitors.getMonitorDetails(callAsCurrentUser, monitorId)) },
+      body: {
+        ...(await libs.monitors.getMonitorDetails({ callES: callAsCurrentUser, monitorId })),
+      },
     });
   },
 });

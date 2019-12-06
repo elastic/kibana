@@ -12,10 +12,16 @@ import { UMPingsAdapter, HistogramQueryResult } from './adapter_types';
 import { getHistogramInterval } from '../../helper/get_histogram_interval';
 
 export const elasticsearchPingsAdapter: UMPingsAdapter = {
-  getAll: async (
-    callEs,
-    { dateRangeStart, dateRangeEnd, monitorId, status, sort, size, location }
-  ) => {
+  getAll: async ({
+    callES,
+    dateRangeStart,
+    dateRangeEnd,
+    monitorId,
+    status,
+    sort,
+    size,
+    location,
+  }) => {
     const sortParam = { sort: [{ '@timestamp': { order: sort ?? 'desc' } }] };
     const sizeParam = size ? { size } : undefined;
     const filter: any[] = [{ range: { '@timestamp': { gte: dateRangeStart, lte: dateRangeEnd } } }];
@@ -55,7 +61,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     const {
       hits: { hits, total },
       aggregations: aggs,
-    } = await callEs('search', params);
+    } = await callES('search', params);
 
     const locations = get(aggs, 'locations', { buckets: [{ key: 'N/A', doc_count: 0 }] });
 
@@ -82,7 +88,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     return results;
   },
 
-  getLatestMonitorDocs: async (callEs, { dateRangeStart, dateRangeEnd, monitorId, location }) => {
+  getLatestMonitorDocs: async ({ callES, dateRangeStart, dateRangeEnd, monitorId, location }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -124,7 +130,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
       },
     };
 
-    const result = await callEs('search', params);
+    const result = await callES('search', params);
     const buckets: any[] = get(result, 'aggregations.by_id.buckets', []);
 
     return buckets.map(
@@ -142,10 +148,14 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     );
   },
 
-  getPingHistogram: async (
-    callEs,
-    { dateRangeStart, dateRangeEnd, filters, monitorId, statusFilter }
-  ) => {
+  getPingHistogram: async ({
+    callES,
+    dateRangeStart,
+    dateRangeEnd,
+    filters,
+    monitorId,
+    statusFilter,
+  }) => {
     const boolFilters = parseFilterQuery(filters);
     const additionaFilters = [];
     if (monitorId) {
@@ -194,7 +204,7 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
       },
     };
 
-    const result = await callEs('search', params);
+    const result = await callES('search', params);
     const buckets: HistogramQueryResult[] = get(result, 'aggregations.timeseries.buckets', []);
     const histogram = buckets.map(bucket => {
       const x: number = get(bucket, 'key');
@@ -213,8 +223,8 @@ export const elasticsearchPingsAdapter: UMPingsAdapter = {
     };
   },
 
-  getDocCount: async callEs => {
-    const { count } = await callEs('count', { index: INDEX_NAMES.HEARTBEAT });
+  getDocCount: async ({ callES }) => {
+    const { count } = await callES('count', { index: INDEX_NAMES.HEARTBEAT });
 
     return { count };
   },

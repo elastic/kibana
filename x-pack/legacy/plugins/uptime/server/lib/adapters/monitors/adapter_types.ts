@@ -38,11 +38,11 @@ export interface UMMonitorsAdapter {
   /**
    * Fetches data used to populate monitor charts
    */
-  getMonitorChartsData: UMElasticsearchQueryFn<MonitorChart, GetMonitorChartsDataParams>;
-  getFilterBar: UMElasticsearchQueryFn<any, GetFilterBarParams>;
+  getMonitorChartsData: UMElasticsearchQueryFn<GetMonitorChartsDataParams, MonitorChart>;
+  getFilterBar: UMElasticsearchQueryFn<GetFilterBarParams, any>;
   /**
    * Fetch data for the monitor page title.
    */
-  getMonitorPageTitle: UMElasticsearchQueryFn<MonitorPageTitle | null, { monitorId: string }>;
-  getMonitorDetails: UMElasticsearchQueryFn<MonitorDetails, GetMonitorDetailsParams>;
+  getMonitorPageTitle: UMElasticsearchQueryFn<{ monitorId: string }, MonitorPageTitle | null>;
+  getMonitorDetails: UMElasticsearchQueryFn<GetMonitorDetailsParams, MonitorDetails>;
 }

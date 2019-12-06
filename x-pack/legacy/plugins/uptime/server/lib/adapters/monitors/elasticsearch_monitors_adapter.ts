@@ -32,7 +32,7 @@ const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
 };
 
 export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
-  getMonitorChartsData: async (callEs, { dateRangeStart, dateRangeEnd, monitorId, location }) => {
+  getMonitorChartsData: async ({ callES, dateRangeStart, dateRangeEnd, monitorId, location }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -72,7 +72,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
       },
     };
 
-    const result = await callEs('search', params);
+    const result = await callES('search', params);
 
     const dateHistogramBuckets = get<any[]>(result, 'aggregations.timeseries.buckets', []);
     /**
@@ -160,7 +160,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     return monitorChartsData;
   },
 
-  getFilterBar: async (callEs, { dateRangeStart, dateRangeEnd }) => {
+  getFilterBar: async ({ callES, dateRangeStart, dateRangeEnd }) => {
     const fields: { [key: string]: string } = {
       ids: 'monitor.id',
       schemes: 'monitor.type',
@@ -186,7 +186,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
         }, {}),
       },
     };
-    const { aggregations } = await callEs('search', params);
+    const { aggregations } = await callES('search', params);
 
     return Object.keys(fields).reduce((acc: { [key: string]: any[] }, field) => {
       const bucketName = fields[field];
@@ -195,7 +195,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     }, {});
   },
 
-  getMonitorPageTitle: async (callEs, { monitorId }) => {
+  getMonitorPageTitle: async ({ callES, monitorId }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -219,7 +219,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
       },
     };
 
-    const result = await callEs('search', params);
+    const result = await callES('search', params);
     const pageTitle: Ping | null = get(result, 'hits.hits[0]._source', null);
     if (pageTitle === null) {
       return null;
@@ -231,7 +231,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
     };
   },
 
-  getMonitorDetails: async (callEs, { monitorId }) => {
+  getMonitorDetails: async ({ callES, monitorId }) => {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -265,7 +265,7 @@ export const elasticsearchMonitorsAdapter: UMMonitorsAdapter = {
       },
     };
 
-    const result = await callEs('search', params);
+    const result = await callES('search', params);
 
     const data = result.hits.hits[0]?._source;
 

@@ -36,9 +36,10 @@ export const createGetAllRoute: UMRestApiRouteCreator = (libs: UMServerLibs) => 
     request,
     response
   ): Promise<any> => {
-    const { size, sort, dateRangeStart, dateRangeEnd, location, monitorId, status } = request.query;
+    const { dateRangeStart, dateRangeEnd, location, monitorId, size, sort, status } = request.query;
 
-    const result = await libs.pings.getAll(callAsCurrentUser, {
+    const result = await libs.pings.getAll({
+      callES: callAsCurrentUser,
       dateRangeStart,
       dateRangeEnd,
       monitorId,

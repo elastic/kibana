@@ -62,16 +62,16 @@ export interface GetPingHistogramParams {
  * Count the number of documents in heartbeat indices
  */
 export interface UMPingsAdapter {
-  getAll: UMElasticsearchQueryFn<PingResults, GetAllParams>;
+  getAll: UMElasticsearchQueryFn<GetAllParams, PingResults>;
 
-  getLatestMonitorDocs: UMElasticsearchQueryFn<Ping[], GetLatestMonitorDocsParams>;
+  getLatestMonitorDocs: UMElasticsearchQueryFn<GetLatestMonitorDocsParams, Ping[]>;
 
-  getPingHistogram: UMElasticsearchQueryFn<HistogramResult, GetPingHistogramParams>;
+  getPingHistogram: UMElasticsearchQueryFn<GetPingHistogramParams, HistogramResult>;
 
   /**
    * Gets data used for a composite histogram for the currently-running monitors.
    */
-  getDocCount: UMElasticsearchQueryFn<DocCount>;
+  getDocCount: UMElasticsearchQueryFn<{}, DocCount>;
 }
 
 export interface HistogramQueryResult {

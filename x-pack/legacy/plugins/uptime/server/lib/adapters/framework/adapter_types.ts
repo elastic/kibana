@@ -28,14 +28,15 @@ export interface UMFrameworkRouteOptions<
   validate: any;
 }
 
-export type UMElasticsearchQueryFn<T = any, P = undefined> = (
-  callAsCurrentUser: (
-    endpoint: string,
-    clientParams: Record<string, any>,
-    options?: CallAPIOptions
-  ) => Promise<any>,
-  params: P
-) => Promise<T> | T;
+type CallElasticsearchAsCurrentUser = (
+  endpoint: string,
+  clientParams: Record<string, any>,
+  options?: CallAPIOptions
+) => Promise<any>;
+
+export type UMElasticsearchQueryFn<P, R = any> = (
+  params: { callES: CallElasticsearchAsCurrentUser } & P
+) => Promise<R> | R;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
   client: SavedObjectsClientContract,

@@ -23,17 +23,21 @@ export interface QueryContext {
 
 export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
   // Gets a page of monitor states.
-  getMonitorStates: async (
-    callAsCurrentUser,
-    { dateRangeStart, dateRangeEnd, pagination, filters, statusFilter }
-  ) => {
+  getMonitorStates: async ({
+    callES,
+    dateRangeStart,
+    dateRangeEnd,
+    pagination,
+    filters,
+    statusFilter,
+  }) => {
     pagination = pagination || CONTEXT_DEFAULTS.CURSOR_PAGINATION;
     statusFilter = statusFilter === null ? undefined : statusFilter;
     const size = 10;
 
     const queryContext: QueryContext = {
-      count: (query: Record<string, any>): Promise<any> => callAsCurrentUser('count', query),
-      search: (query: Record<string, any>): Promise<any> => callAsCurrentUser('search', query),
+      count: (query: Record<string, any>): Promise<any> => callES('count', query),
+      search: (query: Record<string, any>): Promise<any> => callES('search', query),
       dateRangeStart,
       dateRangeEnd,
       pagination,
@@ -51,10 +55,10 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
     };
   },
 
-  getSnapshotCount: async (callEs, { dateRangeStart, dateRangeEnd, filters, statusFilter }) => {
+  getSnapshotCount: async ({ callES, dateRangeStart, dateRangeEnd, filters, statusFilter }) => {
     const context: QueryContext = {
-      count: query => callEs('count', query),
-      search: query => callEs('search', query),
+      count: query => callES('count', query),
+      search: query => callES('search', query),
       dateRangeStart,
       dateRangeEnd,
       pagination: CONTEXT_DEFAULTS.CURSOR_PAGINATION,
@@ -65,12 +69,12 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
     return getSnapshotCountHelper(new MonitorGroupIterator(context));
   },
 
-  statesIndexExists: async callEs => {
+  statesIndexExists: async ({ callES }) => {
     // TODO: adapt this to the states index in future release
     const {
       _shards: { total },
       count,
-    } = await callEs('count', { index: INDEX_NAMES.HEARTBEAT });
+    } = await callES('count', { index: INDEX_NAMES.HEARTBEAT });
     return {
       indexExists: total > 0,
       docCount: {

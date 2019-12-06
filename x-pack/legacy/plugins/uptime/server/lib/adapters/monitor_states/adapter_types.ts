@@ -22,9 +22,9 @@ export interface MonitorStatesParams {
 }
 
 export interface UMMonitorStatesAdapter {
-  getMonitorStates: UMElasticsearchQueryFn<GetMonitorStatesResult, MonitorStatesParams>;
-  getSnapshotCount: UMElasticsearchQueryFn<Snapshot, GetSnapshotCountParams>;
-  statesIndexExists: UMElasticsearchQueryFn<StatesIndexStatus>;
+  getMonitorStates: UMElasticsearchQueryFn<MonitorStatesParams, GetMonitorStatesResult>;
+  getSnapshotCount: UMElasticsearchQueryFn<GetSnapshotCountParams, Snapshot>;
+  statesIndexExists: UMElasticsearchQueryFn<{}, StatesIndexStatus>;
 }
 
 export interface CursorPagination {
