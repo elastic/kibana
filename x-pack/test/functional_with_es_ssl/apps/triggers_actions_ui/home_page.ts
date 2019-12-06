@@ -24,11 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const headingText = await pageObjects.triggersActionsUI.sectionHeadingText();
       expect(headingText).to.be('Alerts and actions');
 
-      const actionsConnectorsList = await testSubjects.exists('actionsList');
-      expect(actionsConnectorsList).to.be(true);
-
-      const typeFilterButton = await pageObjects.triggersActionsUI.typeFilterButton();
-      expect(await typeFilterButton.isDisplayed()).to.be(true);
+      await testSubjects.existOrFail('createActionButton');
     });
 
     describe('Alerts tab', () => {
@@ -43,8 +39,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(url).to.contain(`/alerts`);
 
         // Verify content
-        const alertsList = await testSubjects.exists('alertsList');
-        expect(alertsList).to.be(true);
+        await testSubjects.existOrFail('alertsList');
       });
     });
   });

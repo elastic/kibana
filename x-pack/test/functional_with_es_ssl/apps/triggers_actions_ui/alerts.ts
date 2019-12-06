@@ -144,7 +144,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await muteAllBtn.click();
 
       // Unmute all button shows after clicking mute all
-      await testSubjects.exists('unmuteAll');
+      await testSubjects.existOrFail('unmuteAll');
 
       // TODO: More assertions
     });
@@ -170,7 +170,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await unmuteAllBtn.click();
 
       // Mute all button shows after clicking unmute all
-      await testSubjects.exists('muteAll');
+      await testSubjects.existOrFail('muteAll');
 
       // TODO: More assertions
     });
@@ -193,7 +193,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await disableAllBtn.click();
 
       // Enable all button shows after clicking disable all
-      await testSubjects.exists('enableAll');
+      await testSubjects.existOrFail('enableAll');
 
       // TODO: More assertions
     });
@@ -219,7 +219,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await enableAllBtn.click();
 
       // Disable all button shows after clicking enable all
-      await testSubjects.exists('disableAll');
+      await testSubjects.existOrFail('disableAll');
 
       // TODO: More assertions
     });

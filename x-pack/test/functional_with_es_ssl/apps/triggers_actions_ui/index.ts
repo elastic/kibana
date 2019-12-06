@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   describe('Actions and Triggers app', function() {
-    this.tags('ciGroup3'); // not sure about which CI group this tests should belong to
+    this.tags('ciGroup3');
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./connectors'));
     loadTestFile(require.resolve('./alerts'));

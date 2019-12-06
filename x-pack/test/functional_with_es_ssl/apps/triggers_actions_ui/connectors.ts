@@ -146,7 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await saveButton.click();
 
-      await testSubjects.exists('euiToastHeader');
+      await testSubjects.existOrFail('euiToastHeader');
 
       const closeButton = await testSubjects.find('toastCloseButton');
       await closeButton.click();
@@ -188,7 +188,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await saveButton.click();
 
-      await testSubjects.exists('euiToastHeader');
+      await testSubjects.existOrFail('euiToastHeader');
 
       const closeButton = await testSubjects.find('toastCloseButton');
       await closeButton.click();
