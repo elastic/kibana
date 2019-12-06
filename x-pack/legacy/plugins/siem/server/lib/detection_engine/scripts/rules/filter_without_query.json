@@ -9,7 +9,6 @@
   "type": "query",
   "from": "now-24h",
   "to": "now",
-  "output_index": ".siem-signals",
   "language": "lucene",
   "filters": [
     {
