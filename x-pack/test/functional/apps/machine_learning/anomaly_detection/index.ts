@@ -6,7 +6,8 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ loadTestFile }: FtrProviderContext) {
-  describe('anomaly detection', function() {
+  // eslint-disable-next-line ban/ban
+  describe.only('anomaly detection', function() {
     this.tags(['skipFirefox']);
 
     loadTestFile(require.resolve('./single_metric_job'));
