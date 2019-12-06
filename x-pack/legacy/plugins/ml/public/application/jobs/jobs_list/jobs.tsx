@@ -13,9 +13,9 @@ import { JobsListView } from './components/jobs_list_view';
 
 export const JobsPage: FC<{ props?: any }> = props => {
   return (
-    <>
+    <div data-test-subj="mlPageJobManagement">
       <NavigationMenu tabId="jobs" />
       <JobsListView {...props} />
-    </>
+    </div>
   );
 };

@@ -93,7 +93,7 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 }
 
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
-  <div ref={resizeRef}>
+  <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="explorer" />
     <JobSelector {...jobSelectorProps} />
     {children}
