@@ -6,8 +6,8 @@
 
 import { isString } from 'lodash';
 import {
-  SavedObjectPrivilege,
-  isSavedObjectPrivilege,
+  SavedObjectConditionalPrivilege,
+  isSavedObjectConditionalPrivilege,
 } from '../../../../features/server/feature_kibana_privileges';
 
 export class SavedObjectActions {
@@ -21,8 +21,11 @@ export class SavedObjectActions {
     return `${this.prefix}*`;
   }
 
-  public get(typeOrSavedObjectPrivilege: string | SavedObjectPrivilege, operation: string): string {
-    if (!typeOrSavedObjectPrivilege) {
+  public get(
+    typeOrSavedObjectConditionalPrivilege: string | SavedObjectConditionalPrivilege,
+    operation: string
+  ): string {
+    if (!typeOrSavedObjectConditionalPrivilege) {
       throw new Error('typeOrSavedObjectPrivilege is required');
     }
 
@@ -30,19 +33,21 @@ export class SavedObjectActions {
       throw new Error('operation is required and must be a string');
     }
 
-    if (isString(typeOrSavedObjectPrivilege)) {
-      return `${this.prefix}${typeOrSavedObjectPrivilege}/${operation}`;
+    if (isString(typeOrSavedObjectConditionalPrivilege)) {
+      return `${this.prefix}${typeOrSavedObjectConditionalPrivilege}/${operation}`;
     }
 
-    if (isSavedObjectPrivilege(typeOrSavedObjectPrivilege)) {
-      const conditions = Array.isArray(typeOrSavedObjectPrivilege.when)
-        ? typeOrSavedObjectPrivilege.when
-        : [typeOrSavedObjectPrivilege.when];
-      return `${this.prefix}${typeOrSavedObjectPrivilege.type}/${operation}(${conditions
-        .map(({ key, value }) => `${key}=${value}`)
-        .join('&')})`;
+    if (isSavedObjectConditionalPrivilege(typeOrSavedObjectConditionalPrivilege)) {
+      const conditions = Array.isArray(typeOrSavedObjectConditionalPrivilege.condition)
+        ? typeOrSavedObjectConditionalPrivilege.condition
+        : [typeOrSavedObjectConditionalPrivilege.condition];
+      return `${this.prefix}${
+        typeOrSavedObjectConditionalPrivilege.type
+      }/${operation}(${conditions.map(({ key, value }) => `${key}=${value}`).join('&')})`;
     }
 
-    throw new Error(`typeOrSavedObjectPrivilege must be a string or SavedObjectPrivilege`);
+    throw new Error(
+      `typeOrSavedObjectPrivilege must be a string or SavedObjectConditionalPrivilege`
+    );
   }
 }

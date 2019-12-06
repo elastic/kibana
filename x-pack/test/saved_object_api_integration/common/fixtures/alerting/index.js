@@ -19,10 +19,10 @@ export default function (kibana) {
     config() {},
     init(server) {
       server.plugins.xpack_main.registerFeature({
-        id: 'alerting_plugin',
-        name: 'alerting_plugin',
+        id: 'alerting',
+        name: 'alerting',
         icon: 'upArrow',
-        navLinkId: 'alerting_plugin',
+        navLinkId: 'alerting',
         app: [],
         privileges: {
           all: {
@@ -51,7 +51,7 @@ export default function (kibana) {
         privileges: {
           all: {
             savedObject: {
-              all: [{ type: 'alerting', when: { key: 'consumer', value: 'siem' } }],
+              all: [{ type: 'alerting', condition: { key: 'consumer', value: 'siem' } }],
               read: [],
             },
             ui: [],
@@ -59,7 +59,7 @@ export default function (kibana) {
           read: {
             savedObject: {
               all: [],
-              read: [{ type: 'alerting', when: { key: 'consumer', value: 'siem' } }],
+              read: [{ type: 'alerting', condition: { key: 'consumer', value: 'siem' } }],
             },
             ui: [],
           },
@@ -78,7 +78,7 @@ export default function (kibana) {
               all: [
                 {
                   type: 'alerting',
-                  when: [
+                  condition: [
                     { key: 'consumer', value: 'siem' },
                     { key: 'alert_type', value: 'threshold' },
                   ],
@@ -94,7 +94,7 @@ export default function (kibana) {
               read: [
                 {
                   type: 'alerting',
-                  when: [
+                  condition: [
                     { key: 'consumer', value: 'siem' },
                     { key: 'alert_type', value: 'threshold' },
                   ],
@@ -118,7 +118,7 @@ export default function (kibana) {
               all: [
                 {
                   type: 'alerting',
-                  when: [
+                  condition: [
                     { key: 'consumer', value: 'stack-monitoring' },
                     { key: 'alert_type', value: 'threshold' },
                   ],
@@ -134,7 +134,7 @@ export default function (kibana) {
               read: [
                 {
                   type: 'alerting',
-                  when: [
+                  condition: [
                     { key: 'consumer', value: 'stack-monitoring' },
                     { key: 'alert_type', value: 'threshold' },
                   ],

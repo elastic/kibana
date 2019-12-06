@@ -13,7 +13,7 @@ import {
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
   SavedObjectsUpdateOptions,
-  SavedObjectsPredicate,
+  ISavedObjectsPredicate,
   SavedObjectsPredicates,
   PropertyEqualsSavedObjectsPredicate,
   SavedObjectsTypesPredicate,
@@ -32,7 +32,7 @@ interface SecureSavedObjectsClientWrapperOptions {
 }
 
 interface EnsureAuthorizedForTypeResult {
-  predicate?: SavedObjectsPredicate;
+  predicate?: ISavedObjectsPredicate;
 }
 
 interface EnsureAuthorizedForTypesResult {
@@ -232,24 +232,22 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
         const conditions = this.savedObjectsPrivileges.getConditions(type);
         for (const condition of conditions) {
-          actions.push(this.actions.savedObject.get({ type, when: condition }, action));
+          actions.push(this.actions.savedObject.get({ type, condition }, action));
         }
       }
     }
 
     const { username, privileges } = await this.checkPrivileges(actions, namespace);
     const authorizedTypes: string[] = [];
-    const typesPredicate: SavedObjectsTypesPredicate = new Map<string, SavedObjectsPredicate>();
+    const typesPredicate: SavedObjectsTypesPredicate = new Map<string, ISavedObjectsPredicate>();
     for (const type of types) {
       if (privileges[this.actions.savedObject.get(type, action)] === true) {
         authorizedTypes.push(type);
       } else if (this.savedObjectsPrivileges.hasConditionalPrivileges(type)) {
-        const predicates: SavedObjectsPredicate[] = [];
+        const predicates: ISavedObjectsPredicate[] = [];
         const conditions = this.savedObjectsPrivileges.getConditions(type);
         for (const condition of conditions) {
-          if (
-            privileges[this.actions.savedObject.get({ type, when: condition }, action)] === true
-          ) {
+          if (privileges[this.actions.savedObject.get({ type, condition }, action)] === true) {
             if (!Array.isArray(condition)) {
               predicates.push(
                 new PropertyEqualsSavedObjectsPredicate(condition.key, condition.value)
@@ -302,9 +300,9 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   }
 
   private andPredicates(
-    predicate1: SavedObjectsPredicate | undefined,
-    predicate2: SavedObjectsPredicate | undefined
-  ): SavedObjectsPredicate | undefined {
+    predicate1: ISavedObjectsPredicate | undefined,
+    predicate2: ISavedObjectsPredicate | undefined
+  ): ISavedObjectsPredicate | undefined {
     if (predicate1 == null && predicate2 == null) {
       return undefined;
     }
@@ -337,7 +335,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     }
 
     const allTypes = new Set([...typesPredicate1.keys(), ...typesPredicate2.keys()]);
-    const typesPredicate = new Map<string, SavedObjectsPredicate>();
+    const typesPredicate = new Map<string, ISavedObjectsPredicate>();
     for (const type of allTypes) {
       const predicate = this.andPredicates(typesPredicate1.get(type), typesPredicate2.get(type));
       if (predicate != null) {

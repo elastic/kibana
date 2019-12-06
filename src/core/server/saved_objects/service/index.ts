@@ -59,7 +59,7 @@ export {
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
   PropertyEqualsSavedObjectsPredicate,
-  SavedObjectsPredicate,
+  ISavedObjectsPredicate,
   SavedObjectsPredicates,
   SavedObjectsPredicatesOperator,
 } from './lib';

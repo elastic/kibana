@@ -28,7 +28,7 @@ export {
 
 export {
   PropertyEqualsSavedObjectsPredicate,
-  SavedObjectsPredicate,
+  ISavedObjectsPredicate,
   SavedObjectsPredicates,
   SavedObjectsPredicatesOperator,
 } from './predicates';

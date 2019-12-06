@@ -21,7 +21,7 @@ import { toElasticsearchQuery, KueryNode } from '@kbn/es-query';
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { SavedObjectsSchema } from '../../../schema';
 import { SavedObjectsTypesPredicate } from '../../../types';
-import { SavedObjectsPredicate } from '../predicates';
+import { ISavedObjectsPredicate } from '../predicates';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -66,7 +66,7 @@ function getClauseForType(
   schema: SavedObjectsSchema,
   namespace: string | undefined,
   type: string,
-  predicate: SavedObjectsPredicate | undefined
+  predicate: ISavedObjectsPredicate | undefined
 ) {
   if (namespace && !schema.isNamespaceAgnostic(type)) {
     return {

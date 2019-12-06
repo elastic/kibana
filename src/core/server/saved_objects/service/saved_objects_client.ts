@@ -28,7 +28,7 @@ import {
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
-import { SavedObjectsPredicate } from './lib/predicates';
+import { ISavedObjectsPredicate } from './lib/predicates';
 
 /**
  *
@@ -44,7 +44,7 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The Elasticsearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
-  predicate?: SavedObjectsPredicate;
+  predicate?: ISavedObjectsPredicate;
 }
 
 /**

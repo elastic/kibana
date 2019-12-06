@@ -22,7 +22,7 @@ import { SavedObjectsMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
 import { SavedObjectsSchemaDefinition } from './schema';
 import { PropertyValidators } from './validation';
-import { SavedObjectsPredicate } from './service';
+import { ISavedObjectsPredicate } from './service';
 
 /**
  * Information about the migrations that have been applied to this SavedObject.
@@ -109,7 +109,7 @@ export interface SavedObjectReference {
   id: string;
 }
 
-export type SavedObjectsTypesPredicate = Map<string, SavedObjectsPredicate>;
+export type SavedObjectsTypesPredicate = Map<string, ISavedObjectsPredicate>;
 
 /**
  *

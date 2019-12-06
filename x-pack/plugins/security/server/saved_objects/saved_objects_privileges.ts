@@ -6,7 +6,7 @@
 
 import { FeaturesService } from '../plugin';
 import {
-  isSavedObjectPrivilege,
+  isSavedObjectConditionalPrivilege,
   SavedObjectPrivilegeCondition,
 } from '../../../features/server/feature_kibana_privileges';
 
@@ -27,15 +27,15 @@ export class SavedObjectsPrivileges {
       .flat()
       .map(privilege => [...privilege.savedObject.all, ...privilege.savedObject.read])
       .flat()
-      .filter(isSavedObjectPrivilege);
+      .filter(isSavedObjectConditionalPrivilege);
 
     this.conditionalTypes = savedObjectPrivileges.map(
       savedObjectPrivilege => savedObjectPrivilege.type
     );
     this.typesConditions = new Map();
     for (const savedObjectPrivilege of savedObjectPrivileges) {
-      const { type, when } = savedObjectPrivilege;
-      this.typesConditions.set(type, [...(this.typesConditions.get(type) || []), when]);
+      const { type, condition } = savedObjectPrivilege;
+      this.typesConditions.set(type, [...(this.typesConditions.get(type) || []), condition]);
     }
   }
 

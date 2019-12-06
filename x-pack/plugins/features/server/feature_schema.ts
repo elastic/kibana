@@ -29,9 +29,9 @@ const savedObjectPrivilegeCondition = Joi.object({
   value: Joi.string().required(),
 });
 
-export const savedObjectPrivilegeSchema = Joi.object({
+export const savedObjectConditionalPrivilegeSchema = Joi.object({
   type: Joi.string().required(),
-  when: Joi.array()
+  condition: Joi.array()
     .items(savedObjectPrivilegeCondition)
     .single()
     .required(),
@@ -45,10 +45,10 @@ const privilegeSchema = Joi.object({
   app: Joi.array().items(Joi.string()),
   savedObject: Joi.object({
     all: Joi.array()
-      .items(Joi.string(), savedObjectPrivilegeSchema)
+      .items(Joi.string(), savedObjectConditionalPrivilegeSchema)
       .required(),
     read: Joi.array()
-      .items(Joi.string(), savedObjectPrivilegeSchema)
+      .items(Joi.string(), savedObjectConditionalPrivilegeSchema)
       .required(),
   }).required(),
   ui: Joi.array()

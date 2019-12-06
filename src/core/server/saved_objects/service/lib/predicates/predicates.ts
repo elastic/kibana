@@ -16,14 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsPredicate } from './predicate';
+import { ISavedObjectsPredicate } from './predicate';
 
 export type SavedObjectsPredicatesOperator = 'AND' | 'OR';
 
-export class SavedObjectsPredicates implements SavedObjectsPredicate {
+export class SavedObjectsPredicates implements ISavedObjectsPredicate {
   constructor(
     public readonly operator: SavedObjectsPredicatesOperator,
-    public readonly predicates: SavedObjectsPredicate[]
+    public readonly predicates: ISavedObjectsPredicate[]
   ) {}
 
   exec(obj: any): boolean {

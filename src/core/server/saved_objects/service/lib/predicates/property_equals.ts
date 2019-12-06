@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { SavedObjectsPredicate } from './predicate';
+import { ISavedObjectsPredicate } from './predicate';
 
-export class PropertyEqualsSavedObjectsPredicate implements SavedObjectsPredicate {
+export class PropertyEqualsSavedObjectsPredicate implements ISavedObjectsPredicate {
   constructor(public readonly key: string, public readonly value: string) {}
 
   exec(obj: any): boolean {

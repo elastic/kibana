@@ -166,7 +166,7 @@ export {
   SavedObjectsUpdateResponse,
   SavedObjectsDeleteOptions,
   PropertyEqualsSavedObjectsPredicate,
-  SavedObjectsPredicate,
+  ISavedObjectsPredicate,
   SavedObjectsPredicates,
   SavedObjectsPredicatesOperator,
 } from './saved_objects';

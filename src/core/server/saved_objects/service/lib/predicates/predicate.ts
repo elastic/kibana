@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export interface SavedObjectsPredicate {
+export interface ISavedObjectsPredicate {
   exec(obj: any): boolean;
   getQuery(type: string): Record<string, any>;
 }
