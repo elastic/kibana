@@ -284,7 +284,7 @@ export function uiRenderMixin(kbnServer, server, config) {
 
         legacyMetadata,
 
-        apm: getApmConfig(legacyMetadata),
+        apm: getApmConfig(legacyMetadata.app),
       },
     });
 

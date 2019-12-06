@@ -17,7 +17,10 @@
  * under the License.
  */
 
-const apmEnabled = process.env.APM_ENABLED === 'true';
+import { getConfig, isKibanaDistributable } from '../../../apm';
+import agent from 'elastic-apm-node';
+
+const apmEnabled = !isKibanaDistributable && process.env.ELASTIC_APM_ACTIVE === 'true';
 
 export function apmImport() {
   return apmEnabled ? 'import { init } from "@elastic/apm-rum"' : '';
@@ -27,23 +30,34 @@ export function apmInit(config) {
   return apmEnabled ? `init(${config})` : '';
 }
 
-/**
- * TODO: Fetch it from central place
- * as Node.js agent
- */
-export function getApmConfig(legacyMetadata) {
+export function getApmConfig(appMetadata) {
+  if (!apmEnabled) {
+    return {};
+  }
   /**
-   * we use the injected metadata from the server to extract the
+   * we use the injected app metadata from the server to extract the
    * app URL path to be used for page-load transaction
    */
-  const app = legacyMetadata.app;
-  const navLink = app.getNavLink();
-  const pageUrl = navLink ? navLink.toJSON().url : app._url;
+  const navLink = appMetadata.getNavLink();
+  const pageUrl = navLink ? navLink.toJSON().url : appMetadata._url;
 
-  return {
-    active: false,
-    serviceName: 'kibana-frontend',
-    serverUrl: 'http://localhost:8200',
+  const config = ({ ... getConfig('kibana-frontend'), ...{
+    active: true,
     pageLoadTransactionName: pageUrl,
-  };
+  } });
+  /**
+   * Get current active backend transaction to make distrubuted tracing
+   * work for rendering the app
+   */
+  const backendTransaction = agent.currentTransaction;
+
+  if (backendTransaction) {
+    const { sampled, traceId } = backendTransaction;
+    return { ...config, ...{
+      pageLoadTraceId: traceId,
+      pageLoadSampled: sampled,
+      pageLoadSpanId: backendTransaction.ensureParentId()
+    } };
+  }
+  return config;
 }

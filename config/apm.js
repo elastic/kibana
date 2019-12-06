@@ -53,6 +53,7 @@ module.exports = merge(
     // for now, to simply leave it in.
     secretToken: 'R0Gjg46pE9K9wGestd',
     globalLabels: {},
+    breakdownMetrics: true,
     centralConfig: false,
     logUncaughtExceptions: true,
   },

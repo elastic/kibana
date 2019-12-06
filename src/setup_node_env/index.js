@@ -20,5 +20,4 @@
 require('symbol-observable');
 require('./root');
 require('./node_version_validator');
-require('./apm');
 require('./babel_register');

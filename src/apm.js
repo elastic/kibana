@@ -19,19 +19,35 @@
 
 const { existsSync } = require('fs');
 const { join } = require('path');
-const { name, version } = require('../package.json');
+const { name, version, build } = require('../package.json');
+
+/**
+ * flag to disable APM support on all kibana builds by default
+ */
+const isKibanaDistributable = Boolean(build && build.distributable === true);
+
+function getConfig(serviceName) {
+  const config = {
+    serviceName: `${serviceName}-${version.replace(/\./g, '_')}`,
+  };
+
+  const configPath = join(__dirname, '..', 'config', 'apm.js');
+  if (existsSync(configPath)) {
+    const configFile = require(configPath); // eslint-disable-line import/no-dynamic-require
+    Object.assign(config, configFile);
+  } else {
+    config.active = false;
+  }
+  return config;
+}
 
 module.exports = function(serviceName = name) {
   if (process.env.kbnWorkerType === 'optmzr') return;
 
-  const conf = {
-    serviceName: `${serviceName}-${version.replace(/\./g, '_')}`,
-  };
-
-  const configFile = join(__dirname, '..', 'config', 'apm.js');
-
-  if (existsSync(configFile)) conf.configFile = configFile;
-  else conf.active = false;
+  const conf = getConfig(serviceName);
 
   require('elastic-apm-node').start(conf);
 };
+
+module.exports.getConfig = getConfig;
+module.exports.isKibanaDistributable = isKibanaDistributable;
