@@ -11,7 +11,7 @@ import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
-import { px, unit, units } from '../../../../../../style/variables';
+import { px, unit, units, pct } from '../../../../../../style/variables';
 import { asDuration } from '../../../../../../utils/formatters';
 import { ErrorCountBadge } from '../../ErrorCountBadge';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
@@ -29,6 +29,8 @@ interface IContainerStyleProps {
 interface IBarStyleProps {
   type: ItemType;
   color: string;
+  left: number;
+  width: number;
 }
 
 const Container = styled.div<IContainerStyleProps>`
@@ -55,14 +57,17 @@ const ItemBar = styled.div<IBarStyleProps>`
   height: ${px(unit)};
   min-width: 2px;
   background-color: ${props => props.color};
+  left: ${props => pct(props.left)};
+  width: ${props => pct(props.width)};
 `;
 
-const ItemText = styled.span`
+const ItemText = styled.span<{ minWidth: number }>`
   position: absolute;
   right: 0;
   display: flex;
   align-items: center;
   height: ${px(units.plus)};
+  min-width: ${props => pct(props.minWidth)};
 
   /* add margin to all direct descendants */
   & > * {
@@ -195,14 +200,8 @@ export function WaterfallItem({
       isSelected={isSelected}
       onClick={onClick}
     >
-      <ItemBar // using inline styles instead of props to avoid generating a css class for each item
-        style={{ left: `${left}%`, width: `${width}%` }}
-        color={color}
-        type={item.docType}
-      />
-      <ItemText // using inline styles instead of props to avoid generating a css class for each item
-        style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
-      >
+      <ItemBar left={left} width={width} color={color} type={item.docType} />
+      <ItemText minWidth={Math.max(100 - left, 0)}>
         <SpanActionToolTip item={item}>
           <PrefixIcon item={item} />
         </SpanActionToolTip>

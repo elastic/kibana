@@ -5,14 +5,14 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { Span } from '../../../../../../../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../../../../../../../typings/es_schemas/ui/Transaction';
 import {
   getClockSkew,
-  getOrderedWaterfallItems,
+  sortWaterfall,
   getWaterfall,
   IWaterfallItem
-} from './waterfall_helpers';
+} from '../waterfall_helpers';
 
 describe('waterfall_helpers', () => {
   describe('getWaterfall', () => {
@@ -107,8 +107,8 @@ describe('waterfall_helpers', () => {
         },
         entryTransactionId
       );
-      expect(waterfall.orderedItems.length).toBe(6);
-      expect(waterfall.orderedItems[0].id).toBe('myTransactionId1');
+      expect(waterfall.items.length).toBe(6);
+      expect(waterfall.items[0].id).toBe('myTransactionId1');
       expect(waterfall).toMatchSnapshot();
     });
 
@@ -125,8 +125,8 @@ describe('waterfall_helpers', () => {
         },
         entryTransactionId
       );
-      expect(waterfall.orderedItems.length).toBe(4);
-      expect(waterfall.orderedItems[0].id).toBe('myTransactionId2');
+      expect(waterfall.items.length).toBe(4);
+      expect(waterfall.items[0].id).toBe('myTransactionId2');
       expect(waterfall).toMatchSnapshot();
     });
 
@@ -145,6 +145,98 @@ describe('waterfall_helpers', () => {
       );
       const transaction = waterfall.getTransactionById('myTransactionId2');
       expect(transaction!.transaction.id).toBe('myTransactionId2');
+    });
+  });
+
+  describe('getWaterfall - legacy', () => {
+    const hits = [
+      {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1'
+        },
+        timestamp: { us: 1549324795784006 }
+      } as Transaction,
+      {
+        processor: { event: 'span' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-ruby' },
+        transaction: { id: 'myTransactionId2' },
+        timestamp: { us: 1549324795825633 },
+        span: {
+          duration: { us: 481 },
+          name: 'SELECT FROM products',
+          id: 'mySpanIdB'
+        }
+      } as Span,
+      {
+        processor: { event: 'span' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-ruby' },
+        transaction: { id: 'myTransactionId2' },
+        span: {
+          duration: { us: 6161 },
+          name: 'Api::ProductsController#index',
+          id: 'mySpanIdA'
+        },
+        timestamp: { us: 1549324795824504 }
+      } as Span,
+      {
+        processor: { event: 'span' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-ruby' },
+        transaction: { id: 'myTransactionId2' },
+        span: {
+          duration: { us: 532 },
+          name: 'SELECT FROM product',
+          id: 'mySpanIdC'
+        },
+        timestamp: { us: 1549324795827905 }
+      } as Span,
+      {
+        processor: { event: 'span' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        transaction: { id: 'myTransactionId1' },
+        span: {
+          duration: { us: 47557 },
+          name: 'GET opbeans-ruby:3000/api/products',
+          id: 'mySpanIdD'
+        },
+        timestamp: { us: 1549324795785760 }
+      } as Span,
+      {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-ruby' },
+        transaction: {
+          duration: { us: 8634 },
+          name: 'Api::ProductsController#index',
+          id: 'myTransactionId2'
+        },
+        timestamp: { us: 1549324795823304 }
+      } as Transaction
+    ];
+    it('should return waterfall', () => {
+      const entryTransactionId = 'myTransactionId1';
+      const errorsPerTransaction = {
+        myTransactionId1: 2,
+        myTransactionId2: 3
+      };
+      const waterfall = getWaterfall(
+        {
+          trace: { items: hits, exceedsMax: false },
+          errorsPerTransaction
+        },
+        entryTransactionId
+      );
+      expect(waterfall.items.length).toBe(6);
+      expect(waterfall.items[0].id).toBe('myTransactionId1');
+      expect(waterfall).toMatchSnapshot();
     });
   });
 
@@ -231,7 +323,7 @@ describe('waterfall_helpers', () => {
       );
       const entryTransactionItem = childrenByParentId.root[0];
       expect(
-        getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
+        sortWaterfall(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
 
@@ -245,7 +337,7 @@ describe('waterfall_helpers', () => {
       );
       const entryTransactionItem = childrenByParentId.root[0];
       expect(
-        getOrderedWaterfallItems(childrenByParentId, entryTransactionItem)
+        sortWaterfall(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
   });

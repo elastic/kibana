@@ -62,6 +62,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
   traceSamples
 }) => {
   const [sampleActivePage, setSampleActivePage] = useState(0);
+  const { entryTransaction, errorsPerTransaction, rootTransaction } = waterfall;
 
   useEffect(() => {
     setSampleActivePage(0);
@@ -80,7 +81,6 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
     });
   };
 
-  const { entryTransaction } = waterfall;
   if (!entryTransaction) {
     const content = isLoading ? (
       <LoadingStatePrompt />
@@ -140,8 +140,8 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
       <EuiSpacer size="s" />
 
       <TransactionSummary
-        errorCount={sum(Object.values(waterfall.errorCountByTransactionId))}
-        totalDuration={waterfall.traceRootDuration}
+        errorCount={sum(Object.values(errorsPerTransaction))}
+        totalDuration={rootTransaction?.duration}
         transaction={entryTransaction}
       />
       <EuiSpacer size="s" />
