@@ -32,7 +32,7 @@ export const visDataRoutes = (router, framework) => {
     },
     async (requestContext, request, response) => {
       try {
-        const results = await getVisData(requestContext, request, framework);
+        const results = await getVisData(requestContext, request.body, framework);
         return response.ok({ body: results });
       } catch (error) {
         return response.internalError({
