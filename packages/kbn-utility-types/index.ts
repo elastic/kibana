@@ -47,3 +47,14 @@ export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promis
  * Ensures T is of type X.
  */
 export type Ensure<T, X> = T extends X ? T : never;
+
+// If we define this inside RecursiveReadonly TypeScript complains.
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface RecursiveReadonlyArray<T> extends Array<RecursiveReadonly<T>> {}
+export type RecursiveReadonly<T> = T extends (...args: any) => any
+  ? T
+  : T extends any[]
+  ? RecursiveReadonlyArray<T[number]>
+  : T extends object
+  ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
+  : T;
