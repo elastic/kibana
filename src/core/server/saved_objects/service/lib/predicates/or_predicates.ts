@@ -33,6 +33,10 @@ export class OrSavedObjectsPredicates implements ISavedObjectsPredicate {
       };
     }
 
+    // When we have an OR predicate, we can't use any of the predicate's errors because
+    // all of them failed and we'd have to figure out how to combine errors... Instead, if
+    // a consumer is using an OR predicate, they should explicit specify an error at this level
+    // if they want it to be used.
     return {
       isValid,
       error: this.error,

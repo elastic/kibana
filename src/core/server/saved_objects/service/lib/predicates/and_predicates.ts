@@ -33,6 +33,10 @@ export class AndSavedObjectsPredicates implements ISavedObjectsPredicate {
       };
     }
 
+    // When we have an AND predicate, if any of the predicates themselves have an explicit
+    // error and they're false, we can use the first one's error. There might be other errors,
+    // but we can only use one of their status codes, so we're just going to use the first. Otherwise,
+    // we have to figure out how to "combine" errors, and that seems complicated
     const invalidPredicateResultWithError = predicateResults.find(
       result => result.isValid === false && result.error
     );
