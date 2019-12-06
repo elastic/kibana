@@ -30,7 +30,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.emailAction.selectMessageText',
       {
-        defaultMessage: 'Send an email.',
+        defaultMessage: 'Configure SMTP settings to send email from your servers',
       }
     ),
     validateConnector: (action: ActionConnector): ValidationResult => {

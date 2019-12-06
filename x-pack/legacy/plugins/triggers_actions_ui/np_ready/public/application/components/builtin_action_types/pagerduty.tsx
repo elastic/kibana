@@ -22,7 +22,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.selectMessageText',
       {
-        defaultMessage: 'Create an event in PagerDuty.',
+        defaultMessage: 'Configure PageDuty API details to send events to their system',
       }
     ),
     validateConnector: (action: ActionConnector): ValidationResult => {

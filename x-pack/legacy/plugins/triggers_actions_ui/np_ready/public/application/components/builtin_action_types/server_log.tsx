@@ -16,7 +16,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.serverLogAction.selectMessageText',
       {
-        defaultMessage: 'Add an item to the logs.',
+        defaultMessage: 'Adds a log line with a message you define',
       }
     ),
     validateConnector: (): ValidationResult => {

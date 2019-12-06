@@ -13,6 +13,7 @@ import {
   EuiIcon,
   EuiEmptyPrompt,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -151,24 +152,31 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   const actionsTableColumns = [
     {
-      field: 'actionType',
-      'data-test-subj': 'connectorsTableCell-actionType',
-      name: i18n.translate(
-        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle',
-        {
-          defaultMessage: 'Type',
-        }
-      ),
-      sortable: false,
-      truncateText: true,
-    },
-    {
       field: 'name',
       'data-test-subj': 'connectorsTableCell-name',
       name: i18n.translate(
         'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.nameTitle',
         {
           defaultMessage: 'Name',
+        }
+      ),
+      sortable: false,
+      truncateText: true,
+      render: (item: ActionConnectorTableItem) => {
+        return (
+          <EuiLink onClick={() => editItem(item)} key={item.id}>
+            {item}
+          </EuiLink>
+        );
+      },
+    },
+    {
+      field: 'actionType',
+      'data-test-subj': 'connectorsTableCell-actionType',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actionTypeTitle',
+        {
+          defaultMessage: 'Type',
         }
       ),
       sortable: false,
@@ -184,7 +192,11 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
       sortable: false,
       truncateText: true,
       render: (value: number, item: ActionConnectorTableItem) => {
-        return <EuiBadge key={item.id}>{value}</EuiBadge>;
+        return (
+          <EuiBadge color="hollow" key={item.id}>
+            {value}
+          </EuiBadge>
+        );
       },
     },
     {

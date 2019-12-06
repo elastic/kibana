@@ -22,7 +22,7 @@ export function getActionType(): ActionTypeModel {
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.slackAction.selectMessageText',
       {
-        defaultMessage: 'Send a message to a Slack user or channel.',
+        defaultMessage: 'Configure Slack using a webhook url they provide',
       }
     ),
     validateConnector: (action: ActionConnector): ValidationResult => {
