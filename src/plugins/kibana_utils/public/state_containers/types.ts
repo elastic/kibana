@@ -18,8 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-
-export type Ensure<T, X> = T extends X ? T : never;
+import { Ensure } from '@kbn/utility-types';
 
 export interface TransitionDescription<Type extends string = string, Args extends any[] = any[]> {
   type: Type;
