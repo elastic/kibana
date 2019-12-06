@@ -172,6 +172,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async getSelectedCalendars(): Promise<string[]> {
+      await this.ensureAdditionalSettingsSectionOpen();
       return await comboBox.getComboBoxSelectedOptions(
         'mlJobWizardComboBoxCalendars > comboBoxInput'
       );
@@ -182,6 +183,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async addCalendar(calendarId: string) {
+      await this.ensureAdditionalSettingsSectionOpen();
       await comboBox.setCustom('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
       expect(await this.getSelectedCalendars()).to.contain(calendarId);
     },
@@ -397,6 +399,8 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async addCustomUrl(customUrl: { label: string }) {
+      await this.ensureAdditionalSettingsSectionOpen();
+
       const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlsList > *');
 
       await this.ensureNewCustomUrlFormModalOpen();
