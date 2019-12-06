@@ -2,6 +2,35 @@
 [[canvas-expression-lifecycle]]
 == Canvas expression lifecycle
 
+[[canvas-understanding-the-syntax]]
+=== Understanding the Syntax
+
+Elements in Canvas are all created using an *expression language* that defines how to retrieve, manipulate, and ultimately visualize data. The goal is to allow users to do most of what they need without having to edit or even know that it exists, but learning how it works unlocks a lot of the application’s power.
+
+Learning a new language can be a chore, but the *expressions* in Canvas are intentionally readable, and once you understand the syntax, you will hopefully find them pretty approachable. The easiest way to explain how they work is by walking through an example expression and explaining what happens step by step. 
+
+[[canvas-expressions-always-start-with-a-function]]
+=== Expressions Always Start with a Function
+
+Expressions simply execute <<canvas-function-reference, functions>>, in a specific order, which produce some kind of output. That output can then be piped into another function, and another after that, until it produces the output you need. Let’s start with the following expression, which uses random data available in Canvas to produce a table.
+
+*[Note] You can follow along*
+
+You can run all of the following expressions to see the output yourself
+
+[source,text]
+----
+filters
+| demodata
+| table
+| render
+----
+
+This expression starts out with the <<filters_fn, function>> function, which provides the value of any time filters or dropdown filters in the workpad. This is then piped to <<demodata_fn, demodata>>, a function that returns exactly what you expect, demo data. Because the <<demodata_fn, demodata>> function receives the filter information from the <<filters_fn, filters>> function before it, it applies those filters to reduce the set of data it returns. We call the output from the previous function _context_.
+
+The filtered <<demodata_fn, demodata>> then becomes the _context_ of the next function, <<table_fn, table>>, which creates a table visualization from this data set. This function isn’t strictly required, but by being explicit you also have the option of providing arguments to control things like the font used in the table. Finally, that output becomes the _context_ of the next function, <<render_fn, render>>, and like <<table_fn, table>> before it, this function isn’t required either. But, just like before, using it allows access to other arguments, such as styling the border of the element or injecting custom CSS.
+
+
 [[canvas-function-can-take-arguments]]
 === Functions Can Take Arguments
 
