@@ -35,12 +35,11 @@ import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
-
+import { hashedItemStore } from '../../../../plugins/kibana_utils/public';
 import {
   createStateHash,
-  HashedItemStoreSingleton,
-  isStateHash,
-} from './state_storage';
+  isStateHash
+} from './state_hashing';
 
 export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
@@ -54,13 +53,13 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
   function State(
     urlParam,
     defaults,
-    hashedItemStore = HashedItemStoreSingleton
+    _hashedItemStore = hashedItemStore
   ) {
     State.Super.call(this);
 
     this.setDefaults(defaults);
     this._urlParam = urlParam || '_s';
-    this._hashedItemStore = hashedItemStore;
+    this._hashedItemStore = _hashedItemStore;
 
     // When the URL updates we need to fetch the values from the URL
     this._cleanUpListeners = _.partial(callEach, [
@@ -293,9 +292,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
 
     // We need to strip out Angular-specific properties.
     const json = angular.toJson(state);
-    const hash = createStateHash(json, hash => {
-      return this._hashedItemStore.getItem(hash);
-    });
+    const hash = createStateHash(json);
     const isItemSet = this._hashedItemStore.setItem(hash, json);
 
     if (isItemSet) {
