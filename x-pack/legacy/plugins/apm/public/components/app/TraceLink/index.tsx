@@ -66,7 +66,7 @@ export const TraceLink = () => {
     callApmApi => {
       if (traceId) {
         return callApmApi({
-          pathname: '/api/apm/transaction/{traceId}',
+          pathname: '/api/apm/traces/{traceId}/root_transaction',
           params: {
             path: {
               traceId

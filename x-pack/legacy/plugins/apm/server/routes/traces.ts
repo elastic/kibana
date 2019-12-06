@@ -10,6 +10,7 @@ import { getTrace } from '../lib/traces/get_trace';
 import { getTransactionGroupList } from '../lib/transaction_groups';
 import { createRoute } from './create_route';
 import { rangeRt, uiFiltersRt } from './default_api_types';
+import { getRootTransactionByTraceId } from '../lib/transactions/get_transaction_by_trace';
 
 export const tracesRoute = createRoute(() => ({
   path: '/api/apm/traces',
@@ -33,5 +34,19 @@ export const tracesByIdRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     return getTrace(context.params.path.traceId, setup);
+  }
+}));
+
+export const rootTransactionByTraceIdRoute = createRoute(() => ({
+  path: '/api/apm/traces/{traceId}/root_transaction',
+  params: {
+    path: t.type({
+      traceId: t.string
+    })
+  },
+  handler: async ({ context, request }) => {
+    const { traceId } = context.params.path;
+    const setup = await setupRequest(context, request);
+    return getRootTransactionByTraceId(traceId, setup);
   }
 }));
