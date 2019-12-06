@@ -17,7 +17,7 @@ interface MyState {
 }
 ```
 
-Create default state of your *store*.
+Create default state of your container.
 
 ```ts
 const defaultState: MyState = {
@@ -27,17 +27,12 @@ const defaultState: MyState = {
 };
 ```
 
-Create your state container, i.e *store*.
+Create your a state container.
 
 ```ts
-import { createStore } from 'kibana-utils';
+import { createStateContainer } from 'src/plugins/kibana_utils';
 
-const store = createStore<MyState>(defaultState);
-console.log(store.get());
+const container = createStateContainer<MyState>(defaultState, {});
+
+console.log(container.get());
 ```
-
-> ##### N.B.
-> 
-> State must always be an object `{}`.
-> 
-> You cannot create a store out of an array, e.g ~~`createStore([])`~~.

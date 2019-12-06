@@ -17,26 +17,20 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { Store as ReduxStore } from 'redux';
+import { result as counterResult } from './state_containers/counter';
+import { result as todomvcResult } from './state_containers/todomvc';
 
-export interface AppStore<
-  State extends {},
-  StateMutators extends Mutators<PureMutators<State>> = {}
-> {
-  redux: ReduxStore;
-  get: () => State;
-  set: (state: State) => void;
-  state$: Observable<State>;
-  createMutators: <M extends PureMutators<State>>(pureMutators: M) => Mutators<M>;
-  mutators: StateMutators;
-}
+describe('demos', () => {
+  describe('state containers', () => {
+    test('counter demo works', () => {
+      expect(counterResult).toBe(10);
+    });
 
-export type PureMutator<State extends {}> = (state: State) => (...args: any[]) => State;
-export type Mutator<M extends PureMutator<any>> = (...args: Parameters<ReturnType<M>>) => void;
-
-export interface PureMutators<State extends {}> {
-  [name: string]: PureMutator<State>;
-}
-
-export type Mutators<M extends PureMutators<any>> = { [K in keyof M]: Mutator<M[K]> };
+    test('TodoMVC demo works', () => {
+      expect(todomvcResult).toEqual([
+        { id: 0, text: 'Learning state containers', completed: true },
+        { id: 1, text: 'Learning transitions...', completed: true },
+      ]);
+    });
+  });
+});

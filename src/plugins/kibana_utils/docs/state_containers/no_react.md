@@ -1,4 +1,4 @@
-# Reading state
+# Consuming state in non-React setting
 
 To read the current `state` of the store use `.get()` method.
 
