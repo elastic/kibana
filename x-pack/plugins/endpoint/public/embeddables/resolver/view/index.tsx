@@ -118,7 +118,7 @@ const Diagnostic = styled(
     useEffect(() => {
       window.addEventListener('mouseup', handleMouseUp, { passive: true });
       return () => {
-        window.removeEventListener('mousemove', handleMouseUp);
+        window.removeEventListener('mouseup', handleMouseUp);
       };
     }, [handleMouseUp]);
 
