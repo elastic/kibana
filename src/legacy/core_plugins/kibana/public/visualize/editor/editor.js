@@ -45,7 +45,7 @@ import {
   showSaveModal,
   stateMonitorFactory,
   subscribeWithScope,
-  StateManagement
+  unhashUrl
 } from '../kibana_services';
 
 const {
@@ -248,7 +248,7 @@ function VisEditor(
         anchorElement,
         allowEmbed: true,
         allowShortUrl: capabilities.visualize.createShortUrl,
-        shareableUrl: StateManagement.Url.unhashUrl(window.location.href),
+        shareableUrl: unhashUrl(window.location.href),
         objectId: savedVis.id,
         objectType: 'visualization',
         sharingData: {

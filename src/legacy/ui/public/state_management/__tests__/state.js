@@ -26,7 +26,9 @@ import { toastNotifications } from '../../notify';
 import * as FatalErrorNS from '../../notify/fatal_error';
 import { StateProvider } from '../state';
 import {
-  StateManagement,
+  unhashQuery,
+  createStateHash,
+  isStateHash,
   HashedItemStore
 } from '../../../../../plugins/kibana_utils/public';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
@@ -56,7 +58,7 @@ describe('State Management', () => {
         const hashedItemStore = new HashedItemStore(store);
         const state = new State(param, initial, hashedItemStore);
 
-        const getUnhashedSearch = () => StateManagement.Url.unhashQuery($location.search());
+        const getUnhashedSearch = () => unhashQuery($location.search());
 
         return { store, hashedItemStore, state, getUnhashedSearch };
       };
@@ -246,7 +248,7 @@ describe('State Management', () => {
         state.save();
         const urlVal = $location.search()[state.getQueryParamName()];
 
-        expect(StateManagement.StateHash.isStateHash(urlVal)).to.be(true);
+        expect(isStateHash(urlVal)).to.be(true);
         expect(hashedItemStore.getItem(urlVal)).to.eql(JSON.stringify({ foo: 'bar' }));
       });
 
@@ -260,7 +262,7 @@ describe('State Management', () => {
 
         const urlVal = $location.search()._s;
         expect(urlVal).to.not.be(rison);
-        expect(StateManagement.StateHash.isStateHash(urlVal)).to.be(true);
+        expect(isStateHash(urlVal)).to.be(true);
         expect(hashedItemStore.getItem(urlVal)).to.eql(JSON.stringify(obj));
       });
 
@@ -276,7 +278,7 @@ describe('State Management', () => {
 
           const { state } = setup({ storeInHash: true });
           const search = $location.search();
-          const badHash = StateManagement.StateHash.createStateHash('{"a": "b"}', () => null);
+          const badHash = createStateHash('{"a": "b"}', () => null);
 
           search[state.getQueryParamName()] = badHash;
           $location.search(search);
@@ -313,10 +315,10 @@ describe('State Management', () => {
           expect(state.translateHashToRison('(a:b)')).to.be('(a:b)');
           expect(state.translateHashToRison('')).to.be('');
 
-          const existingHash = StateManagement.StateHash.createStateHash('{"a": "b"}', () => null);
+          const existingHash = createStateHash('{"a": "b"}', () => null);
           hashedItemStore.setItem(existingHash, '{"a": "b"}');
 
-          const nonExistingHash = StateManagement.StateHash.createStateHash('{"b": "c"}', () => null);
+          const nonExistingHash = createStateHash('{"b": "c"}', () => null);
 
           expect(state.translateHashToRison(existingHash)).to.be('(a:b)');
           expect(state.translateHashToRison(nonExistingHash)).to.be('!n');

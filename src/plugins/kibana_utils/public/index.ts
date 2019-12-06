@@ -28,5 +28,5 @@ export * from './errors';
 export * from './field_mapping';
 export * from './storage';
 export * from './storage/hashed_item_store';
-import * as StateManagement from './state_management';
-export { StateManagement };
+export * from './state_management/state_hash';
+export * from './state_management/url';

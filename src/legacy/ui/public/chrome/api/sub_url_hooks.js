@@ -19,7 +19,7 @@
 
 import url from 'url';
 
-import { StateManagement } from '../../../../../plugins/kibana_utils/public';
+import { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 import { toastNotifications } from '../../notify/toasts';
 
 export function registerSubUrlHooks(angularModule, internals) {
@@ -30,7 +30,7 @@ export function registerSubUrlHooks(angularModule, internals) {
       const urlWithHashes = window.location.href;
       let urlWithStates;
       try {
-        urlWithStates = StateManagement.Url.unhashUrl(urlWithHashes);
+        urlWithStates = unhashUrl(urlWithHashes);
       } catch (e) {
         toastNotifications.addDanger(e.message);
       }

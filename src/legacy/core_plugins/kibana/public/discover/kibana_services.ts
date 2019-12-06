@@ -78,7 +78,7 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { StateManagement } from '../../../../../plugins/kibana_utils/public';
+export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 
 // EXPORT types
 export { Vis } from 'ui/vis';
