@@ -32,6 +32,7 @@ const freeze: <T>(value: T) => RecursiveReadonly<T> =
   process.env.NODE_ENV !== 'production'
     ? <T>(value: T): RecursiveReadonly<T> => {
         if (!value) return value as RecursiveReadonly<T>;
+        if (value instanceof Array) return value as RecursiveReadonly<T>;
         if (typeof value === 'object') return Object.freeze({ ...value }) as RecursiveReadonly<T>;
         else return value as RecursiveReadonly<T>;
       }

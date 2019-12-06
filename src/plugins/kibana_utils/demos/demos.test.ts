@@ -17,24 +17,17 @@
  * under the License.
  */
 
-import { join } from 'path';
-import { execSync } from 'child_process';
+import { result as counterResult } from './state_containers/counter';
+import { result as todomvcResult } from './state_containers/todomvc';
 
 describe('demos', () => {
   describe('state containers', () => {
     test('counter demo works', () => {
-      const demoFile = join(__dirname, 'state_containers', 'counter.ts');
-      const result = execSync(`npx -q ts-node ${demoFile}`).toString('utf8');
-
-      expect(Number(result)).toBe(10);
+      expect(counterResult).toBe(10);
     });
 
     test('TodoMVC demo works', () => {
-      const demoFile = join(__dirname, 'state_containers', 'todomvc.ts');
-      const result = execSync(`npx -q ts-node ${demoFile}`).toString('utf8');
-
-      const data = JSON.parse(result);
-      expect(data).toEqual([
+      expect(todomvcResult).toEqual([
         { id: 0, text: 'Learning state containers', completed: true },
         { id: 1, text: 'Learning transitions...', completed: true },
       ]);

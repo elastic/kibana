@@ -28,3 +28,5 @@ container.transitions.increment(5);
 container.transitions.double();
 
 console.log(container.get()); // eslint-disable-line
+
+export const result = container.get();
