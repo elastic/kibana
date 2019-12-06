@@ -18,3 +18,4 @@
  */
 
 export * from './legacy_editor';
+export * from './text_object';

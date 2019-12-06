@@ -16,8 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsClientContract } from 'src/core/public';
+import { ObjectStorage } from '../services';
+import { TextObject, type } from './models/text_object';
 
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export { createSettings, Settings, DevToolsSettings } from './settings';
-export { ObjectStorage } from './object_storage';
+interface Dependencies {
+  client: SavedObjectsClientContract;
+}
+
+export type AppDatabase = ReturnType<typeof create>;
+
+export const create = ({ client }: Dependencies) => ({
+  text: new ObjectStorage<TextObject>(type, client),
+});

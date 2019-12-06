@@ -18,10 +18,11 @@
  */
 
 import React from 'react';
-import { NotificationsSetup } from 'src/core/public';
+import { NotificationsSetup, SavedObjectsClientContract } from 'src/core/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
+import * as appDatabase from './app_database';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
@@ -32,8 +33,9 @@ export function boot(deps: {
   docLinkVersion: string;
   I18nContext: any;
   notifications: NotificationsSetup;
+  savedObjects: SavedObjectsClientContract;
 }) {
-  const { I18nContext, notifications, docLinkVersion } = deps;
+  const { I18nContext, notifications, docLinkVersion, savedObjects } = deps;
 
   const storage = createStorage({
     engine: window.localStorage,
@@ -43,12 +45,14 @@ export function boot(deps: {
   const settings = createSettings({ storage });
   settingsRef = settings;
 
+  const db = appDatabase.create({ client: savedObjects });
+
   return (
     <I18nContext>
       <ServicesContextProvider
         value={{
           docLinkVersion,
-          services: { storage, history, settings, notifications },
+          services: { storage, history, settings, notifications, db },
         }}
       >
         <RequestContextProvider>

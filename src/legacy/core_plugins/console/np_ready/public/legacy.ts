@@ -23,6 +23,7 @@ import 'brace/ext/searchbox';
 import 'brace/mode/json';
 import 'brace/mode/text';
 
+import { SavedObjectsClientContract } from 'src/core/public';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
@@ -32,6 +33,7 @@ export interface XPluginSet {
   dev_tools: DevToolsSetup;
   home: HomePublicPluginSetup;
   __LEGACY: {
+    savedObjects: SavedObjectsClientContract;
     I18nContext: any;
   };
 }
@@ -45,6 +47,7 @@ const pluginInstance = plugin({} as any);
 pluginInstance.setup(npSetup.core, {
   ...npSetup.plugins,
   __LEGACY: {
+    savedObjects: npStart.core.savedObjects.client,
     I18nContext,
   },
 });

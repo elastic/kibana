@@ -17,7 +17,4 @@
  * under the License.
  */
 
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export { createSettings, Settings, DevToolsSettings } from './settings';
-export { ObjectStorage } from './object_storage';
+export { TextObject, type } from './text_object';

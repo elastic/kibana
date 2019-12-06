@@ -1,0 +1,18 @@
+{
+  "text-object": {
+    "properties": {
+      "lastUpdatedAt": {
+        "type": "long"
+      },
+      "createdAt": {
+        "type": "long"
+      },
+      "text": {
+        "type": "text"
+      },
+      "userId": {
+        "type": "text"
+      }
+    }
+  }
+}

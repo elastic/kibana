@@ -16,8 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectAttributes } from 'src/core/public';
 
-export { createHistory, History } from './history';
-export { createStorage, Storage, StorageKeys } from './storage';
-export { createSettings, Settings, DevToolsSettings } from './settings';
-export { ObjectStorage } from './object_storage';
+export const type = 'text_object';
+
+export interface TextObject extends SavedObjectAttributes {
+  id: string;
+  userId: string;
+  lastUpdatedAt: number;
+  createdAt: number;
+  text: string;
+}
