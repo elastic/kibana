@@ -36,8 +36,7 @@ export async function applyESResp(
   savedObject._source = _.cloneDeep(resp._source);
   const injectReferences = config.injectReferences;
   const hydrateIndexPattern = savedObject.hydrateIndexPattern!;
-
-  if (!resp.found) {
+  if (typeof resp.found === 'boolean' && !resp.found) {
     throw new SavedObjectNotFound(esType, savedObject.id || '');
   }
 
