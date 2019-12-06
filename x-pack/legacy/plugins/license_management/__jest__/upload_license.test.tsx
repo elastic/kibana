@@ -17,7 +17,6 @@ import { licenseManagementStore } from '../public/np_ready/application/store/sto
 
 // @ts-ignore
 import { UploadLicense } from '../public/np_ready/application/sections/upload_license';
-import { BASE_PATH } from '../common/constants';
 
 import {
   UPLOAD_LICENSE_EXPIRED,
@@ -34,10 +33,6 @@ let store: any = null;
 let component: any = null;
 const services = {
   legacy: {
-    kbnUrl: {
-      change: jest.fn(),
-    },
-    autoLogout: () => {},
     xPackInfo: {
       refresh: jest.fn(),
       get: () => {
@@ -47,6 +42,9 @@ const services = {
     refreshXpack: jest.fn(),
   },
   http: httpServiceMock.createSetupContract(),
+  history: {
+    replace: jest.fn(),
+  },
 };
 
 describe('UploadLicense', () => {
@@ -61,7 +59,7 @@ describe('UploadLicense', () => {
 
   afterEach(() => {
     services.legacy.xPackInfo.refresh.mockReset();
-    services.legacy.kbnUrl.change.mockReset();
+    services.history.replace.mockReset();
     jest.clearAllMocks();
   });
 
@@ -105,7 +103,7 @@ describe('UploadLicense', () => {
     const validLicense = JSON.stringify({ license: { type: 'basic' } });
     await uploadLicense(validLicense)(store.dispatch, null, services);
     expect(services.legacy.refreshXpack).toHaveBeenCalled();
-    expect(services.legacy.kbnUrl.change).toHaveBeenCalledWith(BASE_PATH);
+    expect(services.history.replace).toHaveBeenCalled();
   });
 
   it('should display error when ES returns error', async () => {
