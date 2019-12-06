@@ -18,16 +18,26 @@
  */
 
 import { Subject } from 'rxjs';
-import { PureTransitionsToTransitions, PureTransition, ReduxLikeStateContainer } from './types';
+import {
+  PureTransitionsToTransitions,
+  PureTransition,
+  ReduxLikeStateContainer,
+  PureSelectorsToSelectors,
+} from './types';
 
 const $$observable = (typeof Symbol === 'function' && (Symbol as any).observable) || '@@observable';
 
-export const createStateContainer = <State, PureTransitions extends object>(
+export const createStateContainer = <
+  State,
+  PureTransitions extends object,
+  PureSelectors extends object = {}
+>(
   defaultState: State,
-  pureTransitions: PureTransitions
-): ReduxLikeStateContainer<State, PureTransitions> => {
+  pureTransitions: PureTransitions,
+  pureSelectors: PureSelectors = {} as PureSelectors
+): ReduxLikeStateContainer<State, PureTransitions, PureSelectors> => {
   const state$ = new Subject<State>();
-  const container: ReduxLikeStateContainer<State, PureTransitions> = {
+  const container: ReduxLikeStateContainer<State, PureTransitions, PureSelectors> = {
     state: defaultState,
     get: () => container.state,
     getState: () => container.state,
@@ -47,6 +57,13 @@ export const createStateContainer = <State, PureTransitions extends object>(
     transitions: Object.keys(pureTransitions).reduce<PureTransitionsToTransitions<PureTransitions>>(
       (acc, type) => ({ ...acc, [type]: (...args: any) => container.dispatch({ type, args }) }),
       {} as PureTransitionsToTransitions<PureTransitions>
+    ),
+    selectors: Object.keys(pureSelectors).reduce<PureSelectorsToSelectors<PureSelectors>>(
+      (acc, selector) => ({
+        ...acc,
+        [selector]: (...args: any) => (pureSelectors as any)[selector](container.state)(...args),
+      }),
+      {} as PureSelectorsToSelectors<PureSelectors>
     ),
     addMiddleware: middleware => (container.dispatch = middleware(container)(container.dispatch)),
     subscribe: (listener: (state: State) => void) => {

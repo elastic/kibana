@@ -20,7 +20,6 @@
 import { Observable } from 'rxjs';
 
 export type Ensure<T, X> = T extends X ? T : never;
-export type EnsureFunction<F> = Ensure<F, (...args: any) => any>;
 
 export interface TransitionDescription<Type extends string = string, Args extends any[] = any[]> {
   type: Type;
@@ -41,13 +40,20 @@ export interface BaseStateContainer<State> {
   state$: Observable<State>;
 }
 
-export interface StateContainer<State, PureTransitions extends object>
-  extends BaseStateContainer<State> {
+export interface StateContainer<
+  State,
+  PureTransitions extends object,
+  PureSelectors extends object = {}
+> extends BaseStateContainer<State> {
   transitions: PureTransitionsToTransitions<PureTransitions>;
+  selectors: PureSelectorsToSelectors<PureSelectors>;
 }
 
-export interface ReduxLikeStateContainer<State, PureTransitions extends object>
-  extends StateContainer<State, PureTransitions> {
+export interface ReduxLikeStateContainer<
+  State,
+  PureTransitions extends object,
+  PureSelectors extends object = {}
+> extends StateContainer<State, PureTransitions, PureSelectors> {
   getState: () => State;
   reducer: Reducer<State>;
   replaceReducer: (nextReducer: Reducer<State>) => void;
@@ -73,11 +79,21 @@ export type UnboxTransitions<
   Container extends StateContainer<any, any>
 > = Container extends StateContainer<any, infer T> ? T : never;
 
-export type Selector<State, Result> = (state: State) => Result;
+export type Selector<Result, Args extends any[] = []> = (...args: Args) => Result;
+export type PureSelector<State, Result, Args extends any[] = []> = (
+  state: State
+) => Selector<Result, Args>;
+export type EnsurePureSelector<T> = Ensure<T, PureSelector<any, any, any>>;
+export type PureSelectorToSelector<T extends PureSelector<any, any, any>> = ReturnType<
+  EnsurePureSelector<T>
+>;
+export type PureSelectorsToSelectors<T extends object> = {
+  [K in keyof T]: PureSelectorToSelector<EnsurePureSelector<T[K]>>;
+};
+
 export type Comparator<Result> = (previous: Result, current: Result) => boolean;
 
-export type MapStateToProps<State, StateProps extends {}> = Selector<State, StateProps>;
-
-export type Connect<State extends {}> = <Props extends {}, StatePropKeys extends keyof Props>(
+export type MapStateToProps<State, StateProps extends object> = (state: State) => StateProps;
+export type Connect<State> = <Props extends object, StatePropKeys extends keyof Props>(
   mapStateToProp: MapStateToProps<State, Pick<Props, StatePropKeys>>
 ) => (component: React.ComponentType<Props>) => React.FC<Omit<Props, StatePropKeys>>;
