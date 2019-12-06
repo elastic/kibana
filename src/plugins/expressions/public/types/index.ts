@@ -20,7 +20,7 @@
 import { ExpressionInterpret } from '../interpreter_provider';
 import { TimeRange, Query, esFilters } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
-import { ExpressionRenderDefinition } from '../registries';
+import { ExpressionRenderDefinition } from '../../common/registries';
 
 export type ExpressionInterpretWithHandlers = (
   ast: Parameters<ExpressionInterpret>[0],

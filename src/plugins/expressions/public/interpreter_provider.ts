@@ -29,7 +29,7 @@ import {
   ArgumentType,
 } from '../common/types';
 import { getType } from '../common/type';
-import { FunctionsRegistry } from './registries';
+import { FunctionsRegistry } from '../common/registries';
 
 export { createError };
 
