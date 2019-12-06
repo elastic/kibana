@@ -75,6 +75,18 @@ describe('create()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -88,6 +100,7 @@ describe('create()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -134,6 +147,7 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": "test",
             "group": "default",
             "id": "1",
             "params": Object {
@@ -235,6 +249,18 @@ describe('create()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -249,6 +275,7 @@ describe('create()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -268,6 +295,7 @@ describe('create()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": "test",
             "group": "default",
             "id": "1",
             "params": Object {
@@ -308,6 +336,23 @@ describe('create()', () => {
     );
   });
 
+  test('throws error if loading actions fails', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const data = getMockData();
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      name: 'Test',
+      actionGroups: ['default'],
+      async executor() {},
+    });
+    savedObjectsClient.bulkGet.mockRejectedValueOnce(new Error('Test Error'));
+    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Test Error"`
+    );
+    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
   test('throws error if create saved object fails', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
@@ -316,6 +361,18 @@ describe('create()', () => {
       name: 'Test',
       actionGroups: ['default'],
       async executor() {},
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
     });
     savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -333,6 +390,18 @@ describe('create()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -346,6 +415,7 @@ describe('create()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -383,6 +453,18 @@ describe('create()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -396,6 +478,7 @@ describe('create()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -444,6 +527,18 @@ describe('create()', () => {
       created: true,
       result: { id: '123', api_key: 'abc' },
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -457,6 +552,7 @@ describe('create()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1152,6 +1248,18 @@ describe('update()', () => {
       references: [],
       version: '123',
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -1165,6 +1273,7 @@ describe('update()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1193,7 +1302,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1205,6 +1313,7 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": "test",
             "group": "default",
             "id": "1",
             "params": Object {
@@ -1286,6 +1395,18 @@ describe('update()', () => {
       references: [],
       version: '123',
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       created: true,
       result: { id: '123', api_key: 'abc' },
@@ -1303,6 +1424,7 @@ describe('update()', () => {
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1332,7 +1454,6 @@ describe('update()', () => {
           {
             group: 'default',
             id: '1',
-            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1344,6 +1465,7 @@ describe('update()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": "test",
             "group": "default",
             "id": "1",
             "params": Object {
@@ -1442,7 +1564,6 @@ describe('update()', () => {
             {
               group: 'default',
               id: '1',
-              actionTypeId: 'test',
               params: {
                 foo: true,
               },

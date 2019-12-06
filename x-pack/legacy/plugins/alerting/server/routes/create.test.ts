@@ -22,7 +22,6 @@ const mockedAlert = {
     {
       group: 'default',
       id: '2',
-      actionTypeId: 'test',
       params: {
         foo: true,
       },
@@ -42,6 +41,12 @@ test('creates an alert with proper parameters', async () => {
   alertsClient.create.mockResolvedValueOnce({
     ...mockedAlert,
     id: '123',
+    actions: [
+      {
+        ...mockedAlert.actions[0],
+        actionTypeId: 'test',
+      },
+    ],
   });
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
@@ -77,37 +82,6 @@ test('creates an alert with proper parameters', async () => {
         "data": Object {
           "actions": Array [
             Object {
-              "actionTypeId": "test",
-              "group": "default",
-              "id": "2",
-              "params": Object {
-                "foo": true,
-              },
-            },
-          ],
-          "alertTypeId": "1",
-          "enabled": true,
-          "interval": "10s",
-          "name": "abc",
-          "params": Object {
-            "bar": true,
-          },
-          "tags": Array [
-            "foo",
-          ],
-          "throttle": null,
-        },
-      },
-    ]
-  `);
-  expect(alertsClient.create).toHaveBeenCalledTimes(1);
-  expect(alertsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
-    Array [
-      Object {
-        "data": Object {
-          "actions": Array [
-            Object {
-              "actionTypeId": "test",
               "group": "default",
               "id": "2",
               "params": Object {

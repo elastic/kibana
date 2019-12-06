@@ -48,7 +48,6 @@ test('calls the update function with proper parameters', async () => {
         {
           group: 'default',
           id: '2',
-          actionTypeId: 'test',
           params: {
             baz: true,
           },
@@ -69,7 +68,6 @@ test('calls the update function with proper parameters', async () => {
         "data": Object {
           "actions": Array [
             Object {
-              "actionTypeId": "test",
               "group": "default",
               "id": "2",
               "params": Object {

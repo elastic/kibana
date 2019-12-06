@@ -174,7 +174,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   {
                     group: 'default',
                     id: createdAction.id,
-                    actionTypeId: 'test.rate-limit',
                     params: {
                       reference,
                       index: ES_TEST_INDEX_NAME,
@@ -365,7 +364,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   {
                     group: 'default',
                     id: createdAction.id,
-                    actionTypeId: 'test.authorization',
                     params: {
                       callClusterAuthorizationIndex: authorizationIndex,
                       savedObjectsClientType: 'dashboard',
@@ -502,7 +500,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 {
                   group: 'default',
                   id: indexRecordActionId,
-                  actionTypeId: 'test.index-record',
                   params: {
                     index: ES_TEST_INDEX_NAME,
                     reference,
@@ -512,7 +509,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 {
                   group: 'other',
                   id: indexRecordActionId,
-                  actionTypeId: 'test.index-record',
                   params: {
                     index: ES_TEST_INDEX_NAME,
                     reference,
@@ -536,6 +532,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
               // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               await alertUtils.disable(response.body.id);

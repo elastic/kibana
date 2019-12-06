@@ -18,7 +18,6 @@ interface ScheduleRequest extends Hapi.Request {
     actions: Array<{
       group: string;
       id: string;
-      actionTypeId: string;
       params: Record<string, any>;
     }>;
     params: Record<string, any>;
@@ -51,7 +50,6 @@ export const createAlertRoute = {
               Joi.object().keys({
                 group: Joi.string().required(),
                 id: Joi.string().required(),
-                actionTypeId: Joi.string().required(),
                 params: Joi.object().required(),
               })
             )

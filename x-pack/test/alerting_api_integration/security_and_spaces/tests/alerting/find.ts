@@ -99,7 +99,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                   {
                     id: createdAction.id,
                     group: 'default',
-                    actionTypeId: 'test.noop',
                     params: {},
                   },
                 ],
