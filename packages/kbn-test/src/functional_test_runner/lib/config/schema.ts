@@ -258,7 +258,12 @@ export const schema = Joi.object()
     security: Joi.object()
       .keys({
         roles: Joi.object().default(),
-        defaultRoles: Joi.array().items(Joi.string()),
+        defaultRoles: Joi.array()
+          .items(Joi.string())
+          .when('$primary', {
+            is: true,
+            then: Joi.array().min(1),
+          }),
       })
       .default(),
   })
