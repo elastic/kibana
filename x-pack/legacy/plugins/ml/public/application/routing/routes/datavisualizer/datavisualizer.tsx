@@ -29,7 +29,7 @@ export const selectorRoute: MlRoute = {
 };
 
 const PageWrapper: FC<PageProps> = ({ location, config }) => {
-  const { context } = useResolver('', undefined, config, {
+  const { context } = useResolver(undefined, undefined, config, {
     checkBasicLicense,
     checkFindFileStructurePrivilege,
   });
