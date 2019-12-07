@@ -97,9 +97,12 @@ class AppComponent extends Component {
   }
 
   registerRouter() {
-    const { history } = this.props;
+    const { history, location } = this.props;
     routing.reactRouter = {
       history,
+      route: {
+        location,
+      },
     };
   }
 
