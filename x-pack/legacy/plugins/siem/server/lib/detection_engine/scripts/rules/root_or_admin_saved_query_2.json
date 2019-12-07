@@ -8,7 +8,7 @@
   "type": "saved_query",
   "from": "now-6m",
   "to": "now",
-  "saved_id": "test-saveid-2",
+  "saved_id": "test-saved-id-2",
   "query": "user.name: root or user.name: admin",
   "language": "kuery"
 }

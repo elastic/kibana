@@ -28,5 +28,5 @@ If the saved_id does not exist and you do not provide a query and/or filter then
 in your kibana console logging:
 
 ```sh
-server log [11:48:33.331] [error][task_manager] Task alerting:siem.signals "fedc2390-1858-11ea-9184-15f04d7099dc" failed: Error: Saved object [query/test-saveid] not found
+server log [11:48:33.331] [error][task_manager] Task alerting:siem.signals "fedc2390-1858-11ea-9184-15f04d7099dc" failed: Error: Saved object [query/test-saved-id] not found
 ```

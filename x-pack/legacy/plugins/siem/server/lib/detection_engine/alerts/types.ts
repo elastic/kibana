@@ -35,7 +35,6 @@ export interface RuleAlertParams {
   description: string;
   enabled: boolean;
   falsePositives: string[];
-  filter: Record<string, {}> | undefined | null;
   filters: PartialFilter[] | undefined | null;
   from: string;
   immutable: boolean;
@@ -55,7 +54,7 @@ export interface RuleAlertParams {
   tags: string[];
   to: string;
   threats: ThreatParams[] | undefined | null;
-  type: 'filter' | 'query' | 'saved_query';
+  type: 'query' | 'saved_query';
 }
 
 export type RuleAlertParamsRest = Omit<

@@ -34,7 +34,6 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     description: alert.params.description,
     enabled: alert.enabled,
     false_positives: alert.params.falsePositives,
-    filter: alert.params.filter,
     filters: alert.params.filters,
     from: alert.params.from,
     id: alert.id,
