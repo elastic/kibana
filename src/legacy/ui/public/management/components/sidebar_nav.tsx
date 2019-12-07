@@ -32,7 +32,7 @@ interface Subsection {
   icon?: IconType;
 }
 interface Section extends Subsection {
-  visibleItems: IndexedArray<Subsection>;
+  items: IndexedArray<Subsection>;
 }
 
 const sectionVisible = (section: Subsection) => !section.disabled && section.visible;
@@ -48,9 +48,9 @@ const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Subsec
 export const sideNavItems = (sections: Section[], selectedId: string) =>
   sections
     .filter(sectionVisible)
-    .filter(section => section.visibleItems.filter(sectionVisible).length)
+    .filter(section => section.items.filter(sectionVisible).length)
     .map(section => ({
-      items: section.visibleItems.filter(sectionVisible).map(sectionToNav(selectedId)),
+      items: section.items.filter(sectionVisible).map(sectionToNav(selectedId)),
       ...sectionToNav(selectedId)(section),
     }));
 
