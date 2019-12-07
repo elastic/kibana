@@ -20,3 +20,17 @@ export const TECHNIQUES = i18n.translate(
 export const ADD_MITRE_ATTACK = i18n.translate('xpack.siem.detectionEngine.mitreAttack.addTitle', {
   defaultMessage: 'Add MITRE ATT&CK threat',
 });
+
+export const TECHNIQUES_PLACEHOLDER = i18n.translate(
+  'xpack.siem.detectionEngine.mitreAttack.techniquesPlaceHolderDescription',
+  {
+    defaultMessage: 'Select techniques ...',
+  }
+);
+
+export const TACTIC_PLACEHOLDER = i18n.translate(
+  'xpack.siem.detectionEngine.mitreAttack.techniquesPlaceHolderDescription',
+  {
+    defaultMessage: 'Select tactic ...',
+  }
+);

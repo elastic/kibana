@@ -74,14 +74,16 @@ const formatAboutStepData = (aboutStepData: AboutStepRule): AboutStepRuleJson =>
     false_positives: falsePositives.filter(item => !isEmpty(item)),
     references: references.filter(item => !isEmpty(item)),
     risk_score: riskScore,
-    threats: threats.map(threat => ({
-      ...threat,
-      framework: 'MITRE ATT&CK',
-      techniques: threat.techniques.map(technique => {
-        const { id, name, reference } = technique;
-        return { id, name, reference };
-      }),
-    })),
+    threats: threats
+      .filter(threat => threat.tactic.name !== 'none')
+      .map(threat => ({
+        ...threat,
+        framework: 'MITRE ATT&CK',
+        techniques: threat.techniques.map(technique => {
+          const { id, name, reference } = technique;
+          return { id, name, reference };
+        }),
+      })),
     ...rest,
   };
 };

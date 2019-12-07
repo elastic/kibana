@@ -26,9 +26,8 @@ import * as I18n from './translations';
 import { IMitreEnterpriseAttack } from '../../types';
 
 const MyEuiFormControlLayout = styled(EuiFormControlLayout)`
-  .euiComboBox__inputWrap {
-    height: 32px !important;
-    overflow-y: scroll;
+  &.euiFormControlLayout--compressed {
+    height: fit-content !important;
   }
 `;
 interface AddItemProps {
@@ -51,11 +50,13 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
 
   const addItem = useCallback(() => {
     const values = field.value as IMitreEnterpriseAttack[];
-    const { id, name, reference } = tacticsOptions[0];
     if (!isEmpty(values[values.length - 1])) {
-      field.setValue([...values, { tactic: { id, name, reference }, techniques: [] }]);
+      field.setValue([
+        ...values,
+        { tactic: { id: 'none', name: 'none', reference: 'none' }, techniques: [] },
+      ]);
     } else {
-      field.setValue([{ tactic: { id, name, reference }, techniques: [] }]);
+      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, techniques: [] }]);
     }
   }, [field]);
 
@@ -72,6 +73,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
         {
           ...values[index],
           tactic: { id, reference, name },
+          techniques: [],
         },
         ...values.slice(index + 1),
       ]);
@@ -95,7 +97,10 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
 
   const values = field.value as IMitreEnterpriseAttack[];
   const selectTacticOptions = useMemo(
-    () => tacticsOptions.map(t => ({ text: t.text, value: t.value })),
+    () => [
+      { text: I18n.TACTIC_PLACEHOLDER, value: 'none' },
+      ...tacticsOptions.map(t => ({ text: t.text, value: t.value })),
+    ],
     [tacticsOptions]
   );
   return (
@@ -133,7 +138,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
                   <MyEuiFormControlLayout compressed fullWidth prepend={I18n.TECHNIQUES}>
                     <EuiComboBox
                       compressed
-                      placeholder="Select from a list of options"
+                      placeholder={I18n.TECHNIQUES_PLACEHOLDER}
                       options={techniquesOptions.filter(t =>
                         t.tactics.includes(kebabCase(item.tactic.name))
                       )}

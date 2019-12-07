@@ -23,6 +23,7 @@ export interface RuleStepProps {
   setStepData: (step: RuleStep, data: unknown, isValid: boolean) => void;
   isEditView: boolean;
   isLoading: boolean;
+  resizeParentContainer?: (height: number) => void;
 }
 
 interface StepRuleData {

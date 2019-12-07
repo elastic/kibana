@@ -163,13 +163,13 @@ const getDescriptionItem = (
           title: label,
           description: (
             <ThreatsEuiFlexGroup direction="column">
-              {threats.map(threat => {
+              {threats.map((threat, index) => {
                 const tactic = tacticsOptions.find(t => t.name === threat.tactic.name);
                 return (
-                  <EuiFlexItem>
+                  <EuiFlexItem key={`${threat.tactic.name}-${index}`}>
                     <EuiText grow={false} size="s">
                       <h5>
-                        <EuiLink href={threat.tactic.reference}>
+                        <EuiLink href={threat.tactic.reference} target="_blank">
                           {tactic != null ? tactic.text : ''}
                         </EuiLink>
                       </h5>
@@ -183,6 +183,7 @@ const getDescriptionItem = (
                           return {
                             label: myTechnique != null ? myTechnique.label : '',
                             href: technique.reference,
+                            target: '_blank',
                           };
                         })}
                       />

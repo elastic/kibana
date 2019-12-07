@@ -126,7 +126,7 @@ export const schema: FormSchema = {
           const [{ value, path }] = args;
           let hasError = false;
           (value as IMitreEnterpriseAttack[]).forEach(v => {
-            if (isEmpty(v.tactic.name) || isEmpty(v.techniques)) {
+            if (isEmpty(v.tactic.name) || (v.tactic.name !== 'none' && isEmpty(v.techniques))) {
               hasError = true;
             }
           });
