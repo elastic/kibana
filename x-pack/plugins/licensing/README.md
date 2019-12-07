@@ -67,7 +67,7 @@ class MyPlugin {
     deps.licensing.license$.subscribe(license => {
       const { state, message } = license.check('myPlugin', 'gold')
       const hasRequiredLicense = state === LICENSE_CHECK_STATE.Valid;
-      if(hasRequiredLicense && license.getFeature('name').isAvailable){
+      if (hasRequiredLicense && license.getFeature('name').isAvailable) {
         // enable some server side logic 
       } else {
         log(message);
