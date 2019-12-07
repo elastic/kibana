@@ -1,4 +1,4 @@
 {
-  "rule_id": "rule-id-only-rule-id",
+  "rule_id": "query-rule-id",
   "name": "Changes only the name to this new value"
 }

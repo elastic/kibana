@@ -1,15 +1,15 @@
 {
-  "rule_id": "rule-7",
-  "risk_score": 7,
-  "description": "Detecting root and admin users",
+  "name": "Query Filter With UI Meta Data",
+  "description": "A Query Filter that has lots of UI meta data state in the filters which goes back by 24 hours",
+  "rule_id": "query-filter-ui-kuery",
+  "risk_score": 6,
   "interval": "5m",
-  "name": "Detect Root/Admin Users",
   "severity": "high",
   "type": "query",
   "from": "now-24h",
   "to": "now",
   "query": "user.name: root or user.name: admin",
-  "language": "lucene",
+  "language": "kuery",
   "filters": [
     {
       "$state": {

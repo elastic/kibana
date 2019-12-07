@@ -206,7 +206,9 @@ export const singleBulkCreate = async ({
     body: bulkBody,
   });
   const time2 = performance.now();
-  logger.debug(`individual bulk process time took: ${time2 - time1} milliseconds`);
+  logger.debug(
+    `individual bulk process time took: ${Number(time2 - time1).toFixed(2)} milliseconds`
+  );
   logger.debug(`took property says bulk took: ${firstResult.took} milliseconds`);
   if (firstResult.errors) {
     // go through the response status errors and see what

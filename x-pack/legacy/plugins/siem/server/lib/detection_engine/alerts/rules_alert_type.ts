@@ -116,7 +116,7 @@ export const rulesAlertType = ({
               noReIndexResult.hits.total.value
             } signals from the indexes of "[${inputIndex.join(
               ', '
-            )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index ${outputIndex}`
+            )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
           );
         }
 

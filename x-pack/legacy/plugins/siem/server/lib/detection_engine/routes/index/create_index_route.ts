@@ -37,7 +37,7 @@ export const createCreateIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
         const callWithRequest = callWithRequestFactory(request);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (indexExists) {
-          return new Boom(`index ${index} already exists`, { statusCode: 409 });
+          return new Boom(`index: "${index}" already exists`, { statusCode: 409 });
         } else {
           const policyExists = await getPolicyExists(callWithRequest, index);
           if (!policyExists) {

@@ -20,7 +20,8 @@
       }
     }
   ],
-  "immutable": "true",
+  "enabled": false,
+  "immutable": true,
   "index": ["auditbeat-*", "filebeat-*"],
   "interval": "5m",
   "query": "user.name: root or user.name: admin",
