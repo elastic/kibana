@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 import { fatalError } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -34,18 +34,16 @@ import {
   FollowerIndexEdit,
 } from './sections';
 
-export class App extends Component {
-  static contextTypes = {
-    router: PropTypes.shape({
-      history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired
-      }).isRequired
-    }).isRequired
-  }
+class AppComponent extends Component {
+  static propTypes = {
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+      createHref: PropTypes.func.isRequired,
+    }).isRequired,
+  };
 
-  constructor(...args) {
-    super(...args);
+  constructor(props) {
+    super(props);
     this.registerRouter();
 
     this.state = {
@@ -99,8 +97,10 @@ export class App extends Component {
   }
 
   registerRouter() {
-    const { router } = this.context;
-    routing.reactRouter = router;
+    const { history } = this.props;
+    routing.reactRouter = {
+      history,
+    };
   }
 
   render() {
@@ -196,3 +196,5 @@ export class App extends Component {
     );
   }
 }
+
+export const App = withRouter(AppComponent);
