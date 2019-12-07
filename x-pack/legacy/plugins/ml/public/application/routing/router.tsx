@@ -101,6 +101,9 @@ export const useResolver = (
         setResults(tempResults);
 
         if (indexPatternId !== undefined || savedSearchId !== undefined) {
+          // note, currently we're using our own kibana context that requires a current index pattern to be set
+          // this means, if the page uses this context, useResolve must be passed a string for the index pattern id
+          // and loadIndexPatterns must be part of the resolvers.
           const { indexPattern, savedSearch } =
             savedSearchId !== undefined
               ? await getIndexPatternAndSavedSearch(savedSearchId)
