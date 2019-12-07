@@ -14,6 +14,7 @@ export async function getReportingApiConfig({ readConfigFile }) {
 
   return {
     servers: apiConfig.get('servers'),
+    security: apiConfig.get('security'),
     services: {
       ...apiConfig.get('services'),
       reportingAPI: ReportingAPIProvider,
