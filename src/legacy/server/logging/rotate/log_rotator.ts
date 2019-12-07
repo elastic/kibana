@@ -339,15 +339,21 @@ export class LogRotator {
 
   _sendReloadLogConfigSignal() {
     if (isMaster) {
-      // @ts-ignore
-      process.emit('SIGHUP');
+      (process as NodeJS.EventEmitter).emit('SIGHUP');
       return;
     }
 
     // Send a special message to the cluster manager
     // so it can forward it correctly
     // It will only run when we are under cluster mode (not under a production environment)
-    // @ts-ignore
+    if (!process.send) {
+      this.log(
+        ['error', 'logging:rotate'],
+        'For some unknown reason process.send is not defined, the rotation was not successful'
+      );
+      return;
+    }
+
     process.send(['RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER']);
   }
 }
