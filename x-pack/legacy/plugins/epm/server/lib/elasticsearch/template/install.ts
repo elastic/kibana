@@ -23,24 +23,23 @@ const isFields = (path: string) => {
  * The template is currently loaded with the pkgey-package-dataset
  */
 export async function installTemplates(pkg: RegistryPackage, callCluster: CallESAsCurrentUser) {
-  const promises: Array<Promise<AssetReference>> = [];
+  if (!pkg.datasets) return;
 
-  for (const dataset of pkg.datasets) {
+  const promises = pkg.datasets.map(async dataset => {
     // Fetch all assset entries for this dataset
     const assetEntries = await getAssetsData(pkg, isFields, dataset.name);
 
     // Merge all the fields of a dataset together and create an Elasticsearch index template
-    let datasetFields: Field[] = [];
+    let fields: Field[] = [];
     for (const entry of assetEntries) {
       // Make sure it is defined as it is optional. Should never happen.
       if (entry.buffer) {
-        datasetFields = safeLoad(entry.buffer.toString());
+        fields = safeLoad(entry.buffer.toString());
       }
     }
 
-    const promise = installTemplate({ callCluster, fields: datasetFields, pkg, dataset });
-    promises.push(promise);
-  }
+    return installTemplate({ callCluster, fields, pkg, dataset });
+  });
 
   return Promise.all(promises);
 }

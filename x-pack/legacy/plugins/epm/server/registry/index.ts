@@ -56,8 +56,6 @@ export async function getArchiveInfo(
   pkgkey: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
-  // assume .tar.gz for now. add support for .zip if/when we need it
-  const key = `${pkgkey}.tar.gz`;
   const paths: string[] = [];
   const onEntry = (entry: ArchiveEntry) => {
     const { path, buffer } = entry;
@@ -69,7 +67,7 @@ export async function getArchiveInfo(
     }
   };
 
-  await extract(key, filter, onEntry);
+  await extract(pkgkey, filter, onEntry);
 
   return paths;
 }
@@ -105,19 +103,21 @@ export function pathParts(path: string): AssetParts {
 }
 
 async function extract(
-  key: string,
+  pkgkey: string,
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry: (entry: ArchiveEntry) => void
 ) {
-  const archiveBuffer = await getOrFetchArchiveBuffer(key);
+  const archiveBuffer = await getOrFetchArchiveBuffer(pkgkey);
 
   return untarBuffer(archiveBuffer, filter, onEntry);
 }
 
-async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
+async function getOrFetchArchiveBuffer(pkgkey: string): Promise<Buffer> {
+  // assume .tar.gz for now. add support for .zip if/when we need it
+  const key = `${pkgkey}.tar.gz`;
   let buffer = cacheGet(key);
   if (!buffer) {
-    buffer = await fetchArchiveBuffer(key);
+    buffer = await fetchArchiveBuffer(pkgkey);
     cacheSet(key, buffer);
   }
 
@@ -130,14 +130,9 @@ async function getOrFetchArchiveBuffer(key: string): Promise<Buffer> {
 
 async function fetchArchiveBuffer(key: string): Promise<Buffer> {
   const { registryUrl } = epmConfigStore.getConfig();
-  // TODO: Should this use the "download" key from the package info? Or is this the foundation
-  // to get started so should never change?
+  const { download: archivePath } = await fetchInfo(key);
 
-  // Extract the package name from the key, removes version and .tar.gz part
-  const dashIndex = key.lastIndexOf('-');
-  const packageName = key.substring(0, dashIndex);
-
-  return getResponseStream(`${registryUrl}/epr/${packageName}/${key}`).then(streamToBuffer);
+  return getResponseStream(`${registryUrl}${archivePath}`).then(streamToBuffer);
 }
 
 export function getAsset(key: string) {

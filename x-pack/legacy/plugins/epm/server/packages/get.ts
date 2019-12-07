@@ -66,7 +66,7 @@ export async function getPackageInfo(options: {
   const updated = {
     ...item,
     title: item.title || nameAsTitle(item.name),
-    assets: Registry.groupPathsByService(item.assets),
+    assets: Registry.groupPathsByService(item?.assets || []),
   };
   return createInstallableFrom(updated, savedObject);
 }
