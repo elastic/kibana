@@ -88,7 +88,8 @@
     "**/image-diff/gm/debug": "^2.6.9",
     "**/react-dom": "^16.12.0",
     "**/react-test-renderer": "^16.12.0",
-    "**/deepmerge": "^4.2.2"
+    "**/deepmerge": "^4.2.2",
+    "**/serialize-javascript": "^2.1.1"
   },
   "workspaces": {
     "packages": [
@@ -165,6 +166,7 @@
     "encode-uri-query": "1.0.1",
     "execa": "^3.2.0",
     "expiry-js": "0.1.7",
+    "fast-deep-equal": "^3.1.1",
     "file-loader": "4.2.0",
     "font-awesome": "4.7.0",
     "getos": "^3.1.0",
@@ -228,6 +230,7 @@
     "react-resize-detector": "^4.2.0",
     "react-router-dom": "^4.3.1",
     "react-sizeme": "^2.3.6",
+    "react-use": "^13.10.2",
     "reactcss": "1.2.3",
     "redux": "4.0.0",
     "redux-actions": "2.2.1",

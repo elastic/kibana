@@ -6,8 +6,11 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { RuleAlertParamsRest, RuleAlertType } from '../../alerts/types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { RuleAlertParamsRest, RuleAlertType, SignalsRestParams } from '../../alerts/types';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+} from '../../../../../common/constants';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
@@ -33,6 +36,20 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
       techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
+});
+
+export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams> => ({
+  signal_ids: ['somefakeid1', 'somefakeid2'],
+  status: 'closed',
+});
+
+export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsRestParams> => ({
+  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  status: 'closed',
+});
+
+export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsRestParams> => ({
+  status: 'closed',
 });
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
@@ -96,6 +113,22 @@ export const getCreateRequest = (): ServerInjectOptions => ({
   url: DETECTION_ENGINE_RULES_URL,
   payload: {
     ...typicalPayload(),
+  },
+});
+
+export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByIdsPayload(),
+  },
+});
+
+export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByQueryPayload(),
   },
 });
 

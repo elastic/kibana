@@ -31,6 +31,7 @@ const risk_score = Joi.number()
   .greater(-1)
   .less(101);
 const severity = Joi.string();
+const status = Joi.string().valid('open', 'closed');
 const to = Joi.string();
 const type = Joi.string().valid('query', 'saved_query');
 const queryFilter = Joi.string();
@@ -43,6 +44,8 @@ const per_page = Joi.number()
 const page = Joi.number()
   .min(1)
   .default(1);
+const signal_ids = Joi.array().items(Joi.string());
+const signal_status_query = Joi.object();
 const sort_field = Joi.string();
 const sort_order = Joi.string().valid('asc', 'desc');
 const tags = Joi.array().items(Joi.string());
@@ -151,3 +154,9 @@ export const findRulesSchema = Joi.object({
   }),
   sort_order,
 });
+
+export const setSignalsStatusSchema = Joi.object({
+  signal_ids,
+  query: signal_status_query,
+  status: status.required(),
+}).xor('signal_ids', 'query');
