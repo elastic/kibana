@@ -262,7 +262,9 @@ export class LogRotator {
     await this._deleteLastRotatedFile(rotatedFiles);
 
     // rename all files to correct index + 1
-    // and normalize
+    // and normalize numbering if by some reason
+    // (for example log file deletion) that numbering
+    // was interrupted
     await this._renameRotatedFilesByOne(rotatedFiles);
 
     // rename current log into 0
