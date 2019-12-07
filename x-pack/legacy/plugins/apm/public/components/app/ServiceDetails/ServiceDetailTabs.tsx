@@ -32,7 +32,7 @@ export function ServiceDetailTabs({ tab }: Props) {
   const { serviceName } = urlParams;
   const { agentName } = useAgentName();
   const { apm } = usePlugins();
-  const { apmServiceMapEnabled } = apm.config;
+  const { serviceMapEnabled } = apm.config;
 
   if (!serviceName) {
     // this never happens, urlParams type is not accurate enough
@@ -107,7 +107,7 @@ export function ServiceDetailTabs({ tab }: Props) {
     name: 'service-map'
   };
 
-  if (apmServiceMapEnabled) {
+  if (serviceMapEnabled) {
     tabs.push(serviceMapTab);
   }
 
