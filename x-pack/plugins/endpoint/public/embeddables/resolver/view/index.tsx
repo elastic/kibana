@@ -54,7 +54,7 @@ const Diagnostic = styled(
           payload: [elementBoundingClientRect.width, elementBoundingClientRect.height],
         });
       }
-    }, [elementBoundingClientRect, dispatch]);
+    }, [dispatch, elementBoundingClientRect]);
 
     const handleMouseDown = useCallback(
       (event: React.MouseEvent<HTMLDivElement>) => {
@@ -111,7 +111,7 @@ const Diagnostic = styled(
           event.preventDefault();
           dispatch({
             type: 'userZoomed',
-            payload: event.deltaY / elementBoundingClientRect.height,
+            payload: (-2 * event.deltaY) / elementBoundingClientRect.height,
           });
         }
       },
