@@ -46,11 +46,6 @@ export async function setupLoggingRotate(server: Server, config: KibanaConfig) {
     return;
   }
 
-  server.log(
-    ['warning', 'logging:rotate'],
-    'Log rotation is enabled but logging.dest is configured for stdout. Set logging.dest to a file for this setting to take effect.'
-  );
-
   // Enable Logging Rotate Service
   // We need the master process and it can
   // try to setupLoggingRotate more than once,

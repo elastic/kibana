@@ -136,9 +136,6 @@ export class LogRotator {
         }, 0);
       });
 
-      // fs.writeFileSync(tempFile, 'test');
-      // await writeFileAsync(tempFile, 'test');
-
       // wait for the first observable result and consider it as the result
       // for our use polling test
       const usePollingTestResult = await usePollingTest$.pipe(first()).toPromise();
@@ -152,19 +149,6 @@ export class LogRotator {
     }
   }
 
-  _buildWatchCfg(usePolling: boolean = false) {
-    return {
-      ignoreInitial: true,
-      awaitWriteFinish: false,
-      useFsEvents: false,
-      usePolling,
-      interval: this.pollingInterval,
-      binaryInterval: this.pollingInterval,
-      alwaysStat: true,
-      atomic: false,
-    };
-  }
-
   async _startLogFileSizeMonitor() {
     this.usePolling = await this._shouldUsePolling();
 
@@ -175,12 +159,16 @@ export class LogRotator {
       );
     }
 
-    this.log(
-      ['warning', 'logging:rotate'],
-      'The current environment does not support `fs.watch`. Falling back to polling using `fs.watchFile`'
-    );
-
-    this.stalker = chokidar.watch(this.logFilePath, this._buildWatchCfg(this.usePolling));
+    this.stalker = chokidar.watch(this.logFilePath, {
+      ignoreInitial: true,
+      awaitWriteFinish: false,
+      useFsEvents: false,
+      usePolling: this.usePolling,
+      interval: this.pollingInterval,
+      binaryInterval: this.pollingInterval,
+      alwaysStat: true,
+      atomic: false,
+    });
     this.stalker.on('change', this._logFileSizeMonitorHandler);
   }
 
