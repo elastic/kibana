@@ -29,6 +29,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
               </a>,
               "defaultIndex": <a
                 href="/test/base/path/app/kibana#/management/kibana/settings"
+                rel="noopener noreferrer"
                 target="_blank"
               >
                 siem:defaultIndex
