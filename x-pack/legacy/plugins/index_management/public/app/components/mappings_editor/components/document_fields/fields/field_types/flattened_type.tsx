@@ -62,13 +62,13 @@ export const FlattenedType = React.memo(({ field }: Props) => {
             title={
               <h3>
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
-                  defaultMessage: 'Set depth limit',
+                  defaultMessage: 'Customize depth limit',
                 })}
               </h3>
             }
             description={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitDescription', {
               defaultMessage:
-                'The maximum allowed depth of the flattened object field, in terms of nested inner objects.',
+                'The maximum allowed depth of the flattened object field, in terms of nested inner objects. Defaults to 20.',
             })}
           >
             <UseField path="depth_limit" config={getFieldConfig('depth_limit')} component={Field} />
