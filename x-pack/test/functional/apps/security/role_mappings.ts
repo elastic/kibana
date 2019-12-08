@@ -7,13 +7,9 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// see https://w3c.github.io/webdriver/webdriver-spec.html#keyboard-actions
-const BKSP_KEY = '\uE003';
-
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'roleMappings']);
   const security = getService('security');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const aceEditor = getService('aceEditor');
@@ -36,13 +32,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('roleMappingsAdvancedRuleEditorButton');
 
-      const container = await testSubjects.find('codeEditorContainer');
-      await container.click();
-
-      const input = await find.activeElement();
-      await input.type([BKSP_KEY, BKSP_KEY], { charByChar: true }); // delete current content
-
-      input.type(
+      await aceEditor.setValue(
+        'roleMappingsAdvancedEditor',
         JSON.stringify({
           all: [
             {
@@ -72,11 +63,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               },
             },
           ],
-        }),
-        { charByChar: false }
+        })
       );
 
-      await testSubjects.click('saveRoleMappingButon');
+      await testSubjects.click('roleMappingsVisualRuleEditorButton');
+
+      await testSubjects.click('saveRoleMappingButton');
 
       await testSubjects.existOrFail('savedRoleMappingSuccessToast');
     });
@@ -129,13 +121,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('displays a table of all role mappings', async () => {
-        const rows = await testSubjects.findAll('rowMappingRow');
+        const rows = await testSubjects.findAll('roleMappingRow');
         expect(rows.length).to.eql(mappings.length);
         for (let i = 0; i < rows.length; i++) {
           const row = rows[i];
           const mapping = mappings[i];
 
-          const name = await testSubjects.findDescendant('roleMappingName', row);
+          const name = await (
+            await testSubjects.findDescendant('roleMappingName', row)
+          ).getVisibleText();
+
           const enabled =
             (await (
               await testSubjects.findDescendant('roleMappingEnabled', row)

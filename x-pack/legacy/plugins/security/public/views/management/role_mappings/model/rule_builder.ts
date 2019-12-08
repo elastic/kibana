@@ -85,7 +85,7 @@ function createRuleForType(
       const values = Array.isArray(value) ? value : [value];
       values.forEach(fieldValue => {
         const valueType = typeof fieldValue;
-        if (value !== null && !['string', 'number'].includes(valueType)) {
+        if (fieldValue !== null && !['string', 'number'].includes(valueType)) {
           throw new RuleBuilderError(
             `Invalid value type for field. Expected one of null, string, or number, but found ${valueType} (${value})`,
             [...ruleTrace, `field[${field}]`]

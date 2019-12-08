@@ -40,7 +40,7 @@ import {
 interface State {
   isLoadingApp: boolean;
   isLoadingTable: boolean;
-  roleMappings: RoleMapping[];
+  roleMappings: null | RoleMapping[];
   selectedItems: RoleMapping[];
   permissionDenied: boolean;
   hasCompatibleRealms: boolean;
@@ -62,7 +62,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
     this.state = {
       isLoadingApp: true,
       isLoadingTable: false,
-      roleMappings: [],
+      roleMappings: null,
       permissionDenied: false,
       hasCompatibleRealms: true,
       selectedItems: [],
@@ -295,9 +295,10 @@ export class RoleMappingsGridPage extends Component<any, State> {
           const { roles = [], role_templates: roleTemplates = [] } = record;
           if (roleTemplates.length > 0) {
             return (
-              <span data-test-subj="rowMappingRoles">
+              <span data-test-subj="roleMappingRoles">
                 {i18n.translate('xpack.security.management.roleMappings.table.roleTemplates', {
-                  defaultMessage: '{templateCount} role templates defined',
+                  defaultMessage:
+                    '{templateCount, plural, one{# role template} other {# role templates}} defined',
                   values: {
                     templateCount: roleTemplates.length,
                   },
@@ -313,7 +314,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
               </Fragment>
             );
           });
-          return <div data-test-subj="rowMappingRoles">{roleLinks}</div>;
+          return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
         },
       },
       {
@@ -437,19 +438,15 @@ export class RoleMappingsGridPage extends Component<any, State> {
         this.setState({ isLoadingApp: false });
       }
     } catch (e) {
-      if (_.get(e, 'body.statusCode') === 403) {
-        this.setState({ permissionDenied: true, isLoadingApp: false });
-      } else {
-        toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.security.management.roleMappings.table.fetchingRoleMappingsErrorMessage',
-            {
-              defaultMessage: 'Error checking privileges: {message}',
-              values: { message: _.get(e, 'body.message', '') },
-            }
-          )
-        );
-      }
+      toastNotifications.addDanger(
+        i18n.translate(
+          'xpack.security.management.roleMappings.table.fetchingRoleMappingsErrorMessage',
+          {
+            defaultMessage: 'Error loading role mappings: {message}',
+            values: { message: _.get(e, 'body.message', '') },
+          }
+        )
+      );
     }
   }
 

@@ -102,7 +102,7 @@ export const RoleTemplateEditor = ({
       if (!canUseInlineScripts) {
         extraProps.isInvalid = true;
         extraProps.error = (
-          <EuiText size="xs" color="danger">
+          <EuiText size="xs" color="danger" data-test-subj="roleMappingInlineScriptsDisabled">
             This template cannot be used because inline scripts are disabled in Elasticsearch.
           </EuiText>
         );
@@ -134,10 +134,10 @@ export const RoleTemplateEditor = ({
 
     if (isStoredRoleTemplate(roleTemplate)) {
       const extraProps: Record<string, any> = {};
-      if (!canUseInlineScripts) {
+      if (!canUseStoredScripts) {
         extraProps.isInvalid = true;
         extraProps.error = (
-          <EuiText size="xs" color="danger">
+          <EuiText size="xs" color="danger" data-test-subj="roleMappingStoredScriptsDisabled">
             This template cannot be used because stored scripts are disabled in Elasticsearch.
           </EuiText>
         );

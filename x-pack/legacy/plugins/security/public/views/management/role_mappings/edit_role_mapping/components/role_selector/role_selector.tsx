@@ -30,7 +30,7 @@ export class RoleSelector extends React.Component<Props, State> {
     this.state = { roles: [] };
   }
 
-  public async componentWillMount() {
+  public async componentDidMount() {
     const roles = await RolesApi.getRoles();
     this.setState({ roles });
   }

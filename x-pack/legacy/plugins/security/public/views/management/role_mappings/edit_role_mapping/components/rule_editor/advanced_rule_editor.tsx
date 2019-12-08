@@ -61,11 +61,11 @@ export const AdvancedRuleEditor = (props: Props) => {
         }`
       }
       fullWidth
+      data-test-subj="roleMappingsAdvancedEditor"
     >
       <Fragment>
         <EuiCodeEditor
           aria-label={''}
-          data-test-subj="roleMappingsAdvancedEditor"
           mode={'json'}
           theme="github"
           value={rawRules}

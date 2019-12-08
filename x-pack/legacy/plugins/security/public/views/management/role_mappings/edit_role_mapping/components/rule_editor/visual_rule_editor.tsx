@@ -35,6 +35,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
       <EuiEmptyPrompt
         title={<h3>No rules defined</h3>}
         body={<div>Add a rule to control which users should be assigned roles.</div>}
+        data-test-subj="roleMappingsNoRulesDefined"
         actions={
           <AddRuleButton
             autoAdd={true}
@@ -55,7 +56,11 @@ export class VisualRuleEditor extends Component<Props, {}> {
     }
     return (
       <Fragment>
-        <EuiCallOut iconType="alert" title="Switch to advanced editor">
+        <EuiCallOut
+          iconType="alert"
+          title="Switch to advanced editor"
+          data-test-subj="roleMappingsRulesTooComplex"
+        >
           <p>
             Role mapping rules are too complex for the visual editor. Switch to the advanced editor
             to continue editing this rule.
@@ -107,7 +112,7 @@ export class VisualRuleEditor extends Component<Props, {}> {
           />
         );
       default:
-        return <div>Unsupported rule type: {rule.getType()}</div>;
+        throw new Error(`Unsupported rule type: ${rule.getType()}`);
     }
   }
 }
