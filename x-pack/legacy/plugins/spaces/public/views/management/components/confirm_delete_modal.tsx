@@ -61,6 +61,10 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
           (<strong>{space.name}</strong>)
         </span>
       );
+      const deleteText = intl.formatMessage({
+        id: 'xpack.spaces.management.confirmDeleteModal.deleteText',
+        defaultMessage: 'DELETE',
+      });
       warning = (
         <>
           <EuiSpacer />
@@ -122,7 +126,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
               <EuiFormRow
                 label={intl.formatMessage({
                   id: 'xpack.spaces.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
-                  defaultMessage: 'Please type DELETE to confirm this action.',
+                  defaultMessage: 'Please type {delete} to confirm this action.',
                 })}
                 isInvalid={!!this.state.error}
                 error={intl.formatMessage({
