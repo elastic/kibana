@@ -42,23 +42,6 @@ export const FlattenedType = React.memo(({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        {/* depth_limit */}
-        <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
-                defaultMessage: 'Set depth limit',
-              })}
-            </h3>
-          }
-          description={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitDescription', {
-            defaultMessage:
-              'The maximum allowed depth of the flattened object field, in terms of nested inner objects.',
-          })}
-        >
-          <UseField path="depth_limit" config={getFieldConfig('depth_limit')} component={Field} />
-        </EditFieldFormRow>
-
         {/* index */}
         <IndexParameter
           config={getFieldConfig('index_options_flattened')}
@@ -73,6 +56,23 @@ export const FlattenedType = React.memo(({ field }: Props) => {
         <EditFieldSection>
           {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
+
+          {/* depth_limit */}
+          <EditFieldFormRow
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
+                  defaultMessage: 'Set depth limit',
+                })}
+              </h3>
+            }
+            description={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitDescription', {
+              defaultMessage:
+                'The maximum allowed depth of the flattened object field, in terms of nested inner objects.',
+            })}
+          >
+            <UseField path="depth_limit" config={getFieldConfig('depth_limit')} component={Field} />
+          </EditFieldFormRow>
 
           {/* ignore_above */}
           <EditFieldFormRow
