@@ -17,10 +17,19 @@ import { zeekRowRenderer } from './zeek_row_renderer';
 describe('zeek_row_renderer', () => {
   let nonZeek: Ecs;
   let zeek: Ecs;
+  let root: HTMLElement;
 
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
     nonZeek = cloneDeep(mockTimelineData[0].ecs);
     zeek = cloneDeep(mockTimelineData[13].ecs);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   test('renders correctly against snapshot', () => {
@@ -53,7 +62,8 @@ describe('zeek_row_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('some children');
   });
@@ -68,7 +78,8 @@ describe('zeek_row_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toContain(
       'some children C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'

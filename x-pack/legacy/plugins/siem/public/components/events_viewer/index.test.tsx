@@ -40,6 +40,19 @@ const from = 1566943856794;
 const to = 1566857456791;
 
 describe('StatefulEventsViewer', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the events viewer', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -51,7 +64,8 @@ describe('StatefulEventsViewer', () => {
             start={from}
           />
         </MockedProvider>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     await wait();
@@ -76,7 +90,8 @@ describe('StatefulEventsViewer', () => {
             start={from}
           />
         </MockedProvider>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     await wait();
@@ -101,7 +116,8 @@ describe('StatefulEventsViewer', () => {
             start={from}
           />
         </MockedProvider>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     await wait();

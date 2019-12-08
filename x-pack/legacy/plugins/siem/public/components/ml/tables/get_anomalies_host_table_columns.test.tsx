@@ -19,6 +19,19 @@ const interval = 'days';
 const narrowDateRange = jest.fn();
 
 describe('get_anomalies_host_table_columns', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('on hosts page, we expect to get all columns', () => {
     expect(
       getAnomaliesHostTableColumnsCurated(
@@ -108,7 +121,9 @@ describe('get_anomalies_host_table_columns', () => {
       },
     };
     if (column != null && column.render != null) {
-      const wrapper = mount(<TestProviders>{column.render('', anomaly)}</TestProviders>);
+      const wrapper = mount(<TestProviders>{column.render('', anomaly)}</TestProviders>, {
+        attachTo: root,
+      });
       expect(
         wrapper
           .find(
@@ -168,7 +183,9 @@ describe('get_anomalies_host_table_columns', () => {
       },
     };
     if (column != null && column.render != null) {
-      const wrapper = mount(<TestProviders>{column.render(undefined, anomaly)}</TestProviders>);
+      const wrapper = mount(<TestProviders>{column.render(undefined, anomaly)}</TestProviders>, {
+        attachTo: root,
+      });
       expect(wrapper.text()).toEqual('');
     } else {
       expect(column).not.toBe(null);

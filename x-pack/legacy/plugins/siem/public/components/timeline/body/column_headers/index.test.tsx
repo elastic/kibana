@@ -26,6 +26,19 @@ jest.mock('../../../resize_handle/is_resizing', () => ({
 }));
 
 describe('ColumnHeaders', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     const sort: Sort = {
       columnId: 'fooColumn',
@@ -67,7 +80,8 @@ describe('ColumnHeaders', () => {
             timelineId={'test'}
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -94,7 +108,8 @@ describe('ColumnHeaders', () => {
             timelineId={'test'}
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       defaultHeaders.forEach(h => {
@@ -123,7 +138,8 @@ describe('ColumnHeaders', () => {
             timelineId={'test'}
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       defaultHeaders.forEach(h => {

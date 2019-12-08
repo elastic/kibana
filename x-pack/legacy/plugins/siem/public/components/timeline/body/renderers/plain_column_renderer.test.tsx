@@ -22,6 +22,19 @@ jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 const mockFramework = mockFrameworks.default_UTC;
 
 describe('plain_column_renderer', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     let mockDatum: TimelineNonEcsData[];
     const _id = mockTimelineData[0]._id;
@@ -65,7 +78,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('Access');
     });
@@ -81,7 +95,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('192.168.0.3');
     });
@@ -97,7 +112,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('120.6KB');
     });
@@ -113,7 +129,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('Action');
     });
@@ -129,7 +146,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         moment
@@ -150,7 +168,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{emptyColumn}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -167,7 +186,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{emptyColumn}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -184,7 +204,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('I am a log file message');
     });
@@ -201,7 +222,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -223,7 +245,8 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(

@@ -37,6 +37,18 @@ const columnHeaders: ColumnHeader[] = [
 
 describe('field_items', () => {
   const timelineId = 'test';
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
 
   describe('getFieldItems', () => {
     Object.keys(selectedCategoryFields!).forEach(fieldId => {
@@ -61,7 +73,8 @@ describe('field_items', () => {
               onCategorySelected={jest.fn()}
               timelineId={timelineId}
             />
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         expect(
@@ -95,7 +108,8 @@ describe('field_items', () => {
               onCategorySelected={jest.fn()}
               timelineId={timelineId}
             />
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         expect(
@@ -128,7 +142,8 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -160,7 +175,8 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -194,7 +210,8 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -233,7 +250,8 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -265,7 +283,8 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(

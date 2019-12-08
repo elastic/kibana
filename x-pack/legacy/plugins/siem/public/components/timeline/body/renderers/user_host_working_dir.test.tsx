@@ -4,15 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
 import { UserHostWorkingDir } from './user_host_working_dir';
 
 describe('UserHostWorkingDir', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
@@ -57,7 +69,7 @@ describe('UserHostWorkingDir', () => {
     });
 
     test('it returns userDomain if that is the only attribute defined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -69,13 +81,14 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('\\[user-domain-123]');
     });
 
     test('it returns userName if that is the only attribute defined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -87,13 +100,14 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[user-name-123]');
     });
 
     test('it returns hostName if that is the only attribute defined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -105,13 +119,14 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[host-name-123]');
     });
 
     test('it returns "in" + workingDirectory if that is the only attribute defined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -123,13 +138,14 @@ describe('UserHostWorkingDir', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('in[working-directory-123]');
     });
 
     test('it returns userName and workingDirectory', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -141,13 +157,14 @@ describe('UserHostWorkingDir', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[user-name-123]in[working-directory-123]');
     });
 
     test('it returns hostName and workingDirectory', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -159,13 +176,14 @@ describe('UserHostWorkingDir', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[host-name-123]in[working-directory-123]');
     });
 
     test('it returns userName, userDomain, hostName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -177,13 +195,14 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[user-name-123]\\[user-domain-123]@[host-name-123]');
     });
 
     test('it returns hostName and userName with the default hostNameSeparator "@", when hostNameSeparator is NOT specified as a prop', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -195,14 +214,15 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('[user-name-123]@[host-name-123]');
     });
 
     test('it returns hostName and userName with an overridden hostNameSeparator, when hostNameSeparator is specified as a prop', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -215,14 +235,15 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('[user-name-123]custom separator[host-name-123]');
     });
 
     test('it renders a draggable `user.domain` field (by default) when userDomain is provided, and userDomainField is NOT specified as a prop', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -234,14 +255,15 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="draggable-content-user.domain"]').exists()).toBe(true);
     });
 
     test('it renders a draggable with an overridden field name when userDomain is provided, and userDomainField is also specified as a prop', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -254,7 +276,8 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -263,7 +286,7 @@ describe('UserHostWorkingDir', () => {
     });
 
     test('it renders a draggable `user.name` field (by default) when userName is provided, and userNameField is NOT specified as a prop', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -275,14 +298,15 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="draggable-content-user.name"]').exists()).toBe(true);
     });
 
     test('it renders a draggable with an overridden field name when userName is provided, and userNameField is also specified as a prop', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <UserHostWorkingDir
@@ -295,7 +319,8 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(

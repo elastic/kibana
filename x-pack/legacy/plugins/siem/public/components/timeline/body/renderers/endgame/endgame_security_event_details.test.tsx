@@ -10,7 +10,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../../mock';
 import { mockBrowserFields } from '../../../../../../public/containers/source/mock';
@@ -24,8 +24,21 @@ import {
 import { EndgameSecurityEventDetails } from './endgame_security_event_details';
 
 describe('EndgameSecurityEventDetails', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the expected text given an Endgame Security user_logon event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
           browserFields={mockBrowserFields}
@@ -33,7 +46,8 @@ describe('EndgameSecurityEventDetails', () => {
           data={mockEndgameUserLogon}
           timelineId="timeline-id-test"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'SYSTEM\\NT AUTHORITY@HD-v1s-d2118419successfully logged inusing logon type5 - Service(target logon ID0x3e7)viaC:\\Windows\\System32\\services.exe(432)as requested by subjectWIN-Q3DOP1UKA81$(subject logon ID0x3e7)4624'
@@ -41,7 +55,7 @@ describe('EndgameSecurityEventDetails', () => {
   });
 
   test('it renders the expected text given an Endgame Security admin_logon event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
           browserFields={mockBrowserFields}
@@ -49,7 +63,8 @@ describe('EndgameSecurityEventDetails', () => {
           data={mockEndgameAdminLogon}
           timelineId="timeline-id-test"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54successfully logged inviaC:\\Windows\\System32\\lsass.exe(964)as requested by subjectSYSTEM\\NT AUTHORITY4672'
@@ -57,7 +72,7 @@ describe('EndgameSecurityEventDetails', () => {
   });
 
   test('it renders the expected text given an Endgame Security explicit_user_logon event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
           browserFields={mockBrowserFields}
@@ -65,7 +80,8 @@ describe('EndgameSecurityEventDetails', () => {
           data={mockEndgameExplicitUserLogon}
           timelineId="timeline-id-test"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentialsArun\\Anvi-AcertoHD-55b-3ec87f66viaC:\\Windows\\System32\\svchost.exe(1736)as requested by subjectANVI-ACER$\\WORKGROUP(subject logon ID0x3e7)4648'
@@ -73,7 +89,7 @@ describe('EndgameSecurityEventDetails', () => {
   });
 
   test('it renders the expected text given an Endgame Security user_logoff event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
           browserFields={mockBrowserFields}
@@ -81,7 +97,8 @@ describe('EndgameSecurityEventDetails', () => {
           data={mockEndgameUserLogoff}
           timelineId="timeline-id-test"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'Arun\\Anvi-Acer@HD-55b-3ec87f66logged offusing logon type2 - Interactive(target logon ID0x16db41e)viaC:\\Windows\\System32\\lsass.exe(964)4634'

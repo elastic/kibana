@@ -10,15 +10,28 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../../mock';
 
 import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
 
 describe('EndgameSecurityEventDetailsLine', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the expected text when all properties are provided and event action is admin_logon', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -40,7 +53,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -48,7 +62,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when all properties are provided and event action is explicit_user_logon', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -70,7 +84,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -78,7 +93,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameLogonType is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -100,7 +115,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName](target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -108,7 +124,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameSubjectDomainName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -130,7 +146,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -138,7 +155,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameSubjectLogonId is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -160,7 +177,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName][eventCode]'
@@ -168,7 +186,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when when endgameSubjectUserName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -190,7 +208,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -198,7 +217,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameTargetDomainName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -220,7 +239,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -228,7 +248,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameTargetLogonId is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -250,7 +270,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactivevia[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -258,7 +279,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when endgameTargetUserName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -280,7 +301,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials\\[endgameTargetDomainName][hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -288,7 +310,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when eventAction is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -310,7 +332,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -318,7 +341,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when eventCode is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -340,7 +363,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[winlogEventId]'
@@ -348,7 +372,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when hostName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -370,7 +394,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -378,7 +403,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processExecutable is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -400,7 +425,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -408,7 +434,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -430,7 +456,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processExecutable](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -438,7 +465,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processPid is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -460,7 +487,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName]as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -468,7 +496,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when userDomain is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -490,7 +518,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -498,7 +527,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when userName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -520,7 +549,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName={undefined}
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,\\[userDomain][hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -528,7 +558,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when winlogEventId is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -550,7 +580,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -558,7 +589,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
   });
 
   test('it renders the expected text when BOTH eventCode and winlogEventId are NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
           contextId="test"
@@ -580,7 +611,8 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])'

@@ -21,6 +21,18 @@ jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
 describe('Events', () => {
   const theme = () => ({ eui: euiDarkVars, darkMode: true });
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
@@ -138,7 +150,8 @@ describe('Events', () => {
           truncate
           value={null}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
   });
@@ -154,7 +167,8 @@ describe('Events', () => {
           truncate
           value={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
   });
@@ -170,7 +184,8 @@ describe('Events', () => {
           truncate
           value={''}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.find('[data-test-subj="message-tool-tip"]').exists()).toEqual(false);
   });
@@ -238,7 +253,8 @@ describe('Events', () => {
           fieldType="text"
           value={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.find('[data-test-subj="host-details-link"]').exists()).toEqual(false);
   });
@@ -253,7 +269,8 @@ describe('Events', () => {
           fieldType="text"
           value={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

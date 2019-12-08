@@ -23,8 +23,18 @@ jest.mock('../../containers/events/last_event_time', () => ({
 }));
 
 describe('Last Event Time Stat', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     mockUseLastEventTimeQuery.mockReset();
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   test('Loading', async () => {
@@ -36,7 +46,8 @@ describe('Last Event Time Stat', () => {
     const wrapper = mount(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.html()).toBe(
       '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
@@ -51,7 +62,8 @@ describe('Last Event Time Stat', () => {
     const wrapper = mount(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">12 minutes ago</span>');
   });
@@ -64,7 +76,8 @@ describe('Last Event Time Stat', () => {
     const wrapper = mount(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.html()).toBe('something-invalid');
@@ -78,7 +91,8 @@ describe('Last Event Time Stat', () => {
     const wrapper = mount(
       <TestProviders>
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.html()).toContain(getEmptyValue());
   });

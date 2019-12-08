@@ -22,11 +22,20 @@ jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 describe('NetworkTopNFlow Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
-
   let store = createStore(state, apolloClientObservable);
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
 
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   describe('rendering', () => {
@@ -76,7 +85,8 @@ describe('NetworkTopNFlow Table Component', () => {
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
-        </MockedProvider>
+        </MockedProvider>,
+        { attachTo: root }
       );
 
       expect(store.getState().network.page.queries!.dns.sort).toEqual({

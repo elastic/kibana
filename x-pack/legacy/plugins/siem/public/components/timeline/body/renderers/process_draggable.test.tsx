@@ -4,15 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
 import { ProcessDraggable, ProcessDraggableWithNonExistentProcess } from './process_draggable';
 
 describe('ProcessDraggable', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
@@ -60,7 +72,7 @@ describe('ProcessDraggable', () => {
     });
 
     test('it returns process name if that is all that is passed in', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -71,13 +83,14 @@ describe('ProcessDraggable', () => {
             processName="[process-name]"
             processPid={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-name]');
     });
 
     test('it returns process executable if that is all that is passed in', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -88,13 +101,14 @@ describe('ProcessDraggable', () => {
             processName={null}
             processPid={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-executable]');
     });
 
     test('it returns process pid if that is all that is passed in', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -105,13 +119,14 @@ describe('ProcessDraggable', () => {
             processName={null}
             processPid={123}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('(123)');
     });
 
     test('it returns just process name if process.pid and endgame.pid are NaN', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -122,13 +137,14 @@ describe('ProcessDraggable', () => {
             processName="[process-name]"
             processPid={NaN}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-name]');
     });
 
     test('it returns just process executable if process.pid and endgame.pid are NaN', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -139,13 +155,14 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={NaN}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-executable]');
     });
 
     test('it returns process executable if everything else is an empty string or NaN', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -156,13 +173,14 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={NaN}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-executable]');
     });
 
     test('it returns endgame.process_name if everything else is an empty string or NaN', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -173,13 +191,14 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={NaN}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[endgame-process_name]');
     });
 
     test('it returns endgame.process_name and endgame.pid if everything else is an empty string or undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -190,13 +209,14 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[endgame-process_name](456)');
     });
 
     test('it returns process pid if everything else is an empty string', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -207,13 +227,14 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={123}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('(123)');
     });
 
     test('it returns endgame.pid if everything else is an empty string', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -224,13 +245,14 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('(456)');
     });
 
     test('it returns pid and process name if everything is filled', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -241,13 +263,14 @@ describe('ProcessDraggable', () => {
             processName="[process-name]"
             processPid={123}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-name](123)');
     });
 
     test('it returns process pid and executable and if process name and endgame process name are null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -258,13 +281,14 @@ describe('ProcessDraggable', () => {
             processName={null}
             processPid={123}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-executable](123)');
     });
 
     test('it returns endgame pid and executable and if process name and endgame process name are null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -275,13 +299,14 @@ describe('ProcessDraggable', () => {
             processName={null}
             processPid={null}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-executable](456)');
     });
 
     test('it returns process pid and executable and if process name is undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -292,13 +317,14 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={123}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-executable](123)');
     });
 
     test('it returns process pid and executable if process name is an empty string', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -309,13 +335,14 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={123}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-executable](123)');
     });
 
     test('it prefers process.name when process.executable and endgame.process_name are also provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -326,13 +353,14 @@ describe('ProcessDraggable', () => {
             processName="[process-name]"
             processPid={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-name]');
     });
 
     test('it falls back to rendering process.executable when process.name is NOT provided, but process.executable and endgame.process_name are provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -343,13 +371,14 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[process-executable]');
     });
 
     test('it falls back to rendering endgame.process_name when process.name and process.executable are NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -360,13 +389,14 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[endgame-process-name]');
     });
 
     test('it prefers process.pid when endgame.pid is also provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -377,13 +407,14 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={123}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('(123)');
     });
 
     test('it falls back to rendering endgame.pid when process.pid is NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <ProcessDraggable
             contextId="context-123"
@@ -394,7 +425,8 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('(999)');
     });
@@ -402,8 +434,21 @@ describe('ProcessDraggable', () => {
 });
 
 describe('ProcessDraggableWithNonExistentProcess', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the expected text when all fields are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -414,13 +459,14 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('an unknown process');
   });
 
   test('it renders the expected text when just endgamePid is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -431,13 +477,14 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('(999)');
   });
 
   test('it renders the expected text when just endgameProcessName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -448,13 +495,14 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[endgameProcessName]');
   });
 
   test('it renders the expected text when just processExecutable is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -465,13 +513,14 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[processExecutable]');
   });
 
   test('it renders the expected text when just processName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -482,13 +531,14 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName="[processName]"
           processPid={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[processName]');
   });
 
   test('it renders the expected text when just processPid is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -499,13 +549,14 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={123}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('(123)');
   });
 
   test('it renders the expected text when all values are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessDraggableWithNonExistentProcess
           contextId="context-123"
@@ -516,7 +567,8 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName="[processName]"
           processPid={123}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[processName](123)');
   });

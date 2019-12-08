@@ -16,6 +16,19 @@ import { HeaderPage } from './index';
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('HeaderPage', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders', () => {
     const wrapper = shallow(
       <HeaderPage
@@ -36,7 +49,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -51,7 +65,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage backOptions={{ href: '#', text: 'Test link' }} title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -66,7 +81,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -81,7 +97,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage subtitle="Test subtitle" title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -96,7 +113,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -111,7 +129,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage subtitle2="Test subtitle 2" title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -126,7 +145,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -143,7 +163,8 @@ describe('HeaderPage', () => {
         <HeaderPage title="Test title">
           <p>{'Test supplement'}</p>
         </HeaderPage>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -158,7 +179,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -173,7 +195,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage border title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
 
@@ -185,7 +208,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
 
@@ -197,7 +221,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage draggableArguments={{ field: 'neat', value: 'cool' }} title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -212,7 +237,8 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(

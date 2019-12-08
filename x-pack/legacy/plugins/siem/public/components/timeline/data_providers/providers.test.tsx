@@ -18,6 +18,19 @@ import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './prov
 
 describe('Providers', () => {
   const mockTimelineContext: boolean = true;
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
@@ -52,7 +65,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={jest.fn()}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       mockDataProviders.forEach(dataProvider =>
@@ -81,7 +95,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={jest.fn()}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       wrapper
         .find('[data-test-subj="providerBadge"] svg')
@@ -109,7 +124,8 @@ describe('Providers', () => {
               />
             </DroppableWrapper>
           </TimelineContext.Provider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -137,7 +153,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={jest.fn()}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       wrapper
         .find('button[data-test-subj="providerBadge"]')
@@ -172,7 +189,8 @@ describe('Providers', () => {
               />
             </DroppableWrapper>
           </TimelineContext.Provider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       wrapper
         .find('button[data-test-subj="providerBadge"]')
@@ -216,7 +234,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={jest.fn()}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -254,7 +273,8 @@ describe('Providers', () => {
               />
             </DroppableWrapper>
           </TimelineContext.Provider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -291,7 +311,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={onToggleDataProviderExcluded}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -332,7 +353,8 @@ describe('Providers', () => {
               />
             </DroppableWrapper>
           </TimelineContext.Provider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -371,7 +393,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={jest.fn()}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       const andProviderBadges = wrapper.find(
@@ -404,7 +427,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={jest.fn()}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -441,7 +465,8 @@ describe('Providers', () => {
               />
             </DroppableWrapper>
           </TimelineContext.Provider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -476,7 +501,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={jest.fn()}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -522,7 +548,8 @@ describe('Providers', () => {
               />
             </DroppableWrapper>
           </TimelineContext.Provider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -562,7 +589,8 @@ describe('Providers', () => {
               onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
             />
           </DroppableWrapper>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -608,7 +636,8 @@ describe('Providers', () => {
               />
             </DroppableWrapper>
           </TimelineContext.Provider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper

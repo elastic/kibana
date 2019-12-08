@@ -18,10 +18,19 @@ import { suricataRowRenderer } from './suricata_row_renderer';
 describe('suricata_row_renderer', () => {
   let nonSuricata: Ecs;
   let suricata: Ecs;
+  let root: HTMLElement;
 
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     nonSuricata = cloneDeep(mockTimelineData[0].ecs);
     suricata = cloneDeep(mockTimelineData[2].ecs);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   test('renders correctly against snapshot', () => {
@@ -54,7 +63,8 @@ describe('suricata_row_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('some children');
   });
@@ -69,7 +79,8 @@ describe('suricata_row_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toContain(
       'some children 4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
@@ -87,7 +98,8 @@ describe('suricata_row_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('some children');
   });

@@ -12,6 +12,19 @@ import { TestProviders } from '../../mock';
 import { CertificateFingerprint } from '.';
 
 describe('CertificateFingerprint', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('renders the expected label', () => {
     const wrapper = mount(
       <TestProviders>
@@ -22,7 +35,8 @@ describe('CertificateFingerprint', () => {
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(
       wrapper
@@ -42,7 +56,8 @@ describe('CertificateFingerprint', () => {
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(
       wrapper
@@ -62,7 +77,8 @@ describe('CertificateFingerprint', () => {
           fieldName="tls.client_certificate.fingerprint.sha1"
           value="3f4c57934e089f02ae7511200aee2d7e7aabd272"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(

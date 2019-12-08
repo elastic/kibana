@@ -12,6 +12,19 @@ import { TestProviders } from '../../mock';
 import { Ja3Fingerprint } from '.';
 
 describe('Ja3Fingerprint', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('renders the expected label', () => {
     const wrapper = mount(
       <TestProviders>
@@ -21,7 +34,8 @@ describe('Ja3Fingerprint', () => {
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -41,7 +55,8 @@ describe('Ja3Fingerprint', () => {
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -61,7 +76,8 @@ describe('Ja3Fingerprint', () => {
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(

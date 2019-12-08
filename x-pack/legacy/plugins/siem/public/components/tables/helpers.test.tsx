@@ -18,6 +18,18 @@ import { getEmptyValue } from '../empty_value';
 
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
 
   describe('#getRowItemDraggable', () => {
     test('it returns correctly against snapshot', () => {
@@ -37,7 +49,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>, { attachTo: root });
       expect(wrapper.find('DragDropContext').text()).toBe(getEmptyValue());
     });
 
@@ -48,7 +60,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>, { attachTo: root });
       expect(
         wrapper
           .find('[data-test-subj="draggable-content-attrName"]')
@@ -64,7 +76,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>, { attachTo: root });
 
       expect(wrapper.text()).toBe(getEmptyValue());
     });
@@ -77,7 +89,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         render: renderer,
       });
-      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItem}</TestProviders>, { attachTo: root });
       expect(
         wrapper
           .find('[data-test-subj="draggable-content-attrName"]')
@@ -105,7 +117,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>, { attachTo: root });
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -115,7 +127,7 @@ describe('Table Helpers', () => {
         attrName: 'attrName',
         idPrefix: 'idPrefix',
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>, { attachTo: root });
       expect(
         wrapper
           .find('[data-test-subj="draggable-content-attrName"]')
@@ -131,7 +143,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>, { attachTo: root });
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -142,7 +154,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 0,
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>, { attachTo: root });
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -152,7 +164,7 @@ describe('Table Helpers', () => {
         attrName: 'attrName',
         idPrefix: 'idPrefix',
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>, { attachTo: root });
       expect(wrapper.text()).toBe(getEmptyValue());
     });
 
@@ -165,7 +177,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         displayCount: 2,
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>, { attachTo: root });
       expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').hostNodes().length).toBe(2);
     });
 
@@ -177,7 +189,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
         render: renderer,
       });
-      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
+      const wrapper = mount(<TestProviders>{rowItems}</TestProviders>, { attachTo: root });
       expect(
         wrapper
           .find('[data-test-subj="draggable-content-attrName"]')

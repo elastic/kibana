@@ -20,6 +20,19 @@ import {
 } from './generic_row_renderer';
 
 describe('GenericRowRenderer', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('#createGenericAuditRowRenderer', () => {
     let nonAuditd: Ecs;
     let auditd: Ecs;
@@ -74,7 +87,8 @@ describe('GenericRowRenderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{children}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('some children');
     });
@@ -89,7 +103,8 @@ describe('GenericRowRenderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{children}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toContain(
         'some children Session246alice@zeek-londonsome textwget(1490)wget www.example.comwith resultsuccessDestination93.184.216.34:80'
@@ -153,7 +168,8 @@ describe('GenericRowRenderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{children}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('some children');
     });
@@ -168,7 +184,8 @@ describe('GenericRowRenderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{children}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toContain(
         'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journal(27244)/lib/systemd/systemd-journaldwith resultsuccess'

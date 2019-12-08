@@ -18,6 +18,19 @@ import { defaultHeaders } from '../../mock/header';
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EventDetails', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('should match snapshot', () => {
       const wrapper = shallow(
@@ -53,7 +66,8 @@ describe('EventDetails', () => {
               timelineId="test"
               toggleColumn={jest.fn()}
             />
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         expect(
@@ -79,7 +93,8 @@ describe('EventDetails', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(

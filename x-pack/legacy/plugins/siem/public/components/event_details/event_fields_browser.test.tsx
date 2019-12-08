@@ -5,7 +5,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
@@ -17,10 +17,23 @@ import { defaultHeaders } from '../../mock/header';
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EventFieldsBrowser', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('column headers', () => {
     ['Field', 'Value', 'Description'].forEach(header => {
       test(`it renders the ${header} column header`, () => {
-        const wrapper = mountWithIntl(
+        const wrapper = mount(
           <TestProviders>
             <EventFieldsBrowser
               browserFields={mockBrowserFields}
@@ -31,7 +44,8 @@ describe('EventFieldsBrowser', () => {
               timelineId="test"
               toggleColumn={jest.fn()}
             />
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         expect(wrapper.find('thead').containsMatchingElement(<span>{header}</span>)).toBeTruthy();
@@ -41,7 +55,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('filter input', () => {
     test('it renders a filter input with the expected placeholder', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -52,7 +66,8 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('input[type="search"]').props().placeholder).toEqual(
@@ -67,7 +82,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders an UNchecked checkbox for a field that is not a member of columnHeaders', () => {
       const field = 'agent.id';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -78,7 +93,8 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -92,7 +108,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders an checked checkbox for a field that is a member of columnHeaders', () => {
       const field = '@timestamp';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -103,7 +119,8 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -118,7 +135,7 @@ describe('EventFieldsBrowser', () => {
       const field = '@timestamp';
       const toggleColumn = jest.fn();
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -129,7 +146,8 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={toggleColumn}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       wrapper
@@ -151,7 +169,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('field type icon', () => {
     test('it renders the expected icon type for the data provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -162,7 +180,8 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -178,7 +197,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('field', () => {
     test('it renders the field name for the data provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -189,7 +208,8 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(
         wrapper
@@ -202,7 +222,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('value', () => {
     test('it renders the expected value for the data provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -213,7 +233,8 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(
         wrapper
@@ -226,7 +247,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('description', () => {
     test('it renders the expected field description the data provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -237,7 +258,8 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(

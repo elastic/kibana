@@ -4,15 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 import { Package } from './package';
 
 describe('Package', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
@@ -54,7 +66,7 @@ describe('Package', () => {
     });
 
     test('it returns just the package name', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package
@@ -65,13 +77,14 @@ describe('Package', () => {
               packageVersion={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[package-name-123]');
     });
 
     test('it returns just the package name and package summary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package
@@ -82,13 +95,14 @@ describe('Package', () => {
               packageVersion={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[package-name-123][package-summary-123]');
     });
 
     test('it returns just the package name, package summary, package version', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <Package
@@ -99,7 +113,8 @@ describe('Package', () => {
               packageVersion="[package-version-123]"
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[package-name-123][package-version-123][package-summary-123]'

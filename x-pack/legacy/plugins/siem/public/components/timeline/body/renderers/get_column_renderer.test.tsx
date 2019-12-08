@@ -22,8 +22,18 @@ import { getValues, findItem, deleteItemIdx } from './helpers';
 describe('get_column_renderer', () => {
   let nonSuricata: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     nonSuricata = cloneDeep(mockTimelineData[0].data);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   test('renders correctly against snapshot', () => {
@@ -54,7 +64,8 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{column}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('3');
   });
@@ -74,7 +85,8 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{column}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
@@ -92,7 +104,8 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{column}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

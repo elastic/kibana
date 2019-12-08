@@ -11,6 +11,19 @@ import { EntityDraggableComponent } from './entity_draggable';
 import { TestProviders } from '../../mock/test_providers';
 
 describe('entity_draggable', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <EntityDraggableComponent
@@ -30,7 +43,8 @@ describe('entity_draggable', () => {
           entityName="entity-name"
           entityValue="entity-value"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('entity-name: "entity-value"');
   });

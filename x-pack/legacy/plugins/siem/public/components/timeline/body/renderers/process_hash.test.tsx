@@ -5,15 +5,28 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../mock';
 
 import { ProcessHash } from './process_hash';
 
 describe('ProcessHash', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('displays the processHashMd5, processHashSha1, and processHashSha256 when they are all provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -22,13 +35,14 @@ describe('ProcessHash', () => {
           processHashSha1="[processHashSha1]"
           processHashSha256="[processHashSha256]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[processHashSha256][processHashSha1][processHashMd5]');
   });
 
   test('displays nothing when processHashMd5, processHashSha1, and processHashSha256 are all undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -37,13 +51,14 @@ describe('ProcessHash', () => {
           processHashSha1={undefined}
           processHashSha256={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('');
   });
 
   test('displays just processHashMd5 when the other hashes are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -52,13 +67,14 @@ describe('ProcessHash', () => {
           processHashSha1={undefined}
           processHashSha256={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[processHashMd5]');
   });
 
   test('displays just processHashSha1 when the other hashes are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -67,13 +83,14 @@ describe('ProcessHash', () => {
           processHashSha1="[processHashSha1]"
           processHashSha256={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[processHashSha1]');
   });
 
   test('displays just processHashSha256 when the other hashes are undefined', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <ProcessHash
           contextId="test"
@@ -82,7 +99,8 @@ describe('ProcessHash', () => {
           processHashSha1={undefined}
           processHashSha256="[processHashSha256]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[processHashSha256]');
   });

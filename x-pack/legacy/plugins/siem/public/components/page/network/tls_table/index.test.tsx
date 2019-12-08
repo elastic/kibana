@@ -24,9 +24,18 @@ describe('Tls Table Component', () => {
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
+  let root: HTMLElement;
 
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   describe('Rendering', () => {
@@ -68,7 +77,8 @@ describe('Tls Table Component', () => {
               type={networkModel.NetworkType.details}
             />
           </TestProviders>
-        </MockedProvider>
+        </MockedProvider>,
+        { attachTo: root }
       );
       expect(store.getState().network.details.queries!.tls.sort).toEqual({
         direction: 'desc',

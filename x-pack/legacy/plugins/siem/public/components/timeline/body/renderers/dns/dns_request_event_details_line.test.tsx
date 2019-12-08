@@ -10,15 +10,28 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../../mock';
 
 import { DnsRequestEventDetailsLine } from './dns_request_event_details_line';
 
 describe('DnsRequestEventDetailsLine', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the expected text when all properties are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -36,7 +49,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -44,7 +58,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when dnsQuestionName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -62,7 +76,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -70,7 +85,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when dnsQuestionType is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -88,7 +103,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -96,7 +112,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when dnsResolvedIp is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -114,7 +130,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -122,7 +139,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when dnsResponseCode is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -140,7 +157,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp]via[processName](123)[eventCode]'
@@ -148,7 +166,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when eventCode is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -166,7 +184,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[winlogEventId]'
@@ -174,7 +193,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when hostName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -192,7 +211,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -200,7 +220,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processExecutable is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -218,7 +238,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -226,7 +247,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -244,7 +265,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processExecutable](123)[eventCode]'
@@ -252,7 +274,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processPid is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -270,7 +292,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName][eventCode]'
@@ -278,7 +301,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when userDomain is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -296,7 +319,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -304,7 +328,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when userName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -322,7 +346,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName={undefined}
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '\\[userDomain][hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -330,7 +355,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when winlogEventId is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -348,7 +373,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -356,7 +382,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when both eventCode and winlogEventId are NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -374,7 +400,8 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)'

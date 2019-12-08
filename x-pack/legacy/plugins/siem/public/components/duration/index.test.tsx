@@ -13,6 +13,19 @@ import { ONE_MILLISECOND_AS_NANOSECONDS } from '../formatted_duration/helpers';
 import { Duration } from '.';
 
 describe('Duration', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the expected formatted duration', () => {
     const wrapper = mount(
       <TestProviders>
@@ -22,7 +35,8 @@ describe('Duration', () => {
           fieldName="event.duration"
           value={`${ONE_MILLISECOND_AS_NANOSECONDS}`}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(
       wrapper

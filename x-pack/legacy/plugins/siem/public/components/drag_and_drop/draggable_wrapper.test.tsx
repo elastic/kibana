@@ -18,6 +18,19 @@ import { DraggableWrapper } from './draggable_wrapper';
 describe('DraggableWrapper', () => {
   const dataProvider = mockDataProviders[0];
   const message = 'draggable wrapper content';
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
       const wrapper = shallow(
@@ -41,7 +54,8 @@ describe('DraggableWrapper', () => {
               <DraggableWrapper dataProvider={dataProvider} render={() => message} />
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(message);
@@ -57,7 +71,8 @@ describe('DraggableWrapper', () => {
               <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').exists()).toEqual(
@@ -73,7 +88,8 @@ describe('DraggableWrapper', () => {
               <DraggableWrapper dataProvider={dataProvider} render={() => message} />
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').exists()).toEqual(

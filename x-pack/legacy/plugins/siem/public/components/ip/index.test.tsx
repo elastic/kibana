@@ -4,16 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../mock/test_providers';
 
 import { Ip } from '.';
 
 describe('Port', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
@@ -22,10 +34,11 @@ describe('Port', () => {
   });
 
   test('it renders the the ip address', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -37,10 +50,11 @@ describe('Port', () => {
   });
 
   test('it hyperlinks to the network/ip page', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(

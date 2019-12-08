@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
@@ -15,6 +14,19 @@ import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
 
 describe('SystemGenericFileDetails', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders the default SystemGenericDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
@@ -32,7 +44,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it returns system rendering if the data does contain system data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <SystemGenericFileDetails
             contextId="[contextid-123]"
@@ -41,7 +53,8 @@ describe('SystemGenericFileDetails', () => {
             data={mockTimelineData[29].ecs}
             timelineId="test"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         'Evan@zeek-london[generic-text-123](6278)with resultfailureSource128.199.212.120'
@@ -51,7 +64,7 @@ describe('SystemGenericFileDetails', () => {
 
   describe('#SystemGenericFileLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -90,7 +103,8 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][generic-text-123][fileName-123]in[filePath-123][processName-123](123)[arg-1][arg-2][arg-3][some-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -98,7 +112,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it returns nothing if data is all null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -137,13 +151,14 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('an unknown process');
     });
 
     test('it can return only the host name', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -182,13 +197,14 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[hostname-123]an unknown process');
     });
 
     test('it can return the host, message', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -227,13 +243,14 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[hostname-123]an unknown process[message-123]');
     });
 
     test('it can return the host, message, outcome', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -272,7 +289,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][message-123]'
@@ -280,7 +298,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -319,7 +337,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][message-123]'
@@ -327,7 +346,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -366,7 +385,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][packageSummary-123][message-123]'
@@ -374,7 +394,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -413,7 +433,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -421,7 +442,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -460,7 +481,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -468,7 +490,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -507,7 +529,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashMd5-123][message-123]'
@@ -515,7 +538,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -554,7 +577,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -562,7 +586,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -601,7 +625,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -609,7 +634,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -648,7 +673,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processExecutable-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -656,7 +682,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -695,7 +721,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)via parent process(456)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -703,7 +730,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -742,7 +769,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -750,7 +778,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -789,7 +817,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -797,7 +826,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -836,7 +865,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -844,7 +874,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -883,7 +913,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '\\[userDomain-123][hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -891,7 +922,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -930,7 +961,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -938,7 +970,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -977,7 +1009,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -985,7 +1018,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1024,7 +1057,8 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[process-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -1032,7 +1066,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it can return the endgameExitCode, endgameParentProcessName, eventAction, host, message, outcome, packageName, pacakgeSummary, packageVersion, packageExecutable, processHashMd5, processHashSha1, processHashSha256, processPid, processPpid, processName, sshMethod, sshSignature, text, userDomain, username, working-directory, process-title, args', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1071,7 +1105,8 @@ describe('SystemGenericFileDetails', () => {
               args={['[arg-1]', '[arg-2]', '[arg-3]']}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[arg-1][arg-2][arg-3][process-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -1079,7 +1114,7 @@ describe('SystemGenericFileDetails', () => {
     });
 
     test('it renders a FileDraggable when endgameFileName and endgameFilePath are provided, but fileName and filePath are NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1118,13 +1153,14 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[endgameFileName]in[endgameFilePath]an unknown process');
     });
 
     test('it prefers to render fileName and filePath over endgameFileName and endgameFilePath respectfully when all of those fields are provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1163,7 +1199,8 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('[fileName]in[filePath]an unknown process');
@@ -1171,7 +1208,7 @@ describe('SystemGenericFileDetails', () => {
 
     ['file_create_event', 'created', 'file_delete_event', 'deleted'].forEach(eventAction => {
       test(`it renders the text "via" when eventAction is ${eventAction}`, () => {
-        const wrapper = mountWithIntl(
+        const wrapper = mount(
           <TestProviders>
             <div>
               <SystemGenericFileLine
@@ -1210,7 +1247,8 @@ describe('SystemGenericFileDetails', () => {
                 workingDirectory={undefined}
               />
             </div>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         expect(wrapper.text().includes('via')).toBe(true);
@@ -1220,7 +1258,7 @@ describe('SystemGenericFileDetails', () => {
     test('it does NOT render the text "via" when eventAction is not a whitelisted action', () => {
       const eventAction = 'a_non_whitelisted_event_action';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1259,7 +1297,8 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text().includes('via')).toBe(false);
@@ -1268,7 +1307,7 @@ describe('SystemGenericFileDetails', () => {
     test('it renders a ParentProcessDraggable when eventAction is NOT "process_stopped" and NOT "termination_event"', () => {
       const eventAction = 'something_else';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1307,7 +1346,8 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -1318,7 +1358,7 @@ describe('SystemGenericFileDetails', () => {
     test('it does NOT render a ParentProcessDraggable when eventAction is "process_stopped"', () => {
       const eventAction = 'process_stopped';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1357,7 +1397,8 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('an unknown process');
@@ -1366,7 +1407,7 @@ describe('SystemGenericFileDetails', () => {
     test('it does NOT render a ParentProcessDraggable when eventAction is "termination_event"', () => {
       const eventAction = 'termination_event';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1405,14 +1446,15 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('an unknown process');
     });
 
     test('it returns renders the message when showMessage is true', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1451,14 +1493,15 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('an unknown process[message]');
     });
 
     test('it does NOT render the message when showMessage is false', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1497,14 +1540,15 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('an unknown process');
     });
 
     test('it renders a ProcessDraggableWithNonExistentProcess when endgamePid and endgameProcessName are provided, but processPid and processName are NOT provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1543,14 +1587,15 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('[endgameProcessName](789)');
     });
 
     test('it prefers to render processName and processPid over endgameProcessName and endgamePid respectfully when all of those fields are provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <div>
             <SystemGenericFileLine
@@ -1589,7 +1634,8 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('[processName](123)');

@@ -13,6 +13,19 @@ import { mockTimelineData, TestProviders } from '../../../../mock';
 import { HostWorkingDir } from './host_working_dir';
 
 describe('HostWorkingDir', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <HostWorkingDir
@@ -36,7 +49,8 @@ describe('HostWorkingDir', () => {
             workingDirectory={undefined}
           />
         </div>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.text()).toEqual('[hostname-123]');
@@ -53,7 +67,8 @@ describe('HostWorkingDir', () => {
             workingDirectory={null}
           />
         </div>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.text()).toEqual('[hostname-123]');
@@ -70,7 +85,8 @@ describe('HostWorkingDir', () => {
             workingDirectory="[working-directory-123]"
           />
         </div>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.text()).toEqual('in[working-directory-123]');
@@ -87,7 +103,8 @@ describe('HostWorkingDir', () => {
             workingDirectory="[working-directory-123]"
           />
         </div>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.text()).toEqual('in[working-directory-123]');

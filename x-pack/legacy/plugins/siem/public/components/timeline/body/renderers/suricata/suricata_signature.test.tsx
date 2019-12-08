@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 import {
@@ -18,6 +17,19 @@ import {
 } from './suricata_signature';
 
 describe('SuricataSignature', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = shallow(
@@ -39,7 +51,7 @@ describe('SuricataSignature', () => {
     });
 
     test('should render a single if it is present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <div>
           <Tokens tokens={['ET']} />
         </div>
@@ -48,7 +60,7 @@ describe('SuricataSignature', () => {
     });
 
     test('should render the multiple tokens if they are present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <div>
           <Tokens tokens={['ET', 'SCAN']} />
         </div>
@@ -59,19 +71,21 @@ describe('SuricataSignature', () => {
 
   describe('DraggableSignatureId', () => {
     test('it renders the default SuricataSignature', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableSignatureId id="id-123" signatureId={123} />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('123');
     });
 
     test('it renders a tooltip for the signature field', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableSignatureId id="id-123" signatureId={123} />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(

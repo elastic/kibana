@@ -52,6 +52,18 @@ describe('body', () => {
     anomalies: 'AnomaliesQueryTabBody',
     events: 'EventsQueryTabBody',
   };
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
 
   Object.entries(scenariosMap).forEach(([path, componentName]) =>
     test(`it should pass expected object properties to ${componentName}`, () => {
@@ -71,7 +83,8 @@ describe('body', () => {
               filterQuery='{"bool":{"must":[],"filter":[{"match_all":{}},{"match_phrase":{"host.name":{"query":"host-1"}}}],"should":[],"must_not":[]}}'
             />
           </MemoryRouter>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       // match against everything but the functions to ensure they are there as expected

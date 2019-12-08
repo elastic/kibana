@@ -15,6 +15,19 @@ import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
 
 describe('DataProviders', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     const dropMessage = ['Drop', 'query', 'build', 'here'];
 
@@ -53,7 +66,8 @@ describe('DataProviders', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
@@ -74,7 +88,8 @@ describe('DataProviders', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
@@ -95,7 +110,8 @@ describe('DataProviders', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       mockDataProviders.forEach(dataProvider =>

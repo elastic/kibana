@@ -5,15 +5,28 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../mock';
 
 import { FileDraggable } from './file_draggable';
 
 describe('FileDraggable', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it prefers fileName and filePath over endgameFileName and endgameFilePath when all of them are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -23,13 +36,14 @@ describe('FileDraggable', () => {
           fileName="[fileName]"
           filePath="[filePath]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[fileName]in[filePath]');
   });
 
   test('it returns an empty string when none of the files or paths are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -39,13 +53,14 @@ describe('FileDraggable', () => {
           fileName={undefined}
           filePath={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('');
   });
 
   test('it renders just the endgameFileName if only endgameFileName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -55,13 +70,14 @@ describe('FileDraggable', () => {
           fileName={undefined}
           filePath={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[endgameFileName]');
   });
 
   test('it renders "in endgameFilePath" if only endgameFilePath is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -71,13 +87,14 @@ describe('FileDraggable', () => {
           fileName={undefined}
           filePath={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('in[endgameFilePath]');
   });
 
   test('it renders just the filename if only fileName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -87,13 +104,14 @@ describe('FileDraggable', () => {
           fileName="[fileName]"
           filePath={undefined}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('[fileName]');
   });
 
   test('it renders "in filePath" if only filePath is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -103,7 +121,8 @@ describe('FileDraggable', () => {
           fileName={undefined}
           filePath="[filePath]"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual('in[filePath]');
   });

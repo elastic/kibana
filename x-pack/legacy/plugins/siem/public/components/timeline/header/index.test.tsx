@@ -26,6 +26,18 @@ mockUseKibanaCore.mockImplementation(() => ({
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
 
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
@@ -73,7 +85,8 @@ describe('Header', () => {
               sortDirection: Direction.desc,
             }}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(true);
@@ -100,7 +113,8 @@ describe('Header', () => {
               sortDirection: Direction.desc,
             }}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists()).toEqual(true);

@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
@@ -28,9 +27,18 @@ import {
 
 describe('ZeekSignature', () => {
   let zeek: Ecs;
+  let root: HTMLElement;
 
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     zeek = cloneDeep(mockTimelineData[13].ecs);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   describe('rendering', () => {
@@ -70,7 +78,7 @@ describe('ZeekSignature', () => {
 
   describe('#TotalVirusLinkSha', () => {
     test('should return null if value is null', () => {
-      const wrapper = mountWithIntl(<TotalVirusLinkSha value={null} />);
+      const wrapper = mount(<TotalVirusLinkSha value={null} />);
       expect(
         wrapper
           .find('TotalVirusLinkSha')
@@ -80,19 +88,19 @@ describe('ZeekSignature', () => {
     });
 
     test('should render value', () => {
-      const wrapper = mountWithIntl(<TotalVirusLinkSha value={'abc'} />);
+      const wrapper = mount(<TotalVirusLinkSha value={'abc'} />);
       expect(wrapper.text()).toEqual('abc');
     });
 
     test('should render link with sha', () => {
-      const wrapper = mountWithIntl(<TotalVirusLinkSha value={'abcdefg'} />);
+      const wrapper = mount(<TotalVirusLinkSha value={'abcdefg'} />);
       expect(wrapper.find('a').prop('href')).toEqual('https://www.virustotal.com/#/search/abcdefg');
     });
   });
 
   describe('#Link', () => {
     test('should return null if value is null', () => {
-      const wrapper = mountWithIntl(<Link value={null} />);
+      const wrapper = mount(<Link value={null} />);
       expect(
         wrapper
           .find('Link')
@@ -102,12 +110,12 @@ describe('ZeekSignature', () => {
     });
 
     test('should render value', () => {
-      const wrapper = mountWithIntl(<Link value={'abc'} />);
+      const wrapper = mount(<Link value={'abc'} />);
       expect(wrapper.text()).toEqual('abc');
     });
 
     test('should render value and link', () => {
-      const wrapper = mountWithIntl(<Link value={'abcdefg'} link={'somethingelse'} />);
+      const wrapper = mount(<Link value={'abcdefg'} link={'somethingelse'} />);
       expect(wrapper.find('a').prop('href')).toEqual(
         'https://www.google.com/search?q=somethingelse'
       );
@@ -116,10 +124,11 @@ describe('ZeekSignature', () => {
 
   describe('DraggableZeekElement', () => {
     test('it returns null if value is null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(
         wrapper
@@ -130,16 +139,17 @@ describe('ZeekSignature', () => {
     });
 
     test('it renders the default ZeekSignature', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('mynote');
     });
 
     test('it renders with a custom string renderer', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableZeekElement
             id="id-123"
@@ -147,7 +157,8 @@ describe('ZeekSignature', () => {
             value={'mynote'}
             stringRenderer={value => `->${value}<-`}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('->mynote<-');
     });
@@ -155,10 +166,11 @@ describe('ZeekSignature', () => {
     describe('#TagTooltip', () => {
       test('it renders the name of the field in a tooltip', () => {
         const field = 'zeek.notice';
-        const wrapper = mountWithIntl(
+        const wrapper = mount(
           <TestProviders>
             <DraggableZeekElement id="id-123" field={field} value={'the people you love'} />
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         expect(

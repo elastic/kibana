@@ -43,9 +43,18 @@ describe('Hosts Table', () => {
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
+  let root: HTMLElement;
 
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   describe('rendering', () => {
@@ -71,28 +80,7 @@ describe('Hosts Table', () => {
     });
 
     describe('Sorting on Table', () => {
-      let wrapper = mount(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <HostsTable
-              id="hostsQuery"
-              isInspect={false}
-              indexPattern={mockIndexPattern}
-              loading={false}
-              data={mockData.Hosts.edges}
-              totalCount={mockData.Hosts.totalCount}
-              fakeTotalCount={getOr(50, 'fakeTotalCount', mockData.Hosts.pageInfo)}
-              showMorePagesIndicator={getOr(
-                false,
-                'showMorePagesIndicator',
-                mockData.Hosts.pageInfo
-              )}
-              loadPage={loadPage}
-              type={hostsModel.HostsType.page}
-            />
-          </TestProviders>
-        </MockedProvider>
-      );
+      let wrapper: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       beforeEach(() => {
         wrapper = mount(
@@ -115,7 +103,8 @@ describe('Hosts Table', () => {
                 type={hostsModel.HostsType.page}
               />
             </TestProviders>
-          </MockedProvider>
+          </MockedProvider>,
+          { attachTo: root }
         );
       });
       test('Initial value of the store', () => {

@@ -41,6 +41,19 @@ const from = 1566943856794;
 const to = 1566857456791;
 
 describe('EventsViewer', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the "Showing..." subtitle with the expected event count', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -52,7 +65,8 @@ describe('EventsViewer', () => {
             start={from}
           />
         </MockedProvider>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     await wait();
@@ -77,7 +91,8 @@ describe('EventsViewer', () => {
             start={from}
           />
         </MockedProvider>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     await wait();
@@ -102,7 +117,8 @@ describe('EventsViewer', () => {
             start={from}
           />
         </MockedProvider>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     await wait();
@@ -128,7 +144,8 @@ describe('EventsViewer', () => {
               start={from}
             />
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       await wait();

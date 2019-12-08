@@ -20,8 +20,18 @@ jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('anomaly_scores', () => {
   let anomalies: Anomalies = cloneDeep(mockAnomalies);
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     anomalies = cloneDeep(mockAnomalies);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   test('renders correctly against snapshot', () => {
@@ -49,7 +59,8 @@ describe('anomaly_scores', () => {
           interval="day"
           narrowDateRange={narrowDateRange}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.find('[data-test-subj="anomaly-description-list"]').exists()).toEqual(false);
   });
@@ -65,7 +76,8 @@ describe('anomaly_scores', () => {
           interval="day"
           narrowDateRange={narrowDateRange}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     wrapper
       .find('[data-test-subj="anomaly-score-popover"]')

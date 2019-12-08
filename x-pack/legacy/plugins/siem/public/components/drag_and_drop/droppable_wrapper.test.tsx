@@ -16,6 +16,19 @@ import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DroppableWrapper } from './droppable_wrapper';
 
 describe('DroppableWrapper', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
       const message = 'draggable wrapper content';
@@ -43,7 +56,8 @@ describe('DroppableWrapper', () => {
               <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(message);
@@ -61,7 +75,8 @@ describe('DroppableWrapper', () => {
               </DroppableWrapper>
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="this-should-not-render"]').exists()).toBe(false);
@@ -78,7 +93,8 @@ describe('DroppableWrapper', () => {
               />
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('isDraggingOver is: false');

@@ -4,15 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 import { PrimarySecondaryUserInfo, nilOrUnSet } from './primary_secondary_user_info';
 
 describe('UserPrimarySecondary', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders the default PrimarySecondaryUserInfo', () => {
       const wrapper = shallow(
@@ -28,7 +40,7 @@ describe('UserPrimarySecondary', () => {
     });
 
     test('should render user name only if that is all that is present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -37,13 +49,14 @@ describe('UserPrimarySecondary', () => {
             primary={undefined}
             secondary={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('user-name-1');
     });
 
     test('should render user name only if the others are in unset mode', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -52,13 +65,14 @@ describe('UserPrimarySecondary', () => {
             primary="unset"
             secondary="unset"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('user-name-1');
     });
 
     test('should render primary name only if that is all that is present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -67,13 +81,14 @@ describe('UserPrimarySecondary', () => {
             userName={undefined}
             secondary={undefined}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('primary-1');
     });
 
     test('should render primary name only if the others are in unset mode', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -82,13 +97,14 @@ describe('UserPrimarySecondary', () => {
             userName="unset"
             secondary="unset"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('primary-1');
     });
 
     test('should render the secondary name only if that is all that is present', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -97,13 +113,14 @@ describe('UserPrimarySecondary', () => {
             primary={undefined}
             secondary="secondary-1"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('secondary-1');
     });
 
     test('should render the secondary name only if the others are in unset mode', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -112,13 +129,14 @@ describe('UserPrimarySecondary', () => {
             primary="unset"
             userName="unset"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('secondary-1');
     });
 
     test('should render the user name if all three are the same', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -127,13 +145,14 @@ describe('UserPrimarySecondary', () => {
             primary="username-1"
             secondary="username-1"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('username-1');
     });
 
     test('should render the primary with as if all three are different', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <PrimarySecondaryUserInfo
             contextId="context-123"
@@ -142,7 +161,8 @@ describe('UserPrimarySecondary', () => {
             primary="[primary]"
             secondary="[secondary]"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('[primary]as[secondary]');
     });

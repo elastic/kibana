@@ -112,6 +112,8 @@ jest.mock('ui/documentation_links', () => ({
 }));
 
 describe('Ip Details', () => {
+  let root: HTMLElement;
+
   beforeAll(() => {
     (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
@@ -126,14 +128,23 @@ describe('Ip Details', () => {
   afterAll(() => {
     delete (global as GlobalWithFetch).fetch;
   });
-  const state: State = mockGlobalState;
 
+  const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
     localSource = cloneDeep(mocksSource);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
   });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders', () => {
     const wrapper = shallow(<IPDetailsComponent {...getMockProps('123.456.78.90')} />);
     expect(wrapper.find('[data-test-subj="ip-details-page"]').exists()).toBe(true);
@@ -154,7 +165,8 @@ describe('Ip Details', () => {
             <IPDetails {...getMockProps(ip)} />
           </Router>
         </MockedProvider>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     // Why => https://github.com/apollographql/react-apollo/issues/1711
     await new Promise(resolve => setTimeout(resolve));

@@ -38,6 +38,19 @@ import {
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('SourceDestinationIp', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('#isIpFieldPopulated', () => {
     test('it returns true when type is `source` and sourceIp has an IP address', () => {
       expect(
@@ -367,7 +380,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={undefined}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -421,7 +435,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -475,7 +490,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -529,7 +545,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -584,7 +601,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -638,7 +656,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -692,7 +711,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={[]}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.exists('[data-test-subj="source-label"]')).toBe(false);
@@ -741,7 +761,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.exists('[data-test-subj="destination-label"]')).toBe(false);
@@ -790,7 +811,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -844,7 +866,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={[]}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -898,7 +921,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -952,7 +976,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -1006,7 +1031,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -1060,7 +1086,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -1114,7 +1141,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -1169,7 +1197,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -1224,7 +1253,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={undefined}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.exists(`[data-test-subj="${type}-ip-badge"]`)).toBe(false);
@@ -1274,7 +1304,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.exists(`[data-test-subj="${type}-ip-badge"]`)).toBe(false);
@@ -1323,7 +1354,8 @@ describe('SourceDestinationIp', () => {
           sourcePort={asArrayIfExists(get(SOURCE_PORT_FIELD_NAME, getMockNetflowData()))}
           type={type}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(

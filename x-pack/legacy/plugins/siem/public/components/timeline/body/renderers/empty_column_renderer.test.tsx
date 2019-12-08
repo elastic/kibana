@@ -18,8 +18,18 @@ import { emptyColumnRenderer } from './empty_column_renderer';
 describe('empty_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     mockDatum = cloneDeep(mockTimelineData[0].data);
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
   });
 
   test('renders correctly against snapshot', () => {
@@ -66,7 +76,8 @@ describe('empty_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{emptyColumn}</span>
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(wrapper.text()).toEqual(getEmptyValue());

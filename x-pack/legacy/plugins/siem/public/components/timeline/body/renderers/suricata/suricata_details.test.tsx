@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData } from '../../../../../mock';
@@ -15,6 +14,19 @@ import { TestProviders } from '../../../../../mock/test_providers';
 import { SuricataDetails } from './suricata_details';
 
 describe('SuricataDetails', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders the default SuricataDetails', () => {
       const wrapper = shallow(
@@ -28,14 +40,15 @@ describe('SuricataDetails', () => {
     });
 
     test('it returns text if the data does contain suricata data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <SuricataDetails
             data={mockTimelineData[2].ecs}
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(
         '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'

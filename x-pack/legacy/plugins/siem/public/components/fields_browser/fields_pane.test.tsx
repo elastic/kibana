@@ -16,6 +16,19 @@ import { FieldsPane } from './fields_pane';
 const timelineId = 'test';
 
 describe('FieldsPane', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the selected category', () => {
     const selectedCategory = 'auditd';
 
@@ -33,7 +46,8 @@ describe('FieldsPane', () => {
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -61,7 +75,8 @@ describe('FieldsPane', () => {
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -89,7 +104,8 @@ describe('FieldsPane', () => {
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(
@@ -117,7 +133,8 @@ describe('FieldsPane', () => {
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
 
     expect(

@@ -40,6 +40,19 @@ jest.mock('../../../lib/helpers/scheduler', () => ({
 }));
 
 describe('Body', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders the column headers', () => {
       const wrapper = mount(
@@ -68,7 +81,8 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -106,7 +120,8 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -144,7 +159,8 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -184,7 +200,8 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       wrapper.update();
       await wait();
@@ -271,7 +288,8 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       addaNoteToEvent(wrapper, 'hello world');
 
@@ -310,7 +328,8 @@ describe('Body', () => {
           sort={mockSort}
           toggleColumn={jest.fn()}
           updateNote={jest.fn()}
-        />
+        />,
+        { attachTo: root }
       );
       addaNoteToEvent(wrapper, 'hello world');
       dispatchAddNoteToEvent.mockClear();

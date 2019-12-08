@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../mock';
 import { getEmptyString } from '../empty_value';
@@ -20,6 +19,19 @@ import {
 } from '.';
 
 describe('draggables', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('it renders the default DefaultDraggable', () => {
       const wrapper = shallow(
@@ -99,10 +111,11 @@ describe('draggables', () => {
 
   describe('DefaultDraggable', () => {
     test('it works with just an id, field, and value and is some value', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultDraggable id="draggable-id" field="some-field" value="some value" />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('some value');
     });
@@ -122,10 +135,11 @@ describe('draggables', () => {
     });
 
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultDraggable id="draggable-id" field="source.bytes" value="a default draggable" />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -137,7 +151,7 @@ describe('draggables', () => {
     });
 
     test('it renders the tooltipContent when a string is provided as content', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
             id="draggable-id"
@@ -145,7 +159,8 @@ describe('draggables', () => {
             tooltipContent="default draggable string tooltip"
             value="a default draggable"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -157,7 +172,7 @@ describe('draggables', () => {
     });
 
     test('it renders the tooltipContent when an element is provided as content', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
             id="draggable-id"
@@ -165,7 +180,8 @@ describe('draggables', () => {
             tooltipContent={<span>{'default draggable tooltip'}</span>}
             value="a default draggable"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -177,7 +193,7 @@ describe('draggables', () => {
     });
 
     test('it does NOT render a tooltip when tooltipContent is null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DefaultDraggable
             id="draggable-id"
@@ -185,7 +201,8 @@ describe('draggables', () => {
             tooltipContent={null}
             value="a default draggable"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -199,7 +216,7 @@ describe('draggables', () => {
 
   describe('DraggableBadge', () => {
     test('it works with just an id, field, and value and is the default', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableBadge
             contextId="context-id"
@@ -208,7 +225,8 @@ describe('draggables', () => {
             value="some value"
             iconType="number"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual('some value');
     });
@@ -240,7 +258,7 @@ describe('draggables', () => {
     });
 
     test('it returns Empty string text if value is an empty string', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableBadge
             contextId="context-id"
@@ -249,13 +267,14 @@ describe('draggables', () => {
             value=""
             iconType="document"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toEqual(getEmptyString());
     });
 
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableBadge
             contextId="context-id"
@@ -264,7 +283,8 @@ describe('draggables', () => {
             value="some value"
             iconType="number"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -276,7 +296,7 @@ describe('draggables', () => {
     });
 
     test('it renders the tooltipContent when a string is provided as content', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableBadge
             contextId="context-id"
@@ -286,7 +306,8 @@ describe('draggables', () => {
             iconType="number"
             tooltipContent="draggable badge string tooltip"
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -298,7 +319,7 @@ describe('draggables', () => {
     });
 
     test('it renders the tooltipContent when an element is provided as content', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableBadge
             contextId="context-id"
@@ -308,7 +329,8 @@ describe('draggables', () => {
             iconType="number"
             tooltipContent={<span>{'draggable badge tooltip'}</span>}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(
@@ -320,7 +342,7 @@ describe('draggables', () => {
     });
 
     test('it does NOT render a tooltip when tooltipContent is null', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <DraggableBadge
             contextId="context-id"
@@ -330,7 +352,8 @@ describe('draggables', () => {
             iconType="number"
             tooltipContent={null}
           />
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(

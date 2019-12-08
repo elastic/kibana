@@ -50,6 +50,19 @@ describe('Timeline', () => {
     { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
   ];
 
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
@@ -118,7 +131,8 @@ describe('Timeline', () => {
               toggleColumn={jest.fn()}
             />
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="timelineHeader"]').exists()).toEqual(true);
@@ -157,7 +171,8 @@ describe('Timeline', () => {
               toggleColumn={jest.fn()}
             />
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="events-table"]').exists()).toEqual(true);
@@ -196,7 +211,8 @@ describe('Timeline', () => {
               toggleColumn={jest.fn()}
             />
           </MockedProvider>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.find('[data-test-subj="table-pagination"]').exists()).toEqual(false);
@@ -240,7 +256,8 @@ describe('Timeline', () => {
                 toggleColumn={jest.fn()}
               />
             </MockedProvider>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         wrapper
@@ -286,7 +303,8 @@ describe('Timeline', () => {
                 toggleColumn={jest.fn()}
               />
             </MockedProvider>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
         wrapper
           .find('button[data-test-subj="providerBadge"]')
@@ -340,7 +358,8 @@ describe('Timeline', () => {
                 toggleColumn={jest.fn()}
               />
             </MockedProvider>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         wrapper
@@ -398,7 +417,8 @@ describe('Timeline', () => {
                 toggleColumn={jest.fn()}
               />
             </MockedProvider>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         wrapper
@@ -459,7 +479,8 @@ describe('Timeline', () => {
                 toggleColumn={jest.fn()}
               />
             </MockedProvider>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         const andProviderBadges = wrapper.find(
@@ -510,7 +531,8 @@ describe('Timeline', () => {
                 toggleColumn={jest.fn()}
               />
             </MockedProvider>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         wrapper
@@ -567,7 +589,8 @@ describe('Timeline', () => {
                 toggleColumn={jest.fn()}
               />
             </MockedProvider>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         wrapper
@@ -628,7 +651,8 @@ describe('Timeline', () => {
                 toggleColumn={jest.fn()}
               />
             </MockedProvider>
-          </TestProviders>
+          </TestProviders>,
+          { attachTo: root }
         );
 
         wrapper

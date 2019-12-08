@@ -10,7 +10,7 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../../mock';
 import { mockBrowserFields } from '../../../../../../public/containers/source/mock';
@@ -19,8 +19,21 @@ import { mockEndgameDnsRequest } from '../../../../../../public/mock/mock_endgam
 import { DnsRequestEventDetails } from './dns_request_event_details';
 
 describe('DnsRequestEventDetails', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   test('it renders the expected text given an Endgame DNS request_event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetails
           browserFields={mockBrowserFields}
@@ -28,7 +41,8 @@ describe('DnsRequestEventDetails', () => {
           data={mockEndgameDnsRequest}
           timelineId="timeline-id-test"
         />
-      </TestProviders>
+      </TestProviders>,
+      { attachTo: root }
     );
     expect(wrapper.text()).toEqual(
       'SYSTEM\\NT AUTHORITY@HD-obe-8bf77f54asked forupdate.googleapis.comwith question typeA, which resolved to10.100.197.67viaGoogleUpdate.exe(443192)3008dns'

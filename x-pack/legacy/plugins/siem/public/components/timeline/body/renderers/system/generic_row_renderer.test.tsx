@@ -51,6 +51,19 @@ import * as i18n from './translations';
 jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
 
 describe('GenericRowRenderer', () => {
+  let root: HTMLElement;
+
+  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
+  beforeEach(() => {
+    root = document.createElement('div');
+    root.id = 'root';
+    document.body.appendChild(root);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(root);
+  });
+
   describe('#createGenericSystemRowRenderer', () => {
     let nonSystem: Ecs;
     let system: Ecs;
@@ -105,7 +118,8 @@ describe('GenericRowRenderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{children}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toContain(
         'some children Evan@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
@@ -168,7 +182,8 @@ describe('GenericRowRenderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{children}</span>
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
       expect(wrapper.text()).toContain(
         'some children Braden@zeek-londonsome text(6278)with resultfailureSource128.199.212.120'
@@ -198,7 +213,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -227,7 +243,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -256,7 +273,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -287,7 +305,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -318,7 +337,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -347,7 +367,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -376,7 +397,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -405,7 +427,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -434,7 +457,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -463,7 +487,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -494,7 +519,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -525,7 +551,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -554,7 +581,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -583,7 +611,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -612,7 +641,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -641,7 +671,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -670,7 +701,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -699,7 +731,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -728,7 +761,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -753,7 +787,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -778,7 +813,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -803,7 +839,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -828,7 +865,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -853,7 +891,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -877,7 +916,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -901,7 +941,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual(
@@ -931,7 +972,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
@@ -959,7 +1001,8 @@ describe('GenericRowRenderer', () => {
               children: <span>{'some children '}</span>,
               timelineId: 'test',
             })}
-        </TestProviders>
+        </TestProviders>,
+        { attachTo: root }
       );
 
       expect(wrapper.text()).toEqual('');
