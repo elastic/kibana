@@ -22,6 +22,7 @@ import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
 import { ElasticsearchService } from './elasticsearch';
+import { PulseService } from './pulse';
 import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory } from './logging';
@@ -50,6 +51,7 @@ export class Server {
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
+  private readonly pulse: PulseService;
   private readonly http: HttpService;
   private readonly legacy: LegacyService;
   private readonly log: Logger;
@@ -71,6 +73,7 @@ export class Server {
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
+    this.pulse = new PulseService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
     this.capabilities = new CapabilitiesService(core);
@@ -107,6 +110,10 @@ export class Server {
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
       http: httpSetup,
+    });
+
+    await this.pulse.setup({
+      elasticsearch: elasticsearchServiceSetup,
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({
