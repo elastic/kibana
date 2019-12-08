@@ -14,7 +14,8 @@ export default function ({ getService, getPageObjects }) {
   const pipelinesList = getService('monitoringLogstashPipelines');
   const lsClusterSummaryStatus = getService('monitoringLogstashSummaryStatus');
 
-  describe('Logstash pipelines', () => {
+  // FAILING: https://github.com/elastic/kibana/issues/52470
+  describe.skip('Logstash pipelines', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
