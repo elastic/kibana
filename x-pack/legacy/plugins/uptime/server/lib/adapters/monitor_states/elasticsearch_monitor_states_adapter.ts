@@ -78,6 +78,12 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
           bool: { filter: (await context.dateAndCustomFilters()) },
         },
         aggs: {
+          unique: {
+            cardinality: {
+              field: "monitor.id",
+              precision_threshold: 40000,
+            }
+          },
           by_status: {
             filters: {
               filters: {
@@ -89,6 +95,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
               unique: {
                 cardinality: {
                   field: "monitor.id",
+                  precision_threshold: 40000,
                 }
               }
             }
@@ -97,23 +104,38 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       }
     };
 
-    console.log("Q IS", JSON.stringify(params.body.query));
+    console.log("QUERY", JSON.stringify(params.body));
 
-    const roughCount = await context.database.search(context.request, params);
-    const uniqueUp = roughCount.aggregations.by_status.buckets.down.unique.value;
-    const uniqueDown = roughCount.aggregations.by_status.buckets.down.unique.value;
+    const statistics = await context.database.search(context.request, params);
+    const uniqueUp = statistics.aggregations.by_status.buckets.up.unique.value;
+    const uniqueDown = statistics.aggregations.by_status.buckets.down.unique.value;
+    const total = statistics.aggregations.unique.value;
 
     console.log("ROUGH U/D", uniqueUp, uniqueDown);
 
-    const iteratorStatusFilter = uniqueUp < uniqueDown ? 'up' : 'down';
+    // Use the iterator to count the lower cardinality of up or down. Since these precise counts are expensive
+    // it's cheaper to count whichever one is most likely to be lower
+    context.statusFilter = uniqueUp < uniqueDown ? 'up' : 'down';
+    console.log("STATUS SEARCH", context.statusFilter);
+    const iterator = new MonitorGroupIterator(context);
+    let iterCount = 0;
+    while (await iterator.next()) {
+      iterCount++;
+    }
 
-    // It's much faster to calculate the total number of monitors via a simple aggregation,
-    // then subtract the down monitors which have been accurately counted by the iterator.
-    // Since the iterator is slower, and it is almost always the case that there are more up
-    // than down items this is a reasonable plan of attack.
-    context.statusFilter = 'down';
-    const downIterator = new MonitorGroupIterator(context)
+    console.log("DO IT")
+    const res = {total, mixed: 0};
+    if (context.statusFilter === 'up') {
+      res.up = iterCount;
+      res.down = total - iterCount;
+    } else {
+      res.up = total - iterCount;
+      res.down = iterCount;
+    }
 
+    console.log("RES IS", res);
+
+    return res;
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {

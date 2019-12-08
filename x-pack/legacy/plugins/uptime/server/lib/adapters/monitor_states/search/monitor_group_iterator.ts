@@ -117,6 +117,7 @@ export class MonitorGroupIterator {
       this.bufferPos = 0;
     }
 
+    console.log("CHUNK FETCH", await this.queryContext.dateAndCustomFilters());
     const results = await this.chunkFetcher(this.queryContext, this.searchAfter, size);
     // If we've hit the end of the stream searchAfter will be empty
 
@@ -155,7 +156,7 @@ export class MonitorGroupIterator {
 
   // Returns a copy of this fetcher that goes backwards from the current position
   reverse(): MonitorGroupIterator | null {
-    const reverseContext = Object.assign({}, this.queryContext);
+    const reverseContext = this.queryContext.clone();
     const current = this.getCurrent();
 
     reverseContext.pagination = {

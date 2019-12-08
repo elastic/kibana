@@ -51,6 +51,7 @@ const fetchPageMonitorGroups: MonitorGroupsFetcher = async (
   size: number
 ): Promise<MonitorGroupsPage> => {
   const monitorGroups: MonitorGroups[] = [];
+
   const iterator = new MonitorGroupIterator(queryContext);
 
   let paginationBefore: CursorPagination | null = null;

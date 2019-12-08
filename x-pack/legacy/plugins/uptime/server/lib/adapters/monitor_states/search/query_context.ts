@@ -50,12 +50,12 @@ export class QueryContext {
     return clauses;
   }
 
-  async dateRangeFilter(forceTimespan?: boolean): Promise<any> {
+  async dateRangeFilter(forceNoTimespan?: boolean): Promise<any> {
     const timestampClause = {
       range: {'@timestamp': {gte: this.dateRangeStart, lte: this.dateRangeEnd}},
     };
 
-    if (forceTimespan === true || await this.hasTimespan()) {
+    if (forceNoTimespan === true || !(await this.hasTimespan())) {
       return timestampClause;
     }
 
@@ -106,6 +106,21 @@ export class QueryContext {
       terminate_after: 1,
     })).count > 0;
 
+    console.log("SET TS CACHE", this.hasTimespanCache);
+
     return this.hasTimespanCache;
+  }
+
+  clone(): QueryContext {
+    return new QueryContext(
+      this.database,
+      this.request,
+      this.dateRangeStart,
+      this.dateRangeEnd,
+      this.pagination,
+      this.filterClause,
+      this.size,
+      this.statusFilter,
+    )
   }
 }
