@@ -69,7 +69,7 @@ describe('Router validator', () => {
   it('should validate and infer the type from a config-schema non-ObjectType', () => {
     const schemaValidation = new RouteValidator({ params: schema.buffer() });
 
-    const foo = new Buffer('hi!');
+    const foo = Buffer.from('hi!');
     expect(schemaValidation.getParams(foo)).toStrictEqual(foo);
     expect(schemaValidation.getParams(foo).byteLength).toBeGreaterThan(0); // It knows it's a buffer! :)
     expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
