@@ -131,6 +131,7 @@ export {
   RouteValidateFunction,
   RouteValidateFunctionReturn,
   RouteValidatorOptions,
+  RouteValidatorFullConfig,
   RouteValidationError,
   SessionStorage,
   SessionStorageCookieOptions,

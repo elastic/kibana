@@ -24,7 +24,7 @@ import { deepFreeze, RecursiveReadonly } from '../../../utils';
 import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
-import { RouteValidator } from './validator';
+import { RouteValidator, RouteValidatorFullConfig } from './validator';
 
 const requestSymbol = Symbol('request');
 
@@ -70,10 +70,11 @@ export class KibanaRequest<
    */
   public static from<P, Q, B>(
     req: Request,
-    routeSchemas?: RouteValidator<P, Q, B>,
+    routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>,
     withoutSecretHeaders: boolean = true
   ) {
-    const requestParts = KibanaRequest.validate(req, routeSchemas);
+    const routeValidator = routeSchemas && RouteValidator.from<P, Q, B>(routeSchemas);
+    const requestParts = KibanaRequest.validate(req, routeValidator);
     return new KibanaRequest(
       req,
       requestParts.params,

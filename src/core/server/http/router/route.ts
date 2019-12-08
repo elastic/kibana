@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { RouteValidatorConfig, RouteValidatorOptions } from './validator';
+import { RouteValidatorFullConfig } from './validator';
 
 /**
  * The set of common HTTP methods supported by Kibana routing.
@@ -195,7 +195,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * });
    * ```
    */
-  validate: (RouteValidatorConfig<P, Q, B> & RouteValidatorOptions) | false;
+  validate: RouteValidatorFullConfig<P, Q, B> | false;
 
   /**
    * Additional route options {@link RouteConfigOptions}.

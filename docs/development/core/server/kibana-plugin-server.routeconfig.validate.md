@@ -9,7 +9,7 @@ A schema created with `@kbn/config-schema` that every request will be validated 
 <b>Signature:</b>
 
 ```typescript
-validate: (RouteValidatorConfig<P, Q, B> & RouteValidatorOptions) | false;
+validate: RouteValidatorFullConfig<P, Q, B> | false;
 ```
 
 ## Remarks

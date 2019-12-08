@@ -796,7 +796,7 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     // Warning: (ae-forgotten-export) The symbol "RouteValidator" needs to be exported by the entry point index.d.ts
     // 
     // @internal
-    static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
+    static from<P, Q, B>(req: Request, routeSchemas?: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>, withoutSecretHeaders?: boolean): KibanaRequest<P, Q, B, any>;
     readonly headers: Headers;
     // (undocumented)
     readonly params: Params;
@@ -1156,7 +1156,7 @@ export type ResponseHeaders = {
 export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
     options?: RouteConfigOptions<Method>;
     path: string;
-    validate: (RouteValidatorConfig<P, Q, B> & RouteValidatorOptions) | false;
+    validate: RouteValidatorFullConfig<P, Q, B> | false;
 }
 
 // @public
@@ -1209,6 +1209,9 @@ export interface RouteValidatorConfig<P, Q, B> {
     params?: RouteValidationSpec<P>;
     query?: RouteValidationSpec<Q>;
 }
+
+// @public
+export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> & RouteValidatorOptions;
 
 // @public
 export interface RouteValidatorOptions {

@@ -100,11 +100,28 @@ export interface RouteValidatorOptions {
 }
 
 /**
+ * Route validations config and options merged into one object
+ * @public
+ */
+export type RouteValidatorFullConfig<P, Q, B> = RouteValidatorConfig<P, Q, B> &
+  RouteValidatorOptions;
+
+/**
  * Route validator class to define the validation logic for each new route.
  *
  * @private
  */
 export class RouteValidator<P = {}, Q = {}, B = {}> {
+  public static from<P = {}, Q = {}, B = {}>(
+    opts: RouteValidator<P, Q, B> | RouteValidatorFullConfig<P, Q, B>
+  ) {
+    if (opts instanceof RouteValidator) {
+      return opts;
+    }
+    const { params, query, body, ...options } = opts;
+    return new RouteValidator({ params, query, body }, options);
+  }
+
   constructor(
     private readonly config: RouteValidatorConfig<P, Q, B>,
     private readonly options: RouteValidatorOptions = {}

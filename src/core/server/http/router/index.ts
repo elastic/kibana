@@ -62,4 +62,5 @@ export {
   RouteValidateFunctionReturn,
   RouteValidatorOptions,
   RouteValidationError,
+  RouteValidatorFullConfig,
 } from './validator';
