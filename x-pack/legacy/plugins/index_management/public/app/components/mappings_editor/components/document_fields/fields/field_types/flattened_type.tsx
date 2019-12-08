@@ -59,7 +59,7 @@ export const FlattenedType = React.memo(({ field }: Props) => {
         </EditFieldFormRow>
 
         {/* index */}
-        <IndexParameter />
+        <IndexParameter config={getFieldConfig('index_options_flattened')} />
 
         {/* doc_values */}
         <DocValuesParameter />

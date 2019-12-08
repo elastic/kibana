@@ -48,6 +48,16 @@ const nullValueLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFie
 
 const mapIndexToValue = ['true', true, 'false', false];
 
+const indexOptionsConfig = {
+  label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
+    defaultMessage: 'Index options',
+  }),
+  type: FIELD_TYPES.SUPER_SELECT,
+  helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
+    defaultMessage: 'Information that should be stored in the index.',
+  }),
+};
+
 export const PARAMETERS_DEFINITION = {
   name: {
     fieldConfig: {
@@ -426,14 +436,14 @@ export const PARAMETERS_DEFINITION = {
   },
   index_options: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
-        defaultMessage: 'Index options',
-      }),
+      ...indexOptionsConfig,
       defaultValue: 'positions',
-      type: FIELD_TYPES.SUPER_SELECT,
-      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
-        defaultMessage: 'Information that should be stored in the index.',
-      }),
+    },
+  },
+  index_options_flattened: {
+    fieldConfig: {
+      ...indexOptionsConfig,
+      defaultValue: 'docs',
     },
   },
   eager_global_ordinals: {

@@ -94,6 +94,7 @@ export type ParameterName =
   | 'search_analyzer'
   | 'search_quote_analyzer'
   | 'index_options'
+  | 'index_options_flattened'
   | 'eager_global_ordinals'
   | 'index_prefixes'
   | 'index_phrases'
