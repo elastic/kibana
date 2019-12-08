@@ -13,6 +13,15 @@ import { EmptyPrompt } from './empty_prompt';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { EuiLink } from '@elastic/eui';
 
+jest.mock('../../../../../lib/role_mapping_api', () => {
+  return {
+    RoleMappingApi: {
+      getRoleMappings: jest.fn(),
+      getRoleMappingFeatures: jest.fn(),
+    },
+  };
+});
+
 describe('RoleMappingsGridPage', () => {
   it('renders an empty prompt when no role mappings exist', async () => {
     (RoleMappingApi as any).getRoleMappings.mockResolvedValue([]);

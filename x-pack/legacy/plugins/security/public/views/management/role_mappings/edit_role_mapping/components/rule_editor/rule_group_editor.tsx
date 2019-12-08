@@ -20,7 +20,7 @@ import { RuleGroup, Rule, FieldRule } from '../../../model';
 interface Props {
   rule: RuleGroup;
   allowAdd: boolean;
-  parentRule?: Rule;
+  parentRule?: RuleGroup;
   ruleDepth: number;
   onChange: (rule: RuleGroup) => void;
   onDelete: () => void;
@@ -45,7 +45,12 @@ export class RuleGroupEditor extends Component<Props, {}> {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="danger" onClick={this.props.onDelete} size="s">
+                <EuiButtonEmpty
+                  color="danger"
+                  onClick={this.props.onDelete}
+                  size="s"
+                  data-test-subj="deleteRuleGroupButton"
+                >
                   Delete rule group
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -74,8 +79,8 @@ export class RuleGroupEditor extends Component<Props, {}> {
       switch (subRule.getType()) {
         case 'field':
           return (
-            <Fragment>
-              <EuiFlexItem key={subRuleIndex}>
+            <Fragment key={subRuleIndex}>
+              <EuiFlexItem>
                 <FieldRuleEditor
                   rule={subRule as FieldRule}
                   onChange={updatedSubRule => {
@@ -99,8 +104,8 @@ export class RuleGroupEditor extends Component<Props, {}> {
         case 'any':
         case 'all':
           return (
-            <Fragment>
-              <EuiFlexItem key={subRuleIndex}>
+            <Fragment key={subRuleIndex}>
+              <EuiFlexItem>
                 <RuleGroupEditor
                   rule={subRule as RuleGroup}
                   parentRule={this.props.rule}

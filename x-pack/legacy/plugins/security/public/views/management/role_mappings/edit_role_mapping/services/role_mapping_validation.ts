@@ -50,8 +50,8 @@ export function validateRoleMappingRoleTemplates({
 
 export function validateRoleMappingRules({ rules }: RoleMapping): ValidationResult {
   try {
-    const parsedRule = generateRulesFromRaw(rules);
-    if (!parsedRule) {
+    const { rules: parsedRules } = generateRulesFromRaw(rules);
+    if (!parsedRules) {
       return invalid(
         i18n.translate('xpack.security.role_mappings.validation.invalidRoleRule', {
           defaultMessage: 'At least one rule is required.',
@@ -66,10 +66,14 @@ export function validateRoleMappingRules({ rules }: RoleMapping): ValidationResu
 }
 
 export function validateRoleMappingForSave(roleMapping: RoleMapping): ValidationResult {
-  const { isInvalid: isNameInvalid } = validateRoleMappingName(roleMapping);
-  const { isInvalid: areRolesInvalid } = validateRoleMappingRoles(roleMapping);
-  const { isInvalid: areRoleTemplatesInvalid } = validateRoleMappingRoleTemplates(roleMapping);
-  const { isInvalid: areRulesInvalid } = validateRoleMappingRules(roleMapping);
+  const { isInvalid: isNameInvalid, error: nameError } = validateRoleMappingName(roleMapping);
+  const { isInvalid: areRolesInvalid, error: rolesError } = validateRoleMappingRoles(roleMapping);
+  const {
+    isInvalid: areRoleTemplatesInvalid,
+    error: roleTemplatesError,
+  } = validateRoleMappingRoleTemplates(roleMapping);
+
+  const { isInvalid: areRulesInvalid, error: rulesError } = validateRoleMappingRules(roleMapping);
 
   const canSave =
     !isNameInvalid && (!areRolesInvalid || !areRoleTemplatesInvalid) && !areRulesInvalid;
@@ -77,7 +81,7 @@ export function validateRoleMappingForSave(roleMapping: RoleMapping): Validation
   if (canSave) {
     return valid();
   }
-  return invalid();
+  return invalid(nameError || rulesError || rolesError || roleTemplatesError);
 }
 
 function valid() {

@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import {
   RuleGroup,
-  Rule,
   AllRule,
   AnyRule,
   ExceptAllRule,
@@ -27,7 +26,7 @@ import {
 interface Props {
   rule: RuleGroup;
   readonly?: boolean;
-  parentRule?: Rule;
+  parentRule?: RuleGroup;
   onChange: (rule: RuleGroup) => void;
 }
 
@@ -40,7 +39,8 @@ export const RuleGroupTitle = (props: Props) => {
   const [showConfirmChangeModal, setShowConfirmChangeModal] = useState(false);
   const [pendingNewRule, setPendingNewRule] = useState<RuleGroup | null>(null);
 
-  const canUseExcept = props.parentRule && props.parentRule.getType() === 'all';
+  const canUseExcept =
+    props.parentRule && exceptRules.every(except => props.parentRule!.canContainRule(except));
 
   const availableRuleTypes = [...rules, ...(canUseExcept ? exceptRules : [])];
 
@@ -65,7 +65,7 @@ export const RuleGroupTitle = (props: Props) => {
   };
 
   const ruleButton = (
-    <EuiLink onClick={() => setIsMenuOpen(!isMenuOpen)}>
+    <EuiLink onClick={() => setIsMenuOpen(!isMenuOpen)} data-test-subj="ruleGroupTitle">
       {props.rule.getDisplayTitle()} <EuiIcon type="arrowDown" />
     </EuiLink>
   );
@@ -89,6 +89,7 @@ export const RuleGroupTitle = (props: Props) => {
   const confirmChangeModal = showConfirmChangeModal ? (
     <EuiOverlayMask>
       <EuiConfirmModal
+        data-test-subj="confirmRuleChangeModal"
         title={'Switch with invalid rules?'}
         onCancel={() => {
           setShowConfirmChangeModal(false);

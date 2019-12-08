@@ -139,6 +139,7 @@ export class FieldRuleEditor extends Component<Props, State> {
               <EuiButtonIcon
                 iconType="trash"
                 color="danger"
+                aria-label="Delete value"
                 onClick={() => this.onRemoveAlternateValue(0)}
               />
             </EuiFormRow>
@@ -194,6 +195,7 @@ export class FieldRuleEditor extends Component<Props, State> {
             <EuiButtonIcon
               iconType="trash"
               color="danger"
+              aria-label="Delete value"
               onClick={() => this.onRemoveAlternateValue(valueIndex)}
             />
           </EuiFormRow>
