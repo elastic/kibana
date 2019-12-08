@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 import { CatAliasesParams } from 'elasticsearch';
 import { CatAllocationParams } from 'elasticsearch';
 import { CatCommonParams } from 'elasticsearch';
@@ -109,6 +108,7 @@ import { PingParams } from 'elasticsearch';
 import { PutScriptParams } from 'elasticsearch';
 import { PutTemplateParams } from 'elasticsearch';
 import { Readable } from 'stream';
+import { RecursiveReadonly as RecursiveReadonly_2 } from 'kibana/public';
 import { ReindexParams } from 'elasticsearch';
 import { ReindexRethrottleParams } from 'elasticsearch';
 import { RenderSearchTemplateParams } from 'elasticsearch';
@@ -468,6 +468,33 @@ export interface CallAPIOptions {
 }
 
 // @public
+export interface Capabilities {
+    [key: string]: Record<string, boolean | Record<string, boolean>>;
+    catalogue: Record<string, boolean>;
+    management: {
+        [sectionId: string]: Record<string, boolean>;
+    };
+    navLinks: Record<string, boolean>;
+}
+
+// @public
+export type CapabilitiesProvider = () => Partial<Capabilities>;
+
+// @public
+export interface CapabilitiesSetup {
+    registerProvider(provider: CapabilitiesProvider): void;
+    registerSwitcher(switcher: CapabilitiesSwitcher): void;
+}
+
+// @public
+export interface CapabilitiesStart {
+    resolveCapabilities(request: KibanaRequest): Promise<Capabilities>;
+}
+
+// @public
+export type CapabilitiesSwitcher = (request: KibanaRequest, uiCapabilities: Capabilities) => Partial<Capabilities> | Promise<Partial<Capabilities>>;
+
+// @public
 export class ClusterClient implements IClusterClient {
     constructor(config: ElasticsearchClientConfig, log: Logger, getAuthHeaders?: GetAuthHeaders);
     asScoped(request?: KibanaRequest | LegacyRequest | FakeRequest): IScopedClusterClient;
@@ -506,6 +533,8 @@ export type CoreId = symbol;
 // @public
 export interface CoreSetup {
     // (undocumented)
+    capabilities: CapabilitiesSetup;
+    // (undocumented)
     context: ContextSetup;
     // (undocumented)
     elasticsearch: ElasticsearchServiceSetup;
@@ -519,6 +548,8 @@ export interface CoreSetup {
 
 // @public
 export interface CoreStart {
+    // (undocumented)
+    capabilities: CapabilitiesStart;
     // (undocumented)
     savedObjects: SavedObjectsServiceStart;
 }
@@ -666,6 +697,7 @@ export interface HttpServiceSetup {
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
+    registerOnPreResponse: (handler: OnPreResponseHandler) => void;
     registerRouteHandlerContext: <T extends keyof RequestHandlerContext>(contextName: T, provider: RequestHandlerContextProvider<T>) => RequestHandlerContextContainer;
 }
 
@@ -742,15 +774,15 @@ export type IScopedClusterClient = Pick<ScopedClusterClient, 'callAsCurrentUser'
 
 // @public
 export interface IUiSettingsClient {
-    get: <T extends SavedObjectAttribute = any>(key: string) => Promise<T>;
-    getAll: <T extends SavedObjectAttribute = any>() => Promise<Record<string, T>>;
+    get: <T = any>(key: string) => Promise<T>;
+    getAll: <T = any>() => Promise<Record<string, T>>;
     getRegistered: () => Readonly<Record<string, UiSettingsParams>>;
-    getUserProvided: <T extends SavedObjectAttribute = any>() => Promise<Record<string, UserProvidedValues<T>>>;
+    getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
     isOverridden: (key: string) => boolean;
     remove: (key: string) => Promise<void>;
     removeMany: (keys: string[]) => Promise<void>;
-    set: <T extends SavedObjectAttribute = any>(key: string, value: T) => Promise<void>;
-    setMany: <T extends SavedObjectAttribute = any>(changes: Record<string, T>) => Promise<void>;
+    set: (key: string, value: any) => Promise<void>;
+    setMany: (changes: Record<string, any>) => Promise<void>;
 }
 
 // @public
@@ -945,6 +977,27 @@ export interface OnPreAuthToolkit {
     rewriteUrl: (url: string) => OnPreAuthResult;
 }
 
+// @public
+export interface OnPreResponseExtensions {
+    headers?: ResponseHeaders;
+}
+
+// Warning: (ae-forgotten-export) The symbol "OnPreResponseResult" needs to be exported by the entry point index.d.ts
+// 
+// @public
+export type OnPreResponseHandler = (request: KibanaRequest, preResponse: OnPreResponseInfo, toolkit: OnPreResponseToolkit) => OnPreResponseResult | Promise<OnPreResponseResult>;
+
+// @public
+export interface OnPreResponseInfo {
+    // (undocumented)
+    statusCode: number;
+}
+
+// @public
+export interface OnPreResponseToolkit {
+    next: (responseExtensions?: OnPreResponseExtensions) => OnPreResponseResult;
+}
+
 // @public (undocumented)
 export interface PackageInfo {
     // (undocumented)
@@ -987,6 +1040,9 @@ export type PluginInitializer<TSetup, TStart, TPluginsSetup extends object = obj
 export interface PluginInitializerContext<ConfigSchema = unknown> {
     // (undocumented)
     config: {
+        legacy: {
+            globalConfig$: Observable<SharedGlobalConfig>;
+        };
         create: <T = ConfigSchema>() => Observable<T>;
         createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
     };
@@ -1565,14 +1621,15 @@ export interface SavedObjectsRawDoc {
 
 // @public (undocumented)
 export class SavedObjectsRepository {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsRepositoryOptions" needs to be exported by the entry point index.d.ts
-    // 
-    // @internal
-    constructor(options: SavedObjectsRepositoryOptions);
     bulkCreate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkGet<T extends SavedObjectAttributes = any>(objects?: SavedObjectsBulkGetObject[], options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkResponse<T>>;
     bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
     create<T extends SavedObjectAttributes>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SavedObject<T>>;
+    // Warning: (ae-forgotten-export) The symbol "KibanaMigrator" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
+    static createRepository(migrator: KibanaMigrator, schema: SavedObjectsSchema, config: LegacyConfig, indexName: string, callCluster: APICaller, extraTypes?: string[], injectedConstructor?: any): any;
     delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     deleteByNamespace(namespace: string, options?: SavedObjectsDeleteByNamespaceOptions): Promise<any>;
     // (undocumented)
@@ -1612,7 +1669,7 @@ export class SavedObjectsSchema {
     // (undocumented)
     getConvertToAliasScript(type: string): string | undefined;
     // (undocumented)
-    getIndexForType(config: Config, type: string): string | undefined;
+    getIndexForType(config: LegacyConfig, type: string): string | undefined;
     // (undocumented)
     isHiddenType(type: string): boolean;
     // (undocumented)
@@ -1713,7 +1770,7 @@ export interface UiSettingsServiceSetup {
 export type UiSettingsType = 'json' | 'markdown' | 'number' | 'select' | 'boolean' | 'string';
 
 // @public
-export interface UserProvidedValues<T extends SavedObjectAttribute = any> {
+export interface UserProvidedValues<T = any> {
     // (undocumented)
     isOverridden?: boolean;
     // (undocumented)
@@ -1728,5 +1785,6 @@ export const validBodyOutput: readonly ["data", "stream"];
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:228:15 - (ae-forgotten-export) The symbol "SharedGlobalConfig" needs to be exported by the entry point index.d.ts
 
 ```

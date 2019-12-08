@@ -16,71 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import 'ui/collapsible_sidebar';
-import 'ui/directives/listen';
-import 'ui/directives/storage';
-import 'ui/fixed_scroll';
-import 'ui/directives/css_truncate';
-
-import { npStart } from 'ui/new_platform';
-import chromeLegacy from 'ui/chrome';
 import angular from 'angular'; // just used in embeddables and discover controller
-import uiRoutes from 'ui/routes';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-// @ts-ignore
-import { StateProvider } from 'ui/state_management/state';
-// @ts-ignore
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
-import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
-// @ts-ignore
-import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
-import { wrapInI18nContext } from 'ui/i18n';
-// @ts-ignore
-import { docTitle } from 'ui/doc_title';
-// @ts-ignore
-import * as docViewsRegistry from 'ui/registry/doc_views';
-import { SearchSource } from '../../../../ui/public/courier';
+import { DiscoverServices } from './helpers/build_services';
 
-const services = {
-  // new plattform
-  core: npStart.core,
-  addBasePath: npStart.core.http.basePath.prepend,
-  capabilities: npStart.core.application.capabilities,
-  chrome: npStart.core.chrome,
-  docLinks: npStart.core.docLinks,
-  eui_utils: npStart.plugins.eui_utils,
-  inspector: npStart.plugins.inspector,
-  metadata: npStart.core.injectedMetadata.getLegacyMetadata(),
-  toastNotifications: npStart.core.notifications.toasts,
-  uiSettings: npStart.core.uiSettings,
-  uiActions: npStart.plugins.uiActions,
-  embeddable: npStart.plugins.embeddable,
-  npData: npStart.plugins.data,
-  share: npStart.plugins.share,
-  timefilter: npStart.plugins.data.query.timefilter.timefilter,
-  // legacy
-  docTitle,
-  docViewsRegistry,
-  FilterBarQueryFilterProvider,
-  getInjector: () => {
-    return chromeLegacy.dangerouslyGetActiveInjector();
-  },
-  SavedObjectRegistryProvider,
-  SavedObjectProvider,
-  SearchSource,
-  StateProvider,
-  uiModules,
-  uiRoutes,
-  wrapInI18nContext,
-};
-export function getServices() {
+let angularModule: any = null;
+let services: DiscoverServices | null = null;
+
+/**
+ * set bootstrapped inner angular module
+ */
+export function setAngularModule(module: any) {
+  angularModule = module;
+}
+
+/**
+ * get boostrapped inner angular module
+ */
+export function getAngularModule() {
+  return angularModule;
+}
+
+export function getServices(): DiscoverServices {
+  if (!services) {
+    throw new Error('Discover services are not yet available');
+  }
   return services;
 }
 
-// EXPORT legacy static dependencies
+export function setServices(newServices: any) {
+  services = newServices;
+}
+
+// EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
+export { wrapInI18nContext } from 'ui/i18n';
 export { buildVislibDimensions } from '../../../visualizations/public';
 // @ts-ignore
 export { callAfterBindingsWorkaround } from 'ui/compat';
@@ -105,17 +74,15 @@ export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
 // @ts-ignore
 export { timezoneProvider } from 'ui/vis/lib/timezone';
 // @ts-ignore
-export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
-// @ts-ignore
 export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { unhashUrl } from 'ui/state_management/state_hashing';
+export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 
 // EXPORT types
 export { Vis } from 'ui/vis';
-export { StaticIndexPattern, IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
+export { IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';

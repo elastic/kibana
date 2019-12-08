@@ -52,7 +52,7 @@ export const HeaderContent = ({
   );
 };
 
-HeaderComponent.displayName = 'HeaderComponent';
+HeaderContent.displayName = 'HeaderContent';
 
 export const Header = React.memo(HeaderContent);
 

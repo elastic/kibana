@@ -41,7 +41,7 @@ export const HeaderComponent = React.memo<HeaderComponentProps>(
                 data-test-subj="header-tooltip"
                 content={<HeaderToolTipContent header={header} />}
               >
-                <>{header.id}</>
+                <>{header.label ?? header.id}</>
               </EuiToolTip>
             </TruncatableText>
 
@@ -57,7 +57,7 @@ export const HeaderComponent = React.memo<HeaderComponentProps>(
                 data-test-subj="header-tooltip"
                 content={<HeaderToolTipContent header={header} />}
               >
-                <>{header.id}</>
+                <>{header.label ?? header.id}</>
               </EuiToolTip>
             </TruncatableText>
           </EventsHeadingTitleSpan>
