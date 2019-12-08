@@ -24,14 +24,12 @@ export function checkViewOrCreateJobs(moduleId: string, indexPatternId: string):
     // Always want to call reject() so as not to load original page.
     ml.dataRecognizerModuleJobsExist({ moduleId })
       .then((resp: any) => {
-        const basePath = `${chrome.getBasePath()}/app/`;
-
         if (resp.jobsExist === true) {
           const resultsPageUrl = mlJobService.createResultsUrlForJobs(resp.jobs, 'explorer');
-          window.location.href = `${basePath}${resultsPageUrl}`;
+          window.location.href = resultsPageUrl;
           reject();
         } else {
-          window.location.href = `${basePath}ml#/jobs/new_job/recognize?id=${moduleId}&index=${indexPatternId}`;
+          window.location.href = `#/jobs/new_job/recognize?id=${moduleId}&index=${indexPatternId}`;
           reject();
         }
       })

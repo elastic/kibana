@@ -13,14 +13,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
 
 import { mlJobService } from '../../../../services/job_service';
 import { injectI18n } from '@kbn/i18n/react';
 
 export function getLink(location, jobs) {
-  const resultsPageUrl = mlJobService.createResultsUrlForJobs(jobs, location);
-  return `${chrome.getBasePath()}/app/${resultsPageUrl}`;
+  return mlJobService.createResultsUrlForJobs(jobs, location);
 }
 
 function ResultLinksUI({ jobs, intl }) {
