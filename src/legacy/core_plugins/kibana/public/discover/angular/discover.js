@@ -78,7 +78,7 @@ import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
 import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
 
-const { savedQueryService } = data.query.savedQueries;
+const { getSavedQuery } = data.query.savedQueries;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -971,7 +971,7 @@ function discoverController(
       return;
     }
     if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
-      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;
           updateStateFromSavedQuery(savedQuery);
