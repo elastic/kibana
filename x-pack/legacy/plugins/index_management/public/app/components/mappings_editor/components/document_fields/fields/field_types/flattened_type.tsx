@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
+import { PARAMETERS_OPTIONS } from '../../../../constants';
 import {
   DocValuesParameter,
   IndexParameter,
@@ -59,7 +60,10 @@ export const FlattenedType = React.memo(({ field }: Props) => {
         </EditFieldFormRow>
 
         {/* index */}
-        <IndexParameter config={getFieldConfig('index_options_flattened')} />
+        <IndexParameter
+          config={getFieldConfig('index_options_flattened')}
+          indexOptions={PARAMETERS_OPTIONS.index_options_keyword}
+        />
 
         {/* doc_values */}
         <DocValuesParameter />

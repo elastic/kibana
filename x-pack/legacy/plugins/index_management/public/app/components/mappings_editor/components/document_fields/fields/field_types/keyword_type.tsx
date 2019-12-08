@@ -53,11 +53,8 @@ export const KeywordType = ({ field }: Props) => {
       <EditFieldSection>
         <StoreParameter />
         <IndexParameter
-          config={{ ...getFieldConfig('index_options'), defaultValue: 'docs' }}
-          indexOptions={(PARAMETERS_OPTIONS.index_options! as SuperSelectOption[]).filter(
-            // keyword type do not allow "positions" for index_options
-            option => option.value !== 'positions' && option.value !== 'offsets'
-          )}
+          config={{ ...getFieldConfig('index_options_keyword') }}
+          indexOptions={PARAMETERS_OPTIONS.index_options_keyword}
         />
         <DocValuesParameter />
         {/* normalizer */}

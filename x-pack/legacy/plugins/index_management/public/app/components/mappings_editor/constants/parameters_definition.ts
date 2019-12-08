@@ -440,6 +440,12 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: 'positions',
     },
   },
+  index_options_keyword: {
+    fieldConfig: {
+      ...indexOptionsConfig,
+      defaultValue: 'docs',
+    },
+  },
   index_options_flattened: {
     fieldConfig: {
       ...indexOptionsConfig,
