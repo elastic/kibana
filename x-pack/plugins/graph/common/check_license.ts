@@ -5,7 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ILicense } from '../../licensing/common/types';
+import { ILicense, LICENSE_CHECK_STATE } from '../../licensing/common/types';
+import { assertNever } from '../../../../src/core/utils';
 
 export interface GraphLicenseInformation {
   showAppLink: boolean;
@@ -39,33 +40,29 @@ export function checkLicense(license: ILicense | undefined): GraphLicenseInforma
     };
   }
 
-  const isLicenseActive = license.isActive;
-  let message = '';
-  if (!isLicenseActive) {
-    message = i18n.translate('xpack.graph.serverSideErrors.expiredLicenseErrorMessage', {
-      defaultMessage: 'Graph is unavailable - license has expired.',
-    });
+  const check = license.check('graph', 'platinum');
+
+  switch (check.state) {
+    case LICENSE_CHECK_STATE.Expired:
+      return {
+        showAppLink: true,
+        enableAppLink: false,
+        message: check.message || '',
+      };
+    case LICENSE_CHECK_STATE.Invalid:
+    case LICENSE_CHECK_STATE.Unavailable:
+      return {
+        showAppLink: false,
+        enableAppLink: false,
+        message: check.message || '',
+      };
+    case LICENSE_CHECK_STATE.Valid:
+      return {
+        showAppLink: true,
+        enableAppLink: true,
+        message: '',
+      };
+    default:
+      return assertNever(check.state);
   }
-
-  if (license.isOneOf(['trial', 'platinum'])) {
-    return {
-      showAppLink: true,
-      enableAppLink: isLicenseActive,
-      message,
-    };
-  }
-
-  message = i18n.translate('xpack.graph.serverSideErrors.wrongLicenseTypeErrorMessage', {
-    defaultMessage:
-      'Graph is unavailable for the current {licenseType} license. Please upgrade your license.',
-    values: {
-      licenseType: license.type,
-    },
-  });
-
-  return {
-    showAppLink: false,
-    enableAppLink: false,
-    message,
-  };
 }
