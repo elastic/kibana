@@ -263,7 +263,8 @@ export const schema = Joi.object()
           .when('$primary', {
             is: true,
             then: Joi.array().min(1),
-          }),
+          })
+          .default(['superuser']),
       })
       .default(),
   })

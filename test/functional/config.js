@@ -116,8 +116,6 @@ export default async function ({ readConfigFile }) {
               except: [] } }], run_as: [] }, kibana: []
         }
       },
-      defaultRoles: ['superuser'],
-
     }
   };
 }
