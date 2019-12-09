@@ -15,8 +15,8 @@ import {
   ExpressionsStart,
 } from '../../../../../../src/plugins/expressions/public';
 import {
-  Setup as EmbeddableSetup,
-  Start as EmbeddableStart,
+  IEmbeddableSetup,
+  IEmbeddableStart,
 } from '../../../../../../src/plugins/embeddable/public';
 import {
   setup as dataSetup,
@@ -36,13 +36,13 @@ import { getActiveDatasourceIdFromDoc } from './editor_frame/state_management';
 
 export interface EditorFrameSetupPlugins {
   data: typeof dataSetup;
-  embeddable: EmbeddableSetup;
+  embeddable: IEmbeddableSetup;
   expressions: ExpressionsSetup;
 }
 
 export interface EditorFrameStartPlugins {
   data: typeof dataStart;
-  embeddable: EmbeddableStart;
+  embeddable: IEmbeddableStart;
   expressions: ExpressionsStart;
   chrome: Chrome;
 }
@@ -57,8 +57,8 @@ export class EditorFramePlugin {
     plugins.expressions.registerFunction(() => mergeTables);
 
     return {
-      registerDatasource: (name, datasource) => {
-        this.datasources[name] = datasource as Datasource<unknown, unknown>;
+      registerDatasource: datasource => {
+        this.datasources[datasource.id] = datasource as Datasource<unknown, unknown>;
       },
       registerVisualization: visualization => {
         this.visualizations[visualization.id] = visualization as Visualization<unknown, unknown>;
