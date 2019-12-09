@@ -79,7 +79,8 @@ const unused = (unusedKey: string): ConfigDeprecation => (config, rootPath, log)
 const unusedFromRoot = (unusedKey: string): ConfigDeprecation => (config, rootPath, log) =>
   _unused(config, '', log, unusedKey);
 
-const getPath = (rootPath: string, subPath: string) => `${rootPath}.${subPath}`;
+const getPath = (rootPath: string, subPath: string) =>
+  rootPath !== '' ? `${rootPath}.${subPath}` : subPath;
 
 /**
  * The actual platform implementation of {@link ConfigDeprecationFactory}
