@@ -29,7 +29,7 @@ export const TECHNIQUES_PLACEHOLDER = i18n.translate(
 );
 
 export const TACTIC_PLACEHOLDER = i18n.translate(
-  'xpack.siem.detectionEngine.mitreAttack.techniquesPlaceHolderDescription',
+  'xpack.siem.detectionEngine.mitreAttack.tacticPlaceHolderDescription',
   {
     defaultMessage: 'Select tactic ...',
   }
