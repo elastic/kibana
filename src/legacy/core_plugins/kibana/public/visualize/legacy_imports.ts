@@ -36,7 +36,6 @@ export { GlobalStateProvider } from 'ui/state_management/global_state';
 // @ts-ignore
 export { StateManagementConfigProvider } from 'ui/state_management/config_provider';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-export { unhashUrl } from 'ui/state_management/state_hashing';
 export { PersistedState } from 'ui/persisted_state';
 
 export { npSetup, npStart } from 'ui/new_platform';

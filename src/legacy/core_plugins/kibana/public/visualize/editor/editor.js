@@ -32,6 +32,7 @@ import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
 import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
+import { unhashUrl } from '../../../../../../plugins/kibana_utils/public';
 
 import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
@@ -44,7 +45,6 @@ import {
   showSaveModal,
   stateMonitorFactory,
   subscribeWithScope,
-  unhashUrl,
 } from '../legacy_imports';
 
 import { getServices } from '../kibana_services';
