@@ -143,8 +143,7 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "align": "left",
-            "dataType": "number",
+            "align": "center",
             "field": "observer.geo.name",
             "name": "Location",
             "render": [Function],
@@ -162,9 +161,10 @@ exports[`PingList component renders sorted list without errors 1`] = `
             "render": [Function],
           },
           Object {
-            "align": "left",
+            "align": "right",
             "field": "error.type",
             "name": "Error type",
+            "render": [Function],
           },
           Object {
             "align": "right",
