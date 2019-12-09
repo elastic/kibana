@@ -34,6 +34,7 @@ function normalizeServerLicense(license: RawLicense): PublicLicense {
   return {
     uid: license.uid,
     type: license.type,
+    mode: license.mode,
     expiryDateInMillis: license.expiry_date_in_millis,
     status: license.status,
   };

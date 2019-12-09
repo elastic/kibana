@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RawLicense } from '../../../../../plugins/licensing/server';
+import { ILicense } from '../../../../../plugins/licensing/server';
 
 /**
  * "View" for XPack Info license information.
@@ -15,9 +15,9 @@ export class XPackInfoLicense {
    * @type {Function}
    * @private
    */
-  _getRawLicense: () => RawLicense | undefined;
+  _getRawLicense: () => ILicense | undefined;
 
-  constructor(getRawLicense: () => RawLicense | undefined) {
+  constructor(getRawLicense: () => ILicense | undefined) {
     this._getRawLicense = getRawLicense;
   }
 
@@ -34,7 +34,7 @@ export class XPackInfoLicense {
    * @returns {boolean}
    */
   isActive() {
-    return this._getRawLicense()?.status === 'active';
+    return Boolean(this._getRawLicense()?.isActive);
   }
 
   /**
@@ -45,7 +45,7 @@ export class XPackInfoLicense {
    * @returns {number|undefined}
    */
   getExpiryDateInMillis() {
-    return this._getRawLicense()?.expiry_date_in_millis;
+    return this._getRawLicense()?.expiryDateInMillis;
   }
 
   /**
@@ -54,9 +54,9 @@ export class XPackInfoLicense {
    * @returns {boolean}
    */
   isOneOf(candidateLicenses: string | string[]) {
-    const candidate = Array.isArray(candidateLicenses) ? candidateLicenses : [candidateLicenses];
+    const candidates = Array.isArray(candidateLicenses) ? candidateLicenses : [candidateLicenses];
     const mode = this._getRawLicense()?.mode;
-    return Boolean(mode && candidate.includes(mode));
+    return Boolean(mode && candidates.includes(mode));
   }
 
   /**
@@ -84,7 +84,7 @@ export class XPackInfoLicense {
   isActiveLicense(typeChecker: (mode: string) => boolean) {
     const license = this._getRawLicense();
 
-    return license?.status === 'active' && typeChecker(license?.mode);
+    return Boolean(license?.isActive && typeChecker(license.mode as any));
   }
 
   /**

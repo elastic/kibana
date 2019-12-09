@@ -5,19 +5,11 @@
  */
 
 import { createHash } from 'crypto';
-import moment from 'moment';
-import { get, has } from 'lodash';
-import { APICaller } from 'src/core/server';
 import { Legacy } from 'kibana';
 
-import { Poller } from '../../../../common/poller';
 import { XPackInfoLicense } from './xpack_info_license';
 
-import {
-  ElasticsearchError,
-  RawLicense,
-  RawFeatures,
-} from '../../../../../plugins/licensing/server';
+import { LicensingPluginSetup, ILicense } from '../../../../../plugins/licensing/server';
 
 export interface XPackInfoOptions {
   clusterSource?: string;
@@ -31,11 +23,6 @@ export interface XPackFeature {
   isEnabled(): boolean;
   registerLicenseCheckResultsGenerator(generator: LicenseGeneratorCheck): void;
   getLicenseCheckResults(): any;
-}
-
-interface LicenseResponse {
-  license?: RawLicense;
-  features?: RawFeatures;
 }
 
 /**
@@ -70,18 +57,11 @@ export class XPackInfo {
    * @private
    */
   private _cache: {
-    response?: LicenseResponse;
-    error?: ElasticsearchError;
+    license?: ILicense;
+    error?: string;
     json?: Record<string, any>;
     signature?: string;
   };
-
-  /**
-   * XPack info poller.
-   * @type {Poller}
-   * @private
-   */
-  _poller: Poller;
 
   /**
    * XPack License instance.
@@ -91,11 +71,7 @@ export class XPackInfo {
     return this._license;
   }
 
-  private readonly _log: any;
-  private readonly _cluster: {
-    callWithInternalUser: APICaller;
-  };
-  private readonly _clusterSource: string;
+  private readonly licensingPlugin: LicensingPluginSetup;
 
   /**
    * Constructs XPack info object.
@@ -110,27 +86,28 @@ export class XPackInfo {
     server: Legacy.Server,
     { clusterSource = 'data', pollFrequencyInMillis }: XPackInfoOptions
   ) {
-    this._log = server.log.bind(server);
-    this._cluster = server.plugins.elasticsearch.getCluster(clusterSource);
-    this._clusterSource = clusterSource;
-
-    // Create a poller that will be (re)started inside of the `refreshNow` call.
-    this._poller = new Poller({
-      functionToPoll: () => this.refreshNow(),
-      trailing: true,
-      pollFrequencyInMillis,
-      continuePollingOnError: true,
-    });
-
-    server.events.on('stop', () => {
-      this._poller.stop();
-    });
+    this.licensingPlugin = server.newPlatform.setup.plugins.licensing as LicensingPluginSetup;
+    if (!this.licensingPlugin) {
+      throw new Error('XPackInfo requires enabled Licensing plugin');
+    }
 
     this._cache = {};
 
-    this._license = new XPackInfoLicense(
-      () => this._cache.response && this._cache.response.license
-    );
+    this.licensingPlugin.license$.subscribe((license: ILicense) => {
+      if (license.isActive) {
+        this._cache = {
+          license,
+          error: undefined,
+        };
+      } else {
+        this._cache = {
+          license,
+          error: license.error,
+        };
+      }
+    });
+
+    this._license = new XPackInfoLicense(() => this._cache.license);
   }
 
   /**
@@ -138,7 +115,7 @@ export class XPackInfo {
    * @returns {boolean}
    */
   isAvailable() {
-    return !!this._cache.response && !!this._cache.response.license;
+    return Boolean(this._cache.license?.isAvailable);
   }
 
   /**
@@ -146,7 +123,10 @@ export class XPackInfo {
    * @returns {boolean}
    */
   isXpackUnavailable() {
-    return this._cache.error instanceof Error && this._cache.error.status === 400;
+    return (
+      this._cache.error &&
+      this._cache.error === 'X-Pack plugin is not installed on the Elasticsearch cluster.'
+    );
   }
 
   /**
@@ -154,15 +134,7 @@ export class XPackInfo {
    * @returns {Error|string}
    */
   unavailableReason() {
-    if (!this._cache.error && this._cache.response && !this._cache.response.license) {
-      return `[${this._clusterSource}] Elasticsearch cluster did not respond with license information.`;
-    }
-
-    if (this.isXpackUnavailable()) {
-      return `X-Pack plugin is not installed on the [${this._clusterSource}] Elasticsearch cluster.`;
-    }
-
-    return this._cache.error;
+    return this._cache.license?.getUnavailableReason();
   }
 
   onLicenseInfoChange(handler: () => void) {
@@ -174,64 +146,7 @@ export class XPackInfo {
    * @returns {Promise.<XPackInfo>}
    */
   async refreshNow() {
-    this._log(
-      ['license', 'debug', 'xpack'],
-      `Calling [${
-        this._clusterSource
-      }] Elasticsearch _xpack API. Polling frequency: ${this._poller.getPollFrequency()}`
-    );
-
-    // We can reset polling timer since we force refresh here.
-    this._poller.stop();
-
-    try {
-      const response = await this._cluster.callWithInternalUser('transport.request', {
-        method: 'GET',
-        path: '/_xpack',
-      });
-
-      const licenseInfoChanged = this._hasLicenseInfoChanged(response);
-
-      if (licenseInfoChanged) {
-        const licenseInfoParts = [
-          `mode: ${get(response, 'license.mode')}`,
-          `status: ${get(response, 'license.status')}`,
-        ];
-
-        if (has(response, 'license.expiry_date_in_millis')) {
-          const expiryDate = moment(response.license.expiry_date_in_millis, 'x').format();
-          licenseInfoParts.push(`expiry date: ${expiryDate}`);
-        }
-
-        const licenseInfo = licenseInfoParts.join(' | ');
-
-        this._log(
-          ['license', 'info', 'xpack'],
-          `Imported ${this._cache.response ? 'changed ' : ''}license information` +
-            ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
-        );
-      }
-
-      this._cache = { response };
-
-      if (licenseInfoChanged) {
-        // call license info changed listeners
-        for (const listener of this._licenseInfoChangedListeners) {
-          listener();
-        }
-      }
-    } catch (error) {
-      this._log(
-        ['license', 'warning', 'xpack'],
-        `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-          ` for the [${this._clusterSource}] cluster. ${error}`
-      );
-
-      this._cache = { error };
-    }
-
-    this._poller.start();
-
+    await this.licensingPlugin.refresh();
     return this;
   }
 
@@ -248,7 +163,7 @@ export class XPackInfo {
        * @returns {boolean}
        */
       isAvailable: () => {
-        return !!get(this._cache.response, `features.${name}.available`);
+        return Boolean(this._cache.license?.getFeature(name).isAvailable);
       },
 
       /**
@@ -256,7 +171,7 @@ export class XPackInfo {
        * @returns {boolean}
        */
       isEnabled: () => {
-        return !!get(this._cache.response, `features.${name}.enabled`);
+        return Boolean(this._cache.license?.getFeature(name).isEnabled);
       },
 
       /**
@@ -325,28 +240,5 @@ export class XPackInfo {
     }
 
     return this._cache.json;
-  }
-
-  /**
-   * Checks whether license within specified response differs from the current license.
-   * Comparison is based on license mode, status and expiration date.
-   * @param {Object} response xPack info response object returned from the backend.
-   * @returns {boolean} True if license within specified response object differs from
-   * the one we already have.
-   * @private
-   */
-  _hasLicenseInfoChanged(response: LicenseResponse) {
-    const newLicense: RawLicense = response?.license || (({} as unknown) as RawLicense);
-    const cachedLicense: RawLicense = this._cache.response?.license || ({} as RawLicense);
-
-    if (newLicense.type !== cachedLicense.type) {
-      return true;
-    }
-
-    if (newLicense.status !== cachedLicense.status) {
-      return true;
-    }
-
-    return newLicense.expiry_date_in_millis !== cachedLicense.expiry_date_in_millis;
   }
 }

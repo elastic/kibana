@@ -57,6 +57,10 @@ export interface PublicLicense {
    * The license type, being usually one of basic, standard, gold, platinum, or trial.
    */
   type: LicenseType;
+  /**
+   * The license type, being usually one of basic, standard, gold, platinum, or trial.
+   */
+  mode: LicenseType;
 }
 
 /**
@@ -118,6 +122,11 @@ export interface ILicense {
    * The license type, being usually one of basic, standard, gold, platinum, or trial.
    */
   type?: LicenseType;
+
+  /**
+   * The license type, being usually one of basic, standard, gold, platinum, or trial.
+   */
+  mode?: LicenseType;
 
   /**
    * Signature of the license content.
