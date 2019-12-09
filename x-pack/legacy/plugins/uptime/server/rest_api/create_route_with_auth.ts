@@ -28,9 +28,9 @@ export const createRouteWithAuth = (
       case 400:
         return response.badRequest({ body: { message } });
       case 401:
-        return response.unauthorized({ body: message });
+        return response.unauthorized({ body: { message } });
       case 403:
-        return response.forbidden({ body: message });
+        return response.forbidden({ body: { message } });
       default:
         return response.internalError();
     }
