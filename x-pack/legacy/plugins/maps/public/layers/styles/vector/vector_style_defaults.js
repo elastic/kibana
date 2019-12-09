@@ -27,6 +27,9 @@ export const VECTOR_STYLES = {
   ICON_ORIENTATION: 'iconOrientation'
 };
 
+export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
+export const POLYGON_STYLES = [VECTOR_STYLES.FILL_COLOR, VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
+
 export function getDefaultProperties(mapColors = []) {
   return {
     ...getDefaultStaticProperties(mapColors),
