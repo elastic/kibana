@@ -5,10 +5,10 @@
  */
 
 import { generatePath } from 'react-router-dom';
-import { useCore } from '.';
 import { PLUGIN } from '../../common/constants';
 import { getFilePath, getInfoPath } from '../../common/routes';
 import { patterns } from '../routes';
+import { useCore } from '.';
 import { DetailViewPanelName } from '..';
 
 // TODO: get this from server/packages/handlers.ts (move elsewhere?)
@@ -17,6 +17,7 @@ interface DetailParams {
   name: string;
   version: string;
   panel?: DetailViewPanelName;
+  withAppRoot?: boolean;
 }
 
 const removeRelativePath = (relativePath: string): string =>
@@ -47,11 +48,14 @@ export function useLinks() {
       return http.basePath.prepend(filePath);
     },
     toListView: () => appRoot(patterns.LIST_VIEW),
-    toDetailView: ({ name, version, panel }: DetailParams) => {
+    toDetailView: ({ name, version, panel, withAppRoot = true }: DetailParams) => {
       // panel is optional, but `generatePath` won't accept `path: undefined`
       // so use this to pass `{ pkgkey }` or `{ pkgkey, panel }`
       const params = Object.assign({ pkgkey: `${name}-${version}` }, panel ? { panel } : {});
-      return appRoot(generatePath(patterns.DETAIL_VIEW, params));
+      const path = generatePath(patterns.DETAIL_VIEW, params);
+      return withAppRoot ? appRoot(path) : path;
     },
+    toAddDataSourceView: ({ name, version }: { name: string; version: string }) =>
+      appRoot(generatePath(patterns.ADD_DATA_SOURCE_VIEW, { pkgkey: `${name}-${version}` })),
   };
 }
