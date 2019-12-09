@@ -77,7 +77,27 @@ export default function({ getService }: FtrProviderContext) {
       expect(savedObjectResponse.id).to.be('yamlpipeline-1.0.0');
     });
     it('works with a package with only an ingest pipeline', async () => {
-      expect(true).to.be(true);
+      const createDataSource = async () => {
+        const response = await supertest
+          .get('/api/epm/datasource/install/yamlpipeline-1.0.0')
+          .expect(200);
+        return response.body;
+      };
+
+      // const readDataSourceSavedObject = async () => {
+      //   const response = await supertest
+      //     .get('/api/saved_objects/epm-datasource/yamlpipeline-1.0.0')
+      //     .expect(200);
+      //   return response.body;
+      // };
+
+      const createDataSourceResponse = await createDataSource();
+      console.log('createDataSourceResponse is ', createDataSourceResponse);
+
+      // const readDataSourceSavedObjectResponse = await readDataSourceSavedObject();
+      // console.log('readDataSourceSavedObjectResponse is ', readDataSourceSavedObjectResponse);
+
+      expect(false).to.be(true);
     });
   });
 }
