@@ -73,6 +73,17 @@ function createRuleForType(
     case 'field': {
       const fieldData = ruleDefinition || { username: '*' };
 
+      let fieldDataType: string = typeof fieldData;
+      if (Array.isArray(fieldData)) {
+        fieldDataType = 'array';
+      }
+      if (fieldDataType !== 'object') {
+        throw new RuleBuilderError(`Expected an object, but found ${fieldDataType}`, [
+          ...ruleTrace,
+          ruleType,
+        ]);
+      }
+
       const entries = Object.entries(fieldData);
       if (entries.length !== 1) {
         throw new RuleBuilderError(`Expected a single field, but found ${entries.length}`, [
@@ -157,10 +168,10 @@ function createRuleForType(
         ]);
       }
       if (parentRuleType !== 'all') {
-        throw new RuleBuilderError(
-          `'except' can only exist within an 'all' rule, but found within ${parentRuleType}`,
-          [...ruleTrace, ruleType]
-        );
+        throw new RuleBuilderError(`'except' can only exist within an 'all' rule`, [
+          ...ruleTrace,
+          ruleType,
+        ]);
       }
       return parseRawRules(ruleDefinition || {}, ruleType, [...ruleTrace, ruleType], depth);
     }
