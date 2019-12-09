@@ -53,13 +53,12 @@ export const createGotoRoute = ({
             location: http.basePath.prepend(url),
           },
         });
-      } else {
-        return response.redirected({
-          headers: {
-            location: http.basePath.prepend('/goto_LP/' + request.params.urlId),
-          },
-        });
       }
+      return response.redirected({
+        headers: {
+          location: http.basePath.prepend('/goto_LP/' + request.params.urlId),
+        },
+      });
     })
   );
 };
