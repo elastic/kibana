@@ -9,6 +9,7 @@ import Boom from 'boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import { schema } from '@kbn/config-schema';
 
 import { throwErrors } from '../../../common/runtime_types';
 
@@ -31,6 +32,8 @@ import { InfraSourceConfiguration } from '../../../public/graphql/types';
 
 import { buildLogSummaryQueryBody } from './helpers';
 
+const escapeHatch = schema.object({}, { allowUnknowns: true });
+
 // FIXME: move to a shared place, or to the elasticsearch-js repo
 interface DateRangeAggregation {
   buckets: Array<{
@@ -47,19 +50,21 @@ interface DateRangeAggregation {
 
 export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) => {
   // Summary
-  framework.registerRoute({
-    method: 'POST',
-    path: LOGS_SUMMARY_PATH,
-    handler: async (req, res) => {
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: LOGS_SUMMARY_PATH,
+      validate: { body: escapeHatch },
+    },
+    async (requestContext, request, response) => {
       try {
         const payload = pipe(
-          logsSummaryRequestRT.decode(req.payload),
+          logsSummaryRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
-
         const { sourceId, startDate, endDate, bucketSize, query } = payload;
 
-        const sourceConfiguration = (await sources.getSourceConfiguration(req, sourceId))
+        const sourceConfiguration = (await sources.getSourceConfiguration(requestContext, sourceId))
           .configuration;
 
         const {
@@ -70,7 +75,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
         const esResults = await framework.callWithRequest<
           {},
           { log_summary: DateRangeAggregation }
-        >(req, 'search', {
+        >(requestContext, 'search', {
           index: sourceConfiguration.logAlias,
           body: buildLogSummaryQueryBody({
             startDate,
@@ -82,8 +87,8 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
           }),
         });
 
-        return res.response(
-          logsSummaryResponseRT.encode({
+        return response.ok({
+          body: logsSummaryResponseRT.encode({
             data: {
               start: startDate,
               end: endDate,
@@ -94,27 +99,32 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
                   entriesCount: bucket.doc_count,
                 })) ?? [],
             },
-          })
-        );
+          }),
+        });
       } catch (error) {
-        return Boom.badImplementation(error.message);
+        return response.internalError({
+          body: error.message,
+        });
       }
-    },
-  });
+    }
+  );
 
   // Summary Highlights
-  framework.registerRoute({
-    method: 'POST',
-    path: LOGS_SUMMARY_HIGHLIGHTS_PATH,
-    handler: async (req, res) => {
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: LOGS_SUMMARY_HIGHLIGHTS_PATH,
+      validate: { body: escapeHatch },
+    },
+    async (requestContext, request, response) => {
       try {
         const payload = pipe(
-          logsSummaryHighlightsRequestRT.decode(req.payload),
+          logsSummaryHighlightsRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
         const { sourceId, startDate, endDate, bucketSize, query, highlightTerms } = payload;
 
-        const sourceConfiguration = (await sources.getSourceConfiguration(req, sourceId))
+        const sourceConfiguration = (await sources.getSourceConfiguration(requestContext, sourceId))
           .configuration;
 
         const timestampField = sourceConfiguration.fields.timestamp;
@@ -132,7 +142,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
             const esResults = await framework.callWithRequest<
               {},
               { log_summary: DateRangeAggregation }
-            >(req, 'search', {
+            >(requestContext, 'search', {
               index: sourceConfiguration.logAlias,
               body: buildLogSummaryQueryBody({
                 startDate,
@@ -165,12 +175,16 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
           })
         );
 
-        return res.response(logsSummaryHighlightsResponseRT.encode({ data: summaries }));
+        return response.ok({
+          body: logsSummaryHighlightsResponseRT.encode({ data: summaries }),
+        });
       } catch (error) {
-        return Boom.badImplementation(error.message);
+        return response.internalError({
+          body: error.message,
+        });
       }
-    },
-  });
+    }
+  );
 };
 
 const getRequiredFields = (
