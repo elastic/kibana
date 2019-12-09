@@ -59,6 +59,9 @@ export async function SecurityServiceProvider({ getService }: FtrProviderContext
 
   const enabledPlugins = await kibanaServer.plugins.getEnabledIds();
   if (enabledPlugins.includes('security')) {
+    log.debug(
+      '====================================================creating roles and users========================='
+    );
     await secService.setupConfiguredRoles();
     await secService.setupTestUser();
   }
