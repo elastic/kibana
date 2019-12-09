@@ -6,13 +6,13 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchStatus } from '../../../../models/watch_status';
-import { NPServer, ServerShim } from '../../../../types';
+import { RouteDependencies, ServerShim } from '../../../../types';
 
 function acknowledgeAction(callWithRequest: any, watchId: string, actionId: string) {
   return callWithRequest('watcher.ackWatch', {
@@ -21,7 +21,7 @@ function acknowledgeAction(callWithRequest: any, watchId: string, actionId: stri
   });
 }
 
-export function registerAcknowledgeRoute(server: NPServer, legacy: ServerShim) {
+export function registerAcknowledgeRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(legacy, request);
@@ -51,7 +51,7 @@ export function registerAcknowledgeRoute(server: NPServer, legacy: ServerShim) {
     }
   };
 
-  server.router.put(
+  deps.router.put(
     {
       path: '/api/watcher/watch/{watchId}/action/{actionId}/acknowledge',
       validate: {

@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 /* Legacy UI imports */
 import { npSetup, npStart } from 'ui/new_platform';
 import routes from 'ui/routes';
-import { I18nContext } from 'ui/i18n';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 // @ts-ignore
 import { TimeBuckets } from 'ui/time_buckets';
@@ -63,7 +62,6 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
           ...(npSetup.plugins as typeof npSetup.plugins & { eui_utils: any }),
           __LEGACY: {
             MANAGEMENT_BREADCRUMB,
-            I18nContext,
             TimeBuckets,
             licenseStatus,
           },

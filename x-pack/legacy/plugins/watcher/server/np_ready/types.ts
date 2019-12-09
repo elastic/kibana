@@ -17,6 +17,6 @@ export interface ServerShim {
   };
 }
 
-export interface NPServer {
+export interface RouteDependencies {
   router: IRouter;
 }

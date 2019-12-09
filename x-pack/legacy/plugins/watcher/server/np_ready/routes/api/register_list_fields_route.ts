@@ -10,7 +10,7 @@ import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Fields } from '../../models/fields';
-import { NPServer, ServerShim } from '../../types';
+import { RouteDependencies, ServerShim } from '../../types';
 
 function fetchFields(callWithRequest: any, indexes: string[]) {
   const params = {
@@ -24,7 +24,7 @@ function fetchFields(callWithRequest: any, indexes: string[]) {
   return callWithRequest('fieldCaps', params);
 }
 
-export function registerListFieldsRoute(server: NPServer, legacy: ServerShim) {
+export function registerListFieldsRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
 
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
@@ -52,7 +52,7 @@ export function registerListFieldsRoute(server: NPServer, legacy: ServerShim) {
     }
   };
 
-  server.router.post(
+  deps.router.post(
     {
       path: '/api/watcher/fields',
       validate: false,

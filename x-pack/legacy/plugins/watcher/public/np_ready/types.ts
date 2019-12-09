@@ -9,7 +9,3 @@ export interface LegacyDependencies {
   TimeBuckets: any;
   licenseStatus: any;
 }
-
-export interface BootLegacyDependencies extends LegacyDependencies {
-  I18nContext: any;
-}

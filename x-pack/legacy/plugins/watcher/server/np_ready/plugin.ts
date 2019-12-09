@@ -3,11 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { Plugin, CoreSetup } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN } from '../../common/constants';
-import { ServerShim, NPServer } from './types';
+import { ServerShim, RouteDependencies } from './types';
 
 import { registerLicenseChecker } from '../../../../server/lib/register_license_checker';
 import { registerSettingsRoutes } from './routes/api/settings';
@@ -21,7 +20,7 @@ import { registerLoadHistoryRoute } from './routes/api/register_load_history_rou
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
   async setup({ http }: CoreSetup, { __LEGACY: serverShim }: { __LEGACY: ServerShim }) {
     const router = http.createRouter();
-    const npServer: NPServer = {
+    const routeDependencies: RouteDependencies = {
       router,
     };
     // Register license checker
@@ -32,13 +31,13 @@ export class WatcherServerPlugin implements Plugin<void, void, any, any> {
       PLUGIN.MINIMUM_LICENSE_REQUIRED
     );
 
-    registerListFieldsRoute(npServer, serverShim);
-    registerLoadHistoryRoute(npServer, serverShim);
-    registerIndicesRoutes(npServer, serverShim);
-    registerLicenseRoutes(npServer, serverShim);
-    registerSettingsRoutes(npServer, serverShim);
-    registerWatchesRoutes(npServer, serverShim);
-    registerWatchRoutes(npServer, serverShim);
+    registerListFieldsRoute(routeDependencies, serverShim);
+    registerLoadHistoryRoute(routeDependencies, serverShim);
+    registerIndicesRoutes(routeDependencies, serverShim);
+    registerLicenseRoutes(routeDependencies, serverShim);
+    registerSettingsRoutes(routeDependencies, serverShim);
+    registerWatchesRoutes(routeDependencies, serverShim);
+    registerWatchRoutes(routeDependencies, serverShim);
   }
   start() {}
   stop() {}

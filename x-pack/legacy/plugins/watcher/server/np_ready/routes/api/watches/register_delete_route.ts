@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { NPServer, ServerShim } from '../../../types';
+import { RouteDependencies, ServerShim } from '../../../types';
 
 function deleteWatches(callWithRequest: any, watchIds: string[]) {
   const deletePromises = watchIds.map(watchId => {
@@ -37,7 +37,7 @@ function deleteWatches(callWithRequest: any, watchIds: string[]) {
   });
 }
 
-export function registerDeleteRoute(server: NPServer, legacy: ServerShim) {
+export function registerDeleteRoute(deps: RouteDependencies, legacy: ServerShim) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(legacy, request);
 
@@ -49,7 +49,7 @@ export function registerDeleteRoute(server: NPServer, legacy: ServerShim) {
     }
   };
 
-  server.router.post(
+  deps.router.post(
     {
       path: '/api/watcher/watches/delete',
       validate: {

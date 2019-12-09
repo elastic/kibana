@@ -11,7 +11,7 @@ import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
-import { NPServer, ServerShim } from '../../../types';
+import { RouteDependencies, ServerShim } from '../../../types';
 // @ts-ignore
 import { ExecuteDetails } from '../../../models/execute_details';
 // @ts-ignore
@@ -28,7 +28,7 @@ function executeWatch(callWithRequest: any, executeDetails: any, watchJson: any)
   });
 }
 
-export function registerExecuteRoute(server: NPServer, legacy: ServerShim) {
+export function registerExecuteRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(legacy, request);
@@ -64,7 +64,7 @@ export function registerExecuteRoute(server: NPServer, legacy: ServerShim) {
     }
   };
 
-  server.router.put(
+  deps.router.put(
     {
       path: '/api/watcher/watch/execute',
       validate: {

@@ -6,10 +6,10 @@
 
 import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
 
-import { BootLegacyDependencies } from './types';
+import { LegacyDependencies } from './types';
 
 interface LegacyPlugins {
-  __LEGACY: BootLegacyDependencies;
+  __LEGACY: LegacyDependencies;
 }
 
 export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
@@ -25,9 +25,10 @@ export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
           core: {
             docLinks,
             chrome,
-            // Will be passed through in future, remove @ts-ignore when shim is removed or types are updated
+            // Waiting for types to be updated.
             // @ts-ignore
             savedObjects,
+            i18n: { Context: I18nContext },
           },
         },
         { element }
@@ -42,7 +43,8 @@ export class WatcherUIPlugin implements Plugin<void, void, LegacyPlugins, any> {
           docLinks,
           chrome,
           euiUtils,
-          savedObjects,
+          savedObjects: savedObjects.client,
+          I18nContext,
           legacy: {
             ...__LEGACY,
           },

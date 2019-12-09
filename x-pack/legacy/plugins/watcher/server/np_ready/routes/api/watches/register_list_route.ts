@@ -11,7 +11,7 @@ import { fetchAllFromScroll } from '../../../lib/fetch_all_from_scroll';
 import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../../common/constants';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { NPServer, ServerShim } from '../../../types';
+import { RouteDependencies, ServerShim } from '../../../types';
 // @ts-ignore
 import { Watch } from '../../../models/watch';
 
@@ -30,7 +30,7 @@ function fetchWatches(callWithRequest: any) {
   );
 }
 
-export function registerListRoute(server: NPServer, legacy: ServerShim) {
+export function registerListRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(legacy, request);
@@ -77,7 +77,7 @@ export function registerListRoute(server: NPServer, legacy: ServerShim) {
     }
   };
 
-  server.router.get(
+  deps.router.get(
     {
       path: '/api/watcher/watches',
       validate: false,

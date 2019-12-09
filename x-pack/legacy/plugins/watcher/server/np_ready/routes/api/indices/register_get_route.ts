@@ -9,7 +9,7 @@ import { reduce, size } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { NPServer, ServerShim } from '../../../types';
+import { RouteDependencies, ServerShim } from '../../../types';
 
 function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   return reduce(
@@ -60,7 +60,7 @@ function getIndices(callWithRequest: any, pattern: string, limit = 10) {
   });
 }
 
-export function registerGetRoute(server: NPServer, legacy: ServerShim) {
+export function registerGetRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(legacy, request);
@@ -80,7 +80,7 @@ export function registerGetRoute(server: NPServer, legacy: ServerShim) {
     }
   };
 
-  server.router.post(
+  deps.router.post(
     {
       path: '/api/watcher/indices',
       validate: false,

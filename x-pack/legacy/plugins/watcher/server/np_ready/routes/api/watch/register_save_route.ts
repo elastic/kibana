@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { WATCH_TYPES } from '../../../../../common/constants';
 import {
@@ -15,7 +15,7 @@ import {
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { NPServer, ServerShim } from '../../../types';
+import { RouteDependencies, ServerShim } from '../../../types';
 
 function fetchWatch(callWithRequest: any, watchId: string) {
   return callWithRequest('watcher.getWatch', {
@@ -30,7 +30,7 @@ function saveWatch(callWithRequest: any, id: string, body: any) {
   });
 }
 
-export function registerSaveRoute(server: NPServer, legacy: ServerShim) {
+export function registerSaveRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(legacy, request);
@@ -90,7 +90,7 @@ export function registerSaveRoute(server: NPServer, legacy: ServerShim) {
     }
   };
 
-  server.router.put(
+  deps.router.put(
     {
       path: '/api/watcher/watch/{id}',
       validate: {

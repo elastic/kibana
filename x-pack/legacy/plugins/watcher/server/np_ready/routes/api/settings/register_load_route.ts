@@ -10,7 +10,7 @@ import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Settings } from '../../../models/settings';
-import { NPServer, ServerShim } from '../../../types';
+import { RouteDependencies, ServerShim } from '../../../types';
 
 function fetchClusterSettings(callWithInternalUser: any) {
   return callWithInternalUser('cluster.getSettings', {
@@ -19,7 +19,7 @@ function fetchClusterSettings(callWithInternalUser: any) {
   });
 }
 
-export function registerLoadRoute(server: NPServer, legacy: ServerShim) {
+export function registerLoadRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
@@ -37,7 +37,7 @@ export function registerLoadRoute(server: NPServer, legacy: ServerShim) {
   };
   const callWithInternalUser = callWithInternalUserFactory(legacy);
 
-  server.router.get(
+  deps.router.get(
     {
       path: '/api/watcher/settings',
       validate: false,

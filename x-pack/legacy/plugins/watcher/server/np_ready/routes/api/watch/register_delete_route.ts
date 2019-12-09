@@ -5,11 +5,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RequestHandler } from 'kibana/server';
+import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
-import { NPServer, ServerShim } from '../../../types';
+import { RouteDependencies, ServerShim } from '../../../types';
 
 function deleteWatch(callWithRequest: any, watchId: string) {
   return callWithRequest('watcher.deleteWatch', {
@@ -17,7 +17,7 @@ function deleteWatch(callWithRequest: any, watchId: string) {
   });
 }
 
-export function registerDeleteRoute(server: NPServer, legacy: ServerShim) {
+export function registerDeleteRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(legacy, request);
@@ -39,7 +39,7 @@ export function registerDeleteRoute(server: NPServer, legacy: ServerShim) {
     }
   };
 
-  server.router.delete(
+  deps.router.delete(
     {
       path: '/api/watcher/watch/{watchId}',
       validate: {
