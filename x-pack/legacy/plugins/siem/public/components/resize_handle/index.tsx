@@ -15,7 +15,6 @@ export const resizeCursorStyle = 'col-resize';
 export const globalResizeCursorClassName = 'global-resize-cursor';
 
 /** This polyfill is for Safari and IE-11 only. `movementX` is more accurate and "feels" better, so only use this function on Safari and IE-11 */
-
 export const calculateDeltaX = ({ prevX, screenX }: { prevX: number; screenX: number }) =>
   prevX !== 0 ? screenX - prevX : 0;
 
@@ -24,7 +23,6 @@ const isSafari = /^((?!chrome|android|crios|fxios|Firefox).)*safari/i.test(navig
 interface ResizeHandleContainerProps {
   bottom?: string | number;
   /** optionally provide a height style ResizeHandleContainer */
-
   height?: string;
   left?: string | number;
   positionAbsolute?: boolean;
@@ -34,16 +32,12 @@ interface ResizeHandleContainerProps {
 
 interface Props extends ResizeHandleContainerProps {
   /** a (styled) resize handle */
-
   handle: React.ReactNode;
   /** the `onResize` callback will be invoked with this id */
-
   id: string;
   /** invoked when the handle is resized */
-
   onResize: OnResize;
   /** The resizeable content to render */
-
   render: (isResizing: boolean) => React.ReactNode;
 }
 
