@@ -48,7 +48,7 @@ export function validateRoleMappingRoleTemplates({
   return valid();
 }
 
-export function validateRoleMappingRules({ rules }: RoleMapping): ValidationResult {
+export function validateRoleMappingRules({ rules }: Pick<RoleMapping, 'rules'>): ValidationResult {
   try {
     const { rules: parsedRules } = generateRulesFromRaw(rules);
     if (!parsedRules) {

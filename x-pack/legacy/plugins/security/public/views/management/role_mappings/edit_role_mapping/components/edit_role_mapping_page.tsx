@@ -4,25 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, ChangeEvent, Fragment } from 'react';
+import React, { Component, Fragment } from 'react';
 import {
   EuiCallOut,
-  EuiDescribedFormGroup,
-  EuiFieldText,
   EuiForm,
-  EuiFormRow,
   EuiPageContent,
-  EuiPanel,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
-  EuiLink,
-  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,8 +23,7 @@ import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { RoleMapping } from '../../../../../../common/model';
 import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
-import { RuleEditor } from './rule_editor';
-import { RoleSelector } from './role_selector';
+import { RuleEditorPanel } from './rule_editor_panel';
 import {
   NoCompatibleRealms,
   PermissionDenied,
@@ -39,13 +31,8 @@ import {
   SectionLoading,
 } from '../../components';
 import { ROLE_MAPPINGS_PATH } from '../../../management_urls';
-import {
-  validateRoleMappingName,
-  validateRoleMappingRoles,
-  validateRoleMappingRoleTemplates,
-  validateRoleMappingForSave,
-  validateRoleMappingRules,
-} from '../services/role_mapping_validation';
+import { validateRoleMappingForSave } from '../services/role_mapping_validation';
+import { MappingInfoPanel } from './mapping_info_panel';
 
 interface State {
   isLoadingApp: boolean;
@@ -135,60 +122,29 @@ export class EditRoleMappingPage extends Component<Props, State> {
     return (
       <div>
         <EuiForm isInvalid={this.state.formError.isInvalid} error={this.state.formError.error}>
-          <EuiTitle size="l">
-            <h1>
-              {this.editingExistingRoleMapping() ? (
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.editRoleMappingTitle"
-                  defaultMessage="Edit role mapping"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.createRoleMappingTitle"
-                  defaultMessage="Create role mapping"
-                />
-              )}
-            </h1>
-          </EuiTitle>
-          <EuiText color="subdued" size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.security.management.editRoleMapping.roleMappingDescription"
-                defaultMessage="Use role mappings to control which roles are assigned to your users."
-              />
-            </p>
-          </EuiText>
-          {!this.state.hasCompatibleRealms && (
-            <>
-              <EuiSpacer size="s" />
-              <NoCompatibleRealms />
-            </>
-          )}
+          {this.getFormTitle()}
           <EuiSpacer />
-          <EuiPanel>
-            <EuiTitle>
-              <h2>Role mapping</h2>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.security.management.editRoleMapping.configureRoleMappingText"
-                  defaultMessage="Configure your role mapping."
-                />
-              </p>
-            </EuiText>
-            <EuiSpacer />
-            {this.getRoleMappingName()}
-            {this.getEnabledSwitch()}
-            {this.getRolesSelector()}
-          </EuiPanel>
+          <MappingInfoPanel
+            roleMapping={this.state.roleMapping!}
+            onChange={roleMapping => this.setState({ roleMapping })}
+            mode={this.editingExistingRoleMapping() ? 'edit' : 'create'}
+            validateForm={this.state.validateForm}
+            canUseInlineScripts={this.state.canUseInlineScripts}
+            canUseStoredScripts={this.state.canUseStoredScripts}
+          />
           <EuiSpacer />
-          <EuiPanel>
-            <EuiTitle>
-              <h2>Mapping rules</h2>
-            </EuiTitle>
-            {this.getRuleEditor()}
-          </EuiPanel>
+          <RuleEditorPanel
+            onValidityChange={this.onRuleValidityChange}
+            rawRules={this.state.roleMapping!.rules}
+            onChange={rules =>
+              this.setState({
+                roleMapping: {
+                  ...this.state.roleMapping!,
+                  rules,
+                },
+              })
+            }
+          />
           <EuiSpacer />
           {this.getFormButtons()}
         </EuiForm>
@@ -196,200 +152,40 @@ export class EditRoleMappingPage extends Component<Props, State> {
     );
   }
 
-  private getRoleMappingName = () => {
+  private getFormTitle = () => {
     return (
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.roleMappingNameFormRowTitle"
-              defaultMessage="Name"
-            />
-          </h3>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.roleMappingNameFormRowHelpText"
-            defaultMessage="The distinct name that identifies the role mapping. The name is used solely as an identifier; it does not affect the behavior of the mapping in any way."
-          />
-        }
-      >
-        <EuiFormRow
-          hasEmptyLabelSpace
-          {...(this.state.validateForm && validateRoleMappingName(this.state.roleMapping!))}
-        >
-          <EuiFieldText
-            name={'name'}
-            value={this.state.roleMapping!.name || ''}
-            onChange={this.onNameChange}
-            data-test-subj={'roleMappingFormNameInput'}
-            readOnly={this.editingExistingRoleMapping()}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-    );
-  };
-
-  private getRolesSelector = () => {
-    const validationFunction = () => {
-      if (!this.state.validateForm) {
-        return {};
-      }
-      if (this.state.mode === 'roles') {
-        return validateRoleMappingRoles(this.state.roleMapping!);
-      }
-      return validateRoleMappingRoleTemplates(this.state.roleMapping!);
-    };
-    return (
-      <EuiDescribedFormGroup
-        title={
-          <h3>
-            <FormattedMessage
-              id="xpack.security.management.editRoleMapping.roleMappingRolesFormRowTitle"
-              defaultMessage="Roles"
-            />
-          </h3>
-        }
-        description={
-          <EuiText size="s" color="subdued">
-            <span>
+      <Fragment>
+        <EuiTitle size="l">
+          <h1>
+            {this.editingExistingRoleMapping() ? (
               <FormattedMessage
-                id="xpack.security.management.editRoleMapping.roleMappingRolesFormRowHelpText"
-                defaultMessage="Choose which roles to assign to your users."
+                id="xpack.security.management.editRoleMapping.editRoleMappingTitle"
+                defaultMessage="Edit role mapping"
               />
-            </span>
-            <EuiSpacer size="xs" />
-            {this.state.mode === 'templates' ? (
-              <EuiLink
-                onClick={() => {
-                  this.setState({ mode: 'roles' });
-                }}
-              >
-                Switch to roles <EuiIcon size="s" type="inputOutput" />
-              </EuiLink>
             ) : (
-              <EuiLink
-                onClick={() => {
-                  this.setState({ mode: 'templates' });
-                }}
-              >
-                Switch to role templates <EuiIcon size="s" type="inputOutput" />
-              </EuiLink>
-            )}
-          </EuiText>
-        }
-      >
-        <EuiFormRow fullWidth={true} {...validationFunction()}>
-          <RoleSelector
-            roleMapping={this.state.roleMapping!}
-            mode={this.state.mode}
-            canUseInlineScripts={this.state.canUseInlineScripts}
-            canUseStoredScripts={this.state.canUseStoredScripts}
-            onChange={roleMapping => this.setState({ roleMapping })}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-    );
-  };
-
-  private getRuleEditor = () => {
-    const validationResult =
-      this.state.validateForm && validateRoleMappingRules(this.state.roleMapping!);
-
-    let validationWarning = null;
-    if (validationResult) {
-      validationWarning = (
-        <Fragment>
-          <EuiCallOut color="danger" title={validationResult.error || 'FIXME YO'} size="s" />
-        </Fragment>
-      );
-    }
-
-    return (
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            <p>
               <FormattedMessage
-                id="xpack.security.management.editRoleMapping.roleMappingRulesFormRowHelpText"
-                defaultMessage="Roles will be assigned to users matching these rules."
+                id="xpack.security.management.editRoleMapping.createRoleMappingTitle"
+                defaultMessage="Create role mapping"
               />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            {...(this.state.validateForm && validateRoleMappingRules(this.state.roleMapping!))}
-          >
-            <Fragment>
-              {validationWarning}
-              <RuleEditor
-                onValidityChange={this.onRuleValidityChange}
-                rawRules={this.state.roleMapping!.rules}
-                onChange={rules =>
-                  this.setState({
-                    roleMapping: {
-                      ...this.state.roleMapping!,
-                      rules,
-                    },
-                  })
-                }
-              />
-            </Fragment>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
-  private getEnabledSwitch = () => {
-    return (
-      <EuiDescribedFormGroup
-        title={
-          <h3>
+            )}
+          </h1>
+        </EuiTitle>
+        <EuiText color="subdued" size="s">
+          <p>
             <FormattedMessage
-              id="xpack.security.management.editRoleMapping.roleMappingEnabledFormRowTitle"
-              defaultMessage="Enabled"
+              id="xpack.security.management.editRoleMapping.roleMappingDescription"
+              defaultMessage="Use role mappings to control which roles are assigned to your users."
             />
-          </h3>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.security.management.editRoleMapping.roleMappingEnabledFormRowHelpText"
-            defaultMessage="Mappings that are disabled are ignored when role mapping is performed."
-          />
-        }
-      >
-        <EuiFormRow hasEmptyLabelSpace>
-          <EuiSwitch
-            name={'enabled'}
-            label={'enabled'}
-            showLabel={false}
-            checked={this.state.roleMapping!.enabled}
-            onChange={e => {
-              this.setState({
-                roleMapping: {
-                  ...this.state.roleMapping!,
-                  enabled: e.target.checked,
-                },
-              });
-            }}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
+          </p>
+        </EuiText>
+        {!this.state.hasCompatibleRealms && (
+          <>
+            <EuiSpacer size="s" />
+            <NoCompatibleRealms />
+          </>
+        )}
+      </Fragment>
     );
-  };
-
-  private onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
-
-    this.setState({
-      roleMapping: {
-        ...this.state.roleMapping!,
-        name,
-      },
-    });
   };
 
   private getFormButtons = () => {

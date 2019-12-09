@@ -38,7 +38,7 @@ routes.defaults(/^\/management\/security(\/|$)/, {
   resolve: {
     securityManagementSection: function (ShieldUser) {
       const showSecurityLinks = xpackInfo.get('features.security.showLinks');
-      const showRoleMappingManagementLink = xpackInfo.get('features.security.showRoleMappingManagement');
+      const showRoleMappingManagementLink = xpackInfo.get('features.security.showRoleMappingsManagement');
 
       function deregisterSecurity() {
         management.deregister('security');

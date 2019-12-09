@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import {
   EuiSpacer,
   EuiConfirmModal,
@@ -12,7 +12,14 @@ import {
   EuiCallOut,
   EuiIcon,
   EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiFormRow,
+  EuiPanel,
+  EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { RoleMapping } from '../../../../../../../common/model';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { AdvancedRuleEditor } from './advanced_rule_editor';
@@ -21,6 +28,7 @@ import {
   VISUAL_MAX_RULE_DEPTH,
 } from '../../services/role_mapping_constants';
 import { Rule, generateRulesFromRaw } from '../../../model';
+import { validateRoleMappingRules } from '../../services/role_mapping_validation';
 
 interface Props {
   rawRules: RoleMapping['rules'];
@@ -37,7 +45,7 @@ interface State {
   mode: 'visual' | 'advanced';
 }
 
-export class RuleEditor extends Component<Props, State> {
+export class RuleEditorPanel extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -49,13 +57,46 @@ export class RuleEditor extends Component<Props, State> {
   }
 
   public render() {
+    const validationResult = validateRoleMappingRules({ rules: this.state.rules || {} });
+
+    let validationWarning = null;
+    if (validationResult) {
+      validationWarning = (
+        <Fragment>
+          <EuiCallOut color="danger" title={validationResult.error || 'FIXME YO'} size="s" />
+        </Fragment>
+      );
+    }
+
     return (
-      <div>
-        {this.getEditor()}
-        <EuiSpacer />
-        {this.getModeToggle()}
-        {this.getConfirmModeChangePrompt()}
-      </div>
+      <EuiPanel>
+        <EuiTitle>
+          <h2>Mapping rules</h2>
+        </EuiTitle>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.roleMappingRulesFormRowHelpText"
+                  defaultMessage="Roles will be assigned to users matching these rules."
+                />
+              </p>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow fullWidth {...validationResult}>
+              <Fragment>
+                {validationWarning}
+                {this.getEditor()}
+                <EuiSpacer />
+                {this.getModeToggle()}
+                {this.getConfirmModeChangePrompt()}
+              </Fragment>
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     );
   }
 

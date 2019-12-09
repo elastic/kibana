@@ -20,13 +20,13 @@ interface RoleMappingExceptRule {
   except: RoleMappingRule;
 }
 
-export type RoleMappingRule =
+type RoleMappingRule =
   | RoleMappingAnyRule
   | RoleMappingAllRule
   | RoleMappingFieldRule
   | RoleMappingExceptRule;
 
-export type RoleTemplateFormat = 'string' | 'json';
+type RoleTemplateFormat = 'string' | 'json';
 
 export interface InlineRoleTemplate {
   template: { source: string };

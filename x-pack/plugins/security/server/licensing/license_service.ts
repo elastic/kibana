@@ -47,7 +47,7 @@ export class SecurityLicenseService {
               showLogin: true,
               allowLogin: false,
               showLinks: false,
-              showRoleMappingManagement: false,
+              showRoleMappingsManagement: false,
               allowRoleDocumentLevelSecurity: false,
               allowRoleFieldLevelSecurity: false,
               allowRbac: false,
@@ -63,7 +63,7 @@ export class SecurityLicenseService {
               showLogin: false,
               allowLogin: false,
               showLinks: false,
-              showRoleMappingManagement: false,
+              showRoleMappingsManagement: false,
               allowRoleDocumentLevelSecurity: false,
               allowRoleFieldLevelSecurity: false,
               allowRbac: false,
@@ -78,7 +78,7 @@ export class SecurityLicenseService {
             showLinks: true,
             // Role mappings are currently only applicable with paid auth realms.
             // The free realms (native, file) do not support role mappings, so the UI to manage them is useless.
-            showRoleMappingManagement: rawLicense.isNotBasic,
+            showRoleMappingsManagement: rawLicense.isNotBasic,
             // Only platinum and trial licenses are compliant with field- and document-level security.
             allowRoleDocumentLevelSecurity: isLicensePlatinumOrTrial,
             allowRoleFieldLevelSecurity: isLicensePlatinumOrTrial,

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RuleEditor } from './rule_editor';
+export { MappingInfoPanel } from './mapping_info_panel';

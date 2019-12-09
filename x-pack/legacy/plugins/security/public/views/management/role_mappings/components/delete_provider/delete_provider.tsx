@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useRef, useState } from 'react';
+import React, { Fragment, useRef, useState, ReactElement } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
@@ -12,7 +12,7 @@ import { RoleMapping } from '../../../../../../common/model';
 import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
 
 interface Props {
-  children: (deleteMappings: DeleteRoleMappings) => React.ReactElement;
+  children: (deleteMappings: DeleteRoleMappings) => ReactElement;
 }
 
 export type DeleteRoleMappings = (

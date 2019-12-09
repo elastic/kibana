@@ -92,7 +92,7 @@ export function getRoleMappingBreadcrumbs() {
     MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('xpack.security.roleMapping.breadcrumb', {
-        defaultMessage: 'Role Mapping',
+        defaultMessage: 'Role Mappings',
       }),
       href: '#/management/security/role_mappings',
     },

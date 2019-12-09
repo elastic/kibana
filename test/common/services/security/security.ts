@@ -31,7 +31,7 @@ export function SecurityServiceProvider({ getService }: FtrProviderContext) {
 
   return new (class SecurityService {
     role = new Role(url, log);
-    user = new User(url, log);
     roleMappings = new RoleMappings(url, log);
+    user = new User(url, log);
   })();
 }
