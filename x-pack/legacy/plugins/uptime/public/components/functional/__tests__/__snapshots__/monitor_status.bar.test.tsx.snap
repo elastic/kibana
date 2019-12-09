@@ -30,7 +30,7 @@ exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          Down
+          Up
         </div>
       </div>
     </div>
