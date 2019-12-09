@@ -16,7 +16,6 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 
 import { npSetup, npStart } from 'ui/new_platform';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { start as navigation } from '../../../../../src/legacy/core_plugins/navigation/public/legacy';
 import { GraphPlugin } from './plugin';
 
@@ -49,7 +48,6 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
     ...npSetup.plugins,
   });
   instance.start(npStart.core, {
-    data,
     npData: npStart.plugins.data,
     navigation,
     __LEGACY: {

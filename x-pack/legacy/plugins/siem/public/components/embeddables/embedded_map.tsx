@@ -23,7 +23,7 @@ import { Loader } from '../loader';
 import { useStateToaster } from '../toasters';
 import { Embeddable } from './embeddable';
 import { EmbeddableHeader } from './embeddable_header';
-import { createEmbeddable, displayErrorToast, setupEmbeddablesAPI } from './embedded_map_helpers';
+import { createEmbeddable, displayErrorToast } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
@@ -103,17 +103,6 @@ export const EmbeddedMapComponent = ({
 
   const plugins = useKibanaPlugins();
   const core = useKibanaCore();
-
-  // Setup embeddables API (i.e. detach extra actions) useEffect
-  useEffect(() => {
-    try {
-      setupEmbeddablesAPI(plugins);
-    } catch (e) {
-      displayErrorToast(i18n.ERROR_CONFIGURING_EMBEDDABLES_API, e.message, dispatchToaster);
-      setIsLoading(false);
-      setIsError(true);
-    }
-  }, []);
 
   // Initial Load useEffect
   useEffect(() => {

@@ -6,14 +6,12 @@
 
 // NP type imports
 import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/core/public';
-import { DataStart } from 'src/legacy/core_plugins/data/public';
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { LegacyAngularInjectedDependencies } from './render_app';
 import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
 import { LicensingPluginSetup } from '../../../../plugins/licensing/common/types';
 
 export interface GraphPluginStartDependencies {
-  data: DataStart;
   npData: ReturnType<DataPlugin['start']>;
   navigation: NavigationStart;
 }
@@ -32,7 +30,6 @@ export interface GraphPluginStartDependencies {
 }
 
 export class GraphPlugin implements Plugin {
-  private dataStart: DataStart | null = null;
   private navigationStart: NavigationStart | null = null;
   private npDataStart: ReturnType<DataPlugin['start']> | null = null;
   private savedObjectsClient: SavedObjectsClientContract | null = null;
@@ -62,7 +59,7 @@ export class GraphPlugin implements Plugin {
           chrome: contextCore.chrome,
           config: contextCore.uiSettings,
           toastNotifications: contextCore.notifications.toasts,
-          indexPatterns: this.dataStart!.indexPatterns.indexPatterns,
+          indexPatterns: this.npDataStart!.indexPatterns,
           ...this.angularDependencies!,
         });
       },
@@ -71,10 +68,9 @@ export class GraphPlugin implements Plugin {
 
   start(
     core: CoreStart,
-    { data, npData, navigation, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
+    { npData, navigation, __LEGACY: { angularDependencies } }: GraphPluginStartDependencies
   ) {
     this.navigationStart = navigation;
-    this.dataStart = data;
     this.npDataStart = npData;
     this.angularDependencies = angularDependencies;
     this.savedObjectsClient = core.savedObjects.client;
