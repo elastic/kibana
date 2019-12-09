@@ -17,24 +17,21 @@
  * under the License.
  */
 
-import { Filter, FilterMeta, LatLon } from './meta_filter';
+import { buildExistsFilter, getExistsFilterField } from './exists_filter';
+import { IIndexPattern } from '../../index_patterns';
+import { fields } from '../../index_patterns/fields/fields.mocks.ts';
 
-export type GeoPolygonFilterMeta = FilterMeta & {
-  params: {
-    points: LatLon[];
-  };
-};
+describe('exists filter', function() {
+  const indexPattern: IIndexPattern = ({
+    fields,
+  } as unknown) as IIndexPattern;
 
-export type GeoPolygonFilter = Filter & {
-  meta: GeoPolygonFilterMeta;
-  geo_polygon: any;
-};
-
-export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
-  filter && filter.geo_polygon;
-
-export const getGeoPolygonFilterField = (filter: GeoPolygonFilter) => {
-  return (
-    filter.geo_polygon && Object.keys(filter.geo_polygon).find(key => key !== 'ignore_unmapped')
-  );
-};
+  describe('getExistsFilterField', function() {
+    it('should return the name of the field an exists query is targeting', () => {
+      const field = indexPattern.fields.find(patternField => patternField.name === 'extension');
+      const filter = buildExistsFilter(field!, indexPattern);
+      const result = getExistsFilterField(filter);
+      expect(result).toBe('extension');
+    });
+  });
+});

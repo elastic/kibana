@@ -17,24 +17,29 @@
  * under the License.
  */
 
-import { Filter, FilterMeta, LatLon } from './meta_filter';
+import { getFilterField, cleanFilter, Filter } from '../filters';
+import { IIndexPattern } from '../../index_patterns';
 
-export type GeoPolygonFilterMeta = FilterMeta & {
-  params: {
-    points: LatLon[];
+export const handleNestedFilter = (filter: Filter, indexPattern?: IIndexPattern) => {
+  if (!indexPattern) return filter;
+
+  const fieldName = getFilterField(filter);
+  if (!fieldName) {
+    return filter;
+  }
+
+  const field = indexPattern.fields.find(indexPatternField => indexPatternField.name === fieldName);
+  if (!field || !field.subType || !field.subType.nested || !field.subType.nested.path) {
+    return filter;
+  }
+
+  const query = cleanFilter(filter);
+
+  return {
+    meta: filter.meta,
+    nested: {
+      path: field.subType.nested.path,
+      query: query.query || query,
+    },
   };
-};
-
-export type GeoPolygonFilter = Filter & {
-  meta: GeoPolygonFilterMeta;
-  geo_polygon: any;
-};
-
-export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
-  filter && filter.geo_polygon;
-
-export const getGeoPolygonFilterField = (filter: GeoPolygonFilter) => {
-  return (
-    filter.geo_polygon && Object.keys(filter.geo_polygon).find(key => key !== 'ignore_unmapped')
-  );
 };
