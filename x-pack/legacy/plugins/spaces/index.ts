@@ -57,7 +57,7 @@ export const spaces = (kibana: Record<string, any>) =>
           hidden: true,
         },
       ],
-      hacks: [],
+      hacks: ['plugins/spaces/legacy'],
       mappings,
       migrations: {
         space: {
@@ -70,7 +70,7 @@ export const spaces = (kibana: Record<string, any>) =>
           hidden: true,
         },
       },
-      home: ['plugins/spaces/legacy'],
+      home: [],
       injectDefaultVars(server: Server) {
         return {
           serverBasePath: server.config().get('server.basePath'),
