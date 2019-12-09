@@ -86,7 +86,8 @@ export class FetchService {
   };
 
   private createRequest(path: string, options?: HttpFetchOptions): Request {
-    const { query, prependBasePath: shouldPrependBasePath, ...fetchOptions } = merge(
+    // Merge and destructure options out that are not applicable to the Fetch API.
+    const { query, prependBasePath: shouldPrependBasePath, asResponse, ...fetchOptions } = merge(
       {
         method: 'GET',
         credentials: 'same-origin',
