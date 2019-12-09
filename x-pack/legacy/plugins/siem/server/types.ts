@@ -13,6 +13,7 @@ export interface ServerFacade {
   injectUiAppVars: Legacy.Server['injectUiAppVars'];
   plugins: {
     alerting?: Legacy.Server['plugins']['alerting'];
+    spaces: Legacy.Server['plugins']['spaces'];
     xpack_main: Legacy.Server['plugins']['xpack_main'];
   };
   route: Legacy.Server['route'];

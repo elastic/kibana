@@ -35,12 +35,14 @@ import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
 import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
+import { stackVersionFromLegacyMetadata } from './stackVersionFromLegacyMetadata';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
 const MainContainer = styled.main`
   min-width: ${px(unit * 50)};
   padding: ${px(units.plus)};
+  height: 100%;
 `;
 
 const App = ({ routes }: { routes: BreadcrumbRoute[] }) => {
@@ -69,16 +71,22 @@ export interface ApmPluginStartDeps {
 }
 
 export interface ConfigSchema {
-  apmIndexPatternTitle: string;
-  apmServiceMapEnabled: boolean;
-  apmUiEnabled: boolean;
+  indexPatternTitle: string;
+  serviceMapEnabled: boolean;
+  ui: {
+    enabled: boolean;
+  };
 }
 
 // These are to be used until we switch over all our context handling to
 // kibana_react
 export const PluginsContext = createContext<
-  ApmPluginStartDeps & { apm: { config: ConfigSchema } }
->({} as ApmPluginStartDeps & { apm: { config: ConfigSchema } });
+  ApmPluginStartDeps & { apm: { config: ConfigSchema; stackVersion: string } }
+>(
+  {} as ApmPluginStartDeps & {
+    apm: { config: ConfigSchema; stackVersion: string };
+  }
+);
 export function usePlugins() {
   return useContext(PluginsContext);
 }
@@ -112,7 +120,17 @@ export class ApmPlugin
     //
     // Until then we use a shim to get it from legacy injectedMetadata:
     const config = getConfigFromInjectedMetadata();
-    const pluginsForContext = { ...plugins, apm: { config } };
+
+    // Once we're actually an NP plugin we'll get the package info from the
+    // initializerContext like:
+    //
+    //     const stackVersion = this.initializerContext.env.packageInfo.branch
+    //
+    // Until then we use a shim to get it from legacy metadata:
+    const stackVersion = stackVersionFromLegacyMetadata;
+
+    const pluginsForContext = { ...plugins, apm: { config, stackVersion } };
+
     const routes = getRoutes(config);
 
     // render APM feedback link in global help menu

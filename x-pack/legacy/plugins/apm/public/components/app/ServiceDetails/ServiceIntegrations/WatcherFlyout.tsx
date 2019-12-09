@@ -151,9 +151,9 @@ export class WatcherFlyout extends Component<
   };
 
   public createWatch = ({
-    apmIndexPatternTitle
+    indexPatternTitle
   }: {
-    apmIndexPatternTitle: string;
+    indexPatternTitle: string;
   }) => () => {
     const { serviceName } = this.props.urlParams;
     const core = this.context;
@@ -199,7 +199,7 @@ export class WatcherFlyout extends Component<
       slackUrl,
       threshold: this.state.threshold,
       timeRange,
-      apmIndexPatternTitle
+      apmIndexPatternTitle: indexPatternTitle
     })
       .then((id: string) => {
         this.props.onClose();
