@@ -57,6 +57,8 @@ export function runFtrCli() {
         }
       );
 
+      process.env.TEST_THROTTLE_NETWORK = flags.throttle as string;
+
       let teardownRun = false;
       const teardown = async (err?: Error) => {
         if (teardownRun) return;
@@ -96,7 +98,15 @@ export function runFtrCli() {
     },
     {
       flags: {
-        string: ['config', 'grep', 'exclude', 'include-tag', 'exclude-tag', 'kibana-install-dir'],
+        string: [
+          'config',
+          'grep',
+          'exclude',
+          'include-tag',
+          'exclude-tag',
+          'kibana-install-dir',
+          'throttle',
+        ],
         boolean: ['bail', 'invert', 'test-stats', 'updateBaselines'],
         default: {
           config: 'test/functional/config.js',
@@ -113,6 +123,7 @@ export function runFtrCli() {
         --test-stats       print the number of tests (included and excluded) to STDERR
         --updateBaselines  replace baseline screenshots with whatever is generated from the test
         --kibana-install-dir  directory where the Kibana install being tested resides
+        --throttle         enable network throttling in Chrome browser
       `,
       },
     }
