@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useEffect, useRef, useState } from 'react';
-import moment from 'moment-timezone';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -14,6 +13,7 @@ import {
   EuiCallOut,
   EuiCodeBlock,
   EuiCopy,
+  EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,19 +21,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  ColumnType,
-  mlInMemoryTableBasicFactory,
-  SORT_DIRECTION,
-} from '../../../../../shared_imports';
 import { dictionaryToArray } from '../../../../../../common/types/common';
-import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
-import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
+import { getNestedProperty } from '../../../../../../common/utils/object_utils';
 
 import { useCurrentIndexPattern } from '../../../../lib/kibana';
 
 import {
-  getFlattenedFields,
+  EsFieldName,
   PreviewRequestBody,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -42,7 +36,14 @@ import {
 } from '../../../../common';
 
 import { getPivotPreviewDevConsoleStatement } from './common';
-import { PreviewItem, PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
+import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
+
+// EuiDataGrid needs a fixed width on the parent element to provide a horizontal scrollbar.
+// Because the overall transform wizard doesn't have a fixed width, we need to calculate it
+// based of the overall width of the root element and substract all paddings and margins
+// from elements between the root and the EuiDataGrid component.
+const defaultPanelWidth = 500;
+const panelPadding = 410 + 48 + 16 + 32 + 24 + 12 + 32;
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -58,14 +59,6 @@ function sortColumns(groupByArr: PivotGroupByConfig[]) {
     }
     return a.localeCompare(b);
   };
-}
-
-function usePrevious(value: any) {
-  const ref = useRef(null);
-  useEffect(() => {
-    ref.current = value;
-  });
-  return ref.current;
 }
 
 interface PreviewTitleProps {
@@ -119,46 +112,91 @@ interface PivotPreviewProps {
 }
 
 export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, query }) => {
-  const [clearTable, setClearTable] = useState(false);
+  const [panelWidth, setPanelWidth] = useState(defaultPanelWidth);
+
+  const resizeHandler = () => {
+    const docWidth = document.documentElement.clientWidth;
+    const sideBarWidth = (document.getElementById('management-sidenav')?.clientWidth || 192) + 24;
+    // TODO This doesn't consider when the document width doesn't change but the nav does yet ...
+    const navWidth = document.getElementById('navDrawerMenu')?.clientWidth || 48;
+    const nextPanelWidth = docWidth - panelPadding - sideBarWidth - navWidth;
+    setPanelWidth(nextPanelWidth);
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', resizeHandler);
+    resizeHandler();
+    return () => {
+      window.removeEventListener('resize', resizeHandler);
+    };
+  }, []);
 
   const indexPattern = useCurrentIndexPattern();
 
   const {
-    previewData,
+    previewData: data,
     previewMappings,
     errorMessage,
     previewRequest,
     status,
   } = usePivotPreviewData(indexPattern, query, aggs, groupBy);
-
   const groupByArr = dictionaryToArray(groupBy);
 
-  // EuiInMemoryTable has an issue with dynamic sortable columns
-  // and will trigger a full page Kibana error in such a case.
-  // The following is a workaround until this is solved upstream:
-  // - If the sortable/columns config changes,
-  //   the table will be unmounted/not rendered.
-  //   This is what the useEffect() part does.
-  // - After that the table gets re-enabled. To make sure React
-  //   doesn't consolidate the state updates, setTimeout is used.
-  const firstColumnName =
-    previewData.length > 0
-      ? Object.keys(previewData[0]).sort(sortColumns(groupByArr))[0]
-      : undefined;
+  const columnKeys = Object.keys(previewMappings.properties);
+  columnKeys.sort(sortColumns(groupByArr));
 
-  const firstColumnNameChanged = usePrevious(firstColumnName) !== firstColumnName;
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(columnKeys);
+
   useEffect(() => {
-    if (firstColumnNameChanged) {
-      setClearTable(true);
-    }
-    if (clearTable) {
-      setTimeout(() => setClearTable(false), 0);
-    }
-  }, [firstColumnNameChanged, clearTable]);
+    setVisibleColumns(columnKeys);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(columnKeys)]);
 
-  if (firstColumnNameChanged) {
-    return null;
-  }
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
+
+  // EuiDataGrid State
+  const dataGridColumns = columnKeys.map(id => ({ id }));
+
+  const onChangeItemsPerPage = useCallback(pageSize => setPagination(p => ({ ...p, pageSize })), [
+    setPagination,
+  ]);
+
+  const onChangePage = useCallback(pageIndex => setPagination(p => ({ ...p, pageIndex })), [
+    setPagination,
+  ]);
+
+  // Sorting config
+  const [sortingColumns, setSortingColumns] = useState([]);
+  const onSort = useCallback(sc => setSortingColumns(sc), [setSortingColumns]);
+
+  const renderCellValue = useMemo(() => {
+    return ({
+      rowIndex,
+      columnId,
+      setCellProps,
+    }: {
+      rowIndex: number;
+      columnId: string;
+      setCellProps: any;
+    }) => {
+      const adjustedRowIndex = rowIndex - pagination.pageIndex * pagination.pageSize;
+
+      const cellValue = data.hasOwnProperty(adjustedRowIndex)
+        ? getNestedProperty(data[adjustedRowIndex], columnId, null)
+        : null;
+
+      if (typeof cellValue === 'object' && cellValue !== null) {
+        return JSON.stringify(cellValue);
+      }
+
+      if (cellValue === undefined) {
+        return null;
+      }
+
+      return cellValue;
+    };
+  }, [data, pagination.pageIndex, pagination.pageSize]);
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
@@ -177,7 +215,7 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
     );
   }
 
-  if (previewData.length === 0) {
+  if (data.length === 0) {
     let noDataMessage = i18n.translate(
       'xpack.transform.pivotPreview.PivotPreviewNoDataCalloutBody',
       {
@@ -210,79 +248,46 @@ export const PivotPreview: FC<PivotPreviewProps> = React.memo(({ aggs, groupBy, 
     );
   }
 
-  const columnKeys = getFlattenedFields(previewData[0]);
-  columnKeys.sort(sortColumns(groupByArr));
-
-  const columns = columnKeys.map(k => {
-    const column: ColumnType<PreviewItem> = {
-      field: k,
-      name: k,
-      sortable: true,
-      truncateText: true,
-    };
-    if (typeof previewMappings.properties[k] !== 'undefined') {
-      const esFieldType = previewMappings.properties[k].type;
-      switch (esFieldType) {
-        case ES_FIELD_TYPES.BOOLEAN:
-          column.dataType = 'boolean';
-          break;
-        case ES_FIELD_TYPES.DATE:
-          column.align = 'right';
-          column.render = (d: any) => formatHumanReadableDateTimeSeconds(moment(d).unix() * 1000);
-          break;
-        case ES_FIELD_TYPES.BYTE:
-        case ES_FIELD_TYPES.DOUBLE:
-        case ES_FIELD_TYPES.FLOAT:
-        case ES_FIELD_TYPES.HALF_FLOAT:
-        case ES_FIELD_TYPES.INTEGER:
-        case ES_FIELD_TYPES.LONG:
-        case ES_FIELD_TYPES.SCALED_FLOAT:
-        case ES_FIELD_TYPES.SHORT:
-          column.dataType = 'number';
-          break;
-        case ES_FIELD_TYPES.KEYWORD:
-        case ES_FIELD_TYPES.TEXT:
-          column.dataType = 'string';
-          break;
-      }
-    }
-    return column;
-  });
-
-  if (columns.length === 0) {
+  if (columnKeys.length === 0) {
     return null;
   }
 
-  const sorting = {
-    sort: {
-      field: columns[0].field as string,
-      direction: SORT_DIRECTION.ASC,
-    },
-  };
-
-  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<PreviewItem>();
-
   return (
-    <EuiPanel data-test-subj="transformPivotPreview loaded">
+    <EuiPanel data-test-subj="transformPivotPreview loaded" style={{ width: `${panelWidth}px` }}>
       <PreviewTitle previewRequest={previewRequest} />
       {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {previewData.length > 0 && clearTable === false && columns.length > 0 && (
-        <MlInMemoryTableBasic
-          allowNeutralSort={false}
-          compressed
-          items={previewData}
-          columns={columns}
-          pagination={{
-            initialPageSize: 5,
-            pageSizeOptions: [5, 10, 25],
+      {dataGridColumns.length > 0 && data.length > 0 && (
+        <EuiDataGrid
+          aria-label="Source index preview"
+          columns={dataGridColumns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          gridStyle={{
+            border: 'all',
+            fontSize: 's',
+            cellPadding: 's',
+            stripes: true,
+            rowHover: 'highlight',
+            header: 'shade',
           }}
-          rowProps={() => ({
-            'data-test-subj': 'transformPivotPreviewRow',
-          })}
-          sorting={sorting}
+          inMemory={{ level: 'sorting' }}
+          rowCount={data.length}
+          renderCellValue={renderCellValue}
+          sorting={{ columns: sortingColumns, onSort }}
+          toolbarVisibility={{
+            showColumnSelector: true,
+            showStyleSelector: false,
+            showSortSelector: true,
+            showFullScreenSelector: true,
+          }}
+          pagination={{
+            ...pagination,
+            pageSizeOptions: [5, 10, 25],
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
         />
       )}
     </EuiPanel>
