@@ -301,7 +301,7 @@ function createElasticSearchModule() {
 }
 
 function createIndexPatternsModule() {
-  angular.module('discoverIndexPatterns', []).service('indexPatterns', IndexPatterns);
+  angular.module('discoverIndexPatterns', []).value('indexPatterns', IndexPatterns);
 }
 
 function createPagerFactoryModule() {
