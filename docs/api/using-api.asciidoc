@@ -38,9 +38,7 @@ curl -X POST -u $USER:$PASSWORD "localhost:5601/api/kibana/dashboards/export?das
 [[api-request-headers]]
 === Request headers
 
-For all non whitelisted APIs, you must use a header.
-
-{kib} APIs support the following headers:
+For all APIs, you must use a request header. The {kib} APIs support the `kbn-xsrf` and `Content-Type` headers.
 
 `kbn-xsrf: true`::
   By default, you must use `kbn-xsrf` for all API calls, except in the following scenarios:
@@ -52,7 +50,7 @@ For all non whitelisted APIs, you must use a header.
 * XSRF protections are disabled using the `server.xsrf.disableProtection` setting
 
 `Content-Type: application/json`::
-  {kib} APIs use JSON for requests and responses. To make an API call, configure the `Content-Type` accordingly.
+  Applicable only when you send a payload in the API request. {kib} APIs use JSON for requests and responses. Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header. 
 
 Request header example:
 
