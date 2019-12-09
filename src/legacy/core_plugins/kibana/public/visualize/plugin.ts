@@ -108,7 +108,7 @@ export class VisualizePlugin implements Plugin {
           data,
           embeddables,
           getBasePath: core.http.basePath.get,
-          indexPatterns: data.indexPatterns.indexPatterns,
+          indexPatterns: data.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
           savedObjectsClient,
