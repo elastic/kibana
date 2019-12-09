@@ -5,21 +5,10 @@
  */
 
 import React from 'react';
-import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 'react-router-dom';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-  EuiPageSideBar,
-  EuiTitle,
-  EuiSideNav,
-} from '@elastic/eui';
+import { EuiSideNav } from '@elastic/eui';
+import { AppMountContext } from 'kibana/public';
 
 type NavProps = RouteComponentProps & {
   navigateToApp: AppMountContext['core']['application']['navigateToApp'];

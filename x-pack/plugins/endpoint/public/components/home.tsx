@@ -6,7 +6,6 @@
 
 import React from 'react';
 import {
-  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
@@ -14,9 +13,7 @@ import {
   EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSideBar,
   EuiTitle,
-  EuiSideNav,
 } from '@elastic/eui';
 export const Home = () => (
   <EuiPageBody>
