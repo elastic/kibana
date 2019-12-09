@@ -297,6 +297,11 @@ export default function ({ getService }) {
       });
       expect(successfulRunNowResult).to.eql({ id: originalTask.id });
 
+      await retry.try(async () => {
+        const [task] = (await currentTasks()).docs.filter(taskDoc => taskDoc.id === originalTask.id);
+        expect(task.state.count).to.eql(2);
+      });
+
       // third run should fail
       const failedRunNowResult  = await runTaskNow({
         id: originalTask.id

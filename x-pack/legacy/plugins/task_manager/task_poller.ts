@@ -11,10 +11,10 @@
 import { performance } from 'perf_hooks';
 import { after } from 'lodash';
 import { Subject, merge, partition, interval, of, Observable } from 'rxjs';
-import { mapTo, buffer, filter, mergeScan, concatMap, tap } from 'rxjs/operators';
+import { mapTo, filter, mergeScan, concatMap, tap } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, map as mapOptional, isSome } from 'fp-ts/lib/Option';
+import { Option, none, map as mapOptional, isSome, getOrElse } from 'fp-ts/lib/Option';
 import { pullFromSet } from './lib/pull_from_set';
 import { Result, asOk, asErr } from './lib/result_type';
 
@@ -55,18 +55,18 @@ export function createTaskPoller<T, H>({
   const hasCapacity = () => getCapacity() > 0;
 
   // emit an event on a fixed interval, but only if there's capacity
-  const pollOnInterval$ = interval(pollInterval).pipe(filter(hasCapacity));
+  const pollOnInterval$ = interval(pollInterval).pipe(mapTo(none));
   return merge(
     // buffer all requests, releasing them whenever an interval expires & there's capacity
-    requests$.pipe(buffer(pollOnInterval$)),
+    requests$,
     // emit an event when we're nudged to poll for work, as long as there's capacity
-    nudgeRequests$.pipe(filter(hasCapacity), mapTo([]))
+    merge(pollOnInterval$, nudgeRequests$).pipe(filter(hasCapacity))
   ).pipe(
     // buffer all requests in a single set (to remove duplicates) as we don't want
     // work to take place in parallel (it could cause Task Manager to pull in the same
     // task twice)
-    mergeScan<Array<Option<T>>, Set<T>>(
-      (queue, requests) => of(pushOptionalValuesIntoSet(queue, requests)),
+    mergeScan<Option<T>, Set<T>>(
+      (queue, request) => of(pushOptionalIntoSet(queue, request)),
       new Set<T>()
     ),
     // take as many argumented calls as we have capacity for and call `work` with
@@ -100,20 +100,17 @@ const closeSleepPerf = after(2, () => {
 });
 
 /**
- * Cycles through an array of optionals and any optional that contains a value in unwrapped and its value
- * is pushed into the Set
+ * Unwraps optional values and pushes them into a set
  * @param set A Set of generic type T
- * @param values An array of either empty optionals or optionals contianing a generic type T
+ * @param value An optional T to push into the set if it is there
  */
-function pushOptionalValuesIntoSet<T>(set: Set<T>, values: Array<Option<T>>): Set<T> {
-  values.forEach(optionalValue => {
-    pipe(
-      optionalValue,
-      mapOptional<T, T>(req => {
-        set.add(req);
-        return req;
-      })
-    );
-  });
-  return set;
+function pushOptionalIntoSet<T>(set: Set<T>, value: Option<T>): Set<T> {
+  return pipe(
+    value,
+    mapOptional<T, Set<T>>(req => {
+      set.add(req);
+      return set;
+    }),
+    getOrElse(() => set)
+  );
 }
