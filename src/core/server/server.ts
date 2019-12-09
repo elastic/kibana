@@ -20,7 +20,13 @@
 import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
-import { ConfigService, Env, ConfigPath, RawConfigurationProvider } from './config';
+import {
+  ConfigService,
+  Env,
+  ConfigPath,
+  RawConfigurationProvider,
+  coreDeprecationProvider,
+} from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService, ensureValidConfiguration } from './legacy';
@@ -44,6 +50,7 @@ import { InternalCoreSetup } from './internal_types';
 import { CapabilitiesService } from './capabilities';
 
 const coreId = Symbol('core');
+const rootConfigPath = '';
 
 export class Server {
   public readonly configService: ConfigService;
@@ -220,6 +227,8 @@ export class Server {
       [savedObjectsConfig.path, savedObjectsConfig.schema],
       [uiSettingsConfig.path, uiSettingsConfig.schema],
     ];
+
+    this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
 
     for (const [path, schema] of schemas) {
       await this.configService.setSchema(path, schema);

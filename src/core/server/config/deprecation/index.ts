@@ -25,4 +25,5 @@ export {
   ConfigDeprecationProvider,
 } from './types';
 export { configDeprecationFactory } from './deprecation_factory';
+export { coreDeprecationProvider } from './core_deprecations';
 export { applyDeprecations } from './apply_deprecations';

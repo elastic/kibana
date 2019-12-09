@@ -27,6 +27,7 @@ export {
   ConfigDeprecationLogger,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
+  coreDeprecationProvider,
 } from './deprecation';
 
 export { EnvironmentMode, PackageInfo } from './types';
