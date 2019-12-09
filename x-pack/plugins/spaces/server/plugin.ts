@@ -32,7 +32,6 @@ import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
 import { initInternalSpacesApi } from './routes/api/internal';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
