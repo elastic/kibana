@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart, IAnonymousPaths } from 'src/core/public';
-import { Subscription, Observable } from 'rxjs';
-import { LicensingPluginSetup, ILicense } from '../../licensing/public';
+import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { LicensingPluginSetup } from '../../licensing/public';
 import {
   SessionExpired,
   SessionTimeout,
   SessionTimeoutHttpInterceptor,
   UnauthorizedResponseHttpInterceptor,
 } from './session';
-import { AuthenticatedUser } from '../common/model';
 import { SecurityLicenseService } from '../common/licensing';
-import { registerSecurityNavControl } from './nav_control/nav_control';
+import { SecurityNavControlService } from './nav_control';
 
 export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
@@ -24,11 +22,7 @@ export interface PluginSetupDependencies {
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   private sessionTimeout!: SessionTimeout;
 
-  private license$!: Observable<ILicense>;
-
-  private licenseSubscription?: Subscription;
-
-  private navControlRegistered = false;
+  private navControlService!: SecurityNavControlService;
 
   public setup(core: CoreSetup, { licensing }: PluginSetupDependencies) {
     const { http, notifications, injectedMetadata } = core;
@@ -43,7 +37,11 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);
     http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
 
-    this.license$ = licensing.license$;
+    this.navControlService = new SecurityNavControlService();
+    this.navControlService.setup({
+      securityLicenseService: new SecurityLicenseService().setup(),
+      licensing,
+    });
 
     return {
       anonymousPaths,
@@ -53,38 +51,12 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
 
   public start(core: CoreStart) {
     this.sessionTimeout.start();
-
-    const securityLicenseService = new SecurityLicenseService().setup();
-    this.licenseSubscription = this.license$.subscribe(rawLicense => {
-      securityLicenseService.update(rawLicense);
-      const showSecurityLinks = securityLicenseService.license.getFeatures().showLinks;
-
-      const shouldRegisterNavControl =
-        !this.isAnonymousPath(core.http.anonymousPaths) && showSecurityLinks;
-
-      if (shouldRegisterNavControl && !this.navControlRegistered) {
-        const user = core.http.get('/api/security/v1/me', {
-          headers: {
-            'kbn-system-api': true,
-          },
-        }) as Promise<AuthenticatedUser>;
-        registerSecurityNavControl(core, user);
-        this.navControlRegistered = true;
-      }
-    });
+    this.navControlService.start({ core });
   }
 
   public stop() {
     this.sessionTimeout.stop();
-    if (this.licenseSubscription) {
-      this.licenseSubscription.unsubscribe();
-      this.licenseSubscription = undefined;
-    }
-    this.navControlRegistered = false;
-  }
-
-  private isAnonymousPath(anonymousPaths: IAnonymousPaths) {
-    return anonymousPaths.isAnonymous(window.location.pathname);
+    this.navControlService.stop();
   }
 }
 
