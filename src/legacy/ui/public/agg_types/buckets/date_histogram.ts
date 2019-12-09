@@ -21,7 +21,7 @@ import _ from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { BUCKET_TYPES } from 'ui/agg_types/buckets/bucket_agg_types';
-import chrome from '../../chrome';
+import { npStart } from 'ui/new_platform';
 import { BucketAggParam, BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
@@ -32,15 +32,13 @@ import { ScaleMetricsParamEditor } from '../../vis/editors/default/controls/scal
 import { dateHistogramInterval } from '../../../../core_plugins/data/public';
 import { writeParams } from '../agg_params';
 import { AggConfigs } from '../agg_configs';
-import { AggConfig } from '../agg_config';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { TimeBuckets } from '../../time_buckets';
 
-const config = chrome.getUiSettingsClient();
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
@@ -189,7 +187,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
         const scaleMetrics = scaleMetricValues && interval.scaled && interval.scale < 1;
         if (scaleMetrics && aggs) {
           const metrics = aggs.aggs.filter(a => isMetricAggType(a.type));
-          const all = _.every(metrics, (a: AggConfig) => {
+          const all = _.every(metrics, (a: IBucketAggConfig) => {
             const { type } = a;
 
             if (isMetricAggType(type)) {
@@ -225,6 +223,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
           ]);
         }
         if (!tz) {
+          const config = npStart.core.uiSettings;
           // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
           const isDefaultTimezone = config.isDefault('dateFormat:tz');
           tz = isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');

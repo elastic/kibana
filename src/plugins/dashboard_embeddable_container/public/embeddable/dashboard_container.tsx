@@ -20,8 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
-import { Filter } from '@kbn/es-query';
-import { RefreshInterval, TimeRange, Query } from '../../../data/public';
+import { RefreshInterval, TimeRange, Query, esFilters } from '../../../data/public';
 import { CoreStart } from '../../../../core/public';
 import { IUiActionsStart } from '../ui_actions_plugin';
 import {
@@ -31,7 +30,7 @@ import {
   ViewMode,
   EmbeddableFactory,
   IEmbeddable,
-  Start as EmbeddableStartContract,
+  IEmbeddableStart,
 } from '../embeddable_plugin';
 import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 import { createPanelState } from './panel';
@@ -46,7 +45,7 @@ import {
 
 export interface DashboardContainerInput extends ContainerInput {
   viewMode: ViewMode;
-  filters: Filter[];
+  filters: esFilters.Filter[];
   query: Query;
   timeRange: TimeRange;
   refreshConfig?: RefreshInterval;
@@ -65,7 +64,7 @@ interface IndexSignature {
 }
 
 export interface InheritedChildInput extends IndexSignature {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   query: Query;
   timeRange: TimeRange;
   refreshConfig?: RefreshInterval;
@@ -78,7 +77,7 @@ export interface DashboardContainerOptions {
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
-  embeddable: EmbeddableStartContract;
+  embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
   SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;

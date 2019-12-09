@@ -28,8 +28,9 @@ import { I18nStart } from '../i18n';
 import { NotificationsStart } from '../notifications';
 import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
-import { UiSettingsClientContract } from '../ui_settings';
+import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
+import { SavedObjectsStart } from '../saved_objects';
 
 /** @public */
 export interface AppBase {
@@ -80,6 +81,12 @@ export interface App extends AppBase {
    * @returns An unmounting function that will be called to unmount the application.
    */
   mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+
+  /**
+   * Hide the UI chrome when the application is mounted. Defaults to `false`.
+   * Takes precedence over chrome service visibility settings.
+   */
+  chromeless?: boolean;
 }
 
 /** @internal */
@@ -112,8 +119,10 @@ export interface AppMountContext {
     notifications: NotificationsStart;
     /** {@link OverlayStart} */
     overlays: OverlayStart;
-    /** {@link UiSettingsClient} */
-    uiSettings: UiSettingsClientContract;
+    /** {@link SavedObjectsStart} */
+    savedObjects: SavedObjectsStart;
+    /** {@link IUiSettingsClient} */
+    uiSettings: IUiSettingsClient;
     /**
      * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
      * use *only* to retrieve config values. There is no way to set injected values
@@ -145,12 +154,13 @@ export interface AppMountParameters {
    * export class MyPlugin implements Plugin {
    *   setup({ application }) {
    *     application.register({
-   *     id: 'my-app',
-   *     async mount(context, params) {
-   *       const { renderApp } = await import('./application');
-   *       return renderApp(context, params);
-   *     },
-   *   });
+   *      id: 'my-app',
+   *      async mount(context, params) {
+   *        const { renderApp } = await import('./application');
+   *        return renderApp(context, params);
+   *      },
+   *    });
+   *  }
    * }
    * ```
    *

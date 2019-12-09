@@ -36,7 +36,6 @@ import {
   EmbeddableFactory,
   EmbeddableOutput,
   ErrorEmbeddable,
-  getVisualizeLoader,
   VisSavedObject,
 } from '../kibana_services';
 
@@ -131,7 +130,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       const visId = savedObject.id as string;
 
       const editUrl = visId ? addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`) : '';
-      const loader = await getVisualizeLoader();
       const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
 
       if (!isLabsEnabled && savedObject.vis.type.stage === 'experimental') {
@@ -143,7 +141,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       return new VisualizeEmbeddable(
         {
           savedVisualization: savedObject,
-          loader,
           indexPatterns,
           editUrl,
           editable: this.isEditable(),

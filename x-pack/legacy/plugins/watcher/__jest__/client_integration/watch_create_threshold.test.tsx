@@ -33,7 +33,11 @@ const SETTINGS = {
 };
 
 const WATCH_VISUALIZE_DATA = {
-  count: [[1559404800000, 14], [1559448000000, 196], [1559491200000, 44]],
+  count: [
+    [1559404800000, 14],
+    [1559448000000, 196],
+    [1559491200000, 44],
+  ],
 };
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
@@ -102,7 +106,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
     beforeEach(async () => {
       testBed = await setup();
 
-      // @ts-ignore (remove when react 16.9.0 is released)
       await act(async () => {
         const { component } = testBed;
         await nextTick();
@@ -125,7 +128,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
 
         testBed = await setup();
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           await nextTick();
           testBed.component.update();
@@ -178,7 +180,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
           form.setInputValue('watchTimeFieldSelect', '@timestamp');
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -200,7 +201,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
             find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
             form.setInputValue('watchTimeFieldSelect', '@timestamp');
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               await nextTick();
               component.update();
@@ -220,7 +220,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
             // Provide valid value
             form.setInputValue('watchThresholdInput', '0');
 
-            // @ts-ignore (remove when react 16.9.0 is released)
             await act(async () => {
               await nextTick();
               component.update();
@@ -240,7 +239,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
           form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();
@@ -266,7 +264,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           // Next, provide valid field and verify
           form.setInputValue('loggingTextInput', LOGGING_MESSAGE);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -335,7 +332,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           // Next, provide valid field and verify
           form.setInputValue('indexInput', INDEX);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -396,7 +392,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
 
           form.setInputValue('slackMessageTextarea', SLACK_MESSAGE);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -467,7 +462,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('emailSubjectInput', EMAIL_SUBJECT);
           form.setInputValue('emailBodyInput', EMAIL_BODY);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -556,7 +550,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('webhookUsernameInput', USERNAME);
           form.setInputValue('webhookPasswordInput', PASSWORD);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -643,7 +636,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           form.setInputValue('jiraIssueTypeInput', ISSUE_TYPE);
           form.setInputValue('jiraSummaryInput', SUMMARY);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -722,7 +714,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           // Next, provide valid fields and verify
           form.setInputValue('pagerdutyDescriptionInput', DESCRIPTION);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             actions.clickSimulateButton();
             await nextTick();
@@ -782,7 +773,6 @@ describe.skip('<ThresholdWatchEdit /> create route', () => {
           find('mockComboBox').simulate('change', [{ label: 'index1', value: 'index1' }]); // Using mocked EuiComboBox
           form.setInputValue('watchTimeFieldSelect', WATCH_TIME_FIELD);
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             await nextTick();
             component.update();

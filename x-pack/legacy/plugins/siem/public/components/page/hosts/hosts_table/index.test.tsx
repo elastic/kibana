@@ -30,9 +30,12 @@ mockUseKibanaCore.mockImplementation(() => ({
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
-// For now let's forget about SiemSearchBar
+// For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../search_bar', () => ({
   SiemSearchBar: () => null,
+}));
+jest.mock('../../../query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 describe('Hosts Table', () => {
@@ -64,7 +67,7 @@ describe('Hosts Table', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('HostsTable'))).toMatchSnapshot();
     });
 
     describe('Sorting on Table', () => {

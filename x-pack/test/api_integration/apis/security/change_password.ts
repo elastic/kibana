@@ -6,11 +6,10 @@
 
 import { Cookie, cookie } from 'request';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { SecurityService } from '../../../common/services/security';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
 
   const mockUserName = 'test-user';
   const mockUserPassword = 'test-password';
@@ -39,7 +38,7 @@ export default function({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .set('Cookie', sessionCookie.cookieString())
         .send({ password: wrongPassword, newPassword })
-        .expect(401);
+        .expect(403);
 
       // Let's check that we can't login with wrong password, just in case.
       await supertest

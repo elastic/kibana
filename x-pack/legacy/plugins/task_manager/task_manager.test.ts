@@ -121,6 +121,85 @@ describe('TaskManager', () => {
     expect(savedObjectsClient.create).toHaveBeenCalled();
   });
 
+  test('allows scheduling existing tasks that may have already been scheduled', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
+    });
+    savedObjectsClient.create.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    client.start();
+
+    const result = await client.ensureScheduled({
+      id: 'my-foo-id',
+      taskType: 'foo',
+      params: {},
+      state: {},
+    });
+
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('doesnt ignore failure to scheduling existing tasks for reasons other than already being scheduled', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
+    });
+    savedObjectsClient.create.mockRejectedValueOnce({
+      statusCode: 500,
+    });
+
+    client.start();
+
+    return expect(
+      client.ensureScheduled({
+        id: 'my-foo-id',
+        taskType: 'foo',
+        params: {},
+        state: {},
+      })
+    ).rejects.toMatchObject({
+      statusCode: 500,
+    });
+  });
+
+  test('doesnt allow naively rescheduling existing tasks that have already been scheduled', async () => {
+    const client = new TaskManager(taskManagerOpts);
+    client.registerTaskDefinitions({
+      foo: {
+        type: 'foo',
+        title: 'Foo',
+        createTaskRunner: jest.fn(),
+      },
+    });
+    savedObjectsClient.create.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    client.start();
+
+    return expect(
+      client.schedule({
+        id: 'my-foo-id',
+        taskType: 'foo',
+        params: {},
+        state: {},
+      })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+    });
+  });
+
   test('allows and queues removing tasks before starting', async () => {
     const client = new TaskManager(taskManagerOpts);
     savedObjectsClient.delete.mockResolvedValueOnce({});
@@ -174,6 +253,7 @@ describe('TaskManager', () => {
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
+      beforeMarkRunning: async (runOpts: any) => runOpts,
     };
     expect(() => client.addMiddleware(middleware)).not.toThrow();
   });
@@ -183,6 +263,7 @@ describe('TaskManager', () => {
     const middleware = {
       beforeSave: async (saveOpts: any) => saveOpts,
       beforeRun: async (runOpts: any) => runOpts,
+      beforeMarkRunning: async (runOpts: any) => runOpts,
     };
 
     client.start();
@@ -241,7 +322,10 @@ describe('TaskManager', () => {
 
       claimAvailableTasks(claim, 10, logger);
 
-      sinon.assert.calledWithMatch(logger.warn, /inline scripts/);
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn.mock.calls[0][0]).toMatchInlineSnapshot(
+        `"Task Manager cannot operate when inline scripts are disabled in Elasticsearch"`
+      );
     });
   });
 });

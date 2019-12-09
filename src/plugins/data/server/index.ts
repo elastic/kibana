@@ -25,7 +25,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DataServerPlugin as Plugin };
+export {
+  IndexPatternsFetcher,
+  FieldDescriptor,
+  shouldReadFieldFromDocValues,
+} from './index_patterns';
 
 export * from './search';
+export * from '../common';
 
 export { IRequestTypesMap, IResponseTypesMap } from './search';

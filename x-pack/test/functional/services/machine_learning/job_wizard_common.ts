@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MachineLearningCustomUrlsProvider } from './custom_urls';
 
-export function MachineLearningJobWizardCommonProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardCommonProvider(
+  { getService }: FtrProviderContext,
+  customUrls: ProvidedType<typeof MachineLearningCustomUrlsProvider>
+) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -166,6 +171,23 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       expect(await this.getSelectedJobGroups()).to.contain(jobGroup);
     },
 
+    async getSelectedCalendars(): Promise<string[]> {
+      await this.ensureAdditionalSettingsSectionOpen();
+      return await comboBox.getComboBoxSelectedOptions(
+        'mlJobWizardComboBoxCalendars > comboBoxInput'
+      );
+    },
+
+    async assertCalendarsSelection(calendars: string[]) {
+      expect(await this.getSelectedCalendars()).to.eql(calendars);
+    },
+
+    async addCalendar(calendarId: string) {
+      await this.ensureAdditionalSettingsSectionOpen();
+      await comboBox.setCustom('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
+      expect(await this.getSelectedCalendars()).to.contain(calendarId);
+    },
+
     async assertModelPlotSwitchExists(
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ) {
@@ -181,11 +203,12 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ): Promise<boolean> {
       let subj = 'mlJobWizardSwitchModelPlot';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
       if (sectionOptions.withAdvancedSection === true) {
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      return await testSubjects.isSelected(subj);
+      return isSelected === 'true';
     },
 
     async assertModelPlotSwitchCheckedState(
@@ -213,11 +236,12 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
       sectionOptions: SectionOptions = { withAdvancedSection: true }
     ): Promise<boolean> {
       let subj = 'mlJobWizardSwitchUseDedicatedIndex';
+      const isSelected = await testSubjects.getAttribute(subj, 'aria-checked');
       if (sectionOptions.withAdvancedSection === true) {
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      return await testSubjects.isSelected(subj);
+      return isSelected === 'true';
     },
 
     async assertDedicatedIndexSwitchCheckedState(
@@ -354,6 +378,40 @@ export function MachineLearningJobWizardCommonProvider({ getService }: FtrProvid
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
       await testSubjects.clickWhenNotDisabled('mlButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
+    },
+
+    async ensureAdditionalSettingsSectionOpen() {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists('mlJobWizardAdditionalSettingsSection')) === false) {
+          await testSubjects.click('mlJobWizardToggleAdditionalSettingsSection');
+          await testSubjects.existOrFail('mlJobWizardAdditionalSettingsSection', { timeout: 1000 });
+        }
+      });
+    },
+
+    async ensureNewCustomUrlFormModalOpen() {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists('mlJobNewCustomUrlFormModal')) === false) {
+          await testSubjects.click('mlJobOpenCustomUrlFormButton');
+          await testSubjects.existOrFail('mlJobNewCustomUrlFormModal', { timeout: 1000 });
+        }
+      });
+    },
+
+    async addCustomUrl(customUrl: { label: string }) {
+      await this.ensureAdditionalSettingsSectionOpen();
+
+      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlsList > *');
+
+      await this.ensureNewCustomUrlFormModalOpen();
+      // Fill-in the form
+      await customUrls.setCustomUrlLabel(customUrl.label);
+      // Save custom URL
+      await customUrls.saveCustomUrl('mlJobNewCustomUrlFormModal');
+
+      const expectedIndex = existingCustomUrls.length;
+
+      await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
     },
 
     async ensureAdvancedSectionOpen() {

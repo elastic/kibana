@@ -320,7 +320,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   };
                 })}
                 onChange={async (selected: EuiComboBoxOptionProps[]) => {
-                  setWatchProperty('index', selected.map(aSelected => aSelected.value));
+                  setWatchProperty(
+                    'index',
+                    selected.map(aSelected => aSelected.value)
+                  );
                   const indices = selected.map(s => s.value as string);
 
                   // reset time field and expression fields if indices are deleted

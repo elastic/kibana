@@ -31,7 +31,7 @@ describe('User routes', () => {
     clusterStub = sinon.stub({ callWithRequest() {} });
     sandbox.stub(ClientShield, 'getClient').returns(clusterStub);
 
-    initUsersApi({ authc: { login: loginStub }, config: { authc: { providers: ['basic'] } } }, serverStub);
+    initUsersApi({ authc: { login: loginStub }, __legacyCompat: { config: { authc: { providers: ['basic'] } } } }, serverStub);
   });
 
   afterEach(() => sandbox.restore());
@@ -90,7 +90,7 @@ describe('User routes', () => {
         expect(response.isBoom).to.be(true);
         expect(response.output.payload).to.eql({
           statusCode: 403,
-          error: 'Unauthorized',
+          error: 'Forbidden',
           message: 'Something went wrong.'
         });
       });

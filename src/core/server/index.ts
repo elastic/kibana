@@ -39,24 +39,17 @@
  * @packageDocumentation
  */
 
-import {
-  ElasticsearchServiceSetup,
-  InternalElasticsearchServiceSetup,
-  IScopedClusterClient,
-} from './elasticsearch';
-import { InternalHttpServiceSetup, HttpServiceSetup } from './http';
+import { ElasticsearchServiceSetup, IScopedClusterClient } from './elasticsearch';
+import { HttpServiceSetup } from './http';
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
 import { ContextSetup } from './context';
-import { SavedObjectsServiceStart } from './saved_objects';
-
-import {
-  InternalUiSettingsServiceSetup,
-  IUiSettingsClient,
-  UiSettingsServiceSetup,
-} from './ui_settings';
+import { IUiSettingsClient, UiSettingsServiceSetup } from './ui_settings';
 import { SavedObjectsClientContract } from './saved_objects/types';
+import { SavedObjectsServiceSetup, SavedObjectsServiceStart } from './saved_objects';
+import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 
 export { bootstrap } from './bootstrap';
+export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
 export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
 export {
   IContextContainer,
@@ -103,6 +96,7 @@ export {
   IsAuthenticated,
   KibanaRequest,
   KibanaRequestRoute,
+  KibanaRequestRouteOptions,
   IKibanaResponse,
   LifecycleResponseFactory,
   KnownHeaders,
@@ -111,6 +105,10 @@ export {
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
   RedirectResponseOptions,
   RequestHandler,
   RequestHandlerContextContainer,
@@ -122,10 +120,16 @@ export {
   KibanaResponseFactory,
   RouteConfig,
   IRouter,
+  RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
+  RouteSchemas,
+  RouteConfigOptionsBody,
+  RouteContentType,
+  validBodyOutput,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionCookieValidationResult,
   SessionStorageFactory,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
@@ -133,6 +137,8 @@ export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
 export {
   DiscoveredPlugin,
   Plugin,
+  PluginConfigDescriptor,
+  PluginConfigSchema,
   PluginInitializer,
   PluginInitializerContext,
   PluginManifest,
@@ -150,6 +156,7 @@ export {
   SavedObjectsClientProviderOptions,
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
   SavedObjectsCreateOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsExportOptions,
@@ -171,13 +178,18 @@ export {
   SavedObjectsLegacyService,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
   SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
 } from './saved_objects';
 
 export {
   IUiSettingsClient,
   UiSettingsParams,
-  InternalUiSettingsServiceSetup,
   UiSettingsType,
   UiSettingsServiceSetup,
   UserProvidedValues,
@@ -234,12 +246,16 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CoreSetup {
+  /** {@link CapabilitiesSetup} */
+  capabilities: CapabilitiesSetup;
   /** {@link ContextSetup} */
   context: ContextSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
   /** {@link HttpServiceSetup} */
   http: HttpServiceSetup;
+  /** {@link SavedObjectsServiceSetup} */
+  savedObjects: SavedObjectsServiceSetup;
   /** {@link UiSettingsServiceSetup} */
   uiSettings: UiSettingsServiceSetup;
 }
@@ -249,21 +265,18 @@ export interface CoreSetup {
  *
  * @public
  */
-export interface CoreStart {} // eslint-disable-line @typescript-eslint/no-empty-interface
-
-/** @internal */
-export interface InternalCoreSetup {
-  context: ContextSetup;
-  http: InternalHttpServiceSetup;
-  elasticsearch: InternalElasticsearchServiceSetup;
-  uiSettings: InternalUiSettingsServiceSetup;
-}
-
-/**
- * @internal
- */
-export interface InternalCoreStart {
+export interface CoreStart {
+  /** {@link CapabilitiesStart} */
+  capabilities: CapabilitiesStart;
+  /** {@link SavedObjectsServiceStart} */
   savedObjects: SavedObjectsServiceStart;
 }
 
-export { ContextSetup, PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId };
+export {
+  CapabilitiesSetup,
+  CapabilitiesStart,
+  ContextSetup,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+  PluginOpaqueId,
+};

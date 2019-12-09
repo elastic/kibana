@@ -34,7 +34,7 @@ describe('Authentication routes', () => {
 
     initAuthenticateApi({
       authc: { login: loginStub, logout: logoutStub },
-      config: { authc: { providers: ['basic'] } },
+      __legacyCompat: { config: { authc: { providers: ['basic'] } } },
     }, serverStub);
   });
 
