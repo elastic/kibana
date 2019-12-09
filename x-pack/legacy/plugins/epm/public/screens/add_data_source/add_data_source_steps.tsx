@@ -31,7 +31,7 @@ const FormNav = styled.div`
 export const AddDataSourceSteps = (props: AddDataSourceStepsProps) => {
   const [addDataSourceSuccess, setAddDataSourceSuccess] = useState<boolean>(false);
   const { notifications } = useCore();
-  const { toDetailViewRelative } = useLinks();
+  const { toDetailView } = useLinks();
   const { pkgName, pkgTitle, pkgVersion } = props;
   const handleRequestInstallDatasource = useCallback(async () => {
     try {
@@ -59,7 +59,12 @@ export const AddDataSourceSteps = (props: AddDataSourceStepsProps) => {
     <Fragment>
       {addDataSourceSuccess ? (
         <Redirect
-          to={toDetailViewRelative({ name: pkgName, version: pkgVersion, panel: 'data-sources' })}
+          to={toDetailView({
+            name: pkgName,
+            version: pkgVersion,
+            panel: 'data-sources',
+            withAppRoot: false,
+          })}
         />
       ) : (
         <EuiPanel>
