@@ -26,7 +26,7 @@ import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { registerSpacesUsageCollector } from './lib/spaces_usage_collector';
 import { SpacesService } from './spaces_service';
-import { SpacesServiceSetup } from './spaces_service/spaces_service';
+import { SpacesServiceSetup } from './spaces_service';
 import { ConfigType } from './config';
 import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
