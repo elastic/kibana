@@ -6,7 +6,9 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
+import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { RuleAlertType, isAlertType, OutputRuleAlertRest, isAlertTypes } from '../alerts/types';
+import { ServerFacade, RequestFacade } from '../../../types';
 
 export const getIdError = ({
   id,
@@ -87,4 +89,17 @@ export const transformError = (err: Error & { statusCode?: number }) => {
       return err;
     }
   }
+};
+
+export const getIndex = (request: RequestFacade, server: ServerFacade): string => {
+  const spaceId = server.plugins.spaces.getSpaceId(request);
+  const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+  return `${signalsIndex}-${spaceId}`;
+};
+
+export const callWithRequestFactory = (request: RequestFacade) => {
+  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+  return <T, U>(endpoint: string, params: T, options?: U) => {
+    return callWithRequest(request, endpoint, params, options);
+  };
 };

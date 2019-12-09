@@ -42,7 +42,6 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   getServices,
-  getUnhashableStatesProvider,
   hasSearchStategyForIndexPattern,
   intervalOptions,
   isDefaultTypeIndexPattern,
@@ -74,13 +73,12 @@ const {
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
-import { start as dataLP } from '../../../../data/public/legacy';
 import { generateFilters } from '../../../../../../plugins/data/public';
 import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
 import { FilterStateManager } from '../../../../data/public/filter/filter_manager';
 
-const { savedQueryService } = data.query.savedQueries;
+const { getSavedQuery } = data.query.savedQueries;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -124,9 +122,9 @@ app.config($routeProvider => {
     reloadOnSearch: false,
     resolve: {
       savedObjects: function (redirectWhenMissing, $route, kbnUrl, Promise, $rootScope) {
-        const indexPatterns = dataLP.indexPatterns.indexPatterns;
+        const indexPatterns = getServices().indexPatterns;
         const savedSearchId = $route.current.params.id;
-        return ensureDefaultIndexPattern(core, dataLP, $rootScope, kbnUrl).then(() => {
+        return ensureDefaultIndexPattern(core, getServices().data, $rootScope, kbnUrl).then(() => {
           return Promise.props({
             ip: indexPatterns.getCache().then((indexPatternList) => {
               /**
@@ -195,9 +193,7 @@ function discoverController(
   globalState,
 ) {
   const responseHandler = vislibSeriesResponseHandlerProvider().handler;
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
   const filterStateManager = new FilterStateManager(globalState, getAppState, filterManager);
-
 
   const inspectorAdapters = {
     requests: new RequestAdapter()
@@ -333,7 +329,7 @@ function discoverController(
           anchorElement,
           allowEmbed: false,
           allowShortUrl: uiCapabilities.discover.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+          shareableUrl: unhashUrl(window.location.href),
           objectId: savedSearch.id,
           objectType: 'search',
           sharingData: {
@@ -425,7 +421,7 @@ function discoverController(
   };
 
   const getFieldCounts = async () => {
-    // the field counts aren't set until we have the dataLP back,
+    // the field counts aren't set until we have the data back,
     // so we wait for the fetch to be done before proceeding
     if ($scope.fetchStatus === fetchStatuses.COMPLETE) {
       return $scope.fieldCounts;
@@ -581,7 +577,7 @@ function discoverController(
           if (!angular.equals(sort, currentSort)) $scope.fetch();
         });
 
-        // update dataLP source when filters update
+        // update data source when filters update
         subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: () => {
             $scope.filters = filterManager.getFilters();
@@ -591,12 +587,12 @@ function discoverController(
           }
         }));
 
-        // fetch dataLP when filters fire fetch event
+        // fetch data when filters fire fetch event
         subscriptions.add(subscribeWithScope($scope, filterManager.getUpdates$(), {
           next: $scope.fetch
         }));
 
-        // update dataLP source when hitting forward/back and the query changes
+        // update data source when hitting forward/back and the query changes
         $scope.$listen($state, 'fetch_with_changes', function (diff) {
           if (diff.indexOf('query') >= 0) $scope.fetch();
         });
@@ -636,7 +632,7 @@ function discoverController(
           let prev = {};
           const status = {
             UNINITIALIZED: 'uninitialized',
-            LOADING: 'loading', // initial dataLP load
+            LOADING: 'loading', // initial data load
             READY: 'ready', // results came back
             NO_RESULTS: 'none' // no results came back
           };
@@ -707,7 +703,7 @@ function discoverController(
                 savedSearchTitle: savedSearch.title,
               }
             }),
-            'dataLP-test-subj': 'saveSearchSuccess',
+            'data-test-subj': 'saveSearchSuccess',
           });
 
           if (savedSearch.id !== $route.current.params.id) {
@@ -768,7 +764,7 @@ function discoverController(
         } else {
           toastNotifications.addError(error, {
             title: i18n.translate('kbn.discover.errorLoadingData', {
-              defaultMessage: 'Error loading dataLP',
+              defaultMessage: 'Error loading data',
             }),
           });
         }
@@ -816,10 +812,10 @@ function discoverController(
   function logInspectorRequest() {
     inspectorAdapters.requests.reset();
     const title = i18n.translate('kbn.discover.inspectorRequestDataTitle', {
-      defaultMessage: 'dataLP',
+      defaultMessage: 'data',
     });
     const description = i18n.translate('kbn.discover.inspectorRequestDescription', {
-      defaultMessage: 'This request queries Elasticsearch to fetch the dataLP for the search.',
+      defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
     inspectorRequest = inspectorAdapters.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
@@ -975,7 +971,7 @@ function discoverController(
       return;
     }
     if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
-      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      getSavedQuery(newSavedQueryId).then((savedQuery) => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;
           updateStateFromSavedQuery(savedQuery);
