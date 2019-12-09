@@ -29,24 +29,6 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
       case 'POST':
         this.server.route.post(routeDefinition, handler);
         break;
-      case 'POST':
-        this.server.route.post(
-          {
-            path,
-            validate,
-          },
-          handler
-        );
-        break;
-      case 'POST':
-        this.server.route.post(
-          {
-            path,
-            validate,
-          },
-          handler
-        );
-        break;
       default:
         throw new Error(`Handler for method ${method} is not defined`);
     }
@@ -78,7 +60,7 @@ export class UMKibanaBackendFrameworkAdapter implements UMBackendFrameworkAdapte
         const options = {
           graphQLOptions: (_req: any) => {
             return {
-              context: { ...context, callAsCurrentUser },
+              context: { ...context, APICaller: callAsCurrentUser },
               schema,
             };
           },
