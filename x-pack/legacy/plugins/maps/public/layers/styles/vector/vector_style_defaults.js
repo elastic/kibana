@@ -14,8 +14,8 @@ import {
 
 const DEFAULT_ICON = 'airfield';
 
-export const DEFAULT_MIN_SIZE = 1;
-export const DEFAULT_MAX_SIZE = 64;
+export const MIN_SIZE = 1;
+export const MAX_SIZE = 64;
 export const DEFAULT_SIGMA = 3;
 
 export const VECTOR_STYLES = {
