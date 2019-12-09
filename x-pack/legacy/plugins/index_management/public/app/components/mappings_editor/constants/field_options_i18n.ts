@@ -313,7 +313,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
     title: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.formSelect.termVector.withPositionsOffsetsTitle',
       {
-        defaultMessage: 'With positions & offsets',
+        defaultMessage: 'With positions and offsets',
       }
     ),
     description: i18n.translate(
@@ -327,7 +327,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
     title: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.formSelect.termVector.withPositionsPayloadsTitle',
       {
-        defaultMessage: 'With positions & payloads',
+        defaultMessage: 'With positions and payloads',
       }
     ),
     description: i18n.translate(
@@ -341,7 +341,7 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
     title: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.formSelect.termVector.withPositionsOffsetsPayloadsTitle',
       {
-        defaultMessage: 'With positions, offsets & payloads',
+        defaultMessage: 'With positions, offsets, and payloads',
       }
     ),
     description: i18n.translate(

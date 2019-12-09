@@ -8,6 +8,24 @@
  unless "--toggle" is added. In that case we don't need padding as the toggle will add it.
 */
 
+.mappingsEditor__editField {
+  min-width: 680px;
+}
+
+.mappingsEditor__editField__section {
+  border-bottom: $euiBorderThin;
+  margin-bottom: $euiSizeXL;
+  padding-bottom: $euiSizeXL;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  + .mappingsEditor__editField__advancedSettings {
+    margin-top: $euiSizeL * -1;
+  }
+}
+
 .mappingsEditor {
   &__createFieldWrapper {
     background-color: $euiColorLightestShade;
@@ -25,45 +43,6 @@
     margin-top: $euiSizeL;
     padding-top: $euiSize;
     border-top: 1px solid $euiColorLightShade;
-  }
-
-  &__editField {
-    min-width: 680px;
-
-    &__section {
-      border-bottom: $euiBorderThin;
-      margin-bottom: $euiSizeXL;
-      padding-bottom: $euiSizeXL;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      + .mappingsEditor__editField__advancedSettings {
-        margin-top: $euiSizeL * -1;
-      }
-    }
-
-    &__formRow {
-      margin-bottom: $euiSizeXL;
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      &__btnTitle {
-        display: inherit;
-        text-align: left;
-
-        &:focus {
-          animation: none !important;
-        }
-      }
-
-      &__title {
-        line-height: 1;
-        margin-bottom: $euiSizeS;
-      }
-    }
   }
 
   &__selectWithCustom {

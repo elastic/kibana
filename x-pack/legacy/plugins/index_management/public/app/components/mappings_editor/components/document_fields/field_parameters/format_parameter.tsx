@@ -6,7 +6,7 @@
 
 import React, { useState } from 'react';
 
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
@@ -49,27 +49,30 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
       <UseField path="format" config={getFieldConfig('format')}>
         {formatField => {
           return (
-            <EuiComboBox
-              placeholder={i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.formatParameter.placeholderLabel',
-                {
-                  defaultMessage: 'Select a format',
-                }
-              )}
-              options={comboBoxOptions}
-              selectedOptions={formatField.value as ComboBoxOption[]}
-              onChange={value => {
-                formatField.setValue(value);
-              }}
-              onCreateOption={(searchValue: string) => {
-                const newOption = {
-                  label: searchValue,
-                };
+            <EuiFormRow label={formatField.label} helpText={formatField.helpText} fullWidth>
+              <EuiComboBox
+                placeholder={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.formatParameter.placeholderLabel',
+                  {
+                    defaultMessage: 'Select a format',
+                  }
+                )}
+                options={comboBoxOptions}
+                selectedOptions={formatField.value as ComboBoxOption[]}
+                onChange={value => {
+                  formatField.setValue(value);
+                }}
+                onCreateOption={(searchValue: string) => {
+                  const newOption = {
+                    label: searchValue,
+                  };
 
-                formatField.setValue([...(formatField.value as ComboBoxOption[]), newOption]);
-                setComboBoxOptions([...comboBoxOptions, newOption]);
-              }}
-            />
+                  formatField.setValue([...(formatField.value as ComboBoxOption[]), newOption]);
+                  setComboBoxOptions([...comboBoxOptions, newOption]);
+                }}
+                fullWidth
+              />
+            </EuiFormRow>
           );
         }}
       </UseField>
