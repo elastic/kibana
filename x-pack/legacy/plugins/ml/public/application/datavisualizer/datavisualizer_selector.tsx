@@ -145,7 +145,7 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#datavisualizer_index_select"
+                    href="#/datavisualizer_index_select"
                     data-test-subj="mlDataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage
