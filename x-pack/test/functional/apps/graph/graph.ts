@@ -13,8 +13,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  // eslint-disable-next-line ban/ban
-  describe.only('graph', function() {
+  describe('graph', function() {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('load graph/secrepo data');
