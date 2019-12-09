@@ -164,9 +164,14 @@ export const formSetup = async (
     const { find, form, component } = testBed;
 
     form.setInputValue('nameParameterInput', name);
-    form.setInputValue('fieldTypeSelect', type);
+    find('createFieldWrapper.mockComboBox').simulate('change', [
+      {
+        label: type,
+        value: type,
+      },
+    ]);
 
-    await nextTick();
+    await nextTick(50);
     component.update();
 
     find('createFieldWrapper.addButton').simulate('click');
@@ -205,10 +210,11 @@ export type TestSubjects =
   | 'createFieldWrapper.addFieldButton'
   | 'createFieldWrapper.addMultiFieldButton'
   | 'createFieldWrapper.cancelButton'
+  | 'createFieldWrapper.mockComboBox'
   | 'editFieldButton'
   | 'editFieldUpdateButton'
   | 'fieldsListItem'
-  | 'fieldTypeSelect'
+  | 'fieldTypeComboBox'
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
