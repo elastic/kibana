@@ -11,10 +11,10 @@ import { EuiSideNav } from '@elastic/eui';
 import { AppMountContext } from 'kibana/public';
 
 type NavProps = RouteComponentProps & {
-  navigateToApp: AppMountContext['core']['application']['navigateToApp'];
+  navigateToApp?: AppMountContext['core']['application']['navigateToApp'];
 };
 
-export const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
+export const Nav = withRouter(({ history }: NavProps) => (
   <EuiSideNav
     data-test-subj="menuEndpoint"
     items={[
@@ -26,21 +26,25 @@ export const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
             id: 'home',
             name: 'Home',
             onClick: () => history.push('/'),
+            'data-test-subj': 'navHomeItem',
           },
           {
             id: 'management',
             name: 'Management',
             onClick: () => history.push('/management'),
+            'data-test-subj': 'navManagementItem',
           },
           {
             id: 'endpoints',
             name: 'Endpoints',
             onClick: () => history.push('/endpoints'),
+            'data-test-subj': 'navEndpointsItem',
           },
           {
             id: 'alerts',
             name: 'Alerts',
             onClick: () => history.push('/alerts'),
+            'data-test-subj': 'navalertsItem',
           },
         ],
       },
