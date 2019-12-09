@@ -8,7 +8,6 @@ import { endpointListReducer } from './endpoints_list';
 import { createStore, Store } from 'redux';
 import { actions } from '../actions/endpoints_list';
 import { EndpointData } from '../../server/types';
-import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
 describe('reducer: endpoints list', () => {
   let store: Store;
@@ -111,7 +110,7 @@ describe('reducer: endpoints list', () => {
       actions.userPaginatedOrSortedEndpointListTable({
         pageIndex: 100,
         pageSize: 50,
-        sortDirection: 'ASC' as Direction,
+        sortDirection: 'asc',
         sortField: 'Name',
       })
     );
