@@ -45,7 +45,7 @@ import {
   showSaveModal,
   stateMonitorFactory,
   subscribeWithScope,
-  unhashUrl,
+  unhashUrl
 } from '../kibana_services';
 
 const {
