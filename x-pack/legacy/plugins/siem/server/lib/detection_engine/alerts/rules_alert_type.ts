@@ -34,7 +34,6 @@ export const rulesAlertType = ({
         description: schema.string(),
         falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
         from: schema.string(),
-        filter: schema.nullable(schema.object({}, { allowUnknowns: true })),
         ruleId: schema.string(),
         immutable: schema.boolean({ defaultValue: false }),
         index: schema.nullable(schema.arrayOf(schema.string())),
@@ -56,7 +55,6 @@ export const rulesAlertType = ({
     },
     async executor({ alertId, services, params }) {
       const {
-        filter,
         from,
         ruleId,
         index,
@@ -87,7 +85,6 @@ export const rulesAlertType = ({
       const inputIndex = await getInputIndex(services, version, index);
       const esFilter = await getFilter({
         type,
-        filter,
         filters,
         language,
         query,
@@ -106,18 +103,20 @@ export const rulesAlertType = ({
       });
 
       try {
-        logger.debug(`Starting signal rule "id: ${alertId}", "ruleId: ${ruleId}"`);
         logger.debug(
-          `[+] Initial search call of signal rule "id: ${alertId}", "ruleId: ${ruleId}"`
+          `Starting signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+        );
+        logger.debug(
+          `[+] Initial search call of signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
         );
         const noReIndexResult = await services.callCluster('search', noReIndex);
         if (noReIndexResult.hits.total.value !== 0) {
           logger.info(
             `Found ${
               noReIndexResult.hits.total.value
-            } signals from the indexes of "${inputIndex.join(
+            } signals from the indexes of "[${inputIndex.join(
               ', '
-            )}" using signal rule "id: ${alertId}", "ruleId: ${ruleId}", pushing signals to index ${outputIndex}`
+            )}]" using signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}", pushing signals to index "${outputIndex}"`
           );
         }
 
@@ -128,6 +127,7 @@ export const rulesAlertType = ({
           logger,
           id: alertId,
           signalsIndex: outputIndex,
+          filter: esFilter,
           name,
           createdBy,
           updatedBy,
@@ -137,15 +137,19 @@ export const rulesAlertType = ({
         });
 
         if (bulkIndexResult) {
-          logger.debug(`Finished signal rule "id: ${alertId}", "ruleId: ${ruleId}"`);
+          logger.debug(
+            `Finished signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
         } else {
-          logger.error(`Error processing signal rule "id: ${alertId}", "ruleId: ${ruleId}"`);
+          logger.error(
+            `Error processing signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
+          );
         }
       } catch (err) {
         // TODO: Error handling and writing of errors into a signal that has error
         // handling/conditions
         logger.error(
-          `Error from signal rule "id: ${alertId}", "ruleId: ${ruleId}", ${err.message}`
+          `Error from signal rule name: "${name}", id: "${alertId}", rule_id: "${ruleId}"`
         );
       }
     },

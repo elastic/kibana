@@ -103,27 +103,6 @@ describe('create_rules', () => {
       expect(statusCode).toBe(200);
     });
 
-    test('returns 200 if type is filter', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
-      // Cannot type request with a ServerInjectOptions as the type system complains
-      // about the property filter involving Hapi types, so I left it off for now
-      const { language, query, type, ...noType } = typicalPayload();
-      const request = {
-        method: 'POST',
-        url: DETECTION_ENGINE_RULES_URL,
-        payload: {
-          ...noType,
-          type: 'filter',
-          filter: {},
-        },
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
-    });
-
     test('returns 400 if type is not filter or kql', async () => {
       alertsClient.find.mockResolvedValue(getFindResult());
       alertsClient.get.mockResolvedValue(getResult());
