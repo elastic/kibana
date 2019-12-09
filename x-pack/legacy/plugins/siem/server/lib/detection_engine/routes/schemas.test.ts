@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createRulesSchema, updateRulesSchema, findRulesSchema, queryRulesSchema } from './schemas';
+import {
+  createRulesSchema,
+  updateRulesSchema,
+  findRulesSchema,
+  queryRulesSchema,
+  setSignalsStatusSchema,
+} from './schemas';
 import {
   RuleAlertParamsRest,
   FindParamsRest,
   UpdateRuleAlertParamsRest,
   ThreatParams,
+  SignalsRestParams,
 } from '../alerts/types';
 
 describe('schemas', () => {
@@ -134,7 +141,7 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('[rule_id, description, from, to, name, severity, type, query, index, interval] does not validate', () => {
+    test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
       expect(
         createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
           rule_id: 'rule-1',
@@ -149,7 +156,7 @@ describe('schemas', () => {
           index: ['index-1'],
           interval: '5m',
         }).error
-      ).toBeTruthy();
+      ).toBeFalsy();
     });
 
     test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
@@ -220,8 +227,7 @@ describe('schemas', () => {
           name: 'some-name',
           severity: 'severity',
           interval: '5m',
-          type: 'filter',
-          filter: {},
+          type: 'query',
           risk_score: 50,
         }).error
       ).toBeFalsy();
@@ -240,8 +246,7 @@ describe('schemas', () => {
           name: 'some-name',
           severity: 'severity',
           interval: '5m',
-          type: 'filter',
-          filter: {},
+          type: 'query',
         }).error
       ).toBeFalsy();
     });
@@ -280,8 +285,7 @@ describe('schemas', () => {
           name: 'some-name',
           severity: 'severity',
           interval: '5m',
-          type: 'filter',
-          filter: {},
+          type: 'query',
           threats: [
             {
               framework: 'someFramework',
@@ -290,93 +294,17 @@ describe('schemas', () => {
                 name: 'fakeName',
                 reference: 'fakeRef',
               },
-              technique: {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
           ],
         }).error
       ).toBeFalsy();
-    });
-
-    test('If filter type is set then filter is required', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-        }).error
-      ).toBeTruthy();
-    });
-
-    test('If filter type is set then query is not allowed', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-          filter: {},
-          query: 'some query value',
-        }).error
-      ).toBeTruthy();
-    });
-
-    test('If filter type is set then language is not allowed', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-          filter: {},
-          language: 'kuery',
-        }).error
-      ).toBeTruthy();
-    });
-
-    test('If filter type is set then filters are not allowed', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-          filter: {},
-          filters: [],
-        }).error
-      ).toBeTruthy();
     });
 
     test('allows references to be sent as valid', () => {
@@ -500,26 +428,6 @@ describe('schemas', () => {
       ).toEqual(100);
     });
 
-    test('filter and filters cannot exist together', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'query',
-          filter: {},
-          filters: [],
-        }).error
-      ).toBeTruthy();
-    });
-
     test('saved_id is required when type is saved_query and will not validate without out', () => {
       expect(
         createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
@@ -595,26 +503,6 @@ describe('schemas', () => {
           type: 'saved_query',
           saved_id: 'some id',
           filters: 'some string',
-        }).error
-      ).toBeTruthy();
-    });
-
-    test('saved_query type cannot have filter with it', () => {
-      expect(
-        createRulesSchema.validate<Partial<RuleAlertParamsRest>>({
-          rule_id: 'rule-1',
-          risk_score: 50,
-          output_index: '.siem-signals',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'saved_query',
-          saved_id: 'some id',
-          filter: {},
         }).error
       ).toBeTruthy();
     });
@@ -825,11 +713,13 @@ describe('schemas', () => {
                 name: 'fakeName',
                 reference: 'fakeRef',
               },
-              technique: {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
           ],
         }).error
@@ -860,11 +750,13 @@ describe('schemas', () => {
           threats: [
             {
               framework: 'fake',
-              technique: {
-                id: 'techniqueId',
-                name: 'techniqueName',
-                reference: 'techniqueRef',
-              },
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
           ],
         }).error
@@ -1144,30 +1036,6 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('You can have an empty query string when filters are present', () => {
-      expect(
-        createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'meta'> & { meta: string }>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          immutable: true,
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'query',
-          references: ['index-1'],
-          query: '',
-          language: 'kuery',
-          filters: [],
-          max_signals: 1,
-        }).error
-      ).toBeFalsy();
-    });
-
     test('You can omit the query string when filters are present', () => {
       expect(
         createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'meta'> & { meta: string }>>({
@@ -1189,29 +1057,6 @@ describe('schemas', () => {
           max_signals: 1,
         }).error
       ).toBeFalsy();
-    });
-
-    test('query string defaults to empty string when present with filters', () => {
-      expect(
-        createRulesSchema.validate<Partial<Omit<RuleAlertParamsRest, 'meta'> & { meta: string }>>({
-          rule_id: 'rule-1',
-          output_index: '.siem-signals',
-          risk_score: 50,
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          immutable: true,
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'query',
-          references: ['index-1'],
-          language: 'kuery',
-          filters: [],
-          max_signals: 1,
-        }).value.query
-      ).toEqual('');
     });
   });
 
@@ -1543,8 +1388,7 @@ describe('schemas', () => {
           name: 'some-name',
           severity: 'severity',
           interval: '5m',
-          type: 'filter',
-          filter: {},
+          type: 'query',
         }).error
       ).toBeFalsy();
     });
@@ -1560,80 +1404,9 @@ describe('schemas', () => {
           name: 'some-name',
           severity: 'severity',
           interval: '5m',
-          type: 'filter',
-          filter: {},
+          type: 'query',
         }).error
       ).toBeFalsy();
-    });
-
-    test('If filter type is set then filter is still not required', () => {
-      expect(
-        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-          id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-        }).error
-      ).toBeFalsy();
-    });
-
-    test('If filter type is set then query is not allowed', () => {
-      expect(
-        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-          id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-          filter: {},
-          query: 'some query value',
-        }).error
-      ).toBeTruthy();
-    });
-
-    test('If filter type is set then language is not allowed', () => {
-      expect(
-        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-          id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-          filter: {},
-          language: 'kuery',
-        }).error
-      ).toBeTruthy();
-    });
-
-    test('If filter type is set then filters are not allowed', () => {
-      expect(
-        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-          id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'filter',
-          filter: {},
-          filters: [],
-        }).error
-      ).toBeTruthy();
     });
 
     test('allows references to be sent as a valid value to update with', () => {
@@ -1745,24 +1518,6 @@ describe('schemas', () => {
       ).toBeTruthy();
     });
 
-    test('filter and filters cannot exist together', () => {
-      expect(
-        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-          id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'query',
-          filter: {},
-          filters: [],
-        }).error
-      ).toBeTruthy();
-    });
-
     test('saved_id is not required when type is saved_query and will validate without it', () => {
       expect(
         updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
@@ -1812,24 +1567,6 @@ describe('schemas', () => {
           filters: [],
         }).error
       ).toBeFalsy();
-    });
-
-    test('saved_query type cannot have filter with it', () => {
-      expect(
-        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-          id: 'rule-1',
-          description: 'some description',
-          from: 'now-5m',
-          to: 'now',
-          index: ['index-1'],
-          name: 'some-name',
-          severity: 'severity',
-          interval: '5m',
-          type: 'saved_query',
-          saved_id: 'some id',
-          filter: {},
-        }).error
-      ).toBeTruthy();
     });
 
     test('language validates with kuery', () => {
@@ -2000,178 +1737,187 @@ describe('schemas', () => {
         }).value.threats
       ).toBe(undefined);
     });
-  });
-  test('threats is not defaulted to undefined on update with empty array', () => {
-    expect(
-      updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-        id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'severity',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threats: [],
-      }).value.threats
-    ).toMatchObject([]);
-  });
-  test('threats is valid when updated with all sub-objects', () => {
-    const expected: ThreatParams[] = [
-      {
-        framework: 'fake',
-        tactic: {
-          id: 'fakeId',
-          name: 'fakeName',
-          reference: 'fakeRef',
+
+    test('threats is not defaulted to undefined on update with empty array', () => {
+      expect(
+        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [],
+        }).value.threats
+      ).toMatchObject([]);
+    });
+    test('threats is valid when updated with all sub-objects', () => {
+      const expected: ThreatParams[] = [
+        {
+          framework: 'fake',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+          techniques: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
         },
-        technique: {
-          id: 'techniqueId',
-          name: 'techniqueName',
-          reference: 'techniqueRef',
-        },
-      },
-    ];
-    expect(
-      updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
-        id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'severity',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threats: [
-          {
-            framework: 'fake',
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
+      ];
+      expect(
+        updateRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [
+            {
+              framework: 'fake',
+              tactic: {
+                id: 'fakeId',
+                name: 'fakeName',
+                reference: 'fakeRef',
+              },
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
-            technique: {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
+          ],
+        }).value.threats
+      ).toMatchObject(expected);
+    });
+    test('threats is invalid when updated with missing property framework', () => {
+      expect(
+        updateRulesSchema.validate<
+          Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
+            threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
+          }
+        >({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [
+            {
+              tactic: {
+                id: 'fakeId',
+                name: 'fakeName',
+                reference: 'fakeRef',
+              },
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
-          },
-        ],
-      }).value.threats
-    ).toMatchObject(expected);
-  });
-  test('threats is invalid when updated with missing property framework', () => {
-    expect(
-      updateRulesSchema.validate<
-        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'framework'>>>;
-        }
-      >({
-        id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'severity',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threats: [
-          {
-            tactic: {
-              id: 'fakeId',
-              name: 'fakeName',
-              reference: 'fakeRef',
+          ],
+        }).error
+      ).toBeTruthy();
+    });
+    test('threats is invalid when updated with missing tactic sub-object', () => {
+      expect(
+        updateRulesSchema.validate<
+          Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
+            threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
+          }
+        >({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [
+            {
+              framework: 'fake',
+              techniques: [
+                {
+                  id: 'techniqueId',
+                  name: 'techniqueName',
+                  reference: 'techniqueRef',
+                },
+              ],
             },
-            technique: {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
+          ],
+        }).error
+      ).toBeTruthy();
+    });
+    test('threats is invalid when updated with missing techniques', () => {
+      expect(
+        updateRulesSchema.validate<
+          Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
+            threats: Array<Partial<Omit<ThreatParams, 'techniques'>>>;
+          }
+        >({
+          id: 'rule-1',
+          description: 'some description',
+          from: 'now-5m',
+          to: 'now',
+          index: ['index-1'],
+          name: 'some-name',
+          severity: 'severity',
+          interval: '5m',
+          type: 'query',
+          references: ['index-1'],
+          query: 'some query',
+          language: 'kuery',
+          max_signals: 1,
+          threats: [
+            {
+              framework: 'fake',
+              tactic: {
+                id: 'techniqueId',
+                name: 'techniqueName',
+                reference: 'techniqueRef',
+              },
             },
-          },
-        ],
-      }).error
-    ).toBeTruthy();
-  });
-  test('threats is invalid when updated with missing tactic sub-object', () => {
-    expect(
-      updateRulesSchema.validate<
-        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'tactic'>>>;
-        }
-      >({
-        id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'severity',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threats: [
-          {
-            framework: 'fake',
-            technique: {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
-            },
-          },
-        ],
-      }).error
-    ).toBeTruthy();
-  });
-  test('threats is invalid when updated with missing technique sub-object', () => {
-    expect(
-      updateRulesSchema.validate<
-        Partial<Omit<UpdateRuleAlertParamsRest, 'threats'>> & {
-          threats: Array<Partial<Omit<ThreatParams, 'technique'>>>;
-        }
-      >({
-        id: 'rule-1',
-        description: 'some description',
-        from: 'now-5m',
-        to: 'now',
-        index: ['index-1'],
-        name: 'some-name',
-        severity: 'severity',
-        interval: '5m',
-        type: 'query',
-        references: ['index-1'],
-        query: 'some query',
-        language: 'kuery',
-        max_signals: 1,
-        threats: [
-          {
-            framework: 'fake',
-            tactic: {
-              id: 'techniqueId',
-              name: 'techniqueName',
-              reference: 'techniqueRef',
-            },
-          },
-        ],
-      }).error
-    ).toBeTruthy();
+          ],
+        }).error
+      ).toBeTruthy();
+    });
   });
 
   describe('find rules schema', () => {
@@ -2324,6 +2070,64 @@ describe('schemas', () => {
       expect(
         queryRulesSchema.validate<Partial<UpdateRuleAlertParamsRest>>({ rule_id: '1' }).error
       ).toBeFalsy();
+    });
+  });
+
+  describe('set signal status schema', () => {
+    test('signal_ids and status is valid', () => {
+      expect(
+        setSignalsStatusSchema.validate<Partial<SignalsRestParams>>({
+          signal_ids: ['somefakeid'],
+          status: 'open',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('query and status is valid', () => {
+      expect(
+        setSignalsStatusSchema.validate<Partial<SignalsRestParams>>({
+          query: {},
+          status: 'open',
+        }).error
+      ).toBeFalsy();
+    });
+
+    test('signal_ids and missing status is invalid', () => {
+      expect(
+        setSignalsStatusSchema.validate<Partial<SignalsRestParams>>({
+          signal_ids: ['somefakeid'],
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('query and missing status is invalid', () => {
+      expect(
+        setSignalsStatusSchema.validate<Partial<SignalsRestParams>>({
+          query: {},
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('status is present but query or signal_ids is missing is invalid', () => {
+      expect(
+        setSignalsStatusSchema.validate<Partial<SignalsRestParams>>({
+          status: 'closed',
+        }).error
+      ).toBeTruthy();
+    });
+
+    test('signal_ids is present but status has wrong value', () => {
+      expect(
+        setSignalsStatusSchema.validate<
+          Partial<
+            Omit<SignalsRestParams, 'status'> & {
+              status: string;
+            }
+          >
+        >({
+          status: 'fakeVal',
+        }).error
+      ).toBeTruthy();
     });
   });
 });

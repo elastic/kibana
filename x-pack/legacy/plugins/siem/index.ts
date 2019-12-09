@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
+import { Root } from 'joi';
 
 import { PluginInitializerContext } from 'src/core/server';
 import { plugin } from './server';
@@ -24,6 +25,7 @@ import {
   DEFAULT_FROM,
   DEFAULT_TO,
   DEFAULT_SIGNALS_INDEX,
+  SIGNALS_INDEX_KEY,
   DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
@@ -103,6 +105,8 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
+        // DEPRECATED: This should be removed once the front end is no longer using any parts of it.
+        // TODO: Remove this as soon as no code is left that is pulling data from it.
         [DEFAULT_SIGNALS_INDEX_KEY]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
             defaultMessage: 'Elasticsearch signals index',
@@ -166,7 +170,11 @@ export const siem = (kibana: any) => {
         getInjectedUiAppVars,
         indexPatternsServiceFactory,
         injectUiAppVars,
-        plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
+        plugins: {
+          alerting: plugins.alerting,
+          xpack_main: plugins.xpack_main,
+          spaces: plugins.spaces,
+        },
         route: route.bind(server),
         savedObjects,
       };
@@ -176,6 +184,14 @@ export const siem = (kibana: any) => {
         setup.plugins,
         serverFacade
       );
+    },
+    config(Joi: Root) {
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
+        })
+        .default();
     },
   });
 };

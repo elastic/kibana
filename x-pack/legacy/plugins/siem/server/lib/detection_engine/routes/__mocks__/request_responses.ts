@@ -6,8 +6,11 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { RuleAlertParamsRest, RuleAlertType } from '../../alerts/types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { RuleAlertParamsRest, RuleAlertType, SignalsRestParams } from '../../alerts/types';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+} from '../../../../../common/constants';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
@@ -30,23 +33,23 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
     {
       framework: 'fake',
       tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
-      technique: { id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' },
+      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
 });
 
-export const typicalFilterPayload = (): Partial<RuleAlertParamsRest> => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  risk_score: 50,
-  type: 'filter',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  filter: {},
+export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams> => ({
+  signal_ids: ['somefakeid1', 'somefakeid2'],
+  status: 'closed',
+});
+
+export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsRestParams> => ({
+  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  status: 'closed',
+});
+
+export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsRestParams> => ({
+  status: 'closed',
 });
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
@@ -113,6 +116,22 @@ export const getCreateRequest = (): ServerInjectOptions => ({
   },
 });
 
+export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByIdsPayload(),
+  },
+});
+
+export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByQueryPayload(),
+  },
+});
+
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
@@ -154,11 +173,13 @@ export const getResult = (): RuleAlertType => ({
           name: 'impact',
           reference: 'https://attack.mitre.org/tactics/TA0040/',
         },
-        technique: {
-          id: 'T1499',
-          name: 'endpoint denial of service',
-          reference: 'https://attack.mitre.org/techniques/T1499/',
-        },
+        techniques: [
+          {
+            id: 'T1499',
+            name: 'endpoint denial of service',
+            reference: 'https://attack.mitre.org/techniques/T1499/',
+          },
+        ],
       },
     ],
     references: ['http://www.example.com', 'https://ww.example.com'],
