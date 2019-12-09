@@ -13,6 +13,7 @@ import { installTemplates } from '../lib/elasticsearch/template/install';
 import { AssetReference, InstallationStatus, RegistryPackage } from '../../common/types';
 import { getPackageInfo } from '../packages';
 import * as Registry from '../registry';
+import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 
 const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
 export class PackageNotInstalledError extends Error {
@@ -27,14 +28,19 @@ export async function createDatasource(options: {
   callCluster: CallESAsCurrentUser;
 }) {
   const { savedObjectsClient, pkgkey, callCluster } = options;
-  const info = await getPackageInfo({ savedObjectsClient, pkgkey });
+  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
 
-  if (info.status !== InstallationStatus.installed) {
+  if (packageInfo.status !== InstallationStatus.installed) {
     throw new PackageNotInstalledError(pkgkey);
   }
 
   const toSave = await installPipelines({ pkgkey, callCluster });
   // TODO: Clean up
+  const info = await Registry.fetchInfo(pkgkey);
+
+  // TODO: This should be moved out of the initial data source creation in the end
+  await baseSetup(callCluster);
+  await installTemplates(info, callCluster);
   const pkg = await Registry.fetchInfo(pkgkey);
 
   await Promise.all([
@@ -47,6 +53,19 @@ export async function createDatasource(options: {
   ]);
 
   return toSave;
+}
+
+/**
+ * Makes the basic setup of the assets like global ILM policies. Creates them if they do
+ * not exist yet but will not overwrite existing once.
+ */
+async function baseSetup(callCluster: CallESAsCurrentUser) {
+  if (!(await policyExists('logs-default', callCluster))) {
+    await installILMPolicy('logs-default', callCluster);
+  }
+  if (!(await policyExists('metrics-default', callCluster))) {
+    await installILMPolicy('metrics-default', callCluster);
+  }
 }
 
 async function saveDatasourceReferences(options: {
