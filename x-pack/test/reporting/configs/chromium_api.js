@@ -4,26 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getReportingApiConfig } from './api';
+import * as path from 'path';
+import { ReportingAPIProvider } from '../services';
 
 export default async function ({ readConfigFile }) {
+  const apiConfig = await readConfigFile(require.resolve('../../api_integration/config.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
-  const reportingApiConfig = await getReportingApiConfig({ readConfigFile });
-
-  return {
-    ...reportingApiConfig,
-    junit: {
-      reportName: 'X-Pack Chromium API Reporting Tests',
-    },
+  const config = {
+    servers: apiConfig.get('servers'),
+    junit: { reportName: 'X-Pack Chromium API Reporting Tests' },
     testFiles: [require.resolve('../api/chromium_tests')],
+    services: {
+      ...apiConfig.get('services'),
+      reportingAPI: ReportingAPIProvider,
+    },
     kbnTestServer: {
-      ...reportingApiConfig.kbnTestServer,
+      ...apiConfig.get('kbnTestServer'),
       serverArgs: [
-        ...reportingApiConfig.kbnTestServer.serverArgs,
+        ...functionalConfig.get('kbnTestServer.serverArgs'), // optimizer config
+        '--logging.events.log', '["info","warning","error","fatal","optimize","reporting"]',
+        '--xpack.endpoint.enabled=true',
         '--xpack.reporting.csv.enablePanelActionDownload=true',
-        `--xpack.reporting.capture.browser.type=chromium`,
-        `--xpack.spaces.enabled=false`,
+        '--xpack.security.session.idleTimeout=3600000',
+        '--xpack.spaces.enabled=false',
       ],
     },
+    esArchiver: {
+      directory: path.resolve(__dirname, '../es_archives')
+    },
+    esTestCluster: apiConfig.get('esTestCluster'),
   };
+
+  console.log(JSON.stringify(config));
+  return config;
 }

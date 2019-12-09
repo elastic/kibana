@@ -4,25 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getFunctionalConfig } from './functional';
+import * as path from 'path';
 
 export default async function ({ readConfigFile }) {
+  const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
-  const functionalConfig = await getFunctionalConfig({ readConfigFile });
-
-  return {
-    ...functionalConfig,
+  const config = {
+    services: functionalConfig.get('services'),
+    pageObjects: functionalConfig.get('pageObjects'),
+    servers: functionalConfig.get('servers'),
+    esTestCluster: functionalConfig.get('esTestCluster'),
+    apps: functionalConfig.get('apps'),
+    esArchiver: {
+      directory: path.resolve(__dirname, '../es_archives')
+    },
+    screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'X-Pack Chromium Functional Reporting Tests',
     },
     testFiles: [require.resolve('../functional')],
     kbnTestServer: {
-      ...functionalConfig.kbnTestServer,
+      ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
-        ...functionalConfig.kbnTestServer.serverArgs,
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        '--logging.events.log', '["info","warning","error","fatal","optimize","reporting"]',
+        '--xpack.endpoint.enabled=true',
         '--xpack.reporting.csv.enablePanelActionDownload=true',
-        `--xpack.reporting.capture.browser.type=chromium`,
+        '--xpack.security.session.idleTimeout=3600000',
+        '--xpack.spaces.enabled=false',
       ],
     },
   };
+
+  console.log(JSON.stringify(config));
+  return config;
 }
