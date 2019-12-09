@@ -18,11 +18,19 @@
  */
 
 import Joi from 'joi';
-const stringOptionalNullable = Joi.string().allow('', null).optional();
-const stringRequired = Joi.string().allow('').required();
+const stringOptionalNullable = Joi.string()
+  .allow('', null)
+  .optional();
+const stringRequired = Joi.string()
+  .allow('')
+  .required();
 const arrayNullable = Joi.array().allow(null);
-const numberIntegerOptional = Joi.number().integer().optional();
-const numberIntegerRequired = Joi.number().integer().required();
+const numberIntegerOptional = Joi.number()
+  .integer()
+  .optional();
+const numberIntegerRequired = Joi.number()
+  .integer()
+  .required();
 const numberOptional = Joi.number().optional();
 const numberRequired = Joi.number().required();
 const queryObject = Joi.object({
@@ -45,10 +53,12 @@ const annotationsItems = Joi.object({
 });
 
 const backgroundColorRulesItems = Joi.object({
-  value: Joi.number().allow(null).optional(),
+  value: Joi.number()
+    .allow(null)
+    .optional(),
   id: stringOptionalNullable,
   background_color: stringOptionalNullable,
-  color: stringOptionalNullable
+  color: stringOptionalNullable,
 });
 
 const gaugeColorRulesItems = Joi.object({
@@ -66,17 +76,21 @@ const metricsItems = Joi.object({
   sigma: stringOptionalNullable,
   function: stringOptionalNullable,
   script: stringOptionalNullable,
-  variables: Joi.array().items(Joi.object({
-    field: stringOptionalNullable,
-    id: stringRequired,
-    name: stringOptionalNullable,
-  })).optional(),
+  variables: Joi.array()
+    .items(
+      Joi.object({
+        field: stringOptionalNullable,
+        id: stringRequired,
+        name: stringOptionalNullable,
+      })
+    )
+    .optional(),
   type: stringRequired,
   value: stringOptionalNullable,
   values: Joi.array()
     .items(Joi.string().allow('', null))
     .allow(null)
-    .optional()
+    .optional(),
 });
 
 const splitFiltersItems = Joi.object({
@@ -84,9 +98,9 @@ const splitFiltersItems = Joi.object({
   color: stringOptionalNullable,
   filter: Joi.object({
     language: Joi.string().allow(''),
-    query: Joi.string().allow('')
+    query: Joi.string().allow(''),
   }).optional(),
-  label: stringOptionalNullable
+  label: stringOptionalNullable,
 });
 
 const seriesItems = Joi.object({
@@ -98,12 +112,15 @@ const seriesItems = Joi.object({
   chart_type: stringRequired,
   color: stringRequired,
   color_rules: Joi.array()
-    .items(Joi.object({
-      value: numberOptional,
-      id: stringRequired,
-      text: stringOptionalNullable,
-      operator: stringOptionalNullable
-    })).optional(),
+    .items(
+      Joi.object({
+        value: numberOptional,
+        id: stringRequired,
+        text: stringOptionalNullable,
+        operator: stringOptionalNullable,
+      })
+    )
+    .optional(),
   fill: numberOptional,
   filter: Joi.object({
     query: stringRequired,
@@ -115,8 +132,7 @@ const seriesItems = Joi.object({
   id: stringRequired,
   label: stringOptionalNullable,
   line_width: numberOptional,
-  metrics: Joi.array()
-    .items(metricsItems),
+  metrics: Joi.array().items(metricsItems),
   offset_time: stringOptionalNullable,
   override_index_pattern: numberOptional,
   point_size: numberRequired,
@@ -128,7 +144,8 @@ const seriesItems = Joi.object({
   series_drop_last_bucket: numberIntegerOptional,
   split_color_mode: stringOptionalNullable,
   split_filters: Joi.array()
-    .items(splitFiltersItems).optional(),
+    .items(splitFiltersItems)
+    .optional(),
   split_mode: stringRequired,
   stacked: stringRequired,
   steps: numberIntegerOptional,
@@ -142,15 +159,16 @@ const seriesItems = Joi.object({
   trend_arrows: numberOptional,
   type: stringOptionalNullable,
   value_template: stringOptionalNullable,
-  var_name: stringOptionalNullable
+  var_name: stringOptionalNullable,
 });
 
 export const visPayload = {
   filters: arrayNullable,
-  panels: Joi.array()
-    .items(Joi.object({
+  panels: Joi.array().items(
+    Joi.object({
       annotations: Joi.array()
-        .items(annotationsItems).optional(),
+        .items(annotationsItems)
+        .optional(),
       axis_formatter: stringRequired,
       axis_position: stringRequired,
       axis_scale: stringRequired,
@@ -159,7 +177,8 @@ export const visPayload = {
       bar_color_rules: arrayNullable.optional(),
       background_color: stringOptionalNullable,
       background_color_rules: Joi.array()
-        .items(backgroundColorRulesItems).optional(),
+        .items(backgroundColorRulesItems)
+        .optional(),
       default_index_pattern: stringOptionalNullable,
       default_timefield: stringOptionalNullable,
       drilldown_url: stringOptionalNullable,
@@ -168,10 +187,12 @@ export const visPayload = {
         stringOptionalNullable,
         Joi.object({
           language: stringOptionalNullable,
-          query: stringOptionalNullable
-        })),
+          query: stringOptionalNullable,
+        })
+      ),
       gauge_color_rules: Joi.array()
-        .items(gaugeColorRulesItems).optional(),
+        .items(gaugeColorRulesItems)
+        .optional(),
       gauge_width: [stringOptionalNullable, numberOptional],
       gauge_inner_color: stringOptionalNullable,
       gauge_inner_width: Joi.alternatives(stringOptionalNullable, numberIntegerOptional),
@@ -195,24 +216,31 @@ export const visPayload = {
       pivot_type: stringOptionalNullable,
       pivot_rows: stringOptionalNullable,
       series: Joi.array()
-        .items(seriesItems).required(),
+        .items(seriesItems)
+        .required(),
       show_grid: numberIntegerRequired,
       show_legend: numberIntegerRequired,
       time_field: stringOptionalNullable,
       time_range_mode: stringOptionalNullable,
       type: stringRequired,
-    })),
+    })
+  ),
   // general
   query: Joi.array()
     .items(queryObject)
     .allow(null)
     .required(),
-  state: Joi.object({}).required(),
+  state: Joi.object({
+    sort: Joi.object({
+      column: stringRequired,
+      order: Joi.string()
+        .valid(['asc', 'desc'])
+        .required(),
+    }).optional(),
+  }).required(),
   timerange: Joi.object({
     timezone: stringRequired,
     min: stringRequired,
-    max: stringRequired
-  }).required()
+    max: stringRequired,
+  }).required(),
 };
-
-
