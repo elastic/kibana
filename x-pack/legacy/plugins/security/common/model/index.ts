@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Role, RoleIndexPrivilege, RoleKibanaPrivilege } from './role';
-export { FeaturesPrivileges } from './features_privileges';
-export { RawKibanaPrivileges, RawKibanaFeaturePrivileges } from './raw_kibana_privileges';
-export { KibanaPrivileges } from './kibana_privileges';
 export { ApiKey } from './api_key';
-export { User, EditUser, getUserDisplayName } from '../../../../../plugins/security/common/model';
 export {
   AuthenticatedUser,
+  BuiltinESPrivileges,
+  EditUser,
+  FeaturesPrivileges,
+  KibanaPrivileges,
+  RawKibanaFeaturePrivileges,
+  RawKibanaPrivileges,
+  Role,
+  RoleIndexPrivilege,
+  RoleKibanaPrivilege,
+  User,
   canUserChangePassword,
+  getUserDisplayName,
 } from '../../../../../plugins/security/common/model';
-export { BuiltinESPrivileges } from './builtin_es_privileges';

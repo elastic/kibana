@@ -23,8 +23,7 @@ import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { tabifyGetColumns } from 'ui/agg_response/tabify/_get_columns';
-import { VisOptionsProps } from 'ui/vis/editors/default';
+import { tabifyGetColumns, VisOptionsProps } from '../legacy_imports';
 import {
   NumberInputOption,
   SwitchOption,
@@ -78,7 +77,7 @@ function TableOptions({
           <>
             <FormattedMessage
               id="visTypeTable.params.perPageLabel"
-              defaultMessage="Rows per page"
+              defaultMessage="Max rows per page"
             />{' '}
             <EuiIconTip
               content="Leaving this field empty means it will use number of buckets from the response."

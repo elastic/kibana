@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../server/lib/helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../server/lib/helpers/setup_request';
 import {
   SERVICE_NAME,
   PROCESSOR_EVENT,
@@ -30,11 +34,11 @@ export function getMetricsProjection({
   serviceName,
   serviceNodeName
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   serviceNodeName?: string;
 }) {
-  const { start, end, uiFiltersES, config } = setup;
+  const { start, end, uiFiltersES, indices } = setup;
 
   const filter = [
     { term: { [SERVICE_NAME]: serviceName } },
@@ -45,7 +49,7 @@ export function getMetricsProjection({
   ];
 
   return {
-    index: config.get<string>('apm_oss.metricsIndices'),
+    index: indices['apm_oss.metricsIndices'],
     body: {
       query: {
         bool: {

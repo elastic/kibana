@@ -58,7 +58,7 @@ export const SnippetsStep: FC<{ onCopy: OnCopyFn }> = ({ onCopy }) => (
     <EuiHorizontalRule />
     <EuiDescriptionList>
       <EuiDescriptionListTitle>
-        <EuiCode>kbn-canvas-shareable="canvas"</EuiCode> ({strings.getRequiredLabel()})
+        <EuiCode>kbn-canvas-shareable=&quot;canvas&quot;</EuiCode> ({strings.getRequiredLabel()})
       </EuiDescriptionListTitle>
       <EuiDescriptionListDescription>
         {strings.getShareableParameterDescription()}

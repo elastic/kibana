@@ -4,7 +4,7 @@
 
 ## UiSettingsParams.options property
 
-a range of valid values
+array of permitted values for this setting
 
 <b>Signature:</b>
 

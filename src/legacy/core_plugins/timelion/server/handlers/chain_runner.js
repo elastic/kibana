@@ -21,9 +21,9 @@
 import _ from 'lodash';
 import Bluebird from 'bluebird';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
 
 import parseSheet from './lib/parse_sheet.js';
-import parseDateMath from '../lib/date_math.js';
 import repositionArguments from './lib/reposition_arguments.js';
 import indexArguments from './lib/index_arguments.js';
 import validateTime from './lib/validate_time.js';
@@ -191,8 +191,8 @@ export default function chainRunner(tlConfig) {
     validateTime(request.time, tlConfig);
 
     tlConfig.time = request.time;
-    tlConfig.time.to = parseDateMath(request.time.to, true).valueOf();
-    tlConfig.time.from = parseDateMath(request.time.from).valueOf();
+    tlConfig.time.to = moment(request.time.to).valueOf();
+    tlConfig.time.from = moment(request.time.from).valueOf();
     tlConfig.time.interval = calculateInterval(
       tlConfig.time.from,
       tlConfig.time.to,

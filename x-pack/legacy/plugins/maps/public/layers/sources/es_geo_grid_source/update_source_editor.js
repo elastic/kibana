@@ -13,6 +13,8 @@ import { ResolutionEditor } from './resolution_editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
+import { isMetricCountable } from '../../util/is_metric_countable';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -61,12 +63,16 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'resolution', value: e });
   };
 
+  _onApplyGlobalQueryChange = applyGlobalQuery => {
+    this.props.onChange({ propName: 'applyGlobalQuery', value: applyGlobalQuery });
+  };
+
   _renderMetricsEditor() {
     const metricsFilter =
       this.props.renderAs === RENDER_AS.HEATMAP
         ? metric => {
           //these are countable metrics, where blending heatmap color blobs make sense
-          return ['count', 'sum'].includes(metric.value);
+          return isMetricCountable(metric.value);
         }
         : null;
     const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;
@@ -94,7 +100,13 @@ export class UpdateSourceEditor extends Component {
       <Fragment>
         <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange} />
         <EuiSpacer size="m" />
+
         {this._renderMetricsEditor()}
+
+        <GlobalFilterCheckbox
+          applyGlobalQuery={this.props.applyGlobalQuery}
+          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+        />
       </Fragment>
     );
   }

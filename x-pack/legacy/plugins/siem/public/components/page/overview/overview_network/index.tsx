@@ -7,9 +7,8 @@
 import { EuiButton, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState } from 'react';
-import { pure } from 'recompose';
 
-import { HeaderPanel } from '../../../header_panel';
+import { HeaderSection } from '../../../header_section';
 import { manageQuery } from '../../../page/manage_query';
 import {
   ID as OverviewNetworkQueryId,
@@ -17,6 +16,7 @@ import {
 } from '../../../../containers/overview/overview_network';
 import { inputsModel } from '../../../../store/inputs';
 import { OverviewNetworkStats } from '../overview_network_stats';
+import { getNetworkUrl } from '../../../link_to';
 
 export interface OwnProps {
   startDate: number;
@@ -36,12 +36,12 @@ export interface OwnProps {
 
 const OverviewNetworkStatsManage = manageQuery(OverviewNetworkStats);
 
-export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery }) => {
+export const OverviewNetwork = React.memo<OwnProps>(({ endDate, startDate, setQuery }) => {
   const [isHover, setIsHover] = useState(false);
   return (
     <EuiFlexItem>
       <EuiPanel onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)}>
-        <HeaderPanel
+        <HeaderSection
           border
           id={OverviewNetworkQueryId}
           showInspect={isHover}
@@ -58,13 +58,13 @@ export const OverviewNetwork = pure<OwnProps>(({ endDate, startDate, setQuery })
             />
           }
         >
-          <EuiButton href="#/link-to/network/">
+          <EuiButton href={getNetworkUrl()}>
             <FormattedMessage
               id="xpack.siem.overview.networkAction"
               defaultMessage="View network"
             />
           </EuiButton>
-        </HeaderPanel>
+        </HeaderSection>
 
         <OverviewNetworkQuery endDate={endDate} sourceId="default" startDate={startDate}>
           {({ overviewNetwork, loading, id, inspect, refetch }) => (

@@ -6,32 +6,20 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import moment from 'moment-timezone';
+import { asAbsoluteDateTime, TimeUnit } from '../../../utils/formatters';
 
 interface Props {
   /**
    * timestamp in milliseconds
    */
   time: number;
-  precision?: 'days' | 'minutes' | 'milliseconds';
+  timeUnit?: TimeUnit;
 }
 
-function getPreciseTime(precision: Props['precision']) {
-  switch (precision) {
-    case 'days':
-      return '';
-    case 'minutes':
-      return ', HH:mm';
-    default:
-      return ', HH:mm:ss.SSS';
-  }
-}
-
-export function TimestampTooltip({ time, precision = 'milliseconds' }: Props) {
-  const momentTime = moment.tz(time, moment.tz.guess());
+export function TimestampTooltip({ time, timeUnit = 'milliseconds' }: Props) {
+  const momentTime = moment(time);
   const relativeTimeLabel = momentTime.fromNow();
-  const absoluteTimeLabel = momentTime.format(
-    `MMM Do YYYY${getPreciseTime(precision)} (ZZ zz)`
-  );
+  const absoluteTimeLabel = asAbsoluteDateTime(time, timeUnit);
 
   return (
     <EuiToolTip content={absoluteTimeLabel}>

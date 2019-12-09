@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Chrome } from 'ui/chrome';
+import { ChromeStart } from 'kibana/public';
 import { GraphWorkspaceSavedObject } from '../types';
 import { MetaDataState } from '../state_management';
 
@@ -21,23 +21,26 @@ export function getEditPath({ id }: GraphWorkspaceSavedObject) {
   return `/workspace/${id}`;
 }
 
-export function getEditUrl(chrome: Chrome, workspace: GraphWorkspaceSavedObject) {
-  return chrome.addBasePath(`#${getEditPath(workspace)}`);
+export function getEditUrl(
+  addBasePath: (url: string) => string,
+  workspace: GraphWorkspaceSavedObject
+) {
+  return addBasePath(`#${getEditPath(workspace)}`);
 }
 
 export type SetBreadcrumbOptions =
   | {
-      chrome: Chrome;
+      chrome: ChromeStart;
     }
   | {
-      chrome: Chrome;
+      chrome: ChromeStart;
       metaData: MetaDataState;
       navigateTo: (path: string) => void;
     };
 
 export function setBreadcrumbs(options: SetBreadcrumbOptions) {
   if ('metaData' in options) {
-    options.chrome.breadcrumbs.set([
+    options.chrome.setBreadcrumbs([
       {
         text: i18n.translate('xpack.graph.home.breadcrumb', {
           defaultMessage: 'Graph',
@@ -53,7 +56,7 @@ export function setBreadcrumbs(options: SetBreadcrumbOptions) {
       },
     ]);
   } else {
-    options.chrome.breadcrumbs.set([
+    options.chrome.setBreadcrumbs([
       {
         text: i18n.translate('xpack.graph.home.breadcrumb', {
           defaultMessage: 'Graph',

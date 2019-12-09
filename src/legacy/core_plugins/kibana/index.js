@@ -23,8 +23,6 @@ import { promisify } from 'util';
 
 import { migrations } from './migrations';
 import manageUuid from './server/lib/manage_uuid';
-import { searchApi } from './server/routes/api/search';
-import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
@@ -62,12 +60,11 @@ export default function (kibana) {
 
     uiExports: {
       hacks: [
-        'plugins/kibana/dev_tools/hacks/hide_empty_tools',
+        'plugins/kibana/discover',
+        'plugins/kibana/dev_tools',
       ],
-      fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/discover/saved_searches/saved_search_register',
         'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
       ],
       app: {
@@ -85,7 +82,6 @@ export default function (kibana) {
           }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
-          icon: 'plugins/kibana/assets/discover.svg',
           euiIconType: 'discoverApp',
         },
         {
@@ -95,7 +91,6 @@ export default function (kibana) {
           }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
-          icon: 'plugins/kibana/assets/visualize.svg',
           euiIconType: 'visualizeApp',
         },
         {
@@ -111,7 +106,6 @@ export default function (kibana) {
           // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
-          icon: 'plugins/kibana/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
         },
         {
@@ -121,7 +115,6 @@ export default function (kibana) {
           }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
-          icon: 'plugins/kibana/assets/wrench.svg',
           euiIconType: 'devToolsApp',
         },
         {
@@ -131,7 +124,6 @@ export default function (kibana) {
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
-          icon: 'plugins/kibana/assets/settings.svg',
           euiIconType: 'managementApp',
           linkToLastSubUrl: false,
         },
@@ -330,12 +322,11 @@ export default function (kibana) {
     },
 
     init: async function (server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       // uuid
       await manageUuid(server);
       // routes
-      searchApi(server);
       scriptsApi(server);
-      scrollSearchApi(server);
       importApi(server);
       exportApi(server);
       homeApi(server);
@@ -344,8 +335,8 @@ export default function (kibana) {
       registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
-      makeKQLUsageCollector(server);
-      registerCspCollector(server);
+      makeKQLUsageCollector(usageCollection, server);
+      registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },

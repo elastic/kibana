@@ -14,7 +14,7 @@ import { NotePreviews } from '../note_previews';
 import * as i18n from '../translations';
 import { OnOpenTimeline, OnToggleShowNotes, OpenTimelineResult } from '../types';
 import { getEmptyTagValue } from '../../empty_value';
-import { FormattedDate } from '../../formatted_date';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -43,9 +43,7 @@ export const getCommonColumns = ({
               ? onToggleShowNotes(omit(savedObjectId, itemIdToExpandedNotesRowMap))
               : onToggleShowNotes({
                   ...itemIdToExpandedNotesRowMap,
-                  [savedObjectId]: (
-                    <NotePreviews notes={notes} isModal={!showExtendedColumnsAndActions} />
-                  ),
+                  [savedObjectId]: <NotePreviews notes={notes} />,
                 })
           }
           aria-label={itemIdToExpandedNotesRowMap[savedObjectId] ? i18n.COLLAPSE : i18n.EXPAND}
@@ -96,7 +94,7 @@ export const getCommonColumns = ({
     render: (date: number, timelineResult: OpenTimelineResult) => (
       <div data-test-subj="updated">
         {timelineResult.updated != null ? (
-          <FormattedDate fieldName="" value={date} />
+          <FormattedRelativePreferenceDate value={date} />
         ) : (
           getEmptyTagValue()
         )}

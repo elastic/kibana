@@ -7,7 +7,7 @@ import React from 'react';
 import { flatten } from 'lodash';
 import { escapeKuery } from './escape_kuery';
 import { sortPrefixFirst } from 'ui/utils/sort_prefix_first';
-import { isFilterable } from 'ui/index_patterns';
+import { isFilterable } from '../../../../../../src/plugins/data/public';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 
@@ -29,15 +29,28 @@ export function getSuggestionsProvider({ indexPatterns }) {
   const allFields = flatten(indexPatterns.map(indexPattern => {
     return indexPattern.fields.filter(isFilterable);
   }));
-  return function getFieldSuggestions({ start, end, prefix, suffix }) {
-    const search = `${prefix}${suffix}`.toLowerCase();
-    const fieldNames = allFields.map(field => field.name);
-    const matchingFieldNames = fieldNames.filter(name => name.toLowerCase().includes(search));
-    const sortedFieldNames = sortPrefixFirst(matchingFieldNames.sort(keywordComparator), search);
-    const suggestions = sortedFieldNames.map(fieldName => {
-      const text = `${escapeKuery(fieldName)} `;
-      const description = getDescription(fieldName);
-      return { type, text, description, start, end };
+  return function getFieldSuggestions({ start, end, prefix, suffix, nestedPath = '' }) {
+    const search = `${prefix}${suffix}`.trim().toLowerCase();
+    const matchingFields = allFields.filter(field => {
+      return (
+        !nestedPath
+        || (nestedPath && (field.subType && field.subType.nested && field.subType.nested.path.includes(nestedPath)))
+      )
+      && field.name.toLowerCase().includes(search) && field.name !== search;
+    });
+    const sortedFields = sortPrefixFirst(matchingFields.sort(keywordComparator), search, 'name');
+    const suggestions = sortedFields.map(field => {
+      const remainingPath = field.subType && field.subType.nested
+        ? field.subType.nested.path.slice(nestedPath ? nestedPath.length + 1 : 0)
+        : '';
+      const text = field.subType && field.subType.nested && remainingPath.length > 0
+        ? `${escapeKuery(remainingPath)}:{ ${escapeKuery(field.name.slice(field.subType.nested.path.length + 1))}  }`
+        : `${escapeKuery(field.name.slice(nestedPath ? nestedPath.length + 1 : 0))} `;
+      const description = getDescription(field.name);
+      const cursorIndex = field.subType && field.subType.nested && remainingPath.length > 0
+        ? text.length - 2
+        : text.length;
+      return { type, text, description, start, end, cursorIndex, field };
     });
     return suggestions;
   };
@@ -45,10 +58,10 @@ export function getSuggestionsProvider({ indexPatterns }) {
 
 function keywordComparator(first, second) {
   const extensions = ['raw', 'keyword'];
-  if (extensions.map(ext => `${first}.${ext}`).includes(second)) {
+  if (extensions.map(ext => `${first.name}.${ext}`).includes(second.name)) {
     return 1;
-  } else if (extensions.map(ext => `${second}.${ext}`).includes(first)) {
+  } else if (extensions.map(ext => `${second.name}.${ext}`).includes(first.name)) {
     return -1;
   }
-  return first.localeCompare(second);
+  return first.name.localeCompare(second.name);
 }

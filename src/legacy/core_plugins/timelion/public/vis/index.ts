@@ -20,7 +20,6 @@
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
-import { visFactory } from '../../../visualizations/public';
 import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
 import editorConfigTemplate from './timelion_vis_params.html';
@@ -28,13 +27,15 @@ import { TimelionVisualizationDependencies } from '../plugin';
 // @ts-ignore
 import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
 
+export const TIMELION_VIS_NAME = 'timelion';
+
 export function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return visFactory.createBaseVisualization({
-    name: 'timelion',
+  return {
+    name: TIMELION_VIS_NAME,
     title: 'Timelion',
     icon: 'visTimelion',
     description: i18n.translate('timelion.timelionDescription', {
@@ -59,5 +60,5 @@ export function getTimelionVisualization(dependencies: TimelionVisualizationDepe
       showQueryBar: false,
       showFilterBar: false,
     },
-  });
+  };
 }

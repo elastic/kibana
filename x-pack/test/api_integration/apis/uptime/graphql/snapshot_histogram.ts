@@ -7,6 +7,7 @@
 import { snapshotHistogramQueryString } from '../../../../../legacy/plugins/uptime/public/queries/snapshot_histogram_query';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { assertCloseTo } from '../../../../../legacy/plugins/uptime/server/lib/helper';
 
 export default function({ getService }: FtrProviderContext) {
   describe('snapshotHistogram', () => {
@@ -31,6 +32,10 @@ export default function({ getService }: FtrProviderContext) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotHistogramQuery });
+      // manually testing this value and then removing it to avoid flakiness
+      const { interval } = data.queryResult;
+      assertCloseTo(interval, 22801, 100);
+      delete data.queryResult.interval;
       expectFixtureEql(data, 'snapshot_histogram');
     });
 
@@ -50,6 +55,9 @@ export default function({ getService }: FtrProviderContext) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotHistogramQuery });
+      const { interval } = data.queryResult;
+      assertCloseTo(interval, 22801, 100);
+      delete data.queryResult.interval;
       expectFixtureEql(data, 'snapshot_histogram_by_id');
     });
 
@@ -71,6 +79,9 @@ export default function({ getService }: FtrProviderContext) {
         .post('/api/uptime/graphql')
         .set('kbn-xsrf', 'foo')
         .send({ ...getSnapshotHistogramQuery });
+      const { interval } = data.queryResult;
+      assertCloseTo(interval, 22801, 100);
+      delete data.queryResult.interval;
       expectFixtureEql(data, 'snapshot_histogram_by_filter');
     });
   });

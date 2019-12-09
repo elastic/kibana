@@ -16,19 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { wrapInI18nContext } from 'ui/i18n';
+import { wrapInI18nContext } from '../../kibana_services';
 import { DiscoverFieldSearch } from './discover_field_search';
 
-const app = uiModules.get('apps/discover');
-
-app.directive('discoverFieldSearch', function(reactDirective: any) {
+export function createFieldSearchDirective(reactDirective: any) {
   return reactDirective(wrapInI18nContext(DiscoverFieldSearch), [
     ['onChange', { watchDepth: 'reference' }],
-    ['onShowFilter', { watchDepth: 'reference' }],
-    ['showFilter', { watchDepth: 'value' }],
     ['value', { watchDepth: 'value' }],
-    ['filtersActive', { watchDepth: 'value' }],
+    ['types', { watchDepth: 'value' }],
   ]);
-});
+}

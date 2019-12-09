@@ -20,11 +20,11 @@
 import Hapi from 'hapi';
 import { createMockServer } from './_mock_server';
 import { createImportRoute } from './import';
-import { SavedObjectsClientMock } from '../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../../core/server/mocks';
 
 describe('POST /api/saved_objects/_import', () => {
   let server: Hapi.Server;
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
   const emptyResponse = {
     saved_objects: [],
     total: 0,

@@ -12,15 +12,16 @@ import { manageQuery } from '../../../components/page/manage_query';
 import { EventsOverTimeHistogram } from '../../../components/page/hosts/events_over_time';
 import { EventsOverTimeQuery } from '../../../containers/events/events_over_time';
 import { hostsModel } from '../../../store/hosts';
+import { eventsDefaultModel } from '../../../components/events_viewer/default_model';
 
 const HOSTS_PAGE_TIMELINE_ID = 'hosts-page';
 const EventsOverTimeManage = manageQuery(EventsOverTimeHistogram);
 
 export const EventsQueryTabBody = ({
   endDate,
-  startDate,
-  setQuery,
   filterQuery,
+  setQuery,
+  startDate,
   updateDateRange = () => {},
 }: HostsComponentsQueryProps) => {
   return (
@@ -48,7 +49,12 @@ export const EventsQueryTabBody = ({
         )}
       </EventsOverTimeQuery>
       <EuiSpacer size="l" />
-      <StatefulEventsViewer end={endDate} id={HOSTS_PAGE_TIMELINE_ID} start={startDate} />
+      <StatefulEventsViewer
+        defaultModel={eventsDefaultModel}
+        end={endDate}
+        id={HOSTS_PAGE_TIMELINE_ID}
+        start={startDate}
+      />
     </>
   );
 };

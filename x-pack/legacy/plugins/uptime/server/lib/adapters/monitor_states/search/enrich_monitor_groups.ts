@@ -6,7 +6,7 @@
 
 import { get, sortBy } from 'lodash';
 import { QueryContext } from '../elasticsearch_monitor_states_adapter';
-import { getHistogramInterval } from '../../../helper';
+import { getHistogramIntervalFormatted } from '../../../helper';
 import { INDEX_NAMES, STATES } from '../../../../../common/constants';
 import {
   MonitorSummary,
@@ -324,7 +324,7 @@ const getHistogramForMonitors = async (
             histogram: {
               date_histogram: {
                 field: '@timestamp',
-                fixed_interval: getHistogramInterval(
+                fixed_interval: getHistogramIntervalFormatted(
                   queryContext.dateRangeStart,
                   queryContext.dateRangeEnd
                 ),

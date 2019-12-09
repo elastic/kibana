@@ -5,16 +5,14 @@
  */
 
 import { GenericParams } from 'elasticsearch';
+import * as GraphiQL from 'apollo-server-module-graphiql';
+import Boom from 'boom';
+import { ResponseToolkit } from 'hapi';
 import { EnvironmentMode } from 'kibana/public';
 import { GraphQLSchema } from 'graphql';
-import { Legacy } from 'kibana';
+import { runHttpQuery } from 'apollo-server-core';
+import { ServerFacade, RequestFacade } from '../../types';
 
-import {
-  graphiqlHapi,
-  graphqlHapi,
-  HapiGraphiQLPluginOptions,
-  HapiGraphQLPluginOptions,
-} from './apollo_server_hapi';
 import {
   FrameworkAdapter,
   FrameworkIndexPatternsService,
@@ -31,13 +29,13 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
   public envMode: EnvironmentMode;
 
-  constructor(private server: Legacy.Server) {
+  constructor(private server: ServerFacade, mode: EnvironmentMode) {
     this.version = server.config().get('pkg.version');
-    this.envMode = server.newPlatform.env.mode;
+    this.envMode = mode;
   }
 
   public async callWithRequest(
-    req: FrameworkRequest<Legacy.Request>,
+    req: FrameworkRequest,
     endpoint: string,
     params: CallWithRequestParams,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,40 +77,87 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.register<HapiGraphQLPluginOptions>({
+    this.server.route({
       options: {
-        graphqlOptions: (req: Legacy.Request) => ({
-          context: { req: wrapRequest(req) },
-          schema,
-        }),
-        path: routePath,
-        route: {
-          tags: ['access:siem'],
-        },
+        tags: ['access:siem'],
       },
-      plugin: graphqlHapi,
+      handler: async (request: RequestFacade, h: ResponseToolkit) => {
+        try {
+          const query =
+            request.method === 'post'
+              ? (request.payload as Record<string, any>) // eslint-disable-line @typescript-eslint/no-explicit-any
+              : (request.query as Record<string, any>); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+          const gqlResponse = await runHttpQuery([request], {
+            method: request.method.toUpperCase(),
+            options: (req: RequestFacade) => ({
+              context: { req: wrapRequest(req) },
+              schema,
+            }),
+
+            query,
+          });
+
+          return h.response(gqlResponse).type('application/json');
+        } catch (error) {
+          if ('HttpQueryError' !== error.name) {
+            const queryError = Boom.boomify(error);
+
+            queryError.output.payload.message = error.message;
+
+            return queryError;
+          }
+
+          if (error.isGraphQLError === true) {
+            return h
+              .response(error.message)
+              .code(error.statusCode)
+              .type('application/json');
+          }
+
+          const genericError = new Boom(error.message, { statusCode: error.statusCode });
+
+          if (error.headers) {
+            Object.keys(error.headers).forEach(header => {
+              genericError.output.headers[header] = error.headers[header];
+            });
+          }
+
+          // Boom hides the error when status code is 500
+          genericError.output.payload.message = error.message;
+
+          throw genericError;
+        }
+      },
+      method: ['GET', 'POST'],
+      path: routePath,
+      vhost: undefined,
     });
 
     if (!this.envMode.prod) {
-      this.server.register<HapiGraphiQLPluginOptions>({
+      this.server.route({
         options: {
-          graphiqlOptions: {
-            endpointURL: routePath,
-            passHeader: `'kbn-version': '${this.version}'`,
-          },
-          path: `${routePath}/graphiql`,
-          route: {
-            tags: ['access:siem'],
-          },
+          tags: ['access:siem'],
         },
-        plugin: graphiqlHapi,
+        handler: async (request: RequestFacade, h: ResponseToolkit) => {
+          const graphiqlString = await GraphiQL.resolveGraphiQLString(
+            request.query,
+            {
+              endpointURL: routePath,
+              passHeader: `'kbn-version': '${this.version}'`,
+            },
+            request
+          );
+
+          return h.response(graphiqlString).type('text/html');
+        },
+        method: 'GET',
+        path: `${routePath}/graphiql`,
       });
     }
   }
 
-  public getIndexPatternsService(
-    request: FrameworkRequest<Legacy.Request>
-  ): FrameworkIndexPatternsService {
+  public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
     return this.server.indexPatternsServiceFactory({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {

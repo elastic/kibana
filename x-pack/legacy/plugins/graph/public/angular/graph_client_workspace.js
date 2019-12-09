@@ -894,10 +894,6 @@ module.exports = (function () {
           existingEdge.doc_count = Math.max(existingEdge.doc_count, edge.doc_count);
           continue;
         }
-        // Inferred edges were a feature that used Levenshtein edit distance on node labels
-        // to determine connections - removed that feature but may bring back.
-
-        const inferred = edge.inferred ? true : false;
         const newEdge = {
           'source': srcWrapperObj,
           'target': targetWrapperObj,
@@ -905,7 +901,6 @@ module.exports = (function () {
           'width': edge.width,
           'id': edge.id,
           'doc_count': edge.doc_count,
-          'inferred': inferred
         };
         if (edge.label) {
           newEdge.label = edge.label;

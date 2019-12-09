@@ -19,7 +19,7 @@
 
 import { SavedObject, SavedObjectAttributes } from 'src/core/server';
 import { collectReferencesDeep } from './collect_references_deep';
-import { SavedObjectsClientMock } from '../../../../../../core/server/mocks';
+import { savedObjectsClientMock } from '../../../../../../core/server/mocks';
 
 const data: Array<SavedObject<SavedObjectAttributes>> = [
   {
@@ -102,7 +102,7 @@ const data: Array<SavedObject<SavedObjectAttributes>> = [
 ];
 
 test('collects dashboard and all dependencies', async () => {
-  const savedObjectClient = SavedObjectsClientMock.create();
+  const savedObjectClient = savedObjectsClientMock.create();
   savedObjectClient.bulkGet.mockImplementation(objects => {
     if (!objects) {
       throw new Error('Invalid test data');

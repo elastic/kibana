@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, SFC, useContext, useEffect, useState } from 'react';
+import React, { Fragment, FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -29,8 +29,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { ToastNotificationText } from '../../../../components';
 import { useApi } from '../../../../hooks/use_api';
-import { isKibanaContextInitialized, KibanaContext } from '../../../../lib/kibana';
+import { useKibanaContext } from '../../../../lib/kibana';
 import { RedirectToTransformManagement } from '../../../../common/navigation';
 import { PROGRESS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants';
 
@@ -58,7 +60,7 @@ interface Props {
   onChange(s: StepDetailsExposedState): void;
 }
 
-export const StepCreateForm: SFC<Props> = React.memo(
+export const StepCreateForm: FC<Props> = React.memo(
   ({ createIndexPattern, transformConfig, transformId, onChange, overrides }) => {
     const defaults = { ...getDefaultStepCreateState(), ...overrides };
 
@@ -71,23 +73,31 @@ export const StepCreateForm: SFC<Props> = React.memo(
       undefined
     );
 
-    const kibanaContext = useContext(KibanaContext);
+    const kibanaContext = useKibanaContext();
 
     useEffect(() => {
       onChange({ created, started, indexPatternId });
+      // custom comparison
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [created, started, indexPatternId]);
 
     const api = useApi();
-
-    if (!isKibanaContextInitialized(kibanaContext)) {
-      return null;
-    }
 
     async function createTransform() {
       setCreated(true);
 
       try {
-        await api.createTransform(transformId, transformConfig);
+        const resp = await api.createTransform(transformId, transformConfig);
+        if (resp.errors !== undefined && Array.isArray(resp.errors)) {
+          if (resp.errors.length === 1) {
+            throw resp.errors[0];
+          }
+
+          if (resp.errors.length > 1) {
+            throw resp.errors;
+          }
+        }
+
         toastNotifications.addSuccess(
           i18n.translate('xpack.transform.stepCreateForm.createTransformSuccessMessage', {
             defaultMessage: 'Request to create transform {transformId} acknowledged.',
@@ -96,12 +106,13 @@ export const StepCreateForm: SFC<Props> = React.memo(
         );
       } catch (e) {
         setCreated(false);
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
-            defaultMessage: 'An error occurred creating the transform {transformId}: {error}',
-            values: { transformId, error: JSON.stringify(e) },
-          })
-        );
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepCreateForm.createTransformErrorMessage', {
+            defaultMessage: 'An error occurred creating the transform {transformId}:',
+            values: { transformId },
+          }),
+          text: toMountPoint(<ToastNotificationText text={e} />),
+        });
         return false;
       }
 
@@ -125,18 +136,19 @@ export const StepCreateForm: SFC<Props> = React.memo(
         );
       } catch (e) {
         setStarted(false);
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
-            defaultMessage: 'An error occurred starting the transform {transformId}: {error}',
-            values: { transformId, error: JSON.stringify(e) },
-          })
-        );
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepCreateForm.startTransformErrorMessage', {
+            defaultMessage: 'An error occurred starting the transform {transformId}:',
+            values: { transformId },
+          }),
+          text: toMountPoint(<ToastNotificationText text={e} />),
+        });
       }
     }
 
     async function createAndStartTransform() {
-      const success = await createTransform();
-      if (success) {
+      const acknowledged = await createTransform();
+      if (acknowledged) {
         await startTransform();
       }
     }
@@ -182,13 +194,14 @@ export const StepCreateForm: SFC<Props> = React.memo(
         setIndexPatternId(id);
         return true;
       } catch (e) {
-        toastNotifications.addDanger(
-          i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
+        toastNotifications.addDanger({
+          title: i18n.translate('xpack.transform.stepCreateForm.createIndexPatternErrorMessage', {
             defaultMessage:
-              'An error occurred creating the Kibana index pattern {indexPatternName}: {error}',
-            values: { indexPatternName, error: JSON.stringify(e) },
-          })
-        );
+              'An error occurred creating the Kibana index pattern {indexPatternName}:',
+            values: { indexPatternName },
+          }),
+          text: toMountPoint(<ToastNotificationText text={e} />),
+        });
         return false;
       }
     };
@@ -214,12 +227,12 @@ export const StepCreateForm: SFC<Props> = React.memo(
               }
             }
           } catch (e) {
-            toastNotifications.addDanger(
-              i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
-                defaultMessage: 'An error occurred getting the progress percentage: {error}',
-                values: { error: JSON.stringify(e) },
-              })
-            );
+            toastNotifications.addDanger({
+              title: i18n.translate('xpack.transform.stepCreateForm.progressErrorMessage', {
+                defaultMessage: 'An error occurred getting the progress percentage:',
+              }),
+              text: toMountPoint(<ToastNotificationText text={e} />),
+            });
             clearInterval(interval);
           }
         }, PROGRESS_REFRESH_INTERVAL_MS);
@@ -230,11 +243,7 @@ export const StepCreateForm: SFC<Props> = React.memo(
     }
 
     function getTransformConfigDevConsoleStatement() {
-      return `PUT _data_frame/transforms/${transformId}\n${JSON.stringify(
-        transformConfig,
-        null,
-        2
-      )}\n\n`;
+      return `PUT _transform/${transformId}\n${JSON.stringify(transformConfig, null, 2)}\n\n`;
     }
 
     // TODO move this to SASS
@@ -247,169 +256,197 @@ export const StepCreateForm: SFC<Props> = React.memo(
     }
 
     return (
-      <EuiForm>
-        {!created && (
+      <div data-test-subj="transformStepCreateForm">
+        <EuiForm>
+          {!created && (
+            <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+              <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+                <EuiButton
+                  fill
+                  isDisabled={created && started}
+                  onClick={createAndStartTransform}
+                  data-test-subj="transformWizardCreateAndStartButton"
+                >
+                  {i18n.translate('xpack.transform.stepCreateForm.createAndStartTransformButton', {
+                    defaultMessage: 'Create and start',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate(
+                    'xpack.transform.stepCreateForm.createAndStartTransformDescription',
+                    {
+                      defaultMessage:
+                        'Creates and starts the transform. A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the transform.',
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+          {created && (
+            <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+              <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+                <EuiButton
+                  fill
+                  isDisabled={created && started}
+                  onClick={startTransform}
+                  data-test-subj="transformWizardStartButton"
+                >
+                  {i18n.translate('xpack.transform.stepCreateForm.startTransformButton', {
+                    defaultMessage: 'Start',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('xpack.transform.stepCreateForm.startTransformDescription', {
+                    defaultMessage:
+                      'Starts the transform. A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the transform.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
           <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
             <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-              <EuiButton fill isDisabled={created && started} onClick={createAndStartTransform}>
-                {i18n.translate('xpack.transform.stepCreateForm.createAndStartTransformButton', {
-                  defaultMessage: 'Create and start',
+              <EuiButton
+                isDisabled={created}
+                onClick={createTransform}
+                data-test-subj="transformWizardCreateButton"
+              >
+                {i18n.translate('xpack.transform.stepCreateForm.createTransformButton', {
+                  defaultMessage: 'Create',
                 })}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText color="subdued" size="s">
+                {i18n.translate('xpack.transform.stepCreateForm.createTransformDescription', {
+                  defaultMessage:
+                    'Create the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
+            <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
+              <EuiCopy textToCopy={getTransformConfigDevConsoleStatement()}>
+                {(copy: () => void) => (
+                  <EuiButton
+                    onClick={copy}
+                    style={{ width: '100%' }}
+                    data-test-subj="transformWizardCopyToClipboardButton"
+                  >
+                    {i18n.translate(
+                      'xpack.transform.stepCreateForm.copyTransformConfigToClipboardButton',
+                      {
+                        defaultMessage: 'Copy to clipboard',
+                      }
+                    )}
+                  </EuiButton>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
                 {i18n.translate(
-                  'xpack.transform.stepCreateForm.createAndStartTransformDescription',
+                  'xpack.transform.stepCreateForm.copyTransformConfigToClipboardDescription',
                   {
                     defaultMessage:
-                      'Creates and starts the transform. A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the transform.',
+                      'Copies to the clipboard the Kibana Dev Console command for creating the transform.',
                   }
                 )}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-        )}
-        {created && (
-          <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
-            <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-              <EuiButton fill isDisabled={created && started} onClick={startTransform}>
-                {i18n.translate('xpack.transform.stepCreateForm.startTransformButton', {
-                  defaultMessage: 'Start',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText color="subdued" size="s">
-                {i18n.translate('xpack.transform.stepCreateForm.startTransformDescription', {
-                  defaultMessage:
-                    'Starts the transform. A transform will increase search and indexing load in your cluster. Please stop the transform if excessive load is experienced. After the transform is started, you will be offered options to continue exploring the transform.',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-        <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
-          <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-            <EuiButton isDisabled={created} onClick={createTransform}>
-              {i18n.translate('xpack.transform.stepCreateForm.createTransformButton', {
-                defaultMessage: 'Create',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.transform.stepCreateForm.createTransformDescription', {
-                defaultMessage:
-                  'Create the transform without starting it. You will be able to start the transform later by returning to the transforms list.',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup alignItems="center" style={FLEX_GROUP_STYLE}>
-          <EuiFlexItem grow={false} style={FLEX_ITEM_STYLE}>
-            <EuiCopy textToCopy={getTransformConfigDevConsoleStatement()}>
-              {(copy: () => void) => (
-                <EuiButton onClick={copy} style={{ width: '100%' }}>
-                  {i18n.translate(
-                    'xpack.transform.stepCreateForm.copyTransformConfigToClipboardButton',
-                    {
-                      defaultMessage: 'Copy to clipboard',
-                    }
-                  )}
-                </EuiButton>
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {i18n.translate(
-                'xpack.transform.stepCreateForm.copyTransformConfigToClipboardDescription',
-                {
-                  defaultMessage:
-                    'Copies to the clipboard the Kibana Dev Console command for creating the transform.',
-                }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {progressPercentComplete !== undefined && isBatchTransform && (
-          <Fragment>
-            <EuiSpacer size="m" />
-            <EuiText size="xs">
-              <strong>
-                {i18n.translate('xpack.transform.stepCreateForm.progressTitle', {
-                  defaultMessage: 'Progress',
-                })}
-              </strong>
-            </EuiText>
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem style={{ width: '400px' }} grow={false}>
-                <EuiProgress size="l" color="primary" value={progressPercentComplete} max={100} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs">{progressPercentComplete}%</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </Fragment>
-        )}
-        {created && (
-          <Fragment>
-            <EuiHorizontalRule />
-            <EuiFlexGrid gutterSize="l">
-              <EuiFlexItem style={PANEL_ITEM_STYLE}>
-                <EuiCard
-                  icon={<EuiIcon size="xxl" type="list" />}
-                  title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
-                    defaultMessage: 'Transforms',
+          {progressPercentComplete !== undefined && isBatchTransform && (
+            <Fragment>
+              <EuiSpacer size="m" />
+              <EuiText size="xs">
+                <strong>
+                  {i18n.translate('xpack.transform.stepCreateForm.progressTitle', {
+                    defaultMessage: 'Progress',
                   })}
-                  description={i18n.translate(
-                    'xpack.transform.stepCreateForm.transformListCardDescription',
-                    {
-                      defaultMessage: 'Return to the transform management page.',
-                    }
-                  )}
-                  onClick={() => setRedirectToTransformManagement(true)}
-                />
-              </EuiFlexItem>
-              {started === true && createIndexPattern === true && indexPatternId === undefined && (
-                <EuiFlexItem style={PANEL_ITEM_STYLE}>
-                  <EuiPanel style={{ position: 'relative' }}>
-                    <EuiProgress size="xs" color="primary" position="absolute" />
-                    <EuiText color="subdued" size="s">
-                      <p>
-                        {i18n.translate(
-                          'xpack.transform.stepCreateForm.creatingIndexPatternMessage',
-                          {
-                            defaultMessage: 'Creating Kibana index pattern ...',
-                          }
-                        )}
-                      </p>
-                    </EuiText>
-                  </EuiPanel>
-                </EuiFlexItem>
-              )}
-              {started === true && indexPatternId !== undefined && (
-                <EuiFlexItem style={PANEL_ITEM_STYLE}>
-                  <EuiCard
-                    icon={<EuiIcon size="xxl" type="discoverApp" />}
-                    title={i18n.translate('xpack.transform.stepCreateForm.discoverCardTitle', {
-                      defaultMessage: 'Discover',
-                    })}
-                    description={i18n.translate(
-                      'xpack.transform.stepCreateForm.discoverCardDescription',
-                      {
-                        defaultMessage: 'Use Discover to explore the transform.',
-                      }
-                    )}
-                    href={getDiscoverUrl(indexPatternId, kibanaContext.kbnBaseUrl)}
+                </strong>
+              </EuiText>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem style={{ width: '400px' }} grow={false}>
+                  <EuiProgress
+                    size="l"
+                    color="primary"
+                    value={progressPercentComplete}
+                    max={100}
+                    data-test-subj="transformWizardProgressBar"
                   />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGrid>
-          </Fragment>
-        )}
-      </EuiForm>
+                <EuiFlexItem>
+                  <EuiText size="xs">{progressPercentComplete}%</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </Fragment>
+          )}
+          {created && (
+            <Fragment>
+              <EuiHorizontalRule />
+              <EuiFlexGrid gutterSize="l">
+                <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                  <EuiCard
+                    icon={<EuiIcon size="xxl" type="list" />}
+                    title={i18n.translate('xpack.transform.stepCreateForm.transformListCardTitle', {
+                      defaultMessage: 'Transforms',
+                    })}
+                    description={i18n.translate(
+                      'xpack.transform.stepCreateForm.transformListCardDescription',
+                      {
+                        defaultMessage: 'Return to the transform management page.',
+                      }
+                    )}
+                    onClick={() => setRedirectToTransformManagement(true)}
+                    data-test-subj="transformWizardCardManagement"
+                  />
+                </EuiFlexItem>
+                {started === true && createIndexPattern === true && indexPatternId === undefined && (
+                  <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                    <EuiPanel style={{ position: 'relative' }}>
+                      <EuiProgress size="xs" color="primary" position="absolute" />
+                      <EuiText color="subdued" size="s">
+                        <p>
+                          {i18n.translate(
+                            'xpack.transform.stepCreateForm.creatingIndexPatternMessage',
+                            {
+                              defaultMessage: 'Creating Kibana index pattern ...',
+                            }
+                          )}
+                        </p>
+                      </EuiText>
+                    </EuiPanel>
+                  </EuiFlexItem>
+                )}
+                {started === true && indexPatternId !== undefined && (
+                  <EuiFlexItem style={PANEL_ITEM_STYLE}>
+                    <EuiCard
+                      icon={<EuiIcon size="xxl" type="discoverApp" />}
+                      title={i18n.translate('xpack.transform.stepCreateForm.discoverCardTitle', {
+                        defaultMessage: 'Discover',
+                      })}
+                      description={i18n.translate(
+                        'xpack.transform.stepCreateForm.discoverCardDescription',
+                        {
+                          defaultMessage: 'Use Discover to explore the transform.',
+                        }
+                      )}
+                      href={getDiscoverUrl(indexPatternId, kibanaContext.kbnBaseUrl)}
+                      data-test-subj="transformWizardCardDiscover"
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGrid>
+            </Fragment>
+          )}
+        </EuiForm>
+      </div>
     );
   }
 );

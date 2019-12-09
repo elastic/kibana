@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SnapshotHeading renders custom heading for no down monitors 1`] = `
+<EuiTitle
+  size="s"
+>
+  <h2>
+    All monitors are up
+  </h2>
+</EuiTitle>
+`;
+
+exports[`SnapshotHeading renders custom heading for no monitors 1`] = `
+<EuiTitle
+  size="s"
+>
+  <h2>
+    No monitors found
+  </h2>
+</EuiTitle>
+`;
+
+exports[`SnapshotHeading renders standard heading for valid counts 1`] = `
+<EuiTitle
+  size="s"
+>
+  <h2>
+    3/17 monitors are down
+  </h2>
+</EuiTitle>
+`;

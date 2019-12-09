@@ -26,7 +26,7 @@ import '../config';
 import '../notify';
 import '../private';
 import '../promises';
-import '../storage';
+import '../directives/storage';
 import '../directives/watch_multi';
 import './services';
 import '../react_components';

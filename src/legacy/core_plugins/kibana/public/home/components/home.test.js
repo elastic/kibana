@@ -25,6 +25,13 @@ import { shallow } from 'enzyme';
 import { Home } from './home';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+jest.mock('../kibana_services', () =>({
+  getServices: () => ({
+    getBasePath: () => 'path',
+    getInjected: () => ''
+  })
+}));
+
 describe('home', () => {
   let defaultProps;
 

@@ -21,10 +21,11 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  UiSettingsClientContract,
+  IUiSettingsClient,
   HttpSetup,
 } from 'kibana/public';
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
+import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisualization } from './vis';
@@ -34,15 +35,17 @@ import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim'
 
 /** @internal */
 export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timelionPanels: Map<string, Panel>;
+  timefilter: TimefilterContract;
 }
 
 /** @internal */
 export interface TimelionPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  data: DataPublicPluginSetup;
 
   // Temporary solution
   __LEGACY: LegacyDependenciesPlugin;
@@ -58,7 +61,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { __LEGACY, expressions, visualizations }: TimelionPluginSetupDependencies
+    { __LEGACY, expressions, visualizations, data }: TimelionPluginSetupDependencies
   ) {
     const timelionPanels: Map<string, Panel> = new Map();
 
@@ -66,13 +69,14 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
       uiSettings: core.uiSettings,
       http: core.http,
       timelionPanels,
+      timefilter: data.query.timefilter.timefilter,
       ...(await __LEGACY.setup(core, timelionPanels)),
     };
 
     this.registerPanels(dependencies);
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    visualizations.types.registerVisualization(() => getTimelionVisualization(dependencies));
+    visualizations.types.createBaseVisualization(getTimelionVisualization(dependencies));
   }
 
   private registerPanels(dependencies: TimelionVisualizationDependencies) {

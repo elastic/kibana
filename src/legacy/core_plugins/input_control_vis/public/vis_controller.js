@@ -23,7 +23,8 @@ import { I18nContext } from 'ui/i18n';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
-import { start as data } from '../../../core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
+import { SearchSource } from '../../../ui/public/courier/search_source/search_source';
 
 class VisController {
   constructor(el, vis) {
@@ -33,7 +34,7 @@ class VisController {
 
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
 
-    this.filterManager = data.filter.filterManager;
+    this.filterManager = npStart.plugins.data.query.filterManager;
     this.updateSubsciption = this.filterManager.getUpdates$()
       .subscribe(this.queryBarUpdateHandler);
   }
@@ -79,7 +80,7 @@ class VisController {
 
     const controlFactoryPromises = controlParamsList.map((controlParams) => {
       const factory = controlFactory(controlParams);
-      return factory(controlParams, this.vis.API, this.visParams.useTimeFilter);
+      return factory(controlParams, this.visParams.useTimeFilter, SearchSource);
     });
     const controls = await Promise.all(controlFactoryPromises);
 

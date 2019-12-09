@@ -24,12 +24,14 @@ import { BrowserProvider } from './browser';
 import { ComboBoxProvider } from './combo_box';
 import {
   DashboardAddPanelProvider,
+  DashboardReplacePanelProvider,
   DashboardExpectProvider,
   DashboardPanelActionsProvider,
   DashboardVisualizationProvider,
   // @ts-ignore not TS yet
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
+import { ElasticChartProvider } from './elastic_chart';
 import { EmbeddingProvider } from './embedding';
 import { FailureDebuggingProvider } from './failure_debugging';
 import { FilterBarProvider } from './filter_bar';
@@ -66,6 +68,7 @@ export const services = {
   failureDebugging: FailureDebuggingProvider,
   visualizeListingTable: VisualizeListingTableProvider,
   dashboardAddPanel: DashboardAddPanelProvider,
+  dashboardReplacePanel: DashboardReplacePanelProvider,
   dashboardPanelActions: DashboardPanelActionsProvider,
   flyout: FlyoutProvider,
   comboBox: ComboBoxProvider,
@@ -79,4 +82,5 @@ export const services = {
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
+  elasticChart: ElasticChartProvider,
 };

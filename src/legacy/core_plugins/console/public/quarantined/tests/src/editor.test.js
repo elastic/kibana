@@ -22,13 +22,11 @@ import _ from 'lodash';
 import ace from 'brace';
 import 'brace/mode/json';
 
-import { initializeInput } from '../../src/input';
+import { initializeEditor } from '../../src/input';
 const editorInput1 = require('./editor_input1.txt');
 const utils = require('../../src/utils');
 
 const aceRange = ace.acequire('ace/range');
-
-
 
 describe('Editor', () => {
   let input;
@@ -42,12 +40,9 @@ describe('Editor', () => {
         <div id="ConCopyAsCurl" />
       </div>`;
 
-    input = initializeInput(
+    input = initializeEditor(
       $('#ConAppEditor'),
       $('#ConAppEditorActions'),
-      {},
-      { applyCurrentSettings: () => {} },
-      null
     );
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
@@ -58,6 +53,14 @@ describe('Editor', () => {
   });
 
   let testCount = 0;
+
+  const callWithEditorMethod = (editorMethod, fn) => (done) => {
+    try {
+      input[editorMethod](results => fn(results, done));
+    } catch {
+      done();
+    }
+  };
 
   function utilsTest(name, prefix, data, testToRun) {
     const id = testCount++;
@@ -76,10 +79,9 @@ describe('Editor', () => {
       data = prefix;
     }
 
-    test('Utils test ' + id + ' : ' + name, async function (done) {
+    test('Utils test ' + id + ' : ' + name, function (done) {
       input.update(data, function () {
-        testToRun();
-        done();
+        testToRun(done);
       });
     });
   }
@@ -123,203 +125,186 @@ describe('Editor', () => {
     'simple request range',
     simpleRequest.prefix,
     simpleRequest.data,
-    function () {
-      input.getRequestRange(function (range) {
-        const expected = new aceRange.Range(0, 0, 3, 1);
-        compareRequest(range, expected);
-      });
-    }
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      const expected = new aceRange.Range(0, 0, 3, 1);
+      compareRequest(range, expected);
+      done();
+    })
   );
 
   utilsTest(
     'simple request data',
     simpleRequest.prefix,
     simpleRequest.data,
-    function () {
-      input.getRequest(function (request) {
-        const expected = {
-          method: 'POST',
-          url: '_search',
-          data: [simpleRequest.data],
-        };
-
-        compareRequest(request, expected);
-      });
-    }
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'POST',
+        url: '_search',
+        data: [simpleRequest.data],
+      };
+      compareRequest(request, expected);
+      done();
+    })
   );
 
   utilsTest(
     'simple request range, prefixed with spaces',
     '   ' + simpleRequest.prefix,
     simpleRequest.data,
-    function () {
-      input.getRequestRange(function (range) {
-        const expected = new aceRange.Range(0, 0, 3, 1);
-        expect(range).toEqual(expected);
-      });
-    }
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      const expected = new aceRange.Range(0, 0, 3, 1);
+      expect(range).toEqual(expected);
+      done();
+    })
   );
 
   utilsTest(
     'simple request data, prefixed with spaces',
     '    ' + simpleRequest.prefix,
     simpleRequest.data,
-    function () {
-      input.getRequest(function (request) {
-        const expected = {
-          method: 'POST',
-          url: '_search',
-          data: [simpleRequest.data],
-        };
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'POST',
+        url: '_search',
+        data: [simpleRequest.data],
+      };
 
-        compareRequest(request, expected);
-      });
-    }
+      compareRequest(request, expected);
+      done();
+    })
   );
+
 
   utilsTest(
     'simple request range, suffixed with spaces',
     simpleRequest.prefix + '   ',
     simpleRequest.data + '  ',
-    function () {
-      input.getRequestRange(function (range) {
-        const expected = new aceRange.Range(0, 0, 3, 1);
-        compareRequest(range, expected);
-      });
-    }
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      const expected = new aceRange.Range(0, 0, 3, 1);
+      compareRequest(range, expected);
+      done();
+    })
   );
 
   utilsTest(
     'simple request data, suffixed with spaces',
     simpleRequest.prefix + '    ',
     simpleRequest.data + ' ',
-    function () {
-      input.getRequest(function (request) {
-        const expected = {
-          method: 'POST',
-          url: '_search',
-          data: [simpleRequest.data],
-        };
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'POST',
+        url: '_search',
+        data: [simpleRequest.data],
+      };
 
-        compareRequest(request, expected);
-      });
-    }
+      compareRequest(request, expected);
+      done();
+    })
   );
+
 
   utilsTest(
     'single line request range',
     singleLineRequest.prefix,
     singleLineRequest.data,
-    function () {
-      input.getRequestRange(function (range) {
-        const expected = new aceRange.Range(0, 0, 1, 32);
-        compareRequest(range, expected);
-      });
-    }
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      const expected = new aceRange.Range(0, 0, 1, 32);
+      compareRequest(range, expected);
+      done();
+    })
   );
 
   utilsTest(
     'full url: single line request data',
     'POST https://somehost/_search',
     singleLineRequest.data,
-    function () {
-      input.getRequest(function (request) {
-        const expected = {
-          method: 'POST',
-          url: 'https://somehost/_search',
-          data: [singleLineRequest.data],
-        };
-
-        compareRequest(request, expected);
-      });
-    }
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'POST',
+        url: 'https://somehost/_search',
+        data: [singleLineRequest.data],
+      };
+      compareRequest(request, expected);
+      done();
+    })
   );
 
   utilsTest(
     'request with no data followed by a new line',
     getRequestNoData.prefix,
     '\n',
-    function () {
-      input.getRequestRange(function (range) {
-        const expected = new aceRange.Range(0, 0, 0, 10);
-        compareRequest(range, expected);
-      });
-    }
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      const expected = new aceRange.Range(0, 0, 0, 10);
+      compareRequest(range, expected);
+      done();
+    })
   );
 
   utilsTest(
     'request with no data followed by a new line (data)',
     getRequestNoData.prefix,
     '\n',
-    function () {
-      input.getRequest(function (request) {
-        const expected = {
-          method: 'GET',
-          url: '_stats',
-          data: [],
-        };
-
-        compareRequest(request, expected);
-      });
-    }
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'GET',
+        url: '_stats',
+        data: [],
+      };
+      compareRequest(request, expected);
+      done();
+    })
   );
 
   utilsTest(
     'request with no data',
     getRequestNoData.prefix,
     getRequestNoData.data,
-    function () {
-      input.getRequestRange(function (range) {
-        const expected = new aceRange.Range(0, 0, 0, 10);
-        expect(range).toEqual(expected);
-      });
-    }
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      const expected = new aceRange.Range(0, 0, 0, 10);
+      expect(range).toEqual(expected);
+      done();
+    })
   );
 
   utilsTest(
     'request with no data (data)',
     getRequestNoData.prefix,
     getRequestNoData.data,
-    function () {
-      input.getRequest(function (request) {
-        const expected = {
-          method: 'GET',
-          url: '_stats',
-          data: [],
-        };
-
-        compareRequest(request, expected);
-      });
-    }
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'GET',
+        url: '_stats',
+        data: [],
+      };
+      compareRequest(request, expected);
+      done();
+    })
   );
 
   utilsTest(
     'multi doc request range',
     multiDocRequest.prefix,
     multiDocRequest.data,
-    function () {
-      input.getRequestRange(function (range) {
-        const expected = new aceRange.Range(0, 0, 2, 14);
-        expect(range).toEqual(expected);
-      });
-    }
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      const expected = new aceRange.Range(0, 0, 2, 14);
+      expect(range).toEqual(expected);
+      done();
+    })
   );
 
   utilsTest(
     'multi doc request data',
     multiDocRequest.prefix,
     multiDocRequest.data,
-    function () {
-      input.getRequest(function (request) {
-        const expected = {
-          method: 'POST',
-          url: '_bulk',
-          data: multiDocRequest.data_as_array,
-        };
-
-        compareRequest(request, expected);
-      });
-    }
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'POST',
+        url: '_bulk',
+        data: multiDocRequest.data_as_array,
+      };
+      compareRequest(request, expected);
+      done();
+    })
   );
 
   const scriptRequest = {
@@ -337,33 +322,32 @@ describe('Editor', () => {
     'script request range',
     scriptRequest.prefix,
     scriptRequest.data,
-    function () {
-      input.getRequestRange(function (range) {
-        const expected = new aceRange.Range(0, 0, 5, 1);
-        compareRequest(range, expected);
-      });
-    }
+    callWithEditorMethod('getRequestRange', (range, done) => {
+      const expected = new aceRange.Range(0, 0, 5, 1);
+      compareRequest(range, expected);
+      done();
+    })
   );
+
 
   utilsTest(
     'simple request data',
     simpleRequest.prefix,
     simpleRequest.data,
-    function () {
-      input.getRequest(function (request) {
-        const expected = {
-          method: 'POST',
-          url: '_search',
-          data: [utils.collapseLiteralStrings(simpleRequest.data)],
-        };
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'POST',
+        url: '_search',
+        data: [utils.collapseLiteralStrings(simpleRequest.data)],
+      };
 
-        compareRequest(request, expected);
-      });
-    }
+      compareRequest(request, expected);
+      done();
+    })
   );
 
   function multiReqTest(name, editorInput, range, expected) {
-    utilsTest('multi request select - ' + name, editorInput, function () {
+    utilsTest('multi request select - ' + name, editorInput, function (done) {
       input.getRequestsInRange(range, function (requests) {
         // convert to format returned by request.
         _.each(expected, function (req) {
@@ -372,6 +356,7 @@ describe('Editor', () => {
         });
 
         compareRequest(requests, expected);
+        done();
       });
     });
   }
@@ -475,9 +460,10 @@ describe('Editor', () => {
   );
 
   function multiReqCopyAsCurlTest(name, editorInput, range, expected) {
-    utilsTest('multi request copy as curl - ' + name, editorInput, function () {
+    utilsTest('multi request copy as curl - ' + name, editorInput, function (done) {
       input.getRequestsAsCURL(range, function (curl) {
         expect(curl).toEqual(expected);
+        done();
       });
     });
   }

@@ -34,7 +34,11 @@ function getDescription(state?: State) {
   }
 
   if (!state.layers.length) {
-    return visualizationTypes.find(v => v.id === state.preferredSeriesType)!;
+    const visualizationType = visualizationTypes.find(v => v.id === state.preferredSeriesType)!;
+    return {
+      icon: visualizationType.largeIcon || visualizationType.icon,
+      label: visualizationType.label,
+    };
   }
 
   const visualizationType = visualizationTypes.find(t => t.id === state.layers[0].seriesType)!;
@@ -50,7 +54,7 @@ function getDescription(state?: State) {
         ? visualizationType.label
         : isHorizontalChart(state.layers)
         ? i18n.translate('xpack.lens.xyVisualization.mixedBarHorizontalLabel', {
-            defaultMessage: 'Mixed Horizontal Bar',
+            defaultMessage: 'Mixed horizontal bar',
           })
         : i18n.translate('xpack.lens.xyVisualization.mixedLabel', {
             defaultMessage: 'Mixed XY',
@@ -66,7 +70,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   getDescription(state) {
     const { icon, label } = getDescription(state);
     const chartLabel = i18n.translate('xpack.lens.xyVisualization.chartLabel', {
-      defaultMessage: '{label} Chart',
+      defaultMessage: '{label} chart',
       values: { label },
     });
 
@@ -89,7 +93,7 @@ export const xyVisualization: Visualization<State, PersistableState> = {
   initialize(frame, state) {
     return (
       state || {
-        title: 'Empty XY Chart',
+        title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
         preferredSeriesType: defaultSeriesType,
         layers: [

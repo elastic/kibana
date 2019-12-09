@@ -11,13 +11,13 @@ import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
   ES_SPATIAL_RELATIONS,
-  FEATURE_ID_PROPERTY_NAME,
   GEO_JSON_TYPE,
   POLYGON_COORDINATES_EXTERIOR_INDEX,
   LON_INDEX,
   LAT_INDEX,
 } from '../common/constants';
 import { getEsSpatialRelationLabel } from '../common/i18n_getters';
+import { SPATIAL_FILTER_TYPE } from './kibana_services';
 
 function ensureGeoField(type) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -75,17 +75,15 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
     // don't include geometry field value in properties
     delete properties[geoFieldName];
 
-    // _id is unique to Elasticsearch documents.
-    // Move _id to FEATURE_ID_PROPERTY_NAME to standardize featureId keys across all sources
-    properties[FEATURE_ID_PROPERTY_NAME] = properties._id;
-    delete properties._id;
-
     //create new geojson Feature for every individual geojson geometry.
     for (let j = 0; j < tmpGeometriesAccumulator.length; j++) {
       features.push({
         type: 'Feature',
         geometry: tmpGeometriesAccumulator[j],
-        properties: properties
+        // _id is not unique across Kibana index pattern. Multiple ES indices could have _id collisions
+        // Need to prefix with _index to guarantee uniqueness
+        id: `${properties._index}:${properties._id}:${j}`,
+        properties,
       });
     }
   }
@@ -287,6 +285,7 @@ function createGeometryFilterWithMeta({
     })
     : getEsSpatialRelationLabel(relation);
   const meta = {
+    type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
     alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`

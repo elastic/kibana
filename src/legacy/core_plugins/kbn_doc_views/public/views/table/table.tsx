@@ -37,7 +37,7 @@ export function DocViewTable({
   const [fieldRowOpen, setFieldRowOpen] = useState({} as Record<string, boolean>);
 
   function toggleValueCollapse(field: string) {
-    fieldRowOpen[field] = !fieldRowOpen[field];
+    fieldRowOpen[field] = fieldRowOpen[field] !== true;
     setFieldRowOpen({ ...fieldRowOpen });
   }
 
@@ -49,7 +49,8 @@ export function DocViewTable({
           .map(field => {
             const valueRaw = flattened[field];
             const value = formatted[field];
-            const isCollapsible = typeof value === 'string' && value.length > COLLAPSE_LINE_LENGTH;
+
+            const isCollapsible = value.length > COLLAPSE_LINE_LENGTH;
             const isCollapsed = isCollapsible && !fieldRowOpen[field];
             const toggleColumn =
               onRemoveColumn && onAddColumn && Array.isArray(columns)

@@ -53,8 +53,7 @@ describe('Last Event Time Stat', () => {
         <LastEventTime indexKey={LastEventIndexKey.hosts} />
       </TestProviders>
     );
-
-    expect(wrapper.html()).toBe('<span class="euiToolTipAnchor">Last event: 12 days ago</span>');
+    expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">12 minutes ago</span>');
   });
   test('Bad date time string', async () => {
     mockUseLastEventTimeQuery.mockImplementation(() => ({

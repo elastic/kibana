@@ -8,6 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningJobSourceSelectionProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   return {
     async assertSourceListContainsEntry(sourceName: string) {
@@ -16,15 +17,25 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
 
     async filterSourceSelection(sourceName: string) {
       await testSubjects.setValue('savedObjectFinderSearchInput', sourceName, {
-        withKeyboard: true,
+        clearWithKeyboard: true,
       });
       await this.assertSourceListContainsEntry(sourceName);
     },
 
-    async selectSource(sourceName: string) {
+    async selectSource(sourceName: string, nextPageSubj: string) {
       await this.filterSourceSelection(sourceName);
-      await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
-      await testSubjects.existOrFail('mlPageJobTypeSelection');
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabled(`savedObjectTitle${sourceName}`);
+        await testSubjects.existOrFail(nextPageSubj, { timeout: 10 * 1000 });
+      });
+    },
+
+    async selectSourceForAnomalyDetectionJob(sourceName: string) {
+      await this.selectSource(sourceName, 'mlPageJobTypeSelection');
+    },
+
+    async selectSourceForIndexBasedDataVisualizer(sourceName: string) {
+      await this.selectSource(sourceName, 'mlPageIndexDataVisualizer');
     },
   };
 }

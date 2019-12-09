@@ -4,41 +4,51 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { startsWith, uniq } from 'lodash';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
+import { startsWith, uniq, first } from 'lodash';
+import { idx } from '@kbn/elastic-idx';
+import { RequestHandlerContext } from 'src/core/server';
+import { InfraDatabaseSearchResponse } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { FieldsAdapter, IndexFieldDescriptor } from './adapter_types';
 import { getAllowedListForPrefix } from '../../../../common/ecs_allowed_list';
+import { getAllCompositeData } from '../../../utils/get_all_composite_data';
+import { createAfterKeyHandler } from '../../../utils/create_afterkey_handler';
 
 interface Bucket {
-  key: string;
+  key: { dataset: string };
   doc_count: number;
 }
 
 interface DataSetResponse {
-  modules: {
+  datasets: {
     buckets: Bucket[];
-  };
-  dataSets: {
-    buckets: Bucket[];
+    after_key: {
+      dataset: string;
+    };
   };
 }
 
 export class FrameworkFieldsAdapter implements FieldsAdapter {
-  private framework: InfraBackendFrameworkAdapter;
+  private framework: KibanaFramework;
 
-  constructor(framework: InfraBackendFrameworkAdapter) {
+  constructor(framework: KibanaFramework) {
     this.framework = framework;
   }
 
   public async getIndexFields(
-    request: InfraFrameworkRequest,
-    indices: string
+    requestContext: RequestHandlerContext,
+    indices: string,
+    timefield: string
   ): Promise<IndexFieldDescriptor[]> {
-    const indexPatternsService = this.framework.getIndexPatternsService(request);
+    const indexPatternsService = this.framework.getIndexPatternsService(requestContext);
     const response = await indexPatternsService.getFieldsForWildcard({
       pattern: indices,
     });
-    const { dataSets, modules } = await this.getDataSetsAndModules(request, indices);
+    const { dataSets, modules } = await this.getDataSetsAndModules(
+      requestContext,
+      indices,
+      timefield
+    );
     const allowedList = modules.reduce(
       (acc, name) => uniq([...acc, ...getAllowedListForPrefix(name)]),
       [] as string[]
@@ -51,42 +61,66 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
   }
 
   private async getDataSetsAndModules(
-    request: InfraFrameworkRequest,
-    indices: string
+    requestContext: RequestHandlerContext,
+    indices: string,
+    timefield: string
   ): Promise<{ dataSets: string[]; modules: string[] }> {
     const params = {
       index: indices,
       allowNoIndices: true,
       ignoreUnavailable: true,
       body: {
-        aggs: {
-          modules: {
-            terms: {
-              field: 'event.modules',
-              size: 1000,
-            },
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  [timefield]: {
+                    gte: 'now-24h',
+                    lte: 'now',
+                  },
+                },
+              },
+            ],
           },
-          dataSets: {
-            terms: {
-              field: 'event.dataset',
-              size: 1000,
+        },
+        aggs: {
+          datasets: {
+            composite: {
+              sources: [
+                {
+                  dataset: {
+                    terms: {
+                      field: 'event.dataset',
+                    },
+                  },
+                },
+              ],
             },
           },
         },
       },
     };
-    const response = await this.framework.callWithRequest<{}, DataSetResponse>(
-      request,
-      'search',
-      params
+
+    const bucketSelector = (response: InfraDatabaseSearchResponse<{}, DataSetResponse>) =>
+      (response.aggregations && response.aggregations.datasets.buckets) || [];
+    const handleAfterKey = createAfterKeyHandler('body.aggs.datasets.composite.after', input =>
+      idx(input, _ => _.aggregations.datasets.after_key)
     );
-    if (!response.aggregations) {
-      return { dataSets: [], modules: [] };
-    }
-    const { modules, dataSets } = response.aggregations;
-    return {
-      modules: modules.buckets.map(bucket => bucket.key),
-      dataSets: dataSets.buckets.map(bucket => bucket.key),
-    };
+
+    const buckets = await getAllCompositeData<DataSetResponse, Bucket>(
+      this.framework,
+      requestContext,
+      params,
+      bucketSelector,
+      handleAfterKey
+    );
+    const dataSets = buckets.map(bucket => bucket.key.dataset);
+    const modules = dataSets.reduce((acc, dataset) => {
+      const module = first(dataset.split(/\./));
+      return module ? uniq([...acc, module]) : acc;
+    }, [] as string[]);
+    return { modules, dataSets };
   }
 }

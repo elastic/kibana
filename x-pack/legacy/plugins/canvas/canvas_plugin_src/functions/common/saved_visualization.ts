@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+
+import { ExpressionFunction } from 'src/plugins/expressions/common/types';
 import { VisualizeInput } from 'src/legacy/core_plugins/kibana/public/visualize/embeddable';
 import {
   EmbeddableTypes,
@@ -26,7 +27,6 @@ export function savedVisualization(): ExpressionFunction<
   Arguments,
   Return
 > {
-  // @ts-ignore elastic/kibana#44822 Disabling pending filters work
   const { help, args: argHelp } = getFunctionHelp().savedVisualization;
   return {
     name: 'savedVisualization',

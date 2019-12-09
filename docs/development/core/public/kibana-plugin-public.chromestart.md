@@ -16,6 +16,7 @@ export interface ChromeStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [docTitle](./kibana-plugin-public.chromestart.doctitle.md) | <code>ChromeDocTitle</code> | APIs for accessing and updating the document title. |
 |  [navControls](./kibana-plugin-public.chromestart.navcontrols.md) | <code>ChromeNavControls</code> | [APIs](./kibana-plugin-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [navLinks](./kibana-plugin-public.chromestart.navlinks.md) | <code>ChromeNavLinks</code> | [APIs](./kibana-plugin-public.chromenavlinks.md) for manipulating nav links. |
 |  [recentlyAccessed](./kibana-plugin-public.chromestart.recentlyaccessed.md) | <code>ChromeRecentlyAccessed</code> | [APIs](./kibana-plugin-public.chromerecentlyaccessed.md) for recently accessed history. |
@@ -38,6 +39,7 @@ export interface ChromeStart
 |  [setBrand(brand)](./kibana-plugin-public.chromestart.setbrand.md) | Set the brand configuration. |
 |  [setBreadcrumbs(newBreadcrumbs)](./kibana-plugin-public.chromestart.setbreadcrumbs.md) | Override the current set of breadcrumbs |
 |  [setHelpExtension(helpExtension)](./kibana-plugin-public.chromestart.sethelpextension.md) | Override the current set of custom help content |
+|  [setHelpSupportUrl(url)](./kibana-plugin-public.chromestart.sethelpsupporturl.md) | Override the default support URL shown in the help menu |
 |  [setIsCollapsed(isCollapsed)](./kibana-plugin-public.chromestart.setiscollapsed.md) | Set the collapsed state of the chrome navigation. |
 |  [setIsVisible(isVisible)](./kibana-plugin-public.chromestart.setisvisible.md) | Set the temporary visibility for the chrome. This does nothing if the chrome is hidden by default and should be used to hide the chrome for things like full-screen modes with an exit button. |
 

@@ -76,7 +76,7 @@ const PageA = () => (
           </EuiTitle>
         </EuiPageContentHeaderSection>
       </EuiPageContentHeader>
-      <EuiPageContentBody>Page A's content goes here</EuiPageContentBody>
+      <EuiPageContentBody>Page A&apos;s content goes here</EuiPageContentBody>
     </EuiPageContent>
   </EuiPageBody>
 );

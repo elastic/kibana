@@ -110,7 +110,7 @@ export class GuideSection extends React.Component<Props, State> {
 
     return code.map((codeBlock, i) => (
       <React.Fragment key={i}>
-        <EuiSpacer></EuiSpacer>
+        <EuiSpacer />
         <h3>{codeBlock.description}</h3>
         <EuiCodeBlock language="ts">{this.removeLicenseBlock(codeBlock.snippet)}</EuiCodeBlock>
         <EuiHorizontalRule />

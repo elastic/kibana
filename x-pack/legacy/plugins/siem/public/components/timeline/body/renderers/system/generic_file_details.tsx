@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
@@ -17,7 +16,7 @@ import { OverflowField } from '../../../../tables/helpers';
 import * as i18n from './translations';
 import { NetflowRenderer } from '../netflow';
 import { UserHostWorkingDir } from '../user_host_working_dir';
-import { Details, showVia, TokensFlexItem } from '../helpers';
+import { Details, isProcessStoppedOrTerminationEvent, showVia, TokensFlexItem } from '../helpers';
 import { ProcessDraggableWithNonExistentProcess } from '../process_draggable';
 import { Args } from '../args';
 import { AuthSsh } from './auth_ssh';
@@ -26,7 +25,7 @@ import { FileDraggable } from '../file_draggable';
 import { Package } from './package';
 import { Badge } from '../../../../page';
 import { ParentProcessDraggable } from '../parent_process_draggable';
-import { ProcessHash } from '../process.hash';
+import { ProcessHash } from '../process_hash';
 
 interface Props {
   args: string[] | null | undefined;
@@ -64,7 +63,7 @@ interface Props {
   workingDirectory: string | null | undefined;
 }
 
-export const SystemGenericFileLine = pure<Props>(
+export const SystemGenericFileLine = React.memo<Props>(
   ({
     args,
     contextId,
@@ -144,14 +143,15 @@ export const SystemGenericFileLine = pure<Props>(
           eventId={id}
           text={i18n.WITH_EXIT_CODE}
         />
-        <ParentProcessDraggable
-          contextId={contextId}
-          endgameParentProcessName={endgameParentProcessName}
-          eventAction={eventAction}
-          eventId={id}
-          processPpid={processPpid}
-          text={i18n.VIA_PARENT_PROCESS}
-        />
+        {!isProcessStoppedOrTerminationEvent(eventAction) && (
+          <ParentProcessDraggable
+            contextId={contextId}
+            endgameParentProcessName={endgameParentProcessName}
+            eventId={id}
+            processPpid={processPpid}
+            text={i18n.VIA_PARENT_PROCESS}
+          />
+        )}
         {outcome != null && (
           <TokensFlexItem grow={false} component="span">
             {i18n.WITH_RESULT}
@@ -215,7 +215,7 @@ interface GenericDetailsProps {
   timelineId: string;
 }
 
-export const SystemGenericFileDetails = pure<GenericDetailsProps>(
+export const SystemGenericFileDetails = React.memo<GenericDetailsProps>(
   ({ data, contextId, showMessage = true, text, timelineId }) => {
     const id = data._id;
     const message: string | null = data.message != null ? data.message[0] : null;

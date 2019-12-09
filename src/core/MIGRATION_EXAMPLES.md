@@ -3,6 +3,19 @@
 This document is a list of examples of how to migrate plugin code from legacy
 APIs to their New Platform equivalents.
 
+- [Migration Examples](#migration-examples)
+  - [Configuration](#configuration)
+    - [Declaring config schema](#declaring-config-schema)
+    - [Using New Platform config from a Legacy plugin](#using-new-platform-config-from-a-legacy-plugin)
+      - [Create a New Platform plugin](#create-a-new-platform-plugin)
+  - [HTTP Routes](#http-routes)
+    - [1. Legacy route registration](#1-legacy-route-registration)
+    - [2. New Platform shim using legacy router](#2-new-platform-shim-using-legacy-router)
+    - [3. New Platform shim using New Platform router](#3-new-platform-shim-using-new-platform-router)
+      - [4. New Platform plugin](#4-new-platform-plugin)
+    - [Accessing Services](#accessing-services)
+  - [Chrome](#chrome)
+  
 ## Configuration
 
 ### Declaring config schema
@@ -43,6 +56,62 @@ export const config = {
 export type MyPluginConfig = TypeOf<typeof config.schema>;
 ```
 
+### Using New Platform config in a new plugin
+
+After setting the config schema for your plugin, you might want to reach the configuration in the plugin.
+It is provided as part of the [PluginInitializerContext](../../docs/development/core/server/kibana-plugin-server.plugininitializercontext.md)
+in the *constructor* of the plugin:
+
+```ts
+// myPlugin/(public|server)/index.ts
+
+import { PluginInitializerContext } from 'kibana/server';
+import { MyPlugin } from './plugin';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new MyPlugin(initializerContext);
+}
+```
+
+```ts
+// myPlugin/(public|server)/plugin.ts
+
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from 'kibana/server';
+import { MyPlugin } from './plugin';
+
+export class MyPlugin implements Plugin {
+  private readonly config$: Observable<MyPluginConfig>;
+  private readonly log: Logger;
+
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.log = initializerContext.logger.get();
+    this.config$ = initializerContext.config.create();
+  }
+
+  public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
+    const isEnabled = await this.config$.pipe(first()).toPromise();
+    ...
+  }
+  ...
+}
+}
+```
+
+Additionally, some plugins need to read other plugins' config to act accordingly (like timing out a request, matching ElasticSearch's timeout). For those use cases, the plugin can rely on the *globalConfig* and *env* properties in the context:
+
+```ts
+export class MyPlugin implements Plugin {
+...
+  public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
+    const { mode: { dev }, packageInfo: { version } } = this.initializerContext.env;
+    const { elasticsearch: { shardTimeout }, path: { data } } = await this.initializerContext.config.legacy.globalConfig$
+      .pipe(first()).toPromise();
+    ...
+  }
+```
+
 ### Using New Platform config from a Legacy plugin
 
 During the migration process, you'll want to migrate your schema to the new
@@ -51,6 +120,7 @@ config service due to the way that config is tied to the `kibana.json` file
 (which does not exist for legacy plugins).
 
 There is a workaround though:
+
 - Create a New Platform plugin that contains your plugin's config schema in the new format
 - Expose the config from the New Platform plugin in its setup contract
 - Read the config from the setup contract in your legacy plugin
@@ -140,6 +210,7 @@ interface, which is exposed via the
 object injected into the `setup` method of server-side plugins.
 
 This interface has a different API with slightly different behaviors.
+
 - All input (body, query parameters, and URL parameters) must be validated using
   the `@kbn/config-schema` package. If no validation schema is provided, these
   values will be empty objects.
@@ -149,16 +220,19 @@ This interface has a different API with slightly different behaviors.
   continue using the `boom` module internally in your plugin, the framework does
   not have native support for converting Boom exceptions into HTTP responses.
 
-### Route Registration
+Because of the incompatibility between the legacy and New Platform HTTP Route
+API's it might be helpful to break up your migration work into several stages.
+
+### 1. Legacy route registration
 
 ```ts
-// Legacy route registration
+// legacy/plugins/myplugin/index.ts
 import Joi from 'joi';
 
 new kibana.Plugin({
   init(server) {
     server.route({
-      path: '/api/my-plugin/my-route',
+      path: '/api/demoplugin/search',
       method: 'POST',
       options: {
         validate: {
@@ -173,17 +247,104 @@ new kibana.Plugin({
     });
   }
 });
+```
 
+### 2. New Platform shim using legacy router
 
-// New Platform equivalent
+Create a New Platform shim and inject the legacy `server.route` into your
+plugin's setup function.
+
+```ts
+// legacy/plugins/demoplugin/index.ts
+import { Plugin, LegacySetup } from './server/plugin';
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      // core shim
+      const coreSetup: server.newPlatform.setup.core;
+      const pluginSetup = {};
+      const legacySetup: LegacySetup = {
+        route: server.route
+      };
+
+      new Plugin().setup(coreSetup, pluginSetup, legacySetup);
+    }
+  }
+}
+```
+
+```ts
+// legacy/plugins/demoplugin/server/plugin.ts
+import { CoreSetup } from 'src/core/server';
+import { Legacy } from 'kibana';
+
+export interface LegacySetup {
+  route: Legacy.Server['route'];
+};
+
+export interface DemoPluginsSetup {};
+
+export class Plugin {
+  public setup(core: CoreSetup, plugins: DemoPluginsSetup, __LEGACY: LegacySetup) {
+    __LEGACY.route({
+      path: '/api/demoplugin/search',
+      method: 'POST',
+      options: {
+        validate: {
+          payload: Joi.object({
+            field1: Joi.string().required(),
+          }),
+        }
+      },
+      async handler(req) {
+        return { message: `Received field1: ${req.payload.field1}` };
+      },
+    });
+  }
+}
+```
+
+### 3. New Platform shim using New Platform router
+
+We now switch the shim to use the real New Platform HTTP API's in `coreSetup`
+instead of relying on the legacy `server.route`. Since our plugin is now using
+the New Platform API's we are guaranteed that our HTTP route handling is 100%
+compatible with the New Platform. As a result, we will also have to adapt our
+route registration accordingly.
+
+```ts
+// legacy/plugins/demoplugin/index.ts
+import { Plugin } from './server/plugin';
+export default (kibana) => {
+  return new kibana.Plugin({
+    id: 'demo_plugin',
+
+    init(server) {
+      // core shim
+      const coreSetup = server.newPlatform.setup.core;
+      const pluginSetup = {};
+
+      new Plugin().setup(coreSetup, pluginSetup);
+    }
+  }
+}
+```
+
+```ts
+// legacy/plugins/demoplugin/server/plugin.ts
 import { schema } from '@kbn/config-schema';
+import { CoreSetup } from 'src/core/server';
+
+export interface DemoPluginsSetup {};
 
 class Plugin {
-  public setup(core) {
+  public setup(core: CoreSetup, pluginSetup: DemoPluginSetup) {
     const router = core.http.createRouter();
     router.post(
       {
-        path: '/api/my-plugin/my-route',
+        path: '/api/demoplugin/search',
         validate: {
           body: schema.object({
             field1: schema.string(),
@@ -200,6 +361,46 @@ class Plugin {
     )
   }
 }
+```
+
+If your plugin still relies on throwing Boom errors from routes, you can use the `router.handleLegacyErrors`
+as a temporary solution until error migration is complete:
+
+```ts
+// legacy/plugins/demoplugin/server/plugin.ts
+import { schema } from '@kbn/config-schema';
+import { CoreSetup } from 'src/core/server';
+
+export interface DemoPluginsSetup {};
+
+class Plugin {
+  public setup(core: CoreSetup, pluginSetup: DemoPluginSetup) {
+    const router = core.http.createRouter();
+    router.post(
+      {
+        path: '/api/demoplugin/search',
+        validate: {
+          body: schema.object({
+            field1: schema.string(),
+          }),
+        }
+      },
+      router.wrapErrors((context, req, res) => {
+        throw Boom.notFound('not there'); // will be converted into proper New Platform error
+      })
+    )
+  }
+}
+```
+
+#### 4. New Platform plugin
+
+As the final step we delete the shim and move all our code into a New Platform
+plugin. Since we were already consuming the New Platform API's no code changes
+are necessary inside `plugin.ts`.
+
+```ts
+// Move legacy/plugins/demoplugin/server/plugin.ts -> plugins/demoplugin/server/plugin.ts
 ```
 
 ### Accessing Services

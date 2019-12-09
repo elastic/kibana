@@ -48,6 +48,11 @@ export function jobAuditMessagesProvider(callWithRequest) {
                 term: {
                   level: 'activity'
                 }
+              },
+              must: {
+                term: {
+                  job_type: 'anomaly_detector'
+                }
               }
             }
           },
@@ -85,7 +90,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
         body:
         {
           sort: [
-            { timestamp: { order: 'asc' } },
+            { timestamp: { order: 'desc' } },
             { job_id: { order: 'asc' } }
           ],
           query

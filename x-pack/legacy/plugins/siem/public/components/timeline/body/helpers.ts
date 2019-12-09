@@ -18,6 +18,8 @@ export const DEFAULT_ACTIONS_COLUMN_WIDTH = 115; // px;
  * an events viewer, which has fewer actions than a regular events viewer
  */
 export const EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH = 32; // px;
+/** Additional column width to include when checkboxes are shown **/
+export const SHOW_CHECK_BOXES_COLUMN_WIDTH = 32; // px;
 /** The default minimum width of a column (when a width for the column type is not specified) */
 export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 /** The default minimum width of a column of type `date` */
@@ -55,7 +57,7 @@ export interface GetPinOnClickParams {
   eventId: string;
   onPinEvent: OnPinEvent;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
+  isEventPinned: boolean;
 }
 
 export const getPinOnClick = ({
@@ -63,15 +65,12 @@ export const getPinOnClick = ({
   eventId,
   onPinEvent,
   onUnPinEvent,
-  pinnedEventIds,
+  isEventPinned,
 }: GetPinOnClickParams): (() => void) => {
   if (!allowUnpinning) {
     return noop;
   }
-
-  return eventIsPinned({ eventId, pinnedEventIds })
-    ? () => onUnPinEvent(eventId)
-    : () => onPinEvent(eventId);
+  return isEventPinned ? () => onUnPinEvent(eventId) : () => onPinEvent(eventId);
 };
 
 export const getColumnWidthFromType = (type: string): number =>
@@ -96,5 +95,6 @@ export const getColumnHeaders = (
 };
 
 /** Returns the (fixed) width of the Actions column */
-export const getActionsColumnWidth = (isEventViewer: boolean): number =>
-  isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH;
+export const getActionsColumnWidth = (isEventViewer: boolean, showCheckboxes = false): number =>
+  (showCheckboxes ? SHOW_CHECK_BOXES_COLUMN_WIDTH : 0) +
+  (isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH);

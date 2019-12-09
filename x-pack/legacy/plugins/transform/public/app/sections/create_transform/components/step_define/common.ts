@@ -124,5 +124,5 @@ export function getPivotDropdownOptions(indexPattern: IndexPattern) {
 }
 
 export const getPivotPreviewDevConsoleStatement = (request: PreviewRequestBody) => {
-  return `POST _data_frame/transforms/_preview\n${JSON.stringify(request, null, 2)}\n`;
+  return `POST _transform/_preview\n${JSON.stringify(request, null, 2)}\n`;
 };

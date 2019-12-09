@@ -11,33 +11,41 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
 
 `GET /api/saved_objects/_find`
 
+`GET /s/<space_id>/api/saved_objects/_find`
+
+[[saved-objects-api-find-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
 [[saved-objects-api-find-query-params]]
 ==== Query Parameters
 
 `type`::
   (Required, array|string) The saved object types to include in the export.
-  
+
 `per_page`::
   (Optional, number) The number of objects to return per page.
-  
+
 `page`::
   (Optional, number) The page of objects to return.
-  
+
 `search`::
   (Optional, string) An Elasticsearch {ref}/query-dsl-simple-query-string-query.html[simple_query_string] query that filters the objects in the response.
-  
+
 `default_search_operator`::
   (Optional, string) The default operator to use for the `simple_query_string`.
-  
+
 `search_fields`::
   (Optional, array|string) The fields to perform the `simple_query_string` parsed query against.
-  
+
 `fields`::
   (Optional, array|string) The fields to return in the response.
-  
+
 `sort_field`::
   (Optional, string) The field that sorts the response.
-  
+
 `has_reference`::
   (Optional, object) Filters to objects that have a relationship with the type and ID combination.
 
@@ -52,7 +60,7 @@ change. Use the find API for traditional paginated results, but avoid using it t
 [[saved-objects-api-find-request-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
     Indicates a successful call.
 
 ==== Examples
@@ -92,4 +100,3 @@ query parameter for each value:
 GET api/saved_objects/_find?fields=id&fields=title
 --------------------------------------------------
 // KIBANA
-

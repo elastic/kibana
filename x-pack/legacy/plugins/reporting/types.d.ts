@@ -4,13 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { ResponseObject } from 'hapi';
+import { EventEmitter } from 'events';
+import { Legacy } from 'kibana';
+import { XPackMainPlugin } from '../xpack_main/xpack_main';
+import {
+  ElasticsearchPlugin,
+  CallCluster,
+} from '../../../../src/legacy/core_plugins/elasticsearch';
+import { CancellationToken } from './common/cancellation_token';
+import { HeadlessChromiumDriverFactory } from './server/browsers/chromium/driver_factory';
+import { BrowserType } from './server/browsers/types';
 
-interface UiSettings {
-  get: (value: string) => string;
+export type Job = EventEmitter & {
+  id: string;
+  toJSON: () => {
+    id: string;
+  };
+};
+
+export interface ReportingPlugin {
+  queue: {
+    addJob: <PayloadType>(type: string, payload: PayloadType, options: object) => Job;
+  };
+  // TODO: convert exportTypesRegistry to TS
+  exportTypesRegistry: {
+    getById: <T, U, V, W>(id: string) => ExportTypeDefinition<T, U, V, W>;
+    getAll: <T, U, V, W>() => Array<ExportTypeDefinition<T, U, V, W>>;
+    get: <T, U, V, W>(
+      callback: (item: ExportTypeDefinition<T, U, V, W>) => boolean
+    ) => ExportTypeDefinition<T, U, V, W>;
+  };
+  browserDriverFactory: HeadlessChromiumDriverFactory;
 }
 
-type SavedObjectClient = any;
+export interface ReportingConfigOptions {
+  browser: BrowserConfig;
+  poll: {
+    jobCompletionNotifier: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+    jobsRefresh: {
+      interval: number;
+      intervalErrorMultiplier: number;
+    };
+  };
+  queue: QueueConfig;
+  capture: CaptureConfig;
+}
 
 export interface NetworkPolicyRule {
   allow: boolean;
@@ -23,30 +65,71 @@ export interface NetworkPolicy {
   rules: NetworkPolicyRule[];
 }
 
-// these types shoud be in core kibana and are only here temporarily
-export interface KbnServer {
-  info: { protocol: string };
-  config: () => ConfigObject;
-  expose: () => void;
-  plugins: Record<string, any>;
-  route: any;
-  log: any;
-  fieldFormatServiceFactory: (uiConfig: any) => any;
-  savedObjects: {
-    getScopedSavedObjectsClient: (fakeRequest: {
-      headers: object;
-      getBasePath: () => string;
-    }) => SavedObjectClient;
-  };
-  uiSettingsServiceFactory: ({
-    savedObjectsClient,
-  }: {
-    savedObjectsClient: SavedObjectClient;
-  }) => UiSettings;
+interface ListQuery {
+  page: string;
+  size: string;
+  ids?: string; // optional field forbids us from extending RequestQuery
+}
+interface GenerateQuery {
+  jobParams: string;
+}
+interface GenerateExportTypePayload {
+  jobParams: string;
+}
+interface DownloadParams {
+  docId: string;
 }
 
-export interface ConfigObject {
-  get: (path?: string) => any;
+/*
+ * Legacy System
+ */
+
+export type ReportingPluginSpecOptions = Legacy.PluginSpecOptions;
+
+export type ServerFacade = Legacy.Server & {
+  plugins: {
+    reporting?: ReportingPlugin;
+    xpack_main?: XPackMainPlugin & {
+      status?: any;
+    };
+  };
+};
+
+interface ReportingRequest {
+  query: ListQuery & GenerateQuery;
+  params: DownloadParams;
+  payload: GenerateExportTypePayload;
+  pre: {
+    management: {
+      jobTypes: any;
+    };
+    user: any;
+  };
+}
+
+export type RequestFacade = ReportingRequest & Legacy.Request;
+
+export type ResponseFacade = ResponseObject & {
+  isBoom: boolean;
+};
+
+export type ReportingResponseToolkit = Legacy.ResponseToolkit;
+
+export type ESCallCluster = CallCluster;
+
+/*
+ * Reporting Config
+ */
+
+export interface CaptureConfig {
+  browser: {
+    type: BrowserType;
+    autoDownload: boolean;
+    chromium: BrowserConfig;
+  };
+  maxAttempts: number;
+  networkPolicy: NetworkPolicy;
+  loadDelay: number;
 }
 
 export interface BrowserConfig {
@@ -59,6 +142,19 @@ export interface BrowserConfig {
     server: string;
     bypass?: string[];
   };
+}
+
+export interface QueueConfig {
+  indexInterval: string;
+  pollEnabled: boolean;
+  pollInterval: number;
+  pollIntervalErrorMultiplier: number;
+  timeout: number;
+}
+
+export interface ScrollConfig {
+  duration: string;
+  size: number;
 }
 
 export interface ElementPosition {
@@ -88,7 +184,7 @@ export interface ConditionalHeadersConditions {
 }
 
 export interface CryptoFactory {
-  decrypt: (headers?: Record<string, string>) => string;
+  decrypt: (headers?: string) => any;
 }
 
 export interface TimeRangeParams {
@@ -102,9 +198,9 @@ export interface JobParamPostPayload {
   timerange: TimeRangeParams;
 }
 
-export interface JobDocPayload {
-  headers?: Record<string, string>;
-  jobParams: object;
+export interface JobDocPayload<JobParamsType> {
+  headers?: string; // serialized encrypted headers
+  jobParams: JobParamsType;
   title: string;
   type: string | null;
 }
@@ -114,16 +210,21 @@ export interface JobDocOutput {
   contentType: string;
 }
 
-export interface JobDoc {
+export interface JobDocExecuted<JobParamsType> {
   jobtype: string;
-  output: JobDocOutput;
-  payload: JobDocPayload;
+  output: JobDocOutputExecuted;
+  payload: JobDocPayload<JobParamsType>;
   status: string; // completed, failed, etc
 }
 
-export interface JobSource {
+export interface JobSource<JobParamsType> {
   _id: string;
-  _source: JobDoc;
+  _source: {
+    jobtype: string;
+    output: JobDocOutput;
+    payload: JobDocPayload<JobParamsType>;
+    status: string; // completed, failed, etc
+  };
 }
 
 /*
@@ -149,19 +250,36 @@ export interface ESQueueWorker {
   on: (event: string, handler: any) => void;
 }
 
-export type ESQueueCreateJobFn = (
-  jobParams: object,
-  headers: ConditionalHeaders,
-  request: Request
-) => Promise<object>;
+export type ESQueueCreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
+  headers: Record<string, string>,
+  request: RequestFacade
+) => Promise<JobParamsType>;
 
-export type ESQueueWorkerExecuteFn = (jobId: string, job: JobDoc, cancellationToken: any) => void;
+export type ImmediateCreateJobFn<JobParamsType> = (
+  jobParams: JobParamsType,
+  headers: Record<string, string>,
+  req: RequestFacade
+) => Promise<{
+  type: string | null;
+  title: string;
+  jobParams: JobParamsType;
+}>;
 
-export type JobIDForImmediate = null;
-export type ImmediateExecuteFn = (
-  jobId: JobIDForImmediate,
-  jobDocPayload: JobDocPayload,
-  request: Request
+export type ESQueueWorkerExecuteFn<JobDocPayloadType> = (
+  jobId: string,
+  job: JobDocPayloadType,
+  cancellationToken?: CancellationToken
+) => void;
+
+/*
+ * ImmediateExecuteFn receives the job doc payload because the payload was
+ * generated in the CreateFn
+ */
+export type ImmediateExecuteFn<JobParamsType> = (
+  jobId: null,
+  job: JobDocPayload<JobParamsType>,
+  request: RequestFacade
 ) => Promise<JobDocOutputExecuted>;
 
 export interface ESQueueWorkerOptions {
@@ -171,38 +289,58 @@ export interface ESQueueWorkerOptions {
   intervalErrorMultiplier: number;
 }
 
-export interface ESQueueInstance {
+// GenericWorkerFn is a generic for ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>,
+type GenericWorkerFn<JobParamsType> = (
+  jobSource: JobSource<JobParamsType>,
+  ...workerRestArgs: any[]
+) => void | Promise<JobDocOutputExecuted>;
+
+export interface ESQueueInstance<JobParamsType, JobDocPayloadType> {
   registerWorker: (
-    jobtype: string,
-    workerFn: any,
+    pluginId: string,
+    workerFn: GenericWorkerFn<JobParamsType>,
     workerOptions: ESQueueWorkerOptions
   ) => ESQueueWorker;
 }
 
-export type CreateJobFactory = (server: KbnServer) => ESQueueCreateJobFn;
-export type ExecuteJobFactory = (server: KbnServer) => ESQueueWorkerExecuteFn;
-export type ExecuteImmediateJobFactory = (server: KbnServer) => ImmediateExecuteFn;
+export type CreateJobFactory<CreateJobFnType> = (server: ServerFacade) => CreateJobFnType;
+export type ExecuteJobFactory<ExecuteJobFnType> = (server: ServerFacade) => ExecuteJobFnType;
 
-export interface ExportTypeDefinition {
+export interface ExportTypeDefinition<
+  JobParamsType,
+  CreateJobFnType,
+  JobPayloadType,
+  ExecuteJobFnType
+> {
   id: string;
   name: string;
   jobType: string;
+  jobContentEncoding?: string;
   jobContentExtension: string;
-  createJobFactory: CreateJobFactory;
-  executeJobFactory: ExecuteJobFactory | ExecuteImmediateJobFactory;
+  createJobFactory: CreateJobFactory<CreateJobFnType>;
+  executeJobFactory: ExecuteJobFactory<ExecuteJobFnType>;
   validLicenses: string[];
 }
 
-// Note: this seems to be nearly a duplicate of ExportTypeDefinition
-export interface ExportType {
-  jobType: string;
-  createJobFactory: any;
-  executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
+export interface ExportTypesRegistry {
+  register: <JobParamsType, CreateJobFnType, JobPayloadType, ExecuteJobFnType>(
+    exportTypeDefinition: ExportTypeDefinition<
+      JobParamsType,
+      CreateJobFnType,
+      JobPayloadType,
+      ExecuteJobFnType
+    >
+  ) => void;
 }
 
-export interface ExportTypesRegistry {
-  register: (exportTypeDefinition: ExportTypeDefinition) => void;
-}
+export { CancellationToken } from './common/cancellation_token';
 
 // Prefer to import this type using: `import { LevelLogger } from 'relative/path/server/lib';`
 export { LevelLogger as Logger } from './server/lib/level_logger';
+
+export interface AbsoluteURLFactoryOptions {
+  defaultBasePath: string;
+  protocol: string;
+  hostname: string;
+  port: string | number;
+}

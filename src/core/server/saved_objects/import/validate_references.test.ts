@@ -18,10 +18,10 @@
  */
 
 import { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
-import { SavedObjectsClientMock } from '../../mocks';
+import { savedObjectsClientMock } from '../../mocks';
 
 describe('getNonExistingReferenceAsKeys()', () => {
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -222,7 +222,7 @@ describe('getNonExistingReferenceAsKeys()', () => {
 });
 
 describe('validateReferences()', () => {
-  const savedObjectsClient = SavedObjectsClientMock.create();
+  const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();

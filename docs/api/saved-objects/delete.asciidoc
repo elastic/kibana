@@ -13,8 +13,13 @@ WARNING: Once you delete a saved object, _it cannot be recovered_.
 
 `DELETE /api/saved_objects/<type>/<id>`
 
+`DELETE /s/<space_id>/api/saved_objects/<type>/<id>`
+
 [[saved-objects-api-delete-path-params]]
 ==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `type`::
   (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`, and `timelion-sheet`.
@@ -25,7 +30,7 @@ WARNING: Once you delete a saved object, _it cannot be recovered_.
 [[saved-objects-api-delete-response-codes]]
 ==== Response code
 
-`200`:: 
+`200`::
   Indicates a successful call.
 
 ==== Examples

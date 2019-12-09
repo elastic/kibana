@@ -17,17 +17,15 @@
  * under the License.
  */
 
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from 'ui/modules';
-import '../../../../../../ui/public/render_complete/directive';
 
+import '../../../../../../ui/public/render_complete/directive';
 import { DiscoverNoResults } from './no_results';
 import { DiscoverUninitialized } from './uninitialized';
 import { DiscoverUnsupportedIndexPattern } from './unsupported_index_pattern';
 import { DiscoverHistogram } from './histogram';
+import { getAngularModule, wrapInI18nContext } from '../../kibana_services';
 
-const app = uiModules.get('apps/discover', ['react']);
+const app = getAngularModule();
 
 app.directive('discoverNoResults', reactDirective =>
   reactDirective(wrapInI18nContext(DiscoverNoResults))

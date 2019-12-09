@@ -25,7 +25,7 @@ import {
   EuiCheckbox,
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
-import { Storage } from 'ui/storage';
+import { Storage } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { STORAGE_KEY, ELASTICSEARCH_SYSTEM_ID, KIBANA_SYSTEM_ID } from '../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

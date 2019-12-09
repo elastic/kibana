@@ -28,9 +28,8 @@ const getConvertFn = (
   convert?: HtmlContextTypeConvert
 ): HtmlContextTypeConvert => {
   const fallbackHtml: HtmlContextTypeConvert = (value, field, hit, meta, returnReact) => {
-    const formatted = returnReact
-      ? format.convert(value, 'text')
-      : escape(format.convert(value, 'text'));
+    const formattedRaw = format.convert(value, 'text');
+    const formatted = returnReact ? formattedRaw : escape(String(formattedRaw));
 
     return !field || !hit || !hit.highlight || !hit.highlight[field.name]
       ? formatted

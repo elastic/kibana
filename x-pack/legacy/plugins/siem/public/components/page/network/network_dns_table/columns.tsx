@@ -69,6 +69,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.queryCount}`,
     name: i18n.TOTAL_QUERIES,
     sortable: true,
@@ -83,6 +84,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.uniqueDomains}`,
     name: i18n.UNIQUE_DOMAINS,
     sortable: true,
@@ -97,6 +99,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.dnsBytesIn}`,
     name: i18n.DNS_BYTES_IN,
     sortable: true,
@@ -111,6 +114,7 @@ export const getNetworkDnsColumns = (type: networkModel.NetworkType): NetworkDns
     },
   },
   {
+    align: 'right',
     field: `node.${NetworkDnsFields.dnsBytesOut}`,
     name: i18n.DNS_BYTES_OUT,
     sortable: true,

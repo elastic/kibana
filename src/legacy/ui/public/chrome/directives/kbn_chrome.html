@@ -1,9 +1,9 @@
-<div class="app-wrapper-panel">
+<div class="app-wrapper-panel" data-test-subj="appA11yRoot">
   <div id="globalBannerList"></div>
 
-  <main
+  <div
     class="application"
     ng-class="'tab-' + getFirstPathSegment() + ' ' + chrome.getApplicationClasses()"
     ng-view
-  ></main>
+  ></div>
 </div>

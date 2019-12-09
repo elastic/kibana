@@ -20,9 +20,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import {
-  Link,
-} from 'react-router';
+import { Link } from 'react-router'; // eslint-disable-line
 
 import classNames from 'classnames';
 
@@ -49,7 +47,7 @@ export class GuideNav extends Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     const currentRoute = nextProps.routes[1];
     const nextRoute = this.props.getNextRoute(currentRoute.name);
     const previousRoute = this.props.getPreviousRoute(currentRoute.name);

@@ -320,7 +320,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                   };
                 })}
                 onChange={async (selected: EuiComboBoxOptionProps[]) => {
-                  setWatchProperty('index', selected.map(aSelected => aSelected.value));
+                  setWatchProperty(
+                    'index',
+                    selected.map(aSelected => aSelected.value)
+                  );
                   const indices = selected.map(s => s.value as string);
 
                   // reset time field and expression fields if indices are deleted
@@ -441,12 +444,12 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
         {shouldShowThresholdExpression ? (
           <Fragment>
             <EuiTitle size="s">
-              <h3 data-test-subj="watchConditionTitle">
+              <h2 data-test-subj="watchConditionTitle">
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.watchConditionSectionTitle"
                   defaultMessage="Match the following condition"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="s">

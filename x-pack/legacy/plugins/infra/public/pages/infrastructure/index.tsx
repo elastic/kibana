@@ -41,10 +41,9 @@ export const InfrastructurePage = injectUICapabilities(
 
         <HelpCenterContent
           feedbackLink="https://discuss.elastic.co/c/metrics"
-          feedbackLinkText={i18n.translate(
-            'xpack.infra.infrastructure.infrastructureHelpContent.feedbackLinkText',
-            { defaultMessage: 'Provide feedback for Metrics' }
-          )}
+          appName={i18n.translate('xpack.infra.header.infrastructureHelpAppName', {
+            defaultMessage: 'Metrics',
+          })}
         />
 
         <Header
@@ -58,7 +57,11 @@ export const InfrastructurePage = injectUICapabilities(
           readOnlyBadge={!uiCapabilities.infrastructure.save}
         />
 
-        <AppNavigation>
+        <AppNavigation
+          aria-label={i18n.translate('xpack.infra.header.infrastructureNavigationTitle', {
+            defaultMessage: 'Metrics',
+          })}
+        >
           <RoutedTabs
             tabs={[
               {

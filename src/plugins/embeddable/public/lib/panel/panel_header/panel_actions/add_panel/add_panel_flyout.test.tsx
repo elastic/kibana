@@ -27,7 +27,8 @@ import {
 import { HelloWorldContainer } from '../../../../test_samples/embeddables/hello_world_container';
 import { ContactCardEmbeddable } from '../../../../test_samples/embeddables/contact_card/contact_card_embeddable';
 import { ContainerInput } from '../../../../containers';
-import { mount } from 'enzyme';
+import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
+import { ReactWrapper } from 'enzyme';
 
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -55,7 +56,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
   };
   const container = new HelloWorldContainer(input, { getEmbeddableFactory } as any);
   const onClose = jest.fn();
-  const component = mount<AddPanelFlyout>(
+  const component = mount(
     <AddPanelFlyout
       container={container}
       onClose={onClose}
@@ -64,7 +65,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       notifications={core.notifications}
       SavedObjectFinder={() => null}
     />
-  );
+  ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
   expect(Object.values(container.getInput().panels).length).toBe(0);
   component.instance().createNewEmbeddable(CONTACT_CARD_EMBEDDABLE);
@@ -109,7 +110,7 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       notifications={core.notifications}
       SavedObjectFinder={() => null}
     />
-  );
+  ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
   const spy = jest.fn();
   component.instance().createNewEmbeddable = spy;

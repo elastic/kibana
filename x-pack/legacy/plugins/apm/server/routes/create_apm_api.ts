@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { indexPatternRoute } from './index_pattern';
+import {
+  staticIndexPatternRoute,
+  dynamicIndexPatternRoute
+} from './index_pattern';
 import {
   errorDistributionRoute,
   errorGroupsRoute,
@@ -25,16 +28,23 @@ import {
   listAgentConfigurationServicesRoute,
   updateAgentConfigurationRoute,
   agentConfigurationAgentNameRoute
-} from './settings';
+} from './settings/agent_configuration';
+import {
+  apmIndexSettingsRoute,
+  apmIndicesRoute,
+  saveApmIndicesRoute
+} from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
+import { transactionByTraceIdRoute } from './transaction';
 import {
   transactionGroupsBreakdownRoute,
   transactionGroupsChartsRoute,
   transactionGroupsDistributionRoute,
   transactionGroupsRoute,
-  transactionGroupsAvgDurationByCountry
+  transactionGroupsAvgDurationByCountry,
+  transactionGroupsAvgDurationByBrowser
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -52,7 +62,8 @@ import { serviceMapRoute } from './services';
 const createApmApi = () => {
   const api = createApi()
     // index pattern
-    .add(indexPatternRoute)
+    .add(staticIndexPatternRoute)
+    .add(dynamicIndexPatternRoute)
 
     // Errors
     .add(errorDistributionRoute)
@@ -75,6 +86,11 @@ const createApmApi = () => {
     .add(listAgentConfigurationServicesRoute)
     .add(updateAgentConfigurationRoute)
 
+    // APM indices
+    .add(apmIndexSettingsRoute)
+    .add(apmIndicesRoute)
+    .add(saveApmIndicesRoute)
+
     // Metrics
     .add(metricsChartsRoute)
     .add(serviceNodesRoute)
@@ -88,6 +104,7 @@ const createApmApi = () => {
     .add(transactionGroupsChartsRoute)
     .add(transactionGroupsDistributionRoute)
     .add(transactionGroupsRoute)
+    .add(transactionGroupsAvgDurationByBrowser)
     .add(transactionGroupsAvgDurationByCountry)
 
     // UI filters
@@ -99,7 +116,10 @@ const createApmApi = () => {
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
-    .add(serviceMapRoute);
+    .add(serviceMapRoute)
+
+    // Transaction
+    .add(transactionByTraceIdRoute);
 
   return api;
 };

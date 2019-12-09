@@ -7,14 +7,13 @@
 import React, { useContext } from 'react';
 
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { HeaderPanel } from '../../header_panel';
+import { HeaderSection } from '../../header_section';
 
 import * as i18n from './translations';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
 import { convertAnomaliesToHosts } from './convert_anomalies_to_hosts';
 import { Loader } from '../../loader';
 import { getIntervalFromAnomalies } from '../anomaly/get_interval_from_anomalies';
-import { getSizeFromAnomalies } from '../anomaly/get_size_from_anomalies';
 import { AnomaliesHostTableProps } from '../types';
 import { hasMlUserPermissions } from '../permissions/has_ml_user_permissions';
 import { MlCapabilitiesContext } from '../permissions/ml_capabilities_provider';
@@ -51,9 +50,9 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
       narrowDateRange
     );
     const pagination = {
-      pageIndex: 0,
-      pageSize: 10,
-      totalItemCount: getSizeFromAnomalies(tableData),
+      initialPageIndex: 0,
+      initialPageSize: 10,
+      totalItemCount: hosts.length,
       pageSizeOptions: [5, 10, 20, 50],
       hidePerPageOptions: false,
     };
@@ -63,7 +62,7 @@ export const AnomaliesHostTable = React.memo<AnomaliesHostTableProps>(
     } else {
       return (
         <Panel loading={loading}>
-          <HeaderPanel
+          <HeaderSection
             subtitle={`${i18n.SHOWING}: ${pagination.totalItemCount.toLocaleString()} ${i18n.UNIT(
               pagination.totalItemCount
             )}`}

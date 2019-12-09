@@ -30,8 +30,6 @@ import { timefilter } from 'ui/timefilter';
 import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
 
-// import the uiExports that we want to "use"
-import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 require('ui/autoload/all');
@@ -407,9 +405,15 @@ app.controller('timelion', function (
     $scope.state.save();
     $scope.running = true;
 
+    // parse the time range client side to make sure it behaves like other charts
+    const timeRangeBounds = timefilter.getBounds();
+
     const httpResult = $http.post('../api/timelion/run', {
       sheet: $scope.state.sheet,
-      time: _.extend(timefilter.getTime(), {
+      time: _.extend({
+        from: timeRangeBounds.min,
+        to: timeRangeBounds.max,
+      }, {
         interval: $scope.state.interval,
         timezone: timezone
       }),

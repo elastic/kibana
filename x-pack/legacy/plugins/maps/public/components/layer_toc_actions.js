@@ -168,6 +168,22 @@ export class LayerTocActions extends Component {
           this.props.cloneLayer();
         }
       });
+      actionItems.push({
+        name: i18n.translate('xpack.maps.layerTocActions.removeLayerTitle', {
+          defaultMessage: 'Remove layer',
+        }),
+        icon: (
+          <EuiIcon
+            type="trash"
+            size="m"
+          />
+        ),
+        'data-test-subj': 'removeLayerButton',
+        onClick: () => {
+          this._closePopover();
+          this.props.removeLayer();
+        }
+      });
     }
 
     return {

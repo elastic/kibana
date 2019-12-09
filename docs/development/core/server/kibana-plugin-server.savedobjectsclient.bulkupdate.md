@@ -9,7 +9,7 @@ Bulk Updates multiple SavedObject at once
 <b>Signature:</b>
 
 ```typescript
-bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBaseOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
+bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options?: SavedObjectsBulkUpdateOptions): Promise<SavedObjectsBulkUpdateResponse<T>>;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ bulkUpdate<T extends SavedObjectAttributes = any>(objects: Array<SavedObjectsBul
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  objects | <code>Array&lt;SavedObjectsBulkUpdateObject&lt;T&gt;&gt;</code> |  |
-|  options | <code>SavedObjectsBaseOptions</code> |  |
+|  options | <code>SavedObjectsBulkUpdateOptions</code> |  |
 
 <b>Returns:</b>
 

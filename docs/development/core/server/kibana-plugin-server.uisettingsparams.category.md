@@ -9,5 +9,5 @@ used to group the configured setting in the UI
 <b>Signature:</b>
 
 ```typescript
-category: string[];
+category?: string[];
 ```

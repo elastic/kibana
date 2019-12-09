@@ -44,7 +44,7 @@ describe('default route provider', () => {
           }
           throw Error(`unsupported ui setting: ${key}`);
         },
-        getDefaults: () => {
+        getRegistered: () => {
           return {
             defaultRoute: {
               value: '/app/kibana',

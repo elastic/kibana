@@ -6,7 +6,7 @@
 
 import React, { FC } from 'react';
 
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface RefreshTransformListButton {
@@ -17,14 +17,16 @@ export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
   onClick,
   isLoading,
 }) => (
-  <EuiButtonEmpty
+  <EuiButton
+    color="secondary"
+    iconType="refresh"
     data-test-subj="transformRefreshTransformListButton"
     onClick={onClick}
     isLoading={isLoading}
   >
     <FormattedMessage
       id="xpack.transform.transformList.refreshButtonLabel"
-      defaultMessage="Refresh"
+      defaultMessage="Reload"
     />
-  </EuiButtonEmpty>
+  </EuiButton>
 );

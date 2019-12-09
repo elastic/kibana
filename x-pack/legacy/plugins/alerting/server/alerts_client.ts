@@ -32,7 +32,7 @@ interface ConstructorOptions {
   createAPIKey: () => Promise<CreateAPIKeyResult>;
 }
 
-interface FindOptions {
+export interface FindOptions {
   options?: {
     perPage?: number;
     page?: number;
@@ -40,6 +40,7 @@ interface FindOptions {
     defaultSearchOperator?: 'AND' | 'OR';
     searchFields?: string[];
     sortField?: string;
+    sortOrder?: string;
     hasReference?: {
       type: string;
       id: string;
@@ -72,9 +73,11 @@ interface CreateOptions {
 interface UpdateOptions {
   id: string;
   data: {
+    name: string;
+    tags: string[];
     interval: string;
     actions: AlertAction[];
-    alertTypeParams: Record<string, any>;
+    params: Record<string, any>;
   };
 }
 
@@ -108,7 +111,7 @@ export class AlertsClient {
   public async create({ data, options }: CreateOptions) {
     // Throws an error if alert type isn't registered
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
-    const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
+    const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
 
@@ -122,7 +125,7 @@ export class AlertsClient {
       apiKey: apiKey.created
         ? Buffer.from(`${apiKey.result.id}:${apiKey.result.api_key}`).toString('base64')
         : undefined,
-      alertTypeParams: validatedAlertTypeParams,
+      params: validatedAlertTypeParams,
       muteAll: false,
       mutedInstanceIds: [],
     });
@@ -196,7 +199,7 @@ export class AlertsClient {
     const apiKey = await this.createAPIKey();
 
     // Validate
-    const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.alertTypeParams);
+    const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     this.validateActions(alertType, data.actions);
 
     const { actions, references } = this.extractReferences(data.actions);
@@ -207,7 +210,7 @@ export class AlertsClient {
       {
         ...attributes,
         ...data,
-        alertTypeParams: validatedAlertTypeParams,
+        params: validatedAlertTypeParams,
         actions,
         updatedBy: username,
         apiKeyOwner: apiKey.created ? username : null,

@@ -17,20 +17,16 @@
  * under the License.
  */
 
-import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
-import { npSetup } from 'ui/new_platform';
+import moment from 'moment';
 import { IBucketAggConfig } from '../_bucket_agg_type';
+import { DateRangeKey } from '../date_range';
+import { esFilters } from '../../../../../../plugins/data/public';
 
-// @ts-ignore
-import { dateRange } from '../../../utils/date_range';
+export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRangeKey) => {
+  const filter: esFilters.RangeFilterParams = {};
+  if (from) filter.gte = moment(from).toISOString();
+  if (to) filter.lt = moment(to).toISOString();
+  if (to && from) filter.format = 'strict_date_optional_time';
 
-export const createFilterDateRange = (agg: IBucketAggConfig, rangeString: string) => {
-  const range = dateRange.parse(rangeString, npSetup.core.uiSettings.get('dateFormat'));
-
-  const filter: RangeFilterParams = {};
-  if (range.from) filter.gte = range.from.toISOString();
-  if (range.to) filter.lt = range.to.toISOString();
-  if (range.to && range.from) filter.format = 'strict_date_optional_time';
-
-  return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
+  return esFilters.buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
 };

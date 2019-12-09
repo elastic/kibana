@@ -31,17 +31,6 @@ export const monitorsSchema = gql`
     y: UnsignedInteger
   }
 
-  type SnapshotCount {
-    up: Int!
-    down: Int!
-    mixed: Int!
-    total: Int!
-  }
-
-  type Snapshot {
-    counts: SnapshotCount!
-  }
-
   type DataPoint {
     x: UnsignedInteger
     y: Float
@@ -120,6 +109,11 @@ export const monitorsSchema = gql`
     monitors: [LatestMonitor!]
   }
 
+  type HistogramResult {
+    histogram: [HistogramDataPoint]!
+    interval: UnsignedInteger!
+  }
+
   type MonitorPageTitle {
     id: String!
     url: String
@@ -134,20 +128,13 @@ export const monitorsSchema = gql`
       statusFilter: String
     ): LatestMonitorsResult
 
-    getSnapshot(
-      dateRangeStart: String!
-      dateRangeEnd: String!
-      filters: String
-      statusFilter: String
-    ): Snapshot
-
     getSnapshotHistogram(
       dateRangeStart: String!
       dateRangeEnd: String!
       filters: String
       statusFilter: String
       monitorId: String
-    ): [HistogramDataPoint!]!
+    ): HistogramResult
 
     getMonitorChartsData(
       monitorId: String!

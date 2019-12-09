@@ -54,8 +54,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },
@@ -102,8 +101,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },
@@ -328,8 +326,7 @@ describe('state_helpers', () => {
                 label: 'Count',
                 dataType: 'number',
                 isBucketed: false,
-
-                // Private
+                sourceField: 'Records',
                 operationType: 'count',
               },
             },

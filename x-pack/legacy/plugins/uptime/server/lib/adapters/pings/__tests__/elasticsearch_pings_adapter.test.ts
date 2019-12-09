@@ -7,6 +7,7 @@
 import { set } from 'lodash';
 import { DatabaseAdapter } from '../../database';
 import { ElasticsearchPingsAdapter } from '../elasticsearch_pings_adapter';
+import { assertCloseTo } from '../../../helper';
 
 describe('ElasticsearchPingsAdapter class', () => {
   let database: DatabaseAdapter;
@@ -88,7 +89,7 @@ describe('ElasticsearchPingsAdapter class', () => {
   });
 
   describe('getPingHistogram', () => {
-    it('returns an empty array for <= 1 bucket', async () => {
+    it('returns a single bucket if array has 1', async () => {
       expect.assertions(2);
       const search = jest.fn();
       search.mockReturnValue({
@@ -115,8 +116,10 @@ describe('ElasticsearchPingsAdapter class', () => {
       };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
+      assertCloseTo(result.interval, 36000, 100);
+      result.interval = 36000;
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
-      expect(result).toEqual([]);
+      expect(result).toMatchSnapshot();
     });
 
     it('returns expected result for no status filter', async () => {
@@ -132,6 +135,8 @@ describe('ElasticsearchPingsAdapter class', () => {
       };
       const pingAdapter = new ElasticsearchPingsAdapter(pingDatabase);
       const result = await pingAdapter.getPingHistogram(serverRequest, 'now-15m', 'now', null);
+      assertCloseTo(result.interval, 36000, 100);
+      result.interval = 36000;
 
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -197,6 +202,8 @@ describe('ElasticsearchPingsAdapter class', () => {
         undefined,
         'down'
       );
+      assertCloseTo(result.interval, 5609564928000, 1000);
+      result.interval = 5609564928000;
 
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
@@ -254,6 +261,8 @@ describe('ElasticsearchPingsAdapter class', () => {
         searchFilter
       );
 
+      assertCloseTo(result.interval, 36000, 100);
+      result.interval = 36000;
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();
     });
@@ -276,6 +285,8 @@ describe('ElasticsearchPingsAdapter class', () => {
         undefined,
         'down'
       );
+      assertCloseTo(result.interval, 5609564928000, 1000);
+      result.interval = 5609564928000;
 
       expect(pingDatabase.search).toHaveBeenCalledTimes(1);
       expect(result).toMatchSnapshot();

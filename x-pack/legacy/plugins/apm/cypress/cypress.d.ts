@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// eslint-disable-next-line spaced-comment
-/// <reference types="cypress" />
-
 declare namespace Cypress {
   interface Chainable<Subject> {
     snapshot: () => {};

@@ -15,7 +15,8 @@ import {
   EuiAvatar,
 } from '@elastic/eui';
 import { NewTimeline, Description, NotesButton } from './helpers';
-import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal';
+import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal/open_timeline_modal_button';
+import { OpenTimelineModal } from '../../open_timeline/open_timeline_modal';
 import { InspectButton } from '../../inspect';
 
 import * as i18n from './translations';
@@ -75,6 +76,9 @@ interface Props {
   getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
   onToggleShowNotes: () => void;
+  onCloseTimelineModal: () => void;
+  onOpenTimelineModal: () => void;
+  showTimelineModal: boolean;
   updateNote: UpdateNote;
 }
 
@@ -98,6 +102,9 @@ export const PropertiesRight = React.memo<Props>(
     noteIds,
     onToggleShowNotes,
     updateNote,
+    showTimelineModal,
+    onCloseTimelineModal,
+    onOpenTimelineModal,
   }) => (
     <PropertiesRightStyle alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -125,7 +132,7 @@ export const PropertiesRight = React.memo<Props>(
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <OpenTimelineModalButton />
+              <OpenTimelineModalButton onClick={onOpenTimelineModal} />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -186,6 +193,8 @@ export const PropertiesRight = React.memo<Props>(
             </HiddenFlexItem>
           ))
         : null}
+
+      {showTimelineModal ? <OpenTimelineModal onClose={onCloseTimelineModal} /> : null}
     </PropertiesRightStyle>
   )
 );

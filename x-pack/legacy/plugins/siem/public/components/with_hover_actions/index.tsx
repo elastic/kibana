@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
-import { pure } from 'recompose';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 interface Props {
@@ -29,18 +28,20 @@ interface Props {
 }
 
 const HoverActionsPanelContainer = styled.div`
-  color: ${props => props.theme.eui.textColors.default}
+  color: ${({ theme }) => theme.eui.textColors.default};
   height: 100%;
   position: relative;
 `;
 
 HoverActionsPanelContainer.displayName = 'HoverActionsPanelContainer';
 
-const HoverActionsPanel = pure<{ children: JSX.Element; show: boolean }>(({ children, show }) => (
-  <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
-    {show ? children : null}
-  </HoverActionsPanelContainer>
-));
+const HoverActionsPanel = React.memo<{ children: JSX.Element; show: boolean }>(
+  ({ children, show }) => (
+    <HoverActionsPanelContainer data-test-subj="hover-actions-panel-container">
+      {show ? children : null}
+    </HoverActionsPanelContainer>
+  )
+);
 
 HoverActionsPanel.displayName = 'HoverActionsPanel';
 
@@ -66,13 +67,14 @@ WithHoverActionsContainer.displayName = 'WithHoverActionsContainer';
 export const WithHoverActions = React.memo<Props>(
   ({ alwaysShow = false, hoverContent, render }) => {
     const [showHoverContent, setShowHoverContent] = useState(false);
-    function onMouseEnter() {
+    const onMouseEnter = useCallback(() => {
       setShowHoverContent(true);
-    }
+    }, []);
 
-    function onMouseLeave() {
+    const onMouseLeave = useCallback(() => {
       setShowHoverContent(false);
-    }
+    }, []);
+
     return (
       <WithHoverActionsContainer onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
         <>{render(showHoverContent)}</>

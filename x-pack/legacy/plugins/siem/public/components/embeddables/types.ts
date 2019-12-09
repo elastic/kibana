@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Filter as ESFilterType } from '@kbn/es-query';
-import { Query } from 'src/plugins/data/common';
 import { TimeRange } from 'src/plugins/data/public';
 import {
   EmbeddableInput,
   EmbeddableOutput,
   IEmbeddable,
+  EmbeddableFactory,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { inputsModel } from '../../store/inputs';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface MapEmbeddableInput extends EmbeddableInput {
-  filters: ESFilterType[];
+  filters: esFilters.Filter[];
   query: Query;
   refreshConfig: {
     isPaused: boolean;
@@ -50,8 +50,7 @@ export interface LoadFeatureProps {
 
 export interface FeatureProperty {
   _propertyKey: string;
-  _rawValue: string;
-  getESFilters(): Promise<object>;
+  _rawValue: string | string[];
 }
 
 export interface FeatureGeometry {
@@ -70,3 +69,8 @@ export interface RenderTooltipContentParams {
 }
 
 export type MapToolTipProps = Partial<RenderTooltipContentParams>;
+
+export interface EmbeddableApi {
+  getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
+  registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;
+}

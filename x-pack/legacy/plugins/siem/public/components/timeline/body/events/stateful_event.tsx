@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import uuid from 'uuid';
 import VisibilitySensor from 'react-visibility-sensor';
 
@@ -21,7 +21,6 @@ import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, OFFSET_SCROLLBAR } from '../../styles';
 import { useTimelineWidthContext } from '../../timeline_context';
 import { ColumnHeader } from '../column_headers/column_header';
-import { eventIsPinned } from '../helpers';
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
@@ -42,7 +41,7 @@ interface Props {
   onPinEvent: OnPinEvent;
   onUnPinEvent: OnUnPinEvent;
   onUpdateColumns: OnUpdateColumns;
-  pinnedEventIds: Readonly<Record<string, boolean>>;
+  isEventPinned: boolean;
   rowRenderers: RowRenderer[];
   timelineId: string;
   toggleColumn: (column: ColumnHeader) => void;
@@ -110,12 +109,12 @@ export const StatefulEvent = React.memo<Props>(
     eventIdToNoteIds,
     getNotesByIds,
     isEventViewer = false,
+    isEventPinned = false,
     maxDelay = 0,
     onColumnResized,
     onPinEvent,
     onUnPinEvent,
     onUpdateColumns,
-    pinnedEventIds,
     rowRenderers,
     timelineId,
     toggleColumn,
@@ -127,27 +126,28 @@ export const StatefulEvent = React.memo<Props>(
 
     const divElement = useRef<HTMLDivElement | null>(null);
 
-    const onToggleShowNotes = (eventId: string): (() => void) => () => {
+    const onToggleShowNotes = useCallback(() => {
+      const eventId = event._id;
       setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
-    };
+    }, [event, showNotes]);
 
-    const onToggleExpanded = (eventId: string): (() => void) => () => {
+    const onToggleExpanded = useCallback(() => {
+      const eventId = event._id;
       setExpanded({
         ...expanded,
         [eventId]: !expanded[eventId],
       });
-    };
+    }, [event, expanded]);
 
-    const associateNote = (
-      eventId: string,
-      addNoteToEventChild: AddNoteToEvent,
-      onPinEventChild: OnPinEvent
-    ): ((noteId: string) => void) => (noteId: string) => {
-      addNoteToEventChild({ eventId, noteId });
-      if (!eventIsPinned({ eventId, pinnedEventIds })) {
-        onPinEventChild(eventId); // pin the event, because it has notes
-      }
-    };
+    const associateNote = useCallback(
+      (noteId: string) => {
+        addNoteToEvent({ eventId: event._id, noteId });
+        if (!isEventPinned) {
+          onPinEvent(event._id); // pin the event, because it has notes
+        }
+      },
+      [addNoteToEvent, event, isEventPinned, onPinEvent]
+    );
 
     /**
      * Incrementally loads the events when it mounts by trying to
@@ -155,7 +155,6 @@ export const StatefulEvent = React.memo<Props>(
      * indicate to React that it should render its self by setting
      * its initialRender to true.
      */
-
     useEffect(() => {
       let _isMounted = true;
 
@@ -201,7 +200,7 @@ export const StatefulEvent = React.memo<Props>(
                   <EventsTrGroup
                     className={STATEFUL_EVENT_CSS_CLASS_NAME}
                     data-test-subj="event"
-                    innerRef={c => {
+                    ref={c => {
                       if (c != null) {
                         divElement.current = c;
                       }
@@ -222,6 +221,7 @@ export const StatefulEvent = React.memo<Props>(
                           expanded={!!expanded[event._id]}
                           getNotesByIds={getNotesByIds}
                           id={event._id}
+                          isEventPinned={isEventPinned}
                           isEventViewer={isEventViewer}
                           loading={loading}
                           onColumnResized={onColumnResized}
@@ -229,7 +229,6 @@ export const StatefulEvent = React.memo<Props>(
                           onToggleExpanded={onToggleExpanded}
                           onToggleShowNotes={onToggleShowNotes}
                           onUnPinEvent={onUnPinEvent}
-                          pinnedEventIds={pinnedEventIds}
                           showNotes={!!showNotes[event._id]}
                           timelineId={timelineId}
                           updateNote={updateNote}

@@ -42,6 +42,8 @@ export default function ({ getService, loadTestFile }) {
       loadTestFile(require.resolve('./_kibana_settings'));
       loadTestFile(require.resolve('./_scripted_fields'));
       loadTestFile(require.resolve('./_scripted_fields_preview'));
+      loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
+
     });
 
     describe('', function () {
