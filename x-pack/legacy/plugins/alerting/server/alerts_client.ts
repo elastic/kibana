@@ -437,9 +437,8 @@ export class AlertsClient {
     alertActions: NormalizedAlertAction[]
   ): Promise<{ actions: RawAlert['actions']; references: SavedObjectReference[] }> {
     // Fetch action objects in bulk
-    const bulkGetOpts = [
-      ...new Set(alertActions.map(alertAction => ({ id: alertAction.id, type: 'action' }))),
-    ];
+    const actionIds = [...new Set(alertActions.map(alertAction => alertAction.id))]
+    const bulkGetOpts = actionIds.map(id => ({ id, type: 'action' }));
     const bulkGetResult = await this.savedObjectsClient.bulkGet(bulkGetOpts);
     const actionMap = new Map<string, any>();
     for (const action of bulkGetResult.saved_objects) {
