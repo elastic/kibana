@@ -1,10 +1,6 @@
 // Should import both the EUI constants and any Kibana ones that are considered global
 @import 'src/legacy/ui/public/styles/styling_constants';
 
-// ML needs EUI card styling till it fully adopts React components
-@import '@elastic/eui/src/components/panel/variables';
-@import '@elastic/eui/src/components/panel/mixins';
-
 // ML has it's own variables for coloring
 @import 'variables';
 
@@ -16,7 +12,6 @@
 // Protect the rest of Kibana from ML generic namespacing
 // SASSTODO: Prefix ml selectors instead
 #ml-app {
-
   // App level
   @import 'app';
 
