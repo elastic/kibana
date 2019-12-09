@@ -39,6 +39,7 @@ export function ServiceMap({ serviceName }: ServiceMapProps) {
   const {
     urlParams: { start, end }
   } = useUrlParams();
+
   const { data } = useFetcher(
     callApmApi => {
       if (start && end) {
