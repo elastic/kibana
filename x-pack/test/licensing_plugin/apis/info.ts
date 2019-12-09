@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../services';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -18,6 +18,12 @@ export default function({ getService }: FtrProviderContext) {
         expect(response.body).property('features');
         expect(response.body).property('license');
         expect(response.body).property('signature');
+      });
+
+      it('returns a correct license type', async () => {
+        const response = await supertest.get('/api/licensing/info').expect(200);
+
+        expect(response.body.license.type).to.be('basic');
       });
     });
   });
