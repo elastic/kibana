@@ -17,8 +17,7 @@
  * under the License.
  */
 
-// @ts-ignore
-import utils from '../../../lib/utils/utils';
+import * as utils from '../../../lib/utils/utils';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
 import { BaseResponseType } from '../../../types/common';

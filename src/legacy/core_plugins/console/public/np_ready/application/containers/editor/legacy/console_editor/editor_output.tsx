@@ -25,8 +25,7 @@ import {
   useRequestReadContext,
 } from '../../../../contexts';
 
-// @ts-ignore
-import utils from '../../../../../lib/utils/utils';
+import * as utils from '../../../../../lib/utils/utils';
 
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
@@ -66,7 +65,7 @@ function EditorOutputUI() {
       editor.session.setMode(mode);
       editor.update(
         data
-          .map(d => d.response.value)
+          .map(d => d.response.value as string)
           .map(readOnlySettings.tripleQuotes ? utils.expandLiteralStrings : a => a)
           .join('\n')
       );

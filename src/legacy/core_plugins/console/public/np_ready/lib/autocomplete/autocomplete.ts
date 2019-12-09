@@ -28,8 +28,9 @@ import {
   getUnmatchedEndpointComponents,
   // @ts-ignore
 } from '../kb/kb';
-// @ts-ignore
-import utils from '../utils/utils';
+
+import * as utils from '../utils/utils';
+
 // @ts-ignore
 import { populateContext } from './engine';
 // @ts-ignore

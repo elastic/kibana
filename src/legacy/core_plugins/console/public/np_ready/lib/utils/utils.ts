@@ -27,7 +27,7 @@ export function textFromRequest(request: any) {
   return request.method + ' ' + request.url + '\n' + data;
 }
 
-export function jsonToString(data: any, indent: number) {
+export function jsonToString(data: any, indent: boolean) {
   return JSON.stringify(data, null, indent ? 2 : 0);
 }
 
@@ -37,7 +37,7 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   for (let i = 0; i < data.length; i++) {
     const curDoc = data[i];
     try {
-      let newDoc = jsonToString(JSON.parse(collapseLiteralStrings(curDoc)), indent ? 2 : 0);
+      let newDoc = jsonToString(JSON.parse(collapseLiteralStrings(curDoc)), indent);
       if (indent) {
         newDoc = expandLiteralStrings(newDoc);
       }
