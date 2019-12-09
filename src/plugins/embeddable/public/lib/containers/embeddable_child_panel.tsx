@@ -40,9 +40,8 @@ export interface EmbeddableChildPanelProps {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
-  uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
   inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 interface State {
@@ -103,9 +102,8 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
             getAllEmbeddableFactories={this.props.getAllEmbeddableFactories}
             overlays={this.props.overlays}
             notifications={this.props.notifications}
-            savedObjects={this.props.savedObjects}
-            uiSettings={this.props.uiSettings}
             inspector={this.props.inspector}
+            SavedObjectFinder={this.props.SavedObjectFinder}
           />
         )}
       </div>

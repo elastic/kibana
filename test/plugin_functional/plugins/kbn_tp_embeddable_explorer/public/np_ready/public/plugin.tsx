@@ -39,6 +39,10 @@ import {
 } from './embeddable_api';
 import { App } from './app';
 import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../../../src/plugins/kibana_react/public/saved_objects';
+import {
   IEmbeddableStart,
   IEmbeddableSetup,
 } from '.../../../../../../../src/plugins/embeddable/public';
@@ -97,6 +101,13 @@ export class EmbeddableExplorerPublicPlugin
 
     plugins.__LEGACY.onRenderComplete(() => {
       const root = document.getElementById(REACT_ROOT_ID);
+      const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+        <SavedObjectFinderUi
+          {...props}
+          savedObjects={core.savedObjects}
+          uiSettings={core.uiSettings}
+        />
+      );
       ReactDOM.render(
         <App
           getActions={plugins.uiActions.getTriggerCompatibleActions}
@@ -105,9 +116,8 @@ export class EmbeddableExplorerPublicPlugin
           notifications={core.notifications}
           overlays={core.overlays}
           inspector={plugins.inspector}
+          SavedObjectFinder={SavedObjectFinder}
           I18nContext={core.i18n.Context}
-          uiSettings={core.uiSettings}
-          savedObjects={core.savedObjects}
         />,
         root
       );

@@ -22,16 +22,14 @@ import React from 'react';
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { GetEmbeddableFactories } from 'src/plugins/embeddable/public';
 import { DashboardPanelState } from '../embeddable';
-import { CoreStart, NotificationsStart, Toast } from '../../../../core/public';
+import { NotificationsStart, Toast } from '../../../../core/public';
 import { IContainer, IEmbeddable, EmbeddableInput, EmbeddableOutput } from '../embeddable_plugin';
-import { SavedObjectFinderUi } from '../../../kibana_react/public';
 
 interface Props {
   container: IContainer;
+  savedObjectsFinder: React.ComponentType<any>;
   onClose: () => void;
   notifications: NotificationsStart;
-  uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
   getEmbeddableFactories: GetEmbeddableFactories;
 }
@@ -96,8 +94,9 @@ export class ReplacePanelFlyout extends React.Component<Props> {
   };
 
   public render() {
+    const SavedObjectFinder = this.props.savedObjectsFinder;
     const savedObjectsFinder = (
-      <SavedObjectFinderUi
+      <SavedObjectFinder
         noItemsMessage={i18n.translate(
           'dashboardEmbeddableContainer.addPanel.noMatchingObjectsMessage',
           {
@@ -112,8 +111,6 @@ export class ReplacePanelFlyout extends React.Component<Props> {
           .map(({ savedObjectMetaData }) => savedObjectMetaData as any)}
         showFilter={true}
         onChoose={this.onReplacePanel}
-        uiSettings={this.props.uiSettings}
-        savedObjects={this.props.savedObjects}
       />
     );
 

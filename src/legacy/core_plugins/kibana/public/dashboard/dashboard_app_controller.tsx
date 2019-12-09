@@ -70,6 +70,10 @@ import { DashboardAppScope } from './dashboard_app';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../plugins/kibana_react/public';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -717,14 +721,17 @@ export class DashboardAppController {
     };
     navActions[TopNavIds.ADD] = () => {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
+        const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+          <SavedObjectFinderUi {...props} savedObjects={savedObjects} uiSettings={uiSettings} />
+        );
+
         openAddPanelFlyout({
           embeddable: dashboardContainer,
           getAllFactories: embeddables.getEmbeddableFactories,
           getFactory: embeddables.getEmbeddableFactory,
           notifications,
           overlays,
-          uiSettings,
-          savedObjects,
+          SavedObjectFinder,
         });
       }
     };

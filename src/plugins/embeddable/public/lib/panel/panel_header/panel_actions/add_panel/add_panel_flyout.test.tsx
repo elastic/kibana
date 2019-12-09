@@ -63,8 +63,7 @@ test('createNewEmbeddable() add embeddable to container', async () => {
       getFactory={getEmbeddableFactory}
       getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
       notifications={core.notifications}
-      uiSettings={core.uiSettings}
-      savedObjects={core.savedObjects}
+      SavedObjectFinder={() => null}
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 
@@ -109,8 +108,7 @@ test('selecting embeddable in "Create new ..." list calls createNewEmbeddable()'
       getFactory={getEmbeddableFactory}
       getAllFactories={() => new Set<any>([contactCardEmbeddableFactory]).values()}
       notifications={core.notifications}
-      uiSettings={core.uiSettings}
-      savedObjects={core.savedObjects}
+      SavedObjectFinder={() => null}
     />
   ) as ReactWrapper<unknown, unknown, AddPanelFlyout>;
 

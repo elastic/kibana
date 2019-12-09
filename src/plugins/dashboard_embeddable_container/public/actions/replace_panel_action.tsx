@@ -41,6 +41,8 @@ export class ReplacePanelAction implements IAction<ActionContext> {
 
   constructor(
     private core: CoreStart,
+    private savedobjectfinder: React.ComponentType<any>,
+    private notifications: CoreStart['notifications'],
     private getEmbeddableFactories: IEmbeddableStart['getEmbeddableFactories']
   ) {}
 
@@ -80,6 +82,8 @@ export class ReplacePanelAction implements IAction<ActionContext> {
     openReplacePanelFlyout({
       embeddable: dash,
       core: this.core,
+      savedObjectFinder: this.savedobjectfinder,
+      notifications: this.notifications,
       panelToRemove: view,
       getEmbeddableFactories: this.getEmbeddableFactories,
     });

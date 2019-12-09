@@ -36,8 +36,7 @@ export interface AppProps {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
-  uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
+  SavedObjectFinder: React.ComponentType<any>;
   I18nContext: CoreStart['i18n']['Context'];
 }
 
@@ -106,8 +105,7 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
             overlays={this.props.overlays}
             notifications={this.props.notifications}
             inspector={this.props.inspector}
-            uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
+            SavedObjectFinder={this.props.SavedObjectFinder}
           />
         );
       }
@@ -120,8 +118,7 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
             overlays={this.props.overlays}
             notifications={this.props.notifications}
             inspector={this.props.inspector}
-            uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
+            SavedObjectFinder={this.props.SavedObjectFinder}
           />
         );
       }
@@ -134,8 +131,7 @@ export class App extends Component<AppProps, { selectedTabId: string }> {
             overlays={this.props.overlays}
             notifications={this.props.notifications}
             inspector={this.props.inspector}
-            uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
+            SavedObjectFinder={this.props.SavedObjectFinder}
           />
         );
       }

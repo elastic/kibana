@@ -162,9 +162,8 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
         overlays={{} as any}
-        uiSettings={{} as any}
-        savedObjects={{} as any}
         inspector={inspector}
+        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );
@@ -201,9 +200,8 @@ const renderInEditModeAndOpenContextMenu = async (
         getEmbeddableFactory={(() => undefined) as any}
         notifications={{} as any}
         overlays={{} as any}
-        uiSettings={{} as any}
-        savedObjects={{} as any}
         inspector={inspector}
+        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );
@@ -301,8 +299,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         notifications={{} as any}
         overlays={{} as any}
         inspector={inspector}
-        uiSettings={{} as any}
-        savedObjects={{} as any}
+        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );
@@ -364,8 +361,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         notifications={{} as any}
         overlays={{} as any}
         inspector={inspector}
-        uiSettings={{} as any}
-        savedObjects={{} as any}
+        SavedObjectFinder={() => null}
       />
     </I18nProvider>
   );
@@ -417,8 +413,7 @@ test('Check when hide header option is false', async () => {
         notifications={{} as any}
         overlays={{} as any}
         inspector={inspector}
-        uiSettings={{} as any}
-        savedObjects={{} as any}
+        SavedObjectFinder={() => null}
         hideHeader={false}
       />
     </I18nProvider>
@@ -455,8 +450,7 @@ test('Check when hide header option is true', async () => {
         notifications={{} as any}
         overlays={{} as any}
         inspector={inspector}
-        uiSettings={{} as any}
-        savedObjects={{} as any}
+        SavedObjectFinder={() => null}
         hideHeader={true}
       />
     </I18nProvider>

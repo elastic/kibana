@@ -59,8 +59,7 @@ function getProps(
     inspector: {
       isAvailable: jest.fn(),
     } as any,
-    uiSettings: {} as any,
-    savedObjects: {} as any,
+    SavedObjectFinder: () => null,
     ExitFullScreenButton,
     uiActions: {
       getTriggerCompatibleActions: (() => []) as any,

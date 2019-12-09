@@ -68,12 +68,11 @@ function prepare(props?: Partial<DashboardGridProps>) {
     inspector: {
       isAvailable: jest.fn(),
     } as any,
+    SavedObjectFinder: () => null,
     ExitFullScreenButton: () => null,
     uiActions: {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
-    uiSettings: {} as any,
-    savedObjects: {} as any,
   };
   dashboardContainer = new DashboardContainer(initialInput, options);
   const defaultTestProps: DashboardGridProps = {

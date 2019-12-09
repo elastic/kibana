@@ -41,10 +41,9 @@ const options: DashboardContainerOptions = {
   notifications: {} as any,
   overlays: {} as any,
   inspector: {} as any,
+  SavedObjectFinder: () => null,
   ExitFullScreenButton: () => null,
   uiActions: {} as any,
-  uiSettings: {} as any,
-  savedObjects: {} as any,
 };
 
 beforeEach(() => {

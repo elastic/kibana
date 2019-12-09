@@ -77,10 +77,9 @@ export interface DashboardContainerOptions {
   application: CoreStart['application'];
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
-  savedObjects: CoreStart['savedObjects'];
-  uiSettings: CoreStart['uiSettings'];
   embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
   ExitFullScreenButton: React.ComponentType<any>;
   uiActions: IUiActionsStart;
 }

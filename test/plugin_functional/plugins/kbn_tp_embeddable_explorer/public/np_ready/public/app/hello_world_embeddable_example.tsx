@@ -35,8 +35,7 @@ interface Props {
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
   inspector: InspectorStartContract;
-  uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
+  SavedObjectFinder: React.ComponentType<any>;
 }
 
 export class ContactCardEmbeddableExample extends React.Component<Props> {
@@ -65,8 +64,7 @@ export class ContactCardEmbeddableExample extends React.Component<Props> {
           overlays={this.props.overlays}
           notifications={this.props.notifications}
           inspector={this.props.inspector}
-          uiSettings={this.props.uiSettings}
-          savedObjects={this.props.savedObjects}
+          SavedObjectFinder={this.props.SavedObjectFinder}
         />
       </div>
     );

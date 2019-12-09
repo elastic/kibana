@@ -48,9 +48,8 @@ interface Props {
   getAllEmbeddableFactories: GetEmbeddableFactories;
   overlays: CoreStart['overlays'];
   notifications: CoreStart['notifications'];
-  uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
   inspector: InspectorStartContract;
+  SavedObjectFinder: React.ComponentType<any>;
   hideHeader?: boolean;
 }
 
@@ -243,8 +242,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         this.props.getAllEmbeddableFactories,
         this.props.overlays,
         this.props.notifications,
-        this.props.uiSettings,
-        this.props.savedObjects
+        this.props.SavedObjectFinder
       ),
       new InspectPanelAction(this.props.inspector),
       new RemovePanelAction(),

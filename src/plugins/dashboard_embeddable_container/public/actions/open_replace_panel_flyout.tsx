@@ -31,10 +31,19 @@ import {
 export async function openReplacePanelFlyout(options: {
   embeddable: IContainer;
   core: CoreStart;
+  savedObjectFinder: React.ComponentType<any>;
+  notifications: CoreStart['notifications'];
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
   getEmbeddableFactories: IEmbeddableStart['getEmbeddableFactories'];
 }) {
-  const { embeddable, core, panelToRemove, getEmbeddableFactories } = options;
+  const {
+    embeddable,
+    core,
+    panelToRemove,
+    savedObjectFinder,
+    notifications,
+    getEmbeddableFactories,
+  } = options;
   const flyoutSession = core.overlays.openFlyout(
     toMountPoint(
       <ReplacePanelFlyout
@@ -45,9 +54,8 @@ export async function openReplacePanelFlyout(options: {
           }
         }}
         panelToRemove={panelToRemove}
-        notifications={core.notifications}
-        uiSettings={core.uiSettings}
-        savedObjects={core.savedObjects}
+        savedObjectsFinder={savedObjectFinder}
+        notifications={notifications}
         getEmbeddableFactories={getEmbeddableFactories}
       />
     ),

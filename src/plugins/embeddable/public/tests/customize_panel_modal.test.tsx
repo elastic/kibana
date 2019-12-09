@@ -65,8 +65,7 @@ beforeEach(async () => {
       overlays: coreStart.overlays,
       notifications: coreStart.notifications,
       inspector: {} as any,
-      uiSettings: coreStart.uiSettings,
-      savedObjects: coreStart.savedObjects,
+      SavedObjectFinder: () => null,
     }
   );
   const contactCardEmbeddable = await container.addNewEmbeddable<

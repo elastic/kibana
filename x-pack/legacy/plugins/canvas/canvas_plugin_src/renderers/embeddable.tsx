@@ -17,6 +17,10 @@ import {
 import { start } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { EmbeddableExpression } from '../expression_types/embeddable';
 import { RendererStrings } from '../../i18n';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from '../../../../../../src/plugins/kibana_react/public';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -33,6 +37,13 @@ interface Handlers {
 }
 
 const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) => {
+  const SavedObjectFinder = (props: SavedObjectFinderProps) => (
+    <SavedObjectFinderUi
+      {...props}
+      savedObjects={npStart.core.savedObjects}
+      uiSettings={npStart.core.uiSettings}
+    />
+  );
   return (
     <div
       className="embeddable"
@@ -47,8 +58,7 @@ const renderEmbeddable = (embeddableObject: IEmbeddable, domNode: HTMLElement) =
           notifications={npStart.core.notifications}
           overlays={npStart.core.overlays}
           inspector={npStart.plugins.inspector}
-          uiSettings={npStart.core.uiSettings}
-          savedObjects={npStart.core.savedObjects}
+          SavedObjectFinder={SavedObjectFinder}
         />
       </I18nContext>
     </div>
