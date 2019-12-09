@@ -5,7 +5,6 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../services';
-import { SecurityService } from '../../common/services';
 import { PublicLicenseJSON } from '../../../plugins/licensing/server';
 
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -13,7 +12,7 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esSupertestWithoutAuth = getService('esSupertestWithoutAuth');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'security']);
   const testSubjects = getService('testSubjects');
 
