@@ -1,0 +1,7 @@
+{
+  "id": "enhancedData",
+  "version": "kibana",
+  "requiredPlugins": ["data"],
+  "server": false,
+  "ui": true
+}
