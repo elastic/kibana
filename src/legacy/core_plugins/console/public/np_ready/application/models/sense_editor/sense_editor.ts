@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import RowParser from '../../../lib/row_parser';
-import * as utils from './utils';
+import * as utils from '../../../lib/utils/utils';
 // @ts-ignore
 import * as es from '../../../lib/es/es';
 
@@ -150,27 +150,17 @@ export class SenseEditor {
     };
   };
 
-  getEngulfingRequestsRange = async (
+  expandRangeToRequestEdges = async (
     range = this.coreEditor.getSelectionRange()
   ): Promise<Range | null> => {
-    // if (_.isUndefined(cb)) {
-    //   cb = range;
-    //   range = null;
-    // }
-
     await this.coreEditor.waitForLatestTokens();
 
     let startLineNumber = range.start.lineNumber;
     let endLineNumber = range.end.lineNumber;
     const maxLine = Math.max(1, this.coreEditor.getLineCount());
 
-    // move start row to the previous request start if in body, o.w. forward
     if (this.parser.isInBetweenRequestsRow(startLineNumber)) {
-      // for (; startRow <= endRow; startRow++) {
-      //  if (editor.parser.isStartRequestRow(startRow)) {
-      //    break;
-      //  }
-      // }
+      /* Do nothing... */
     } else {
       for (; startLineNumber >= 1; startLineNumber--) {
         if (this.parser.isStartRequestRow(startLineNumber)) {
@@ -294,19 +284,19 @@ export class SenseEditor {
       return [];
     }
 
-    const engulfingRange = await this.getEngulfingRequestsRange(range);
+    const expandedRange = await this.expandRangeToRequestEdges(range);
 
-    if (!engulfingRange) {
+    if (!expandedRange) {
       return [];
     }
 
     const requests: any = [];
 
-    let rangeStartCursor = engulfingRange.start.lineNumber;
-    const endLineNumber = engulfingRange.end.lineNumber;
+    let rangeStartCursor = expandedRange.start.lineNumber;
+    const endLineNumber = expandedRange.end.lineNumber;
 
     // move to the next request start (during the second iterations this may not be exactly on a request
-    let currentLineNumber = engulfingRange.start.lineNumber;
+    let currentLineNumber = expandedRange.start.lineNumber;
 
     const flushNonRequestBlock = () => {
       if (includeNonRequestBlocks) {
@@ -443,15 +433,15 @@ export class SenseEditor {
 
   highlightCurrentRequestsAndUpdateActionBar = _.debounce(async () => {
     await this.coreEditor.waitForLatestTokens();
-    const newCurrentReqRange = await this.getEngulfingRequestsRange();
-    if (newCurrentReqRange === null && this.currentReqRange === null) {
+    const expandedRange = await this.expandRangeToRequestEdges();
+    if (expandedRange === null && this.currentReqRange === null) {
       return;
     }
     if (
-      newCurrentReqRange !== null &&
+      expandedRange !== null &&
       this.currentReqRange !== null &&
-      newCurrentReqRange.start.lineNumber === this.currentReqRange.start.lineNumber &&
-      newCurrentReqRange.end.lineNumber === this.currentReqRange.end.lineNumber
+      expandedRange.start.lineNumber === this.currentReqRange.start.lineNumber &&
+      expandedRange.end.lineNumber === this.currentReqRange.end.lineNumber
     ) {
       // same request, now see if we are on the first line and update the action bar
       const cursorLineNumber = this.coreEditor.getCurrentPosition().lineNumber;
@@ -465,7 +455,7 @@ export class SenseEditor {
       this.coreEditor.removeMarker(this.currentReqRange.markerRef);
     }
 
-    this.currentReqRange = newCurrentReqRange as any;
+    this.currentReqRange = expandedRange as any;
     if (this.currentReqRange) {
       this.currentReqRange.markerRef = this.coreEditor.addMarker(this.currentReqRange);
     }
