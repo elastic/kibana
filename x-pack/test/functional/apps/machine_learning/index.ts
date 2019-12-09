@@ -6,7 +6,8 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ loadTestFile }: FtrProviderContext) {
-  describe('machine learning', function() {
+  // eslint-disable-next-line ban/ban
+  describe.only('machine learning', function() {
     this.tags('ciGroup3');
 
     loadTestFile(require.resolve('./feature_controls'));
