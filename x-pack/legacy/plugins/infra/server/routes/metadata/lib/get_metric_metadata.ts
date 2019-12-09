@@ -5,12 +5,12 @@
  */
 
 import { get } from 'lodash';
+import { RequestHandlerContext } from 'src/core/server';
 import {
-  InfraFrameworkRequest,
   InfraMetadataAggregationBucket,
-  InfraBackendFrameworkAdapter,
   InfraMetadataAggregationResponse,
 } from '../../../lib/adapters/framework';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
@@ -22,8 +22,8 @@ export interface InfraMetricsAdapterResponse {
 }
 
 export const getMetricMetadata = async (
-  framework: InfraBackendFrameworkAdapter,
-  req: InfraFrameworkRequest,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: InventoryItemType
@@ -68,7 +68,7 @@ export const getMetricMetadata = async (
       metrics?: InfraMetadataAggregationResponse;
       nodeName?: InfraMetadataAggregationResponse;
     }
-  >(req, 'search', metricQuery);
+  >(requestContext, 'search', metricQuery);
 
   const buckets =
     response.aggregations && response.aggregations.metrics

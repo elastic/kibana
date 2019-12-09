@@ -5,12 +5,10 @@
  */
 
 import { idx } from '@kbn/elastic-idx';
+import { RequestHandlerContext } from 'src/core/server';
 import { InfraSnapshotNode } from '../../graphql/types';
-import {
-  InfraBackendFrameworkAdapter,
-  InfraFrameworkRequest,
-  InfraDatabaseSearchResponse,
-} from '../adapters/framework';
+import { InfraDatabaseSearchResponse } from '../adapters/framework';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { InfraSources } from '../sources';
 
 import { JsonObject } from '../../../common/typed_json';
@@ -35,12 +33,10 @@ import { InfraSnapshotRequestOptions } from './types';
 import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 
 export class InfraSnapshot {
-  constructor(
-    private readonly libs: { sources: InfraSources; framework: InfraBackendFrameworkAdapter }
-  ) {}
+  constructor(private readonly libs: { sources: InfraSources; framework: KibanaFramework }) {}
 
   public async getNodes(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     options: InfraSnapshotRequestOptions
   ): Promise<InfraSnapshotNode[]> {
     // Both requestGroupedNodes and requestNodeMetrics may send several requests to elasticsearch
@@ -49,17 +45,17 @@ export class InfraSnapshot {
     // when they have both been completed.
     const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(
       this.libs.framework,
-      request,
+      requestContext,
       options
     );
     const optionsWithTimerange = { ...options, timerange: timeRangeWithIntervalApplied };
     const groupedNodesPromise = requestGroupedNodes(
-      request,
+      requestContext,
       optionsWithTimerange,
       this.libs.framework
     );
     const nodeMetricsPromise = requestNodeMetrics(
-      request,
+      requestContext,
       optionsWithTimerange,
       this.libs.framework
     );
@@ -79,9 +75,9 @@ const handleAfterKey = createAfterKeyHandler('body.aggregations.nodes.composite.
 );
 
 const requestGroupedNodes = async (
-  request: InfraFrameworkRequest,
+  requestContext: RequestHandlerContext,
   options: InfraSnapshotRequestOptions,
-  framework: InfraBackendFrameworkAdapter
+  framework: KibanaFramework
 ): Promise<InfraSnapshotNodeGroupByBucket[]> => {
   const inventoryModel = findInventoryModel(options.nodeType);
   const query = {
@@ -131,13 +127,13 @@ const requestGroupedNodes = async (
   return await getAllCompositeData<
     InfraSnapshotAggregationResponse,
     InfraSnapshotNodeGroupByBucket
-  >(framework, request, query, bucketSelector, handleAfterKey);
+  >(framework, requestContext, query, bucketSelector, handleAfterKey);
 };
 
 const requestNodeMetrics = async (
-  request: InfraFrameworkRequest,
+  requestContext: RequestHandlerContext,
   options: InfraSnapshotRequestOptions,
-  framework: InfraBackendFrameworkAdapter
+  framework: KibanaFramework
 ): Promise<InfraSnapshotNodeMetricsBucket[]> => {
   const index =
     options.metric.type === 'logRate'
@@ -192,7 +188,7 @@ const requestNodeMetrics = async (
   return await getAllCompositeData<
     InfraSnapshotAggregationResponse,
     InfraSnapshotNodeMetricsBucket
-  >(framework, request, query, bucketSelector, handleAfterKey);
+  >(framework, requestContext, query, bucketSelector, handleAfterKey);
 };
 
 // buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]

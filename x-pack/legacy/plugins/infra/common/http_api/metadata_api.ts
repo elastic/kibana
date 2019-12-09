@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
 import { ItemTypeRT } from '../../common/inventory_models/types';
 
 export const InfraMetadataRequestRT = rt.type({
@@ -62,6 +61,7 @@ export const InfraMetadataInfoRT = rt.partial({
 });
 
 const InfraMetadataRequiredRT = rt.type({
+  id: rt.string,
   name: rt.string,
   features: rt.array(InfraMetadataFeatureRT),
 });
@@ -75,8 +75,6 @@ export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMe
 export type InfraMetadata = rt.TypeOf<typeof InfraMetadataRT>;
 
 export type InfraMetadataRequest = rt.TypeOf<typeof InfraMetadataRequestRT>;
-
-export type InfraMetadataWrappedRequest = InfraWrappableRequest<InfraMetadataRequest>;
 
 export type InfraMetadataFeature = rt.TypeOf<typeof InfraMetadataFeatureRT>;
 
