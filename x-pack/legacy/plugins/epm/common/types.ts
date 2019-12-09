@@ -62,9 +62,9 @@ export interface ServiceRequirements {
 // Registry's response types
 // from /search
 // https://github.com/elastic/package-registry/blob/master/docs/api/search.json
-export type RegistryList = RegistryListItem[];
+export type RegistrySearchResults = RegistrySearchResult[];
 // from getPackageOutput at https://github.com/elastic/package-registry/blob/master/search.go
-export type RegistryListItem = Pick<
+export type RegistrySearchResult = Pick<
   RegistryPackage,
   'name' | 'title' | 'version' | 'description' | 'type' | 'icons' | 'internal' | 'download' | 'path'
 >;
@@ -152,7 +152,7 @@ export interface RegistryPackage {
 // Managers public HTTP response types
 export type PackageList = PackageListItem[];
 
-export type PackageListItem = Installable<RegistryListItem & PackageAdditions>;
+export type PackageListItem = Installable<RegistrySearchResult & PackageAdditions>;
 export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
 export type PackageInfo = Installable<RegistryPackage & PackageAdditions>;
 
