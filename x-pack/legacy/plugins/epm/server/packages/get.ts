@@ -81,6 +81,14 @@ export async function getInstallationObject(options: {
     .catch(e => undefined);
 }
 
+export async function getInstallation(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+}) {
+  const savedObject = await getInstallationObject(options);
+  return savedObject?.attributes;
+}
+
 function sortByName(a: { name: string }, b: { name: string }) {
   if (a.name > b.name) {
     return 1;
