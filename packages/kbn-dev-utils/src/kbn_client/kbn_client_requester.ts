@@ -88,8 +88,7 @@ export class KbnClientRequester {
     const url = Url.resolve(this.pickUrl(), options.path);
     const description = options.description || `${options.method} ${url}`;
     const attempt = options.attempt === undefined ? 1 : options.attempt;
-    const maxAttempts =
-      options.maxAttempts === undefined ? DEFAULT_MAX_ATTEMPTS : options.maxAttempts;
+    const maxAttempts = options.maxAttempts ?? DEFAULT_MAX_ATTEMPTS;
 
     try {
       const response = await Axios.request<T>({
