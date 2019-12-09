@@ -118,7 +118,7 @@ describe('reducer: endpoints list', () => {
     const { pageIndex, pageSize, sortField, sortDirection } = store.getState();
     expect(pageIndex).toBe(100);
     expect(pageSize).toBe(50);
-    expect(sortDirection).toBe('ASC');
+    expect(sortDirection).toBe('asc');
     expect(sortField).toBe('Name');
   });
 });
