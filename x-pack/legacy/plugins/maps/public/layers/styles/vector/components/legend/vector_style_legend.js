@@ -4,76 +4,59 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import _ from 'lodash';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { rangeShape } from '../style_option_shapes';
 import { StylePropertyLegendRow } from './style_property_legend_row';
-import { LINE_STYLES, POLYGON_STYLES } from '../../vector_style_defaults';
 
 export class VectorStyleLegend extends Component {
 
   state = {
-    isLinesOnly: false,
-    isPolygonsOnly: false,
+    rows: [],
   }
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadFeatureTypes();
+    this._prevRowDescriptors = undefined;
+    this._loadRows();
   }
 
   componentDidUpdate() {
-    this._loadFeatureTypes();
+    this._loadRows();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async _loadFeatureTypes() {
-    const isLinesOnly = await this.props.loadIsLinesOnly();
-    const isPolygonsOnly = await this.props.loadIsPolygonsOnly();
-    if (this._isMounted && (isLinesOnly !== this.state.isLinesOnly || isPolygonsOnly !== this.state.isPolygonsOnly)) {
-      this.setState({ isLinesOnly, isPolygonsOnly });
+  _loadRows = _.debounce(async () => {
+    const rows = await this.props.loadRows();
+    const rowDescriptors = rows.map(row => {
+      return {
+        label: row.label,
+        range: row.range,
+        styleOptions: row.style.getOptions(),
+      };
+    });
+    if (this._isMounted && !_.isEqual(rowDescriptors, this._prevRowDescriptors)) {
+      this._prevRowDescriptors = rowDescriptors;
+      this.setState({ rows });
     }
-  }
+  }, 100);
 
   render() {
-    const legendRows = this.props.styleProperties
-      .filter(styleProperty => {
-        const styleName = styleProperty.style.getStyleName();
-        if (this.state.isLinesOnly) {
-          return LINE_STYLES.includes(styleName);
-        }
-
-        if (this.state.isPolygonsOnly) {
-          return POLYGON_STYLES.includes(styleName);
-        }
-
-        return true;
-      })
-      .map(styleProperty => {
-        return (
-          <StylePropertyLegendRow
-            style={styleProperty.style}
-            key={styleProperty.style.getStyleName()}
-            range={styleProperty.range}
-          />
-        );
-      });
-
-    return <Fragment>{legendRows}</Fragment>;
+    return this.state.rows.map(rowProps => {
+      return (
+        <StylePropertyLegendRow
+          key={rowProps.style.getStyleName()}
+          {...rowProps}
+        />
+      );
+    });
   }
 }
 
-const stylePropertyShape = PropTypes.shape({
-  range: rangeShape,
-  style: PropTypes.object
-});
-
 VectorStyleLegend.propTypes = {
-  loadIsLinesOnly: PropTypes.func.isRequired,
-  loadIsPolygonsOnly: PropTypes.func.isRequired,
-  styleProperties: PropTypes.arrayOf(stylePropertyShape).isRequired,
+  loadRows: PropTypes.func.isRequired,
 };

@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
-import { getDefaultProperties, VECTOR_STYLES } from './vector_style_defaults';
+import { getDefaultProperties, LINE_STYLES, POLYGON_STYLES, VECTOR_STYLES } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
 import {
   GEO_JSON_TYPE,
@@ -363,23 +363,47 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  renderLegendDetails() {
-    const styles = this._getAllStyleProperties();
-    const styleProperties = styles.map((style) => {
-      return {
-        // eslint-disable-next-line max-len
-        range: (style.isDynamic() && style.isComplete() && style.getField().getName()) ? this._getFieldRange(style.getField().getName()) : null,
-        style: style
-      };
-    });
+  async _getLegendDetailStyleProperties() {
+    const isLinesOnly = await this._getIsLinesOnly();
+    const isPolygonsOnly = await this._getIsPolygonsOnly();
 
-    return (
-      <VectorStyleLegend
-        loadIsLinesOnly={this._getIsLinesOnly}
-        loadIsPolygonsOnly={this._getIsPolygonsOnly}
-        styleProperties={styleProperties}
-      />
-    );
+    return this._getAllStyleProperties().filter(styleProperty => {
+      if (!styleProperty.isDynamic() || !styleProperty.isComplete() || !styleProperty.getField().getName()) {
+        return false;
+      }
+
+      if (isLinesOnly) {
+        return LINE_STYLES.includes(styleProperty.getStyleName());
+      }
+
+      if (isPolygonsOnly) {
+        return POLYGON_STYLES.includes(styleProperty.getStyleName());
+      }
+
+      return true;
+    });
+  }
+
+  async hasLegendDetails() {
+    const styles = await this._getLegendDetailStyleProperties();
+    return styles.length > 0;
+  }
+
+  renderLegendDetails() {
+    const loadRows = async () => {
+      const styles = await this._getLegendDetailStyleProperties();
+      const promises = styles.map(async (style) => {
+        return {
+          label: await style.getField().getLabel(),
+          fieldFormatter: await this._source.getFieldFormatter(style.getField().getName()),
+          range: this._getFieldRange(style.getField().getName()),
+          style,
+        };
+      });
+      return await Promise.all(promises);
+    };
+
+    return <VectorStyleLegend loadRows={loadRows} />;
   }
 
   _getStyleFields() {
