@@ -15,22 +15,22 @@ management.getSection('logstash').register('pipelines', {
   url: '#/management/logstash/pipelines/'
 });
 
-management.getSection('logstash/pipelines').register('pipeline', {	
-  visible: false	
-});	
+management.getSection('logstash/pipelines').register('pipeline', {
+  visible: false
+});
 
-management.getSection('logstash/pipelines/pipeline').register('edit', {	
-  display: i18n.translate('xpack.logstash.managementSection.editPipelineTitle', {	
-    defaultMessage: 'Edit pipeline',	
-  }),	
-  order: 1,	
-  visible: false	
-});	
+management.getSection('logstash/pipelines/pipeline').register('edit', {
+  display: i18n.translate('xpack.logstash.managementSection.editPipelineTitle', {
+    defaultMessage: 'Edit pipeline',
+  }),
+  order: 1,
+  visible: false
+});
 
-management.getSection('logstash/pipelines/pipeline').register('new', {	
-  display: i18n.translate('xpack.logstash.managementSection.createPipelineTitle', {	
-    defaultMessage: 'Create pipeline',	
-  }),	
-  order: 1,	
-  visible: false	
+management.getSection('logstash/pipelines/pipeline').register('new', {
+  display: i18n.translate('xpack.logstash.managementSection.createPipelineTitle', {
+    defaultMessage: 'Create pipeline',
+  }),
+  order: 1,
+  visible: false
 });
