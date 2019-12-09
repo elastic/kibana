@@ -23,7 +23,6 @@ export const pluginDefinition = {
       __LEGACY: {
         route: server.route.bind(server),
         plugins: {
-          elasticsearch: server.plugins.elasticsearch,
           watcher: server.plugins[PLUGIN.ID],
           xpack_main: server.plugins.xpack_main,
         },

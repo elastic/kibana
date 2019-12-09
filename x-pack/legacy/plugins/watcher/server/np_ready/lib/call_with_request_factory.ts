@@ -7,7 +7,6 @@
 import { ElasticsearchServiceSetup } from 'src/core/server';
 import { once } from 'lodash';
 import { elasticsearchJsPlugin } from './elasticsearch_js_plugin';
-import { ServerShim } from '../types';
 
 const callWithRequest = once((elasticsearchService: ElasticsearchServiceSetup) => {
   const config = { plugins: [elasticsearchJsPlugin] };
@@ -19,8 +18,11 @@ export const callWithRequestFactory = (
   request: any
 ) => {
   return (...args: any[]) => {
-    return callWithRequest(elasticsearchService)
-      .asScoped(request)
-      .callAsCurrentUser(...args);
+    return (
+      callWithRequest(elasticsearchService)
+        .asScoped(request)
+        // @ts-ignore
+        .callAsCurrentUser(...args)
+    );
   };
 };
