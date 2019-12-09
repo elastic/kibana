@@ -16,22 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
 
-export class IndexPatternListConfig {
-  static key = 'default';
-
-  getIndexPatternTags = (indexPattern, isDefault) => {
-    return isDefault ? [{
-      key: 'default',
-      name: 'Default',
-    }] : [];
+export class SavedObjectsManagementService {
+  public setup() {
+    return {
+      registry: SavedObjectsManagementActionRegistry,
+    };
   }
 
-  getFieldInfo = () => {
-    return [];
-  }
-
-  areScriptedFieldsEnabled = () => {
-    return true;
-  }
+  public stop() {}
 }
+
+/** @internal */
+export type SavedObjectsManagementServiceSetup = ReturnType<SavedObjectsManagementService['setup']>;

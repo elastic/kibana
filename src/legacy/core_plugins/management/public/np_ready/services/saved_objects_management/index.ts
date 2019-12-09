@@ -17,13 +17,6 @@
  * under the License.
  */
 
-export { SavedObjectsManagementActionRegistry } from './saved_objects_management_action_registry';
-export {
-  SavedObjectsManagementAction,
-  SavedObjectsManagementRecord,
-  SavedObjectsManagementRecordReference,
-} from './saved_objects_management_action';
-export {
-  processImportResponse,
-  ProcessedImportResponse,
-} from '../../../../core_plugins/kibana/public/management/sections/objects/lib/process_import_response';
+export * from './saved_objects_management_action_registry';
+export * from './saved_objects_management_action';
+export * from './saved_objects_management_service';

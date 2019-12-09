@@ -19,17 +19,39 @@
 
 import { i18n } from '@kbn/i18n';
 
-const indexPatternTypeName = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultTypeName',
-  { defaultMessage: 'index pattern' });
+const indexPatternTypeName = i18n.translate(
+  'management.editIndexPattern.createIndex.defaultTypeName',
+  { defaultMessage: 'index pattern' }
+);
 
-const indexPatternButtonText = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultButtonText',
-  { defaultMessage: 'Standard index pattern' });
+const indexPatternButtonText = i18n.translate(
+  'management.editIndexPattern.createIndex.defaultButtonText',
+  { defaultMessage: 'Standard index pattern' }
+);
 
-const indexPatternButtonDescription = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultButtonDescription',
-  { defaultMessage: 'Perform full aggregations against any data' });
+const indexPatternButtonDescription = i18n.translate(
+  'management.editIndexPattern.createIndex.defaultButtonDescription',
+  { defaultMessage: 'Perform full aggregations against any data' }
+);
+
+export type UrlHandler = (url: string) => void;
+
+export interface IndexPatternCreationOption {
+  text: string;
+  description: string;
+  testSubj: string;
+  onClick: () => void;
+  isBeta?: boolean;
+}
 
 export class IndexPatternCreationConfig {
-  static key = 'default';
+  public readonly key = 'default';
+
+  protected type?: string;
+  protected name: string;
+  protected showSystemIndices: boolean;
+  protected httpClient: object | null;
+  protected isBeta: boolean;
 
   constructor({
     type = undefined,
@@ -37,6 +59,12 @@ export class IndexPatternCreationConfig {
     showSystemIndices = true,
     httpClient = null,
     isBeta = false,
+  }: {
+    type?: string;
+    name?: string;
+    showSystemIndices?: boolean;
+    httpClient?: object | null;
+    isBeta?: boolean;
   }) {
     this.type = type;
     this.name = name;
@@ -45,7 +73,9 @@ export class IndexPatternCreationConfig {
     this.isBeta = isBeta;
   }
 
-  async getIndexPatternCreationOption(urlHandler) {
+  public async getIndexPatternCreationOption(
+    urlHandler: UrlHandler
+  ): Promise<IndexPatternCreationOption> {
     return {
       text: indexPatternButtonText,
       description: indexPatternButtonDescription,
@@ -56,39 +86,39 @@ export class IndexPatternCreationConfig {
     };
   }
 
-  getIndexPatternType = () => {
+  public getIndexPatternType() {
     return this.type;
   }
 
-  getIndexPatternName = () => {
+  public getIndexPatternName() {
     return this.name;
   }
 
-  getIsBeta = () => {
+  public getIsBeta() {
     return this.isBeta;
   }
 
-  getShowSystemIndices = () => {
+  public getShowSystemIndices() {
     return this.showSystemIndices;
   }
 
-  getIndexTags() {
+  public getIndexTags() {
     return [];
   }
 
-  checkIndicesForErrors = () => {
+  public checkIndicesForErrors() {
     return undefined;
   }
 
-  getIndexPatternMappings = () => {
+  public getIndexPatternMappings() {
     return {};
   }
 
-  renderPrompt = () => {
+  public renderPrompt() {
     return null;
   }
 
-  getFetchForWildcardOptions = () => {
+  public getFetchForWildcardOptions() {
     return {};
   }
 }

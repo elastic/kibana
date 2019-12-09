@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export const indexPatternTypes = [];
-export const addIndexPatternType = (type) => indexPatternTypes.push(type);
+export * from './index_pattern_management';
+export * from './saved_objects_management';

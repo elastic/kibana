@@ -17,10 +17,24 @@
  * under the License.
  */
 
-import { uiRegistry } from 'ui/registry/_registry';
+/**
+ * Static np-ready code, re-exported here so consumers can import from
+ * `src/legacy/core_plugins/management/public`
+ *
+ * @public
+ */
 
-export const IndexPatternListConfigRegistry = uiRegistry({
-  name: 'indexPatternList',
-  index: ['name'],
-  order: ['order'],
-});
+export {
+  ManagementSetup,
+  ManagementStart,
+  plugin,
+  IndexPatternCreationConfig,
+  IndexPatternListConfig,
+  SavedObjectsManagementAction,
+  SavedObjectsManagementRecord,
+} from './np_ready';
+
+export {
+  processImportResponse,
+  ProcessedImportResponse,
+} from '../../kibana/public/management/sections/objects/lib/process_import_response';
