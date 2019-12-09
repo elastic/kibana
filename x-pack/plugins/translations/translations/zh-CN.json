@@ -6398,9 +6398,6 @@
     "xpack.logstash.upgradeFailureActions.goBackButtonLabel": "返回",
     "xpack.logstash.upstreamPipelineArgumentMustContainAnIdPropertyErrorMessage": "upstreamPipeline 参数必须包含 id 属性",
     "xpack.logstash.workersTooltip": "并行执行管道的筛选和输出阶段的工作线程数目。如果您发现事件出现积压或 CPU 未饱和，请考虑增大此数值，以更好地利用机器处理能力。\n\n默认值：主机的 CPU 核心数",
-    "xpack.main.welcomeBanner.licenseIsExpiredDescription": "联系您的管理员或直接{updateYourLicenseLinkText}。",
-    "xpack.main.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText": "更新您的许可",
-    "xpack.main.welcomeBanner.licenseIsExpiredTitle": "您的{licenseType}许可已过期",
     "xpack.maps.addLayerPanel.changeDataSourceButtonLabel": "更改数据源",
     "xpack.maps.addLayerPanel.chooseDataSourceTitle": "选择数据源",
     "xpack.maps.appDescription": "地图应用程序",
@@ -12839,6 +12836,9 @@
     "xpack.lens.xyVisualization.xyLabel": "XY",
     "xpack.licensing.check.errorExpiredMessage": "您不能使用 {pluginName}，因为您的{licenseType}许可证已过期。",
     "xpack.licensing.check.errorUnavailableMessage": "您不能使用 {pluginName}，因为许可证信息当前不可用。",
-    "xpack.licensing.check.errorUnsupportedMessage": "您的{licenseType}许可证不支持 {pluginName}。请升级您的许可证。"
+    "xpack.licensing.check.errorUnsupportedMessage": "您的{licenseType}许可证不支持 {pluginName}。请升级您的许可证。",
+    "xpack.licensing.welcomeBanner.licenseIsExpiredDescription": "联系您的管理员或直接{updateYourLicenseLinkText}。",
+    "xpack.licensing.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText": "更新您的许可",
+    "xpack.licensing.welcomeBanner.licenseIsExpiredTitle": "您的{licenseType}许可已过期"
   }
 }
