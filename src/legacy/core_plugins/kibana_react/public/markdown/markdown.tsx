@@ -22,6 +22,7 @@ import React, { PureComponent } from 'react';
 import MarkdownIt from 'markdown-it';
 import { memoize } from 'lodash';
 import { getSecureRelForTarget } from '@elastic/eui';
+import { sanitizerPlugin } from './sanitizer';
 
 /**
  * Return a memoized markdown rendering function that use the specified
@@ -29,11 +30,18 @@ import { getSecureRelForTarget } from '@elastic/eui';
  * @param {Array of Strings} whiteListedRules - white list of markdown rules
  * list of rules can be found at https://github.com/markdown-it/markdown-it/issues/361
  * @param {Boolean} openLinksInNewTab
+ * @param {boolean} [removeUnknown=false] - Whether to remove unknown HTML tags. If set to `false`,
+ * this will simply HTML-encode the tag; if set to `true`, this will strip the tag.
+ * *Note: this is ignored if `whitelistedRules` is defined.*
  * @return {Function} Returns an Object to use with dangerouslySetInnerHTML
  * with the rendered markdown HTML
  */
 export const markdownFactory = memoize(
-  (whiteListedRules: string[] = [], openLinksInNewTab: boolean = false) => {
+  (
+    whiteListedRules: string[] = [],
+    openLinksInNewTab: boolean = false,
+    removeUnknown?: boolean
+  ) => {
     let markdownIt: MarkdownIt;
 
     // It is imperative that the html config property be set to false, to mitigate XSS: the output of markdown-it is
@@ -43,7 +51,8 @@ export const markdownFactory = memoize(
       markdownIt = new MarkdownIt('zero', { html: false, linkify: true });
       markdownIt.enable(whiteListedRules);
     } else {
-      markdownIt = new MarkdownIt({ html: false, linkify: true });
+      markdownIt = new MarkdownIt({ html: true, linkify: true });
+      markdownIt.use(sanitizerPlugin, removeUnknown);
     }
 
     if (openLinksInNewTab) {
@@ -68,6 +77,7 @@ export const markdownFactory = memoize(
         return originalLinkRender(tokens, idx, options, env, self);
       };
     }
+
     /**
      * This method is used to render markdown from the passed parameter
      * into HTML. It will just return an empty string when the markdown is empty.
@@ -78,8 +88,12 @@ export const markdownFactory = memoize(
       return markdown ? markdownIt.render(markdown) : '';
     };
   },
-  (whiteListedRules: string[] = [], openLinksInNewTab: boolean = false) => {
-    return `${whiteListedRules.join('_')}${openLinksInNewTab}`;
+  (
+    whiteListedRules: string[] = [],
+    openLinksInNewTab: boolean = false,
+    removeUnknown?: boolean
+  ) => {
+    return `${whiteListedRules.join('_')}_${openLinksInNewTab}_${removeUnknown}`;
   }
 );
 
@@ -88,14 +102,22 @@ interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   markdown?: string;
   openLinksInNewTab?: boolean;
   whiteListedRules?: string[];
+  removeUnknown?: boolean;
 }
 
 export class Markdown extends PureComponent<MarkdownProps> {
   render() {
-    const { className, markdown = '', openLinksInNewTab, whiteListedRules, ...rest } = this.props;
+    const {
+      className,
+      markdown = '',
+      openLinksInNewTab,
+      whiteListedRules,
+      removeUnknown,
+      ...rest
+    } = this.props;
 
     const classes = classNames('kbnMarkdown__body', className);
-    const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
+    const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab, removeUnknown);
     const renderedMarkdown = markdownRenderer(markdown);
     return (
       <div

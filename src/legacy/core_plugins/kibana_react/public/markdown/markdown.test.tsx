@@ -27,11 +27,60 @@ test('render', () => {
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('should never render html tags', () => {
-  const component = shallow(
-    <Markdown markdown="<div>I may be dangerous if rendered as html</div>" />
-  );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+describe('sanitizer', () => {
+  test('should escape non-whitelisted html tags', () => {
+    const xss1 = shallow(<Markdown markdown="<Script>alert('xss')</SCRIPT>" />);
+    expect(xss1.html()).toMatchInlineSnapshot(
+      `"<div class=\\"kbnMarkdown__body\\">&lt;Script&gt;alert('xss')&lt;/SCRIPT&gt;</div>"`
+    );
+    const xss2 = shallow(<Markdown markdown="%3cscript%3ealert('xss')%3c/script%3e" />);
+    expect(xss2.html()).toMatchInlineSnapshot(`
+      "<div class=\\"kbnMarkdown__body\\"><p>%3cscript%3ealert('xss')%3c/script%3e</p>
+      </div>"
+    `);
+    const xss3 = shallow(<Markdown markdown="\x3cscript\x3eealert('xss3')\x3c/script\x3e" />);
+    expect(xss3.html()).toMatchInlineSnapshot(`
+      "<div class=\\"kbnMarkdown__body\\"><p>\\\\x3cscript\\\\x3eealert('xss3')\\\\x3c/script\\\\x3e</p>
+      </div>"
+    `);
+    const xss4 = shallow(
+      <Markdown markdown="\u003cscript\u003eealert('xss3')\u003c/script\u003e" />
+    );
+    expect(xss4.html()).toMatchInlineSnapshot(`
+      "<div class=\\"kbnMarkdown__body\\"><p>\\\\u003cscript\\\\u003eealert('xss3')\\\\u003c/script\\\\u003e</p>
+      </div>"
+    `);
+  });
+
+  test('should remove non-whitelisted html tags', () => {
+    const component = shallow(<Markdown markdown="<div>foo</div>" removeUnknown={true} />);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<div class=\\"kbnMarkdown__body\\">foo</div>"`
+    );
+  });
+
+  test('should not escape whitelisted html tags', () => {
+    const component = shallow(<Markdown markdown="<code>foo</code>bar" />);
+    expect(component.html()).toMatchInlineSnapshot(`
+      "<div class=\\"kbnMarkdown__body\\"><p><code>foo</code>bar</p>
+      </div>"
+    `);
+  });
+
+  test('should escape whitelisted html tags that use non-whitelisted attributes', () => {
+    const component = shallow(<Markdown markdown="<ol bar='baz'>foo</ol>" />);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<div class=\\"kbnMarkdown__body\\">&lt;ol bar='baz'&gt;foo&lt;/ol&gt;</div>"`
+    );
+  });
+
+  test('should not escape whitelisted html tags that use whitelisted attributes', () => {
+    const md = '<ol start="2">foo</ol>';
+    const component = shallow(<Markdown markdown={md} />);
+    expect(component.html()).toMatchInlineSnapshot(
+      `"<div class=\\"kbnMarkdown__body\\"><ol start=\\"2\\">foo</ol></div>"`
+    );
+  });
 });
 
 test('should render links with parentheses correctly', () => {

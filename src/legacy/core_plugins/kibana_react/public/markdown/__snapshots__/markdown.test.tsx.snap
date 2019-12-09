@@ -46,15 +46,3 @@ exports[`render 1`] = `
   }
 />
 `;
-
-exports[`should never render html tags 1`] = `
-<div
-  className="kbnMarkdown__body"
-  dangerouslySetInnerHTML={
-    Object {
-      "__html": "<p>&lt;div&gt;I may be dangerous if rendered as html&lt;/div&gt;</p>
-",
-    }
-  }
-/>
-`;
