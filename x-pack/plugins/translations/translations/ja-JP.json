@@ -6396,9 +6396,6 @@
     "xpack.logstash.upgradeFailureActions.goBackButtonLabel": "戻る",
     "xpack.logstash.upstreamPipelineArgumentMustContainAnIdPropertyErrorMessage": "upstreamPipeline 引数には id プロパティを含める必要があります",
     "xpack.logstash.workersTooltip": "パイプラインのフィルターとアウトプットステージを同時に実行するワーカーの数です。イベントが詰まってしまう場合や CPU が飽和状態ではない場合は、マシンの処理能力をより有効に活用するため、この数字を上げてみてください。\n\nデフォルト値:ホストの CPU コア数です",
-    "xpack.main.welcomeBanner.licenseIsExpiredDescription": "管理者または {updateYourLicenseLinkText} に直接お問い合わせください。",
-    "xpack.main.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText": "ライセンスを更新",
-    "xpack.main.welcomeBanner.licenseIsExpiredTitle": "ご使用の {licenseType} ライセンスは期限切れです",
     "xpack.maps.addLayerPanel.changeDataSourceButtonLabel": "データソースを変更",
     "xpack.maps.addLayerPanel.chooseDataSourceTitle": "データソースの選択",
     "xpack.maps.appDescription": "マップアプリケーション",
@@ -12750,6 +12747,9 @@
     "xpack.lens.xyVisualization.xyLabel": "XY",
     "xpack.licensing.check.errorExpiredMessage": "{licenseType} ライセンスが期限切れのため {pluginName} を使用できません。",
     "xpack.licensing.check.errorUnavailableMessage": "現在ライセンス情報が利用できないため {pluginName} を使用できません。",
-    "xpack.licensing.check.errorUnsupportedMessage": "ご使用の {licenseType} ライセンスは {pluginName} をサポートしていません。ライセンスをアップグレードしてください。"
+    "xpack.licensing.check.errorUnsupportedMessage": "ご使用の {licenseType} ライセンスは {pluginName} をサポートしていません。ライセンスをアップグレードしてください。",
+    "xpack.licensing.welcomeBanner.licenseIsExpiredDescription": "管理者または {updateYourLicenseLinkText} に直接お問い合わせください。",
+    "xpack.licensing.welcomeBanner.licenseIsExpiredDescription.updateYourLicenseLinkText": "ライセンスを更新",
+    "xpack.licensing.welcomeBanner.licenseIsExpiredTitle": "ご使用の {licenseType} ライセンスは期限切れです"
   }
 }
