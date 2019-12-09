@@ -1,6 +1,7 @@
-// Import the EUI global scope so we can use EUI constants
-@import 'src/legacy/ui/public/styles/_styling_constants';
+// EUI global scope so we can use EUI constants
+@import './eui_utils/public/sass/styling_constants';
 
+// SASS of individual plugins.
 @import 'src/plugins/dashboard_embeddable_container/public/index';
 @import 'src/plugins/embeddable/public/index';
 @import 'src/plugins/expressions/public/index';
