@@ -17,7 +17,5 @@
  * under the License.
  */
 
-import { IndexPatternCreationConfig } from './index_pattern_creation_config';
-import { addIndexPatternType } from './index_pattern_types';
-
-addIndexPatternType(IndexPatternCreationConfig);
+export { IndexPatternCreationConfig } from './config';
+export { IndexPatternCreationManager } from './manager';

@@ -17,36 +17,35 @@
  * under the License.
  */
 
-import { ManagementSection } from './section';
 import { i18n } from '@kbn/i18n';
+import { IIndexPattern, IFieldType } from 'src/plugins/data/public';
 
-export const management = new ManagementSection('management', {
-  display: i18n.translate('common.ui.management.displayName', {
-    defaultMessage: 'Management',
-  }),
-});
+export interface IndexPatternTag {
+  key: string;
+  name: string;
+}
 
-management.register('data', {
-  display: i18n.translate('common.ui.management.connectDataDisplayName', {
-    defaultMessage: 'Connect Data',
-  }),
-  order: 0,
-});
+export class IndexPatternListConfig {
+  public readonly key = 'default';
 
-management.register('elasticsearch', {
-  display: 'Elasticsearch',
-  order: 20,
-  icon: 'logoElasticsearch',
-});
+  public getIndexPatternTags(indexPattern: IIndexPattern, isDefault: boolean): IndexPatternTag[] {
+    return isDefault
+      ? [
+          {
+            key: 'default',
+            name: i18n.translate('management.editIndexPattern.list.defaultIndexPatternListName', {
+              defaultMessage: 'Default',
+            }),
+          },
+        ]
+      : [];
+  }
 
-management.register('kibana', {
-  display: 'Kibana',
-  order: 30,
-  icon: 'logoKibana',
-});
+  public getFieldInfo(indexPattern: IIndexPattern, field: IFieldType): string[] {
+    return [];
+  }
 
-management.register('logstash', {
-  display: 'Logstash',
-  order: 30,
-  icon: 'logoLogstash',
-});
+  public areScriptedFieldsEnabled(indexPattern: IIndexPattern): boolean {
+    return true;
+  }
+}
