@@ -50,7 +50,7 @@ For all APIs, you must use a request header. The {kib} APIs support the `kbn-xsr
 * XSRF protections are disabled using the `server.xsrf.disableProtection` setting
 
 `Content-Type: application/json`::
-  Applicable only when you send a payload in the API request. {kib} APIs use JSON for requests and responses. Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header. 
+  Applicable only when you send a payload in the API request. {kib} API requests and responses use JSON. Typically, if you include the `kbn-xsrf` header, you must also include the `Content-Type` header. 
 
 Request header example:
 
