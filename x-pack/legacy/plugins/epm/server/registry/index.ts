@@ -12,7 +12,7 @@ import {
   CategoryId,
   CategorySummaryList,
   KibanaAssetType,
-  RegistryList,
+  RegistrySearchResults,
   RegistryPackage,
 } from '../../common/types';
 import { epmConfigStore } from '../config';
@@ -27,7 +27,7 @@ export interface SearchParams {
   category?: CategoryId;
 }
 
-export async function fetchList(params?: SearchParams): Promise<RegistryList> {
+export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const { registryUrl } = epmConfigStore.getConfig();
   const url = new URL(`${registryUrl}/search`);
   if (params && params.category) {
