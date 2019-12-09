@@ -42,7 +42,7 @@ export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => 
           if (request.method.toLowerCase() === 'head') {
             return headers.response().code(404);
           } else {
-            return new Boom('An index for this space does not exist', { statusCode: 404 });
+            return new Boom('index for this space does not exist', { statusCode: 404 });
           }
         }
       } catch (err) {

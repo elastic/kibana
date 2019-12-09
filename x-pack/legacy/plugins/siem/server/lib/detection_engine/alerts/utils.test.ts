@@ -530,6 +530,7 @@ describe('utils', () => {
           services: mockService,
           logger: mockLogger,
           pageSize: 1,
+          filter: undefined,
         })
       ).rejects.toThrow('Attempted to search after with empty sort id');
     });
@@ -543,6 +544,7 @@ describe('utils', () => {
         services: mockService,
         logger: mockLogger,
         pageSize: 1,
+        filter: undefined,
       });
       expect(searchAfterResult).toEqual(sampleDocSearchResultsWithSortId);
     });
@@ -559,6 +561,7 @@ describe('utils', () => {
           services: mockService,
           logger: mockLogger,
           pageSize: 1,
+          filter: undefined,
         })
       ).rejects.toThrow('Fake Error');
     });
@@ -579,6 +582,7 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
       });
       expect(mockService.callCluster).toHaveBeenCalledTimes(0);
       expect(result).toEqual(true);
@@ -629,6 +633,7 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
       });
       expect(mockService.callCluster).toHaveBeenCalledTimes(5);
       expect(result).toEqual(true);
@@ -650,6 +655,7 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
       });
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
@@ -678,6 +684,7 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
       });
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
@@ -706,6 +713,7 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
       });
       expect(result).toEqual(true);
     });
@@ -736,6 +744,7 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
       });
       expect(result).toEqual(true);
     });
@@ -766,6 +775,7 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
       });
       expect(result).toEqual(true);
     });
@@ -798,6 +808,7 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
       });
       expect(result).toEqual(false);
     });
