@@ -100,11 +100,12 @@ export const ColumnHeadersComponent = ({
         isDropDisabled={false}
         type={DRAG_TYPE_FIELD}
       >
-        {dropProvided => (
+        {(dropProvided, snapshot) => (
           <>
             <EventsThGroupData
               data-test-subj="headers-group"
               ref={dropProvided.innerRef}
+              isDragging={snapshot.isDraggingOver}
               {...dropProvided.droppableProps}
             >
               {columnHeaders.map((header, draggableIndex) => (

@@ -97,20 +97,25 @@ EventsThGroupActions.displayName = 'EventsThGroupActions';
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupData ${className}`,
-}))`
+}))<{ isDragging?: boolean }>`
   display: flex;
+
+  > div:hover .siemEventsHeading__handle {
+    display: ${({ isDragging }) => (isDragging ? 'none' : 'block')};
+    opacity: 1;
+    visibility: visible;
+  }
 `;
 EventsThGroupData.displayName = 'EventsThGroupData';
 
 export const EventsTh = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__th ${className}`,
   role: 'columnheader',
-}))<{ position?: string }>`
+}))`
   align-items: center;
   display: flex;
   flex-shrink: 0;
   min-width: 0;
-  position: ${({ position }) => position};
 
   .siemEventsTable__thGroupActions &:first-child:last-child {
     flex: 1;
@@ -120,6 +125,10 @@ export const EventsTh = styled.div.attrs(({ className = '' }) => ({
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
     cursor: move; /* Fallback for IE11 */
     cursor: grab;
+  }
+
+  > div:focus {
+    outline: 0; /* disable focus on Resizable element */
   }
 
   /* don't display Draggable placeholder */
@@ -301,11 +310,6 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
   transition: all ${({ theme }) => theme.eui.euiAnimSpeedNormal} ease;
   visibility: hidden;
   width: ${({ theme }) => theme.eui.euiBorderWidthThick};
-
-  .siemEventsTable__thead:hover & {
-    opacity: 1;
-    visibility: visible;
-  }
 
   &:hover {
     background-color: ${({ theme }) => theme.eui.euiColorPrimary};

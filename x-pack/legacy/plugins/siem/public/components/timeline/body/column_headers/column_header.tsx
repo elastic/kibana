@@ -6,13 +6,14 @@
 
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
-import { Resizable } from 're-resizable';
+import { Resizable, ResizeCallback } from 're-resizable';
 import { DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { getDraggableFieldId, DRAG_TYPE_FIELD } from '../../../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../../../draggables/field_badge';
 import { OnColumnRemoved, OnColumnSorted, OnFilterChange, OnColumnResized } from '../../events';
 import { EventsTh, EventsThContent, EventsHeadingHandle } from '../../styles';
 import { Sort } from '../sort';
+import { DraggingContainer } from './common/dragging_container';
 
 import { Header } from './header';
 import { ColumnId } from '../column_id';
@@ -45,22 +46,6 @@ interface ColumneHeaderProps {
   timelineId: string;
 }
 
-const DraggedContainer = ({
-  children,
-  onDragging,
-}: {
-  children: JSX.Element;
-  onDragging: Function;
-}) => {
-  React.useEffect(() => {
-    onDragging(true);
-
-    return () => onDragging(false);
-  });
-
-  return children;
-};
-
 export const ColumnHeader = React.memo<ColumneHeaderProps>(
   ({
     draggableIndex,
@@ -73,6 +58,9 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
     sort,
   }) => {
     const [isDragging, setIsDragging] = React.useState(false);
+    const handleResizeStop: ResizeCallback = (e, direction, ref, delta) => {
+      onColumnResized({ columnId: header.id, delta: delta.width });
+    };
 
     return (
       <Resizable
@@ -85,11 +73,9 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
           position: isDragging ? 'absolute' : 'relative',
         }}
         handleComponent={{
-          right: !isDragging ? <EventsHeadingHandle /> : undefined,
+          right: <EventsHeadingHandle />,
         }}
-        onResizeStop={(e, direction, ref, delta) => {
-          onColumnResized({ columnId: header.id, delta: delta.width });
-        }}
+        onResizeStop={handleResizeStop}
       >
         <Draggable
           data-test-subj="draggable"
@@ -104,40 +90,31 @@ export const ColumnHeader = React.memo<ColumneHeaderProps>(
           type={DRAG_TYPE_FIELD}
         >
           {(dragProvided, dragSnapshot) => (
-            <div
+            <EventsTh
+              data-test-subj="draggable-header"
               {...dragProvided.draggableProps}
               {...dragProvided.dragHandleProps}
               ref={dragProvided.innerRef}
             >
               {!dragSnapshot.isDragging ? (
-                <EventsTh
-                  data-test-subj="draggable-header"
-                  position="relative"
-                  // Passing the styles directly to the component because the width is being calculated and is recommended by Styled Components for performance: https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-                  style={{
-                    flexBasis: header.width + 'px',
-                    ...dragProvided.draggableProps.style,
-                  }}
-                >
-                  <EventsThContent>
-                    <Header
-                      timelineId={timelineId}
-                      header={header}
-                      onColumnRemoved={onColumnRemoved}
-                      onColumnSorted={onColumnSorted}
-                      onFilterChange={onFilterChange}
-                      sort={sort}
-                    />
-                  </EventsThContent>
-                </EventsTh>
+                <EventsThContent>
+                  <Header
+                    timelineId={timelineId}
+                    header={header}
+                    onColumnRemoved={onColumnRemoved}
+                    onColumnSorted={onColumnSorted}
+                    onFilterChange={onFilterChange}
+                    sort={sort}
+                  />
+                </EventsThContent>
               ) : (
-                <DraggedContainer onDragging={setIsDragging}>
+                <DraggingContainer onDragging={setIsDragging}>
                   <DragEffects>
                     <DraggableFieldBadge fieldId={header.id} fieldWidth={`${header.width}px`} />
                   </DragEffects>
-                </DraggedContainer>
+                </DraggingContainer>
               )}
-            </div>
+            </EventsTh>
           )}
         </Draggable>
       </Resizable>
