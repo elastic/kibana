@@ -167,6 +167,37 @@ describe('DeprecationFactory', () => {
       `);
     });
 
+    it('can move a property to a different namespace', () => {
+      const rawConfig = {
+        oldplugin: {
+          deprecated: 'toberenamed',
+          valid: 'valid',
+        },
+        newplugin: {
+          property: 'value',
+        },
+      };
+      const processed = renameFromRoot('oldplugin.deprecated', 'newplugin.renamed')(
+        rawConfig,
+        'does-not-matter',
+        logger
+      );
+      expect(processed).toEqual({
+        oldplugin: {
+          valid: 'valid',
+        },
+        newplugin: {
+          renamed: 'toberenamed',
+          property: 'value',
+        },
+      });
+      expect(deprecationMessages).toMatchInlineSnapshot(`
+        Array [
+          "\\"oldplugin.deprecated\\" is deprecated and has been replaced by \\"newplugin.renamed\\"",
+        ]
+      `);
+    });
+
     it('does not alter config and does not log if old property is not present', () => {
       const rawConfig = {
         myplugin: {
