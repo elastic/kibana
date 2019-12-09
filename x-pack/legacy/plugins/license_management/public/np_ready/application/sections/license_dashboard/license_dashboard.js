@@ -18,7 +18,8 @@ import {
   EuiSpacer
 } from '@elastic/eui';
 
-export const LicenseDashboard = () => {
+export const LicenseDashboard = ({ setBreadcrumb } = { setBreadcrumb: () => {} }) => {
+  setBreadcrumb('dashboard');
   return (
     <div>
       <LicenseStatus />

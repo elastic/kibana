@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
 import * as history from 'history';
-import { DocLinksStart, HttpSetup, ToastsSetup } from 'src/core/public';
+import { DocLinksStart, HttpSetup, ToastsSetup, ChromeStart } from 'src/core/public';
 
 // @ts-ignore
 import { App } from './app.container';
@@ -18,14 +18,17 @@ import { licenseManagementStore } from './store';
 
 import { setDocLinks } from './lib/docs_links';
 import { BASE_PATH } from '../../../common/constants';
+import { Breadcrumb } from './breadcrumbs';
 
 interface AppDependencies {
   element: HTMLElement;
+  chrome: ChromeStart;
 
+  I18nContext: any;
   legacy: {
-    I18nContext: any;
     xpackInfo: any;
     refreshXpack: () => void;
+    MANAGEMENT_BREADCRUMB: Breadcrumb;
   };
 
   toasts: ToastsSetup;
@@ -34,8 +37,7 @@ interface AppDependencies {
 }
 
 export const boot = (deps: AppDependencies) => {
-  const { element, legacy, toasts, docLinks, http } = deps;
-  const { I18nContext, ...restLegacy } = legacy;
+  const { I18nContext, element, legacy, toasts, docLinks, http, chrome } = deps;
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
   const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
   const securityDocumentationLink = `${esBase}/security-settings.html`;
@@ -46,13 +48,15 @@ export const boot = (deps: AppDependencies) => {
 
   const services = {
     legacy: {
-      refreshXpack: restLegacy.refreshXpack,
+      refreshXpack: legacy.refreshXpack,
       xPackInfo: legacy.xpackInfo,
     },
     // So we can imperatively control the hash route
     history: history.createHashHistory({ basename: BASE_PATH }),
     toasts,
     http,
+    chrome,
+    MANAGEMENT_BREADCRUMB: legacy.MANAGEMENT_BREADCRUMB,
   };
 
   const store = licenseManagementStore(initialState, services);

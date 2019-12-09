@@ -5,6 +5,7 @@
  */
 
 import { connect } from 'react-redux';
+import { setBreadcrumb } from '../../store/actions/set_breadcrumb';
 import { uploadLicense, uploadLicenseStatus } from '../../store/actions/upload_license';
 import { addUploadErrorMessage } from '../../store/actions/add_error_message';
 
@@ -33,6 +34,7 @@ const mapDispatchToProps = {
   addUploadErrorMessage,
   uploadLicense,
   uploadLicenseStatus,
+  setBreadcrumb
 };
 
 export const UploadLicense = connect(mapStateToProps, mapDispatchToProps)(PresentationComponent);

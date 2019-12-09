@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LicenseDashboard } from './license_dashboard';
+export { LicenseDashboard } from './license_dashboard.container';

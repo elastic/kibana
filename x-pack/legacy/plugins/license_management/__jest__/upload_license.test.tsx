@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { httpServiceMock, chromeServiceMock } from '../../../../../src/core/public/mocks';
 import { mountWithIntl } from '../../../../test_utils/enzyme_helpers';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -42,6 +42,7 @@ const services = {
     refreshXpack: jest.fn(),
   },
   http: httpServiceMock.createSetupContract(),
+  chrome: chromeServiceMock.createStartContract(),
   history: {
     replace: jest.fn(),
   },

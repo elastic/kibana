@@ -6,8 +6,10 @@
 
 import { HttpSetup } from 'src/core/public';
 
+const BASE_PATH = '/api/license';
+
 export function putLicense(http: HttpSetup, license: string, acknowledge: boolean) {
-  return http.put('/api/license', {
+  return http.put(BASE_PATH, {
     query: {
       acknowledge: acknowledge ? 'true' : '',
     },
@@ -20,7 +22,7 @@ export function putLicense(http: HttpSetup, license: string, acknowledge: boolea
 }
 
 export function startBasic(http: HttpSetup, acknowledge: boolean) {
-  return http.post('/api/license/start_basic', {
+  return http.post(`${BASE_PATH}/start_basic`, {
     query: {
       acknowledge: acknowledge ? 'true' : '',
     },
@@ -33,7 +35,7 @@ export function startBasic(http: HttpSetup, acknowledge: boolean) {
 }
 
 export function startTrial(http: HttpSetup) {
-  return http.post('/api/license/start_trial', {
+  return http.post(`${BASE_PATH}/start_trial`, {
     headers: {
       contentType: 'application/json',
     },
@@ -42,7 +44,7 @@ export function startTrial(http: HttpSetup) {
 }
 
 export function canStartTrial(http: HttpSetup) {
-  return http.get('/api/license/start_trial', {
+  return http.get(`${BASE_PATH}/start_trial`, {
     headers: {
       contentType: 'application/json',
     },
@@ -51,7 +53,7 @@ export function canStartTrial(http: HttpSetup) {
 }
 
 export function getPermissions(http: HttpSetup) {
-  return http.post('/api/license/permissions', {
+  return http.post(`${BASE_PATH}/permissions`, {
     headers: {
       contentType: 'application/json',
     },

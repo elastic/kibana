@@ -5,13 +5,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-import { BASE_PATH } from '../common/constants';
+import { BASE_PATH } from '../../../common/constants';
 
-export function getDashboardBreadcrumbs() {
+export interface Breadcrumb {
+  text: string;
+  href: string;
+}
+
+export function getDashboardBreadcrumbs(root: Breadcrumb) {
   return [
-    MANAGEMENT_BREADCRUMB,
+    root,
     {
       text: i18n.translate('xpack.licenseMgmt.dashboard.breadcrumb', {
         defaultMessage: 'License management',
@@ -21,9 +25,9 @@ export function getDashboardBreadcrumbs() {
   ];
 }
 
-export function getUploadBreadcrumbs() {
+export function getUploadBreadcrumbs(root: Breadcrumb) {
   return [
-    ...getDashboardBreadcrumbs(),
+    ...getDashboardBreadcrumbs(root),
     {
       text: i18n.translate('xpack.licenseMgmt.upload.breadcrumb', {
         defaultMessage: 'Upload',

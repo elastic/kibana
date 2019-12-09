@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export class UploadLicense extends React.PureComponent {
   componentDidMount() {
+    this.props.setBreadcrumb('upload');
     this.props.addUploadErrorMessage('');
   }
   send = acknowledge => {

@@ -8,9 +8,8 @@ import { App } from 'src/core/public';
 
 /* Legacy Imports */
 import { npSetup, npStart } from 'ui/new_platform';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import routes from 'ui/routes';
-import { I18nContext } from 'ui/i18n';
-import chrome from 'ui/chrome';
 // @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 
@@ -26,8 +25,6 @@ import {
 
 import { BASE_PATH } from '../common/constants';
 
-import { getDashboardBreadcrumbs, getUploadBreadcrumbs } from './breadcrumbs';
-
 /*
   This method handles the cleanup needed when route is scope is destroyed.  It also prevents Angular
   from destroying scope when route changes and both old route and new route are this same route.
@@ -38,8 +35,6 @@ const manageAngularLifecycle = ($scope: any, $route: any, unmount: () => void) =
     const currentRoute = $route.current;
     // if templates are the same we are on the same route
     if (lastRoute.$$route.template === currentRoute.$$route.template) {
-      // update the breadcrumbs by re-running the k7Breadcrumbs function
-      chrome.breadcrumbs.set(currentRoute.$$route.k7Breadcrumbs($route));
       // this prevents angular from destroying scope
       $route.current = lastRoute;
     }
@@ -67,14 +62,6 @@ const template = `<kbn-management-app section="elasticsearch/license_management"
 
 routes.when(`${BASE_PATH}:view?`, {
   template,
-  k7Breadcrumbs($route: any) {
-    switch ($route.current.params.view) {
-      case 'upload_license':
-        return getUploadBreadcrumbs();
-      default:
-        return getDashboardBreadcrumbs();
-    }
-  },
   controllerAs: 'licenseManagement',
   controller: class LicenseManagementController {
     constructor($injector: any, $rootScope: any, $scope: any, $route: any) {
@@ -102,7 +89,7 @@ routes.when(`${BASE_PATH}:view?`, {
             },
           },
           {
-            __LEGACY: { xpackInfo, I18nContext, refreshXpack },
+            __LEGACY: { xpackInfo, refreshXpack, MANAGEMENT_BREADCRUMB },
           }
         );
       });

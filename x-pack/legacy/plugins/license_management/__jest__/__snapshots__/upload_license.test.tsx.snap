@@ -130,6 +130,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
         ]
       }
       needsAcknowledgement={true}
+      setBreadcrumb={[Function]}
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
@@ -1180,6 +1181,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       errorMessage="The supplied license has expired."
       isInvalid={false}
       needsAcknowledgement={false}
+      setBreadcrumb={[Function]}
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
@@ -1647,6 +1649,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       errorMessage="The supplied license is not valid for this product."
       isInvalid={false}
       needsAcknowledgement={false}
+      setBreadcrumb={[Function]}
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
@@ -2114,6 +2117,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       errorMessage="Error encountered uploading license: Check your license file."
       isInvalid={false}
       needsAcknowledgement={false}
+      setBreadcrumb={[Function]}
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
@@ -2577,6 +2581,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       errorMessage="Error encountered uploading license: Can not upgrade to a production license unless TLS is configured or security is disabled"
       isInvalid={false}
       needsAcknowledgement={false}
+      setBreadcrumb={[Function]}
       uploadLicense={[Function]}
       uploadLicenseStatus={[Function]}
     >
