@@ -17,23 +17,4 @@
  * under the License.
  */
 
-import { NotificationsStart, HttpStart } from 'src/core/public';
-import { CoreStart } from 'kibana/public';
-import { FieldFormatsStart } from '.';
-import { createGetterSetter } from '../../kibana_utils/public';
-import { IndexPatternsContract } from './index_patterns';
-
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
-
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
-  'FieldFormats'
-);
-
-export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
-export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');
-
-export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
-  'IndexPatterns'
-);
+export { GLOBAL_APPLY_FILTER_ACTION, createFilterAction } from './apply_filter_action';
