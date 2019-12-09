@@ -26,9 +26,9 @@ import chainRunnerFn from '../handlers/chain_runner.js';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
 
 export interface TimelionRequestQuery {
-  payload?: {
+  payload: {
     sheet: string[];
-    extended: {
+    extended?: {
       es: {
         filter: {
           bool: {
@@ -74,13 +74,13 @@ const requestPayload = {
           }),
         }),
       }),
-    }),
+    }).optional(),
     time: Joi.object({
       from: Joi.string(),
       interval: Joi.string().required(),
       timezone: Joi.string().required(),
       to: Joi.string(),
-    }),
+    }).required(),
   }),
 };
 
