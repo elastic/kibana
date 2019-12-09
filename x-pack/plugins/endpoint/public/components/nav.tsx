@@ -16,6 +16,7 @@ type NavProps = RouteComponentProps & {
 
 export const Nav = withRouter(({ history, navigateToApp }: NavProps) => (
   <EuiSideNav
+    data-test-subj="menuEndpoint"
     items={[
       {
         name: 'Endpoint',

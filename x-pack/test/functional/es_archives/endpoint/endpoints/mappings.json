@@ -1,9 +1,8 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
-    "index": "endpoint",
+    "aliases": {},
+    "index": "endpoint-agent",
     "mappings": {
       "properties": {
         "created_at": {

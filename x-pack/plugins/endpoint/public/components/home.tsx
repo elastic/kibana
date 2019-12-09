@@ -6,6 +6,7 @@
 
 import React from 'react';
 import {
+  EuiPage,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
@@ -15,24 +16,27 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-export const Home = () => (
-  <EuiPageBody>
-    <EuiPageHeader>
-      <EuiPageHeaderSection>
-        <EuiTitle size="l">
-          <h1>Welcome to Endpoint!</h1>
-        </EuiTitle>
-      </EuiPageHeaderSection>
-    </EuiPageHeader>
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiPageContentHeaderSection>
-          <EuiTitle>
-            <h2>Home Page</h2>
+
+export const Home = () => {
+  return (
+    <EuiPageBody>
+      <EuiPageHeader>
+        <EuiPageHeaderSection>
+          <EuiTitle size="l">
+            <h1 data-test-subj="welcomeEndpointMessage">Welcome to Endpoint!</h1>
           </EuiTitle>
-        </EuiPageContentHeaderSection>
-      </EuiPageContentHeader>
-      <EuiPageContentBody>Body Content</EuiPageContentBody>
-    </EuiPageContent>
-  </EuiPageBody>
-);
+        </EuiPageHeaderSection>
+      </EuiPageHeader>
+      <EuiPageContent>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <EuiTitle>
+              <h2>Home Page</h2>
+            </EuiTitle>
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
+        <EuiPageContentBody>Body Content</EuiPageContentBody>
+      </EuiPageContent>
+    </EuiPageBody>
+  );
+};

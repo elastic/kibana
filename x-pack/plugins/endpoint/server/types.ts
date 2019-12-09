@@ -3,11 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { IClusterClient } from 'kibana/server';
+import { IClusterClient, LoggerFactory } from 'kibana/server';
 import { EndpointConfigType } from './config';
 
 export interface EndpointAppContext {
   clusterClient: IClusterClient;
+  logFactory: LoggerFactory;
   config(): Promise<EndpointConfigType>;
 }
 

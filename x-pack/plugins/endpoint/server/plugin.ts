@@ -12,6 +12,7 @@ import { registerEndpointRoutes } from './routes/endpoints';
 import { EndpointHandler, EndpointRequestContext } from './handlers/endpoint_handler';
 import { EndpointAppContext } from './types';
 import { createConfig$, EndpointConfigType } from './config';
+import { registerBootstrapRoutes } from './routes/bootstrap';
 
 declare module 'kibana/server' {
   interface RequestHandlerContext {
@@ -23,22 +24,25 @@ export class EndpointPlugin implements Plugin {
   private readonly logger: Logger;
   private clusterClient?: IClusterClient;
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.logger = this.initializerContext.logger.get();
+    this.logger = this.initializerContext.logger.get('endpoint');
   }
 
   public async setup(core: CoreSetup, deps: {}) {
     this.clusterClient = core.elasticsearch.createClient('endpoint-plugin');
-    const endpointHandler: EndpointRequestContext = new EndpointHandler({
+    const endpointContext = {
       clusterClient: this.clusterClient,
+      logFactory: this.initializerContext.logger,
       config: (): Promise<EndpointConfigType> => {
         return this.getConfig();
       },
-    } as EndpointAppContext);
+    } as EndpointAppContext;
+    const endpointHandler: EndpointRequestContext = new EndpointHandler(endpointContext);
     core.http.registerRouteHandlerContext('endpointPlugin', () => endpointHandler);
     const router = core.http.createRouter();
     managementRoutes(router);
     alertsRoutes(router);
     registerEndpointRoutes(router, endpointHandler);
+    registerBootstrapRoutes(router, endpointContext);
   }
 
   public start() {

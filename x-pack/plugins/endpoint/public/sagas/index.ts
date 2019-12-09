@@ -10,6 +10,7 @@ import { routingSaga } from './common';
 import { alertListSaga } from './alert_list';
 import { alertDetailsSaga } from './alert_details';
 import { endpointsListSaga } from './endpoints_list';
+import { homeSaga } from './home';
 import { SagaContext } from '../lib/saga';
 
 // TODO: Type this properly
@@ -21,6 +22,7 @@ export default function sagas(context: AppMountContext, history: History) {
       alertListSaga(sagaContext, context),
       alertDetailsSaga(sagaContext, context, history),
       endpointsListSaga(sagaContext, context),
+      homeSaga(sagaContext, context),
     ]);
   };
 }
