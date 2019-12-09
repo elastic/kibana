@@ -43,9 +43,9 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
 
   const addItem = useCallback(() => {
     const values = field.value as string[];
-    if (!isEmpty(values[values.length - 1])) {
+    if (!isEmpty(values) && values[values.length - 1]) {
       field.setValue([...values, '']);
-    } else {
+    } else if (isEmpty(values)) {
       field.setValue(['']);
     }
   }, [field]);
@@ -114,7 +114,8 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
             ...(index === values.length - 1
               ? { inputRef: handleLastInputRef.bind(null, index) }
               : {}),
-            ...(inputsRef.current[index] != null && inputsRef.current[index].value !== item
+            ...((inputsRef.current[index] != null && inputsRef.current[index].value !== item) ||
+            inputsRef.current[index] == null
               ? { value: item }
               : {}),
           };

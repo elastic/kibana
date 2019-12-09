@@ -73,8 +73,8 @@ export const StepRuleDescription = memo<StepRuleDescriptionProps>(
     );
     return (
       <EuiFlexGroup gutterSize="none" direction="row" justifyContent="spaceAround">
-        {chunk(Math.ceil(listItems.length / 2), listItems).map(chunckListItems => (
-          <EuiFlexItemWidth grow={false}>
+        {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
+          <EuiFlexItemWidth key={`description-step-rule-${index}`} grow={false}>
             <EuiDescriptionList listItems={chunckListItems} />
           </EuiFlexItemWidth>
         ))}
@@ -156,7 +156,9 @@ const getDescriptionItem = (
     }
     return items;
   } else if (field === 'threats') {
-    const threats: IMitreEnterpriseAttack[] = get(field, value);
+    const threats: IMitreEnterpriseAttack[] = get(field, value).filter(
+      (threat: IMitreEnterpriseAttack) => threat.tactic.name !== 'none'
+    );
     if (threats.length > 0) {
       return [
         {
@@ -212,11 +214,13 @@ const getDescriptionItem = (
           title: label,
           description: (
             <EuiFlexGroup responsive={false} gutterSize="xs">
-              {values.map((val: string) => (
-                <EuiFlexItem grow={false} key={`${field}-${val}`}>
-                  <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
-                </EuiFlexItem>
-              ))}
+              {values.map((val: string) =>
+                isEmpty(val) ? null : (
+                  <EuiFlexItem grow={false} key={`${field}-${val}`}>
+                    <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
+                  </EuiFlexItem>
+                )
+              )}
             </EuiFlexGroup>
           ),
         },

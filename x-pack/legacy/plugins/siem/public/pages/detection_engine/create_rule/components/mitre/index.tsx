@@ -16,7 +16,7 @@ import {
   EuiFormControlLayout,
 } from '@elastic/eui';
 import { isEmpty, kebabCase, camelCase } from 'lodash/fp';
-import React, { ChangeEvent, useCallback, useMemo } from 'react';
+import React, { ChangeEvent, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
@@ -96,13 +96,7 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
   );
 
   const values = field.value as IMitreEnterpriseAttack[];
-  const selectTacticOptions = useMemo(
-    () => [
-      { text: I18n.TACTIC_PLACEHOLDER, value: 'none' },
-      ...tacticsOptions.map(t => ({ text: t.text, value: t.value })),
-    ],
-    [tacticsOptions]
-  );
+
   return (
     <EuiFormRow
       label={field.label}
@@ -124,7 +118,12 @@ export const AddMitreThreat = ({ dataTestSubj, field, idAria, isDisabled }: AddI
                 <EuiFlexItem grow={false}>
                   <EuiSelect
                     id="selectDocExample"
-                    options={selectTacticOptions}
+                    options={[
+                      ...(item.tactic.name === 'none'
+                        ? [{ text: I18n.TACTIC_PLACEHOLDER, value: 'none' }]
+                        : []),
+                      ...tacticsOptions.map(t => ({ text: t.text, value: t.value })),
+                    ]}
                     aria-label=""
                     onChange={updateTactic.bind(null, index)}
                     prepend={I18n.TACTIC}
