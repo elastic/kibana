@@ -17,7 +17,23 @@
  * under the License.
  */
 
-import { IndexPatternListConfig } from './index_pattern_list_config';
-import { IndexPatternListConfigRegistry } from './index_pattern_list_config_registry';
+import { getMissingFilterField } from './missing_filter';
 
-IndexPatternListConfigRegistry.register(() => IndexPatternListConfig);
+describe('missing filter', function() {
+  describe('getMissingFilterField', function() {
+    it('should return the name of the field an missing query is targeting', () => {
+      const filter = {
+        missing: {
+          field: 'extension',
+        },
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+      };
+      const result = getMissingFilterField(filter);
+      expect(result).toBe('extension');
+    });
+  });
+});

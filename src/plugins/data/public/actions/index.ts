@@ -17,21 +17,4 @@
  * under the License.
  */
 
-export class IndexPatternListConfig {
-  static key = 'default';
-
-  getIndexPatternTags = (indexPattern, isDefault) => {
-    return isDefault ? [{
-      key: 'default',
-      name: 'Default',
-    }] : [];
-  }
-
-  getFieldInfo = () => {
-    return [];
-  }
-
-  areScriptedFieldsEnabled = () => {
-    return true;
-  }
-}
+export { GLOBAL_APPLY_FILTER_ACTION, createFilterAction } from './apply_filter_action';

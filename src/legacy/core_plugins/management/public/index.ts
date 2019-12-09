@@ -17,7 +17,24 @@
  * under the License.
  */
 
-import { IndexPatternCreationConfig } from './index_pattern_creation_config';
-import { addIndexPatternType } from './index_pattern_types';
+/**
+ * Static np-ready code, re-exported here so consumers can import from
+ * `src/legacy/core_plugins/management/public`
+ *
+ * @public
+ */
 
-addIndexPatternType(IndexPatternCreationConfig);
+export {
+  ManagementSetup,
+  ManagementStart,
+  plugin,
+  IndexPatternCreationConfig,
+  IndexPatternListConfig,
+  SavedObjectsManagementAction,
+  SavedObjectsManagementRecord,
+} from './np_ready';
+
+export {
+  processImportResponse,
+  ProcessedImportResponse,
+} from '../../kibana/public/management/sections/objects/lib/process_import_response';
