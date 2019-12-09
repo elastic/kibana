@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.clickNewDashboard();
-      //await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
       await dashboardAddPanel.addSavedSearch(savedSearchName);
       await PageObjects.dashboard.saveDashboard(dashboardName);
     });
