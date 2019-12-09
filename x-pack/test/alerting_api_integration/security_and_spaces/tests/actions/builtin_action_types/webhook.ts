@@ -48,7 +48,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       .post('/api/action')
       .set('kbn-xsrf', 'test')
       .send({
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         secrets: {
           user,
@@ -78,7 +78,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'test')
         .send({
-          description: 'A generic Webhook action',
+          name: 'A generic Webhook action',
           actionTypeId: '.webhook',
           secrets: {
             user: 'username',
@@ -92,7 +92,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
           ...defaultValues,
@@ -108,7 +108,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A generic Webhook action',
+        name: 'A generic Webhook action',
         actionTypeId: '.webhook',
         config: {
           ...defaultValues,
@@ -167,7 +167,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'test')
         .send({
-          description: 'A generic Webhook action',
+          name: 'A generic Webhook action',
           actionTypeId: '.webhook',
           secrets: {
             user: 'username',
