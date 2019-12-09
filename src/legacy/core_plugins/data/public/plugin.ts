@@ -22,7 +22,6 @@ import { createSearchBar, StatetfulSearchBarProps } from './search';
 import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
-import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setFieldFormats } from '../../../../plugins/data/public/services';
