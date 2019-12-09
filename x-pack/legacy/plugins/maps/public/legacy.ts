@@ -6,6 +6,7 @@
 
 import { npSetup, npStart } from 'ui/new_platform';
 import { plugin } from '.';
+// @ts-ignore Untyped Module
 import { uiModules } from 'ui/modules'; // eslint-disable-line import/order
 
 const pluginInstance = plugin();
