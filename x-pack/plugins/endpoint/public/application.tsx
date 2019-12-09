@@ -21,7 +21,6 @@ import { AlertDetails } from './components/alert_details';
 import { EndpointsPage } from './components/endpoints_page';
 
 const LocationChangeWrapper = function({ children }: { children: ReactElement }) {
-  // TODO: Find another way that doesn't require updating react-router-dom to 5.1.0
   const location = useLocation();
   const dispatch = useDispatch();
   useEffect(() => {
