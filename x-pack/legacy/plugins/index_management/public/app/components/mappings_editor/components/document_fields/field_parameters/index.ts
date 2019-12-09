@@ -16,6 +16,8 @@ export * from './boost_parameter';
 
 export * from './analyzer_parameter';
 
+export * from './analyzers_parameter';
+
 export * from './null_value_parameter';
 
 export * from './eager_global_ordinals_parameter';
@@ -33,3 +35,5 @@ export * from './format_parameter';
 export * from './ignore_malformed';
 
 export * from './copy_to_parameter';
+
+export * from './term_vector_parameter';

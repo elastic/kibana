@@ -292,8 +292,8 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     },
   },
   completion: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.completionSuggestorDescription', {
-      defaultMessage: 'Completion suggestor',
+    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.completionSuggesterDescription', {
+      defaultMessage: 'Completion suggester',
     }),
     value: 'completion',
     documentation: {

@@ -1,0 +1,21 @@
+.mappingsEditor__editField__formRow {
+  margin-bottom: $euiSizeXL;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.mappingsEditor__editField__formRow__btnTitle {
+  display: inherit;
+  text-align: left;
+
+  &:focus {
+    animation: none !important;
+  }
+}
+
+.mappingsEditor__editField__formRow__title {
+  line-height: 1;
+  margin-bottom: $euiSizeS;
+}

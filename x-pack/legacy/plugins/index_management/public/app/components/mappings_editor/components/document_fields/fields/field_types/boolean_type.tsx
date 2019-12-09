@@ -32,8 +32,6 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
   }
 };
 
-const mapIndexToValue = ['true', true, 'false', false];
-
 const nullValueOptions = [
   {
     value: 0,
@@ -80,16 +78,12 @@ export const BooleanType = ({ field }: Props) => {
           >
             <UseField
               path="null_value"
-              config={{
-                defaultValue: 'true',
-                deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
-                serializer: (value: number) => mapIndexToValue[value],
-              }}
+              config={getFieldConfig('null_value_boolean')}
               component={SelectField}
               componentProps={{
                 euiFieldProps: {
                   options: nullValueOptions,
-                  style: { maxWidth: 300 },
+                  fullWidth: true,
                 },
               }}
             />

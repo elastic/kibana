@@ -9,9 +9,18 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { TemplateFormTestBed } from './helpers/template_form.helpers';
 import * as fixtures from '../../test/fixtures';
-import { TEMPLATE_NAME, SETTINGS, MAPPINGS, ALIASES } from './helpers/constants';
+import { TEMPLATE_NAME, SETTINGS, ALIASES, MAPPINGS as DEFAULT_MAPPING } from './helpers/constants';
 
 const UPDATED_INDEX_PATTERN = ['updatedIndexPattern'];
+const UPDATED_MAPPING_TEXT_FIELD_NAME = 'updated_text_datatype';
+const MAPPING = {
+  ...DEFAULT_MAPPING,
+  properties: {
+    text_datatype: {
+      type: 'text',
+    },
+  },
+};
 
 const { setup } = pageHelpers.templateEdit;
 
@@ -52,6 +61,7 @@ describe('<TemplateEdit />', () => {
   const templateToEdit = fixtures.getTemplate({
     name: TEMPLATE_NAME,
     indexPatterns: ['indexPattern1'],
+    mappings: MAPPING,
   });
 
   beforeEach(async () => {
@@ -82,7 +92,7 @@ describe('<TemplateEdit />', () => {
 
   describe('form payload', () => {
     beforeEach(async () => {
-      const { actions } = testBed;
+      const { actions, component, find, form } = testBed;
 
       await act(async () => {
         // Complete step 1 (logistics)
@@ -94,7 +104,22 @@ describe('<TemplateEdit />', () => {
         await actions.completeStepTwo(JSON.stringify(SETTINGS));
 
         // Step 3 (mappings)
-        await actions.completeStepThree();
+        // Select the first field to edit
+        actions.clickEditButtonAtField(0);
+        await nextTick();
+        component.update();
+        // verify edit field flyout
+        expect(find('mappingsEditorFieldEdit').length).toEqual(1);
+        // change field name
+        form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
+        // Save changes
+        actions.clickEditFieldUpdateButton();
+        await nextTick();
+        component.update();
+        // Proceed to the next step
+        actions.clickNextButton();
+        await nextTick(50);
+        component.update();
 
         // Step 4 (aliases)
         await actions.completeStepFour(JSON.stringify(ALIASES));
@@ -118,9 +143,23 @@ describe('<TemplateEdit />', () => {
         version,
         order,
         indexPatterns: UPDATED_INDEX_PATTERN,
+        mappings: {
+          ...MAPPING,
+          properties: {
+            [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
+              type: 'text',
+              store: false,
+              index: true,
+              fielddata: false,
+              eager_global_ordinals: false,
+              index_phrases: false,
+              norms: true,
+              index_options: 'positions',
+            },
+          },
+        },
         isManaged: false,
         settings: SETTINGS,
-        mappings: MAPPINGS,
         aliases: ALIASES,
       });
 

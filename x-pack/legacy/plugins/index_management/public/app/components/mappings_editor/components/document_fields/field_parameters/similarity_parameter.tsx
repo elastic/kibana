@@ -28,7 +28,6 @@ export const SimilarityParameter = ({ defaultToggleValue }: Props) => (
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldDescription', {
       defaultMessage: 'Which scoring algorithm or similarity should be used.',
     })}
-    direction="column"
     toggleDefaultValue={defaultToggleValue}
   >
     <UseField

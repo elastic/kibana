@@ -8,10 +8,11 @@ import React from 'react';
 import { EuiFormRow, EuiComboBox, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FormRow, UseField, SerializerFunc } from '../../../shared_imports';
+import { UseField, SerializerFunc } from '../../../shared_imports';
 import { getFieldConfig } from '../../../lib';
 import { PARAMETERS_DEFINITION } from '../../../constants';
 import { NormalizedField, NormalizedFields, AliasOption } from '../../../types';
+import { EditFieldFormRow } from '../fields/edit_field';
 
 const targetFieldTypeNotAllowed = PARAMETERS_DEFINITION.path.targetTypesNotAllowed;
 
@@ -74,7 +75,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
         const isInvalid = error ? Boolean(error.length) : false;
 
         return (
-          <FormRow
+          <EditFieldFormRow
             title={
               <h3>
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldTitle', {
@@ -89,7 +90,8 @@ export const PathParameter = ({ field, allFields }: Props) => {
                   'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests, and selected other APIs like field capabilities.',
               }
             )}
-            idAria="mappingsEditorPathParameter"
+            ariaId="mappingsEditorPathParameter"
+            withToggle={false}
           >
             <>
               {!Boolean(suggestedFields.length) && (
@@ -114,6 +116,7 @@ export const PathParameter = ({ field, allFields }: Props) => {
                 helpText={pathField.helpText}
                 error={error}
                 isInvalid={isInvalid}
+                fullWidth
               >
                 <EuiComboBox
                   placeholder="Select a field"
@@ -122,10 +125,11 @@ export const PathParameter = ({ field, allFields }: Props) => {
                   selectedOptions={pathField.value as AliasOption[]}
                   onChange={value => pathField.setValue(value)}
                   isClearable={false}
+                  fullWidth
                 />
               </EuiFormRow>
             </>
-          </FormRow>
+          </EditFieldFormRow>
         );
       }}
     </UseField>

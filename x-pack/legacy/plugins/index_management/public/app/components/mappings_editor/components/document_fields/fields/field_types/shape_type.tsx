@@ -57,7 +57,6 @@ export const ShapeType = ({ field }: Props) => {
               'Define how to interpret vertex order for polygons / multipolygons. This parameter defines one of two coordinate system rules (Right-hand or Left-hand).',
           }
         )}
-        direction="column"
         toggleDefaultValue={getDefaultValueToggle('orientation', field.source)}
       >
         <UseField

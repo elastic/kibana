@@ -5,12 +5,11 @@
  */
 
 import React from 'react';
-import { EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EditFieldFormRow } from '../fields/edit_field';
 import { getFieldConfig } from '../../../lib';
-import { UseField } from '../../../shared_imports';
+import { UseField, RangeField } from '../../../shared_imports';
+import { EditFieldFormRow } from '../fields/edit_field';
 
 interface Props {
   defaultToggleValue: boolean;
@@ -31,16 +30,18 @@ export const BoostParameter = ({ defaultToggleValue }: Props) => (
     toggleDefaultValue={defaultToggleValue}
   >
     {/* Boost level */}
-    <UseField path="boost" config={getFieldConfig('boost')}>
-      {boostField => (
-        <EuiRange
-          min={1}
-          max={20}
-          value={boostField.value as string}
-          onChange={boostField.onChange as any}
-          showInput
-        />
-      )}
-    </UseField>
+    <UseField
+      path="boost"
+      config={getFieldConfig('boost')}
+      component={RangeField}
+      componentProps={{
+        euiFieldProps: {
+          min: 1,
+          max: 20,
+          showInput: true,
+          fullWidth: true,
+        },
+      }}
+    />
   </EditFieldFormRow>
 );

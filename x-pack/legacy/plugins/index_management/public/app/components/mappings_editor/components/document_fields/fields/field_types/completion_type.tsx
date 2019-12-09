@@ -7,11 +7,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer } from '@elastic/eui';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, Field, CheckBoxField, FormDataProvider } from '../../../../shared_imports';
-import { AnalyzerParameter } from '../../field_parameters';
+import { UseField, Field } from '../../../../shared_imports';
+import { AnalyzersParameter } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
@@ -35,53 +34,7 @@ export const CompletionType = ({ field }: Props) => {
   return (
     <EditFieldSection>
       {/* analyzers */}
-      <EditFieldSection
-        title={i18n.translate('xpack.idxMgmt.mappingsEditor.completion.analyzersSectionTitle', {
-          defaultMessage: 'Analyzers',
-        })}
-      >
-        <AnalyzerParameter
-          path="analyzer"
-          label={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.completion.indexSearchAnalyzerFieldLabel',
-            {
-              defaultMessage: 'Index analyzer',
-            }
-          )}
-          defaultValue={field.source.analyzer}
-        />
-
-        <EuiSpacer size="s" />
-
-        <UseField
-          path="useSameAnalyzerForSearch"
-          component={CheckBoxField}
-          config={{
-            label: i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.completion.analyzers.useSameAnalyzerIndexAnSearch',
-              {
-                defaultMessage: 'Use the same analyzers for index and searching',
-              }
-            ),
-            defaultValue: true,
-          }}
-        />
-
-        <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
-          {({ useSameAnalyzerForSearch }) =>
-            useSameAnalyzerForSearch ? null : (
-              <>
-                <EuiSpacer />
-                <AnalyzerParameter
-                  path="search_analyzer"
-                  defaultValue={field.source.search_analyzer}
-                  config={getFieldConfig('search_analyzer')}
-                />
-              </>
-            )
-          }
-        </FormDataProvider>
-      </EditFieldSection>
+      <AnalyzersParameter field={field} />
 
       {/* max_input_length */}
       <EditFieldFormRow

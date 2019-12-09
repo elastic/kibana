@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, TextAreaField } from '../../../../shared_imports';
+import { getFieldConfig } from '../../../../lib';
 import { IgnoreMalformedParameter, NullValueParameter } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
@@ -71,23 +72,8 @@ export const GeoPointType = ({ field }: Props) => {
       >
         <UseField
           path="null_value"
-          config={{
-            deserializer: (value: any) => {
-              if (value === '') {
-                return value;
-              }
-              return JSON.stringify(value);
-            },
-            serializer: (value: string) => {
-              try {
-                return JSON.parse(value);
-              } catch (error) {
-                // swallow error and return non-parsed value;
-                return value;
-              }
-            },
-          }}
           component={TextAreaField}
+          config={getFieldConfig('null_value_geo_point')}
         />
       </NullValueParameter>
     </EditFieldSection>
