@@ -367,11 +367,7 @@ export class VectorStyle extends AbstractStyle {
     const isLinesOnly = await this._getIsLinesOnly();
     const isPolygonsOnly = await this._getIsPolygonsOnly();
 
-    return this._getAllStyleProperties().filter(styleProperty => {
-      if (!styleProperty.isDynamic() || !styleProperty.isComplete() || !styleProperty.getField().getName()) {
-        return false;
-      }
-
+    return this.getDynamicPropertiesArray().filter(styleProperty => {
       if (isLinesOnly) {
         return LINE_STYLES.includes(styleProperty.getStyleName());
       }
