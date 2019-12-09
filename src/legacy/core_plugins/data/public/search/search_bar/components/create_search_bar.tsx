@@ -22,9 +22,12 @@ import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { SearchBar } from '../../../';
-import { SearchBarOwnProps } from '.';
-import { DataPublicPluginStart, esFilters } from '../../../../../../../plugins/data/public';
+import {
+  DataPublicPluginStart,
+  SearchBarOwnProps,
+  SearchBar,
+  esFilters,
+} from '../../../../../../../plugins/data/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
