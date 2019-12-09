@@ -7,7 +7,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ loadTestFile }: FtrProviderContext) {
   describe('data visualizer', function() {
-    this.tags(['skipFirefox']);
+    this.tags(['mlqa']);
 
     loadTestFile(require.resolve('./index_data_visualizer'));
   });
