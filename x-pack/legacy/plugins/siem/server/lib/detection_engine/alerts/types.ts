@@ -21,18 +21,15 @@ import { esFilters } from '../../../../../../../../src/plugins/data/server';
 
 export type PartialFilter = Partial<esFilters.Filter>;
 
+export interface IMitreAttack {
+  id: string;
+  name: string;
+  reference: string;
+}
 export interface ThreatParams {
   framework: string;
-  tactic: {
-    id: string;
-    name: string;
-    reference: string;
-  };
-  technique: {
-    id: string;
-    name: string;
-    reference: string;
-  };
+  tactic: IMitreAttack;
+  techniques: IMitreAttack[];
 }
 export interface RuleAlertParams {
   description: string;
@@ -71,6 +68,16 @@ export type RuleAlertParamsRest = Omit<
   max_signals: RuleAlertParams['maxSignals'];
   risk_score: RuleAlertParams['riskScore'];
   output_index: RuleAlertParams['outputIndex'];
+};
+
+export interface SignalsParams {
+  signalIds: string[] | undefined | null;
+  query: object | undefined | null;
+  status: 'open' | 'closed';
+}
+
+export type SignalsRestParams = Omit<SignalsParams, 'signalIds'> & {
+  signal_ids: SignalsParams['signalIds'];
 };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {
@@ -151,6 +158,10 @@ export type RuleAlertType = Alert & {
 
 export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
+}
+
+export interface SignalsRequest extends RequestFacade {
+  payload: SignalsRestParams;
 }
 
 export interface UpdateRulesRequest extends RequestFacade {

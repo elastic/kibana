@@ -45,7 +45,7 @@ describe('Data Frame Analytics: <CreateAnalyticsForm />', () => {
     );
 
     const euiFormRows = wrapper.find('EuiFormRow');
-    expect(euiFormRows.length).toBe(7);
+    expect(euiFormRows.length).toBe(8);
 
     const row1 = euiFormRows.at(0);
     expect(row1.find('label').text()).toBe('Job type');
