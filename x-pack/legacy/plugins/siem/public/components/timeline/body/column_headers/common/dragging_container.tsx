@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 interface DraggingContainerProps {
   children: JSX.Element;

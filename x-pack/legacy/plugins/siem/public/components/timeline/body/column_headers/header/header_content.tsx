@@ -17,7 +17,7 @@ import { ColumnHeader } from '../column_header';
 import { HeaderToolTipContent } from '../header_tooltip_content';
 import { getSortDirection } from './helpers';
 
-interface HeaderComponentProps {
+interface HeaderContentProps {
   children: React.ReactNode;
   header: ColumnHeader;
   isResizing: boolean;
@@ -25,7 +25,7 @@ interface HeaderComponentProps {
   sort: Sort;
 }
 
-export const HeaderComponent = React.memo<HeaderComponentProps>(
+export const HeaderContent = React.memo<HeaderContentProps>(
   ({ children, header, isResizing, onClick, sort }) => {
     const isLoading = useTimelineContext();
 
@@ -69,4 +69,4 @@ export const HeaderComponent = React.memo<HeaderComponentProps>(
   }
 );
 
-HeaderComponent.displayName = 'HeaderComponent';
+HeaderContent.displayName = 'HeaderContent';

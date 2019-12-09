@@ -13,7 +13,7 @@ import { Actions } from '../actions';
 import { ColumnHeader } from '../column_header';
 import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';
-import { HeaderComponent } from './header_component';
+import { HeaderContent } from './header_content';
 
 interface Props {
   header: ColumnHeader;
@@ -24,7 +24,7 @@ interface Props {
   timelineId: string;
 }
 
-export const HeaderContent = ({
+export const HeaderComponent = ({
   header,
   onColumnRemoved,
   onColumnSorted,
@@ -43,17 +43,17 @@ export const HeaderContent = ({
 
   return (
     <>
-      <HeaderComponent header={header} isResizing={false} onClick={onClick} sort={sort}>
+      <HeaderContent header={header} isResizing={false} onClick={onClick} sort={sort}>
         <Actions header={header} onColumnRemoved={onColumnRemoved} sort={sort} />
-      </HeaderComponent>
+      </HeaderContent>
 
       <Filter header={header} onFilterChange={onFilterChange} />
     </>
   );
 };
 
-HeaderContent.displayName = 'HeaderContent';
+HeaderComponent.displayName = 'HeaderComponent';
 
-export const Header = React.memo(HeaderContent);
+export const Header = React.memo(HeaderComponent);
 
 Header.displayName = 'Header';
