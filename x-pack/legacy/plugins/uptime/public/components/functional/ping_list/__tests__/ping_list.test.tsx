@@ -6,13 +6,8 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-<<<<<<< HEAD:x-pack/legacy/plugins/uptime/public/components/functional/__tests__/ping_list.test.tsx
-import { PingResults, Ping } from '../../../../common/graphql/types';
-import { PingListComponent, BaseLocationOptions, toggleDetails } from '../ping_list';
-=======
 import { PingResults, Ping } from '../../../../../common/graphql/types';
-import { PingListComponent, AllLocationOption, toggleDetails } from '../ping_list';
->>>>>>> 6af9f9bea6... update columns (#51892):x-pack/legacy/plugins/uptime/public/components/functional/ping_list/__tests__/ping_list.test.tsx
+import { PingListComponent, BaseLocationOptions, toggleDetails } from '../ping_list';
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { ExpandedRowMap } from '../../monitor_list/types';
 
