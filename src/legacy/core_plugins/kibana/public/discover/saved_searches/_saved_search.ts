@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { SavedObjectsClientContract } from 'kibana/public';
 import { IndexPatterns } from '../../../../data/public';
@@ -29,6 +28,17 @@ export function createSavedSearchClass(
 
   class SavedSearch extends SavedObjectClass {
     public static type: string = 'search';
+    public static mapping = {
+      title: 'text',
+      description: 'text',
+      hits: 'integer',
+      columns: 'keyword',
+      sort: 'keyword',
+      version: 'integer',
+    };
+    // Order these fields to the top, the rest are alphabetical
+    public static fieldOrder = ['title', 'description'];
+    public static searchSource = true;
 
     public id: string;
     public showInRecentlyAccessed: boolean;
