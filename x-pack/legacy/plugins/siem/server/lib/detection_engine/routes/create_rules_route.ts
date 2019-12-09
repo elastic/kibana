@@ -35,7 +35,6 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         description,
         enabled,
         false_positives: falsePositives,
-        filter,
         from,
         immutable,
         query,
@@ -81,7 +80,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
         if (ruleId != null) {
           const rule = await readRules({ alertsClient, ruleId });
           if (rule != null) {
-            return new Boom(`rule_id ${ruleId} already exists`, { statusCode: 409 });
+            return new Boom(`rule_id: "${ruleId}" already exists`, { statusCode: 409 });
           }
         }
         const createdRule = await createRules({
@@ -90,7 +89,6 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
           description,
           enabled,
           falsePositives,
-          filter,
           from,
           immutable,
           query,

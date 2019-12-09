@@ -1,17 +1,12 @@
 {
-  "rule_id": "rule-1",
-  "description": "Detecting root and admin users",
-  "index": ["auditbeat-*", "filebeat-*", "packetbeat-*", "winlogbeat-*"],
-  "interval": "5s",
-  "name": "Detect Root/Admin Users",
-  "severity": "high",
+  "name": "Query which has Mitre Attack Data",
+  "description": "Example query which has Mitre Attack Data as threats",
   "risk_score": 1,
+  "severity": "high",
   "type": "query",
-  "from": "now-6s",
+  "from": "now-6m",
   "to": "now",
   "query": "user.name: root or user.name: admin",
-  "language": "kuery",
-  "references": ["http://www.example.com", "https://ww.example.com"],
   "threats": [
     {
       "framework": "MITRE ATT&CK",

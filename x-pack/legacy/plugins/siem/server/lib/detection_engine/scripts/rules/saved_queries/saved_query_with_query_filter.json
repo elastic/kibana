@@ -1,15 +1,13 @@
 {
-  "rule_id": "rule-5",
-  "risk_score": 5,
-  "description": "Detecting root and admin users over 24 hours on windows",
-  "interval": "5m",
-  "name": "Detect Root/Admin Users",
+  "name": "Query with filter",
+  "description": "A KQL Query with a two filters",
+  "rule_id": "query-with-two-filters",
+  "risk_score": 15,
   "severity": "high",
   "type": "query",
   "from": "now-24h",
   "to": "now",
   "query": "user.name: root or user.name: admin",
-  "language": "kuery",
   "filters": [
     {
       "query": {
@@ -23,5 +21,6 @@
         "field": "host.hostname"
       }
     }
-  ]
+  ],
+  "saved_id": "test-saved-id"
 }
