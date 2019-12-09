@@ -58,7 +58,7 @@ export class ConfigService {
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
-    this.deprecationLog = logger.get('config', 'deprecations');
+    this.deprecationLog = logger.get('config', 'deprecation');
 
     this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
       map(([rawConfig, deprecations]) => {
