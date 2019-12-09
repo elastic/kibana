@@ -17,9 +17,19 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { get } from './get';
 
-export function unset(obj: Record<string, any>, atPath: string) {
+/**
+ * Unset a (potentially nested) key from given object.
+ * This mutates the original object.
+ *
+ * @example
+ * ```
+ * unset(myObj, 'someRootProperty');
+ * unset(myObj, 'some.nested.path');
+ * ```
+ */
+export function unset<OBJ extends { [k: string]: any }>(obj: OBJ, atPath: string) {
   const paths = atPath
     .split('.')
     .map(s => s.trim())
@@ -32,8 +42,7 @@ export function unset(obj: Record<string, any>, atPath: string) {
     return;
   }
   const property = paths.pop() as string;
-  const parentPath = paths.join('.');
-  const parent = get(obj, parentPath) as any;
+  const parent = get(obj, paths) as any;
   if (parent !== undefined) {
     delete parent[property];
   }

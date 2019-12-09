@@ -19,7 +19,7 @@
 
 import { get, set } from 'lodash';
 import { ConfigDeprecation, ConfigDeprecationLogger, ConfigDeprecationFactory } from './types';
-import { unset } from './utils';
+import { unset } from '../../../utils';
 
 const _rename = (
   config: Record<string, any>,
