@@ -7,13 +7,17 @@
 import { Ecs } from '../../../graphql/types';
 
 import {
+  DEFAULT_ACTIONS_COLUMN_WIDTH,
   DEFAULT_COLUMN_MIN_WIDTH,
   DEFAULT_DATE_COLUMN_MIN_WIDTH,
+  EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
   eventHasNotes,
   eventIsPinned,
+  getActionsColumnWidth,
   getColumnWidthFromType,
   getPinTooltip,
   stringifyEvent,
+  SHOW_CHECK_BOXES_COLUMN_WIDTH,
 } from './helpers';
 
 describe('helpers', () => {
@@ -199,28 +203,22 @@ describe('helpers', () => {
   });
 
   describe('getPinTooltip', () => {
-    test('it informs the user the event may not be unpinned when the event is pinned and has notes', () => {
+    test('it indicates the event may NOT be unpinned when `isPinned` is `true` and the event has notes', () => {
       expect(getPinTooltip({ isPinned: true, eventHasNotes: true })).toEqual(
         'This event cannot be unpinned because it has notes'
       );
     });
 
-    test('it tells the user the event is persisted when the event is pinned, but has no notes', () => {
-      expect(getPinTooltip({ isPinned: true, eventHasNotes: false })).toEqual(
-        'This event is persisted with the timeline'
-      );
+    test('it indicates the event is pinned when `isPinned` is `true` and the event does NOT have notes', () => {
+      expect(getPinTooltip({ isPinned: true, eventHasNotes: false })).toEqual('Pinned event');
     });
 
-    test('it tells the user the event is NOT persisted when the event is not pinned, but it has notes', () => {
-      expect(getPinTooltip({ isPinned: false, eventHasNotes: true })).toEqual(
-        'This is event is NOT persisted with the timeline'
-      );
+    test('it indicates the event is NOT pinned when `isPinned` is `false` and the event has notes', () => {
+      expect(getPinTooltip({ isPinned: false, eventHasNotes: true })).toEqual('Unpinned event');
     });
 
-    test('it tells the user the event is NOT persisted when the event is not pinned, and has no notes', () => {
-      expect(getPinTooltip({ isPinned: false, eventHasNotes: false })).toEqual(
-        'This is event is NOT persisted with the timeline'
-      );
+    test('it indicates the event is NOT pinned when `isPinned` is `false` and the event does NOT have notes', () => {
+      expect(getPinTooltip({ isPinned: false, eventHasNotes: false })).toEqual('Unpinned event');
     });
   });
 
@@ -247,6 +245,28 @@ describe('helpers', () => {
 
     test('it returns the expected width for a date column', () => {
       expect(getColumnWidthFromType('date')).toEqual(DEFAULT_DATE_COLUMN_MIN_WIDTH);
+    });
+  });
+
+  describe('getActionsColumnWidth', () => {
+    test('returns the default actions column width when isEventViewer is false', () => {
+      expect(getActionsColumnWidth(false)).toEqual(DEFAULT_ACTIONS_COLUMN_WIDTH);
+    });
+
+    test('returns the default actions column width + checkbox width when isEventViewer is false and showCheckboxes is true', () => {
+      expect(getActionsColumnWidth(false, true)).toEqual(
+        DEFAULT_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
+      );
+    });
+
+    test('returns the events viewer actions column width when isEventViewer is true', () => {
+      expect(getActionsColumnWidth(true)).toEqual(EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH);
+    });
+
+    test('returns the events viewer actions column width + checkbox width when isEventViewer is true and showCheckboxes is true', () => {
+      expect(getActionsColumnWidth(true, true)).toEqual(
+        EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH + SHOW_CHECK_BOXES_COLUMN_WIDTH
+      );
     });
   });
 });

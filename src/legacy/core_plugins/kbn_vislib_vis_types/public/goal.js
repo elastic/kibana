@@ -17,98 +17,89 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import gaugeTemplate from './editors/gauge.html';
-import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { AggGroupNames } from 'ui/vis/editors/default';
+import { ColorSchemas } from 'ui/vislib/components/color/colormaps';
+import { GaugeOptions } from './components/options';
+import { getGaugeCollections, GaugeTypes, ColorModes } from './utils/collections';
+import { vislibVisController } from './controller';
 
-export default function GoalVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createVislibVisualization({
-    name: 'goal',
-    title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
-    icon: 'visGoal',
-    description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
-      defaultMessage: 'A goal chart indicates how close you are to your final goal.'
-    }),
-    visConfig: {
-      defaults: {
-        addTooltip: true,
-        addLegend: false,
-        isDisplayWarning: false,
-        type: 'gauge',
-        gauge: {
-          verticalSplit: false,
-          autoExtend: false,
-          percentageMode: true,
-          gaugeType: 'Arc',
-          gaugeStyle: 'Full',
-          backStyle: 'Full',
-          orientation: 'vertical',
-          useRanges: false,
-          colorSchema: 'Green to Red',
-          gaugeColorMode: 'None',
-          colorsRange: [
-            { from: 0, to: 10000 }
-          ],
-          invertColors: false,
-          labels: {
-            show: true,
-            color: 'black'
-          },
-          scale: {
-            show: false,
-            labels: false,
-            color: 'rgba(105,112,125,0.2)',
-            width: 2
-          },
-          type: 'meter',
-          style: {
-            bgFill: 'rgba(105,112,125,0.2)',
-            bgColor: false,
-            labelColor: false,
-            subText: '',
-            fontSize: 60,
-          }
-        }
-      },
-    },
-    events: {
-      brush: { disabled: true },
-    },
-    editorConfig: {
-      collections: {
-        gaugeTypes: ['Arc', 'Circle'],
-        gaugeColorMode: ['None', 'Labels', 'Background'],
-        scales: ['linear', 'log', 'square root'],
-        colorSchemas: Object.values(vislibColorMaps).map(value => ({ id: value.id, label: value.label })),
-      },
-      optionsTemplate: gaugeTemplate,
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
-          min: 1,
-          aggFilter: [
-            '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+export const goalDefinition = {
+  name: 'goal',
+  title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
+  icon: 'visGoal',
+  description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
+    defaultMessage: 'A goal chart indicates how close you are to your final goal.'
+  }),
+  visualization: vislibVisController,
+  visConfig: {
+    defaults: {
+      addTooltip: true,
+      addLegend: false,
+      isDisplayWarning: false,
+      type: 'gauge',
+      gauge: {
+        verticalSplit: false,
+        autoExtend: false,
+        percentageMode: true,
+        gaugeType: GaugeTypes.ARC,
+        gaugeStyle: 'Full',
+        backStyle: 'Full',
+        orientation: 'vertical',
+        useRanges: false,
+        colorSchema: ColorSchemas.GreenToRed,
+        gaugeColorMode: ColorModes.NONE,
+        colorsRange: [
+          { from: 0, to: 10000 }
+        ],
+        invertColors: false,
+        labels: {
+          show: true,
+          color: 'black'
         },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split group' }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+        scale: {
+          show: false,
+          labels: false,
+          color: 'rgba(105,112,125,0.2)',
+          width: 2
+        },
+        type: 'meter',
+        style: {
+          bgFill: 'rgba(105,112,125,0.2)',
+          bgColor: false,
+          labelColor: false,
+          subText: '',
+          fontSize: 60,
         }
-      ])
+      }
     },
-    useCustomNoDataScreen: true
-  });
-}
+  },
+  editorConfig: {
+    collections: getGaugeCollections(),
+    optionsTemplate: GaugeOptions,
+    schemas: new Schemas([
+      {
+        group: AggGroupNames.Metrics,
+        name: 'metric',
+        title: i18n.translate('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
+        min: 1,
+        aggFilter: [
+          '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
+          '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
+        defaults: [
+          { schema: 'metric', type: 'count' }
+        ]
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'group',
+        title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split group' }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+      }
+    ])
+  },
+  useCustomNoDataScreen: true
+};

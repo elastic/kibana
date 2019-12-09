@@ -6,7 +6,6 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../../../../containers/source';
@@ -16,17 +15,23 @@ import { NetflowRenderer } from '../netflow';
 import { ZeekSignature } from './zeek_signature';
 
 const Details = styled.div`
-  margin: 10px 0;
+  margin: 5px 0;
 `;
 
 Details.displayName = 'Details';
 
-export const ZeekDetails = pure<{ browserFields: BrowserFields; data: Ecs }>(({ data }) =>
+interface ZeekDetailsProps {
+  browserFields: BrowserFields;
+  data: Ecs;
+  timelineId: string;
+}
+
+export const ZeekDetails = React.memo<ZeekDetailsProps>(({ data, timelineId }) =>
   data.zeek != null ? (
     <Details>
-      <ZeekSignature data={data} />
+      <ZeekSignature data={data} timelineId={timelineId} />
       <EuiSpacer size="s" />
-      <NetflowRenderer data={data} />
+      <NetflowRenderer data={data} timelineId={timelineId} />
     </Details>
   ) : null
 );

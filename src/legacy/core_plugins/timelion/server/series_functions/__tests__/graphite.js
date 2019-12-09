@@ -18,11 +18,11 @@
  */
 
 import proxyquire from 'proxyquire';
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 const expect = require('chai').expect;
 
 const graphiteResponse = function () {
-  return Promise.resolve({
+  return Bluebird.resolve({
     json: function () {
       return [{
         target: '__beer__',

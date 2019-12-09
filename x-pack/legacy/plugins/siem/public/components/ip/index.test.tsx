@@ -45,7 +45,7 @@ describe('Port', () => {
 
     expect(
       wrapper
-        .find('[data-test-subj="draggable-content"]')
+        .find('[data-test-subj="draggable-content-destination.ip"]')
         .find('a')
         .first()
         .props().href

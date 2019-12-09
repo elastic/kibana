@@ -4,6 +4,12 @@
       "enabled": {
         "type": "boolean"
       },
+      "name": {
+        "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
+      },
       "alertTypeId": {
         "type": "keyword"
       },
@@ -25,11 +31,32 @@
           }
         }
       },
-      "alertTypeParams": {
+      "params": {
         "enabled": false,
         "type": "object"
       },
       "scheduledTaskId": {
+        "type": "keyword"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "apiKey": {
+        "type": "binary"
+      },
+      "apiKeyOwner": {
+        "type": "keyword"
+      },
+      "throttle": {
+        "type": "keyword"
+      },
+      "muteAll": {
+        "type": "boolean"
+      },
+      "mutedInstanceIds": {
         "type": "keyword"
       }
     }

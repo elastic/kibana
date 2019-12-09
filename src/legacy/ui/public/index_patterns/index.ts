@@ -17,31 +17,24 @@
  * under the License.
  */
 
-export { IndexPatternSelect } from './components/index_pattern_select';
-export { Field, FieldType } from './_field';
-export { FieldList } from './_field_list';
-export { IndexPattern, StaticIndexPattern } from './_index_pattern';
-export { IndexPatterns, IndexPatternsProvider } from './index_patterns';
+/**
+ * Nothing to see here!
+ *
+ * Index Patterns have moved to the data plugin, and are being re-exported
+ * from ui/index_patterns for backwards compatibility.
+ */
 
-export {
-  INDEX_PATTERN_ILLEGAL_CHARACTERS,
-  INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE,
-} from './constants';
+import { indexPatterns } from '../../../../plugins/data/public';
 
-export { validateIndexPattern, CONTAINS_SPACES, ILLEGAL_CHARACTERS } from './validate';
+// static code
+export const INDEX_PATTERN_ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS;
+export const INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE = indexPatterns.ILLEGAL_CHARACTERS_VISIBLE;
+export const ILLEGAL_CHARACTERS = indexPatterns.ILLEGAL_CHARACTERS_KEY;
+export const CONTAINS_SPACES = indexPatterns.CONTAINS_SPACES_KEY;
+export const validateIndexPattern = indexPatterns.validate;
+export const flattenHitWrapper = indexPatterns.flattenHitWrapper;
+export const getFromSavedObject = indexPatterns.getFromSavedObject;
+export const getRoutes = indexPatterns.getRoutes;
 
-export { getRoutes } from './get_routes';
-export { formatHitProvider } from './_format_hit';
-// @ts-ignore
-export { flattenHitWrapper } from './_flatten_hit.js';
-
-export {
-  IndexPatternAlreadyExists,
-  IndexPatternMissingIndices,
-  NoDefinedIndexPatterns,
-  NoDefaultIndexPattern,
-} from './errors';
-
-export { mockFields, mockIndexPattern } from './fixtures';
-
-export { getFromSavedObject, isFilterable } from './static_utils';
+// types
+export { Field, FieldType, IFieldList, IndexPattern } from '../../../core_plugins/data/public';

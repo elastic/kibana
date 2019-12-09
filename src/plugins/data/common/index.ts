@@ -17,4 +17,10 @@
  * under the License.
  */
 
-export * from './expressions';
+export * from './query';
+export * from './field_formats';
+export * from './kbn_field_types';
+export * from './index_patterns';
+export * from './es_query';
+export * from './utils';
+export * from './types';

@@ -5,7 +5,6 @@
  */
 
 import { EuiInMemoryTable } from '@elastic/eui';
-import { pure } from 'recompose';
 import * as React from 'react';
 import styled from 'styled-components';
 
@@ -33,7 +32,7 @@ interface Props {
   width: number;
 }
 
-export const Category = pure<Props>(
+export const Category = React.memo<Props>(
   ({ categoryId, filteredBrowserFields, fieldItems, timelineId, width }) => (
     <>
       <CategoryTitle
@@ -42,7 +41,12 @@ export const Category = pure<Props>(
         timelineId={timelineId}
       />
 
-      <TableContainer data-test-subj="category-table-container" height={TABLE_HEIGHT} width={width}>
+      <TableContainer
+        className="euiTable--compressed"
+        data-test-subj="category-table-container"
+        height={TABLE_HEIGHT}
+        width={width}
+      >
         <EuiInMemoryTable
           items={fieldItems}
           columns={getFieldColumns()}

@@ -4,40 +4,78 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { isEqual } from 'lodash/fp';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { compose } from 'redux';
 
+import { RouteSpyState } from '../../utils/route/types';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { makeMapStateToProps } from '../url_state/helpers';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
+import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
 
-export class SiemNavigationComponent extends React.Component<RouteComponentProps> {
-  public shouldComponentUpdate(nextProps: Readonly<RouteComponentProps>): boolean {
-    if (
-      this.props.location.pathname === nextProps.location.pathname &&
-      this.props.location.search === nextProps.location.search
-    ) {
-      return false;
-    }
-    return true;
+export const SiemNavigationComponent = React.memo<
+  SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState
+>(
+  ({ detailName, display, navTabs, pageName, pathName, search, tabName, urlState }) => {
+    useEffect(() => {
+      if (pathName) {
+        setBreadcrumbs({
+          query: urlState.query,
+          detailName,
+          filters: urlState.filters,
+          navTabs,
+          pageName,
+          pathName,
+          savedQuery: urlState.savedQuery,
+          search,
+          tabName,
+          timerange: urlState.timerange,
+          timeline: urlState.timeline,
+        });
+      }
+    }, [pathName, search, navTabs, urlState]);
+
+    return (
+      <TabNavigation
+        query={urlState.query}
+        display={display}
+        filters={urlState.filters}
+        navTabs={navTabs}
+        pageName={pageName}
+        pathName={pathName}
+        savedQuery={urlState.savedQuery}
+        tabName={tabName}
+        timeline={urlState.timeline}
+        timerange={urlState.timerange}
+      />
+    );
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.pathName === nextProps.pathName &&
+      prevProps.search === nextProps.search &&
+      isEqual(prevProps.navTabs, nextProps.navTabs) &&
+      isEqual(prevProps.urlState, nextProps.urlState)
+    );
   }
+);
 
-  public componentWillMount(): void {
-    const { location } = this.props;
-    if (location.pathname) {
-      setBreadcrumbs(location.pathname);
-    }
-  }
+SiemNavigationComponent.displayName = 'SiemNavigationComponent';
 
-  public componentWillReceiveProps(nextProps: Readonly<RouteComponentProps>): void {
-    if (this.props.location.pathname !== nextProps.location.pathname) {
-      setBreadcrumbs(nextProps.location.pathname);
-    }
-  }
+export const SiemNavigationRedux = compose<
+  React.ComponentClass<SiemNavigationProps & RouteSpyState>
+>(connect(makeMapStateToProps))(SiemNavigationComponent);
 
-  public render() {
-    const { location } = this.props;
-    return <TabNavigation location={location.pathname} search={location.search} />;
-  }
-}
+export const SiemNavigation = React.memo<SiemNavigationProps>(props => {
+  const [routeProps] = useRouteSpy();
+  const stateNavReduxProps: RouteSpyState & SiemNavigationProps = {
+    ...routeProps,
+    ...props,
+  };
+  return <SiemNavigationRedux {...stateNavReduxProps} />;
+});
 
-export const SiemNavigation = withRouter(SiemNavigationComponent);
+SiemNavigation.displayName = 'SiemNavigation';

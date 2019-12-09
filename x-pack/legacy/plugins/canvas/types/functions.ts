@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/common';
 import { functions as commonFunctions } from '../canvas_plugin_src/functions/common';
 import { functions as browserFunctions } from '../canvas_plugin_src/functions/browser';
 import { functions as serverFunctions } from '../canvas_plugin_src/functions/server';
+import { clientFunctions } from '../public/functions';
 
 /**
  * Utility type for converting a union of types into an intersection.
@@ -24,6 +25,9 @@ export type UnionToIntersection<U> =
  * Utility type: gathers values of a collection as a type for use as a type.
  */
 export type ValuesOf<T extends any[]> = T[number];
+
+type valueof<T> = T[keyof T];
+type ValuesOfUnion<T> = T extends any ? valueof<T> : never;
 
 /**
  * A `ExpressionFunctionFactory` is a powerful type used for any function that produces
@@ -99,22 +103,27 @@ export type FunctionFactory<FnFactory> =
     ExpressionFunction<Name, Context, Arguments, Return> :
     never;
 
-// A type containing all of the raw Function definitions in Canvas.
-// prettier-ignore
-type Functions = 
-  typeof commonFunctions[number] &
-  typeof serverFunctions[number] &
-  typeof browserFunctions[number];
+type CommonFunction = FunctionFactory<typeof commonFunctions[number]>;
+type BrowserFunction = FunctionFactory<typeof browserFunctions[number]>;
+type ServerFunction = FunctionFactory<typeof serverFunctions[number]>;
+type ClientFunctions = FunctionFactory<typeof clientFunctions[number]>;
 
 /**
- * A union type of all Canvas Functions.
+ * A collection of all Canvas Functions.
  */
-export type CanvasFunction = FunctionFactory<Functions>;
+export type CanvasFunction = CommonFunction | BrowserFunction | ServerFunction | ClientFunctions;
 
 /**
  * A union type of all Canvas Function names.
  */
 export type CanvasFunctionName = CanvasFunction['name'];
+
+/**
+ * A union type of all Canvas Function argument objects.
+ */
+export type CanvasArg = CanvasFunction['args'];
+
+export type CanvasArgValue = ValuesOfUnion<CanvasFunction['args']>;
 
 /**
  * Represents a function called by the `case` Function.

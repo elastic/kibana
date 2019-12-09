@@ -8,14 +8,13 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
-
 import chrome from 'ui/chrome';
+
 import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
 import { inputsModel, inputsSelectors } from '../../../store/inputs';
 import { State } from '../../../store';
-import { createFilter } from '../../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
 
 import { overviewHostQuery } from './index.gql_query';
@@ -41,11 +40,11 @@ export interface OverviewHostProps extends QueryTemplateProps {
   startDate: number;
 }
 
-const OverviewHostComponentQuery = pure<OverviewHostProps & OverviewHostReducer>(
+const OverviewHostComponentQuery = React.memo<OverviewHostProps & OverviewHostReducer>(
   ({ id = ID, children, filterQuery, isInspected, sourceId, startDate, endDate }) => (
     <Query<GetOverviewHostQuery.Query, GetOverviewHostQuery.Variables>
       query={overviewHostQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       variables={{
         sourceId,
         timerange: {

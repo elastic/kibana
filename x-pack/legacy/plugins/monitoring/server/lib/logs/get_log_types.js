@@ -8,8 +8,9 @@ import { get } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { createTimeFilter } from '../create_query';
 import { detectReason } from './detect_reason';
+import { detectReasonFromException } from './detect_reason_from_exception';
 
-async function handleResponse(response, req, filebeatIndexPattern, { start, end }) {
+async function handleResponse(response, req, filebeatIndexPattern, opts) {
   const result = {
     enabled: false,
     types: []
@@ -31,7 +32,7 @@ async function handleResponse(response, req, filebeatIndexPattern, { start, end 
     });
   }
   else {
-    result.reason = await detectReason(req, filebeatIndexPattern, { start, end });
+    result.reason = await detectReason(req, filebeatIndexPattern, opts);
   }
 
   return result;
@@ -88,6 +89,13 @@ export async function getLogTypes(req, filebeatIndexPattern, { clusterUuid, node
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  const response = await callWithRequest(req, 'search', params);
-  return await handleResponse(response, req, filebeatIndexPattern, { start, end });
+  let result = {};
+  try {
+    const response = await callWithRequest(req, 'search', params);
+    result = await handleResponse(response, req, filebeatIndexPattern, { clusterUuid, nodeUuid, indexUuid, start, end });
+  }
+  catch (err) {
+    result.reason = detectReasonFromException(err);
+  }
+  return result;
 }

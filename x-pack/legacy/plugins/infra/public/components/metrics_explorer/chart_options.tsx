@@ -5,7 +5,8 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { InjectedIntl, injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiRadioGroup,
   EuiButtonEmpty,
@@ -23,10 +24,9 @@ import {
 interface Props {
   chartOptions: ChartOptions;
   onChange: (options: ChartOptions) => void;
-  intl: InjectedIntl;
 }
 
-export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange, intl }: Props) => {
+export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) => {
   const [isPopoverOpen, setPopoverState] = useState<boolean>(false);
 
   const handleClosePopover = useCallback(() => {
@@ -49,16 +49,14 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
   const yAxisRadios = [
     {
       id: MetricsExplorerYAxisMode.auto,
-      label: intl.formatMessage({
-        id: 'xpack.infra.metricsExplorer.chartOptions.autoLabel',
-        defaultMessage: 'Automatic (Min to Max)',
+      label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.autoLabel', {
+        defaultMessage: 'Automatic (min to max)',
       }),
     },
     {
       id: MetricsExplorerYAxisMode.fromZero,
-      label: intl.formatMessage({
-        id: 'xpack.infra.metricsExplorer.chartOptions.fromZeroLabel',
-        defaultMessage: 'From Zero (0 to Max)',
+      label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.fromZeroLabel', {
+        defaultMessage: 'From zero (0 to max)',
       }),
     },
   ];
@@ -66,16 +64,20 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
   const typeRadios = [
     {
       id: MetricsExplorerChartType.line,
-      label: intl.formatMessage({
-        id: 'xpack.infra.metricsExplorer.chartOptions.lineLabel',
+      label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.lineLabel', {
         defaultMessage: 'Line',
       }),
     },
     {
       id: MetricsExplorerChartType.area,
-      label: intl.formatMessage({
-        id: 'xpack.infra.metricsExplorer.chartOptions.areaLabel',
+      label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.areaLabel', {
         defaultMessage: 'Area',
+      }),
+    },
+    {
+      id: MetricsExplorerChartType.bar,
+      label: i18n.translate('xpack.infra.metricsExplorer.chartOptions.barLabel', {
+        defaultMessage: 'Bar',
       }),
     },
   ];
@@ -120,12 +122,12 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
       <EuiForm>
         <EuiFormRow
           compressed
-          label={intl.formatMessage({
-            id: 'xpack.infra.metricsExplorer.chartOptions.typeLabel',
-            defaultMessage: 'Chart Style',
+          label={i18n.translate('xpack.infra.metricsExplorer.chartOptions.typeLabel', {
+            defaultMessage: 'Chart style',
           })}
         >
           <EuiRadioGroup
+            compressed
             options={typeRadios}
             idSelected={chartOptions.type}
             onChange={handleTypeChange}
@@ -133,14 +135,12 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
         </EuiFormRow>
         <EuiFormRow
           compressed
-          label={intl.formatMessage({
-            id: 'xpack.infra.metricsExplorer.chartOptions.stackLabel',
-            defaultMessage: 'Stack Series',
+          label={i18n.translate('xpack.infra.metricsExplorer.chartOptions.stackLabel', {
+            defaultMessage: 'Stack series',
           })}
         >
           <EuiSwitch
-            label={intl.formatMessage({
-              id: 'xpack.infra.metricsExplorer.chartOptions.stackSwitchLabel',
+            label={i18n.translate('xpack.infra.metricsExplorer.chartOptions.stackSwitchLabel', {
               defaultMessage: 'Stack',
             })}
             checked={chartOptions.stack}
@@ -149,12 +149,12 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
         </EuiFormRow>
         <EuiFormRow
           compressed
-          label={intl.formatMessage({
-            id: 'xpack.infra.metricsExplorer.chartOptions.yAxisDomainLabel',
+          label={i18n.translate('xpack.infra.metricsExplorer.chartOptions.yAxisDomainLabel', {
             defaultMessage: 'Y Axis Domain',
           })}
         >
           <EuiRadioGroup
+            compressed
             options={yAxisRadios}
             idSelected={chartOptions.yAxisMode}
             onChange={handleYAxisChange}
@@ -163,4 +163,4 @@ export const MetricsExplorerChartOptions = injectI18n(({ chartOptions, onChange,
       </EuiForm>
     </EuiPopover>
   );
-});
+};

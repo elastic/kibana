@@ -5,8 +5,9 @@
  */
 
 import chrome from 'ui/chrome';
+
 import { InfluencerInput, MlCapabilities } from '../types';
-import { throwIfNotOk } from './throw_if_not_ok';
+import { throwIfNotOk } from '../../../hooks/api/api';
 
 export interface Body {
   jobIds: string[];
@@ -22,7 +23,8 @@ export interface Body {
 }
 
 export const getMlCapabilities = async (
-  headers: Record<string, string | undefined>
+  kbnVersion: string,
+  signal: AbortSignal
 ): Promise<MlCapabilities> => {
   const response = await fetch(`${chrome.getBasePath()}/api/ml/ml_capabilities`, {
     method: 'GET',
@@ -30,10 +32,11 @@ export const getMlCapabilities = async (
     headers: {
       'kbn-system-api': 'true',
       'content-Type': 'application/json',
-      'kbn-xsrf': chrome.getXsrfToken(),
-      ...headers,
+      'kbn-xsrf': kbnVersion,
+      'kbn-version': kbnVersion,
     },
+    signal,
   });
   await throwIfNotOk(response);
-  return await response.json();
+  return response.json();
 };

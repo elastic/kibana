@@ -26,6 +26,7 @@ import {
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 
 function getEscapedQuery(query = '') {
@@ -68,6 +69,12 @@ const termsAgg = ({ field, size, direction, query }) => {
 class ListControl extends Control {
 
   fetch = async (query) => {
+    // Abort any in-progress fetch
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.abortController = new AbortController();
+
     const indexPattern = this.filterManager.getIndexPattern();
     if (!indexPattern) {
       this.disable(noIndexPatternMsg(this.controlParams.indexPattern));
@@ -103,24 +110,29 @@ class ListControl extends Control {
       terminate_after: chrome.getInjected('autocompleteTerminateAfter')
     };
     const aggs = termsAgg({
-      field: indexPattern.fields.byName[fieldName],
+      field: indexPattern.fields.getByName(fieldName),
       size: this.options.dynamicOptions ? null : _.get(this.options, 'size', 5),
       direction: 'desc',
       query
     });
     const searchSource = createSearchSource(
-      this.kbnApi,
+      this.SearchSource,
       initialSearchSourceState,
       indexPattern,
       aggs,
       this.useTimeFilter,
-      ancestorFilters);
+      ancestorFilters
+    );
+    const abortSignal = this.abortController.signal;
 
     this.lastQuery = query;
     let resp;
     try {
-      resp = await searchSource.fetch();
+      resp = await searchSource.fetch({ abortSignal });
     } catch(error) {
+      // If the fetch was aborted then no need to surface this error in the UI
+      if (error.name === 'AbortError') return;
+
       this.disable(i18n.translate('inputControl.listControl.unableToFetchTooltip', {
         defaultMessage: 'Unable to fetch terms, error: {errorMessage}',
         values: { errorMessage: error.message }
@@ -148,15 +160,19 @@ class ListControl extends Control {
     this.disabledReason = '';
   }
 
+  destroy() {
+    if (this.abortController) this.abortController.abort();
+  }
+
   hasValue() {
     return typeof this.value !== 'undefined' && this.value.length > 0;
   }
 }
 
-export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
+export async function listControlFactory(controlParams, useTimeFilter, SearchSource) {
   let indexPattern;
   try {
-    indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+    indexPattern = await npStart.plugins.data.indexPatterns.get(controlParams.indexPattern);
 
     // dynamic options are only allowed on String fields but the setting defaults to true so it could
     // be enabled for non-string fields (since UI input is hidden for non-string fields).
@@ -171,10 +187,11 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }
 
+  const { filterManager } = npStart.plugins.data.query;
   return new ListControl(
     controlParams,
-    new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter),
-    kbnApi,
-    useTimeFilter
+    new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, filterManager),
+    useTimeFilter,
+    SearchSource,
   );
 }

@@ -7,15 +7,12 @@
 import React, { ComponentType, FunctionComponent } from 'react';
 import { unmountComponentAtNode, render } from 'react-dom';
 import PropTypes from 'prop-types';
+import { I18nProvider } from '@kbn/i18n/react';
 import { ErrorBoundary } from '../components/enhance/error_boundary';
+import { ArgumentHandlers } from '../../types/arguments';
 
 interface Props {
   renderError: Function;
-}
-
-interface Handlers {
-  done: () => void;
-  onDestroy: (fn: () => void) => void;
 }
 
 export const templateFromReactComponent = (Component: ComponentType<any>) => {
@@ -27,7 +24,11 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
           return null;
         }
 
-        return <Component {...props} />;
+        return (
+          <I18nProvider>
+            <Component {...props} />
+          </I18nProvider>
+        );
       }}
     </ErrorBoundary>
   );
@@ -36,7 +37,7 @@ export const templateFromReactComponent = (Component: ComponentType<any>) => {
     renderError: PropTypes.func,
   };
 
-  return (domNode: Element, config: Props, handlers: Handlers) => {
+  return (domNode: HTMLElement, config: Props, handlers: ArgumentHandlers) => {
     try {
       const el = React.createElement(WrappedComponent, config);
       render(el, domNode, () => {

@@ -18,6 +18,7 @@
  */
 import { Request } from 'hapi';
 import { merge } from 'lodash';
+import { Socket } from 'net';
 
 import querystring from 'querystring';
 
@@ -37,6 +38,8 @@ interface RequestFixtureOptions {
   query?: Record<string, any>;
   path?: string;
   method?: RouteMethod;
+  socket?: Socket;
+  routeTags?: string[];
 }
 
 function createKibanaRequestMock({
@@ -46,10 +49,12 @@ function createKibanaRequestMock({
   body = {},
   query = {},
   method = 'get',
+  socket = new Socket(),
+  routeTags,
 }: RequestFixtureOptions = {}) {
   const queryString = querystring.stringify(query);
   return KibanaRequest.from(
-    {
+    createRawRequestMock({
       headers,
       params,
       query,
@@ -58,20 +63,21 @@ function createKibanaRequestMock({
       method,
       url: {
         path,
+        pathname: path,
         query: queryString,
         search: queryString ? `?${queryString}` : queryString,
       },
-      route: { settings: {} },
+      route: { settings: { tags: routeTags } },
       raw: {
-        req: {},
+        req: { socket },
       },
-    } as any,
+    }),
     {
       params: schema.object({}, { allowUnknowns: true }),
       body: schema.object({}, { allowUnknowns: true }),
       query: schema.object({}, { allowUnknowns: true }),
     }
-  );
+  ) as KibanaRequest<Readonly<{}>, Readonly<{}>, Readonly<{}>>;
 }
 
 type DeepPartial<T> = T extends any[]

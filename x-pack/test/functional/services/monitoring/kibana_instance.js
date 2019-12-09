@@ -11,11 +11,11 @@ export function MonitoringKibanaInstanceProvider({ getService }) {
   const SUBJ_INSTANCE_PAGE = 'kibanaInstancePage';
 
   const SUBJ_SUMMARY = 'kibanaDetailStatus';
-  const SUBJ_SUMMARY_TRANSPORT_ADDRESS = `${SUBJ_SUMMARY} transportAddress`;
-  const SUBJ_SUMMARY_OS_FREE_MEMORY = `${SUBJ_SUMMARY} osFreeMemory`;
-  const SUBJ_SUMMARY_VERSION = `${SUBJ_SUMMARY} version`;
-  const SUBJ_SUMMARY_UPTIME = `${SUBJ_SUMMARY} uptime`;
-  const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} statusIcon`;
+  const SUBJ_SUMMARY_TRANSPORT_ADDRESS = `${SUBJ_SUMMARY} > transportAddress`;
+  const SUBJ_SUMMARY_OS_FREE_MEMORY = `${SUBJ_SUMMARY} > osFreeMemory`;
+  const SUBJ_SUMMARY_VERSION = `${SUBJ_SUMMARY} > version`;
+  const SUBJ_SUMMARY_UPTIME = `${SUBJ_SUMMARY} > uptime`;
+  const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
 
   return new class KibanaInstance {
 

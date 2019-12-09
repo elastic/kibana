@@ -4,48 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable max-classes-per-file */
-
-import { FakeRequest, KibanaRequest } from '../../../../../../src/core/server';
+import { KibanaRequest } from '../../../../../../src/core/server';
 import { canRedirectRequest } from '../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { BaseAuthenticationProvider } from './base';
-
-/**
- * Utility class that knows how to decorate request with proper Basic authentication headers.
- */
-export class BasicCredentials {
-  /**
-   * Takes provided `username` and `password`, transforms them into proper `Basic ***` authorization
-   * header and decorates passed request with it.
-   * @param request Request instance.
-   * @param username User name.
-   * @param password User password.
-   */
-  public static decorateRequest<T extends KibanaRequest | FakeRequest>(
-    request: T,
-    username: string,
-    password: string
-  ) {
-    const typeOfRequest = typeof request;
-    if (!request || typeOfRequest !== 'object') {
-      throw new Error('Request should be a valid object.');
-    }
-
-    if (!username || typeof username !== 'string') {
-      throw new Error('Username should be a valid non-empty string.');
-    }
-
-    if (!password || typeof password !== 'string') {
-      throw new Error('Password should be a valid non-empty string.');
-    }
-
-    const basicCredentials = Buffer.from(`${username}:${password}`).toString('base64');
-    request.headers.authorization = `Basic ${basicCredentials}`;
-    return request;
-  }
-}
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
@@ -84,13 +47,11 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   ) {
     this.logger.debug('Trying to perform a login.');
 
-    try {
-      const { headers: authHeaders } = BasicCredentials.decorateRequest(
-        { headers: {} },
-        username,
-        password
-      );
+    const authHeaders = {
+      authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+    };
 
+    try {
       const user = await this.getUser(request, authHeaders);
 
       this.logger.debug('Login has been successfully performed.');

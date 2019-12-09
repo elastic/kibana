@@ -5,39 +5,37 @@
  */
 
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
+import { LevelLogger } from '../../../../server/lib';
 import { LayoutInstance } from '../../layouts/layout';
 import { TimeRange } from './types';
 
 export const getTimeRange = async (
   browser: HeadlessBrowser,
   layout: LayoutInstance,
-  logger: Logger
+  logger: LevelLogger
 ): Promise<TimeRange | null> => {
   logger.debug('getting timeRange');
 
   const timeRange: TimeRange | null = await browser.evaluate({
-    fn: (fromAttribute, toAttribute) => {
-      const fromElement = document.querySelector(`[${fromAttribute}]`);
-      const toElement = document.querySelector(`[${toAttribute}]`);
+    fn: durationAttribute => {
+      const durationElement = document.querySelector(`[${durationAttribute}]`);
 
-      if (!fromElement || !toElement) {
+      if (!durationElement) {
         return null;
       }
 
-      const from = fromElement.getAttribute(fromAttribute);
-      const to = toElement.getAttribute(toAttribute);
-      if (!to || !from) {
+      const duration = durationElement.getAttribute(durationAttribute);
+      if (!duration) {
         return null;
       }
 
-      return { from, to };
+      return { duration };
     },
-    args: [layout.selectors.timefilterFromAttribute, layout.selectors.timefilterToAttribute],
+    args: [layout.selectors.timefilterDurationAttribute],
   });
 
   if (timeRange) {
-    logger.debug(`timeRange from ${timeRange.from} to ${timeRange.to}`);
+    logger.info(`timeRange: ${timeRange.duration}`);
   } else {
     logger.debug('no timeRange');
   }

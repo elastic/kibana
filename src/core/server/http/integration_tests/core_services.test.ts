@@ -18,7 +18,6 @@
  */
 import Boom from 'boom';
 import { Request } from 'hapi';
-import { first } from 'rxjs/operators';
 import { clusterClientMock } from './core_service.test.mocks';
 
 import * as kbnTestServer from '../../../../test_utils/kbn_server';
@@ -40,7 +39,7 @@ describe('http service', () => {
       const cookieOptions = {
         name: 'sid',
         encryptionKey: 'something_at_least_32_characters',
-        validate: (session: StorageData) => true,
+        validate: () => ({ isValid: true }),
         isSecure: false,
         path: '/',
       };
@@ -125,39 +124,6 @@ describe('http service', () => {
           .get(root, legacyUrl)
           .set({ custom: 'custom-header' })
           .expect(200, { authorization: token, custom: 'custom-header' });
-      });
-
-      it('passes associated auth state to Legacy platform', async () => {
-        const user = { id: '42' };
-
-        const { http } = await root.setup();
-        const sessionStorageFactory = await http.createCookieSessionStorageFactory<StorageData>(
-          cookieOptions
-        );
-        http.registerAuth((req, res, toolkit) => {
-          if (req.headers.authorization) {
-            const sessionStorage = sessionStorageFactory.asScoped(req);
-            sessionStorage.set({ value: user, expires: Date.now() + sessionDurationMs });
-            return toolkit.authenticated({ state: user });
-          } else {
-            return res.unauthorized();
-          }
-        });
-        await root.start();
-
-        const legacyUrl = '/legacy';
-        const kbnServer = kbnTestServer.getKbnServer(root);
-        kbnServer.server.route({
-          method: 'GET',
-          path: legacyUrl,
-          handler: kbnServer.newPlatform.setup.core.http.auth.get,
-        });
-
-        const response = await kbnTestServer.request.get(root, legacyUrl).expect(200);
-        expect(response.body.state).toEqual(user);
-        expect(response.body.status).toEqual('authenticated');
-
-        expect(response.header['set-cookie']).toHaveLength(1);
       });
 
       it('attach security header to a successful response handled by Legacy platform', async () => {
@@ -250,9 +216,10 @@ describe('http service', () => {
       clusterClientMock.mockClear();
       await root.shutdown();
     });
+
     it('rewrites authorization header via authHeaders to make a request to Elasticsearch', async () => {
       const authHeaders = { authorization: 'Basic: user:password' };
-      const { http, elasticsearch } = await root.setup();
+      const { http } = await root.setup();
       const { registerAuth, createRouter } = http;
 
       await registerAuth((req, res, toolkit) =>
@@ -260,32 +227,27 @@ describe('http service', () => {
       );
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
-        client.asScoped(req);
-        return res.ok({ header: 'ok' });
-      });
+      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
       await root.start();
 
       await kbnTestServer.request.get(root, '/new-platform/').expect(200);
-      expect(clusterClientMock).toBeCalledTimes(1);
-      const [firstCall] = clusterClientMock.mock.calls;
-      const [, , headers] = firstCall;
-      expect(headers).toEqual(authHeaders);
+
+      // admin client contains authHeaders for BWC with legacy platform.
+      const [adminClient, dataClient] = clusterClientMock.mock.calls;
+      const [, , adminClientHeaders] = adminClient;
+      expect(adminClientHeaders).toEqual(authHeaders);
+      const [, , dataClientHeaders] = dataClient;
+      expect(dataClientHeaders).toEqual(authHeaders);
     });
 
     it('passes request authorization header to Elasticsearch if registerAuth was not set', async () => {
       const authorizationHeader = 'Basic: username:password';
-      const { http, elasticsearch } = await root.setup();
+      const { http } = await root.setup();
       const { createRouter } = http;
 
       const router = createRouter('/new-platform');
-      router.get({ path: '/', validate: false }, async (context, req, res) => {
-        const client = await elasticsearch.dataClient$.pipe(first()).toPromise();
-        client.asScoped(req);
-        return res.ok({ header: 'ok' });
-      });
+      router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
       await root.start();
 
@@ -294,12 +256,11 @@ describe('http service', () => {
         .set('Authorization', authorizationHeader)
         .expect(200);
 
-      expect(clusterClientMock).toBeCalledTimes(1);
-      const [firstCall] = clusterClientMock.mock.calls;
-      const [, , headers] = firstCall;
-      expect(headers).toEqual({
-        authorization: authorizationHeader,
-      });
+      const [adminClient, dataClient] = clusterClientMock.mock.calls;
+      const [, , adminClientHeaders] = adminClient;
+      expect(adminClientHeaders).toEqual({ authorization: authorizationHeader });
+      const [, , dataClientHeaders] = dataClient;
+      expect(dataClientHeaders).toEqual({ authorization: authorizationHeader });
     });
   });
 });

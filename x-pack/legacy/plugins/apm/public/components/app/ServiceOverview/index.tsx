@@ -4,19 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
-import { toastNotifications } from 'ui/notify';
+import React, { useEffect, useMemo } from 'react';
 import url from 'url';
+import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { loadServiceList } from '../../../services/rest/apm/services';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../infra/public';
-import { useCore } from '../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../observability/public';
+import { PROJECTION } from '../../../../common/projections/typings';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
 
 const initalData = {
   items: [],
@@ -27,26 +28,35 @@ const initalData = {
 let hasDisplayedToast = false;
 
 export function ServiceOverview() {
-  const core = useCore();
+  const core = useKibanaCore();
   const {
     urlParams: { start, end },
     uiFilters
   } = useUrlParams();
-  const { data = initalData, status } = useFetcher(() => {
-    if (start && end) {
-      return loadServiceList({ start, end, uiFilters });
-    }
-  }, [start, end, uiFilters]);
+  const { data = initalData, status } = useFetcher(
+    callApmApi => {
+      if (start && end) {
+        return callApmApi({
+          pathname: '/api/apm/services',
+          params: {
+            query: { start, end, uiFilters: JSON.stringify(uiFilters) }
+          }
+        });
+      }
+    },
+    [start, end, uiFilters]
+  );
 
   useEffect(() => {
     if (data.hasLegacyData && !hasDisplayedToast) {
       hasDisplayedToast = true;
-      toastNotifications.addWarning({
+
+      core.notifications.toasts.addWarning({
         title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
           defaultMessage:
             'Legacy data was detected within the selected time range'
         }),
-        text: (
+        text: toMountPoint(
           <p>
             {i18n.translate('xpack.apm.serviceOverview.toastText', {
               defaultMessage:
@@ -70,22 +80,37 @@ export function ServiceOverview() {
         )
       });
     }
-  }, [data.hasLegacyData, core.http.basePath]);
+  }, [data.hasLegacyData, core.http.basePath, core.notifications.toasts]);
 
   useTrackPageview({ app: 'apm', path: 'services_overview' });
   useTrackPageview({ app: 'apm', path: 'services_overview', delay: 15000 });
 
+  const localFiltersConfig: React.ComponentProps<typeof LocalUIFilters> = useMemo(
+    () => ({
+      filterNames: ['host', 'agentName'],
+      projection: PROJECTION.SERVICES
+    }),
+    []
+  );
+
   return (
-    <EuiPanel>
-      <ServiceList
-        items={data.items}
-        noItemsMessage={
-          <NoServicesMessage
-            historicalDataFound={data.hasHistoricalData}
-            status={status}
+    <EuiFlexGroup>
+      <EuiFlexItem grow={1}>
+        <LocalUIFilters {...localFiltersConfig} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={7}>
+        <EuiPanel>
+          <ServiceList
+            items={data.items}
+            noItemsMessage={
+              <NoServicesMessage
+                historicalDataFound={data.hasHistoricalData}
+                status={status}
+              />
+            }
           />
-        }
-      />
-    </EuiPanel>
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

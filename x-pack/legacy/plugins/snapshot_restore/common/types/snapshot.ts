@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 export interface SnapshotConfig {
-  indices?: string[];
+  indices?: string | string[];
   ignoreUnavailable?: boolean;
   includeGlobalState?: boolean;
   partial?: boolean;
@@ -14,7 +14,7 @@ export interface SnapshotConfig {
 }
 
 export interface SnapshotConfigEs {
-  indices?: string[];
+  indices?: string | string[];
   ignore_unavailable?: boolean;
   include_global_state?: boolean;
   partial?: boolean;
@@ -41,8 +41,9 @@ export interface SnapshotDetails {
   durationInMillis: number;
   indexFailures: any[];
   shards: SnapshotDetailsShardsStatus;
-  isManagedRepository?: boolean;
+  managedRepository?: string;
   policyName?: string;
+  isLastSuccessfulSnapshot?: boolean;
 }
 
 export interface SnapshotDetailsEs {
@@ -78,4 +79,17 @@ interface SnapshotDetailsShardsStatusEs {
   total: number;
   failed: number;
   successful: number;
+}
+
+export interface SnapshotRetention {
+  expireAfterValue?: number | '';
+  expireAfterUnit?: string;
+  maxCount?: number | '';
+  minCount?: number | '';
+}
+
+export interface SnapshotRetentionEs {
+  expire_after?: string;
+  max_count?: number;
+  min_count?: number;
 }

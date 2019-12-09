@@ -68,7 +68,7 @@ export class LoggingAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.loggingAction.typeName', {
     defaultMessage: 'Logging',
   });
-  static iconClass = 'loggingApp';
+  static iconClass = 'logsApp';
   static selectMessage = i18n.translate('xpack.watcher.models.loggingAction.selectMessageText', {
     defaultMessage: 'Add an item to the logs.',
   });

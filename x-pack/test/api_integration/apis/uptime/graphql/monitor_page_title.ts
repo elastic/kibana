@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import { monitorPageTitleQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_page_title_query';
-import monitorPageTitle from './fixtures/monitor_page_title.json';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { expectFixtureEql } from './helpers/expect_fixture_eql';
 
 export default function({ getService }: FtrProviderContext) {
-  describe('monitorPageTitle', () => {
+  describe('monitor_page_title', () => {
+    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
+    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+
     const supertest = getService('supertest');
 
     it('will fetch a title for a given monitorId', async () => {
@@ -18,7 +20,7 @@ export default function({ getService }: FtrProviderContext) {
         operationName: 'MonitorPageTitle',
         query: monitorPageTitleQueryString,
         variables: {
-          monitorId: 'auto-http-0X131221E73F825974',
+          monitorId: '0002-up',
         },
       };
 
@@ -29,7 +31,7 @@ export default function({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({ ...getMonitorTitleQuery });
 
-      expect(data).to.eql(monitorPageTitle);
+      expectFixtureEql(data, 'monitor_page_title');
     });
   });
 }

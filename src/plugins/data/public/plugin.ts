@@ -17,21 +17,66 @@
  * under the License.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsService } from './expressions/expressions_service';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { Storage } from '../../kibana_utils/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from './types';
+import { AutocompleteProviderRegister } from './autocomplete_provider';
+import { getSuggestionsProvider } from './suggestions_provider';
+import { SearchService } from './search/search_service';
+import { FieldFormatsService } from './field_formats_provider';
+import { QueryService } from './query';
+import { createIndexPatternSelect } from './ui/index_pattern_select';
+import { IndexPatterns } from './index_patterns';
+import { setNotifications, setFieldFormats } from './services';
 
-export class DataPublicPlugin implements Plugin<{}> {
-  expressions = new ExpressionsService();
+export class DataPublicPlugin implements Plugin<DataPublicPluginSetup, DataPublicPluginStart> {
+  private readonly autocomplete = new AutocompleteProviderRegister();
+  private readonly searchService: SearchService;
+  private readonly fieldFormatsService: FieldFormatsService;
+  private readonly queryService: QueryService;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.searchService = new SearchService(initializerContext);
+    this.queryService = new QueryService();
+    this.fieldFormatsService = new FieldFormatsService();
+  }
 
-  public setup(core: CoreSetup) {
-    const expressions = this.expressions.setup();
+  public setup(core: CoreSetup): DataPublicPluginSetup {
+    const storage = new Storage(window.localStorage);
+
     return {
-      expressions,
+      autocomplete: this.autocomplete,
+      search: this.searchService.setup(core),
+      fieldFormats: this.fieldFormatsService.setup(core),
+      query: this.queryService.setup({
+        uiSettings: core.uiSettings,
+        storage,
+      }),
     };
   }
 
-  public start(core: CoreStart) {}
-  public stop() {}
+  public start(core: CoreStart): DataPublicPluginStart {
+    const { uiSettings, http, notifications, savedObjects } = core;
+    const fieldFormats = this.fieldFormatsService.start();
+    setNotifications(notifications);
+    setFieldFormats(fieldFormats);
+
+    const indexPatternsService = new IndexPatterns(uiSettings, savedObjects.client, http);
+
+    return {
+      autocomplete: this.autocomplete,
+      getSuggestions: getSuggestionsProvider(core.uiSettings, core.http),
+      search: this.searchService.start(core),
+      fieldFormats,
+      query: this.queryService.start(core.savedObjects),
+      ui: {
+        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
+      },
+      indexPatterns: indexPatternsService,
+    };
+  }
+
+  public stop() {
+    this.autocomplete.clearProviders();
+  }
 }

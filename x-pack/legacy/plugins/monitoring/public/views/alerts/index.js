@@ -66,6 +66,7 @@ uiRoutes.when('/alerts', {
         getPageData,
         $scope,
         $injector,
+        storageKey: 'alertsTable',
         reactNodeId: 'monitoringAlertsApp'
       });
 

@@ -26,12 +26,10 @@ import { docTitle } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
-import { recentlyAccessed } from 'ui/persisted_log';
 import { timefilter } from 'ui/timefilter';
+import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
 
-// import the uiExports that we want to "use"
-import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 require('ui/autoload/all');
@@ -97,7 +95,7 @@ require('ui/routes')
         return savedSheets.get($route.current.params.id)
           .then((savedSheet) => {
             if ($route.current.params.id) {
-              recentlyAccessed.add(
+              npStart.core.chrome.recentlyAccessed.add(
                 savedSheet.getFullPath(),
                 savedSheet.title,
                 savedSheet.id);
@@ -326,7 +324,7 @@ app.controller('timelion', function (
     };
 
     $scope.$listen($scope.state, 'fetch_with_changes', $scope.search);
-    $scope.$listen(timefilter, 'fetch', $scope.search);
+    timefilter.getFetch$().subscribe($scope.search);
 
     $scope.opts = {
       saveExpression: saveExpression,
@@ -407,9 +405,15 @@ app.controller('timelion', function (
     $scope.state.save();
     $scope.running = true;
 
+    // parse the time range client side to make sure it behaves like other charts
+    const timeRangeBounds = timefilter.getBounds();
+
     const httpResult = $http.post('../api/timelion/run', {
       sheet: $scope.state.sheet,
-      time: _.extend(timefilter.getTime(), {
+      time: _.extend({
+        from: timeRangeBounds.min,
+        to: timeRangeBounds.max,
+      }, {
         interval: $scope.state.interval,
         timezone: timezone
       }),

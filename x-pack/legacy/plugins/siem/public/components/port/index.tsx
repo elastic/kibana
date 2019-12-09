@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DefaultDraggable } from '../draggables';
 import { getEmptyValue } from '../empty_value';
@@ -26,7 +25,7 @@ export const PORT_NAMES = [
   URL_PORT_FIELD_NAME,
 ];
 
-export const Port = pure<{
+export const Port = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
@@ -35,7 +34,7 @@ export const Port = pure<{
   <DefaultDraggable
     data-test-subj="port"
     field={fieldName}
-    id={`${contextId}-${eventId}-${fieldName}-${value}`}
+    id={`port-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
     tooltipContent={fieldName}
     value={value}
   >

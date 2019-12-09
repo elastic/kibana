@@ -50,7 +50,7 @@ const columns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => formatDateTimeLocal(timestamp),
+    render: timestamp => formatDateTimeLocal(timestamp, true),
   },
   {
     field: 'level',
@@ -80,7 +80,7 @@ const clusterColumns = [
     field: 'timestamp',
     name: columnTimestampTitle,
     width: '12%',
-    render: timestamp => formatDateTimeLocal(timestamp),
+    render: timestamp => formatDateTimeLocal(timestamp, true),
   },
   {
     field: 'level',
@@ -169,7 +169,7 @@ export class Logs extends PureComponent {
         title={i18n.translate('xpack.monitoring.logs.listing.calloutTitle', {
           defaultMessage: 'Want to see more log entries?'
         })}
-        iconType="loggingApp"
+        iconType="logsApp"
       >
         <p>
           <FormattedMessage

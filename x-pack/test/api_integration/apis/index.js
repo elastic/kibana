@@ -13,6 +13,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./monitoring'));
     loadTestFile(require.resolve('./xpack_main'));
+    loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./logstash'));
     loadTestFile(require.resolve('./kibana'));
@@ -24,7 +25,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./siem'));
-    loadTestFile(require.resolve('./code'));
     loadTestFile(require.resolve('./short_urls'));
+    loadTestFile(require.resolve('./lens'));
+    loadTestFile(require.resolve('./endpoint'));
   });
 }

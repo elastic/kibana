@@ -26,6 +26,8 @@ const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
+// before update to make sure it's in sync with validation rules in Legacy
+// https://github.com/elastic/kibana/blob/master/src/legacy/server/config/schema.js
 export const config = {
   path: 'server',
   schema: schema.object(
@@ -34,6 +36,15 @@ export const config = {
       basePath: schema.maybe(
         schema.string({
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
+        })
+      ),
+      defaultRoute: schema.maybe(
+        schema.string({
+          validate(value) {
+            if (!value.startsWith('/')) {
+              return 'must start with a slash';
+            }
+          },
         })
       ),
       cors: schema.conditional(
@@ -69,11 +80,25 @@ export const config = {
       socketTimeout: schema.number({
         defaultValue: 120000,
       }),
+      compression: schema.object({
+        enabled: schema.boolean({ defaultValue: true }),
+        referrerWhitelist: schema.maybe(
+          schema.arrayOf(
+            schema.string({
+              hostname: true,
+            }),
+            { minSize: 1 }
+          )
+        ),
+      }),
     },
     {
       validate: rawConfig => {
         if (!rawConfig.basePath && rawConfig.rewriteBasePath) {
           return 'cannot use [rewriteBasePath] when [basePath] is not specified';
+        }
+        if (!rawConfig.compression.enabled && rawConfig.compression.referrerWhitelist) {
+          return 'cannot use [compression.referrerWhitelist] when [compression.enabled] is set to false';
         }
 
         if (
@@ -104,7 +129,9 @@ export class HttpConfig {
   public basePath?: string;
   public rewriteBasePath: boolean;
   public publicDir: string;
+  public defaultRoute?: string;
   public ssl: SslConfig;
+  public compression: { enabled: boolean; referrerWhitelist?: string[] };
 
   /**
    * @internal
@@ -121,5 +148,7 @@ export class HttpConfig {
     this.rewriteBasePath = rawConfig.rewriteBasePath;
     this.publicDir = env.staticFilesDir;
     this.ssl = new SslConfig(rawConfig.ssl || {});
+    this.defaultRoute = rawConfig.defaultRoute;
+    this.compression = rawConfig.compression;
   }
 }

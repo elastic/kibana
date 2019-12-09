@@ -5,9 +5,8 @@
  */
 
 import { omit, pick, find } from 'lodash';
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
-import { Datatable, DatatableColumn } from '../../../types';
-import { getFunctionHelp } from '../../strings';
+import { Datatable, DatatableColumn, ExpressionFunction } from '../../../types';
+import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {
   include: string;

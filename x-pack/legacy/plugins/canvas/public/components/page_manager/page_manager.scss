@@ -15,7 +15,7 @@
   }
   @for $i from 1 through 20 {
     .canvasPageManager--trayPop > div:nth-child(#{$i}n) {
-      animation-delay: #{$i * 0.05}s;
+      animation-delay: #{$i * .05}s;
     }
   }
 
@@ -50,7 +50,7 @@
 
     &:focus,
     &-isActive {
-      background-color: transparentize(darken($euiColorLightestShade, 30%), 0.5);
+      background-color: transparentize(darken($euiColorLightestShade, 30%), .5);
       outline: none;
       text-decoration: none;
     }
@@ -66,7 +66,7 @@
       text-decoration: none;
 
       .canvasPageManager__pagePreview {
-        @include euiBottomShadowMedium($opacity: 0.3);
+        @include euiBottomShadowMedium($opacity: .3);
       }
 
       .canvasPageManager__controls {
@@ -85,7 +85,7 @@
   }
 
   .canvasPageManager__pageNumber {
-    color: $euiColorDarkShade !important;
+    color: $euiColorDarkShade;
   }
 
   .canvasPageManager__pagePreview {
@@ -107,7 +107,7 @@
     opacity: 0;
     transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
     transition-delay: $euiAnimSpeedNormal;
-    background: transparentize($euiColorGhost, 0.5);
+    background: transparentize($euiColorGhost, .5);
     border-radius: $euiBorderRadius;
   }
 }
@@ -117,10 +117,12 @@
     opacity: 0;
     transform: translateX(100%);
   }
+
   1% {
     opacity: 0;
     transform: translateX(100%);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -132,10 +134,12 @@
     opacity: 0;
     transform: translateY(100%);
   }
+
   1% {
     opacity: 0;
     transform: translateY(100%);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);

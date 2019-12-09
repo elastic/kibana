@@ -21,6 +21,15 @@ describe('Elasticsearch Cluster Settings', () => {
   const getReq = response => {
     return {
       server: {
+        newPlatform: {
+          setup: {
+            plugins: {
+              cloud: {
+                isCloudEnabled: false,
+              }
+            }
+          }
+        },
         plugins: {
           elasticsearch: {
             getCluster() {
@@ -49,6 +58,7 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: '-1',
+        isCloudEnabled: false,
         property: 'xpack.monitoring.collection.interval'
       }
     });
@@ -78,6 +88,7 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: 'Remote exporters indicate a possible misconfiguration: myCoolExporter',
+        isCloudEnabled: false,
         property: 'xpack.monitoring.exporters'
       }
     });
@@ -107,6 +118,7 @@ describe('Elasticsearch Cluster Settings', () => {
       reason: {
         context: `cluster ${source}`,
         data: 'false',
+        isCloudEnabled: false,
         property: 'xpack.monitoring.enabled'
       }
     });

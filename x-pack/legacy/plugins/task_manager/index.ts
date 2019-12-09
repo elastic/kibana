@@ -6,14 +6,19 @@
 
 import { Root } from 'joi';
 import { Legacy } from 'kibana';
+import { Plugin, PluginSetupContract } from './plugin';
 import { SavedObjectsSerializer, SavedObjectsSchema } from '../../../../src/core/server';
-import { TaskManager as TaskManagerClass } from './task_manager';
 import mappings from './mappings.json';
 import { migrations } from './migrations';
-import { TaskManager } from './types';
 
-export { TaskManager };
-export { TaskInstance, ConcreteTaskInstance, TaskRunCreatorFunction } from './task';
+export { PluginSetupContract as TaskManager };
+export {
+  TaskInstance,
+  ConcreteTaskInstance,
+  TaskRunCreatorFunction,
+  TaskStatus,
+  RunContext,
+} from './task';
 
 export function taskManager(kibana: any) {
   return new kibana.Plugin({
@@ -35,45 +40,42 @@ export function taskManager(kibana: any) {
           .default(3000),
         index: Joi.string()
           .description('The name of the index used to store task information.')
-          .default('.kibana_task_manager'),
+          .default('.kibana_task_manager')
+          .invalid(['.tasks']),
         max_workers: Joi.number()
           .description(
             'The maximum number of tasks that this Kibana instance will run simultaneously.'
           )
           .min(1) // disable the task manager rather than trying to specify it with 0 workers
           .default(10),
-        override_num_workers: Joi.object()
-          .pattern(/.*/, Joi.number().greater(0))
-          .description(
-            'Customize the number of workers occupied by specific tasks (e.g. override_num_workers.reporting: 2)'
-          )
-          .default({}),
       }).default();
     },
     init(server: Legacy.Server) {
-      const config = server.config();
+      const plugin = new Plugin({
+        logger: {
+          get: () => ({
+            info: (message: string) => server.log(['info', 'task_manager'], message),
+            debug: (message: string) => server.log(['debug', 'task_manager'], message),
+            warn: (message: string) => server.log(['warn', 'task_manager'], message),
+            error: (message: string) => server.log(['error', 'task_manager'], message),
+          }),
+        },
+      });
       const schema = new SavedObjectsSchema(this.kbnServer.uiExports.savedObjectSchemas);
       const serializer = new SavedObjectsSerializer(schema);
-      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
-      const savedObjectsRepository = server.savedObjects.getSavedObjectsRepository(
-        callWithInternalUser,
-        ['task']
+      const setupContract = plugin.setup(
+        {},
+        {
+          serializer,
+          config: server.config(),
+          elasticsearch: server.plugins.elasticsearch,
+          savedObjects: server.savedObjects,
+        }
       );
-
-      const taskManagerInstance = new TaskManagerClass({
-        kbnServer: this.kbnServer,
-        config,
-        savedObjectsRepository,
-        serializer,
+      this.kbnServer.afterPluginsInit(() => {
+        plugin.start();
       });
-      const exposedFunctions: TaskManager = {
-        fetch: (...args) => taskManagerInstance.fetch(...args),
-        remove: (...args) => taskManagerInstance.remove(...args),
-        schedule: (...args) => taskManagerInstance.schedule(...args),
-        addMiddleware: (...args) => taskManagerInstance.addMiddleware(...args),
-        registerTaskDefinitions: (...args) => taskManagerInstance.registerTaskDefinitions(...args),
-      };
-      server.expose(exposedFunctions);
+      server.expose(setupContract);
     },
     uiExports: {
       mappings,

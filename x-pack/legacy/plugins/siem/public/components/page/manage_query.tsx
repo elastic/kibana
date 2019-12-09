@@ -10,6 +10,7 @@ import React from 'react';
 import { inputsModel } from '../../store';
 
 interface OwnProps {
+  deleteQuery?: ({ id }: { id: string }) => void;
   id: string;
   loading: boolean;
   refetch: inputsModel.Refetch;
@@ -27,14 +28,19 @@ export function manageQuery<T>(WrappedComponent: React.ComponentClass<T> | React
     static displayName: string;
     public componentDidUpdate(prevProps: OwnProps) {
       const { loading, id, refetch, setQuery, inspect = null } = this.props;
-      if (prevProps.loading !== loading) {
-        setQuery({ id, inspect, loading, refetch });
+      setQuery({ id, inspect, loading, refetch });
+    }
+
+    public componentWillUnmount() {
+      const { deleteQuery, id } = this.props;
+      if (deleteQuery) {
+        deleteQuery({ id });
       }
     }
 
     public render() {
       const otherProps = omit(['refetch', 'setQuery'], this.props);
-      return <WrappedComponent {...otherProps} />;
+      return <WrappedComponent {...(otherProps as T)} />;
     }
   }
   ManageQuery.displayName = `ManageQuery (${WrappedComponent.displayName || 'Unknown'})`;

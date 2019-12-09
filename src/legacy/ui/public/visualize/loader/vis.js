@@ -29,123 +29,113 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { VisTypesRegistryProvider } from '../../registry/vis_types';
 import { PersistedState } from '../../persisted_state';
-import { FilterBarQueryFilterProvider } from '../../filter_manager/query_filter';
-import { timefilter } from 'ui/timefilter';
 
-export function VisProvider(Private, indexPatterns, getAppState) {
-  const visTypes = Private(VisTypesRegistryProvider);
-  const queryFilter = Private(FilterBarQueryFilterProvider);
+import { start as visualizations } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
-  class Vis extends EventEmitter {
-    constructor(visState = { type: 'histogram' }) {
-      super();
+const visTypes = visualizations.types;
 
-      this._setUiState(new PersistedState());
-      this.setState(visState);
+export class Vis extends EventEmitter {
+  constructor(visState = { type: 'histogram' }) {
+    super();
 
-      // Session state is for storing information that is transitory, and will not be saved with the visualization.
-      // For instance, map bounds, which depends on the view port, browser window size, etc.
-      this.sessionState = {};
+    this._setUiState(new PersistedState());
+    this.setState(visState);
 
-      this.API = {
-        indexPatterns: indexPatterns,
-        timeFilter: timefilter,
-        queryFilter: queryFilter,
-        events: {
-          filter: data => {
-            if (!this.eventsSubject) return;
-            this.eventsSubject.next({ name: 'filterBucket', data });
-          },
-          brush: data => {
-            if (!this.eventsSubject) return;
-            this.eventsSubject.next({ name: 'brush', data });
-          },
+    // Session state is for storing information that is transitory, and will not be saved with the visualization.
+    // For instance, map bounds, which depends on the view port, browser window size, etc.
+    this.sessionState = {};
+
+    this.API = {
+      events: {
+        filter: data => {
+          if (!this.eventsSubject) return;
+          this.eventsSubject.next({ name: 'filterBucket', data });
         },
-        getAppState,
-      };
-    }
+        brush: data => {
+          if (!this.eventsSubject) return;
+          this.eventsSubject.next({ name: 'brush', data });
+        },
+      },
+    };
+  }
 
-    setState(state) {
-      this.title = state.title || '';
-      const type = state.type || this.type;
-      if (_.isString(type)) {
-        this.type = visTypes.byName[type];
-        if (!this.type) {
-          throw new Error(`Invalid type "${type}"`);
-        }
-      } else {
-        this.type = type;
+  setState(state) {
+    this.title = state.title || '';
+    const type = state.type || this.type;
+    if (_.isString(type)) {
+      this.type = visTypes.get(type);
+      if (!this.type) {
+        throw new Error(`Invalid type "${type}"`);
       }
-
-      this.params = _.defaultsDeep({},
-        _.cloneDeep(state.params || {}),
-        _.cloneDeep(this.type.visConfig.defaults || {})
-      );
+    } else {
+      this.type = type;
     }
 
-    setCurrentState(state) {
-      this.setState(state);
-    }
+    this.params = _.defaultsDeep({},
+      _.cloneDeep(state.params || {}),
+      _.cloneDeep(this.type.visConfig.defaults || {})
+    );
+  }
 
-    getState() {
-      return {
-        title: this.title,
-        type: this.type.name,
-        params: _.cloneDeep(this.params),
-      };
-    }
+  setCurrentState(state) {
+    this.setState(state);
+  }
 
-    updateState() {
-      this.emit('update');
-    }
+  getState() {
+    return {
+      title: this.title,
+      type: this.type.name,
+      params: _.cloneDeep(this.params),
+    };
+  }
 
-    forceReload() {
-      this.emit('reload');
-    }
+  updateState() {
+    this.emit('update');
+  }
 
-    isHierarchical() {
-      if (_.isFunction(this.type.hierarchicalData)) {
-        return !!this.type.hierarchicalData(this);
-      } else {
-        return !!this.type.hierarchicalData;
-      }
-    }
+  forceReload() {
+    this.emit('reload');
+  }
 
-    hasUiState() {
-      return !!this.__uiState;
-    }
-
-    /***
-     * this should not be used outside of visualize
-     * @param uiState
-     * @private
-     */
-    _setUiState(uiState) {
-      if (uiState instanceof PersistedState) {
-        this.__uiState = uiState;
-      }
-    }
-
-    getUiState() {
-      return this.__uiState;
-    }
-
-    /**
-     * Currently this is only used to extract map-specific information
-     * (e.g. mapZoom, mapCenter).
-     */
-    uiStateVal(key, val) {
-      if (this.hasUiState()) {
-        if (_.isUndefined(val)) {
-          return this.__uiState.get(key);
-        }
-        return this.__uiState.set(key, val);
-      }
-      return val;
+  isHierarchical() {
+    if (_.isFunction(this.type.hierarchicalData)) {
+      return !!this.type.hierarchicalData(this);
+    } else {
+      return !!this.type.hierarchicalData;
     }
   }
 
-  return Vis;
+  hasUiState() {
+    return !!this.__uiState;
+  }
+
+  /***
+   * this should not be used outside of visualize
+   * @param uiState
+   * @private
+   */
+  _setUiState(uiState) {
+    if (uiState instanceof PersistedState) {
+      this.__uiState = uiState;
+    }
+  }
+
+  getUiState() {
+    return this.__uiState;
+  }
+
+  /**
+   * Currently this is only used to extract map-specific information
+   * (e.g. mapZoom, mapCenter).
+   */
+  uiStateVal(key, val) {
+    if (this.hasUiState()) {
+      if (_.isUndefined(val)) {
+        return this.__uiState.get(key);
+      }
+      return this.__uiState.set(key, val);
+    }
+    return val;
+  }
 }

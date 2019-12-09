@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiDescriptionList,
@@ -30,7 +30,7 @@ interface Props {
   snapshotDetails: SnapshotDetails;
 }
 
-export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
+export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -111,6 +111,13 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
         ) : null}
       </ul>
     ) : null;
+
+  // Reset indices list state when clicking through different snapshots
+  useEffect(() => {
+    return () => {
+      setIsShowingFullIndicesList(false);
+    };
+  }, []);
 
   return (
     <EuiDescriptionList textStyle="reverse">

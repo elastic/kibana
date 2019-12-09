@@ -5,18 +5,27 @@
  */
 
 import { Location } from 'history';
-import { last } from 'lodash';
 import React from 'react';
-import { InternalCoreStart } from 'src/core/public';
-import { useCore } from '../../../hooks/useCore';
+import { LegacyCoreStart } from 'src/core/public';
+import { useKibanaCore } from '../../../../../observability/public';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
-import { Breadcrumb, ProvideBreadcrumbs } from './ProvideBreadcrumbs';
-import { routes } from './route_config';
+import {
+  Breadcrumb,
+  ProvideBreadcrumbs,
+  BreadcrumbRoute
+} from './ProvideBreadcrumbs';
 
 interface Props {
   location: Location;
   breadcrumbs: Breadcrumb[];
-  core: InternalCoreStart;
+  core: LegacyCoreStart;
+}
+
+function getTitleFromBreadCrumbs(breadcrumbs: Breadcrumb[]) {
+  return breadcrumbs
+    .map(({ value }) => value)
+    .reverse()
+    .join(' | ');
 }
 
 class UpdateBreadcrumbsComponent extends React.Component<Props> {
@@ -26,8 +35,7 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
       href: getAPMHref(match.url, this.props.location.search)
     }));
 
-    const current = last(breadcrumbs) || { text: '' };
-    document.title = current.text;
+    document.title = getTitleFromBreadCrumbs(this.props.breadcrumbs);
     this.props.core.chrome.setBreadcrumbs(breadcrumbs);
   }
 
@@ -44,8 +52,12 @@ class UpdateBreadcrumbsComponent extends React.Component<Props> {
   }
 }
 
-export function UpdateBreadcrumbs() {
-  const core = useCore();
+interface UpdateBreadcrumbsProps {
+  routes: BreadcrumbRoute[];
+}
+
+export function UpdateBreadcrumbs({ routes }: UpdateBreadcrumbsProps) {
+  const core = useKibanaCore();
   return (
     <ProvideBreadcrumbs
       routes={routes}

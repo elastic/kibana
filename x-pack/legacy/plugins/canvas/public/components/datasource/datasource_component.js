@@ -7,16 +7,23 @@
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiButtonEmpty,
   EuiSpacer,
+  EuiIcon,
+  EuiCallOut,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
+import { ComponentStrings, DataSourceStrings } from '../../../i18n';
+import { getDefaultIndex } from '../../lib/es_service';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
+
+const { DatasourceDatasourceComponent: strings } = ComponentStrings;
+const { DemoData: demoDataStrings } = DataSourceStrings;
 
 export class DatasourceComponent extends PureComponent {
   static propTypes = {
@@ -40,6 +47,12 @@ export class DatasourceComponent extends PureComponent {
     isInvalid: PropTypes.bool,
     setInvalid: PropTypes.func,
   };
+
+  state = { defaultIndex: '' };
+
+  componentDidMount() {
+    getDefaultIndex().then(defaultIndex => this.setState({ defaultIndex }));
+  }
 
   componentDidUpdate(prevProps) {
     const { args, resetArgs, datasource, selectDatasource } = this.props;
@@ -100,8 +113,16 @@ export class DatasourceComponent extends PureComponent {
       setInvalid,
     } = this.props;
 
+    const { defaultIndex } = this.state;
+
     if (selecting) {
-      return <DatasourceSelector datasources={datasources} onSelect={this.setSelectedDatasource} />;
+      return (
+        <DatasourceSelector
+          datasources={datasources}
+          onSelect={this.setSelectedDatasource}
+          current={stateDatasource.name}
+        />
+      );
     }
 
     const datasourcePreview = previewing ? (
@@ -112,46 +133,51 @@ export class DatasourceComponent extends PureComponent {
       />
     ) : null;
 
+    const datasourceRender = stateDatasource.render({
+      args: stateArgs,
+      updateArgs,
+      datasourceDef,
+      isInvalid,
+      setInvalid,
+      defaultIndex,
+    });
+
     return (
       <Fragment>
-        <EuiPanel>
+        <div className="canvasDataSource__section">
           <EuiButtonEmpty
             iconSide="right"
-            flush="left"
-            iconType="sortRight"
+            iconType="arrowRight"
             onClick={() => setSelecting(!selecting)}
+            className="canvasDataSource__triggerButton"
+            flush="left"
+            size="s"
           >
-            Change your data source
+            <EuiIcon type="database" className="canvasDataSource__triggerButtonIcon" />
+            {stateDatasource.displayName}
           </EuiButtonEmpty>
           <EuiSpacer size="s" />
-          {stateDatasource.render({
-            args: stateArgs,
-            updateArgs,
-            datasourceDef,
-            isInvalid,
-            setInvalid,
-          })}
-          <EuiSpacer size="m" />
+          {stateDatasource.name === 'demodata' ? (
+            <EuiCallOut title={demoDataStrings.getHeading()} iconType="iInCircle">
+              {datasourceRender}
+            </EuiCallOut>
+          ) : (
+            datasourceRender
+          )}
+          <EuiHorizontalRule margin="m" />
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => setPreviewing(true)} icon="check">
-                Preview
-              </EuiButton>
+              <EuiButtonEmpty size="s" onClick={() => setPreviewing(true)}>
+                {strings.getPreviewButtonLabel()}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                disabled={isInvalid}
-                size="s"
-                color="secondary"
-                fill
-                onClick={this.save}
-                icon="check"
-              >
-                Save
+              <EuiButton disabled={isInvalid} size="s" onClick={this.save} fill color="secondary">
+                {strings.getSaveButtonLabel()}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPanel>
+        </div>
 
         {datasourcePreview}
       </Fragment>

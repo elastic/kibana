@@ -23,8 +23,8 @@ export function systemRoutes({
   elasticsearchPlugin,
   route,
   xpackMainPlugin,
-  config,
-  spacesPlugin
+  spacesPlugin,
+  cloud,
 }) {
   const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
 
@@ -99,13 +99,12 @@ export function systemRoutes({
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
       try {
         const ignoreSpaces = request.query && request.query.ignoreSpaces === 'true';
-        const spacesFeature = xpackMainPlugin.info.feature('spaces');
-        // if spaces is disabled or ignoreSpace is true force isMlEnabledInSpace to be true
-        const { isMlEnabledInSpace } = (spacesFeature.isEnabled() && ignoreSpaces === false) ?
-          spacesUtilsProvider(spacesPlugin, request, config) :
+        // if spaces is disabled force isMlEnabledInSpace to be true
+        const { isMlEnabledInSpace } = spacesPlugin !== undefined ?
+          spacesUtilsProvider(spacesPlugin, request) :
           { isMlEnabledInSpace: async () => true };
 
-        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace);
+        const { getPrivileges } = privilegesProvider(callWithRequest, xpackMainPlugin, isMlEnabledInSpace, ignoreSpaces);
         return await getPrivileges();
       } catch (error) {
         return wrapError(error);
@@ -170,10 +169,16 @@ export function systemRoutes({
   route({
     method: 'GET',
     path: '/api/ml/info',
-    handler(request) {
+    async handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.info')
-        .catch(resp => wrapError(resp));
+
+      try {
+        const info = await callWithRequest('ml.info');
+        const cloudId = cloud && cloud.cloudId;
+        return { ...info, cloudId };
+      } catch (error) {
+        return wrapError(error);
+      }
     },
     config: {
       ...commonRouteConfig

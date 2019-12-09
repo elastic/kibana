@@ -6,17 +6,13 @@
 
 import * as Rx from 'rxjs';
 import { first, mergeMap } from 'rxjs/operators';
-import { PLUGIN_ID } from '../../../../common/constants';
-import { LevelLogger as Logger } from '../../../../server/lib/level_logger';
-import { KbnServer } from '../../../../types';
-import { HeadlessChromiumDriverFactory } from '../../../../server/browsers/chromium/driver_factory';
+import { ServerFacade, CaptureConfig } from '../../../../types';
 import { HeadlessChromiumDriver as HeadlessBrowser } from '../../../../server/browsers/chromium/driver';
 import {
   ElementsPositionAndAttribute,
-  ScreenShotOpts,
-  TimeRangeOpts,
+  ScreenshotResults,
   ScreenshotObservableOpts,
-  BrowserOpts,
+  TimeRange,
 } from './types';
 
 import { checkForToastMessage } from './check_for_toast';
@@ -28,38 +24,35 @@ import { waitForElementsToBeInDOM } from './wait_for_dom_elements';
 import { getTimeRange } from './get_time_range';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getScreenshots } from './get_screenshots';
+import { skipTelemetry } from './skip_telemetry';
 
-export function screenshotsObservableFactory(server: KbnServer) {
-  const logger = Logger.createForServer(server, [PLUGIN_ID, 'screenshots']);
-  const browserDriverFactory: HeadlessChromiumDriverFactory = server.plugins.reporting.browserDriverFactory; // prettier-ignore
+export function screenshotsObservableFactory(server: ServerFacade) {
   const config = server.config();
-  const captureConfig = config.get('xpack.reporting.capture');
+  const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
+  const { browserDriverFactory } = server.plugins.reporting!;
 
   return function screenshotsObservable({
+    logger,
     url,
     conditionalHeaders,
     layout,
     browserTimezone,
-  }: ScreenshotObservableOpts): Rx.Observable<void> {
-    logger.debug(`Creating browser driver factory`);
-
+  }: ScreenshotObservableOpts): Rx.Observable<ScreenshotResults> {
     const create$ = browserDriverFactory.create({
       viewport: layout.getBrowserViewport(),
       browserTimezone,
     });
 
+    // @ts-ignore this needs to be refactored to use less random type declaration and instead rely on structures that work with inference TODO
     return create$.pipe(
-      mergeMap(({ driver$, exit$, message$, consoleMessage$ }) => {
-        logger.debug('Driver factory created');
-        message$.subscribe((line: string) => {
-          logger.debug(line, ['browser']);
-        });
-        consoleMessage$.subscribe((line: string) => {
-          logger.debug(line, ['browserConsole']);
-        });
+      mergeMap(({ driver$, exit$ }) => {
         const screenshot$ = driver$.pipe(
           mergeMap(
             (browser: HeadlessBrowser) => openUrl(browser, url, conditionalHeaders, logger),
+            browser => browser
+          ),
+          mergeMap(
+            (browser: HeadlessBrowser) => skipTelemetry(browser, logger),
             browser => browser
           ),
           mergeMap(
@@ -72,49 +65,48 @@ export function screenshotsObservableFactory(server: KbnServer) {
               // know how many items to expect since gridster incrementally adds panels
               // we have to use this hint to wait for all of them
               const renderSuccess = browser.waitForSelector(
-                `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`
+                `${layout.selectors.renderComplete},[${layout.selectors.itemsCountAttribute}]`,
+                {},
+                logger
               );
-              const renderError = checkForToastMessage(browser, layout);
+              const renderError = checkForToastMessage(browser, layout, logger);
               return Rx.race(Rx.from(renderSuccess), Rx.from(renderError));
             },
             browser => browser
           ),
           mergeMap(
             (browser: HeadlessBrowser) => getNumberOfItems(browser, layout, logger),
-            (browser, itemsCount) => ({ browser, itemsCount })
+            (browser, itemsCount: number) => ({ browser, itemsCount })
           ),
           mergeMap(
             async ({ browser, itemsCount }) => {
               logger.debug('setting viewport');
               const viewport = layout.getViewport(itemsCount);
-              return await browser.setViewport(viewport);
+              return await browser.setViewport(viewport, logger);
             },
             ({ browser, itemsCount }) => ({ browser, itemsCount })
           ),
           mergeMap(
-            ({ browser, itemsCount }) => {
-              logger.debug(`waiting for ${itemsCount} to be in the DOM`);
-              return waitForElementsToBeInDOM(browser, itemsCount, layout);
-            },
-            ({ browser, itemsCount }) => ({ browser, itemsCount })
+            ({ browser, itemsCount }) =>
+              waitForElementsToBeInDOM(browser, itemsCount, layout, logger),
+            ({ browser }) => browser
           ),
           mergeMap(
-            ({ browser }) => {
+            browser => {
               // Waiting till _after_ elements have rendered before injecting our CSS
               // allows for them to be displayed properly in many cases
               return injectCustomCss(browser, layout, logger);
             },
-            ({ browser }) => ({ browser })
+            browser => browser
           ),
           mergeMap(
-            async ({ browser }) => {
+            async browser => {
               if (layout.positionElements) {
-                logger.debug('positioning elements');
                 // position panel elements for print layout
-                return await layout.positionElements(browser);
+                return await layout.positionElements(browser, logger);
               }
             },
-            ({ browser }) => browser
+            browser => browser
           ),
           mergeMap(
             (browser: HeadlessBrowser) => {
@@ -123,21 +115,17 @@ export function screenshotsObservableFactory(server: KbnServer) {
             browser => browser
           ),
           mergeMap(
-            (browser: HeadlessBrowser) => getTimeRange(browser, layout, logger),
-            (browser, timeRange) => ({ browser, timeRange })
+            browser => getTimeRange(browser, layout, logger),
+            (browser, timeRange: TimeRange | null) => ({ browser, timeRange })
           ),
           mergeMap(
             ({ browser }) => getElementPositionAndAttributes(browser, layout),
-            (
-              { browser, timeRange }: BrowserOpts & TimeRangeOpts,
-              elementsPositionAndAttributes: ElementsPositionAndAttribute[]
-            ) => ({ browser, timeRange, elementsPositionAndAttributes })
+            ({ browser, timeRange }, elementsPositionAndAttributes: ElementsPositionAndAttribute[]) => {
+              return { browser, timeRange, elementsPositionAndAttributes };
+            } // prettier-ignore
           ),
           mergeMap(
-            ({
-              browser,
-              elementsPositionAndAttributes,
-            }: BrowserOpts & ScreenShotOpts & TimeRangeOpts) => {
+            ({ browser, elementsPositionAndAttributes }) => {
               return getScreenshots({ browser, elementsPositionAndAttributes, logger });
             },
             ({ timeRange }, screenshots) => ({ timeRange, screenshots })

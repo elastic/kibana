@@ -10,18 +10,19 @@ import {
   PROCESSOR_EVENT,
   SERVICE_NAME
 } from '../../../../common/elasticsearch_fieldnames';
+import { ALL_OPTION_VALUE } from '../../../../common/agent_configuration_constants';
 
 export type AgentConfigurationServicesAPIResponse = PromiseReturnType<
   typeof getServiceNames
 >;
 export async function getServiceNames({ setup }: { setup: Setup }) {
-  const { client, config } = setup;
+  const { client, indices } = setup;
 
   const params = {
     index: [
-      config.get<string>('apm_oss.metricsIndices'),
-      config.get<string>('apm_oss.errorIndices'),
-      config.get<string>('apm_oss.transactionIndices')
+      indices['apm_oss.metricsIndices'],
+      indices['apm_oss.errorIndices'],
+      indices['apm_oss.transactionIndices']
     ],
     body: {
       size: 0,
@@ -36,7 +37,7 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
         services: {
           terms: {
             field: SERVICE_NAME,
-            size: 100
+            size: 50
           }
         }
       }
@@ -44,6 +45,9 @@ export async function getServiceNames({ setup }: { setup: Setup }) {
   };
 
   const resp = await client.search(params);
-  const buckets = resp.aggregations.services.buckets;
-  return buckets.map(bucket => bucket.key);
+  const serviceNames =
+    resp.aggregations?.services.buckets
+      .map(bucket => bucket.key as string)
+      .sort() || [];
+  return [ALL_OPTION_VALUE, ...serviceNames];
 }

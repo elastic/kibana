@@ -134,7 +134,7 @@ export const schema = Joi.object()
     browser: Joi.object()
       .keys({
         type: Joi.string()
-          .valid('chrome', 'firefox')
+          .valid('chrome', 'firefox', 'ie')
           .default('chrome'),
 
         logPollingMs: Joi.number().default(100),
@@ -143,7 +143,7 @@ export const schema = Joi.object()
 
     junit: Joi.object()
       .keys({
-        enabled: Joi.boolean().default(!!process.env.CI),
+        enabled: Joi.boolean().default(!!process.env.CI && !process.env.DISABLE_JUNIT_REPORTER),
         reportName: Joi.string(),
       })
       .default(),
@@ -187,6 +187,7 @@ export const schema = Joi.object()
         buildArgs: Joi.array(),
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
+        installDir: Joi.string(),
       })
       .default(),
 

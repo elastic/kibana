@@ -5,8 +5,7 @@
  */
 
 import { Request } from 'hapi';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { getActiveSpace } from '../../../spaces/server/lib/get_active_space';
+import { LegacySpacesPlugin } from '../../../spaces';
 import { Space } from '../../../spaces/common/model/space';
 
 interface GetActiveSpaceResponse {
@@ -14,17 +13,12 @@ interface GetActiveSpaceResponse {
   space?: Space;
 }
 
-export function spacesUtilsProvider(spacesPlugin: any, request: Request, config: KibanaConfig) {
+export function spacesUtilsProvider(spacesPlugin: LegacySpacesPlugin, request: Request) {
   async function activeSpace(): Promise<GetActiveSpaceResponse> {
-    const spacesClient = await spacesPlugin.getScopedSpacesClient(request);
     try {
       return {
         valid: true,
-        space: await getActiveSpace(
-          spacesClient,
-          request.getBasePath(),
-          config.get('server.basePath')
-        ),
+        space: await spacesPlugin.getActiveSpace(request),
       };
     } catch (e) {
       return {
@@ -33,7 +27,7 @@ export function spacesUtilsProvider(spacesPlugin: any, request: Request, config:
     }
   }
 
-  async function isMlEnabled(): Promise<boolean> {
+  async function isMlEnabledInSpace(): Promise<boolean> {
     const { valid, space } = await activeSpace();
     if (valid === true && space !== undefined) {
       return space.disabledFeatures.includes('ml') === false;
@@ -41,5 +35,5 @@ export function spacesUtilsProvider(spacesPlugin: any, request: Request, config:
     return true;
   }
 
-  return { isMlEnabled };
+  return { isMlEnabledInSpace };
 }

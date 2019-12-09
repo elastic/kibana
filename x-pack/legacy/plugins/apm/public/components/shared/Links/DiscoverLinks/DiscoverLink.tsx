@@ -8,10 +8,10 @@ import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import url from 'url';
 import rison, { RisonValue } from 'rison-node';
-import { useAPMIndexPattern } from '../../../../hooks/useAPMIndexPattern';
 import { useLocation } from '../../../../hooks/useLocation';
 import { getTimepickerRisonData } from '../rison_helpers';
-import { useCore } from '../../../../hooks/useCore';
+import { useKibanaCore } from '../../../../../../observability/public';
+import { APM_STATIC_INDEX_PATTERN_ID } from '../../../../../common/index_pattern_constants';
 
 interface Props {
   query: {
@@ -31,19 +31,14 @@ interface Props {
 }
 
 export function DiscoverLink({ query = {}, ...rest }: Props) {
-  const core = useCore();
-  const apmIndexPattern = useAPMIndexPattern();
+  const core = useKibanaCore();
   const location = useLocation();
-
-  if (!apmIndexPattern.id) {
-    return null;
-  }
 
   const risonQuery = {
     _g: getTimepickerRisonData(location.search),
     _a: {
       ...query._a,
-      index: apmIndexPattern.id
+      index: APM_STATIC_INDEX_PATTERN_ID
     }
   };
 

@@ -6,6 +6,7 @@
 
 
 import { ESTooltipProperty } from './es_tooltip_property';
+import { METRIC_TYPE } from '../../../common/constants';
 
 export class ESAggMetricTooltipProperty extends ESTooltipProperty {
 
@@ -13,6 +14,7 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     super(propertyKey, propertyName, rawValue, indexPattern);
     this._metricField = metricField;
   }
+
   isFilterable() {
     return false;
   }
@@ -21,10 +23,10 @@ export class ESAggMetricTooltipProperty extends ESTooltipProperty {
     if (typeof this._rawValue === 'undefined') {
       return '-';
     }
-    if (this._metricField.type === 'count') {
+    if (this._metricField.getAggType() === METRIC_TYPE.COUNT || this._metricField.getAggType() === METRIC_TYPE.UNIQUE_COUNT) {
       return this._rawValue;
     }
-    const indexPatternField = this._indexPattern.fields.byName[this._metricField.field];
+    const indexPatternField = this._indexPattern.fields.getByName(this._metricField.getESDocFieldName());
     if (!indexPatternField) {
       return this._rawValue;
     }

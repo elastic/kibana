@@ -5,21 +5,13 @@
  */
 import { FlowTarget } from '../../graphql/types';
 
-import {
-  formatDomainsEdges,
-  getIpOverviewAgg,
-  getIpOverviewHostAgg,
-  getUsersEdges,
-} from './elasticsearch_adapter';
+import { getIpOverviewAgg, getIpOverviewHostAgg, getUsersEdges } from './elasticsearch_adapter';
 
 import {
   formattedDestination,
   formattedEmptySource,
   formattedHost,
   formattedSource,
-  mockDomainsResponseBuckets,
-  mockFormattedDestination,
-  mockFormattedSource,
   mockFormattedUsersEdges,
   mockUsersData,
   responseAggs,
@@ -48,18 +40,6 @@ describe('elasticsearch_adapter', () => {
     test('will return an empty source correctly', () => {
       const source = getIpOverviewAgg(FlowTarget.source, {});
       expect(source).toEqual(formattedEmptySource);
-    });
-  });
-
-  describe('#getDomains', () => {
-    test('will return a source correctly', () => {
-      const source = formatDomainsEdges(mockDomainsResponseBuckets, FlowTarget.source);
-      expect(source).toEqual(mockFormattedSource);
-    });
-
-    test('will return a destination correctly', () => {
-      const destination = formatDomainsEdges(mockDomainsResponseBuckets, FlowTarget.destination);
-      expect(destination).toEqual(mockFormattedDestination);
     });
   });
 

@@ -29,7 +29,9 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
       <EuiForm>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={true}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label="Spaces"
           labelType="label"
@@ -160,7 +162,9 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         </EuiFormRow>
         <EuiFormRow
           describedByIds={Array []}
+          display="row"
           fullWidth={true}
+          hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label="Privilege"
           labelType="label"
@@ -294,7 +298,14 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                 ],
               },
               "feature": Object {
-                "excludedFromBase": Object {
+                "allPrivilegeExcludedFromBase": Object {
+                  "canUnassign": true,
+                  "privileges": Array [
+                    "all",
+                    "read",
+                  ],
+                },
+                "bothPrivilegesExcludedFromBase": Object {
                   "canUnassign": true,
                   "privileges": Array [
                     "all",
@@ -319,7 +330,12 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                 "isDirectlyAssigned": true,
               },
               "feature": Object {
-                "excludedFromBase": Object {
+                "allPrivilegeExcludedFromBase": Object {
+                  "actualPrivilege": "none",
+                  "actualPrivilegeSource": 30,
+                  "isDirectlyAssigned": true,
+                },
+                "bothPrivilegesExcludedFromBase": Object {
                   "actualPrivilege": "none",
                   "actualPrivilegeSource": 30,
                   "isDirectlyAssigned": true,
@@ -441,13 +457,22 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             KibanaPrivileges {
               "rawKibanaPrivileges": Object {
                 "features": Object {
-                  "excludedFromBase": Object {
+                  "allPrivilegeExcludedFromBase": Object {
                     "all": Array [
-                      "excluded-from-base-all",
-                      "excluded-from-base-read",
+                      "all-privilege-excluded-from-base-all",
+                      "all-privilege-excluded-from-base-read",
                     ],
                     "read": Array [
-                      "excluded-from-base-read",
+                      "all-privilege-excluded-from-base-read",
+                    ],
+                  },
+                  "bothPrivilegesExcludedFromBase": Object {
+                    "all": Array [
+                      "both-privileges-excluded-from-base-all",
+                      "both-privileges-excluded-from-base-read",
+                    ],
+                    "read": Array [
+                      "both-privileges-excluded-from-base-read",
                     ],
                   },
                   "normal": Object {
@@ -465,9 +490,11 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                     "normal-feature-all",
                     "normal-feature-read",
                     "just-global-all",
+                    "all-privilege-excluded-from-base-read",
                   ],
                   "read": Array [
                     "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
                   ],
                 },
                 "reserved": Object {},
@@ -475,9 +502,11 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   "all": Array [
                     "normal-feature-all",
                     "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
                   ],
                   "read": Array [
                     "normal-feature-read",
+                    "all-privilege-excluded-from-base-read",
                   ],
                 },
               },
@@ -487,7 +516,11 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           onChangeAll={[Function]}
           rankedFeaturePrivileges={
             Object {
-              "excludedFromBase": Array [
+              "allPrivilegeExcludedFromBase": Array [
+                "all",
+                "read",
+              ],
+              "bothPrivilegesExcludedFromBase": Array [
                 "all",
                 "read",
               ],
@@ -529,13 +562,10 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           grow={false}
         >
           <EuiButtonEmpty
-            color="primary"
             data-test-subj="cancelSpacePrivilegeButton"
             flush="left"
-            iconSide="left"
             iconType="cross"
             onClick={[Function]}
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Cancel"
@@ -552,10 +582,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
             data-test-subj="createSpacePrivilegeButton"
             disabled={true}
             fill={true}
-            iconSide="left"
             onClick={[Function]}
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Update space privilege"

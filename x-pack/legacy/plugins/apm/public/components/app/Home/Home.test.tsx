@@ -7,11 +7,26 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { Home } from '../Home';
-
-jest.mock('ui/kfetch');
+import { MockPluginContextWrapper } from '../../../utils/testHelpers';
 
 describe('Home component', () => {
-  it('should render', () => {
-    expect(shallow(<Home />)).toMatchSnapshot();
+  it('should render services', () => {
+    expect(
+      shallow(
+        <MockPluginContextWrapper>
+          <Home tab="services" />
+        </MockPluginContextWrapper>
+      )
+    ).toMatchSnapshot();
+  });
+
+  it('should render traces', () => {
+    expect(
+      shallow(
+        <MockPluginContextWrapper>
+          <Home tab="traces" />
+        </MockPluginContextWrapper>
+      )
+    ).toMatchSnapshot();
   });
 });

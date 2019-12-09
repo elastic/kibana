@@ -9,8 +9,14 @@ exports[`LayerTocActions is rendered 1`] = `
       anchorClassName="mapLayTocActions__tooltipAnchor"
       content={
         <React.Fragment>
-           
           simulated tooltip content at zoom: 0
+          <div>
+            <span>
+              mockFootnoteIcon
+            </span>
+             
+            simulated footnote at isUsingSearch: true
+          </div>
         </React.Fragment>
       }
       delay="regular"
@@ -22,10 +28,8 @@ exports[`LayerTocActions is rendered 1`] = `
         color="text"
         data-test-subj="layerTocActionsPanelToggleButtonlayer1"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="mapTocEntry__layerNameIcon"
@@ -35,6 +39,13 @@ exports[`LayerTocActions is rendered 1`] = `
           </span>
         </span>
         layer 1
+         
+        <React.Fragment>
+          
+          <span>
+            mockFootnoteIcon
+          </span>
+        </React.Fragment>
       </EuiButtonEmpty>
     </EuiToolTip>
   }
@@ -94,6 +105,15 @@ exports[`LayerTocActions is rendered 1`] = `
               "name": "Clone layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "removeLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="trash"
+              />,
+              "name": "Remove layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -112,8 +132,14 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
       anchorClassName="mapLayTocActions__tooltipAnchor"
       content={
         <React.Fragment>
-           
           simulated tooltip content at zoom: 0
+          <div>
+            <span>
+              mockFootnoteIcon
+            </span>
+             
+            simulated footnote at isUsingSearch: true
+          </div>
         </React.Fragment>
       }
       delay="regular"
@@ -125,10 +151,8 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
         color="text"
         data-test-subj="layerTocActionsPanelToggleButtonlayer1"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="mapTocEntry__layerNameIcon"
@@ -138,6 +162,13 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
           </span>
         </span>
         layer 1
+         
+        <React.Fragment>
+          
+          <span>
+            mockFootnoteIcon
+          </span>
+        </React.Fragment>
       </EuiButtonEmpty>
     </EuiToolTip>
   }
@@ -197,6 +228,15 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
               "name": "Clone layer",
               "onClick": [Function],
             },
+            Object {
+              "data-test-subj": "removeLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="trash"
+              />,
+              "name": "Remove layer",
+              "onClick": [Function],
+            },
           ],
           "title": "Layer actions",
         },
@@ -215,8 +255,14 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
       anchorClassName="mapLayTocActions__tooltipAnchor"
       content={
         <React.Fragment>
-           
           simulated tooltip content at zoom: 0
+          <div>
+            <span>
+              mockFootnoteIcon
+            </span>
+             
+            simulated footnote at isUsingSearch: true
+          </div>
         </React.Fragment>
       }
       delay="regular"
@@ -228,10 +274,8 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
         color="text"
         data-test-subj="layerTocActionsPanelToggleButtonlayer1"
         flush="left"
-        iconSide="left"
         onClick={[Function]}
         size="xs"
-        type="button"
       >
         <span
           className="mapTocEntry__layerNameIcon"
@@ -241,6 +285,13 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
           </span>
         </span>
         layer 1
+         
+        <React.Fragment>
+          
+          <span>
+            mockFootnoteIcon
+          </span>
+        </React.Fragment>
       </EuiButtonEmpty>
     </EuiToolTip>
   }

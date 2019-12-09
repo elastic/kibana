@@ -21,16 +21,32 @@ import { useAppDependencies } from '../../../../index';
 import { linkToRepository, linkToRestoreSnapshot } from '../../../../services/navigation';
 import { uiMetricService } from '../../../../services/ui_metric';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
+import { SendRequestResponse } from '../../../../../shared_imports';
 
 interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
-  reload: () => Promise<void>;
+  reload: () => Promise<SendRequestResponse>;
   openSnapshotDetailsUrl: (repositoryName: string, snapshotId: string) => string;
   repositoryFilter?: string;
   policyFilter?: string;
   onSnapshotDeleted: (snapshotsDeleted: Array<{ snapshot: string; repository: string }>) => void;
 }
+
+const getLastSuccessfulManagedSnapshot = (
+  snapshots: SnapshotDetails[]
+): SnapshotDetails | undefined => {
+  const successfulSnapshots = snapshots
+    .filter(
+      ({ state, repository, managedRepository }) =>
+        repository === managedRepository && state === 'SUCCESS'
+    )
+    .sort((a, b) => {
+      return +new Date(b.endTime) - +new Date(a.endTime);
+    });
+
+  return successfulSnapshots[0];
+};
 
 export const SnapshotTable: React.FunctionComponent<Props> = ({
   snapshots,
@@ -48,6 +64,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   const { trackUiMetric } = uiMetricService;
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
 
+  const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(snapshots);
+
   const columns = [
     {
       field: 'snapshot',
@@ -57,6 +75,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (snapshotId: string, snapshot: SnapshotDetails) => (
+        /* eslint-disable-next-line @elastic/eui/href-or-on-click */
         <EuiLink
           onClick={() => trackUiMetric(UIM_SNAPSHOT_SHOW_DETAILS_CLICK)}
           href={openSnapshotDetailsUrl(snapshot.repository, snapshotId)}
@@ -191,21 +210,24 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
           },
         },
         {
-          render: ({ snapshot, repository, isManagedRepository }: SnapshotDetails) => {
+          render: ({ snapshot, repository }: SnapshotDetails) => {
             return (
               <SnapshotDeleteProvider>
                 {deleteSnapshotPrompt => {
-                  const label = !isManagedRepository
+                  const isDeleteDisabled = Boolean(lastSuccessfulManagedSnapshot)
+                    ? snapshot === lastSuccessfulManagedSnapshot!.snapshot
+                    : false;
+                  const label = isDeleteDisabled
                     ? i18n.translate(
-                        'xpack.snapshotRestore.snapshotList.table.actionDeleteTooltip',
-                        { defaultMessage: 'Delete' }
-                      )
-                    : i18n.translate(
                         'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
                         {
                           defaultMessage:
-                            'You cannot delete a snapshot stored in a managed repository.',
+                            'You must store the last successful snapshot in a managed repository.',
                         }
+                      )
+                    : i18n.translate(
+                        'xpack.snapshotRestore.snapshotList.table.actionDeleteTooltip',
+                        { defaultMessage: 'Delete' }
                       );
                   return (
                     <EuiToolTip content={label}>
@@ -213,7 +235,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                         aria-label={i18n.translate(
                           'xpack.snapshotRestore.snapshotList.table.actionDeleteAriaLabel',
                           {
-                            defaultMessage: 'Delete snapshot `{name}`',
+                            defaultMessage: `Delete snapshot '{name}'`,
                             values: { name: snapshot },
                           }
                         )}
@@ -223,7 +245,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
                         onClick={() =>
                           deleteSnapshotPrompt([{ snapshot, repository }], onSnapshotDeleted)
                         }
-                        isDisabled={isManagedRepository}
+                        isDisabled={isDeleteDisabled}
                       />
                     </EuiToolTip>
                   );
@@ -263,13 +285,16 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
 
   const selection = {
     onSelectionChange: (newSelectedItems: SnapshotDetails[]) => setSelectedItems(newSelectedItems),
-    selectable: ({ isManagedRepository }: SnapshotDetails) => !isManagedRepository,
+    selectable: ({ snapshot }: SnapshotDetails) =>
+      Boolean(lastSuccessfulManagedSnapshot)
+        ? snapshot !== lastSuccessfulManagedSnapshot!.snapshot
+        : true,
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
-          'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
+          'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotDescription',
           {
-            defaultMessage: 'You cannot delete a snapshot stored in a managed repository.',
+            defaultMessage: 'You must retain the last successful snapshot in a managed repository.',
           }
         );
       }

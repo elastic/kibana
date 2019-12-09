@@ -13,6 +13,8 @@
  * Bucket spans: 5m, 10m, 30m, 1h, 3h
  */
 
+
+import { mlLog } from '../../client/log';
 import { INTERVALS, LONG_INTERVALS } from './intervals';
 
 export function singleSeriesCheckerFactory(callWithRequest) {
@@ -59,7 +61,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
               start();
             })
             .catch((resp) => {
-              console.log('SingleSeriesChecker: Could not load metric reference data', this);
+              mlLog.warn('SingleSeriesChecker: Could not load metric reference data');
               reject(resp);
             });
         }
@@ -145,7 +147,7 @@ export function singleSeriesCheckerFactory(callWithRequest) {
                   }
                 }
               } else {
-                console.log('SingleSeriesChecker: runTest stopped because fullBuckets is empty', this);
+                mlLog.warn('SingleSeriesChecker: runTest stopped because fullBuckets is empty');
                 reject('runTest stopped because fullBuckets is empty');
               }
             })

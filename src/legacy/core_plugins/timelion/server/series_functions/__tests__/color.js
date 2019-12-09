@@ -59,6 +59,18 @@ describe('color.js', () => {
     expect(seriesColors).to.eql(['#000000', '#111111', '#222222', '#333333', '#444444']);
   });
 
+  it('should work with series.length=1 and more colors', async () => {
+    const oneLongList = {
+      type: 'seriesList',
+      list: seriesList.list.slice(0, 1)
+    };
+    const colorsArg = '#000:#111';
+
+    const r = await invoke(fn, [oneLongList, colorsArg]);
+    const seriesColors = _.map(r.output.list, 'color');
+    expect(seriesColors).to.eql(['#000']);
+  });
+
   it('throws if you do not pass a color', () => {
     invoke(fn, [seriesList, '']).catch((e) => {
       expect(e).to.be.an(Error);

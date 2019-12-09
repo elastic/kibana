@@ -42,6 +42,8 @@ export default {
     '<rootDir>/x-pack/legacy/server',
   ],
   collectCoverageFrom: [
+    'src/plugins/**/*.{ts,tsx}',
+    '!src/plugins/**/*.d.ts',
     'packages/kbn-ui-framework/src/components/**/*.js',
     '!packages/kbn-ui-framework/src/components/index.js',
     '!packages/kbn-ui-framework/src/components/**/*/index.js',
@@ -54,7 +56,11 @@ export default {
     '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
+<<<<<<< HEAD
     '^plugins/watcher/models/(.*)': '<rootDir>/x-pack/legacy/plugins/watcher/public/models/$1',
+=======
+    '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
+>>>>>>> master
     '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
@@ -74,7 +80,7 @@ export default {
   setupFilesAfterEnv: [
     '<rootDir>/src/dev/jest/setup/mocks.js',
   ],
-  coverageDirectory: '<rootDir>/target/jest-coverage',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
   coverageReporters: [
     'html',
     'text',
@@ -106,11 +112,13 @@ export default {
     '^.+\\.html?$': 'jest-raw-loader',
   },
   transformIgnorePatterns: [
-    // ignore all node_modules except @elastic/eui which requires babel transforms to handle dynamic import()
-    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)[/\\\\].+\\.js$',
+    // ignore all node_modules except @elastic/eui and monaco-editor which both require babel transforms to handle dynamic import()
+    // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
+    '[/\\\\]node_modules(?![\\/\\\\]@elastic[\\/\\\\]eui)(?![\\/\\\\]monaco-editor)[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js'
   ],
   snapshotSerializers: [
+    '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
   reporters: [

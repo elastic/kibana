@@ -21,12 +21,19 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const pieChart = getService('pieChart');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['dashboard', 'discover']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
 
   describe('dashboard query bar', () => {
     before(async () => {
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
     });
 

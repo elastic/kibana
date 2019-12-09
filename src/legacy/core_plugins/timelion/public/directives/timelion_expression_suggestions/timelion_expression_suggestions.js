@@ -19,9 +19,7 @@
 
 import template from './timelion_expression_suggestions.html';
 
-const app = require('ui/modules').get('apps/timelion', []);
-
-app.directive('timelionExpressionSuggestions', () => {
+export function TimelionExpressionSuggestions() {
   return {
     restrict: 'E',
     scope: {
@@ -38,4 +36,4 @@ app.directive('timelionExpressionSuggestions', () => {
       scope.onMouseDown = e => e.preventDefault();
     }
   };
-});
+}

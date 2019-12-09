@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Dispatch } from 'redux';
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { Omit } from '../../../common/utility_types';
 import { InputsModelId } from './constants';
 import { CONSTANTS } from '../../components/url_state/constants';
+import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 export interface AbsoluteTimeRange {
   kind: 'absolute';
@@ -48,6 +51,7 @@ interface InspectVariables {
   inspect: boolean;
 }
 export type RefetchWithParams = ({ inspect }: InspectVariables) => void;
+export type RefetchKql = (dispatch: Dispatch) => boolean;
 export type Refetch = () => void;
 
 export interface InspectQuery {
@@ -55,20 +59,32 @@ export interface InspectQuery {
   response: string[];
 }
 
-export interface GlobalQuery {
-  id: string;
+export interface GlobalGenericQuery {
   inspect: InspectQuery | null;
   isInspected: boolean;
   loading: boolean;
-  refetch: null | Refetch | RefetchWithParams;
   selectedInspectIndex: number;
 }
+
+export interface GlobalGraphqlQuery extends GlobalGenericQuery {
+  id: string;
+  refetch: null | Refetch | RefetchWithParams;
+}
+export interface GlobalKqlQuery extends GlobalGenericQuery {
+  id: 'kql';
+  refetch: RefetchKql;
+}
+
+export type GlobalQuery = GlobalGraphqlQuery | GlobalKqlQuery;
 
 export interface InputsRange {
   timerange: TimeRange;
   policy: Policy;
-  query: GlobalQuery[];
+  queries: GlobalQuery[];
   linkTo: InputsModelId[];
+  query: Query;
+  filters: esFilters.Filter[];
+  savedQuery?: SavedQuery;
 }
 
 export interface LinkTo {

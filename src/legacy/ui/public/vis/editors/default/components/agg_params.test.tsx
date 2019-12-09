@@ -20,7 +20,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { IndexPattern } from 'ui/index_patterns';
-import { VisState } from '../../..';
+import { AggConfig, VisState } from '../../..';
 import { DefaultEditorAggParams, DefaultEditorAggParamsProps } from './agg_params';
 
 const mockEditorConfig = {
@@ -94,12 +94,12 @@ describe('DefaultEditorAggParams component', () => {
     intervalDeserialize = jest.fn(() => 'deserialized');
 
     defaultProps = {
-      agg: {
+      agg: ({
         type: {
           params: [{ name: 'interval', deserialize: intervalDeserialize }],
         },
         params: {},
-      },
+      } as any) as AggConfig,
       groupName: 'metrics',
       formIsTouched: false,
       indexPattern: {} as IndexPattern,

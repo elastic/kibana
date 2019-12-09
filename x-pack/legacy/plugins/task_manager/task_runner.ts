@@ -10,16 +10,17 @@
  * rescheduling, middleware application, etc.
  */
 
+import { performance } from 'perf_hooks';
 import Joi from 'joi';
 import { intervalFromDate, intervalFromNow } from './lib/intervals';
-import { Logger } from './lib/logger';
-import { BeforeRunFunction } from './lib/middleware';
+import { Logger } from './types';
+import { BeforeRunFunction, BeforeMarkRunningFunction } from './lib/middleware';
 import {
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
   RunResult,
-  SanitizedTaskDefinition,
+  TaskDefinition,
   TaskDictionary,
   validateRunResult,
   TaskStatus,
@@ -28,12 +29,11 @@ import {
 const defaultBackoffPerFailure = 5 * 60 * 1000;
 
 export interface TaskRunner {
-  numWorkers: number;
   isExpired: boolean;
   cancel: CancelFunction;
-  claimOwnership: () => Promise<boolean>;
+  markTaskAsRunning: () => Promise<boolean>;
   run: () => Promise<RunResult>;
-  toString?: () => string;
+  toString: () => string;
 }
 
 interface Updatable {
@@ -44,10 +44,11 @@ interface Updatable {
 
 interface Opts {
   logger: Logger;
-  definitions: TaskDictionary<SanitizedTaskDefinition>;
+  definitions: TaskDictionary<TaskDefinition>;
   instance: ConcreteTaskInstance;
   store: Updatable;
   beforeRun: BeforeRunFunction;
+  beforeMarkRunning: BeforeMarkRunningFunction;
 }
 
 /**
@@ -61,10 +62,11 @@ interface Opts {
 export class TaskManagerRunner implements TaskRunner {
   private task?: CancellableTask;
   private instance: ConcreteTaskInstance;
-  private definitions: TaskDictionary<SanitizedTaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition>;
   private logger: Logger;
-  private store: Updatable;
+  private bufferedTaskStore: Updatable;
   private beforeRun: BeforeRunFunction;
+  private beforeMarkRunning: BeforeMarkRunningFunction;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -80,16 +82,9 @@ export class TaskManagerRunner implements TaskRunner {
     this.instance = sanitizeInstance(opts.instance);
     this.definitions = opts.definitions;
     this.logger = opts.logger;
-    this.store = opts.store;
+    this.bufferedTaskStore = opts.store;
     this.beforeRun = opts.beforeRun;
-  }
-
-  /**
-   * Gets how many workers are occupied by this task instance.
-   * Per Joi validation logic, this will return a number >= 1
-   */
-  public get numWorkers() {
-    return this.definition.numWorkers;
+    this.beforeMarkRunning = opts.beforeMarkRunning;
   }
 
   /**
@@ -161,14 +156,33 @@ export class TaskManagerRunner implements TaskRunner {
    *
    * @returns {Promise<boolean>}
    */
-  public async claimOwnership(): Promise<boolean> {
+  public async markTaskAsRunning(): Promise<boolean> {
+    performance.mark('markTaskAsRunning_start');
+
     const VERSION_CONFLICT_STATUS = 409;
-    const attempts = this.instance.attempts + 1;
     const now = new Date();
 
+    const { taskInstance } = await this.beforeMarkRunning({
+      taskInstance: this.instance,
+    });
+
+    const attempts = taskInstance.attempts + 1;
+    const ownershipClaimedUntil = taskInstance.retryAt;
+
     try {
-      this.instance = await this.store.update({
-        ...this.instance,
+      const { id } = taskInstance;
+
+      const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
+      if (timeUntilClaimExpires < 0) {
+        this.logger.debug(
+          `[Task Runner] Task ${id} started after ownership expired (${Math.abs(
+            timeUntilClaimExpires
+          )}ms after expiry)`
+        );
+      }
+
+      this.instance = await this.bufferedTaskStore.update({
+        ...taskInstance,
         status: 'running',
         startedAt: now,
         attempts,
@@ -183,13 +197,25 @@ export class TaskManagerRunner implements TaskRunner {
             }),
       });
 
+      const timeUntilClaimExpiresAfterUpdate = howManyMsUntilOwnershipClaimExpires(
+        ownershipClaimedUntil
+      );
+      if (timeUntilClaimExpiresAfterUpdate < 0) {
+        this.logger.debug(
+          `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(
+            timeUntilClaimExpiresAfterUpdate
+          )}ms after expiry)`
+        );
+      }
+
+      performanceStopMarkingTaskAsRunning();
       return true;
     } catch (error) {
+      performanceStopMarkingTaskAsRunning();
       if (error.statusCode !== VERSION_CONFLICT_STATUS) {
         throw error;
       }
     }
-
     return false;
   }
 
@@ -205,14 +231,14 @@ export class TaskManagerRunner implements TaskRunner {
       return task.cancel();
     }
 
-    this.logger.warning(`The task ${this} is not cancellable.`);
+    this.logger.warn(`The task ${this} is not cancellable.`);
   }
 
   private validateResult(result?: RunResult | void): RunResult {
     const { error } = Joi.validate(result, validateRunResult);
 
     if (error) {
-      this.logger.warning(`Invalid task result for ${this}: ${error.message}`);
+      this.logger.warn(`Invalid task result for ${this}: ${error.message}`);
     }
 
     return result || { state: {} };
@@ -248,13 +274,14 @@ export class TaskManagerRunner implements TaskRunner {
       runAt = intervalFromDate(startedAt, this.instance.interval)!;
     }
 
-    await this.store.update({
+    await this.bufferedTaskStore.update({
       ...this.instance,
       runAt,
       state,
       status,
       startedAt: null,
       retryAt: null,
+      ownerId: null,
       attempts: result.error ? this.instance.attempts : 0,
     });
 
@@ -264,12 +291,10 @@ export class TaskManagerRunner implements TaskRunner {
   private async processResultWhenDone(result: RunResult): Promise<RunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
-      await this.store.remove(this.instance.id);
+      await this.bufferedTaskStore.remove(this.instance.id);
     } catch (err) {
       if (err.statusCode === 404) {
-        this.logger.warning(
-          `Task cleanup of ${this} failed in processing. Was remove called twice?`
-        );
+        this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
       } else {
         throw err;
       }
@@ -292,7 +317,7 @@ export class TaskManagerRunner implements TaskRunner {
       return 'idle';
     }
 
-    const maxAttempts = this.definition.maxAttempts || this.store.maxAttempts;
+    const maxAttempts = this.definition.maxAttempts || this.bufferedTaskStore.maxAttempts;
     return this.instance.attempts < maxAttempts ? 'idle' : 'failed';
   }
 
@@ -333,4 +358,17 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
     params: instance.params || {},
     state: instance.state || {},
   };
+}
+
+function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
+  return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
+}
+
+function performanceStopMarkingTaskAsRunning() {
+  performance.mark('markTaskAsRunning_stop');
+  performance.measure(
+    'taskRunner.markTaskAsRunning',
+    'markTaskAsRunning_start',
+    'markTaskAsRunning_stop'
+  );
 }

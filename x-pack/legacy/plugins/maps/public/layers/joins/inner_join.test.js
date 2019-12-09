@@ -13,8 +13,8 @@ jest.mock('ui/vis/editors/default/schemas', () => {
   };
 });
 jest.mock('../../kibana_services', () => {});
-jest.mock('ui/vis/agg_configs', () => {});
-jest.mock('ui/timefilter/timefilter', () => {});
+jest.mock('ui/agg_types', () => {});
+jest.mock('ui/timefilter', () => {});
 jest.mock('../vector_layer', () => {});
 
 
@@ -23,12 +23,25 @@ const rightSource = {
   indexPatternId: '90943e30-9a47-11e8-b64d-95841ca0b247',
   indexPatternTitle: 'kibana_sample_data_logs',
   term: 'geo.dest',
+  metrics: [{ type: 'count' }]
+};
+
+const mockSource = {
+  getInspectorAdapters() {
+  },
+  createField({ fieldName: name }) {
+    return {
+      getName() {
+        return name;
+      }
+    };
+  }
 };
 
 const leftJoin = new InnerJoin({
   leftField: 'iso2',
   right: rightSource
-});
+}, mockSource);
 const COUNT_PROPERTY_NAME = '__kbnjoin__count_groupby_kibana_sample_data_logs.geo.dest';
 
 describe('joinPropertiesToFeature', () => {
@@ -58,7 +71,7 @@ describe('joinPropertiesToFeature', () => {
       properties: {
         iso2: 'CN',
         [COUNT_PROPERTY_NAME]: 61,
-        [`__kbn__scaled(${COUNT_PROPERTY_NAME})`]: 1,
+        [`__kbn__dynamic__${COUNT_PROPERTY_NAME}__fillColor`]: 1,
       }
     };
     const propertiesMap = new Map();
@@ -76,7 +89,7 @@ describe('joinPropertiesToFeature', () => {
     const leftJoin = new InnerJoin({
       leftField: 'zipcode',
       right: rightSource
-    });
+    }, mockSource);
 
     const feature = {
       properties: {
@@ -97,7 +110,7 @@ describe('joinPropertiesToFeature', () => {
 
   it('Should handle undefined values', () => {
 
-    const feature = {//this feature does not have the iso2 field
+    const feature = { //this feature does not have the iso2 field
       properties: {
         zipcode: 40204
       }
@@ -118,7 +131,7 @@ describe('joinPropertiesToFeature', () => {
     const leftJoin = new InnerJoin({
       leftField: 'code',
       right: rightSource
-    });
+    }, mockSource);
 
     const feature = {
       properties: {

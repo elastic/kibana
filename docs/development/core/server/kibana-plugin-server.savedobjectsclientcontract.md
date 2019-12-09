@@ -34,7 +34,7 @@ From my (Spencer) perspective, a 404 from the SavedObjectsApi is a 404; The obje
 
 Unlike all other methods, create requests are supposed to succeed even when the Kibana index does not exist because it will be automatically created by elasticsearch. When that is not the case it is because Elasticsearch's `action.auto_create_index` setting prevents it from being created automatically so we throw a special 503 with the intention of informing the user that their Elasticsearch settings need to be updated.
 
-See [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md)
+See [SavedObjectsClient](./kibana-plugin-server.savedobjectsclient.md) See [SavedObjectsErrorHelpers](./kibana-plugin-server.savedobjectserrorhelpers.md)
 
 <b>Signature:</b>
 

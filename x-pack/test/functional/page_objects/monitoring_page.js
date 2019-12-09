@@ -5,12 +5,26 @@
  */
 
 export function MonitoringPageProvider({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'shield', 'spaceSelector']);
   const testSubjects = getService('testSubjects');
-  const retry = getService('retry');
+  const security = getService('security');
 
   return new class MonitoringPage {
-    async navigateTo() {
+    async navigateTo(useSuperUser = false) {
+      // always create this because our tear down tries to delete it
+      await security.user.create('basic_monitoring_user', {
+        password: 'monitoring_user_password',
+        roles: ['monitoring_user', 'kibana_user'],
+        full_name: 'basic monitoring',
+      });
+
+      if (!useSuperUser) {
+        await PageObjects.common.navigateToApp('login');
+        await PageObjects.shield.login(
+          'basic_monitoring_user',
+          'monitoring_user_password'
+        );
+      }
       await PageObjects.common.navigateToApp('monitoring');
     }
 
@@ -23,19 +37,9 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     }
 
     async assertTableNoData(subj) {
-      await retry.try(async () => {
-        if (!await testSubjects.exists(subj)) {
-          throw new Error('Expected to find the no data message');
-        }
-      });
-    }
-
-    async assertEuiTableNoData(subj) {
-      await retry.try(async () => {
-        if (await testSubjects.exists(subj)) {
-          throw new Error('Expected to find the no data message');
-        }
-      });
+      if (!await testSubjects.exists(subj)) {
+        throw new Error('Expected to find the no data message');
+      }
     }
 
     async tableGetRows(subj) {
@@ -50,7 +54,9 @@ export function MonitoringPageProvider({ getPageObjects, getService }) {
     }
 
     async tableSetFilter(subj, text) {
-      return await testSubjects.setValue(subj, text);
+      await testSubjects.setValue(subj, text);
+      await PageObjects.common.pressEnterKey();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async tableClearFilter(subj) {

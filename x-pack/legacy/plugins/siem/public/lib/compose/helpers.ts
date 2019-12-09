@@ -8,6 +8,7 @@ import { HttpLink } from 'apollo-link-http';
 import { withClientState } from 'apollo-link-state';
 import { InMemoryCache } from 'apollo-cache-inmemory';
 import chrome from 'ui/chrome';
+
 import { errorLink, reTryOneTimeOnErrorLink } from '../../containers/errors';
 
 export const getLinks = (cache: InMemoryCache) => [

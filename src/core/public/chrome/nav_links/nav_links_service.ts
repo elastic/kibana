@@ -21,11 +21,11 @@ import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { NavLinkWrapper, ChromeNavLinkUpdateableFields, ChromeNavLink } from './nav_link';
-import { ApplicationStart } from '../../application';
+import { InternalApplicationStart } from '../../application';
 import { HttpStart } from '../../http';
 
 interface StartDeps {
-  application: ApplicationStart;
+  application: InternalApplicationStart;
   http: HttpStart;
 }
 
@@ -99,10 +99,24 @@ export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
 
   public start({ application, http }: StartDeps): ChromeNavLinks {
-    const legacyAppLinks = application.availableLegacyApps.map(
-      app =>
+    const appLinks = [...application.availableApps]
+      .filter(([, app]) => !app.chromeless)
+      .map(
+        ([appId, app]) =>
+          [
+            appId,
+            new NavLinkWrapper({
+              ...app,
+              legacy: false,
+              baseUrl: relativeToAbsolute(http.basePath.prepend(`/app/${appId}`)),
+            }),
+          ] as [string, NavLinkWrapper]
+      );
+
+    const legacyAppLinks = [...application.availableLegacyApps].map(
+      ([appId, app]) =>
         [
-          app.id,
+          appId,
           new NavLinkWrapper({
             ...app,
             legacy: true,
@@ -112,16 +126,13 @@ export class NavLinksService {
     );
 
     const navLinks$ = new BehaviorSubject<ReadonlyMap<string, NavLinkWrapper>>(
-      new Map(legacyAppLinks)
+      new Map([...legacyAppLinks, ...appLinks])
     );
     const forceAppSwitcherNavigation$ = new BehaviorSubject(false);
 
     return {
       getNavLinks$: () => {
-        return navLinks$.pipe(
-          map(sortNavLinks),
-          takeUntil(this.stop$)
-        );
+        return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
       },
 
       get(id: string) {
@@ -180,7 +191,10 @@ export class NavLinksService {
 }
 
 function sortNavLinks(navLinks: ReadonlyMap<string, NavLinkWrapper>) {
-  return sortBy([...navLinks.values()].map(link => link.properties), 'order');
+  return sortBy(
+    [...navLinks.values()].map(link => link.properties),
+    'order'
+  );
 }
 
 function relativeToAbsolute(url: string) {

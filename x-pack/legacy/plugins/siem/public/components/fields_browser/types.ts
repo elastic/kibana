@@ -18,8 +18,8 @@ export interface FieldBrowserProps {
   browserFields: BrowserFields;
   /** The height of the field browser */
   height: number;
-  /** When true, the timeline is loading data */
-  isLoading: boolean;
+  /** When true, this Fields Browser is being used as an "events viewer" */
+  isEventViewer?: boolean;
   /**
    * Overrides the default behavior of the `FieldBrowser` to enable
    * "selection" mode, where a field is selected by clicking a button
@@ -30,6 +30,8 @@ export interface FieldBrowserProps {
   onUpdateColumns: OnUpdateColumns;
   /** The timeline associated with this field browser */
   timelineId: string;
+  /** Adds or removes a column to / from the timeline */
+  toggleColumn: (column: ColumnHeader) => void;
   /** The width of the field browser */
   width: number;
 }

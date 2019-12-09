@@ -9,18 +9,7 @@ import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants
 import { getRouter } from '../../public/crud_app/services/routing';
 import { CRUD_APP_BASE_PATH } from '../../public/crud_app/constants';
 
-jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual(
-    '../../../../../../src/legacy/ui/public/index_patterns/constants'
-  ); // eslint-disable-line max-len
-  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
-});
-
-jest.mock('ui/chrome', () => ({
-  addBasePath: () => '/api/rollup',
-  breadcrumbs: { set: () => {} },
-  getInjected: () => ({}),
-}));
+jest.mock('ui/new_platform');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 

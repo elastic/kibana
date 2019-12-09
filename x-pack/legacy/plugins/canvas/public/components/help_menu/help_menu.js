@@ -5,9 +5,11 @@
  */
 
 import React, { Fragment, PureComponent } from 'react';
-import { EuiButton, EuiHorizontalRule, EuiText, EuiSpacer, EuiPortal } from '@elastic/eui';
-import { documentationLinks } from '../../lib/documentation_links';
+import { EuiButtonEmpty, EuiPortal } from '@elastic/eui';
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
+import { ComponentStrings } from '../../../i18n';
+
+const { HelpMenu: strings } = ComponentStrings;
 
 export class HelpMenu extends PureComponent {
   state = { isFlyoutVisible: false };
@@ -23,19 +25,14 @@ export class HelpMenu extends PureComponent {
   render() {
     return (
       <Fragment>
-        <EuiHorizontalRule margin="none" />
-        <EuiSpacer />
-        <EuiText size="s">
-          <p>For Canvas specific information</p>
-        </EuiText>
-        <EuiSpacer />
-        <EuiButton fill iconType="popout" href={documentationLinks.canvas} target="_blank">
-          Canvas documentation
-        </EuiButton>
-        <EuiSpacer />
-        <EuiButton onClick={this.showFlyout} target="_blank">
-          Keyboard shortcuts
-        </EuiButton>
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          iconType="keyboardShortcut"
+          onClick={this.showFlyout}
+        >
+          {strings.getKeyboardShortcutsLinkLabel()}
+        </EuiButtonEmpty>
 
         {this.state.isFlyoutVisible && (
           <EuiPortal>

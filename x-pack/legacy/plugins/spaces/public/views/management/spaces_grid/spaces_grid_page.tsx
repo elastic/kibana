@@ -23,7 +23,7 @@ import { capabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-import { Feature } from '../../../../../xpack_main/types';
+import { Feature } from '../../../../../../../plugins/features/server';
 import { isReservedSpace } from '../../../../common';
 import { DEFAULT_SPACE_ID } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
@@ -113,6 +113,7 @@ class SpacesGridPageUI extends Component<Props, State> {
           columns={this.getColumnConfig()}
           hasActions
           pagination={true}
+          sorting={true}
           search={{
             box: {
               placeholder: intl.formatMessage({
@@ -234,7 +235,7 @@ class SpacesGridPageUI extends Component<Props, State> {
     });
 
     const getSpaces = spacesManager.getSpaces();
-    const getFeatures = kfetch({ method: 'get', pathname: '/api/features/v1' });
+    const getFeatures = kfetch({ method: 'get', pathname: '/api/features' });
 
     try {
       const [spaces, features] = await Promise.all([getSpaces, getFeatures]);
@@ -255,10 +256,9 @@ class SpacesGridPageUI extends Component<Props, State> {
     const { intl } = this.props;
     return [
       {
-        field: 'name',
+        field: 'initials',
         name: '',
         width: '50px',
-        sortable: true,
         render: (value: string, record: Space) => (
           <EuiLink
             onClick={() => {
@@ -300,7 +300,9 @@ class SpacesGridPageUI extends Component<Props, State> {
           id: 'xpack.spaces.management.spacesGridPage.featuresColumnName',
           defaultMessage: 'Features',
         }),
-        sortable: true,
+        sortable: (space: Space) => {
+          return getEnabledFeatures(this.state.features, space).length;
+        },
         render: (disabledFeatures: string[], record: Space) => {
           const enabledFeatureCount = getEnabledFeatures(this.state.features, record).length;
           if (enabledFeatureCount === this.state.features.length) {

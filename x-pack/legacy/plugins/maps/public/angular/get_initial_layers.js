@@ -9,10 +9,10 @@ import { EMSTMSSource } from '../layers/sources/ems_tms_source';
 import chrome from 'ui/chrome';
 import { getKibanaTileMap } from '../meta';
 
-export function getInitialLayers(savedMapLayerListJSON) {
+export function getInitialLayers(layerListJSON) {
 
-  if (savedMapLayerListJSON) {
-    return JSON.parse(savedMapLayerListJSON);
+  if (layerListJSON) {
+    return JSON.parse(layerListJSON);
   }
 
   const tilemapSourceFromKibana = getKibanaTileMap();

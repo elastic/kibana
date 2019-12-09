@@ -6,25 +6,27 @@
 
 import moment from 'moment-timezone';
 import * as React from 'react';
-import { useContext } from 'react';
-import { pure } from 'recompose';
+import { FormattedRelative } from '@kbn/i18n/react';
 
 import {
-  AppKibanaFrameworkAdapter,
-  KibanaConfigContext,
-} from '../../lib/adapters/framework/kibana_framework_adapter';
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+  DEFAULT_TIMEZONE_BROWSER,
+} from '../../../common/constants';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 import { getOrEmptyTagFromValue } from '../empty_value';
 import { LocalizedDateTooltip } from '../localized_date_tooltip';
 import { getMaybeDate } from './maybe_date';
 
-export const PreferenceFormattedDate = pure<{ value: Date }>(({ value }) => {
-  const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
+export const PreferenceFormattedDate = React.memo<{ value: Date }>(({ value }) => {
+  const [dateFormat] = useKibanaUiSetting(DEFAULT_DATE_FORMAT);
+  const [dateFormatTz] = useKibanaUiSetting(DEFAULT_DATE_FORMAT_TZ);
+  const [timezone] = useKibanaUiSetting(DEFAULT_TIMEZONE_BROWSER);
+
   return (
     <>
-      {config.dateFormat && config.dateFormatTz && config.timezone
-        ? moment
-            .tz(value, config.dateFormatTz === 'Browser' ? config.timezone : config.dateFormatTz)
-            .format(config.dateFormat)
+      {dateFormat && dateFormatTz && timezone
+        ? moment.tz(value, dateFormatTz === 'Browser' ? timezone : dateFormatTz).format(dateFormat)
         : moment.utc(value).toISOString()}
     </>
   );
@@ -40,7 +42,7 @@ PreferenceFormattedDate.displayName = 'PreferenceFormattedDate';
  * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
  * - the raw date value (e.g. 2019-03-22T00:47:46Z)
  */
-export const FormattedDate = pure<{
+export const FormattedDate = React.memo<{
   fieldName: string;
   value?: string | number | null;
 }>(
@@ -60,3 +62,36 @@ export const FormattedDate = pure<{
 );
 
 FormattedDate.displayName = 'FormattedDate';
+
+/**
+ * Renders the specified date value according to under/over one hour
+ * Under an hour = relative format
+ * Over an hour = in a format determined by the user's preferences,
+ * with a tooltip that renders:
+ * - the name of the field
+ * - a humanized relative date (e.g. 16 minutes ago)
+ * - a long representation of the date that includes the day of the week (e.g. Thursday, March 21, 2019 6:47pm)
+ * - the raw date value (e.g. 2019-03-22T00:47:46Z)
+ */
+
+export const FormattedRelativePreferenceDate = ({ value }: { value?: string | number | null }) => {
+  if (value == null) {
+    return getOrEmptyTagFromValue(value);
+  }
+  const maybeDate = getMaybeDate(value);
+  if (!maybeDate.isValid()) {
+    return getOrEmptyTagFromValue(value);
+  }
+  const date = maybeDate.toDate();
+  return (
+    <LocalizedDateTooltip date={date}>
+      {moment(date)
+        .add(1, 'hours')
+        .isBefore(new Date()) ? (
+        <PreferenceFormattedDate data-test-subj="preference-time" value={date} />
+      ) : (
+        <FormattedRelative data-test-subj="relative-time" value={date} />
+      )}
+    </LocalizedDateTooltip>
+  );
+};

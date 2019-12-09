@@ -32,8 +32,11 @@ describe('RangeFilterManager', function () {
     const indexPatternMock = {
       id: indexPatternId,
       fields: {
-        byName: {
-          field1: fieldMock
+        getByName: name => {
+          const fields = {
+            field1: fieldMock
+          };
+          return fields[name];
         }
       }
     };
@@ -79,8 +82,8 @@ describe('RangeFilterManager', function () {
         {
           range: {
             field1: {
-              gte: 1,
-              lte: 3
+              gt: 1,
+              lt: 3
             }
           }
         }

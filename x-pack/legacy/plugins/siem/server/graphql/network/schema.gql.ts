@@ -18,37 +18,92 @@ export const networkSchema = gql`
     unknown
   }
 
-  type TopNFlowNetworkEcsField {
-    bytes: Float
-    packets: Float
-    transport: String
-    direction: [NetworkDirectionEcs!]
+  type TopNetworkTablesEcsField {
+    bytes_in: Float
+    bytes_out: Float
   }
 
-  type TopNFlowItem {
-    count: Float
+  type GeoItem {
+    geo: GeoEcsFields
+    flowTarget: FlowTargetSourceDest
+  }
+
+  type AutonomousSystemItem {
+    name: String
+    number: Float
+  }
+
+  type TopCountriesItemSource {
+    country: String
+    destination_ips: Float
+    flows: Float
+    location: GeoItem
+    source_ips: Float
+  }
+
+  type TopCountriesItemDestination {
+    country: String
+    destination_ips: Float
+    flows: Float
+    location: GeoItem
+    source_ips: Float
+  }
+
+  type NetworkTopCountriesItem {
+    _id: String
+    source: TopCountriesItemSource
+    destination: TopCountriesItemDestination
+    network: TopNetworkTablesEcsField
+  }
+
+  type NetworkTopCountriesEdges {
+    node: NetworkTopCountriesItem!
+    cursor: CursorType!
+  }
+
+  type NetworkTopCountriesData {
+    edges: [NetworkTopCountriesEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
+  }
+
+  type TopNFlowItemSource {
+    autonomous_system: AutonomousSystemItem
     domain: [String!]
     ip: String
+    location: GeoItem
+    flows: Float
+    destination_ips: Float
   }
 
-  enum NetworkTopNFlowFields {
-    bytes
-    packets
-    ipCount
+  type TopNFlowItemDestination {
+    autonomous_system: AutonomousSystemItem
+    domain: [String!]
+    ip: String
+    location: GeoItem
+    flows: Float
+    source_ips: Float
   }
 
-  input NetworkTopNFlowSortField {
-    field: NetworkTopNFlowFields!
+  enum NetworkTopTablesFields {
+    bytes_in
+    bytes_out
+    flows
+    destination_ips
+    source_ips
+  }
+
+  input NetworkTopTablesSortField {
+    field: NetworkTopTablesFields!
     direction: Direction!
   }
 
   type NetworkTopNFlowItem {
     _id: String
-    source: TopNFlowItem
-    destination: TopNFlowItem
-    client: TopNFlowItem
-    server: TopNFlowItem
-    network: TopNFlowNetworkEcsField
+    source: TopNFlowItemSource
+    destination: TopNFlowItemDestination
+    network: TopNetworkTablesEcsField
   }
 
   type NetworkTopNFlowEdges {
@@ -90,22 +145,75 @@ export const networkSchema = gql`
     cursor: CursorType!
   }
 
+  type MatrixOverOrdinalHistogramData {
+    x: String!
+    y: Float!
+    g: String!
+  }
+
   type NetworkDnsData {
     edges: [NetworkDnsEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfoPaginated!
+    inspect: Inspect
+    histogram: [MatrixOverOrdinalHistogramData!]
+  }
+
+  enum NetworkHttpFields {
+    domains
+    lastHost
+    lastSourceIp
+    methods
+    path
+    requestCount
+    statuses
+  }
+
+  input NetworkHttpSortField {
+    direction: Direction!
+  }
+
+  type NetworkHttpItem {
+    _id: String
+    domains: [String!]!
+    lastHost: String
+    lastSourceIp: String
+    methods: [String!]!
+    path: String
+    requestCount: Float
+    statuses: [String!]!
+  }
+
+  type NetworkHttpEdges {
+    node: NetworkHttpItem!
+    cursor: CursorType!
+  }
+
+  type NetworkHttpData {
+    edges: [NetworkHttpEdges!]!
     totalCount: Float!
     pageInfo: PageInfoPaginated!
     inspect: Inspect
   }
 
   extend type Source {
-    "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
+    NetworkTopCountries(
+      id: String
+      filterQuery: String
+      ip: String
+      flowTarget: FlowTargetSourceDest!
+      pagination: PaginationInputPaginated!
+      sort: NetworkTopTablesSortField!
+      timerange: TimerangeInput!
+      defaultIndex: [String!]!
+    ): NetworkTopCountriesData!
     NetworkTopNFlow(
       id: String
       filterQuery: String
-      flowDirection: FlowDirection!
-      flowTarget: FlowTarget!
+      ip: String
+      flowTarget: FlowTargetSourceDest!
       pagination: PaginationInputPaginated!
-      sort: NetworkTopNFlowSortField!
+      sort: NetworkTopTablesSortField!
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkTopNFlowData!
@@ -118,5 +226,14 @@ export const networkSchema = gql`
       timerange: TimerangeInput!
       defaultIndex: [String!]!
     ): NetworkDnsData!
+    NetworkHttp(
+      id: String
+      filterQuery: String
+      ip: String
+      pagination: PaginationInputPaginated!
+      sort: NetworkHttpSortField!
+      timerange: TimerangeInput!
+      defaultIndex: [String!]!
+    ): NetworkHttpData!
   }
 `;

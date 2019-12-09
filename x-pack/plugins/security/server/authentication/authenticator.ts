@@ -11,7 +11,7 @@ import {
   LoggerFactory,
   Logger,
   HttpServiceSetup,
-  ClusterClient,
+  IClusterClient,
 } from '../../../../../src/core/server';
 import { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
@@ -25,11 +25,13 @@ import {
   SAMLAuthenticationProvider,
   TokenAuthenticationProvider,
   OIDCAuthenticationProvider,
+  PKIAuthenticationProvider,
   isSAMLRequestQuery,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
+import { SessionInfo } from '../../public/types';
 
 /**
  * The shape of the session that is actually stored in the cookie.
@@ -44,13 +46,24 @@ export interface ProviderSession {
    * The Unix time in ms when the session should be considered expired. If `null`, session will stay
    * active until the browser is closed.
    */
-  expires: number | null;
+  idleTimeoutExpiration: number | null;
+
+  /**
+   * The Unix time in ms which is the max total lifespan of the session. If `null`, session expire
+   * time can be extended indefinitely.
+   */
+  lifespanExpiration: number | null;
 
   /**
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
    * entirely determined by the authentication provider that owns the current session.
    */
   state: unknown;
+
+  /**
+   * Cookie "Path" attribute that is validated against the current Kibana server configuration.
+   */
+  path: string;
 }
 
 /**
@@ -66,13 +79,20 @@ export interface ProviderLoginAttempt {
    * Login attempt can have any form and defined by the specific provider.
    */
   value: unknown;
+
+  /**
+   * Indicates whether login attempt should be performed in a "stateless" manner. If `true` provider
+   * performing login will neither be able to retrieve or update existing state if any nor persist
+   * any new state it may produce as a result of the login attempt. It's `false` by default.
+   */
+  stateless?: boolean;
 }
 
 export interface AuthenticatorOptions {
-  config: Pick<ConfigType, 'sessionTimeout' | 'authc'>;
+  config: Pick<ConfigType, 'session' | 'authc'>;
   basePath: HttpServiceSetup['basePath'];
   loggers: LoggerFactory;
-  clusterClient: PublicMethodsOf<ClusterClient>;
+  clusterClient: IClusterClient;
   sessionStorageFactory: SessionStorageFactory<ProviderSession>;
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
 }
@@ -91,6 +111,7 @@ const providerMap = new Map<
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
   ['oidc', OIDCAuthenticationProvider],
+  ['pki', PKIAuthenticationProvider],
 ]);
 
 function assertRequest(request: KibanaRequest) {
@@ -144,9 +165,19 @@ export class Authenticator {
   private readonly providers: Map<string, BaseAuthenticationProvider>;
 
   /**
-   * Session duration in ms. If `null` session will stay active until the browser is closed.
+   * Which base path the HTTP server is hosted on.
    */
-  private readonly ttl: number | null = null;
+  private readonly serverBasePath: string;
+
+  /**
+   * Session timeout in ms. If `null` session will stay active until the browser is closed.
+   */
+  private readonly idleTimeout: number | null = null;
+
+  /**
+   * Session max lifespan in ms. If `null` session may live indefinitely.
+   */
+  private readonly lifespan: number | null = null;
 
   /**
    * Internal authenticator logger.
@@ -192,8 +223,11 @@ export class Authenticator {
         ] as [string, BaseAuthenticationProvider];
       })
     );
+    this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
-    this.ttl = this.options.config.sessionTimeout;
+    // only set these vars if they are defined in options (otherwise coalesce to existing/default)
+    this.idleTimeout = this.options.config.session.idleTimeout;
+    this.lifespan = this.options.config.session.lifespan;
   }
 
   /**
@@ -220,7 +254,7 @@ export class Authenticator {
 
     // If we detect an existing session that belongs to a different provider than the one requested
     // to perform a login we should clear such session.
-    let existingSession = await this.getSessionValue(sessionStorage);
+    let existingSession = attempt.stateless ? null : await this.getSessionValue(sessionStorage);
     if (existingSession && existingSession.provider !== attempt.provider) {
       this.logger.debug(
         `Clearing existing session of another ("${existingSession.provider}") provider.`
@@ -247,11 +281,14 @@ export class Authenticator {
       (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401);
     if (existingSession && shouldClearSession) {
       sessionStorage.clear();
-    } else if (authenticationResult.shouldUpdateState()) {
+    } else if (!attempt.stateless && authenticationResult.shouldUpdateState()) {
+      const { idleTimeoutExpiration, lifespanExpiration } = this.calculateExpiry(existingSession);
       sessionStorage.set({
         state: authenticationResult.state,
         provider: attempt.provider,
-        expires: this.ttl && Date.now() + this.ttl,
+        idleTimeoutExpiration,
+        lifespanExpiration,
+        path: this.serverBasePath,
       });
     }
 
@@ -306,10 +343,18 @@ export class Authenticator {
 
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
     const sessionValue = await this.getSessionValue(sessionStorage);
+    const providerName = this.getProviderName(request.query);
     if (sessionValue) {
       sessionStorage.clear();
 
       return this.providers.get(sessionValue.provider)!.logout(request, sessionValue.state);
+    } else if (providerName) {
+      // provider name is passed in a query param and sourced from the browser's local storage;
+      // hence, we can't assume that this provider exists, so we have to check it
+      const provider = this.providers.get(providerName);
+      if (provider) {
+        return provider.logout(request, null);
+      }
     }
 
     // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
@@ -323,6 +368,29 @@ export class Authenticator {
     }
 
     return DeauthenticationResult.notHandled();
+  }
+
+  /**
+   * Returns session information for the current request.
+   * @param request Request instance.
+   */
+  async getSessionInfo(request: KibanaRequest): Promise<SessionInfo | null> {
+    assertRequest(request);
+
+    const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
+    const sessionValue = await this.getSessionValue(sessionStorage);
+
+    if (sessionValue) {
+      // We can't rely on the client's system clock, so in addition to returning expiration timestamps, we also return
+      // the current server time -- that way the client can calculate the relative time to expiration.
+      return {
+        now: Date.now(),
+        idleTimeoutExpiration: sessionValue.idleTimeoutExpiration,
+        lifespanExpiration: sessionValue.lifespanExpiration,
+        provider: sessionValue.provider,
+      };
+    }
+    return null;
   }
 
   /**
@@ -401,13 +469,35 @@ export class Authenticator {
     ) {
       sessionStorage.clear();
     } else if (sessionCanBeUpdated) {
+      const { idleTimeoutExpiration, lifespanExpiration } = this.calculateExpiry(existingSession);
       sessionStorage.set({
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSession!.state,
         provider: providerType,
-        expires: this.ttl && Date.now() + this.ttl,
+        idleTimeoutExpiration,
+        lifespanExpiration,
+        path: this.serverBasePath,
       });
     }
+  }
+
+  private getProviderName(query: any): string | null {
+    if (query && query.provider && typeof query.provider === 'string') {
+      return query.provider;
+    }
+    return null;
+  }
+
+  private calculateExpiry(
+    existingSession: ProviderSession | null
+  ): { idleTimeoutExpiration: number | null; lifespanExpiration: number | null } {
+    let lifespanExpiration = this.lifespan && Date.now() + this.lifespan;
+    if (existingSession && existingSession.lifespanExpiration && this.lifespan) {
+      lifespanExpiration = existingSession.lifespanExpiration;
+    }
+    const idleTimeoutExpiration = this.idleTimeout && Date.now() + this.idleTimeout;
+
+    return { idleTimeoutExpiration, lifespanExpiration };
   }
 }

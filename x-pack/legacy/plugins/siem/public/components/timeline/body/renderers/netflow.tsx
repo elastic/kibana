@@ -6,7 +6,6 @@
 
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { Ecs } from '../../../../graphql/types';
 import { asArrayIfExists } from '../../../../lib/helpers';
@@ -51,9 +50,14 @@ import {
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../../../source_destination/field_names';
 
-export const NetflowRenderer = pure<{ data: Ecs }>(({ data }) => (
+interface NetflowRendererProps {
+  data: Ecs;
+  timelineId: string;
+}
+
+export const NetflowRenderer = React.memo<NetflowRendererProps>(({ data, timelineId }) => (
   <Netflow
-    contextId="auditd-netflow"
+    contextId={`netflow-renderer-${timelineId}-${data._id}`}
     destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
     destinationGeoContinentName={asArrayIfExists(
       get(DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME, data)

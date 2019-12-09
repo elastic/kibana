@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SECONDS_REGEX = /^[1-9][0-9]*s$/;
-export const MINUTES_REGEX = /^[1-9][0-9]*m$/;
-export const HOURS_REGEX = /^[1-9][0-9]*h$/;
-export const DAYS_REGEX = /^[1-9][0-9]*d$/;
+import Joi from 'joi';
+
+const SECONDS_REGEX = /^[1-9][0-9]*s$/;
+const MINUTES_REGEX = /^[1-9][0-9]*m$/;
+const HOURS_REGEX = /^[1-9][0-9]*h$/;
+const DAYS_REGEX = /^[1-9][0-9]*d$/;
 
 export function parseDuration(duration: string): number {
   const parsed = parseInt(duration, 10);
@@ -22,6 +24,23 @@ export function parseDuration(duration: string): number {
   }
   throw new Error(
     `Invalid duration "${duration}". Durations must be of the form {number}x. Example: 5s, 5m, 5h or 5d"`
+  );
+}
+
+export function getDurationSchema() {
+  return Joi.alternatives().try(
+    Joi.string()
+      .regex(SECONDS_REGEX, 'seconds')
+      .required(),
+    Joi.string()
+      .regex(MINUTES_REGEX, 'minutes')
+      .required(),
+    Joi.string()
+      .regex(HOURS_REGEX, 'hours')
+      .required(),
+    Joi.string()
+      .regex(DAYS_REGEX, 'days')
+      .required()
   );
 }
 

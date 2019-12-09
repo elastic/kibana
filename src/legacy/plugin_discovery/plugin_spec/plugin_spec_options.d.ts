@@ -17,12 +17,16 @@
  * under the License.
  */
 import { Server } from '../../server/kbn_server';
-import { Capabilities } from '../../../core/public';
+import { Capabilities } from '../../../core/server';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { SavedObjectsManagementDefinition } from '../../../core/server/saved_objects/management';
 
 export type InitPluginFunction = (server: Server) => void;
 export interface UiExports {
   injectDefaultVars?: (server: Server) => { [key: string]: any };
   styleSheetPaths?: string;
+  savedObjectsManagement?: SavedObjectsManagementDefinition;
+  mappings?: unknown;
   visTypes?: string[];
   interpreter?: string[];
   hacks?: string[];

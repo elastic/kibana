@@ -6,12 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Component } from 'react';
-import { toastNotifications } from 'ui/notify';
+import { toMountPoint } from '../../../../../../../../../../src/plugins/kibana_react/public';
 import { startMLJob } from '../../../../../services/rest/ml';
-import { getAPMIndexPattern } from '../../../../../services/rest/savedObjects';
 import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
+import { KibanaCoreContext } from '../../../../../../../observability/public';
 
 interface Props {
   isOpen: boolean;
@@ -21,35 +21,14 @@ interface Props {
 
 interface State {
   isCreatingJob: boolean;
-  hasIndexPattern: boolean;
 }
 
 export class MachineLearningFlyout extends Component<Props, State> {
+  static contextType = KibanaCoreContext;
+
   public state: State = {
-    isCreatingJob: false,
-    hasIndexPattern: false
+    isCreatingJob: false
   };
-  public mounted = false;
-
-  public componentWillUnmount() {
-    this.mounted = false;
-  }
-
-  public async componentDidMount() {
-    this.mounted = true;
-    const indexPattern = await getAPMIndexPattern();
-
-    // setTimeout:0 hack forces the state update to wait for next tick
-    // in case the component is mid-unmount :/
-    setTimeout(() => {
-      if (!this.mounted) {
-        return;
-      }
-      this.setState({
-        hasIndexPattern: !!indexPattern
-      });
-    }, 0);
-  }
 
   public onClickCreate = async ({
     transactionType
@@ -58,11 +37,12 @@ export class MachineLearningFlyout extends Component<Props, State> {
   }) => {
     this.setState({ isCreatingJob: true });
     try {
+      const { http } = this.context;
       const { serviceName } = this.props.urlParams;
       if (!serviceName) {
         throw new Error('Service name is required to create this ML job');
       }
-      const res = await startMLJob({ serviceName, transactionType });
+      const res = await startMLJob({ http, serviceName, transactionType });
       const didSucceed = res.datafeeds[0].success && res.jobs[0].success;
       if (!didSucceed) {
         throw new Error('Creating ML job failed');
@@ -77,6 +57,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   };
 
   public addErrorToast = () => {
+    const core = this.context;
     const { urlParams } = this.props;
     const { serviceName } = urlParams;
 
@@ -84,14 +65,14 @@ export class MachineLearningFlyout extends Component<Props, State> {
       return;
     }
 
-    toastNotifications.addWarning({
+    core.notifications.toasts.addWarning({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationTitle',
         {
           defaultMessage: 'Job creation failed'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreationFailedNotificationText',
@@ -110,6 +91,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   }: {
     transactionType: string;
   }) => {
+    const core = this.context;
     const { urlParams } = this.props;
     const { serviceName } = urlParams;
 
@@ -117,14 +99,14 @@ export class MachineLearningFlyout extends Component<Props, State> {
       return;
     }
 
-    toastNotifications.addSuccess({
+    core.notifications.toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationTitle',
         {
           defaultMessage: 'Job successfully created'
         }
       ),
-      text: (
+      text: toMountPoint(
         <p>
           {i18n.translate(
             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText',
@@ -137,17 +119,19 @@ export class MachineLearningFlyout extends Component<Props, State> {
               }
             }
           )}{' '}
-          <MLJobLink
-            serviceName={serviceName}
-            transactionType={transactionType}
-          >
-            {i18n.translate(
-              'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
-              {
-                defaultMessage: 'View job'
-              }
-            )}
-          </MLJobLink>
+          <KibanaCoreContext.Provider value={core}>
+            <MLJobLink
+              serviceName={serviceName}
+              transactionType={transactionType}
+            >
+              {i18n.translate(
+                'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
+                {
+                  defaultMessage: 'View job'
+                }
+              )}
+            </MLJobLink>
+          </KibanaCoreContext.Provider>
         </p>
       )
     });
@@ -156,7 +140,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   public render() {
     const { isOpen, onClose, urlParams } = this.props;
     const { serviceName } = urlParams;
-    const { isCreatingJob, hasIndexPattern } = this.state;
+    const { isCreatingJob } = this.state;
 
     if (!isOpen || !serviceName) {
       return null;
@@ -164,7 +148,6 @@ export class MachineLearningFlyout extends Component<Props, State> {
 
     return (
       <MachineLearningFlyoutView
-        hasIndexPattern={hasIndexPattern}
         isCreatingJob={isCreatingJob}
         onClickCreate={this.onClickCreate}
         onClose={onClose}

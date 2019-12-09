@@ -11,10 +11,11 @@ import {
   EuiText,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { ChangesNeeded } from '../../blurbs';
+import { ChangesNeeded, CloudDeployment } from '../../blurbs';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function ExplainExporters({ context, property, data }) {
+export function ExplainExporters({ reason }) {
+  const { context, property, data } = reason;
   return (
     <Fragment>
       <ChangesNeeded />
@@ -68,7 +69,22 @@ export function ExplainExporters({ context, property, data }) {
 }
 
 ExplainExporters.propTypes = {
-  context: PropTypes.string.isRequired,
-  property: PropTypes.string.isRequired,
-  data: PropTypes.string.isRequired
+  reason: PropTypes.object.isRequired,
 };
+
+export function ExplainExportersCloud() {
+  return (
+    <Fragment>
+      <CloudDeployment />
+      <EuiHorizontalRule size="half" />
+      <EuiText className="eui-textLeft">
+        <p>
+          <FormattedMessage
+            id="xpack.monitoring.noData.explanations.exportersCloudDescription"
+            defaultMessage="In Elastic Cloud, your monitoring data is stored in your dedicated monitoring cluster."
+          />
+        </p>
+      </EuiText>
+    </Fragment>
+  );
+}

@@ -8,13 +8,12 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-
 import chrome from 'ui/chrome';
-import { pure } from 'recompose';
+
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import { GetKpiHostsQuery, KpiHostsData } from '../../graphql/types';
 import { inputsModel, inputsSelectors, State } from '../../store';
-import { createFilter } from '../helpers';
+import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplateProps } from '../query_template';
 
 import { kpiHostsQuery } from './index.gql_query';
@@ -37,11 +36,11 @@ export interface KpiHostsProps extends QueryTemplateProps {
   children: (args: KpiHostsArgs) => React.ReactNode;
 }
 
-const KpiHostsComponentQuery = pure<KpiHostsProps & KpiHostsReducer>(
+const KpiHostsComponentQuery = React.memo<KpiHostsProps & KpiHostsReducer>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <Query<GetKpiHostsQuery.Query, GetKpiHostsQuery.Variables>
       query={kpiHostsQuery}
-      fetchPolicy="cache-and-network"
+      fetchPolicy={getDefaultFetchPolicy()}
       notifyOnNetworkStatusChange
       skip={skip}
       variables={{

@@ -18,4 +18,3 @@
  */
 
 import './kbn_top_nav';
-import './kbn_top_nav2';

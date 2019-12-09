@@ -1,10 +1,13 @@
 @import 'src/legacy/ui/public/styles/styling_constants';
 
+// Elastic charts
+@import '@elastic/eui/src/components/tool_tip/variables';
+@import '@elastic/eui/src/components/tool_tip/mixins';
+@import '@elastic/charts/dist/theme';
+@import '@elastic/eui/src/themes/charts/theme';
+
 // Public UI styles
 @import 'src/legacy/ui/public/index';
-
-// Context styles
-@import './context/index';
 
 // Dev tools styles
 @import './dev_tools/index';
@@ -23,9 +26,6 @@
 
 // Management styles
 @import './management/index';
-
-// Doc Viewer
-@import './doc_viewer/index';
 
 // Dashboard styles
 // MUST STAY AT THE BOTTOM BECAUSE OF DARK THEME IMPORTS

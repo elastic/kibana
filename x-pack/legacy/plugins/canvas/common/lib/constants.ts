@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SHAREABLE_RUNTIME_NAME } from '../../shareable_runtime/constants';
+
 export const CANVAS_TYPE = 'canvas-workpad';
 export const CUSTOM_ELEMENT_TYPE = 'canvas-element';
 export const CANVAS_APP = 'canvas';
@@ -16,8 +18,6 @@ export const API_ROUTE_WORKPAD_STRUCTURES = `${API_ROUTE}/workpad-structures`;
 export const API_ROUTE_CUSTOM_ELEMENT = `${API_ROUTE}/custom-element`;
 export const LOCALSTORAGE_PREFIX = `kibana.canvas`;
 export const LOCALSTORAGE_CLIPBOARD = `${LOCALSTORAGE_PREFIX}.clipboard`;
-export const LOCALSTORAGE_AUTOCOMPLETE_ENABLED = `${LOCALSTORAGE_PREFIX}.isAutocompleteEnabled`;
-export const LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE = `${LOCALSTORAGE_PREFIX}.expressionEditorFontSize`;
 export const LOCALSTORAGE_LASTPAGE = 'canvas:lastpage';
 export const FETCH_TIMEOUT = 30000; // 30 seconds
 export const CANVAS_USAGE_TYPE = 'canvas';
@@ -35,3 +35,7 @@ export const CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR = `canvasLayout__stageContent`
 export const DATATABLE_COLUMN_TYPES = ['string', 'number', 'null', 'boolean', 'date'];
 export const LAUNCHED_FULLSCREEN = 'workpad-full-screen-launch';
 export const LAUNCHED_FULLSCREEN_AUTOPLAY = 'workpad-full-screen-launch-with-autoplay';
+export const API_ROUTE_SHAREABLE_BASE = '/public/canvas';
+export const API_ROUTE_SHAREABLE_ZIP = '/public/canvas/zip';
+export const API_ROUTE_SHAREABLE_RUNTIME = '/public/canvas/runtime';
+export const API_ROUTE_SHAREABLE_RUNTIME_DOWNLOAD = `/public/canvas/${SHAREABLE_RUNTIME_NAME}.js`;

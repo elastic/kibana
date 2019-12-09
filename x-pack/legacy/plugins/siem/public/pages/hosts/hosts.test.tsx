@@ -5,22 +5,45 @@
  */
 
 import { mount } from 'enzyme';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { Router } from 'react-router-dom';
+import { MockedProvider } from 'react-apollo/test-utils';
+import { ActionCreator } from 'typescript-fsa';
 
 import '../../mock/match_media';
-import '../../mock/ui_settings';
-import { Hosts } from './hosts';
 
+import { SiemNavigation } from '../../components/navigation';
 import { mocksSource } from '../../containers/source/mock';
+import { wait } from '../../lib/helpers';
 import { TestProviders } from '../../mock';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { cloneDeep } from 'lodash/fp';
+import { mockUiSettings } from '../../mock/ui_settings';
+import { InputsModelId } from '../../store/inputs/constants';
+import { HostsComponentProps } from './types';
+import { Hosts } from './hosts';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
+
+jest.mock('../../lib/settings/use_kibana_ui_setting');
+
+const mockUseKibanaCore = useKibanaCore as jest.Mock;
+jest.mock('../../lib/compose/kibana_core');
+mockUseKibanaCore.mockImplementation(() => ({
+  uiSettings: mockUiSettings,
+}));
 
 jest.mock('ui/documentation_links', () => ({
   documentationLinks: {
     kibana: 'http://www.example.com',
   },
+}));
+
+// Test will fail because we will to need to mock some core services to make the test work
+// For now let's forget about SiemSearchBar and QueryBar
+jest.mock('../../components/search_bar', () => ({
+  SiemSearchBar: () => null,
+}));
+jest.mock('../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 let localSource: Array<{
@@ -58,18 +81,25 @@ const mockHistory = {
   listen: jest.fn(),
 };
 
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
+const to = new Date('2018-03-23T18:49:23.132Z').valueOf();
+const from = new Date('2018-03-24T03:33:52.253Z').valueOf();
 
 describe('Hosts - rendering', () => {
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
+  const hostProps: HostsComponentProps = {
+    from,
+    to,
+    setQuery: jest.fn(),
+    isInitializing: false,
+    setAbsoluteRangeDatePicker: (jest.fn() as unknown) as ActionCreator<{
+      from: number;
+      id: InputsModelId;
+      to: number;
+    }>,
+    query: { query: '', language: 'kuery' },
+    filters: [],
+    hostsPagePath: '',
+  };
 
-  afterAll(() => {
-    console.error = originalError;
-  });
   beforeEach(() => {
     localSource = cloneDeep(mocksSource);
   });
@@ -80,7 +110,7 @@ describe('Hosts - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Hosts />
+            <Hosts {...hostProps} />
           </Router>
         </MockedProvider>
       </TestProviders>
@@ -97,7 +127,7 @@ describe('Hosts - rendering', () => {
       <TestProviders>
         <MockedProvider mocks={localSource} addTypename={false}>
           <Router history={mockHistory}>
-            <Hosts />
+            <Hosts {...hostProps} />
           </Router>
         </MockedProvider>
       </TestProviders>
@@ -106,5 +136,21 @@ describe('Hosts - rendering', () => {
     await new Promise(resolve => setTimeout(resolve));
     wrapper.update();
     expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+  });
+
+  test('it should render tab navigation', async () => {
+    localSource[0].result.data.source.status.indicesExist = true;
+    const wrapper = mount(
+      <TestProviders>
+        <MockedProvider mocks={localSource} addTypename={false}>
+          <Router history={mockHistory}>
+            <Hosts {...hostProps} />
+          </Router>
+        </MockedProvider>
+      </TestProviders>
+    );
+    await wait();
+    wrapper.update();
+    expect(wrapper.find(SiemNavigation).exists()).toBe(true);
   });
 });

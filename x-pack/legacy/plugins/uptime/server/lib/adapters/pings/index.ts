@@ -6,4 +6,3 @@
 
 export * from './adapter_types';
 export { ElasticsearchPingsAdapter } from './elasticsearch_pings_adapter';
-export { MemoryPingsAdapter } from './memory_pings_adapter';

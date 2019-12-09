@@ -4,6 +4,8 @@
 
 ## HttpFetchOptions.query property
 
+The query string for an HTTP request. See [HttpFetchQuery](./kibana-plugin-public.httpfetchquery.md)<!-- -->.
+
 <b>Signature:</b>
 
 ```typescript

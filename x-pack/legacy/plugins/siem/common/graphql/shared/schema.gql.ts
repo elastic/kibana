@@ -53,6 +53,11 @@ export const sharedSchema = gql`
     source
   }
 
+  enum FlowTargetSourceDest {
+    destination
+    source
+  }
+
   enum FlowDirection {
     uniDirectional
     biDirectional

@@ -6,13 +6,12 @@
 
 import path from 'path';
 import fs from 'fs';
-import { promisify } from 'bluebird';
-import mkdirp from 'mkdirp';
+import { promisify } from 'util';
 import { PDFImage } from 'pdf-image';
 import PDFJS from 'pdfjs-dist';
 import { comparePngs } from '../../../../../test/functional/services/lib/compare_pngs';
 
-const mkdirAsync = promisify(mkdirp);
+const mkdirAsync = promisify(fs.mkdir);
 
 export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screenshotsDirectory, log) {
   log.debug(`checkIfPdfsMatch: ${actualPdfPath} vs ${baselinePdfPath}`);
@@ -21,8 +20,8 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   const sessionDirectoryPath = path.resolve(screenshotsDirectory, 'session');
   const failureDirectoryPath = path.resolve(screenshotsDirectory, 'failure');
 
-  await mkdirAsync(sessionDirectoryPath);
-  await mkdirAsync(failureDirectoryPath);
+  await mkdirAsync(sessionDirectoryPath, { recursive: true });
+  await mkdirAsync(failureDirectoryPath, { recursive: true });
 
   const actualPdfFileName = path.basename(actualPdfPath, '.pdf');
   const baselinePdfFileName = path.basename(baselinePdfPath, '.pdf');

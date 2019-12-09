@@ -22,12 +22,15 @@ interface VerticalScrollPanelProps<Child> {
     bottomChild: Child;
     pagesAbove: number;
     pagesBelow: number;
+    fromScroll: boolean;
   }) => void;
   target: Child | undefined;
   height: number;
   width: number;
   hideScrollbar?: boolean;
   'data-test-subj'?: string;
+  isLocked: boolean;
+  entriesCount: number;
 }
 
 interface VerticalScrollPanelSnapshot<Child> {
@@ -52,11 +55,17 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   public scrollRef = React.createRef<HTMLDivElement>();
   public childRefs = new Map<Child, MeasurableChild>();
   public childDimensions = new Map<Child, Rect>();
+  private nextScrollEventFromCenterTarget = false;
 
   public handleScroll: React.UIEventHandler<HTMLDivElement> = throttle(
     SCROLL_THROTTLE_INTERVAL,
     () => {
-      this.reportVisibleChildren();
+      // If this event was fired by the centerTarget method modifying the scrollTop,
+      // then don't send `fromScroll: true` to reportVisibleChildren. The rest of the
+      // app needs to respond differently depending on whether the user is scrolling through
+      // the pane manually, versus whether the pane is updating itself in response to new data
+      this.reportVisibleChildren(!this.nextScrollEventFromCenterTarget);
+      this.nextScrollEventFromCenterTarget = false;
     }
   );
 
@@ -71,18 +80,15 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   public updateChildDimensions = () => {
     this.childDimensions = new Map<Child, Rect>(
       sortDimensionsByTop(
-        Array.from(this.childRefs.entries()).reduce(
-          (accumulatedDimensions, [key, child]) => {
-            const currentOffsetRect = child.getOffsetRect();
+        Array.from(this.childRefs.entries()).reduce((accumulatedDimensions, [key, child]) => {
+          const currentOffsetRect = child.getOffsetRect();
 
-            if (currentOffsetRect !== null) {
-              accumulatedDimensions.push([key, currentOffsetRect]);
-            }
+          if (currentOffsetRect !== null) {
+            accumulatedDimensions.push([key, currentOffsetRect]);
+          }
 
-            return accumulatedDimensions;
-          },
-          [] as Array<[any, Rect]>
-        )
+          return accumulatedDimensions;
+        }, [] as Array<[any, Rect]>)
       )
     );
   };
@@ -121,7 +127,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     };
   };
 
-  public reportVisibleChildren = () => {
+  public reportVisibleChildren = (fromScroll: boolean = false) => {
     const { onVisibleChildrenChange } = this.props;
     const visibleChildren = this.getVisibleChildren();
     const scrollPosition = this.getScrollPosition();
@@ -134,6 +140,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
       bottomChild: visibleChildren.bottomChild,
       middleChild: visibleChildren.middleChild,
       topChild: visibleChildren.topChild,
+      fromScroll,
       ...scrollPosition,
     });
   };
@@ -146,23 +153,31 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     } = this;
 
     if (scrollRef.current === null || !target || childDimensions.size <= 0) {
-      return;
+      return false;
     }
 
     const targetDimensions = childDimensions.get(target);
 
     if (targetDimensions) {
       const targetOffset = typeof offset === 'undefined' ? targetDimensions.height / 2 : offset;
+      // Flag the scrollTop change that's about to happen as programmatic, as
+      // opposed to being in direct response to user input
+      this.nextScrollEventFromCenterTarget = true;
       scrollRef.current.scrollTop = targetDimensions.top + targetOffset - scrollViewHeight / 2;
+      return true;
     }
+    return false;
   };
 
   public handleUpdatedChildren = (target: Child | undefined, offset: number | undefined) => {
     this.updateChildDimensions();
+    let centerTargetWillReportChildren = false;
     if (!!target) {
-      this.centerTarget(target, offset);
+      centerTargetWillReportChildren = this.centerTarget(target, offset);
     }
-    this.reportVisibleChildren();
+    if (!centerTargetWillReportChildren) {
+      this.reportVisibleChildren();
+    }
   };
 
   public componentDidMount() {
@@ -206,7 +221,16 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     prevState: {},
     snapshot: VerticalScrollPanelSnapshot<Child>
   ) {
-    this.handleUpdatedChildren(snapshot.scrollTarget, snapshot.scrollOffset);
+    if (
+      prevProps.height !== this.props.height ||
+      prevProps.target !== this.props.target ||
+      prevProps.entriesCount !== this.props.entriesCount
+    ) {
+      this.handleUpdatedChildren(snapshot.scrollTarget, snapshot.scrollOffset);
+    }
+    if (prevProps.isLocked && !this.props.isLocked && this.scrollRef.current) {
+      this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight;
+    }
   }
 
   public componentWillUnmount() {
@@ -223,10 +247,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
         style={{ height, width: width + scrollbarOffset }}
         scrollbarOffset={scrollbarOffset}
         onScroll={this.handleScroll}
-        innerRef={
-          /* workaround for missing RefObject support in styled-components typings */
-          this.scrollRef as any
-        }
+        ref={this.scrollRef}
       >
         {typeof children === 'function' ? children(this.registerChild) : null}
       </ScrollPanelWrapper>
@@ -234,7 +255,11 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   }
 }
 
-const ScrollPanelWrapper = euiStyled.div.attrs<{ scrollbarOffset?: number }>({})`
+interface ScrollPanelWrapperProps {
+  scrollbarOffset?: number;
+}
+
+const ScrollPanelWrapper = euiStyled.div<ScrollPanelWrapperProps>`
   overflow-x: hidden;
   overflow-y: scroll;
   position: relative;

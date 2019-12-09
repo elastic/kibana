@@ -32,7 +32,7 @@ import {
  * @param {Object} shardStats: per-node information about shards
  * @return {Array} node info combined with metrics for each node from handle_response
  */
-export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
+export async function getNodes(req, esIndexPattern, pageOfNodes, clusterStats, shardStats) {
   checkParam(esIndexPattern, 'esIndexPattern in getNodes');
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
@@ -51,6 +51,15 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
     calculateAuto(100, duration).asSeconds()
   );
 
+  const uuidsToInclude = pageOfNodes.map(node => node.uuid);
+  const filters = [
+    {
+      terms: {
+        'source_node.uuid': uuidsToInclude
+      }
+    }
+  ];
+
   const params = {
     index: esIndexPattern,
     size: config.get('xpack.monitoring.max_bucket_size'),
@@ -61,6 +70,7 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
         start,
         end,
         clusterUuid,
+        filters,
         metric: metricFields
       }),
       collapse: {
@@ -70,9 +80,19 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
         nodes: {
           terms: {
             field: `source_node.uuid`,
+            include: uuidsToInclude,
             size: config.get('xpack.monitoring.max_bucket_size')
           },
-          aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize)
+          aggs: {
+            by_date: {
+              date_histogram: {
+                field: 'timestamp',
+                min_doc_count: 1,
+                fixed_interval: bucketSize + 's'
+              },
+              aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize)
+            }
+          }
         }
       },
       sort: [ { timestamp: { order: 'desc' } } ]
@@ -87,5 +107,5 @@ export async function getNodes(req, esIndexPattern, clusterStats, shardStats) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
 
-  return handleResponse(response, clusterStats, shardStats, { min, max, bucketSize });
+  return handleResponse(response, clusterStats, shardStats, pageOfNodes, { min, max, bucketSize });
 }

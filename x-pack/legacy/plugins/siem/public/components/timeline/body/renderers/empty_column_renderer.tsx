@@ -6,15 +6,15 @@
 
 import * as React from 'react';
 
-import { ColumnHeader } from '../column_headers/column_header';
-import { ColumnRenderer } from './column_renderer';
+import { TimelineNonEcsData } from '../../../../graphql/types';
 import { DraggableWrapper, DragEffects } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { parseQueryValue } from './parse_query_value';
+import { getEmptyValue } from '../../../empty_value';
 import { EXISTS_OPERATOR } from '../../data_providers/data_provider';
 import { Provider } from '../../data_providers/provider';
-import { TimelineNonEcsData } from '../../../../graphql/types';
-import { getEmptyValue } from '../../../empty_value';
+import { ColumnHeader } from '../column_headers/column_header';
+import { ColumnRenderer } from './column_renderer';
+import { parseQueryValue } from './parse_query_value';
 
 export const dataNotExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex(item => item.field === columnName) === -1;
@@ -26,19 +26,20 @@ export const emptyColumnRenderer: ColumnRenderer = {
     columnName,
     eventId,
     field,
-    width,
+    timelineId,
+    truncate,
   }: {
     columnName: string;
     eventId: string;
     field: ColumnHeader;
-    width?: string;
+    timelineId: string;
+    truncate?: boolean;
   }) => (
     <DraggableWrapper
-      key={`timeline-draggable-column-${columnName}-for-event-${eventId}-${field.id}`}
       dataProvider={{
         enabled: true,
         id: escapeDataProviderId(
-          `id-timeline-column-${columnName}-for-event-${eventId}-${field.id}`
+          `empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`
         ),
         name: `${columnName}: ${parseQueryValue(null)}`,
         queryMatch: {
@@ -51,6 +52,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
         kqlQuery: '',
         and: [],
       }}
+      key={`empty-column-renderer-draggable-wrapper-${timelineId}-${columnName}-${eventId}-${field.id}`}
       render={(dataProvider, _, snapshot) =>
         snapshot.isDragging ? (
           <DragEffects>
@@ -60,7 +62,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
           <span>{getEmptyValue()}</span>
         )
       }
-      width={width}
+      truncate={truncate}
     />
   ),
 };

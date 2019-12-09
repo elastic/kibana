@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LensFieldIcon renders properly 1`] = `
+<FieldIcon
+  className="lnsFieldListPanel__fieldIcon"
+  size="m"
+  type="date"
+  useColor={true}
+/>
+`;

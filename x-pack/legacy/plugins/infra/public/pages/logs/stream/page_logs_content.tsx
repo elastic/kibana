@@ -78,7 +78,15 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       </WithLogFilter>
       <PageContent key={`${sourceId}-${version}`}>
         <WithLogPosition>
-          {({ isAutoReloading, jumpToTargetPosition, reportVisiblePositions, targetPosition }) => (
+          {({
+            isAutoReloading,
+            jumpToTargetPosition,
+            reportVisiblePositions,
+            targetPosition,
+            scrollLockLiveStreaming,
+            scrollUnlockLiveStreaming,
+            isScrollLocked,
+          }) => (
             <WithStreamItems initializeOnMount={!isAutoReloading}>
               {({
                 currentHighlightKey,
@@ -109,6 +117,11 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   setFlyoutVisibility={setFlyoutVisibility}
                   highlightedItem={surroundingLogsId ? surroundingLogsId : null}
                   currentHighlightKey={currentHighlightKey}
+                  scrollLock={{
+                    enable: scrollLockLiveStreaming,
+                    disable: scrollUnlockLiveStreaming,
+                    isEnabled: isScrollLocked,
+                  }}
                 />
               )}
             </WithStreamItems>
@@ -117,23 +130,34 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
         <AutoSizer content bounds detectAnyWindowResize="height">
           {({ measureRef, bounds: { height = 0 }, content: { width = 0 } }) => {
             return (
-              <LogPageMinimapColumn innerRef={measureRef}>
+              <LogPageMinimapColumn ref={measureRef}>
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>
-                      {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
-                        <LogMinimap
-                          height={height}
-                          width={width}
-                          highlightedInterval={visibleTimeInterval}
-                          intervalSize={intervalSize}
-                          jumpToTarget={jumpToTargetPosition}
-                          summaryBuckets={buckets}
-                          summaryHighlightBuckets={
-                            logSummaryHighlights.length > 0 ? logSummaryHighlights[0].buckets : []
-                          }
-                          target={visibleMidpointTime}
-                        />
+                      {({
+                        isAutoReloading,
+                        jumpToTargetPosition,
+                        visibleMidpointTime,
+                        visibleTimeInterval,
+                      }) => (
+                        <WithStreamItems initializeOnMount={!isAutoReloading}>
+                          {({ isReloading }) => (
+                            <LogMinimap
+                              height={height}
+                              width={width}
+                              highlightedInterval={isReloading ? null : visibleTimeInterval}
+                              intervalSize={intervalSize}
+                              jumpToTarget={jumpToTargetPosition}
+                              summaryBuckets={buckets}
+                              summaryHighlightBuckets={
+                                logSummaryHighlights.length > 0
+                                  ? logSummaryHighlights[0].buckets
+                                  : []
+                              }
+                              target={visibleMidpointTime}
+                            />
+                          )}
+                        </WithStreamItems>
                       )}
                     </WithLogPosition>
                   )}

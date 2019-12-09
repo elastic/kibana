@@ -35,7 +35,7 @@ const getQueryOrder = (networkDnsSortField: NetworkDnsSortField): QueryOrder => 
 const getCountAgg = () => ({
   dns_count: {
     cardinality: {
-      field: 'dns.question.etld_plus_one',
+      field: 'dns.question.registered_domain',
     },
   },
 });
@@ -87,7 +87,7 @@ export const buildDnsQuery = ({
         ...getCountAgg(),
         dns_name_query_count: {
           terms: {
-            field: 'dns.question.etld_plus_one',
+            field: 'dns.question.registered_domain',
             size: querySize,
             order: {
               ...getQueryOrder(networkDnsSortField),

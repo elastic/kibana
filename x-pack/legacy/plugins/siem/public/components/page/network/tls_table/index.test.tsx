@@ -17,6 +17,8 @@ import { createStore, networkModel, State } from '../../../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -35,6 +37,7 @@ describe('Tls Table Component', () => {
             data={mockTlsData.edges}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
             id="tls"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
@@ -44,7 +47,7 @@ describe('Tls Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(TlsTableComponent)'))).toMatchSnapshot();
     });
   });
 
@@ -57,6 +60,7 @@ describe('Tls Table Component', () => {
               data={mockTlsData.edges}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockTlsData.pageInfo)}
               id="tls"
+              isInspect={false}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockTlsData.pageInfo)}
@@ -66,7 +70,7 @@ describe('Tls Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.details.queries!.tls.tlsSortField).toEqual({
+      expect(store.getState().network.details.queries!.tls.sort).toEqual({
         direction: 'desc',
         field: '_id',
       });
@@ -78,7 +82,7 @@ describe('Tls Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.tls.tlsSortField).toEqual({
+      expect(store.getState().network.details.queries!.tls.sort).toEqual({
         direction: 'asc',
         field: '_id',
       });

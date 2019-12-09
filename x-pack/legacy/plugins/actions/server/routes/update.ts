@@ -9,40 +9,39 @@ import Hapi from 'hapi';
 
 interface UpdateRequest extends Hapi.Request {
   payload: {
-    description: string;
+    name: string;
     config: Record<string, any>;
     secrets: Record<string, any>;
   };
 }
 
-export function updateRoute(server: Hapi.Server) {
-  server.route({
-    method: 'PUT',
-    path: `/api/action/{id}`,
-    options: {
-      validate: {
-        options: {
-          abortEarly: false,
-        },
-        params: Joi.object()
-          .keys({
-            id: Joi.string().required(),
-          })
-          .required(),
-        payload: Joi.object()
-          .keys({
-            description: Joi.string().required(),
-            config: Joi.object().default({}),
-            secrets: Joi.object().default({}),
-          })
-          .required(),
+export const updateActionRoute = {
+  method: 'PUT',
+  path: `/api/action/{id}`,
+  config: {
+    tags: ['access:actions-all'],
+    validate: {
+      options: {
+        abortEarly: false,
       },
+      params: Joi.object()
+        .keys({
+          id: Joi.string().required(),
+        })
+        .required(),
+      payload: Joi.object()
+        .keys({
+          name: Joi.string().required(),
+          config: Joi.object().default({}),
+          secrets: Joi.object().default({}),
+        })
+        .required(),
     },
-    async handler(request: UpdateRequest) {
-      const { id } = request.params;
-      const { description, config, secrets } = request.payload;
-      const actionsClient = request.getActionsClient!();
-      return await actionsClient.update({ id, action: { description, config, secrets } });
-    },
-  });
-}
+  },
+  async handler(request: UpdateRequest) {
+    const { id } = request.params;
+    const { name, config, secrets } = request.payload;
+    const actionsClient = request.getActionsClient!();
+    return await actionsClient.update({ id, action: { name, config, secrets } });
+  },
+};

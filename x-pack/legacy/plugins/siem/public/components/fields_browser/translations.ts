@@ -37,7 +37,7 @@ export const FIELD = i18n.translate('xpack.siem.fieldBrowser.fieldLabel', {
 });
 
 export const FIELDS = i18n.translate('xpack.siem.fieldBrowser.fieldsTitle', {
-  defaultMessage: 'Fields',
+  defaultMessage: 'Columns',
 });
 
 export const FIELDS_COUNT = (totalCount: number) =>
@@ -64,6 +64,10 @@ export const NO_FIELDS_MATCH_INPUT = (searchInput: string) =>
 
 export const RESET_FIELDS = i18n.translate('xpack.siem.fieldBrowser.resetFieldsLink', {
   defaultMessage: 'Reset Fields',
+});
+
+export const TOGGLE_COLUMN_TOOLTIP = i18n.translate('xpack.siem.fieldBrowser.toggleColumnTooltip', {
+  defaultMessage: 'Toggle column',
 });
 
 export const VIEW_CATEGORY = (categoryId: string) =>

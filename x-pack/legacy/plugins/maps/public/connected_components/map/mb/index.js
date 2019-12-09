@@ -13,17 +13,16 @@ import {
   setMouseCoordinates,
   clearMouseCoordinates,
   clearGoto,
-  setTooltipState,
   setMapInitError,
-  updateDrawState
 } from '../../../actions/map_actions';
 import {
   getTooltipState,
   getLayerList,
   getMapReady,
   getGoto,
-  getDrawState,
-  getScrollZoom
+  getScrollZoom,
+  isInteractiveDisabled,
+  isTooltipControlDisabled,
 } from '../../../selectors/map_selectors';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 
@@ -34,8 +33,9 @@ function mapStateToProps(state = {}) {
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
     tooltipState: getTooltipState(state),
-    drawState: getDrawState(state),
-    scrollZoom: getScrollZoom(state)
+    scrollZoom: getScrollZoom(state),
+    disableInteractive: isInteractiveDisabled(state),
+    disableTooltipControl: isTooltipControlDisabled(state)
   };
 }
 
@@ -61,15 +61,9 @@ function mapDispatchToProps(dispatch) {
     clearGoto: () => {
       dispatch(clearGoto());
     },
-    setTooltipState(tooltipState) {
-      dispatch(setTooltipState(tooltipState));
-    },
     setMapInitError(errorMessage) {
       dispatch(setMapInitError(errorMessage));
     },
-    disableDrawState() {
-      dispatch(updateDrawState(null));
-    }
   };
 }
 

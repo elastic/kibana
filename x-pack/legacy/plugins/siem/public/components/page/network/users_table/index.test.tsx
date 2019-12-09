@@ -18,6 +18,14 @@ import { createStore, networkModel, State } from '../../../../store';
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
 
+jest.mock('../../../../lib/settings/use_kibana_ui_setting');
+
+jest.mock('../../../search_bar', () => ({
+  siemFilterManager: {
+    addFilters: jest.fn(),
+  },
+}));
+
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
@@ -37,6 +45,7 @@ describe('Users Table Component', () => {
             flowTarget={FlowTarget.source}
             fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
             id="user"
+            isInspect={false}
             loading={false}
             loadPage={loadPage}
             showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
@@ -46,7 +55,7 @@ describe('Users Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(UsersTableComponent)'))).toMatchSnapshot();
     });
   });
 
@@ -60,6 +69,7 @@ describe('Users Table Component', () => {
               flowTarget={FlowTarget.source}
               fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
               id="user"
+              isInspect={false}
               loading={false}
               loadPage={loadPage}
               showMorePagesIndicator={getOr(
@@ -73,7 +83,7 @@ describe('Users Table Component', () => {
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'asc',
         field: 'name',
       });
@@ -85,7 +95,7 @@ describe('Users Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.users.usersSortField).toEqual({
+      expect(store.getState().network.details.queries!.users.sort).toEqual({
         direction: 'desc',
         field: 'name',
       });
@@ -94,7 +104,7 @@ describe('Users Table Component', () => {
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('NameClick to sort in ascending order');
+      ).toEqual('UserClick to sort in ascending order');
     });
   });
 });

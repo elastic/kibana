@@ -18,24 +18,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunction, Render } from '../../interpreter/types';
-import { Style } from '../../interpreter/public/types';
+import { ExpressionFunction, Render } from '../../../../plugins/expressions/public';
+import { Arguments, MarkdownVisParams } from './types';
 
 const name = 'markdownVis';
 
 type Context = undefined;
-
-interface Arguments {
-  markdown: string;
-  font: Style;
-  openLinksInNewTab: boolean;
-}
-
-export interface MarkdownVisParams {
-  markdown: Arguments['markdown'];
-  openLinksInNewTab: Arguments['openLinksInNewTab'];
-  fontSize: number;
-}
 
 interface RenderValue {
   visType: 'markdown';

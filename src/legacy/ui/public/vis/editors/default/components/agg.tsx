@@ -22,9 +22,9 @@ import {
   EuiAccordion,
   EuiToolTip,
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiSpacer,
   EuiIconTip,
-  Color,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -37,6 +37,7 @@ export interface DefaultEditorAggProps extends DefaultEditorAggCommonProps {
   aggIndex: number;
   aggIsTooLow: boolean;
   dragHandleProps: {} | null;
+  isDisabled: boolean;
   isDraggable: boolean;
   isLastBucket: boolean;
   isRemovable: boolean;
@@ -49,6 +50,7 @@ function DefaultEditorAgg({
   dragHandleProps,
   formIsTouched,
   groupName,
+  isDisabled,
   isDraggable,
   isLastBucket,
   isRemovable,
@@ -62,7 +64,7 @@ function DefaultEditorAgg({
   setTouched,
   setValidity,
 }: DefaultEditorAggProps) {
-  const [isEditorOpen, setIsEditorOpen] = useState(agg.brandNew);
+  const [isEditorOpen, setIsEditorOpen] = useState((agg as any).brandNew);
   const [validState, setValidState] = useState(true);
   const showDescription = !isEditorOpen && validState;
   const showError = !isEditorOpen && !validState;
@@ -86,6 +88,19 @@ function DefaultEditorAgg({
     }
   }
 
+  // A description of the aggregation, for displaying in the collapsed agg header
+  let aggDescription = '';
+
+  if (agg.type && agg.type.makeLabel) {
+    try {
+      aggDescription = agg.type.makeLabel(agg);
+    } catch (e) {
+      // Date Histogram's `makeLabel` implementation invokes 'write' method for each param, including interval's 'write',
+      // which throws an error when interval is undefined.
+      aggDescription = '';
+    }
+  }
+
   useEffect(() => {
     if (isLastBucketAgg && ['date_histogram', 'histogram'].includes(agg.type.name)) {
       onAggParamsChange(
@@ -97,9 +112,6 @@ function DefaultEditorAgg({
       );
     }
   }, [lastParentPipelineAggTitle, isLastBucket, agg.type]);
-
-  // A description of the aggregation, for displaying in the collapsed agg header
-  const aggDescription = agg.type && agg.type.makeLabel ? agg.type.makeLabel(agg) : '';
 
   const onToggle = (isOpen: boolean) => {
     setIsEditorOpen(isOpen);
@@ -132,6 +144,7 @@ function DefaultEditorAgg({
       actionIcons.push({
         id: 'disableAggregation',
         color: 'text',
+        disabled: isDisabled,
         type: 'eye',
         onClick: () => onToggleEnableAgg(agg, false),
         tooltip: i18n.translate('common.ui.vis.editors.agg.disableAggButtonTooltip', {
@@ -195,8 +208,9 @@ function DefaultEditorAgg({
           return (
             <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
               <EuiButtonIcon
+                disabled={icon.disabled}
                 iconType={icon.type}
-                color={icon.color as Color}
+                color={icon.color as EuiButtonIconProps['color']}
                 onClick={icon.onClick}
                 aria-label={icon.tooltip}
                 data-test-subj={icon.dataTestSubj}

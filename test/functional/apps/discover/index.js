@@ -32,6 +32,7 @@ export default function ({ getService, loadTestFile }) {
       return esArchiver.unload('logstash_functional');
     });
 
+    loadTestFile(require.resolve('./_saved_queries'));
     loadTestFile(require.resolve('./_discover'));
     loadTestFile(require.resolve('./_errors'));
     loadTestFile(require.resolve('./_field_data'));
@@ -42,5 +43,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_inspector'));
     loadTestFile(require.resolve('./_doc_navigation'));
     loadTestFile(require.resolve('./_date_nanos'));
+    loadTestFile(require.resolve('./_date_nanos_mixed'));
   });
 }

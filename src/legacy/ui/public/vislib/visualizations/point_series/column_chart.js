@@ -367,6 +367,10 @@ export class ColumnChart extends PointSeries {
         const bars = self.addBars(svg, self.chartData);
         self.addCircleEvents(bars);
 
+        if (self.thresholdLineOptions.show) {
+          self.addThresholdLine(self.chartEl);
+        }
+
         self.events.emit('rendered', {
           chart: self.chartData
         });

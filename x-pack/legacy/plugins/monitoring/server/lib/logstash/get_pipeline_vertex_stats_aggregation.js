@@ -112,7 +112,7 @@ function createTimeSeriesAgg(timeSeriesIntervalInSeconds, ...aggsList) {
     timeseries: {
       date_histogram: {
         field: 'timestamp',
-        interval: timeSeriesIntervalInSeconds + 's'
+        fixed_interval: timeSeriesIntervalInSeconds + 's'
       },
       aggs: createAggsObjectFromAggsList(aggsList)
     }

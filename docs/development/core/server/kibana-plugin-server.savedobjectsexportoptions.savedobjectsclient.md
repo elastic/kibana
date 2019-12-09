@@ -4,6 +4,8 @@
 
 ## SavedObjectsExportOptions.savedObjectsClient property
 
+an instance of the SavedObjectsClient.
+
 <b>Signature:</b>
 
 ```typescript

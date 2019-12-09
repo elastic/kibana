@@ -24,7 +24,7 @@ import {
 const ROOT_ELEMENT_ID = 'react-infra-root';
 const BREADCRUMBS_ELEMENT_ID = 'react-infra-breadcrumbs';
 
-export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
+export class KibanaFramework implements InfraFrameworkAdapter {
   public appState: object;
   public kbnVersion?: string;
   public timezone?: string;
@@ -115,23 +115,25 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       }),
       scope: true,
       template: `
-        <div
+        <main
           id="${ROOT_ELEMENT_ID}"
           class="infReactRoot"
-        ></div>
+        ></main>
       `,
     }));
 
-    adapterModule.run((
-      config: InfraKibanaUIConfig,
-      kbnVersion: string,
-      Private: <Provider>(provider: Provider) => Provider,
-      // @ts-ignore: inject kibanaAdapter to force eager instatiation
-      kibanaAdapter: any
-    ) => {
-      this.timezone = Private(this.timezoneProvider)();
-      this.kbnVersion = kbnVersion;
-    });
+    adapterModule.run(
+      (
+        config: InfraKibanaUIConfig,
+        kbnVersion: string,
+        Private: <Provider>(provider: Provider) => Provider,
+        // @ts-ignore: inject kibanaAdapter to force eager instatiation
+        kibanaAdapter: any
+      ) => {
+        this.timezone = Private(this.timezoneProvider)();
+        this.kbnVersion = kbnVersion;
+      }
+    );
 
     uiRoutes.enable();
 

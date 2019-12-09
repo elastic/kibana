@@ -43,7 +43,7 @@ export class ProviderItemAnd extends React.PureComponent<ProviderItemAndPopoverP
     } = this.props;
 
     return dataProvidersAnd.map((providerAnd: DataProvidersAnd, index: number) => (
-      <React.Fragment key={`provider-item-and-${providerId}-${providerAnd.id}`}>
+      <React.Fragment key={`provider-item-and-${timelineId}-${providerId}-${providerAnd.id}`}>
         <EuiFlexItem>
           <AndOrBadge type="and" />
         </EuiFlexItem>

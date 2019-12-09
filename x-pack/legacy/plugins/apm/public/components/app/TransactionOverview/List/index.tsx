@@ -4,21 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ITransactionGroup } from '../../../../../server/lib/transaction_groups/transform';
 import { fontFamilyCode, truncate } from '../../../../style/variables';
-import { asDecimal, asMillis } from '../../../../utils/formatters';
+import { asDecimal, convertTo } from '../../../../utils/formatters';
 import { ImpactBar } from '../../../shared/ImpactBar';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { TransactionLink } from '../../../shared/Links/apm/TransactionLink';
+import { TransactionDetailLink } from '../../../shared/Links/apm/TransactionDetailLink';
 
-const TransactionNameLink = styled(TransactionLink)`
+const TransactionNameLink = styled(TransactionDetailLink)`
   ${truncate('100%')};
   font-family: ${fontFamilyCode};
 `;
@@ -27,6 +27,12 @@ interface Props {
   items: ITransactionGroup[];
   isLoading: boolean;
 }
+
+const toMilliseconds = (time: number) =>
+  convertTo({
+    unit: 'milliseconds',
+    microseconds: time
+  }).formatted;
 
 export function TransactionList({ items, isLoading }: Props) {
   const columns: Array<ITableColumn<ITransactionGroup>> = useMemo(
@@ -38,13 +44,19 @@ export function TransactionList({ items, isLoading }: Props) {
         }),
         width: '50%',
         sortable: true,
-        render: (transactionName: string, item: ITransactionGroup) => {
+        render: (transactionName: string, { sample }: ITransactionGroup) => {
           return (
             <EuiToolTip
               id="transaction-name-link-tooltip"
               content={transactionName || NOT_AVAILABLE_LABEL}
             >
-              <TransactionNameLink transaction={item.sample}>
+              <TransactionNameLink
+                serviceName={sample.service.name}
+                transactionId={sample.transaction.id}
+                traceId={sample.trace.id}
+                transactionName={sample.transaction.name}
+                transactionType={sample.transaction.type}
+              >
                 {transactionName || NOT_AVAILABLE_LABEL}
               </TransactionNameLink>
             </EuiToolTip>
@@ -61,7 +73,7 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (value: number) => asMillis(value)
+        render: (time: number) => toMilliseconds(time)
       },
       {
         field: 'p95',
@@ -73,7 +85,7 @@ export function TransactionList({ items, isLoading }: Props) {
         ),
         sortable: true,
         dataType: 'number',
-        render: (value: number) => asMillis(value)
+        render: (time: number) => toMilliseconds(time)
       },
       {
         field: 'transactionsPerMinute',
@@ -95,9 +107,29 @@ export function TransactionList({ items, isLoading }: Props) {
       },
       {
         field: 'impact',
-        name: i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
-          defaultMessage: 'Impact'
-        }),
+        name: (
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.apm.transactionsTable.impactColumnDescription',
+              {
+                defaultMessage:
+                  "The most used and slowest endpoints in your service. It's calculated by taking the relative average duration times the number of transactions per minute."
+              }
+            )}
+          >
+            <>
+              {i18n.translate('xpack.apm.transactionsTable.impactColumnLabel', {
+                defaultMessage: 'Impact'
+              })}{' '}
+              <EuiIcon
+                size="s"
+                color="subdued"
+                type="questionInCircle"
+                className="eui-alignTop"
+              />
+            </>
+          </EuiToolTip>
+        ),
         sortable: true,
         dataType: 'number',
         render: (value: number) => <ImpactBar value={value} />

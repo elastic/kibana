@@ -21,6 +21,7 @@ export const withStreamItems = connect(
     isAutoReloading: logPositionSelectors.selectIsAutoReloading(state),
     isReloading: logEntriesSelectors.selectIsReloadingEntries(state),
     isLoadingMore: logEntriesSelectors.selectIsLoadingMoreEntries(state),
+    wasAutoReloadJustAborted: logPositionSelectors.selectAutoReloadJustAborted(state),
     hasMoreBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart(state),
     hasMoreAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd(state),
     lastLoadedTime: logEntriesSelectors.selectEntriesLastLoadedTime(state),
@@ -54,12 +55,19 @@ export const WithStreamItems = withStreamItems(
     const { currentHighlightKey, logEntryHighlightsById } = useContext(LogHighlightsState.Context);
     const items = useMemo(
       () =>
-        props.isReloading && !props.isAutoReloading
+        props.isReloading && !props.isAutoReloading && !props.wasAutoReloadJustAborted
           ? []
           : props.entries.map(logEntry =>
               createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.gid] || [])
             ),
-      [props.isReloading, props.isAutoReloading, props.entries, logEntryHighlightsById]
+
+      [
+        props.isReloading,
+        props.isAutoReloading,
+        props.wasAutoReloadJustAborted,
+        props.entries,
+        logEntryHighlightsById,
+      ]
     );
 
     useEffect(() => {

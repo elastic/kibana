@@ -17,22 +17,21 @@ import { getDraggableId, Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
 
 describe('Providers', () => {
+  const mockTimelineContext: boolean = true;
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(
-        <DroppableWrapper droppableId="unitTest">
-          <Providers
-            browserFields={{}}
-            dataProviders={mockDataProviders}
-            id="foo"
-            onChangeDataProviderKqlQuery={jest.fn()}
-            onChangeDroppableAndProvider={jest.fn()}
-            onDataProviderEdited={jest.fn()}
-            onDataProviderRemoved={jest.fn()}
-            onToggleDataProviderEnabled={jest.fn()}
-            onToggleDataProviderExcluded={jest.fn()}
-          />
-        </DroppableWrapper>
+        <Providers
+          browserFields={{}}
+          dataProviders={mockDataProviders}
+          id="foo"
+          onChangeDataProviderKqlQuery={jest.fn()}
+          onChangeDroppableAndProvider={jest.fn()}
+          onDataProviderEdited={jest.fn()}
+          onDataProviderRemoved={jest.fn()}
+          onToggleDataProviderEnabled={jest.fn()}
+          onToggleDataProviderExcluded={jest.fn()}
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -95,7 +94,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -158,7 +157,7 @@ describe('Providers', () => {
       const mockOnDataProviderRemoved = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -240,7 +239,7 @@ describe('Providers', () => {
       const mockOnToggleDataProviderEnabled = jest.fn();
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -318,7 +317,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -427,7 +426,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -508,7 +507,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}
@@ -594,7 +593,7 @@ describe('Providers', () => {
 
       const wrapper = mount(
         <TestProviders>
-          <TimelineContext.Provider value={{ isLoading: true }}>
+          <TimelineContext.Provider value={mockTimelineContext}>
             <DroppableWrapper droppableId="unitTest">
               <Providers
                 browserFields={{}}

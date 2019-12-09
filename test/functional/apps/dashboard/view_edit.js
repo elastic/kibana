@@ -21,6 +21,8 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common', 'visualize', 'timePicker']);
   const dashboardName = 'dashboard with filter';
@@ -28,10 +30,16 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await esArchiver.load('dashboard/current/kibana');
+      await kibanaServer.uiSettings.replace({
+        'defaultIndex': '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.preserveCrossAppState();
     });
 
     it('create new dashboard opens in edit mode', async function () {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.clickCancelOutOfEditMode();
     });
@@ -67,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
 
           await PageObjects.dashboard.switchToEditMode();
-          await PageObjects.timePicker.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+          await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2013 @ 06:31:44.000', 'Sep 19, 2013 @ 06:31:44.000');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           // confirm lose changes
@@ -153,10 +161,10 @@ export default function ({ getService, getPageObjects }) {
       describe('and preserves edits on cancel', function () {
         it('when time changed is stored with dashboard', async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-          await PageObjects.timePicker.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+          await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2013 @ 06:31:44.000', 'Sep 19, 2013 @ 06:31:44.000');
           await PageObjects.dashboard.saveDashboard(dashboardName, true);
           await PageObjects.dashboard.switchToEditMode();
-          await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-19 06:31:44.000');
+          await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2015 @ 06:31:44.000', 'Sep 19, 2015 @ 06:31:44.000');
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
           await PageObjects.common.clickCancelOnModal();
@@ -178,7 +186,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.setTimepickerInDataRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, true);
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.timePicker.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+        await PageObjects.timePicker.setAbsoluteRange('Sep 19, 2013 @ 06:31:44.000', 'Sep 19, 2013 @ 06:31:44.000');
         const newTime = await PageObjects.timePicker.getTimeConfig();
 
         await PageObjects.dashboard.clickCancelOutOfEditMode();
@@ -200,7 +208,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: false });
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.timePicker.setAbsoluteRange('2014-10-19 06:31:44.000', '2014-12-19 06:31:44.000');
+        await PageObjects.timePicker.setAbsoluteRange('Oct 19, 2014 @ 06:31:44.000', 'Dec 19, 2014 @ 06:31:44.000');
         await PageObjects.dashboard.clickCancelOutOfEditMode();
 
         await PageObjects.common.expectConfirmModalOpenState(false);

@@ -9,6 +9,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { Empty } from './empty';
+import { TestProviders } from '../../../mock/test_providers';
 
 describe('Empty', () => {
   describe('rendering', () => {
@@ -20,7 +21,11 @@ describe('Empty', () => {
     const dropMessage = ['Drop', 'anything', 'highlighted', 'here'];
 
     test('it renders the expected message', () => {
-      const wrapper = mount(<Empty />);
+      const wrapper = mount(
+        <TestProviders>
+          <Empty />
+        </TestProviders>
+      );
 
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
     });

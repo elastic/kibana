@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
-import { getSetupModeState } from './setup_mode';
+import { isInSetupMode } from './setup_mode';
 import { getClusterFromClusters } from './get_cluster_from_clusters';
 
 export function routeInitProvider(Private, monitoringClusters, globalState, license, kbnUrl) {
@@ -22,12 +22,12 @@ export function routeInitProvider(Private, monitoringClusters, globalState, lice
    * the data just has a single cluster or
    * all the clusters are basic and this is the primary cluster
    */
-  return function routeInit({ codePaths }) {
-    const clusterUuid = globalState.cluster_uuid;
+  return function routeInit({ codePaths, fetchAllClusters }) {
+    const clusterUuid = fetchAllClusters ? null : globalState.cluster_uuid;
     return monitoringClusters(clusterUuid, undefined, codePaths)
     // Set the clusters collection and current cluster in globalState
-      .then((clusters) => {
-        const inSetupMode = getSetupModeState().enabled;
+      .then(async (clusters) => {
+        const inSetupMode = await isInSetupMode();
         const cluster = getClusterFromClusters(clusters, globalState);
         if (!cluster && !inSetupMode) {
           return kbnUrl.redirect('/no-data');

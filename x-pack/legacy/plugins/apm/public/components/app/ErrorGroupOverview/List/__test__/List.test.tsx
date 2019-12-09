@@ -6,7 +6,6 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { mockMoment, toJson } from '../../../../../utils/testHelpers';
 import { ErrorGroupList } from '../index';
 import props from './props.json';
@@ -19,7 +18,7 @@ import {
 const mockRefreshTimeRange = jest.fn();
 const MockUrlParamsProvider: React.FC<{
   params?: IUrlParams;
-}> = ({ params = {}, children }) => (
+}> = ({ params = props.urlParams, children }) => (
   <UrlParamsContext.Provider
     value={{
       urlParams: params,
@@ -38,9 +37,9 @@ describe('ErrorGroupOverview -> List', () => {
   it('should render empty state', () => {
     const storeState = {};
     const wrapper = mount(
-      <MemoryRouter>
+      <MockUrlParamsProvider>
         <ErrorGroupList items={[]} />
-      </MemoryRouter>,
+      </MockUrlParamsProvider>,
       storeState
     );
 
@@ -49,7 +48,7 @@ describe('ErrorGroupOverview -> List', () => {
 
   it('should render with data', () => {
     const wrapper = mount(
-      <MockUrlParamsProvider params={props.urlParams}>
+      <MockUrlParamsProvider>
         <ErrorGroupList items={props.items} />
       </MockUrlParamsProvider>
     );

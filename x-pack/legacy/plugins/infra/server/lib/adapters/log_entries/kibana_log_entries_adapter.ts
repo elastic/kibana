@@ -12,7 +12,10 @@ import first from 'lodash/fp/first';
 import get from 'lodash/fp/get';
 import has from 'lodash/fp/has';
 import zip from 'lodash/fp/zip';
-
+import { pipe } from 'fp-ts/lib/pipeable';
+import { map, fold } from 'fp-ts/lib/Either';
+import { identity, constant } from 'fp-ts/lib/function';
+import { RequestHandlerContext } from 'src/core/server';
 import { compareTimeKeys, isTimeKey, TimeKey } from '../../../../common/time';
 import { JsonObject } from '../../../../common/typed_json';
 import {
@@ -22,8 +25,8 @@ import {
   LogSummaryBucket,
 } from '../../domains/log_entries_domain';
 import { InfraSourceConfiguration } from '../../sources';
-import { InfraFrameworkRequest, SortedSearchHit } from '../framework';
-import { InfraBackendFrameworkAdapter } from '../framework';
+import { SortedSearchHit } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000, Infinity].map(days => days * DAY_MILLIS);
@@ -37,10 +40,10 @@ interface LogItemHit {
 }
 
 export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
-  constructor(private readonly framework: InfraBackendFrameworkAdapter) {}
+  constructor(private readonly framework: KibanaFramework) {}
 
   public async getAdjacentLogEntryDocuments(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: TimeKey,
@@ -62,7 +65,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       }
 
       const documentsInInterval = await this.getLogEntryDocumentsBetween(
-        request,
+        requestContext,
         sourceConfiguration,
         fields,
         intervalStart,
@@ -80,7 +83,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   public async getContainedLogEntryDocuments(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: TimeKey,
@@ -89,7 +92,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     highlightQuery?: LogEntryQuery
   ): Promise<LogEntryDocument[]> {
     const documents = await this.getLogEntryDocumentsBetween(
-      request,
+      requestContext,
       sourceConfiguration,
       fields,
       start.time,
@@ -104,7 +107,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   public async getContainedLogSummaryBuckets(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     start: number,
     end: number,
@@ -163,24 +166,26 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       },
     };
 
-    const response = await this.framework.callWithRequest<any, {}>(request, 'search', query);
+    const response = await this.framework.callWithRequest<any, {}>(requestContext, 'search', query);
 
-    return LogSummaryResponseRuntimeType.decode(response)
-      .map(logSummaryResponse =>
+    return pipe(
+      LogSummaryResponseRuntimeType.decode(response),
+      map(logSummaryResponse =>
         logSummaryResponse.aggregations.count_by_date.buckets.map(
           convertDateRangeBucketToSummaryBucket
         )
-      )
-      .getOrElse([]);
+      ),
+      fold(constant([]), identity)
+    );
   }
 
   public async getLogItem(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     id: string,
     sourceConfiguration: InfraSourceConfiguration
   ) {
     const search = (searchOptions: object) =>
-      this.framework.callWithRequest<LogItemHit, {}>(request, 'search', searchOptions);
+      this.framework.callWithRequest<LogItemHit, {}>(requestContext, 'search', searchOptions);
 
     const params = {
       index: sourceConfiguration.logAlias,
@@ -208,7 +213,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
   }
 
   private async getLogEntryDocumentsBetween(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     sourceConfiguration: InfraSourceConfiguration,
     fields: string[],
     start: number,
@@ -294,7 +299,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
     };
 
     const response = await this.framework.callWithRequest<SortedSearchHit>(
-      request,
+      requestContext,
       'search',
       query
     );

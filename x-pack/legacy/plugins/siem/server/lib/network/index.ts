@@ -5,11 +5,15 @@
  */
 
 import {
-  FlowDirection,
-  FlowTarget,
+  FlowTargetSourceDest,
+  Maybe,
+  NetworkDnsData,
   NetworkDnsSortField,
+  NetworkHttpData,
+  NetworkHttpSortField,
+  NetworkTopCountriesData,
   NetworkTopNFlowData,
-  NetworkTopNFlowSortField,
+  NetworkTopTablesSortField,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptionsPaginated } from '../framework';
 export * from './elasticsearch_adapter';
@@ -18,9 +22,20 @@ import { NetworkAdapter } from './types';
 export * from './types';
 
 export interface NetworkTopNFlowRequestOptions extends RequestOptionsPaginated {
-  networkTopNFlowSort: NetworkTopNFlowSortField;
-  flowTarget: FlowTarget;
-  flowDirection: FlowDirection;
+  networkTopNFlowSort: NetworkTopTablesSortField;
+  flowTarget: FlowTargetSourceDest;
+  ip?: Maybe<string>;
+}
+
+export interface NetworkTopCountriesRequestOptions extends RequestOptionsPaginated {
+  networkTopCountriesSort: NetworkTopTablesSortField;
+  flowTarget: FlowTargetSourceDest;
+  ip?: Maybe<string>;
+}
+
+export interface NetworkHttpRequestOptions extends RequestOptionsPaginated {
+  networkHttpSort: NetworkHttpSortField;
+  ip?: Maybe<string>;
 }
 
 export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
@@ -31,17 +46,31 @@ export interface NetworkDnsRequestOptions extends RequestOptionsPaginated {
 export class Network {
   constructor(private readonly adapter: NetworkAdapter) {}
 
+  public async getNetworkTopCountries(
+    req: FrameworkRequest,
+    options: NetworkTopCountriesRequestOptions
+  ): Promise<NetworkTopCountriesData> {
+    return this.adapter.getNetworkTopCountries(req, options);
+  }
+
   public async getNetworkTopNFlow(
     req: FrameworkRequest,
     options: NetworkTopNFlowRequestOptions
   ): Promise<NetworkTopNFlowData> {
-    return await this.adapter.getNetworkTopNFlow(req, options);
+    return this.adapter.getNetworkTopNFlow(req, options);
   }
 
   public async getNetworkDns(
     req: FrameworkRequest,
     options: NetworkDnsRequestOptions
-  ): Promise<NetworkTopNFlowData> {
-    return await this.adapter.getNetworkDns(req, options);
+  ): Promise<NetworkDnsData> {
+    return this.adapter.getNetworkDns(req, options);
+  }
+
+  public async getNetworkHttp(
+    req: FrameworkRequest,
+    options: NetworkHttpRequestOptions
+  ): Promise<NetworkHttpData> {
+    return this.adapter.getNetworkHttp(req, options);
   }
 }

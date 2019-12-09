@@ -7,10 +7,12 @@ exports[`it renders without crashing 1`] = `
   >
     <EuiComboBox
       compressed={false}
+      data-test-subj="cluster-privileges-combobox"
       fullWidth={false}
       isClearable={true}
       isDisabled={false}
       onChange={[Function]}
+      onCreateOption={[Function]}
       options={
         Array [
           Object {

@@ -4,39 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { curry } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import nodemailerServices from 'nodemailer/lib/well-known/services.json';
+import nodemailerGetService from 'nodemailer/lib/well-known';
 
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './lib/send_email';
 import { nullableType } from './lib/nullable';
+import { portSchema } from './lib/schemas';
+import { Logger } from '../../../../../../src/core/server';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
-
-const PORT_MAX = 256 * 256 - 1;
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 // config definition
-
 export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
 
-const ConfigSchema = schema.object(
-  {
-    service: nullableType(schema.string()),
-    host: nullableType(schema.string()),
-    port: nullableType(schema.number({ min: 1, max: PORT_MAX })),
-    secure: nullableType(schema.boolean()),
-    from: schema.string(),
-  },
-  {
-    validate: validateConfig,
-  }
-);
+const ConfigSchemaProps = {
+  service: nullableType(schema.string()),
+  host: nullableType(schema.string()),
+  port: nullableType(portSchema()),
+  secure: nullableType(schema.boolean()),
+  from: schema.string(),
+};
 
-function validateConfig(configObject: any): string | void {
+const ConfigSchema = schema.object(ConfigSchemaProps);
+
+function validateConfig(
+  configurationUtilities: ActionsConfigurationUtilities,
+  configObject: any
+): string | void {
   // avoids circular reference ...
   const config: ActionTypeConfigType = configObject;
 
   // Make sure service is set, or if not, both host/port must be set.
   // If service is set, host/port are ignored, when the email is sent.
-  if (config.service == null) {
+  // Note, not currently making these message translated, as will be
+  // emitted alongside messages from @kbn/config-schema, which does not
+  // translate messages.
+  if (config.service === JSON_TRANSPORT_SERVICE) {
+    return;
+  } else if (config.service == null) {
     if (config.host == null && config.port == null) {
       return 'either [service] or [host]/[port] is required';
     }
@@ -48,10 +55,17 @@ function validateConfig(configObject: any): string | void {
     if (config.port == null) {
       return '[port] is required if [service] is not provided';
     }
+
+    if (!configurationUtilities.isWhitelistedHostname(config.host)) {
+      return `[host] value '${config.host}' is not in the whitelistedHosts configuration`;
+    }
   } else {
-    // service is not null
-    if (!isValidService(config.service)) {
-      return `[service] value "${config.service}" is not valid`;
+    const host = getServiceNameHost(config.service);
+    if (host == null) {
+      return `[service] value '${config.service}' is not valid`;
+    }
+    if (!configurationUtilities.isWhitelistedHostname(host)) {
+      return `[service] value '${config.service}' resolves to host '${host}' which is not in the whitelistedHosts configuration`;
     }
   }
 }
@@ -94,27 +108,38 @@ function validateParams(paramsObject: any): string | void {
   }
 }
 
-// action type definition
+interface GetActionTypeParams {
+  logger: Logger;
+  configurationUtilities: ActionsConfigurationUtilities;
+}
 
-export const actionType: ActionType = {
-  id: '.email',
-  name: 'email',
-  validate: {
-    config: ConfigSchema,
-    secrets: SecretsSchema,
-    params: ParamsSchema,
-  },
-  executor,
-};
+// action type definition
+export function getActionType(params: GetActionTypeParams): ActionType {
+  const { logger, configurationUtilities } = params;
+  return {
+    id: '.email',
+    name: 'email',
+    validate: {
+      config: schema.object(ConfigSchemaProps, {
+        validate: curry(validateConfig)(configurationUtilities),
+      }),
+      secrets: SecretsSchema,
+      params: ParamsSchema,
+    },
+    executor: curry(executor)({ logger }),
+  };
+}
 
 // action executor
 
-async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionTypeExecutorResult> {
-  const id = execOptions.id;
+async function executor(
+  { logger }: { logger: Logger },
+  execOptions: ActionTypeExecutorOptions
+): Promise<ActionTypeExecutorResult> {
+  const actionId = execOptions.actionId;
   const config = execOptions.config as ActionTypeConfigType;
   const secrets = execOptions.secrets as ActionTypeSecretsType;
   const params = execOptions.params as ActionParamsType;
-  const services = execOptions.services;
 
   const transport: any = {
     user: secrets.user,
@@ -146,11 +171,18 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
   let result;
 
   try {
-    result = await sendEmail(services, sendEmailOptions);
+    result = await sendEmail(logger, sendEmailOptions);
   } catch (err) {
+    const message = i18n.translate('xpack.actions.builtin.email.errorSendingErrorMessage', {
+      defaultMessage: 'error in action "{actionId}" sending email: {errorMessage}',
+      values: {
+        actionId,
+        errorMessage: err.message,
+      },
+    });
     return {
       status: 'error',
-      message: `error in action ${id} sending email: ${err.message}`,
+      message,
     };
   }
 
@@ -159,31 +191,14 @@ async function executor(execOptions: ActionTypeExecutorOptions): Promise<ActionT
 
 // utilities
 
-const ValidServiceNames = getValidServiceNames();
+function getServiceNameHost(service: string): string | null {
+  const serviceEntry = nodemailerGetService(service);
+  if (serviceEntry === false) return null;
 
-function isValidService(service: string): boolean {
-  return ValidServiceNames.has(service.toLowerCase());
-}
+  // in theory this won't happen, but it's JS, so just to be safe ...
+  if (serviceEntry == null) return null;
 
-function getValidServiceNames(): Set<string> {
-  const result = new Set<string>();
-
-  // add our special json service
-  result.add(JSON_TRANSPORT_SERVICE);
-
-  const keys = Object.keys(nodemailerServices) as string[];
-  for (const key of keys) {
-    result.add(key.toLowerCase());
-
-    const record = nodemailerServices[key];
-    if (record.aliases == null) continue;
-
-    for (const alias of record.aliases as string[]) {
-      result.add(alias.toLowerCase());
-    }
-  }
-
-  return result;
+  return serviceEntry.host || null;
 }
 
 // Returns the secure value - whether to use TLS or not.

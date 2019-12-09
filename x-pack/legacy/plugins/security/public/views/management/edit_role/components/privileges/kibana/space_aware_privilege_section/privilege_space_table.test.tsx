@@ -61,26 +61,23 @@ const getTableFromComponent = (
   const table = component.find(EuiInMemoryTable);
   const rows = table.find('tr');
   const dataRows = rows.slice(1);
-  return dataRows.reduce(
-    (acc, row) => {
-      const cells = row.find('td');
-      const spacesCell = cells.at(0);
-      const spacesBadge = spacesCell.find(EuiBadge);
-      const privilegesCell = cells.at(1);
-      const privilegesDisplay = privilegesCell.find(PrivilegeDisplay);
-      return [
-        ...acc,
-        {
-          spaces: spacesBadge.map(badge => badge.text().trim()),
-          privileges: {
-            summary: privilegesDisplay.text().trim(),
-            overridden: privilegesDisplay.find(EuiIconTip).exists('[type="lock"]'),
-          },
+  return dataRows.reduce((acc, row) => {
+    const cells = row.find('td');
+    const spacesCell = cells.at(0);
+    const spacesBadge = spacesCell.find(EuiBadge);
+    const privilegesCell = cells.at(1);
+    const privilegesDisplay = privilegesCell.find(PrivilegeDisplay);
+    return [
+      ...acc,
+      {
+        spaces: spacesBadge.map(badge => badge.text().trim()),
+        privileges: {
+          summary: privilegesDisplay.text().trim(),
+          overridden: privilegesDisplay.find(EuiIconTip).exists('[type="lock"]'),
         },
-      ];
-    },
-    [] as TableRow[]
-  );
+      },
+    ];
+  }, [] as TableRow[]);
 };
 
 describe('only global', () => {
@@ -120,9 +117,9 @@ describe('only global', () => {
     ]);
   });
 
-  it('excludedFromBase feature privilege all', () => {
+  it('bothPrivilegesExcludedFromBase feature privilege all', () => {
     const props = buildProps([
-      { spaces: ['*'], base: [], feature: { excludedFromBase: ['read'] } },
+      { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
     ]);
     const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromComponent(component);
@@ -131,9 +128,31 @@ describe('only global', () => {
     ]);
   });
 
-  it('excludedFromBase feature privilege read', () => {
+  it('bothPrivilegesExcludedFromBase feature privilege read', () => {
     const props = buildProps([
-      { spaces: ['*'], base: [], feature: { excludedFromBase: ['read'] } },
+      { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
+    ]);
+    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+    const actualTable = getTableFromComponent(component);
+    expect(actualTable).toEqual([
+      { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+    ]);
+  });
+
+  it('allPrivilegeExcludedFromBase feature privilege all', () => {
+    const props = buildProps([
+      { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+    ]);
+    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+    const actualTable = getTableFromComponent(component);
+    expect(actualTable).toEqual([
+      { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+    ]);
+  });
+
+  it('allPrivilegeExcludedFromBase feature privilege read', () => {
+    const props = buildProps([
+      { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
     ]);
     const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromComponent(component);
@@ -184,9 +203,13 @@ describe('only default and marketing space', () => {
     ]);
   });
 
-  it('excludedFromBase feature privilege all', () => {
+  it('bothPrivilegesExcludedFromBase feature privilege all', () => {
     const props = buildProps([
-      { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+      {
+        spaces: ['default', 'marketing'],
+        base: [],
+        feature: { bothPrivilegesExcludedFromBase: ['all'] },
+      },
     ]);
     const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromComponent(component);
@@ -195,9 +218,43 @@ describe('only default and marketing space', () => {
     ]);
   });
 
-  it('excludedFromBase feature privilege read', () => {
+  it('bothPrivilegesExcludedFromBase feature privilege read', () => {
     const props = buildProps([
-      { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+      {
+        spaces: ['default', 'marketing'],
+        base: [],
+        feature: { bothPrivilegesExcludedFromBase: ['read'] },
+      },
+    ]);
+    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+    const actualTable = getTableFromComponent(component);
+    expect(actualTable).toEqual([
+      { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+    ]);
+  });
+
+  it('allPrivilegeExcludedFromBase feature privilege all', () => {
+    const props = buildProps([
+      {
+        spaces: ['default', 'marketing'],
+        base: [],
+        feature: { allPrivilegeExcludedFromBase: ['all'] },
+      },
+    ]);
+    const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+    const actualTable = getTableFromComponent(component);
+    expect(actualTable).toEqual([
+      { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+    ]);
+  });
+
+  it('allPrivilegeExcludedFromBase feature privilege read', () => {
+    const props = buildProps([
+      {
+        spaces: ['default', 'marketing'],
+        base: [],
+        feature: { allPrivilegeExcludedFromBase: ['read'] },
+      },
     ]);
     const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
     const actualTable = getTableFromComponent(component);
@@ -261,10 +318,14 @@ describe('global base all', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege all', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege all', () => {
       const props = buildProps([
         { spaces: ['*'], base: ['all'], feature: {} },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['all'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -274,16 +335,54 @@ describe('global base all', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege read', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege read', () => {
       const props = buildProps([
         { spaces: ['*'], base: ['all'], feature: {} },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['read'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
         { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: ['all'], feature: {} },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: ['all'], feature: {} },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'All', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'All', overridden: true } },
       ]);
     });
   });
@@ -326,7 +425,7 @@ describe('global base read', () => {
       const actualTable = getTableFromComponent(component);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
-        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Read', overridden: true } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
       ]);
     });
 
@@ -343,10 +442,14 @@ describe('global base read', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege all', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege all', () => {
       const props = buildProps([
         { spaces: ['*'], base: ['read'], feature: {} },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['all'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -356,16 +459,54 @@ describe('global base read', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege read', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege read', () => {
       const props = buildProps([
         { spaces: ['*'], base: ['read'], feature: {} },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['read'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
       expect(actualTable).toEqual([
         { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
         { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: ['read'], feature: {} },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: ['read'], feature: {} },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Read', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Read', overridden: true } },
       ]);
     });
   });
@@ -425,10 +566,14 @@ describe('global normal feature privilege all', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege all', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege all', () => {
       const props = buildProps([
         { spaces: ['*'], base: [], feature: { normal: ['all'] } },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['all'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -438,10 +583,48 @@ describe('global normal feature privilege all', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege read', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege read', () => {
       const props = buildProps([
         { spaces: ['*'], base: [], feature: { normal: ['all'] } },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { normal: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { normal: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['read'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -507,10 +690,14 @@ describe('global normal feature privilege read', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege all', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege all', () => {
       const props = buildProps([
         { spaces: ['*'], base: [], feature: { normal: ['read'] } },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['all'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -520,10 +707,48 @@ describe('global normal feature privilege read', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege read', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege read', () => {
       const props = buildProps([
         { spaces: ['*'], base: [], feature: { normal: ['read'] } },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { normal: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { normal: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['read'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -535,11 +760,11 @@ describe('global normal feature privilege read', () => {
   });
 });
 
-describe('global excludedFromBase feature privilege all', () => {
+describe('global bothPrivilegesExcludedFromBase feature privilege all', () => {
   describe('default and marketing space', () => {
     it('base all', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['all'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
@@ -552,7 +777,7 @@ describe('global excludedFromBase feature privilege all', () => {
 
     it('base read', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['all'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
@@ -565,7 +790,7 @@ describe('global excludedFromBase feature privilege all', () => {
 
     it('normal feature privilege all', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['all'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
@@ -578,7 +803,7 @@ describe('global excludedFromBase feature privilege all', () => {
 
     it('normal feature privilege read', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['all'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
@@ -589,10 +814,14 @@ describe('global excludedFromBase feature privilege all', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege all', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege all', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['all'] } },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['all'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -602,10 +831,48 @@ describe('global excludedFromBase feature privilege all', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege read', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege read', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['all'] } },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['read'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -617,11 +884,11 @@ describe('global excludedFromBase feature privilege all', () => {
   });
 });
 
-describe('global excludedFromBase feature privilege read', () => {
+describe('global bothPrivilegesExcludedFromBase feature privilege read', () => {
   describe('default and marketing space', () => {
     it('base all', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['read'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
@@ -634,7 +901,7 @@ describe('global excludedFromBase feature privilege read', () => {
 
     it('base read', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['read'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
@@ -647,7 +914,7 @@ describe('global excludedFromBase feature privilege read', () => {
 
     it('normal feature privilege all', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['read'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
@@ -660,7 +927,7 @@ describe('global excludedFromBase feature privilege read', () => {
 
     it('normal feature privilege read', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['read'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
         { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
@@ -671,10 +938,14 @@ describe('global excludedFromBase feature privilege read', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege all', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege all', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['read'] } },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['all'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);
@@ -684,10 +955,296 @@ describe('global excludedFromBase feature privilege read', () => {
       ]);
     });
 
-    it('excludedFromBase feature privilege read', () => {
+    it('bothPrivilegesExcludedFromBase feature privilege read', () => {
       const props = buildProps([
-        { spaces: ['*'], base: [], feature: { excludedFromBase: ['read'] } },
-        { spaces: ['default', 'marketing'], base: [], feature: { excludedFromBase: ['read'] } },
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { bothPrivilegesExcludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+  });
+});
+
+describe('global allPrivilegeExcludedFromBase feature privilege all', () => {
+  describe('default and marketing space', () => {
+    it('base all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
+        { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'All', overridden: false } },
+      ]);
+    });
+
+    it('base read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
+        { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Read', overridden: false } },
+      ]);
+    });
+
+    it('normal feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
+        { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('normal feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
+        { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('bothPrivilegesExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('bothPrivilegesExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['all'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+  });
+});
+
+describe('global allPrivilegeExcludedFromBase feature privilege read', () => {
+  describe('default and marketing space', () => {
+    it('base all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+        { spaces: ['default', 'marketing'], base: ['all'], feature: {} },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'All', overridden: false } },
+      ]);
+    });
+
+    it('base read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+        { spaces: ['default', 'marketing'], base: ['read'], feature: {} },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Read', overridden: false } },
+      ]);
+    });
+
+    it('normal feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+        { spaces: ['default', 'marketing'], base: [], feature: { normal: ['all'] } },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('normal feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+        { spaces: ['default', 'marketing'], base: [], feature: { normal: ['read'] } },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('bothPrivilegesExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('bothPrivilegesExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { bothPrivilegesExcludedFromBase: ['read'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege all', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['all'] },
+        },
+      ]);
+      const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
+      const actualTable = getTableFromComponent(component);
+      expect(actualTable).toEqual([
+        { spaces: ['*'], privileges: { summary: 'Custom', overridden: false } },
+        { spaces: ['Default', 'Marketing'], privileges: { summary: 'Custom', overridden: false } },
+      ]);
+    });
+
+    it('allPrivilegeExcludedFromBase feature privilege read', () => {
+      const props = buildProps([
+        { spaces: ['*'], base: [], feature: { allPrivilegeExcludedFromBase: ['read'] } },
+        {
+          spaces: ['default', 'marketing'],
+          base: [],
+          feature: { allPrivilegeExcludedFromBase: ['read'] },
+        },
       ]);
       const component = mountWithIntl(<PrivilegeSpaceTable {...props} />);
       const actualTable = getTableFromComponent(component);

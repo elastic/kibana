@@ -7,7 +7,7 @@
 import { get } from 'lodash';
 
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
-import { deserializeCluster } from '../../lib/cluster_serialization';
+import { deserializeCluster } from '../../../common/cluster_serialization';
 
 export const register = (router: Router): void => {
   router.get('', getAllHandler);

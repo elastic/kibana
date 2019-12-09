@@ -162,8 +162,8 @@ dataArray.forEach(function (data, i) {
       });
 
       afterEach(function () {
-        vis.off(beforeEvent);
-        vis.off(afterEvent);
+        vis.removeAllListeners(beforeEvent);
+        vis.removeAllListeners(afterEvent);
       });
 
       it('should add an event and its listeners', function () {
@@ -219,8 +219,8 @@ dataArray.forEach(function (data, i) {
       });
 
       afterEach(function () {
-        vis.off(beforeEvent);
-        vis.off(afterEvent);
+        vis.removeAllListeners(beforeEvent);
+        vis.removeAllListeners(afterEvent);
       });
 
       it('should remove a listener', function () {
@@ -241,7 +241,7 @@ dataArray.forEach(function (data, i) {
 
       it('should remove the event and all listeners when only event passed an argument', function () {
         const charts = vis.handler.charts;
-        vis.off(afterEvent);
+        vis.removeAllListeners(afterEvent);
 
         // should remove 'brush' event
         expect(vis.listeners(beforeEvent)).to.contain(listener2);

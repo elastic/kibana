@@ -18,17 +18,16 @@
  */
 
 import sinon from 'sinon';
-import rimraf from 'rimraf';
-import mkdirp from 'mkdirp';
+import del from 'del';
 import Logger from '../lib/logger';
 import list from './list';
 import { join } from 'path';
-import { writeFileSync, appendFileSync } from 'fs';
+import { writeFileSync, appendFileSync, mkdirSync } from 'fs';
 
 
 function createPlugin(name, version, pluginBaseDir) {
   const pluginDir = join(pluginBaseDir, name);
-  mkdirp.sync(pluginDir);
+  mkdirSync(pluginDir, { recursive: true });
   appendFileSync(join(pluginDir, 'package.json'), '{"version": "' + version + '"}');
 }
 
@@ -47,14 +46,14 @@ describe('kibana cli', function () {
       logger = new Logger(settings);
       sinon.stub(logger, 'log');
       sinon.stub(logger, 'error');
-      rimraf.sync(pluginDir);
-      mkdirp.sync(pluginDir);
+      del.sync(pluginDir);
+      mkdirSync(pluginDir, { recursive: true });
     });
 
     afterEach(function () {
       logger.log.restore();
       logger.error.restore();
-      rimraf.sync(pluginDir);
+      del.sync(pluginDir);
     });
 
     it('list all of the folders in the plugin folder', function () {
@@ -97,7 +96,7 @@ describe('kibana cli', function () {
 
     it('list should throw an exception if a plugin does not have a package.json', function () {
       createPlugin('plugin1', '1.0.0', pluginDir);
-      mkdirp.sync(join(pluginDir, 'empty-plugin'));
+      mkdirSync(join(pluginDir, 'empty-plugin'), { recursive: true });
 
       expect(function () {
         list(settings, logger);
@@ -107,7 +106,7 @@ describe('kibana cli', function () {
     it('list should throw an exception if a plugin have an empty package.json', function () {
       createPlugin('plugin1', '1.0.0', pluginDir);
       const invalidPluginDir = join(pluginDir, 'invalid-plugin');
-      mkdirp.sync(invalidPluginDir);
+      mkdirSync(invalidPluginDir, { recursive: true });
       appendFileSync(join(invalidPluginDir, 'package.json'), '');
 
       expect(function () {

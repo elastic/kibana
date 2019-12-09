@@ -11,7 +11,6 @@ import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
 import styled from 'styled-components';
 
-import { pure } from 'recompose';
 import { inputsModel, inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
@@ -29,6 +28,7 @@ const InspectContainer = styled.div<{ showInspect: boolean }>`
 InspectContainer.displayName = 'InspectContainer';
 
 interface OwnProps {
+  compact?: boolean;
   queryId: string;
   inputId?: InputsModelId;
   inspectIndex?: number;
@@ -57,8 +57,9 @@ interface InspectButtonDispatch {
 
 type InspectButtonProps = OwnProps & InspectButtonReducer & InspectButtonDispatch;
 
-const InspectButtonComponent = pure<InspectButtonProps>(
+const InspectButtonComponent = React.memo<InspectButtonProps>(
   ({
+    compact = false,
     inputId = 'global',
     inspect,
     isDisabled,
@@ -72,8 +73,11 @@ const InspectButtonComponent = pure<InspectButtonProps>(
     show,
     title = '',
   }: InspectButtonProps) => (
-    <InspectContainer showInspect={show}>
-      {inputId === 'timeline' && (
+    <InspectContainer
+      data-test-subj={`${show ? 'opaque' : 'transparent'}-inspect-container`}
+      showInspect={show}
+    >
+      {inputId === 'timeline' && !compact && (
         <EuiButtonEmpty
           aria-label={i18n.INSPECT}
           data-test-subj="inspect-empty-button"
@@ -94,10 +98,9 @@ const InspectButtonComponent = pure<InspectButtonProps>(
           {i18n.INSPECT}
         </EuiButtonEmpty>
       )}
-      {inputId === 'global' && (
+      {(inputId === 'global' || compact) && (
         <EuiButtonIcon
           aria-label={i18n.INSPECT}
-          className={show ? '' : ''}
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
@@ -148,9 +151,6 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const InspectButton = connect(
-  makeMapStateToProps,
-  {
-    setIsInspected: inputsActions.setInspectionParameter,
-  }
-)(InspectButtonComponent);
+export const InspectButton = connect(makeMapStateToProps, {
+  setIsInspected: inputsActions.setInspectionParameter,
+})(InspectButtonComponent);

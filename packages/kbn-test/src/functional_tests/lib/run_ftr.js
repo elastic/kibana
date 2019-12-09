@@ -20,13 +20,19 @@
 import { FunctionalTestRunner, readConfigFile } from '../../functional_test_runner';
 import { CliError } from './run_cli';
 
-async function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {
+async function createFtr({
+  configPath,
+  options: { installDir, log, bail, grep, updateBaselines, suiteTags },
+}) {
   const config = await readConfigFile(log, configPath);
 
   return new FunctionalTestRunner(log, configPath, {
     mochaOpts: {
       bail: !!bail,
       grep,
+    },
+    kbnTestServer: {
+      installDir,
     },
     updateBaselines,
     suiteTags: {

@@ -4,12 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface TemplateListItem {
+  name: string;
+  indexPatterns: string[];
+  version?: number;
+  order?: number;
+  hasSettings: boolean;
+  hasAliases: boolean;
+  hasMappings: boolean;
+  ilmPolicy?: {
+    name: string;
+  };
+  isManaged: boolean;
+}
 export interface Template {
   name: string;
-  version: number;
-  order: number;
   indexPatterns: string[];
+  version?: number;
+  order?: number;
+  settings?: object;
+  aliases?: object;
+  mappings?: object;
+  ilmPolicy?: {
+    name: string;
+  };
+  isManaged: boolean;
+}
+
+export interface TemplateEs {
+  name: string;
+  index_patterns: string[];
+  version?: number;
+  order?: number;
   settings?: {
+    [key: string]: any;
     index?: {
       [key: string]: any;
       lifecycle?: {
@@ -17,6 +45,8 @@ export interface Template {
       };
     };
   };
-  aliases?: object;
+  aliases?: {
+    [key: string]: any;
+  };
   mappings?: object;
 }

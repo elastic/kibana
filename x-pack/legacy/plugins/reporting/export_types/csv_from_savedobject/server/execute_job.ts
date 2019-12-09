@@ -4,49 +4,73 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { i18n } from '@kbn/i18n';
+import { cryptoFactory, LevelLogger } from '../../../server/lib';
+import {
+  ExecuteJobFactory,
+  ImmediateExecuteFn,
+  JobDocOutputExecuted,
+  ServerFacade,
+  RequestFacade,
+} from '../../../types';
+import {
+  CONTENT_TYPE_CSV,
+  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+  PLUGIN_ID,
+} from '../../../common/constants';
+import {
+  CsvResultFromSearch,
+  JobParamsPanelCsv,
+  SearchPanel,
+  JobDocPayloadPanelCsv,
+  FakeRequest,
+} from '../types';
+import { createGenerateCsv } from './lib';
 
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../server/lib';
-import { JobDocOutputExecuted, JobDocPayload, KbnServer } from '../../../types';
-import { CONTENT_TYPE_CSV, PLUGIN_ID } from '../../../common/constants';
-import { CsvResultFromSearch, createGenerateCsv } from './lib';
-
-interface FakeRequest {
-  headers: any;
-  getBasePath: (opts: any) => string;
-  server: KbnServer;
-}
-
-type ExecuteJobFn = (job: JobDocPayload, realRequest?: Request) => Promise<JobDocOutputExecuted>;
-
-function executeJobFn(server: KbnServer): ExecuteJobFn {
+export const executeJobFactory: ExecuteJobFactory<ImmediateExecuteFn<
+  JobParamsPanelCsv
+>> = function executeJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
-  const config = server.config();
-  const serverBasePath = config.get('server.basePath');
-  const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'savedobject-csv']);
-  const generateCsv = createGenerateCsv(logger);
+  const logger = LevelLogger.createForServer(server, [
+    PLUGIN_ID,
+    CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+    'execute-job',
+  ]);
 
   return async function executeJob(
-    job: JobDocPayload,
-    realRequest?: Request
+    jobId: string | null,
+    job: JobDocPayloadPanelCsv,
+    realRequest?: RequestFacade
   ): Promise<JobDocOutputExecuted> {
-    const { basePath, jobParams } = job;
-    const { isImmediate, panel, visType } = jobParams;
+    // There will not be a jobID for "immediate" generation.
+    // jobID is only for "queued" jobs
+    // Use the jobID as a logging tag or "immediate"
+    const jobLogger = logger.clone([jobId === null ? 'immediate' : jobId]);
 
-    logger.debug(`Execute job generating [${visType}] csv`);
+    const { jobParams } = job;
+    const { isImmediate, panel, visType } = jobParams as JobParamsPanelCsv & { panel: SearchPanel };
 
-    let requestObject: Request | FakeRequest;
+    if (!panel) {
+      i18n.translate(
+        'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToAccessPanel',
+        { defaultMessage: 'Failed to access panel metadata for job execution' }
+      );
+    }
+
+    jobLogger.debug(`Execute job generating [${visType}] csv`);
+
+    let requestObject: RequestFacade | FakeRequest;
     if (isImmediate && realRequest) {
-      logger.debug(`executing job from immediate API`);
+      jobLogger.info(`Executing job from immediate API`);
       requestObject = realRequest;
     } else {
-      logger.debug(`executing job async using encrypted headers`);
+      jobLogger.info(`Executing job async using encrypted headers`);
       let decryptedHeaders;
       const serializedEncryptedHeaders = job.headers;
       try {
         decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
       } catch (err) {
+        jobLogger.error(err);
         throw new Error(
           i18n.translate(
             'xpack.reporting.exportTypes.csv_from_savedobject.executeJob.failedToDecryptReportJobDataErrorMessage',
@@ -61,7 +85,6 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
 
       requestObject = {
         headers: decryptedHeaders,
-        getBasePath: () => basePath || serverBasePath,
         server,
       };
     }
@@ -70,6 +93,7 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
     let maxSizeReached = false;
     let size = 0;
     try {
+      const generateCsv = createGenerateCsv(jobLogger);
       const generateResults: CsvResultFromSearch = await generateCsv(
         requestObject,
         server,
@@ -82,12 +106,12 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
         result: { content, maxSizeReached, size },
       } = generateResults);
     } catch (err) {
-      logger.error(`Generate CSV Error! ${err}`);
+      jobLogger.error(`Generate CSV Error! ${err}`);
       throw err;
     }
 
     if (maxSizeReached) {
-      logger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
+      jobLogger.warn(`Max size reached: CSV output truncated to ${size} bytes`);
     }
 
     return {
@@ -97,6 +121,4 @@ function executeJobFn(server: KbnServer): ExecuteJobFn {
       size,
     };
   };
-}
-
-export const executeJobFactory = oncePerServer(executeJobFn);
+};

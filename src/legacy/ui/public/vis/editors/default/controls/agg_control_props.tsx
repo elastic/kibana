@@ -19,9 +19,10 @@
 
 import { VisParams } from '../../..';
 import { AggParams } from '../agg_params';
+import { OnAggParamsChange } from '../components/agg_common_props';
 
-export interface AggControlProps<T> {
+export interface AggControlProps {
   aggParams: AggParams;
   editorStateParams: VisParams;
-  setValue(params: AggParams, paramName: string, value: T): void;
+  setValue: OnAggParamsChange;
 }

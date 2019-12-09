@@ -5,23 +5,20 @@
  */
 
 import * as React from 'react';
-import { useContext } from 'react';
 import numeral from '@elastic/numeral';
 
-import {
-  AppKibanaFrameworkAdapter,
-  KibanaConfigContext,
-} from '../../lib/adapters/framework/kibana_framework_adapter';
+import { DEFAULT_BYTES_FORMAT } from '../../../common/constants';
+import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
 
-export const PreferenceFormattedBytes = React.memo<{ value: string | number }>(({ value }) => {
-  const config: Partial<AppKibanaFrameworkAdapter> = useContext(KibanaConfigContext);
+export const PreferenceFormattedBytesComponent = ({ value }: { value: string | number }) => {
+  const [bytesFormat] = useKibanaUiSetting(DEFAULT_BYTES_FORMAT);
   return (
-    <>
-      {config.bytesFormat
-        ? numeral(value).format(config.bytesFormat)
-        : numeral(value).format('0,0.[000]b')}
-    </>
+    <>{bytesFormat ? numeral(value).format(bytesFormat) : numeral(value).format('0,0.[0]b')}</>
   );
-});
+};
+
+PreferenceFormattedBytesComponent.displayName = 'PreferenceFormattedBytesComponent';
+
+export const PreferenceFormattedBytes = React.memo(PreferenceFormattedBytesComponent);
 
 PreferenceFormattedBytes.displayName = 'PreferenceFormattedBytes';

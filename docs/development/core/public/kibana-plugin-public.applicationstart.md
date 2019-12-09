@@ -15,6 +15,13 @@ export interface ApplicationStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [availableApps](./kibana-plugin-public.applicationstart.availableapps.md) | <code>readonly App[]</code> | Apps available based on the current capabilities. Should be used to show navigation links and make routing decisions. |
 |  [capabilities](./kibana-plugin-public.applicationstart.capabilities.md) | <code>RecursiveReadonly&lt;Capabilities&gt;</code> | Gets the read-only capabilities. |
+
+## Methods
+
+|  Method | Description |
+|  --- | --- |
+|  [getUrlForApp(appId, options)](./kibana-plugin-public.applicationstart.geturlforapp.md) | Returns a relative URL to a given app, including the global base path. |
+|  [navigateToApp(appId, options)](./kibana-plugin-public.applicationstart.navigatetoapp.md) | Navigiate to a given app |
+|  [registerMountContext(contextName, provider)](./kibana-plugin-public.applicationstart.registermountcontext.md) | Register a context provider for application mounting. Will only be available to applications that depend on the plugin that registered this context. |
 

@@ -5,19 +5,32 @@
  */
 
 import Mustache from 'mustache';
-import { isPlainObject } from 'lodash';
+import { isString, cloneDeep } from 'lodash';
 import { AlertActionParams, State, Context } from '../types';
 
-export function transformActionParams(params: AlertActionParams, state: State, context: Context) {
-  const result: AlertActionParams = {};
-  for (const [key, value] of Object.entries(params)) {
-    if (isPlainObject(value)) {
-      result[key] = transformActionParams(value as AlertActionParams, state, context);
-    } else if (typeof value !== 'string') {
-      result[key] = value;
-    } else {
-      result[key] = Mustache.render(value, { context, state });
-    }
-  }
-  return result;
+interface TransformActionParamsOptions {
+  alertId: string;
+  alertInstanceId: string;
+  params: AlertActionParams;
+  state: State;
+  context: Context;
+}
+
+export function transformActionParams({
+  alertId,
+  alertInstanceId,
+  context,
+  params,
+  state,
+}: TransformActionParamsOptions): AlertActionParams {
+  const result = cloneDeep(params, (value: any) => {
+    if (!isString(value)) return;
+
+    return Mustache.render(value, { alertId, alertInstanceId, context, state });
+  });
+
+  // The return type signature for `cloneDeep()` ends up taking the return
+  // type signature for the customizer, but rather than pollute the customizer
+  // with casts, seemed better to just do it in one place, here.
+  return (result as unknown) as AlertActionParams;
 }

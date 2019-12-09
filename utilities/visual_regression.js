@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import bluebird, {
-  fromNode,
-  promisify,
-} from 'bluebird';
+import bluebird, { promisify } from 'bluebird';
 import Handlebars from 'handlebars';
 import fs from 'fs';
 import path from 'path';
-import imageDiff from 'image-diff';
-import mkdirp from 'mkdirp';
+import { PNG } from 'pngjs';
+import pixelmatch from 'pixelmatch';
 import moment from 'moment';
 import SimpleGit from 'simple-git';
 
@@ -77,8 +74,8 @@ async function compareScreenshots() {
   const SESSION_SCREENSHOTS_DIR = path.resolve(SCREENSHOTS_DIR, 'session');
 
   // We don't need to create the baseline dir because it's committed.
-  mkdirp.sync(DIFF_SCREENSHOTS_DIR);
-  mkdirp.sync(SESSION_SCREENSHOTS_DIR);
+  fs.mkdirSync(DIFF_SCREENSHOTS_DIR, { recursive: true });
+  fs.mkdirSync(SESSION_SCREENSHOTS_DIR, { recursive: true });
   const files = await readDirAsync(SESSION_SCREENSHOTS_DIR);
   const screenshots = files.filter(file => file.indexOf('.png') !== -1);
 
@@ -111,17 +108,23 @@ async function compareScreenshots() {
       screenshot
     );
 
-    // Diff the images asynchronously.
-    const diffResult = await fromNode((cb) => {
-      imageDiff.getFullResult({
-        actualImage: sessionImagePath,
-        expectedImage: baselineImagePath,
-        diffImage: diffImagePath,
-        shadow: true,
-      }, cb);
-    });
+    const sessionImage = PNG.sync.read(await fs.promises.readFile(sessionImagePath));
+    const baselineImage = PNG.sync.read(await fs.promises.readFile(baselineImagePath));
+    const { width, height } = sessionImage;
+    const diff = new PNG({ width, height });
 
-    const change = diffResult.percentage;
+    const numDiffPixels = pixelmatch(
+      sessionImage.data,
+      baselineImage.data,
+      diff.data,
+      width,
+      height,
+      { threshold: 0 }
+    );
+
+    await fs.promises.writeFile(diffImagePath, PNG.sync.write(diff));
+
+    const change = numDiffPixels / (width * height);
     const changePercentage = (change * 100).toFixed(2);
     console.log(`(${changePercentage}%) ${screenshot}`);
     comparison.percentage = changePercentage;

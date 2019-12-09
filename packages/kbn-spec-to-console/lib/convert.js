@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 const convertParams = require('./convert/params');
 const convertMethods = require('./convert/methods');
 const convertPaths = require('./convert/paths');
@@ -25,38 +24,54 @@ const convertParts = require('./convert/parts');
 
 module.exports = spec => {
   const result = {};
+  // TODO:
+  // Since https://github.com/elastic/elasticsearch/pull/42346 has been merged into ES master
+  // the JSON doc specification has been updated. We need to update this script to take advantage
+  // of the added information but it will also require updating console's editor autocomplete.
   Object.keys(spec).forEach(api => {
     const source = spec[api];
     if (!source.url) {
       return result;
     }
-    const convertedSpec = result[api] = {};
-    if (source.url && source.url.params) {
-      const urlParams = convertParams(source.url.params);
+    const convertedSpec = (result[api] = {});
+    if (source.params) {
+      const urlParams = convertParams(source.params);
       if (Object.keys(urlParams).length > 0) {
         convertedSpec.url_params = urlParams;
       }
     }
 
-    if (source.methods) {
-      convertedSpec.methods = convertMethods(source.methods);
-    }
+    const methodSet = new Set();
+    let patterns;
+    const urlComponents = {};
 
     if (source.url.paths) {
-      convertedSpec.patterns = convertPaths(source.url.paths);
+      patterns = convertPaths(source.url.paths);
+      source.url.paths.forEach(pathsObject => {
+        pathsObject.methods.forEach(method => methodSet.add(method));
+        if (pathsObject.parts) {
+          for (const partName of Object.keys(pathsObject.parts)) {
+            urlComponents[partName] = pathsObject.parts[partName];
+          }
+        }
+      });
     }
 
-    if (source.url.parts) {
-      const components = convertParts(source.url.parts);
-      const hasComponents = Object.keys(components).filter(c => {
-        return Boolean(components[c]);
-      }).length > 0;
+    convertedSpec.methods = convertMethods(Array.from(methodSet));
+    convertedSpec.patterns = patterns;
+
+    if (Object.keys(urlComponents).length) {
+      const components = convertParts(urlComponents);
+      const hasComponents =
+        Object.keys(components).filter(c => {
+          return Boolean(components[c]);
+        }).length > 0;
       if (hasComponents) {
-        convertedSpec.url_components = convertParts(source.url.parts);
+        convertedSpec.url_components = convertParts(urlComponents);
       }
     }
-    if (source.documentation) {
-      convertedSpec.documentation = source.documentation;
+    if (source.documentation && source.documentation.url) {
+      convertedSpec.documentation = source.documentation.url;
     }
   });
 

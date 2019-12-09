@@ -29,7 +29,7 @@ export default function ({ getService }) {
 
     it('should get collection status', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/setup/collection?skipLiveData=true')
+        .post('/api/monitoring/v1/setup/collection/cluster?skipLiveData=true')
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);

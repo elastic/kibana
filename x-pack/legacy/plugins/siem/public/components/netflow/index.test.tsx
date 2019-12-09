@@ -7,7 +7,8 @@
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallow } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
@@ -18,8 +19,7 @@ import {
 } from '../certificate_fingerprint';
 import { EVENT_DURATION_FIELD_NAME } from '../duration';
 import { ID_FIELD_NAME } from '../event_details/event_id';
-import { DESTINATION_IP_FIELD_NAME } from '../ip';
-import { SOURCE_IP_FIELD_NAME } from '../ip';
+import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { JA3_HASH_FIELD_NAME } from '../ja3_fingerprint';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
 import {
@@ -56,6 +56,8 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../source_destination/field_names';
+
+jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 const getNetflowInstance = () => (
   <Netflow
@@ -120,7 +122,7 @@ const getNetflowInstance = () => (
 
 describe('Netflow', () => {
   test('renders correctly against snapshot', () => {
-    const wrapper = shallowWithIntl(<TestProviders>{getNetflowInstance()}</TestProviders>);
+    const wrapper = shallow(getNetflowInstance());
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 

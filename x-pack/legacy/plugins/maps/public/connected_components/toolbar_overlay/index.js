@@ -6,12 +6,9 @@
 
 import { connect } from 'react-redux';
 import { ToolbarOverlay } from './toolbar_overlay';
-import { getUniqueIndexPatternIds } from '../../selectors/map_selectors';
 
-function mapStateToProps(state = {}) {
-  return {
-    uniqueIndexPatternIds: getUniqueIndexPatternIds(state)
-  };
+function mapStateToProps() {
+  return {};
 }
 
 const connectedToolbarOverlay = connect(mapStateToProps, null)(ToolbarOverlay);

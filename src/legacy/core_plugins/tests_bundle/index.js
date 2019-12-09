@@ -23,7 +23,8 @@ import globby from 'globby';
 import MultiStream from 'multistream';
 import webpackMerge from 'webpack-merge';
 
-import { fromRoot } from '../../../legacy/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';
@@ -52,17 +53,13 @@ export default (kibana) => {
           }
         } = kbnServer;
 
-        const testGlobs = [
-          'src/legacy/ui/public/**/*.js',
-          '!src/legacy/ui/public/flot-charts/**/*',
-        ];
+        const testGlobs = [];
+
         const testingPluginIds = config.get('tests_bundle.pluginId');
 
         if (testingPluginIds) {
-          testGlobs.push('!src/legacy/ui/public/**/__tests__/**/*');
           testingPluginIds.split(',').forEach((pluginId) => {
-            const plugin = plugins
-              .find(plugin => plugin.id === pluginId);
+            const plugin = plugins.find(plugin => plugin.id === pluginId);
 
             if (!plugin) {
               throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
@@ -78,6 +75,8 @@ export default (kibana) => {
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
           });
         } else {
+          // add all since we are not just focused on specific plugins
+          testGlobs.push('src/legacy/ui/public/**/*.js', '!src/legacy/ui/public/flot-charts/**/*');
           // add the modules from all of the apps
           for (const app of uiApps) {
             modules.add(app.getMainModuleId());

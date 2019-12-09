@@ -9,6 +9,10 @@ import { NumberFormatArgInput as Component, Props as ComponentProps } from './nu
 import { AdvancedSettings } from '../../../../public/lib/kibana_advanced_settings';
 // @ts-ignore untyped local lib
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
+import { ArgumentFactory } from '../../../../types/arguments';
+import { ArgumentStrings } from '../../../../i18n';
+
+const { NumberFormat: strings } = ArgumentStrings;
 
 const formatMap = {
   NUMBER: AdvancedSettings.get('format:number:defaultPattern'),
@@ -19,20 +23,20 @@ const formatMap = {
 };
 
 const numberFormats = [
-  { value: formatMap.NUMBER, text: 'Number' },
-  { value: formatMap.PERCENT, text: 'Percent' },
-  { value: formatMap.CURRENCY, text: 'Currency' },
-  { value: formatMap.DURATION, text: 'Duration' },
-  { value: formatMap.BYTES, text: 'Bytes' },
+  { value: formatMap.NUMBER, text: strings.getFormatNumber() },
+  { value: formatMap.PERCENT, text: strings.getFormatPercent() },
+  { value: formatMap.CURRENCY, text: strings.getFormatCurrency() },
+  { value: formatMap.DURATION, text: strings.getFormatDuration() },
+  { value: formatMap.BYTES, text: strings.getFormatBytes() },
 ];
 
 export const NumberFormatArgInput = compose<ComponentProps, null>(withProps({ numberFormats }))(
   Component
 );
 
-export const numberFormat = () => ({
+export const numberFormat: ArgumentFactory<ComponentProps> = () => ({
   name: 'numberFormat',
-  displayName: 'Number Format',
-  help: 'Select or enter a valid NumeralJS format',
+  displayName: strings.getDisplayName(),
+  help: strings.getHelp(),
   simpleTemplate: templateFromReactComponent(NumberFormatArgInput),
 });

@@ -6,7 +6,6 @@
 
 import { EuiBadge, EuiBadgeProps, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
@@ -35,16 +34,22 @@ const BadgeHighlighted = (props: EuiBadgeProps) => (
     style={{
       height: '20px',
       margin: '0 5px 0 5px',
-      maxWidth: '70px',
-      minWidth: '70px',
+      maxWidth: '85px',
+      minWidth: '85px',
     }}
   />
 );
 
 BadgeHighlighted.displayName = 'BadgeHighlighted';
 
+const HighlightedBackground = styled.span`
+  background-color: ${props => props.theme.eui.euiColorLightShade};
+`;
+
+HighlightedBackground.displayName = 'HighlightedBackground';
+
 const EmptyContainer = styled.div<{ showSmallMsg: boolean }>`
-  width: ${props => (props.showSmallMsg ? '60px' : 'auto')}
+  width: ${props => (props.showSmallMsg ? '60px' : 'auto')};
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -82,7 +87,7 @@ interface Props {
 /**
  * Prompts the user to drop anything with a facet count into the data providers section.
  */
-export const Empty = pure<Props>(({ showSmallMsg = false }) => (
+export const Empty = React.memo<Props>(({ showSmallMsg = false }) => (
   <EmptyContainer
     className="timeline-drop-area-empty"
     data-test-subj="empty"
@@ -94,7 +99,9 @@ export const Empty = pure<Props>(({ showSmallMsg = false }) => (
           <Text color="subdued" size="s">
             {i18n.DROP_ANYTHING}
           </Text>
-          <BadgeHighlighted>{i18n.HIGHLIGHTED}</BadgeHighlighted>
+          <HighlightedBackground>
+            <BadgeHighlighted>{i18n.HIGHLIGHTED}</BadgeHighlighted>
+          </HighlightedBackground>
         </NoWrap>
 
         <NoWrap>

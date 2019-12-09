@@ -7,7 +7,6 @@
 import {
   // @ts-ignore No typings for EuiSpacer
   EuiSpacer,
-  EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
@@ -23,13 +22,12 @@ import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
-import { BaseLocationOptions } from '../components/functional/ping_list';
 import { useTrackPageview } from '../../../infra/public';
+import { getTitle } from '../lib/helper/get_title';
 
 interface MonitorPageProps {
-  location: { pathname: string; search: string };
   logMonitorPageLoad: () => void;
-  match: { params: { id: string } };
+  match: { params: { monitorId: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
     options: QueryOptions<TVariables>
@@ -38,17 +36,17 @@ interface MonitorPageProps {
 }
 
 export const MonitorPage = ({
-  location,
   logMonitorPageLoad,
   query,
   setBreadcrumbs,
+  match,
 }: MonitorPageProps) => {
-  const parsedPath = location.pathname.replace(/^(\/monitor\/)/, '').split('/');
-  const [monitorId] = useState<string>(decodeURI(parsedPath[0]));
+  // decode 64 base string, it was decoded to make it a valid url, since monitor id can be a url
+  const monitorId = atob(match.params.monitorId);
   const [pingListPageCount, setPingListPageCount] = useState<number>(10);
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [getUrlParams, updateUrlParams] = useUrlParams();
-  const params = getUrlParams();
+  const { absoluteDateRangeStart, absoluteDateRangeEnd, ...params } = getUrlParams();
   const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
   useEffect(() => {
@@ -66,6 +64,7 @@ export const MonitorPage = ({
     }).then((result: any) => {
       const { name, url, id } = result.data.monitorPageTitle;
       const heading: string = name || url || id;
+      document.title = getTitle(name);
       setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
       if (setHeadingText) {
         setHeadingText(heading);
@@ -73,16 +72,12 @@ export const MonitorPage = ({
     });
   }, [params]);
 
-  const [selectedLocation, setSelectedLocation] = useState<EuiComboBoxOptionProps[]>(
-    BaseLocationOptions
-  );
-
-  const selLocationVal = selectedLocation[0].value === 'All' ? null : selectedLocation[0].value;
+  const [selectedLocation, setSelectedLocation] = useState(undefined);
 
   const sharedVariables = {
     dateRangeStart,
     dateRangeEnd,
-    location: selLocationVal,
+    location: selectedLocation,
     monitorId,
   };
 
@@ -110,7 +105,7 @@ export const MonitorPage = ({
       <PingList
         onPageCountChange={setPingListPageCount}
         onSelectedLocationChange={setSelectedLocation}
-        onSelectedStatusChange={(selectedStatus: string | null) =>
+        onSelectedStatusChange={(selectedStatus: string | undefined) =>
           updateUrlParams({ selectedPingStatus: selectedStatus || '' })
         }
         onUpdateApp={refreshApp}

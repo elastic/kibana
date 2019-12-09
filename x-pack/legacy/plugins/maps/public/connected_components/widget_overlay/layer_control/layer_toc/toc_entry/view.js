@@ -178,12 +178,14 @@ export class TOCEntry extends React.Component {
 
   _renderLayerHeader() {
     const {
+      removeLayer,
       cloneLayer,
       isReadOnly,
       layer,
       zoom,
       toggleVisible,
-      fitToBounds
+      fitToBounds,
+      isUsingSearch
     } = this.props;
 
     return (
@@ -195,6 +197,7 @@ export class TOCEntry extends React.Component {
       >
         <LayerTocActions
           layer={layer}
+          isUsingSearch={isUsingSearch}
           fitToBounds={() => {
             fitToBounds(layer.getId());
           }}
@@ -209,6 +212,9 @@ export class TOCEntry extends React.Component {
           }}
           editLayer={this._openLayerPanelWithCheck}
           isReadOnly={isReadOnly}
+          removeLayer={() => {
+            removeLayer(layer.getId());
+          }}
         />
 
         {this._renderLayerIcons()}
@@ -221,7 +227,7 @@ export class TOCEntry extends React.Component {
       return null;
     }
 
-    const tocDetails = this.props.layer.getLegendDetails();
+    const tocDetails = this.props.layer.renderLegendDetails();
     if (!tocDetails) {
       return null;
     }

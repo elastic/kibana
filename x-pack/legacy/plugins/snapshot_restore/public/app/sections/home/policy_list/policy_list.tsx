@@ -7,16 +7,20 @@
 import React, { Fragment, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { SlmPolicy } from '../../../../../common/types';
-import { SectionError, SectionLoading } from '../../../components';
+import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common/constants';
+import { SectionError, SectionLoading, Error } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useAppDependencies } from '../../../index';
-import { useLoadPolicies } from '../../../services/http';
+import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { uiMetricService } from '../../../services/ui_metric';
+import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
+import { WithPrivileges, NotAuthorizedSection } from '../../../lib/authorization';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
+import { PolicyRetentionSchedule } from './policy_retention_schedule';
 
 interface MatchParams {
   policyName?: SlmPolicy['name'];
@@ -43,10 +47,16 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     sendRequest: reload,
   } = useLoadPolicies();
 
+  // Load retention cluster settings
+  const {
+    isLoading: isLoadingRetentionSettings,
+    error: retentionSettingsError,
+    data: retentionSettings,
+    sendRequest: reloadRetentionSettings,
+  } = useLoadRetentionSettings();
+
   const openPolicyDetailsUrl = (newPolicyName: SlmPolicy['name']): string => {
-    return history.createHref({
-      pathname: `${BASE_PATH}/policies/${newPolicyName}`,
-    });
+    return linkToPolicy(newPolicyName);
   };
 
   const closePolicyDetails = () => {
@@ -72,7 +82,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     trackUiMetric(UIM_POLICY_LIST_LOAD);
   }, []);
 
-  let content;
+  let content: JSX.Element;
 
   if (isLoading) {
     content = (
@@ -92,7 +102,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             defaultMessage="Error loading policies"
           />
         }
-        error={error}
+        error={error as Error}
       />
     );
   } else if (policies && policies.length === 0) {
@@ -103,7 +113,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.policyList.emptyPromptTitle"
-              defaultMessage="You don't have any snapshot policies yet"
+              defaultMessage="Create your first snapshot policy"
             />
           </h1>
         }
@@ -112,37 +122,112 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                defaultMessage="Use policies to schedule automatic backups of your cluster."
+                defaultMessage="A policy automates the creation and deletion of snapshots."
               />
             </p>
           </Fragment>
+        }
+        actions={
+          <EuiButton
+            href={linkToAddPolicy()}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createPolicyButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.createPolicyButton"
+              defaultMessage="Create a policy"
+            />
+          </EuiButton>
         }
         data-test-subj="emptyPrompt"
       />
     );
   } else {
+    const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
+    const hasDuplicateSchedules = policySchedules.length > new Set(policySchedules).size;
+    const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
+
     content = (
-      <PolicyTable
-        policies={policies || []}
-        reload={reload}
-        openPolicyDetailsUrl={openPolicyDetailsUrl}
-        onPolicyDeleted={onPolicyDeleted}
-        onPolicyExecuted={onPolicyExecuted}
-      />
+      <Fragment>
+        {hasDuplicateSchedules ? (
+          <Fragment>
+            <EuiCallOut
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyScheduleWarningTitle"
+                  defaultMessage="Two or more policies have the same schedule"
+                />
+              }
+              color="warning"
+              iconType="alert"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyScheduleWarningDescription"
+                defaultMessage="Only one snapshot can be taken at a time. To avoid snapshot failures, edit or delete the policies."
+              />
+            </EuiCallOut>
+            <EuiSpacer />
+          </Fragment>
+        ) : null}
+
+        {hasRetention ? (
+          <PolicyRetentionSchedule
+            retentionSettings={retentionSettings}
+            onRetentionScheduleUpdated={reloadRetentionSettings}
+            isLoading={isLoadingRetentionSettings}
+            error={retentionSettingsError}
+          />
+        ) : null}
+
+        <PolicyTable
+          policies={policies || []}
+          reload={reload}
+          openPolicyDetailsUrl={openPolicyDetailsUrl}
+          onPolicyDeleted={onPolicyDeleted}
+          onPolicyExecuted={onPolicyExecuted}
+        />
+      </Fragment>
     );
   }
 
   return (
-    <section data-test-subj="policyList">
-      {policyName ? (
-        <PolicyDetails
-          policyName={policyName}
-          onClose={closePolicyDetails}
-          onPolicyDeleted={onPolicyDeleted}
-          onPolicyExecuted={onPolicyExecuted}
-        />
-      ) : null}
-      {content}
-    </section>
+    <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map(name => `cluster.${name}`)}>
+      {({ hasPrivileges, privilegesMissing }) =>
+        hasPrivileges ? (
+          <section data-test-subj="policyList">
+            {policyName ? (
+              <PolicyDetails
+                policyName={policyName}
+                onClose={closePolicyDetails}
+                onPolicyDeleted={onPolicyDeleted}
+                onPolicyExecuted={onPolicyExecuted}
+              />
+            ) : null}
+            {content}
+          </section>
+        ) : (
+          <NotAuthorizedSection
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyList.deniedPrivilegeTitle"
+                defaultMessage="You're missing cluster privileges"
+              />
+            }
+            message={
+              <FormattedMessage
+                id="xpack.snapshotRestore.policyList.deniedPrivilegeDescription"
+                defaultMessage="To manage Snapshot Lifecycle Policies, you must have {privilegesCount,
+                  plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
+                values={{
+                  missingPrivileges: privilegesMissing.cluster!.join(', '),
+                  privilegesCount: privilegesMissing.cluster!.length,
+                }}
+              />
+            }
+          />
+        )
+      }
+    </WithPrivileges>
   );
 };

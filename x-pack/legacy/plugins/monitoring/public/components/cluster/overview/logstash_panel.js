@@ -7,7 +7,7 @@
 import React from 'react';
 import { formatNumber } from 'plugins/monitoring/lib/format_number';
 import { ClusterItemContainer, BytesPercentageUsage, DisabledIfNoDataAndInSetupModeLink } from './helpers';
-import { LOGSTASH } from '../../../../common/constants';
+import { LOGSTASH, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 
 import {
   EuiFlexGrid,
@@ -21,12 +21,11 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiToolTip,
-  EuiBadge
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
@@ -42,36 +41,16 @@ export function LogstashPanel(props) {
   const goToNodes = () => props.changeUrl('logstash/nodes');
   const goToPipelines = () => props.changeUrl('logstash/pipelines');
 
-  const setupModeLogstashData = get(setupMode.data, 'logstash');
-  let setupModeInstancesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const migratedNodesCount = Object.values(setupModeLogstashData.byUuid).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(setupModeLogstashData.byUuid).length;
-    if (totalNodesCount === 0 && get(setupMode.data, 'logstash.detected.mightExist', false)) {
-      totalNodesCount = 1;
-    }
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored nodes versus how many ` +
-            `detected total nodes. If there are more detected nodes than monitored nodes, click the Nodes ` +
-            `link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {formatNumber(migratedNodesCount, 'int_commas')}/{formatNumber(totalNodesCount, 'int_commas')}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
+  const setupModeData = get(setupMode.data, 'logstash');
+  const setupModeTooltip = setupMode && setupMode.enabled
+    ? (
+      <SetupModeTooltip
+        setupModeData={setupModeData}
+        productName={LOGSTASH_SYSTEM_ID}
+        badgeClickAction={goToNodes}
+      />
+    )
+    : null;
 
   return (
     <ClusterItemContainer
@@ -88,7 +67,7 @@ export function LogstashPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeLogstashData}
+                  setupModeData={setupModeData}
                   onClick={goToLogstash}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'Logstash Overview'
@@ -151,7 +130,7 @@ export function LogstashPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeInstancesData}
+              {setupModeTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">
@@ -186,7 +165,7 @@ export function LogstashPanel(props) {
                   <h3>
                     <DisabledIfNoDataAndInSetupModeLink
                       setupModeEnabled={setupMode.enabled}
-                      setupModeData={setupModeLogstashData}
+                      setupModeData={setupModeData}
                       onClick={goToPipelines}
                       data-test-subj="lsPipelines"
                       aria-label={i18n.translate(

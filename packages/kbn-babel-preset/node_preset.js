@@ -17,7 +17,26 @@
  * under the License.
  */
 
-module.exports = () => {
+module.exports = (_, options = {}) => {
+  const overrides = [];
+  if (!process.env.ALLOW_PERFORMANCE_HOOKS_IN_TASK_MANAGER) {
+    overrides.push(
+      {
+        test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]task_manager/],
+        plugins: [
+          [
+            require.resolve('babel-plugin-filter-imports'),
+            {
+              imports: {
+                perf_hooks: ['performance'],
+              },
+            },
+          ],
+        ],
+      }
+    );
+  }
+
   return {
     presets: [
       [
@@ -32,12 +51,14 @@ module.exports = () => {
             node: 'current',
           },
 
-          // replaces `import "@babel/polyfill"` with a list of require statements
+          // replaces `import "core-js/stable"` with a list of require statements
           // for just the polyfills that the target versions don't already supply
           // on their own
           useBuiltIns: 'entry',
           modules: 'cjs',
-          corejs: 2,
+          corejs: 3,
+
+          ...(options['@babel/preset-env'] || {}),
         },
       ],
       require('./common_preset'),
@@ -46,9 +67,10 @@ module.exports = () => {
       [
         require.resolve('babel-plugin-transform-define'),
         {
-          'global.__BUILT_WITH_BABEL__': 'true'
-        }
-      ]
-    ]
+          'global.__BUILT_WITH_BABEL__': 'true',
+        },
+      ],
+    ],
+    overrides,
   };
 };

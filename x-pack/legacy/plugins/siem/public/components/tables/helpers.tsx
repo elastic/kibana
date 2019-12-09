@@ -4,16 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiPopover, EuiToolTip, EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
-import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
-import { Provider } from '../timeline/data_providers/provider';
+import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems, Spacer } from '../page';
+import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
+import { Provider } from '../timeline/data_providers/provider';
+
+const Subtext = styled.div`
+  font-size: ${props => props.theme.eui.euiFontSizeXS};
+`;
 
 export const getRowItemDraggable = ({
   rowItem,
@@ -84,7 +89,7 @@ export const getRowItemDraggables = ({
 }): JSX.Element => {
   if (rowItems != null && rowItems.length > 0) {
     const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
+      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
       return (
         <React.Fragment key={id}>
           {index !== 0 && (
@@ -144,41 +149,74 @@ export const getRowItemOverflow = (
   return (
     <>
       {rowItems.length > overflowIndexStart && (
-        <EuiToolTip
-          content={
-            <>
+        <Popover count={rowItems.length - overflowIndexStart} idPrefix={idPrefix}>
+          <EuiText size="xs">
+            <ul>
               {rowItems
                 .slice(overflowIndexStart, overflowIndexStart + maxOverflowItems)
                 .map(rowItem => (
-                  <span key={`${idPrefix}-${rowItem}`}>
-                    {defaultToEmptyTag(rowItem)}
-                    <br />
-                  </span>
+                  <li key={`${idPrefix}-${rowItem}`}>{defaultToEmptyTag(rowItem)}</li>
                 ))}
-              {rowItems.length > overflowIndexStart + maxOverflowItems && (
-                <b>
-                  <br />
+            </ul>
+
+            {rowItems.length > overflowIndexStart + maxOverflowItems && (
+              <p data-test-subj="popover-additional-overflow">
+                <EuiTextColor color="subdued">
+                  {rowItems.length - overflowIndexStart - maxOverflowItems}{' '}
                   <FormattedMessage
                     id="xpack.siem.tables.rowItemHelper.moreDescription"
-                    defaultMessage="More..."
+                    defaultMessage="more not shown"
                   />
-                </b>
-              )}
-            </>
-          }
-        >
-          <MoreRowItems type="boxesHorizontal" />
-        </EuiToolTip>
+                </EuiTextColor>
+              </p>
+            )}
+          </EuiText>
+        </Popover>
       )}
     </>
   );
 };
 
-export const OverflowField = React.memo<{
+export const PopoverComponent = ({
+  children,
+  count,
+  idPrefix,
+}: {
+  children: React.ReactNode;
+  count: number;
+  idPrefix: string;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <Subtext>
+      <EuiPopover
+        button={<EuiLink onClick={() => setIsOpen(!isOpen)}>{`+${count} More`}</EuiLink>}
+        closePopover={() => setIsOpen(!isOpen)}
+        id={`${idPrefix}-popover`}
+        isOpen={isOpen}
+      >
+        {children}
+      </EuiPopover>
+    </Subtext>
+  );
+};
+
+PopoverComponent.displayName = 'PopoverComponent';
+
+export const Popover = React.memo(PopoverComponent);
+
+Popover.displayName = 'Popover';
+
+export const OverflowFieldComponent = ({
+  value,
+  showToolTip = true,
+  overflowLength = 50,
+}: {
   value: string;
   showToolTip?: boolean;
   overflowLength?: number;
-}>(({ value, showToolTip = true, overflowLength = 50 }) => (
+}) => (
   <span>
     {showToolTip ? (
       <EuiToolTip data-test-subj={'message-tooltip'} content={'message'}>
@@ -193,6 +231,10 @@ export const OverflowField = React.memo<{
       </EuiToolTip>
     )}
   </span>
-));
+);
+
+OverflowFieldComponent.displayName = 'OverflowFieldComponent';
+
+export const OverflowField = React.memo(OverflowFieldComponent);
 
 OverflowField.displayName = 'OverflowField';

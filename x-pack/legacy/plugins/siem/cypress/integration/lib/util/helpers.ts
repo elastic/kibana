@@ -6,7 +6,8 @@
 
 import { login } from '../login/helpers';
 
-const KIBANA_LOGO_TIMEOUT = 10 * 1000;
+/** The default time in ms to wait for a Cypress command to complete */
+export const DEFAULT_TIMEOUT = 30 * 1000;
 
 /**
  * Authenticates with Kibana, visits the specified `url`, and waits for the
@@ -15,9 +16,12 @@ const KIBANA_LOGO_TIMEOUT = 10 * 1000;
 export const loginAndWaitForPage = (url: string) => {
   login();
 
-  cy.visit(url);
+  cy.visit(`${Cypress.config().baseUrl}${url}`);
 
   cy.viewport('macbook-15');
 
-  cy.contains('a', 'SIEM', { timeout: KIBANA_LOGO_TIMEOUT });
+  cy.contains('a', 'SIEM', { timeout: DEFAULT_TIMEOUT });
 };
+
+export const waitForTableLoad = (dataTestSubj: string) =>
+  cy.get(dataTestSubj, { timeout: DEFAULT_TIMEOUT });

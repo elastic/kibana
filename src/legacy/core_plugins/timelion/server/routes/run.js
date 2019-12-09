@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Promise from 'bluebird';
+import Bluebird from 'bluebird';
 import _ from 'lodash';
 import chainRunnerFn from '../handlers/chain_runner.js';
 const timelionDefaults = require('../lib/get_namespaced_settings')();
@@ -29,8 +29,7 @@ function formatErrorResponse(e, h) {
   }).code(500);
 }
 
-
-export default function (server) {
+export function runRoute(server) {
   server.route({
     method: ['POST', 'GET'],
     path: '/api/timelion/run',
@@ -45,7 +44,7 @@ export default function (server) {
         });
 
         const chainRunner = chainRunnerFn(tlConfig);
-        const sheet = await Promise.all(chainRunner.processRequest(request.payload || {
+        const sheet = await Bluebird.all(chainRunner.processRequest(request.payload || {
           sheet: [request.query.expression],
           time: {
             from: request.query.from,
@@ -71,5 +70,4 @@ export default function (server) {
       }
     }
   });
-
 }

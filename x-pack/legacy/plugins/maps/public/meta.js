@@ -7,11 +7,11 @@
 
 import {
   GIS_API_PATH,
-  EMS_CATALOGUE_PATH
+  EMS_CATALOGUE_PATH, EMS_GLYPHS_PATH
 } from '../common/constants';
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
-import { EMSClient } from 'ui/vis/map/ems_client';
+import { EMSClient } from '@elastic/ems-client';
 import { xpackInfo } from './kibana_services';
 import fetch from 'node-fetch';
 
@@ -77,4 +77,17 @@ export function getEMSClient() {
   }
   return emsClient;
 
+}
+
+export function getGlyphUrl() {
+  if (!chrome.getInjected('isEmsEnabled', true)) {
+    return '';
+  }
+  return (chrome.getInjected('proxyElasticMapsServiceInMaps', false)) ?
+    (relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_GLYPHS_PATH}`) + `/{fontstack}/{range}`) : chrome.getInjected('emsFontLibraryUrl', true);
+
+}
+
+export function isRetina() {
+  return window.devicePixelRatio === 2;
 }

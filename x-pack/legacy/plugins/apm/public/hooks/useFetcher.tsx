@@ -5,39 +5,64 @@
  */
 
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { toastNotifications } from 'ui/notify';
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
+import { IHttpFetchError } from 'src/core/public';
+import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
-import { KFetchError } from '../../../../../../src/legacy/ui/public/kfetch/kfetch_error';
+import { useKibanaCore } from '../../../observability/public';
+import { APMClient } from '../services/rest/createCallApmApi';
+import { useCallApmApi } from './useCallApmApi';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
   SUCCESS = 'success',
-  FAILURE = 'failure'
+  FAILURE = 'failure',
+  PENDING = 'pending'
 }
 
-export function useFetcher<Response>(
-  fn: () => Promise<Response> | undefined,
+interface Result<Data> {
+  data?: Data;
+  status: FETCH_STATUS;
+  error?: Error;
+}
+
+// fetcher functions can return undefined OR a promise. Previously we had a more simple type
+// but it led to issues when using object destructuring with default values
+type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
+  infer TResponseType
+>
+  ? TResponseType
+  : unknown;
+
+export function useFetcher<TReturn>(
+  fn: (callApmApi: APMClient) => TReturn,
   fnDeps: any[],
-  options: { preservePreviousResponse?: boolean } = {}
-) {
-  const { preservePreviousResponse = true } = options;
+  options: {
+    preservePreviousData?: boolean;
+  } = {}
+): Result<InferResponseType<TReturn>> & { refetch: () => void } {
+  const { notifications } = useKibanaCore();
+  const { preservePreviousData = true } = options;
   const id = useComponentId();
+
+  const callApmApi = useCallApmApi();
+
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
-  const [result, setResult] = useState<{
-    data?: Response;
-    status?: FETCH_STATUS;
-    error?: Error;
-  }>({});
+  const [result, setResult] = useState<Result<InferResponseType<TReturn>>>({
+    data: undefined,
+    status: FETCH_STATUS.PENDING
+  });
   const [counter, setCounter] = useState(0);
 
   useEffect(() => {
     let didCancel = false;
 
     async function doFetch() {
-      const promise = fn();
+      const promise = fn(callApmApi);
+      // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
+      // This can happen if the data fetching is conditional (based on certain inputs).
+      // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
       if (!promise) {
         return;
       }
@@ -45,7 +70,7 @@ export function useFetcher<Response>(
       dispatchStatus({ id, isLoading: true });
 
       setResult(prevResult => ({
-        data: preservePreviousResponse ? prevResult.data : undefined, // preserve data from previous state while loading next state
+        data: preservePreviousData ? prevResult.data : undefined, // preserve data from previous state while loading next state
         status: FETCH_STATUS.LOADING,
         error: undefined
       }));
@@ -58,30 +83,29 @@ export function useFetcher<Response>(
             data,
             status: FETCH_STATUS.SUCCESS,
             error: undefined
-          });
+          } as Result<InferResponseType<TReturn>>);
         }
       } catch (e) {
-        const err = e as KFetchError;
+        const err = e as IHttpFetchError;
         if (!didCancel) {
-          toastNotifications.addWarning({
+          notifications.toasts.addWarning({
             title: i18n.translate('xpack.apm.fetcher.error.title', {
               defaultMessage: `Error while fetching resource`
             }),
-            text: (
+            text: toMountPoint(
               <div>
                 <h5>
                   {i18n.translate('xpack.apm.fetcher.error.status', {
                     defaultMessage: `Error`
                   })}
                 </h5>
-                {idx(err.res, r => r.statusText)} ({idx(err.res, r => r.status)}
-                )
+                {err.response?.statusText} ({err.response?.status})
                 <h5>
                   {i18n.translate('xpack.apm.fetcher.error.url', {
                     defaultMessage: `URL`
                   })}
                 </h5>
-                {idx(err.res, r => r.url)}
+                {err.response?.url}
               </div>
             )
           });
@@ -105,20 +129,19 @@ export function useFetcher<Response>(
   }, [
     counter,
     id,
-    preservePreviousResponse,
+    preservePreviousData,
     dispatchStatus,
     ...fnDeps
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    return {
       ...result,
-      refresh: () => {
+      refetch: () => {
         // this will invalidate the deps to `useEffect` and will result in a new request
         setCounter(count => count + 1);
       }
-    }),
-    [result]
-  );
+    };
+  }, [result]);
 }

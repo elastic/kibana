@@ -22,11 +22,10 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
   EuiFlexGroup,
-  EuiToolTip,
-  EuiBadge
 } from '@elastic/eui';
 import { formatTimestampToDuration } from '../../../../common';
-import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import { CALCULATE_DURATION_SINCE, APM_SYSTEM_ID } from '../../../../common/constants';
+import { SetupModeTooltip } from '../../setup_mode/tooltip';
 
 export function ApmPanel(props) {
   const { setupMode } = props;
@@ -39,36 +38,16 @@ export function ApmPanel(props) {
   const goToApm = () => props.changeUrl('apm');
   const goToInstances = () => props.changeUrl('apm/instances');
 
-  const setupModeApmData = get(setupMode.data, 'apm');
-  let setupModeInstancesData = null;
-  if (setupMode.enabled && setupMode.data) {
-    const migratedNodesCount = Object.values(setupModeApmData.byUuid).filter(node => node.isFullyMigrated).length;
-    let totalNodesCount = Object.values(setupModeApmData.byUuid).length;
-    if (totalNodesCount === 0 && get(setupMode.data, 'apm.detected.mightExist', false)) {
-      totalNodesCount = 1;
-    }
-
-    const badgeColor = migratedNodesCount === totalNodesCount
-      ? 'secondary'
-      : 'danger';
-
-    setupModeInstancesData = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.setupModeNodesTooltip', {
-            defaultMessage: `These numbers indicate how many detected monitored APM servers versus how many ` +
-            `detected total APM servers. If there are more detected APM servers than monitored APM servers, click the Nodes ` +
-            `link and you will be guided in how to setup monitoring for the missing node.`
-          })}
-        >
-          <EuiBadge color={badgeColor}>
-            {migratedNodesCount}/{totalNodesCount}
-          </EuiBadge>
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
+  const setupModeData = get(setupMode.data, 'apm');
+  const setupModeTooltip = setupMode && setupMode.enabled
+    ? (
+      <SetupModeTooltip
+        setupModeData={setupModeData}
+        badgeClickAction={goToInstances}
+        productName={APM_SYSTEM_ID}
+      />
+    )
+    : null;
 
   return (
     <ClusterItemContainer
@@ -85,7 +64,7 @@ export function ApmPanel(props) {
               <h3>
                 <DisabledIfNoDataAndInSetupModeLink
                   setupModeEnabled={setupMode.enabled}
-                  setupModeData={setupModeApmData}
+                  setupModeData={setupModeData}
                   onClick={goToApm}
                   aria-label={i18n.translate('xpack.monitoring.cluster.overview.apmPanel.overviewLinkAriaLabel', {
                     defaultMessage: 'APM Overview'
@@ -152,7 +131,7 @@ export function ApmPanel(props) {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {setupModeInstancesData}
+              {setupModeTooltip}
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />
             <EuiDescriptionList type="column">

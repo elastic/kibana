@@ -20,18 +20,13 @@
 import { PluginInitializerContext } from 'kibana/public';
 import { npSetup, npStart } from 'ui/new_platform';
 
-import { visualizations } from '../../visualizations/public';
+import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 import { MetricVisPluginSetupDependencies } from './plugin';
-import { LegacyDependenciesPlugin } from './shim';
 import { plugin } from '.';
 
 const plugins: Readonly<MetricVisPluginSetupDependencies> = {
-  visualizations,
-  data: npSetup.plugins.data,
-
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
+  expressions: npSetup.plugins.expressions,
+  visualizations: visualizationsSetup,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

@@ -7,65 +7,20 @@
 import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
-import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
-import { GenericHostsModel, HostsType } from './model';
+import { GenericHostsModel, HostsType, HostsTableType } from './model';
 
 const selectHosts = (state: State, hostsType: HostsType): GenericHostsModel =>
   get(hostsType, state.hosts);
 
 export const authenticationsSelector = () =>
-  createSelector(
-    selectHosts,
-    hosts => hosts.queries.authentications
-  );
+  createSelector(selectHosts, hosts => hosts.queries.authentications);
 
 export const hostsSelector = () =>
-  createSelector(
-    selectHosts,
-    hosts => hosts.queries.hosts
-  );
+  createSelector(selectHosts, hosts => hosts.queries[HostsTableType.hosts]);
 
-export const eventsSelector = () =>
-  createSelector(
-    selectHosts,
-    hosts => hosts.queries.events
-  );
+export const eventsSelector = () => createSelector(selectHosts, hosts => hosts.queries.events);
 
 export const uncommonProcessesSelector = () =>
-  createSelector(
-    selectHosts,
-    hosts => hosts.queries.uncommonProcesses
-  );
-
-export const hostsFilterQueryExpression = () =>
-  createSelector(
-    selectHosts,
-    hosts =>
-      hosts.filterQuery && hosts.filterQuery.kuery ? hosts.filterQuery.kuery.expression : null
-  );
-
-export const hostsFilterQueryAsKuery = () =>
-  createSelector(
-    selectHosts,
-    hosts => (hosts.filterQuery && hosts.filterQuery.kuery ? hosts.filterQuery.kuery : null)
-  );
-
-export const hostsFilterQueryAsJson = () =>
-  createSelector(
-    selectHosts,
-    hosts => (hosts.filterQuery ? hosts.filterQuery.serializedQuery : null)
-  );
-
-export const hostsFilterQueryDraft = () =>
-  createSelector(
-    selectHosts,
-    hosts => hosts.filterQueryDraft
-  );
-
-export const isHostFilterQueryDraftValid = () =>
-  createSelector(
-    selectHosts,
-    hosts => isFromKueryExpressionValid(hosts.filterQueryDraft)
-  );
+  createSelector(selectHosts, hosts => hosts.queries.uncommonProcesses);

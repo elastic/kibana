@@ -29,15 +29,13 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
 
   async function initChart() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     log.debug('navigateToApp visualize');
     await PageObjects.visualize.navigateToNewVisualization();
     log.debug('clickLineChart');
     await PageObjects.visualize.clickLineChart();
     await PageObjects.visualize.clickNewSearch();
-    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
     log.debug('Bucket = X-axis');
     await PageObjects.visualize.clickBucket('X-axis');
     log.debug('Aggregation = Date Histogram');
@@ -58,7 +56,7 @@ export default function ({ getService, getPageObjects }) {
     log.debug('adding axis');
     await pointSeriesVis.clickAddAxis();
     // set average count to use second value axis
-    await pointSeriesVis.toggleCollapsibleTitle('Average machine.ram');
+    await PageObjects.visualize.toggleAccordion('visEditorSeriesAccordion3');
     log.debug('Average memory value axis - ValueAxis-2');
     await pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
     await PageObjects.visualize.waitForVisualizationRenderingStabilized();
@@ -107,8 +105,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('multiple chart types', function () {
       it('should change average series type to histogram', async function () {
-        await pointSeriesVis.toggleCollapsibleTitle('RightAxis-1');
-        await pointSeriesVis.setSeriesType(1, 'bar');
+        await pointSeriesVis.setSeriesType(1, 'histogram');
         await PageObjects.visualize.clickGo();
         const length = await pointSeriesVis.getHistogramSeries();
         expect(length).to.be(1);
@@ -209,8 +206,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show different labels in different timezone', async function () {
-        const fromTime = '2015-09-22 09:05:47.415';
-        const toTime = '2015-09-22 16:08:34.554';
+        const fromTime = 'Sep 22, 2015 @ 09:05:47.415';
+        const toTime = 'Sep 22, 2015 @ 16:08:34.554';
         // note that we're setting the absolute time range while we're in 'America/Phoenix' tz
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         await PageObjects.visualize.waitForRenderingCount();

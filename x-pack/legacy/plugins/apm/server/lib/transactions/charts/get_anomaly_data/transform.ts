@@ -5,13 +5,14 @@
  */
 
 import { first, last } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import { Coordinate, RectCoordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
 type IBucket = ReturnType<typeof getBucket>;
 function getBucket(
-  bucket: ESResponse['aggregations']['ml_avg_response_times']['buckets'][0]
+  bucket: Required<
+    ESResponse
+  >['aggregations']['ml_avg_response_times']['buckets'][0]
 ) {
   return {
     x: bucket.key,
@@ -30,9 +31,8 @@ export function anomalySeriesTransform(
   bucketSize: number,
   timeSeriesDates: number[]
 ) {
-  const buckets = (
-    idx(response, _ => _.aggregations.ml_avg_response_times.buckets) || []
-  ).map(getBucket);
+  const buckets =
+    response.aggregations?.ml_avg_response_times.buckets.map(getBucket) || [];
 
   const bucketSizeInMillis = Math.max(bucketSize, mlBucketSize) * 1000;
 

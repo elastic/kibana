@@ -7,6 +7,9 @@
 import { UserInputError } from 'apollo-server-errors';
 import { failure } from 'io-ts/lib/PathReporter';
 
+import { identity } from 'fp-ts/lib/function';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { fold } from 'fp-ts/lib/Either';
 import {
   InfraSourceLogColumn,
   InfraSourceResolvers,
@@ -184,8 +187,11 @@ const compactObject = <T>(obj: T): CompactObject<T> =>
 const decodeLogColumns = (logColumns?: UpdateSourceLogColumnInput[] | null) =>
   logColumns
     ? logColumns.map(logColumn =>
-        SavedSourceConfigurationColumnRuntimeType.decode(logColumn).getOrElseL(errors => {
-          throw new UserInputError(failure(errors).join('\n'));
-        })
+        pipe(
+          SavedSourceConfigurationColumnRuntimeType.decode(logColumn),
+          fold(errors => {
+            throw new UserInputError(failure(errors).join('\n'));
+          }, identity)
+        )
       )
     : undefined;

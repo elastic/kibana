@@ -10,15 +10,16 @@ import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaTileMap } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
+import _ from 'lodash';
 
 export class KibanaTilemapSource extends AbstractTMSSource {
 
   static type = 'KIBANA_TILEMAP';
   static title = i18n.translate('xpack.maps.source.kbnTMSTitle', {
-    defaultMessage: 'Custom Tile Map Service'
+    defaultMessage: 'Configured Tile Map Service'
   });
   static description = i18n.translate('xpack.maps.source.kbnTMSDescription', {
-    defaultMessage: 'Map tiles configured in kibana.yml'
+    defaultMessage: 'Tile map service configured in kibana.yml'
   });
 
   static icon = 'logoKibana';
@@ -75,6 +76,13 @@ export class KibanaTilemapSource extends AbstractTMSSource {
       }));
     }
     return tilemap.url;
+  }
+
+  async getAttributions() {
+    const tilemap = getKibanaTileMap();
+    const markdown = _.get(tilemap, 'options.attribution', '');
+    const objArr = this.convertMarkdownLinkToObjectArr(markdown);
+    return objArr;
   }
 
   async getDisplayName() {

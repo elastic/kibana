@@ -19,26 +19,26 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
-import { TableComponent } from '../table';
+import { Table } from '../table';
 
 const indexPattern = {
   fieldFormatMap: {
     Elastic: {
       type: {
-        title: 'string'
-      }
-    }
-  }
+        title: 'string',
+      },
+    },
+  },
 };
 
 const items = [{ id: 1, name: 'Elastic' }];
 
 describe('Table', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -51,8 +51,8 @@ describe('Table', () => {
   });
 
   it('should render the format', async () => {
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -68,8 +68,8 @@ describe('Table', () => {
   it('should allow edits', () => {
     const editField = jest.fn();
 
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={editField}
@@ -86,8 +86,8 @@ describe('Table', () => {
   it('should allow deletes', () => {
     const deleteField = jest.fn();
 
-    const component = shallowWithIntl(
-      <TableComponent
+    const component = shallowWithI18nProvider(
+      <Table
         indexPattern={indexPattern}
         items={items}
         editField={() => {}}
@@ -100,5 +100,4 @@ describe('Table', () => {
     component.prop('columns')[4].actions[1].onClick();
     expect(deleteField).toBeCalled();
   });
-
 });

@@ -4,17 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotConfig, SnapshotConfigEs } from './snapshot';
-
-export interface SlmPolicy {
+import {
+  SnapshotConfig,
+  SnapshotConfigEs,
+  SnapshotRetention,
+  SnapshotRetentionEs,
+} from './snapshot';
+export interface SlmPolicyPayload {
   name: string;
-  version: number;
-  modifiedDate: string;
-  modifiedDateMillis: number;
   snapshotName: string;
   schedule: string;
   repository: string;
-  config: SnapshotConfig;
+  config?: SnapshotConfig;
+  retention?: SnapshotRetention;
+  isManagedPolicy: boolean;
+}
+
+export interface SlmPolicy extends SlmPolicyPayload {
+  version: number;
+  modifiedDate: string;
+  modifiedDateMillis: number;
   nextExecution: string;
   nextExecutionMillis: number;
   lastSuccess?: {
@@ -28,6 +37,15 @@ export interface SlmPolicy {
     time: number;
     details: object | string;
   };
+  inProgress?: {
+    snapshotName: string;
+  };
+  stats?: {
+    snapshotsTaken: number;
+    snapshotsFailed: number;
+    snapshotsDeleted: number;
+    snapshotDeletionFailures: number;
+  };
 }
 
 export interface SlmPolicyEs {
@@ -38,7 +56,8 @@ export interface SlmPolicyEs {
     name: string;
     schedule: string;
     repository: string;
-    config: SnapshotConfigEs;
+    config?: SnapshotConfigEs;
+    retention?: SnapshotRetentionEs;
   };
   next_execution: string;
   next_execution_millis: number;
@@ -52,5 +71,18 @@ export interface SlmPolicyEs {
     time_string: string;
     time: number;
     details: string;
+  };
+  in_progress?: {
+    name: string;
+    uuid: string;
+    state: string;
+    start_time: string;
+    start_time_millis: number;
+  };
+  stats?: {
+    snapshots_taken: number;
+    snapshots_failed: number;
+    snapshots_deleted: number;
+    snapshot_deletion_failures: number;
   };
 }

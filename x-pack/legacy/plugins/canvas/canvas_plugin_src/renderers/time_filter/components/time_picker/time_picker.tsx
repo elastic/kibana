@@ -11,6 +11,9 @@ import { EuiButton } from '@elastic/eui';
 import moment from 'moment';
 import { DatetimeQuickList } from '../datetime_quick_list';
 import { DatetimeRangeAbsolute } from '../datetime_range_absolute';
+import { ComponentStrings } from '../../../../../i18n';
+
+const { TimePicker: strings } = ComponentStrings;
 
 export interface Props {
   /** Start date string */
@@ -45,7 +48,7 @@ export class TimePicker extends Component<Props, State> {
   };
 
   // TODO: Refactor to no longer use componentWillReceiveProps since it is being deprecated
-  componentWillReceiveProps({ from, to }: Props) {
+  UNSAFE_componentWillReceiveProps({ from, to }: Props) {
     if (from !== this.props.from || to !== this.props.to) {
       this.setState({
         range: { from, to },
@@ -86,7 +89,7 @@ export class TimePicker extends Component<Props, State> {
               onSelect(from, to);
             }}
           >
-            Apply
+            {strings.getApplyButtonLabel()}
           </EuiButton>
         </DatetimeQuickList>
       </div>

@@ -4,41 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
-import * as React from 'react';
+import {
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { getColumnsWithTimestamp } from '../event_details/helpers';
-import { OnUpdateColumns } from '../timeline/events';
-import { WithHoverActions } from '../with_hover_actions';
-
-import * as i18n from './translations';
 import { CountBadge } from '../page';
+import { OnUpdateColumns } from '../timeline/events';
+import { TimelineContext } from '../timeline/timeline_context';
+import { WithHoverActions } from '../with_hover_actions';
 import { LoadingSpinner, getCategoryPaneCategoryClassName, getFieldCount } from './helpers';
+import * as i18n from './translations';
 
 const CategoryName = styled.span<{ bold: boolean }>`
-  font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+  .euiText {
+    font-weight: ${({ bold }) => (bold ? 'bold' : 'normal')};
+  }
 `;
 
 CategoryName.displayName = 'CategoryName';
 
 const HoverActionsContainer = styled(EuiPanel)`
   cursor: default;
-  height: 25px;
   left: 5px;
+  padding: 8px;
   position: absolute;
-  top: -5px;
-  width: 30px;
+  top: -8px;
 `;
 
 HoverActionsContainer.displayName = 'HoverActionsContainer';
 
 const HoverActionsFlexGroup = styled(EuiFlexGroup)`
   cursor: pointer;
-  left: -2px;
-  position: relative;
-  top: -6px;
 `;
 
 HoverActionsFlexGroup.displayName = 'HoverActionsFlexGroup';
@@ -56,13 +62,45 @@ export interface CategoryItem {
   categoryId: string;
 }
 
+interface ToolTipProps {
+  categoryId: string;
+  browserFields: BrowserFields;
+  onUpdateColumns: OnUpdateColumns;
+}
+
+const ToolTip = React.memo<ToolTipProps>(({ categoryId, browserFields, onUpdateColumns }) => {
+  const isLoading = useContext(TimelineContext);
+  return (
+    <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
+      {!isLoading ? (
+        <EuiIcon
+          aria-label={i18n.VIEW_CATEGORY(categoryId)}
+          color="text"
+          onClick={() => {
+            onUpdateColumns(
+              getColumnsWithTimestamp({
+                browserFields,
+                category: categoryId,
+              })
+            );
+          }}
+          type="visTable"
+        />
+      ) : (
+        <LoadingSpinner size="m" />
+      )}
+    </EuiToolTip>
+  );
+});
+
+ToolTip.displayName = 'ToolTip';
+
 /**
  * Returns the column definition for the (single) column that displays all the
  * category names in the field browser */
 export const getCategoryColumns = ({
   browserFields,
   filteredBrowserFields,
-  isLoading,
   onCategorySelected,
   onUpdateColumns,
   selectedCategoryId,
@@ -70,7 +108,6 @@ export const getCategoryColumns = ({
 }: {
   browserFields: BrowserFields;
   filteredBrowserFields: BrowserFields;
-  isLoading: boolean;
   onCategorySelected: (categoryId: string) => void;
   onUpdateColumns: OnUpdateColumns;
   selectedCategoryId: string;
@@ -78,6 +115,7 @@ export const getCategoryColumns = ({
 }) => [
   {
     field: 'categoryId',
+    name: '',
     sortable: true,
     truncateText: false,
     render: (categoryId: string) => (
@@ -87,7 +125,10 @@ export const getCategoryColumns = ({
             <EuiFlexItem grow={false}>
               <WithHoverActions
                 hoverContent={
-                  <HoverActionsContainer data-test-subj="hover-actions-container" paddingSize="s">
+                  <HoverActionsContainer
+                    data-test-subj="hover-actions-container"
+                    paddingSize="none"
+                  >
                     <HoverActionsFlexGroup
                       alignItems="center"
                       direction="row"
@@ -95,25 +136,11 @@ export const getCategoryColumns = ({
                       justifyContent="spaceBetween"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiToolTip content={i18n.VIEW_CATEGORY(categoryId)}>
-                          {!isLoading ? (
-                            <EuiIcon
-                              aria-label={i18n.VIEW_CATEGORY(categoryId)}
-                              color="text"
-                              onClick={() => {
-                                onUpdateColumns(
-                                  getColumnsWithTimestamp({
-                                    browserFields,
-                                    category: categoryId,
-                                  })
-                                );
-                              }}
-                              type="visTable"
-                            />
-                          ) : (
-                            <LoadingSpinner size="m" />
-                          )}
-                        </EuiToolTip>
+                        <ToolTip
+                          categoryId={categoryId}
+                          browserFields={browserFields}
+                          onUpdateColumns={onUpdateColumns}
+                        />
                       </EuiFlexItem>
                     </HoverActionsFlexGroup>
                   </HoverActionsContainer>
@@ -126,14 +153,14 @@ export const getCategoryColumns = ({
                       timelineId,
                     })}
                   >
-                    {categoryId}
+                    <EuiText size="xs">{categoryId}</EuiText>
                   </CategoryName>
                 )}
               />
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <CountBadge color="hollow">
+              <CountBadge data-test-subj={`${categoryId}-category-count`} color="hollow">
                 {getFieldCount(filteredBrowserFields[categoryId])}
               </CountBadge>
             </EuiFlexItem>

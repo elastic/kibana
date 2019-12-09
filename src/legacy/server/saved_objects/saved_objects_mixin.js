@@ -19,14 +19,11 @@
 
 // Disable lint errors for imports from src/core/server/saved_objects until SavedObjects migration is complete
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-
-import { KibanaMigrator } from '../../../core/server/saved_objects/migrations';
 import { SavedObjectsSchema } from '../../../core/server/saved_objects/schema';
 import { SavedObjectsSerializer } from '../../../core/server/saved_objects/serialization';
 import {
   SavedObjectsClient,
   SavedObjectsRepository,
-  ScopedSavedObjectsClientProvider,
   getSortedObjectsForExport,
   importSavedObjects,
   resolveImportErrors,
@@ -42,6 +39,7 @@ import {
   createFindRoute,
   createGetRoute,
   createUpdateRoute,
+  createBulkUpdateRoute,
   createExportRoute,
   createImportRoute,
   createResolveImportErrorsRoute,
@@ -58,7 +56,7 @@ function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
 }
 
 export function savedObjectsMixin(kbnServer, server) {
-  const migrator = new KibanaMigrator({ kbnServer });
+  const migrator = kbnServer.newPlatform.__internals.kibanaMigrator;
   const mappings = migrator.getActiveMappings();
   const allTypes = Object.keys(getRootPropertiesObjects(mappings));
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
@@ -90,6 +88,7 @@ export function savedObjectsMixin(kbnServer, server) {
   };
   server.route(createBulkCreateRoute(prereqs));
   server.route(createBulkGetRoute(prereqs));
+  server.route(createBulkUpdateRoute(prereqs));
   server.route(createCreateRoute(prereqs));
   server.route(createDeleteRoute(prereqs));
   server.route(createFindRoute(prereqs));
@@ -114,6 +113,7 @@ export function savedObjectsMixin(kbnServer, server) {
     });
     const combinedTypes = visibleTypes.concat(extraTypes);
     const allowedTypes = [...new Set(combinedTypes)];
+
     const config = server.config();
 
     return new SavedObjectsRepository({
@@ -128,17 +128,7 @@ export function savedObjectsMixin(kbnServer, server) {
     });
   };
 
-  const provider = new ScopedSavedObjectsClientProvider({
-    index: server.config().get('kibana.index'),
-    mappings,
-    defaultClientFactory({ request }) {
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
-      const callCluster = (...args) => callWithRequest(request, ...args);
-      const repository = createRepository(callCluster);
-
-      return new SavedObjectsClient(repository);
-    },
-  });
+  const provider = kbnServer.newPlatform.__internals.savedObjectsClientProvider;
 
   const service = {
     types: visibleTypes,

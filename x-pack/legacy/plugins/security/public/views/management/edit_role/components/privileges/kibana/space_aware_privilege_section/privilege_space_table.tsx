@@ -14,7 +14,7 @@ import {
 import { FormattedMessage, InjectedIntl } from '@kbn/i18n/react';
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { getSpaceColor } from '../../../../../../../../../spaces/common';
+import { getSpaceColor } from '../../../../../../../../../spaces/public/lib/space_attributes';
 import { Space } from '../../../../../../../../../spaces/common/model/space';
 import {
   FeaturesPrivileges,
@@ -80,8 +80,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
     const privilegeCalculator = privilegeCalculatorFactory.getInstance(this.props.role);
 
     const effectivePrivileges = privilegeCalculator.calculateEffectivePrivileges(false);
-
-    const allowedPrivileges = privilegeCalculator.calculateAllowedPrivileges();
 
     const rows: TableRow[] = spacePrivileges.map((spacePrivs, spacesIndex) => {
       const spaces = spacePrivs.spaces.map(
@@ -199,16 +197,12 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
               />
             );
           } else {
-            const hasNonSupersededCustomizations = Object.entries(privileges.feature).some(
-              ([featureId, featurePrivileges]) => {
-                const allowedFeaturePrivileges =
-                  allowedPrivileges[record.spacesIndex].feature[featureId];
+            const hasNonSupersededCustomizations = Object.keys(privileges.feature).some(
+              featureId => {
+                const featureEffectivePrivilege = effectivePrivilege.feature[featureId];
                 return (
-                  allowedFeaturePrivileges &&
-                  allowedFeaturePrivileges.canUnassign &&
-                  allowedFeaturePrivileges.privileges.some(privilege =>
-                    featurePrivileges.includes(privilege)
-                  )
+                  featureEffectivePrivilege &&
+                  featureEffectivePrivilege.directlyAssignedFeaturePrivilegeMorePermissiveThanBase
                 );
               }
             );

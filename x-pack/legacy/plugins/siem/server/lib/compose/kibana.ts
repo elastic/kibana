@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
-
+import { EnvironmentMode } from 'src/core/server';
+import { ServerFacade } from '../../types';
+import { Anomalies } from '../anomalies';
+import { ElasticsearchAnomaliesAdapter } from '../anomalies/elasticsearch_adapter';
 import { Authentications } from '../authentications';
 import { ElasticsearchAuthenticationAdapter } from '../authentications/elasticsearch_adapter';
 import { KibanaConfigurationAdapter } from '../configuration/kibana_configuration_adapter';
@@ -16,7 +18,9 @@ import { KpiHosts } from '../kpi_hosts';
 import { ElasticsearchKpiHostsAdapter } from '../kpi_hosts/elasticsearch_adapter';
 
 import { ElasticsearchIndexFieldAdapter, IndexFields } from '../index_fields';
-import { ElasticsearchIpOverviewAdapter, IpDetails } from '../ip_details';
+import { ElasticsearchIpDetailsAdapter, IpDetails } from '../ip_details';
+import { ElasticsearchTlsAdapter, TLS } from '../tls';
+
 import { KpiNetwork } from '../kpi_network';
 import { ElasticsearchKpiNetworkAdapter } from '../kpi_network/elasticsearch_adapter';
 import { ElasticsearchNetworkAdapter, Network } from '../network';
@@ -30,9 +34,9 @@ import { Note } from '../note/saved_object';
 import { PinnedEvent } from '../pinned_event/saved_object';
 import { Timeline } from '../timeline/saved_object';
 
-export function compose(server: Server): AppBackendLibs {
+export function compose(server: ServerFacade, mode: EnvironmentMode): AppBackendLibs {
   const configuration = new KibanaConfigurationAdapter<Configuration>(server);
-  const framework = new KibanaBackendFrameworkAdapter(server);
+  const framework = new KibanaBackendFrameworkAdapter(server, mode);
   const sources = new Sources(new ConfigurationSourcesAdapter(configuration));
   const sourceStatus = new SourceStatus(new ElasticsearchSourceStatusAdapter(framework));
 
@@ -41,11 +45,13 @@ export function compose(server: Server): AppBackendLibs {
   const pinnedEvent = new PinnedEvent({ savedObjects: framework.getSavedObjectsService() });
 
   const domainLibs: AppDomainLibs = {
+    anomalies: new Anomalies(new ElasticsearchAnomaliesAdapter(framework)),
     authentications: new Authentications(new ElasticsearchAuthenticationAdapter(framework)),
     events: new Events(new ElasticsearchEventsAdapter(framework)),
     fields: new IndexFields(new ElasticsearchIndexFieldAdapter(framework)),
     hosts: new Hosts(new ElasticsearchHostsAdapter(framework)),
-    ipDetails: new IpDetails(new ElasticsearchIpOverviewAdapter(framework)),
+    ipDetails: new IpDetails(new ElasticsearchIpDetailsAdapter(framework)),
+    tls: new TLS(new ElasticsearchTlsAdapter(framework)),
     kpiHosts: new KpiHosts(new ElasticsearchKpiHostsAdapter(framework)),
     kpiNetwork: new KpiNetwork(new ElasticsearchKpiNetworkAdapter(framework)),
     network: new Network(new ElasticsearchNetworkAdapter(framework)),

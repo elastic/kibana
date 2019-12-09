@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { loadTransactionDistribution } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 import { useUiFilters } from '../context/UrlParamsContext';
+import { TransactionDistributionAPIResponse } from '../../server/lib/transactions/distribution';
 
 const INITIAL_DATA = {
-  buckets: [],
-  totalHits: 0,
+  buckets: [] as TransactionDistributionAPIResponse['buckets'],
+  noHits: true,
   bucketSize: 0
 };
 
@@ -27,29 +27,33 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
   } = urlParams;
   const uiFilters = useUiFilters(urlParams);
 
-  const { data = INITIAL_DATA, status, error } = useFetcher(() => {
-    if (serviceName && start && end && transactionType && transactionName) {
-      return loadTransactionDistribution({
-        serviceName,
-        start,
-        end,
-        transactionType,
-        transactionName,
-        transactionId,
-        traceId,
-        uiFilters
-      });
-    }
-  }, [
-    serviceName,
-    start,
-    end,
-    transactionType,
-    transactionName,
-    transactionId,
-    traceId,
-    uiFilters
-  ]);
+  const { data = INITIAL_DATA, status, error } = useFetcher(
+    callApmApi => {
+      if (serviceName && start && end && transactionType && transactionName) {
+        return callApmApi({
+          pathname:
+            '/api/apm/services/{serviceName}/transaction_groups/distribution',
+          params: {
+            path: {
+              serviceName
+            },
+            query: {
+              start,
+              end,
+              transactionType,
+              transactionName,
+              transactionId,
+              traceId,
+              uiFilters: JSON.stringify(uiFilters)
+            }
+          }
+        });
+      }
+    },
+    // the histogram should not be refetched if the transactionId or traceId changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [serviceName, start, end, transactionType, transactionName, uiFilters]
+  );
 
   return { data, status, error };
 }

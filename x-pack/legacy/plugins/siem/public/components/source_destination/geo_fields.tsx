@@ -5,10 +5,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { get } from 'lodash/fp';
-import { uniq } from 'lodash/fp';
+import { get, uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DefaultDraggable } from '../draggables';
@@ -70,7 +68,7 @@ const GeoFlexItem = styled(EuiFlexItem)`
 
 GeoFlexItem.displayName = 'GeoFlexItem';
 
-const GeoFieldValues = pure<{
+const GeoFieldValues = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
@@ -92,7 +90,7 @@ const GeoFieldValues = pure<{
               <DefaultDraggable
                 data-test-subj={fieldName}
                 field={fieldName}
-                id={`${contextId}-${eventId}-${fieldName}-${value}`}
+                id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
                 tooltipContent={fieldName}
                 value={value}
               />
@@ -114,7 +112,7 @@ GeoFieldValues.displayName = 'GeoFieldValues';
  * - `source|destination.geo.region_iso_code`
  * - `source|destination.geo.city_name`
  */
-export const GeoFields = pure<GeoFieldsProps>(props => {
+export const GeoFields = React.memo<GeoFieldsProps>(props => {
   const { contextId, eventId, type } = props;
 
   const propNameToFieldName = getGeoFieldPropNameToFieldNameMap(type);

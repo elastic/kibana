@@ -20,9 +20,10 @@ import {
   toggleLayerVisible,
   removeTransientLayer,
   cloneLayer,
+  removeLayer
 } from '../../../../../actions/map_actions';
 
-import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
+import { hasDirtyState, getSelectedLayer, isUsingSearch } from '../../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}, ownProps) {
   return {
@@ -31,6 +32,7 @@ function mapStateToProps(state = {}, ownProps) {
     selectedLayer: getSelectedLayer(state),
     hasDirtyStateSelector: hasDirtyState(state),
     isLegendDetailsOpen: getOpenTOCDetails(state).includes(ownProps.layer.getId()),
+    isUsingSearch: isUsingSearch(state),
   };
 }
 
@@ -49,6 +51,9 @@ function mapDispatchToProps(dispatch) {
     },
     cloneLayer: layerId => {
       dispatch(cloneLayer(layerId));
+    },
+    removeLayer: layerId => {
+      dispatch(removeLayer(layerId));
     },
     hideTOCDetails: layerId => {
       dispatch(hideTOCDetails(layerId));

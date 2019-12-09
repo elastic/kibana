@@ -2,33 +2,25 @@
 
 exports[`MonitorList component renders a no items message when no data is provided 1`] = `
 <Fragment>
-  <EuiTitle
-    size="xs"
-  >
-    <h5>
-      <FormattedMessage
-        defaultMessage="Monitor status"
-        id="xpack.uptime.monitorList.monitoringStatusTitle"
-        values={Object {}}
-      />
-    </h5>
-  </EuiTitle>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="s"
-  >
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Monitor status"
+          id="xpack.uptime.monitorList.monitoringStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <EuiBasicTable
+      aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 0 items."
       columns={
         Array [
-          Object {
-            "align": "left",
-            "field": "monitor_id",
-            "name": "",
-            "render": [Function],
-            "sortable": true,
-            "width": "40px",
-          },
           Object {
             "align": "left",
             "field": "state.monitor.status",
@@ -51,17 +43,35 @@ exports[`MonitorList component renders a no items message when no data is provid
           },
           Object {
             "field": "histogram.points",
+            "mobileOptions": Object {
+              "show": false,
+            },
             "name": "Downtime history",
             "render": [Function],
           },
           Object {
             "align": "right",
             "field": "state",
+            "hasActions": true,
+            "id": "actions",
+            "mobileOptions": Object {
+              "header": false,
+            },
             "name": "Integrations",
             "render": [Function],
           },
+          Object {
+            "align": "left",
+            "field": "monitor_id",
+            "isExpander": true,
+            "name": "",
+            "render": [Function],
+            "sortable": true,
+            "width": "40px",
+          },
         ]
       }
+      hasActions={true}
       isExpandable={true}
       itemId="monitor_id"
       itemIdToExpandedRowMap={Object {}}
@@ -70,39 +80,54 @@ exports[`MonitorList component renders a no items message when no data is provid
       noItemsMessage="No uptime monitors found"
       responsive={true}
     />
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
+          direction="prev"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
+          direction="next"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiPanel>
 </Fragment>
 `;
 
 exports[`MonitorList component renders the monitor list 1`] = `
 <Fragment>
-  <EuiTitle
-    size="xs"
-  >
-    <h5>
-      <FormattedMessage
-        defaultMessage="Monitor status"
-        id="xpack.uptime.monitorList.monitoringStatusTitle"
-        values={Object {}}
-      />
-    </h5>
-  </EuiTitle>
-  <EuiPanel
-    grow={true}
-    hasShadow={false}
-    paddingSize="s"
-  >
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Monitor status"
+          id="xpack.uptime.monitorList.monitoringStatusTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="s"
+    />
     <EuiBasicTable
+      aria-label="Monitor Status table with columns for Status, Name, URL, IP, Downtime History and Integrations. The table is currently displaying 2 items."
       columns={
         Array [
-          Object {
-            "align": "left",
-            "field": "monitor_id",
-            "name": "",
-            "render": [Function],
-            "sortable": true,
-            "width": "40px",
-          },
           Object {
             "align": "left",
             "field": "state.monitor.status",
@@ -125,17 +150,35 @@ exports[`MonitorList component renders the monitor list 1`] = `
           },
           Object {
             "field": "histogram.points",
+            "mobileOptions": Object {
+              "show": false,
+            },
             "name": "Downtime history",
             "render": [Function],
           },
           Object {
             "align": "right",
             "field": "state",
+            "hasActions": true,
+            "id": "actions",
+            "mobileOptions": Object {
+              "header": false,
+            },
             "name": "Integrations",
             "render": [Function],
           },
+          Object {
+            "align": "left",
+            "field": "monitor_id",
+            "isExpander": true,
+            "name": "",
+            "render": [Function],
+            "sortable": true,
+            "width": "40px",
+          },
         ]
       }
+      hasActions={true}
       isExpandable={true}
       itemId="monitor_id"
       itemIdToExpandedRowMap={Object {}}
@@ -206,6 +249,29 @@ exports[`MonitorList component renders the monitor list 1`] = `
       noItemsMessage="No uptime monitors found"
       responsive={true}
     />
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.prevButton"
+          direction="prev"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <OverviewPageLink
+          dataTestSubj="xpack.uptime.monitorList.nextButton"
+          direction="next"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiPanel>
 </Fragment>
 `;

@@ -26,7 +26,7 @@ import {
 
 import {
   parseEsInterval,
-} from 'ui/utils/parse_es_interval';
+} from '../../../../../../../../../src/legacy/core_plugins/data/public';
 
 import {
   dateHistogramDetailsUrl,
@@ -195,12 +195,12 @@ export class StepDateHistogramUi extends Component {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="rollupJobCreateDateHistogramTitle">
-              <h3>
+              <h2>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepDateHistogramTitle"
                   defaultMessage="Date histogram"
                 />
-              </h3>
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
 

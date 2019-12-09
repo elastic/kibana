@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { DAY } from '../../shared_imports';
+
 export const BASE_PATH = '/management/elasticsearch/snapshot_restore';
 export const DEFAULT_SECTION: Section = 'snapshots';
 export type Section = 'repositories' | 'snapshots' | 'restore_status' | 'policies';
@@ -86,6 +88,12 @@ export const REMOVE_INDEX_SETTINGS_SUGGESTIONS: string[] = INDEX_SETTING_SUGGEST
   setting => !UNREMOVABLE_INDEX_SETTINGS.includes(setting)
 );
 
+export const DEFAULT_POLICY_SCHEDULE = '0 30 1 * * ?';
+export const DEFAULT_POLICY_FREQUENCY = DAY;
+
+export const DEFAULT_RETENTION_SCHEDULE = '0 30 1 * * ?';
+export const DEFAULT_RETENTION_FREQUENCY = DAY;
+
 // UI Metric constants
 export const UIM_APP_NAME = 'snapshot_restore';
 export const UIM_REPOSITORY_LIST_LOAD = 'repository_list_load';
@@ -112,3 +120,7 @@ export const UIM_POLICY_DETAIL_PANEL_HISTORY_TAB = 'policy_detail_panel_last_suc
 export const UIM_POLICY_EXECUTE = 'policy_execute';
 export const UIM_POLICY_DELETE = 'policy_delete';
 export const UIM_POLICY_DELETE_MANY = 'policy_delete_many';
+export const UIM_POLICY_CREATE = 'policy_create';
+export const UIM_POLICY_UPDATE = 'policy_update';
+export const UIM_RETENTION_SETTINGS_UPDATE = 'retention_settings_update';
+export const UIM_RETENTION_EXECUTE = 'retention_execute';

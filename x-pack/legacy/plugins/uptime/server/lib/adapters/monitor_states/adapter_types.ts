@@ -4,32 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MonitorSummary, StatesIndexStatus } from '../../../../common/graphql/types';
+import {
+  MonitorSummary,
+  StatesIndexStatus,
+  CursorDirection,
+  SortOrder,
+} from '../../../../common/graphql/types';
 
 export interface UMMonitorStatesAdapter {
   getMonitorStates(
     request: any,
-    pageIndex: number,
-    pageSize: number,
-    sortField?: string | null,
-    sortDirection?: string | null
-  ): Promise<MonitorSummary[]>;
-  legacyGetMonitorStates(
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    pagination?: CursorPagination,
+    filters?: string | null,
+    statusFilter?: string | null
+  ): Promise<GetMonitorStatesResult>;
+  statesIndexExists(request: any): Promise<StatesIndexStatus>;
+  getSnapshotCount(
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
-    filters?: string | null
-  ): Promise<MonitorSummary[]>;
-  statesIndexExists(request: any): Promise<StatesIndexStatus>;
+    filters?: string,
+    statusFilter?: string
+  ): Promise<any>;
+}
+
+export interface CursorPagination {
+  cursorKey?: any;
+  cursorDirection: CursorDirection;
+  sortOrder: SortOrder;
+}
+
+export interface GetMonitorStatesResult {
+  summaries: MonitorSummary[];
+  nextPagePagination: string | null;
+  prevPagePagination: string | null;
 }
 
 export interface LegacyMonitorStatesQueryResult {
   result: any;
   statusFilter?: any;
-  afterKey: any | null;
+  searchAfter: any;
 }
 
-export interface LegacyMonitorStatesRecentCheckGroupsQueryResult {
+export interface MonitorStatesCheckGroupsResult {
   checkGroups: string[];
-  afterKey: any | null;
+  searchAfter: any;
+}
+
+export interface EnrichMonitorStatesResult {
+  monitors: any[];
+  nextPagePagination: any | null;
+  prevPagePagination: any | null;
 }

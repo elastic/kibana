@@ -16,32 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  Action,
-  CONTEXT_MENU_TRIGGER,
-} from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
-import { setup } from '../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { npStart } from 'ui/new_platform';
+import { IAction, createAction } from '../../../../../src/plugins/ui_actions/public';
+import { CONTEXT_MENU_TRIGGER } from '../../../../../src/plugins/embeddable/public';
 
-class SamplePanelLink extends Action {
-  public readonly type = 'samplePanelLink';
+export const createSamplePanelLink = (): IAction =>
+  createAction({
+    type: 'samplePanelLink',
+    getDisplayName: () => 'Sample panel Link',
+    execute: async () => {},
+    getHref: () => 'https://example.com/kibana/test',
+  });
 
-  constructor() {
-    super('samplePanelLink');
-  }
-
-  public getDisplayName() {
-    return 'Sample panel Link';
-  }
-
-  public execute() {
-    return;
-  }
-
-  public getHref = () => {
-    return 'https://example.com/kibana/test';
-  };
-}
-
-const action = new SamplePanelLink();
-setup.registerAction(action);
-setup.attachAction(CONTEXT_MENU_TRIGGER, action.id);
+const action = createSamplePanelLink();
+npStart.plugins.uiActions.registerAction(action);
+npStart.plugins.uiActions.attachAction(CONTEXT_MENU_TRIGGER, action.id);

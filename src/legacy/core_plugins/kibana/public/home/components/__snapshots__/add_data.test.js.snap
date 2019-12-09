@@ -2,8 +2,6 @@
 
 exports[`apmUiEnabled 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <EuiFlexGroup>
@@ -54,12 +52,7 @@ exports[`apmUiEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addAmpButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial/apm"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add APM"
@@ -74,10 +67,7 @@ exports[`apmUiEnabled 1`] = `
             type="logoAPM"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="APM"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -96,12 +86,7 @@ exports[`apmUiEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addLogDataButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/logging"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add log data"
@@ -116,10 +101,7 @@ exports[`apmUiEnabled 1`] = `
             type="logoLogging"
           />
         }
-        layout="vertical"
-        textAlign="center"
-        title="Logging"
-        titleElement="span"
+        title="Logs"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -138,12 +120,7 @@ exports[`apmUiEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addMetricsButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/metrics"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add metric data"
@@ -158,10 +135,7 @@ exports[`apmUiEnabled 1`] = `
             type="logoMetrics"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Metrics"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -180,12 +154,7 @@ exports[`apmUiEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/siem"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add security events"
@@ -200,10 +169,7 @@ exports[`apmUiEnabled 1`] = `
             type="logoSecurity"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="SIEM"
-        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -231,7 +197,6 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
@@ -239,7 +204,6 @@ exports[`apmUiEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
@@ -269,7 +233,6 @@ exports[`apmUiEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/management/kibana/index_pattern"
           style={
             Object {
@@ -277,7 +240,6 @@ exports[`apmUiEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
@@ -293,8 +255,6 @@ exports[`apmUiEnabled 1`] = `
 
 exports[`isNewKibanaInstance 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <EuiFlexGroup>
@@ -345,12 +305,7 @@ exports[`isNewKibanaInstance 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addLogDataButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/logging"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add log data"
@@ -365,10 +320,7 @@ exports[`isNewKibanaInstance 1`] = `
             type="logoLogging"
           />
         }
-        layout="vertical"
-        textAlign="center"
-        title="Logging"
-        titleElement="span"
+        title="Logs"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -387,12 +339,7 @@ exports[`isNewKibanaInstance 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addMetricsButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/metrics"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add metric data"
@@ -407,10 +354,7 @@ exports[`isNewKibanaInstance 1`] = `
             type="logoMetrics"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Metrics"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -429,12 +373,7 @@ exports[`isNewKibanaInstance 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/siem"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add security events"
@@ -449,10 +388,7 @@ exports[`isNewKibanaInstance 1`] = `
             type="logoSecurity"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="SIEM"
-        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -480,7 +416,6 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
@@ -488,7 +423,6 @@ exports[`isNewKibanaInstance 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
@@ -518,7 +452,6 @@ exports[`isNewKibanaInstance 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/management/kibana/index_pattern"
           style={
             Object {
@@ -526,7 +459,6 @@ exports[`isNewKibanaInstance 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
@@ -542,8 +474,6 @@ exports[`isNewKibanaInstance 1`] = `
 
 exports[`mlEnabled 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <EuiFlexGroup>
@@ -594,12 +524,7 @@ exports[`mlEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addAmpButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial/apm"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add APM"
@@ -614,10 +539,7 @@ exports[`mlEnabled 1`] = `
             type="logoAPM"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="APM"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -636,12 +558,7 @@ exports[`mlEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addLogDataButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/logging"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add log data"
@@ -656,10 +573,7 @@ exports[`mlEnabled 1`] = `
             type="logoLogging"
           />
         }
-        layout="vertical"
-        textAlign="center"
-        title="Logging"
-        titleElement="span"
+        title="Logs"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -678,12 +592,7 @@ exports[`mlEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addMetricsButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/metrics"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add metric data"
@@ -698,10 +607,7 @@ exports[`mlEnabled 1`] = `
             type="logoMetrics"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Metrics"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -720,12 +626,7 @@ exports[`mlEnabled 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/siem"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add security events"
@@ -740,10 +641,7 @@ exports[`mlEnabled 1`] = `
             type="logoSecurity"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="SIEM"
-        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -771,7 +669,6 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
@@ -779,7 +676,6 @@ exports[`mlEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
@@ -809,7 +705,6 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="path/app/ml#/filedatavisualizer"
           style={
             Object {
@@ -817,7 +712,6 @@ exports[`mlEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Import a CSV, NDJSON, or log file"
@@ -847,7 +741,6 @@ exports[`mlEnabled 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/management/kibana/index_pattern"
           style={
             Object {
@@ -855,7 +748,6 @@ exports[`mlEnabled 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"
@@ -871,8 +763,6 @@ exports[`mlEnabled 1`] = `
 
 exports[`render 1`] = `
 <EuiPanel
-  grow={true}
-  hasShadow={false}
   paddingSize="l"
 >
   <EuiFlexGroup>
@@ -923,12 +813,7 @@ exports[`render 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addLogDataButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/logging"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add log data"
@@ -943,10 +828,7 @@ exports[`render 1`] = `
             type="logoLogging"
           />
         }
-        layout="vertical"
-        textAlign="center"
-        title="Logging"
-        titleElement="span"
+        title="Logs"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -965,12 +847,7 @@ exports[`render 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addMetricsButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/metrics"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add metric data"
@@ -985,10 +862,7 @@ exports[`render 1`] = `
             type="logoMetrics"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="Metrics"
-        titleElement="span"
       />
     </EuiFlexItem>
     <EuiFlexItem
@@ -1007,12 +881,7 @@ exports[`render 1`] = `
           <EuiButton
             aria-describedby="aria-describedby.addSiemButtonLabel"
             className="homAddData__button"
-            color="primary"
-            fill={false}
             href="#/home/tutorial_directory/siem"
-            iconSide="left"
-            size="m"
-            type="button"
           >
             <FormattedMessage
               defaultMessage="Add security events"
@@ -1027,10 +896,7 @@ exports[`render 1`] = `
             type="logoSecurity"
           />
         }
-        layout="vertical"
-        textAlign="center"
         title="SIEM"
-        titleElement="span"
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -1058,7 +924,6 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/home/tutorial_directory/sampleData"
           style={
             Object {
@@ -1066,7 +931,6 @@ exports[`render 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Load a data set and a Kibana dashboard"
@@ -1096,7 +960,6 @@ exports[`render 1`] = `
           />
         </strong>
         <EuiLink
-          color="primary"
           href="#/management/kibana/index_pattern"
           style={
             Object {
@@ -1104,7 +967,6 @@ exports[`render 1`] = `
               "textAlign": "center",
             }
           }
-          type="button"
         >
           <FormattedMessage
             defaultMessage="Connect to your Elasticsearch index"

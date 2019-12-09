@@ -16,6 +16,11 @@ import {
   EuiTabs,
   EuiTab,
   EuiButton,
+  EuiPopover,
+  EuiContextMenu,
+  EuiButtonIcon,
+  EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
@@ -26,12 +31,14 @@ import {
 } from '../../../../constants';
 import { useLoadPolicy } from '../../../../services/http';
 import { uiMetricService } from '../../../../services/ui_metric';
+import { linkToEditPolicy, linkToSnapshot } from '../../../../services/navigation';
 
 import {
   SectionError,
   SectionLoading,
   PolicyExecuteProvider,
   PolicyDeleteProvider,
+  Error,
 } from '../../../../components';
 import { TabSummary, TabHistory } from './tabs';
 
@@ -64,6 +71,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
   const { trackUiMetric } = uiMetricService;
   const { error, data: policyDetails, sendRequest: reload } = useLoadPolicy(policyName);
   const [activeTab, setActiveTab] = useState<string>(TAB_SUMMARY);
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   // Reset tab when we look at a different policy
   useEffect(() => {
@@ -138,7 +146,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
   };
 
   const renderError = () => {
-    const notFound = error.status === 404;
+    const notFound = (error as any).status === 404;
     const errorObject = notFound
       ? {
           data: {
@@ -162,7 +170,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
             defaultMessage="Error loading policy"
           />
         }
-        error={errorObject}
+        error={errorObject as Error}
       />
     );
   };
@@ -183,53 +191,104 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
-
         {policyDetails ? (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <PolicyDeleteProvider>
-                  {deletePolicyPrompt => {
-                    return (
-                      <EuiButtonEmpty
-                        color="danger"
-                        data-test-subj="srPolicyDetailsDeleteActionButton"
-                        onClick={() => deletePolicyPrompt([policyName], onPolicyDeleted)}
-                      >
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.policyDetails.deleteButtonLabel"
-                          defaultMessage="Delete"
-                        />
-                      </EuiButtonEmpty>
-                    );
-                  }}
-                </PolicyDeleteProvider>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <PolicyExecuteProvider>
-                  {executePolicyPrompt => {
-                    return (
-                      <EuiButton
-                        onClick={() =>
-                          executePolicyPrompt(policyName, () => {
-                            onPolicyExecuted();
-                            reload();
-                          })
-                        }
-                        fill
-                        color="primary"
-                        data-test-subj="srPolicyDetailsExecuteActionButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.policyDetails.executeButtonLabel"
-                          defaultMessage="Run policy"
-                        />
-                      </EuiButton>
-                    );
-                  }}
-                </PolicyExecuteProvider>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <PolicyExecuteProvider>
+              {executePolicyPrompt => {
+                return (
+                  <PolicyDeleteProvider>
+                    {deletePolicyPrompt => {
+                      return (
+                        <EuiPopover
+                          id="policyActionMenu"
+                          button={
+                            <EuiButton
+                              data-test-subj="policyActionMenuButton"
+                              iconSide="right"
+                              onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                              iconType="arrowDown"
+                              fill
+                            >
+                              <FormattedMessage
+                                id="xpack.snapshotRestore.policyDetails.manageButtonLabel"
+                                defaultMessage="Manage policy"
+                              />
+                            </EuiButton>
+                          }
+                          isOpen={isPopoverOpen}
+                          closePopover={() => setIsPopoverOpen(false)}
+                          panelPaddingSize="none"
+                          withTitle
+                          anchorPosition="rightUp"
+                          repositionOnScroll
+                        >
+                          <EuiContextMenu
+                            data-test-subj="policyActionContextMenu"
+                            initialPanelId={0}
+                            panels={[
+                              {
+                                id: 0,
+                                title: i18n.translate(
+                                  'xpack.snapshotRestore.policyDetails.managePanelTitle',
+                                  {
+                                    defaultMessage: 'Policy options',
+                                  }
+                                ),
+                                items: [
+                                  {
+                                    name: i18n.translate(
+                                      'xpack.snapshotRestore.policyDetails.executeButtonLabel',
+                                      {
+                                        defaultMessage: 'Run now',
+                                      }
+                                    ),
+                                    icon: 'play',
+                                    onClick: () => {
+                                      executePolicyPrompt(policyName, () =>
+                                        // Wait a little bit for policy to execute before reloading policy table
+                                        // and policy details so that History tab information is updated with
+                                        // results of the execution
+                                        setTimeout(() => {
+                                          onPolicyExecuted();
+                                          reload();
+                                        }, 2000)
+                                      );
+                                    },
+                                    disabled: Boolean(policyDetails.policy.inProgress),
+                                  },
+                                  {
+                                    name: i18n.translate(
+                                      'xpack.snapshotRestore.policyDetails.editButtonLabel',
+                                      {
+                                        defaultMessage: 'Edit',
+                                      }
+                                    ),
+                                    icon: 'pencil',
+                                    href: linkToEditPolicy(policyName),
+                                  },
+                                  {
+                                    name: i18n.translate(
+                                      'xpack.snapshotRestore.policyDetails.deleteButtonLabel',
+                                      {
+                                        defaultMessage: 'Delete',
+                                      }
+                                    ),
+                                    icon: 'trash',
+                                    disabled: policyDetails.policy.isManagedPolicy,
+                                    onClick: () =>
+                                      deletePolicyPrompt([policyName], onPolicyDeleted),
+                                  },
+                                ],
+                              },
+                            ]}
+                          />
+                        </EuiPopover>
+                      );
+                    }}
+                  </PolicyDeleteProvider>
+                );
+              }}
+            </PolicyExecuteProvider>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
@@ -247,9 +306,38 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="srPolicyDetailsFlyoutTitle" data-test-subj="title">
-            {policyName}
+            {policyName}{' '}
+            <EuiButtonIcon
+              iconType="refresh"
+              color="subdued"
+              aria-label={i18n.translate(
+                'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
+                { defaultMessage: 'Reload' }
+              )}
+              onClick={() => reload()}
+            />
           </h2>
         </EuiTitle>
+        {policyDetails && policyDetails.policy && policyDetails.policy.inProgress ? (
+          <>
+            <EuiSpacer size="s" />
+            <SectionLoading inline={true} size="s">
+              <EuiLink
+                href={linkToSnapshot(
+                  policyDetails.policy.repository,
+                  policyDetails.policy.inProgress.snapshotName
+                )}
+                data-test-subj="inProgressSnapshotLink"
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyDetails.inProgressSnapshotLinkText"
+                  defaultMessage="'{snapshotName}' in progress"
+                  values={{ snapshotName: policyDetails.policy.inProgress.snapshotName }}
+                />
+              </EuiLink>
+            </SectionLoading>
+          </>
+        ) : null}
         {renderTabs()}
       </EuiFlyoutHeader>
 

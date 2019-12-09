@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
+import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
@@ -23,10 +22,10 @@ import {
 import { UpdateNote } from '../../notes/helpers';
 import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { Properties } from '../../timeline/properties';
-import { appActions } from '../../../store/app';
+import { appActions, appModel } from '../../../store/app';
 import { inputsActions } from '../../../store/inputs';
 import { timelineActions } from '../../../store/actions';
-import { TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults, TimelineModel } from '../../../store/timeline/model';
 import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body/helpers';
 import { InputsModelId } from '../../../store/inputs/constants';
 
@@ -37,7 +36,7 @@ interface OwnProps {
 
 interface StateReduxProps {
   description: string;
-  getNotesByIds: (noteIds: string[]) => Note[];
+  notesById: appModel.NotesById;
   isDataInTimeline: boolean;
   isDatepickerLocked: boolean;
   isFavorite: boolean;
@@ -71,18 +70,18 @@ interface DispatchProps {
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
 
-const statefulFlyoutHeader = pure<Props>(
+const StatefulFlyoutHeader = React.memo<Props>(
   ({
     associateNote,
     createTimeline,
     description,
-    getNotesByIds,
     isFavorite,
     isDataInTimeline,
     isDatepickerLocked,
     title,
     width = DEFAULT_TIMELINE_WIDTH,
     noteIds,
+    notesById,
     timelineId,
     toggleLock,
     updateDescription,
@@ -90,39 +89,47 @@ const statefulFlyoutHeader = pure<Props>(
     updateNote,
     updateTitle,
     usersViewing,
-  }) => (
-    <Properties
-      associateNote={associateNote}
-      createTimeline={createTimeline}
-      description={description}
-      getNotesByIds={getNotesByIds}
-      isDataInTimeline={isDataInTimeline}
-      isDatepickerLocked={isDatepickerLocked}
-      isFavorite={isFavorite}
-      title={title}
-      noteIds={noteIds}
-      timelineId={timelineId}
-      toggleLock={toggleLock}
-      updateDescription={updateDescription}
-      updateIsFavorite={updateIsFavorite}
-      updateTitle={updateTitle}
-      updateNote={updateNote}
-      usersViewing={usersViewing}
-      width={width}
-    />
-  )
+  }) => {
+    const getNotesByIds = useCallback(
+      (noteIdsVar: string[]): Note[] => appSelectors.getNotes(notesById, noteIdsVar),
+      [notesById]
+    );
+    return (
+      <Properties
+        associateNote={associateNote}
+        createTimeline={createTimeline}
+        description={description}
+        getNotesByIds={getNotesByIds}
+        isDataInTimeline={isDataInTimeline}
+        isDatepickerLocked={isDatepickerLocked}
+        isFavorite={isFavorite}
+        title={title}
+        noteIds={noteIds}
+        timelineId={timelineId}
+        toggleLock={toggleLock}
+        updateDescription={updateDescription}
+        updateIsFavorite={updateIsFavorite}
+        updateTitle={updateTitle}
+        updateNote={updateNote}
+        usersViewing={usersViewing}
+        width={width}
+      />
+    );
+  }
 );
 
-statefulFlyoutHeader.displayName = 'statefulFlyoutHeader';
+StatefulFlyoutHeader.displayName = 'StatefulFlyoutHeader';
 
 const emptyHistory: History[] = []; // stable reference
+
+const emptyNotesId: string[] = []; // stable reference
 
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();
   const getGlobalInput = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, timelineId);
+    const timeline: TimelineModel = getTimeline(state, timelineId) ?? timelineDefaults;
     const globalInput: inputsModel.InputsRange = getGlobalInput(state);
     const {
       dataProviders,
@@ -130,7 +137,7 @@ const makeMapStateToProps = () => {
       isFavorite = false,
       kqlQuery,
       title = '',
-      noteIds = [],
+      noteIds = emptyNotesId,
       width = DEFAULT_TIMELINE_WIDTH,
     } = timeline;
 
@@ -138,7 +145,7 @@ const makeMapStateToProps = () => {
 
     return {
       description,
-      getNotesByIds: getNotesByIds(state),
+      notesById: getNotesByIds(state),
       history,
       isDataInTimeline:
         !isEmpty(dataProviders) || !isEmpty(get('filterQuery.kuery.expression', kqlQuery)),
@@ -208,7 +215,4 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   },
 });
 
-export const FlyoutHeader = connect(
-  makeMapStateToProps,
-  mapDispatchToProps
-)(statefulFlyoutHeader);
+export const FlyoutHeader = connect(makeMapStateToProps, mapDispatchToProps)(StatefulFlyoutHeader);

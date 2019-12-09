@@ -1,5 +1,5 @@
 [[kibana-guide]]
-= Kibana User Guide
+= Kibana Guide
 
 //////////
 release-state can be: released | prerelease | unreleased

@@ -174,10 +174,54 @@ Object {
     undefined,
   ],
   "ssl": Object {
+    "certificateAuthorities": undefined,
     "verificationMode": "none",
   },
 }
 `);
+    });
+
+    it('does not merge elasticsearch hosts if custom config overrides', async () => {
+      configService.atPath.mockReturnValueOnce(
+        new BehaviorSubject({
+          hosts: ['http://1.2.3.4', 'http://9.8.7.6'],
+          healthCheck: {
+            delay: 2000,
+          },
+          ssl: {
+            verificationMode: 'none',
+          },
+        } as any)
+      );
+      elasticsearchService = new ElasticsearchService(coreContext);
+      const setupContract = await elasticsearchService.setup(deps);
+      // reset all mocks called during setup phase
+      MockClusterClient.mockClear();
+
+      const customConfig = {
+        hosts: ['http://8.8.8.8'],
+        logQueries: true,
+        ssl: { certificate: 'certificate-value' },
+      };
+      setupContract.createClient('some-custom-type', customConfig);
+
+      const config = MockClusterClient.mock.calls[0][0];
+      expect(config).toMatchInlineSnapshot(`
+        Object {
+          "healthCheckDelay": 2000,
+          "hosts": Array [
+            "http://8.8.8.8",
+          ],
+          "logQueries": true,
+          "requestHeadersWhitelist": Array [
+            undefined,
+          ],
+          "ssl": Object {
+            "certificate": "certificate-value",
+            "verificationMode": "none",
+          },
+        }
+      `);
     });
   });
 });

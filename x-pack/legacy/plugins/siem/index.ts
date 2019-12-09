@@ -7,19 +7,36 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
+import { Root } from 'joi';
 
-import { initServerWithKibana } from './server/kibana.index';
+import { PluginInitializerContext } from 'src/core/server';
+import { plugin } from './server';
 import { savedObjectMappings } from './server/saved_objects';
 
-import { APP_ID, APP_NAME, DEFAULT_INDEX_KEY, DEFAULT_ANOMALY_SCORE } from './common/constants';
+import {
+  APP_ID,
+  APP_NAME,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_ANOMALY_SCORE,
+  DEFAULT_SIEM_TIME_RANGE,
+  DEFAULT_SIEM_REFRESH_INTERVAL,
+  DEFAULT_INTERVAL_PAUSE,
+  DEFAULT_INTERVAL_VALUE,
+  DEFAULT_FROM,
+  DEFAULT_TO,
+  DEFAULT_SIGNALS_INDEX,
+  SIGNALS_INDEX_KEY,
+  DEFAULT_SIGNALS_INDEX_KEY,
+} from './common/constants';
+import { defaultIndexPattern } from './default_index_pattern';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function siem(kibana: any) {
+export const siem = (kibana: any) => {
   return new kibana.Plugin({
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
@@ -45,26 +62,72 @@ export function siem(kibana: any) {
         },
       ],
       uiSettingDefaults: {
+        [DEFAULT_SIEM_REFRESH_INTERVAL]: {
+          type: 'json',
+          name: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalLabel', {
+            defaultMessage: 'Time filter refresh interval',
+          }),
+          value: `{
+  "pause": ${DEFAULT_INTERVAL_PAUSE},
+  "value": ${DEFAULT_INTERVAL_VALUE}
+}`,
+          description: i18n.translate('xpack.siem.uiSettings.defaultRefreshIntervalDescription', {
+            defaultMessage:
+              '<p>Default refresh interval for the SIEM time filter, in milliseconds.</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        [DEFAULT_SIEM_TIME_RANGE]: {
+          type: 'json',
+          name: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeLabel', {
+            defaultMessage: 'Time filter period',
+          }),
+          value: `{
+  "from": "${DEFAULT_FROM}",
+  "to": "${DEFAULT_TO}"
+}`,
+          description: i18n.translate('xpack.siem.uiSettings.defaultTimeRangeDescription', {
+            defaultMessage: '<p>Default period of time in the SIEM time filter.</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
         [DEFAULT_INDEX_KEY]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultIndexLabel', {
-            defaultMessage: 'Default index',
+            defaultMessage: 'Elasticsearch indices',
           }),
-          value: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          value: defaultIndexPattern,
           description: i18n.translate('xpack.siem.uiSettings.defaultIndexDescription', {
-            defaultMessage: 'Default Elasticsearch index to search',
+            defaultMessage:
+              '<p>Comma-delimited list of Elasticsearch indices from which the SIEM app collects events.</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
+        // DEPRECATED: This should be removed once the front end is no longer using any parts of it.
+        // TODO: Remove this as soon as no code is left that is pulling data from it.
+        [DEFAULT_SIGNALS_INDEX_KEY]: {
+          name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
+            defaultMessage: 'Elasticsearch signals index',
+          }),
+          value: DEFAULT_SIGNALS_INDEX,
+          description: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexDescription', {
+            defaultMessage:
+              '<p>Elasticsearch signals index from which outputted signals will appear by default</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,
         },
         [DEFAULT_ANOMALY_SCORE]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
-            defaultMessage: 'Default anomaly threshold',
+            defaultMessage: 'Anomaly threshold',
           }),
           value: 50,
           type: 'number',
           description: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreDescription', {
             defaultMessage:
-              'Default anomaly score threshold to exceed before showing anomalies. Valid values are between 0 and 100',
+              '<p>Value above which Machine Learning job anomalies are displayed in the SIEM app.</p><p>Valid values: 0 to 100.</p>',
           }),
           category: ['siem'],
           requiresPageReload: true,
@@ -73,7 +136,51 @@ export function siem(kibana: any) {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      initServerWithKibana(server);
+      const {
+        config,
+        getInjectedUiAppVars,
+        indexPatternsServiceFactory,
+        injectUiAppVars,
+        newPlatform,
+        plugins,
+        route,
+        savedObjects,
+      } = server;
+
+      const {
+        env,
+        coreContext: { logger },
+        setup,
+      } = newPlatform;
+      const initializerContext = { logger, env };
+
+      const serverFacade = {
+        config,
+        getInjectedUiAppVars,
+        indexPatternsServiceFactory,
+        injectUiAppVars,
+        plugins: {
+          alerting: plugins.alerting,
+          xpack_main: plugins.xpack_main,
+          spaces: plugins.spaces,
+        },
+        route: route.bind(server),
+        savedObjects,
+      };
+
+      plugin(initializerContext as PluginInitializerContext).setup(
+        setup.core,
+        setup.plugins,
+        serverFacade
+      );
+    },
+    config(Joi: Root) {
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
+        })
+        .default();
     },
   });
-}
+};

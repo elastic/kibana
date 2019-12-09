@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Data Frame: Transform List <DataFrameTransformList /> Minimal initialization 1`] = `
-<ProgressBar
-  isLoading={false}
-/>
-`;

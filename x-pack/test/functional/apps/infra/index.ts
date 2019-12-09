@@ -14,5 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./logs_source_configuration'));
     loadTestFile(require.resolve('./metrics_source_configuration'));
+    loadTestFile(require.resolve('./link_to'));
   });
 };

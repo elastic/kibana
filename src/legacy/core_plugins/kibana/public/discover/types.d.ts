@@ -17,15 +17,17 @@
  * under the License.
  */
 
-import { SearchSource } from 'ui/courier';
+import { SearchSourceContract } from '../../../../ui/public/courier';
+import { SortOrder } from './angular/doc_table/components/table_header/helpers';
+export { SortOrder } from './angular/doc_table/components/table_header/helpers';
 
 export interface SavedSearch {
   readonly id: string;
   title: string;
-  searchSource: SearchSource;
+  searchSource: SearchSourceContract;
   description?: string;
   columns: string[];
-  sort: string[];
+  sort: SortOrder[];
   destroy: () => void;
 }
 export interface SavedSearchLoader {

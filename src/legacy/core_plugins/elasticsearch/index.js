@@ -22,6 +22,7 @@ import { first, map } from 'rxjs/operators';
 import healthCheck from './lib/health_check';
 import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
+import { handleESError } from './lib/handle_es_error';
 
 export default function (kibana) {
   let defaultVars;
@@ -36,7 +37,7 @@ export default function (kibana) {
       // value from all observables here to be able to synchronously return and create
       // cluster clients afterwards.
       const [esConfig, adminCluster, dataCluster] = await combineLatest(
-        server.newPlatform.setup.core.elasticsearch.legacy.config$,
+        server.newPlatform.__internals.elasticsearch.legacy.config$,
         server.newPlatform.setup.core.elasticsearch.adminClient$,
         server.newPlatform.setup.core.elasticsearch.dataClient$
       ).pipe(
@@ -92,13 +93,19 @@ export default function (kibana) {
         clusters.clear();
       });
 
+      server.expose('handleESError', handleESError);
+
       createProxy(server);
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server, esConfig.healthCheckDelay.asMilliseconds());
+      const { start, waitUntilReady } = healthCheck(
+        this,
+        server,
+        esConfig.healthCheckDelay.asMilliseconds(),
+        esConfig.ignoreVersionMismatch
+      );
       server.expose('waitUntilReady', waitUntilReady);
       start();
-    }
+    },
   });
-
 }

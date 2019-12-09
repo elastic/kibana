@@ -8,3 +8,11 @@ export {
   deserializeRestoreSettings,
   serializeRestoreSettings,
 } from './restore_settings_serialization';
+export {
+  deserializeSnapshotDetails,
+  deserializeSnapshotConfig,
+  serializeSnapshotConfig,
+  deserializeSnapshotRetention,
+  serializeSnapshotRetention,
+} from './snapshot_serialization';
+export { deserializePolicy, serializePolicy } from './policy_serialization';

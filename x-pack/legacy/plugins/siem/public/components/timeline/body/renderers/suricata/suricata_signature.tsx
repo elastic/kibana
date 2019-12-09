@@ -6,7 +6,6 @@
 
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DragEffects, DraggableWrapper } from '../../../../drag_and_drop/draggable_wrapper';
@@ -43,7 +42,7 @@ const LinkFlexItem = styled(EuiFlexItem)`
 
 LinkFlexItem.displayName = 'LinkFlexItem';
 
-export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
+export const Tokens = React.memo<{ tokens: string[] }>(({ tokens }) => (
   <>
     {tokens.map(token => (
       <TokensFlexItem key={token} grow={false}>
@@ -57,14 +56,14 @@ export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
 
 Tokens.displayName = 'Tokens';
 
-export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
+export const DraggableSignatureId = React.memo<{ id: string; signatureId: number }>(
   ({ id, signatureId }) => (
     <SignatureFlexItem grow={false}>
       <DraggableWrapper
         dataProvider={{
           and: [],
           enabled: true,
-          id: escapeDataProviderId(`suricata-${id}-sig-${signatureId}`),
+          id: escapeDataProviderId(`suricata-draggable-signature-id-${id}-sig-${signatureId}`),
           name: String(signatureId),
           excluded: false,
           kqlQuery: '',
@@ -97,7 +96,7 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
 
 DraggableSignatureId.displayName = 'DraggableSignatureId';
 
-export const SuricataSignature = pure<{
+export const SuricataSignature = React.memo<{
   contextId: string;
   id: string;
   signature: string;
@@ -106,13 +105,16 @@ export const SuricataSignature = pure<{
   const tokens = getBeginningTokens(signature);
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-      <DraggableSignatureId id={id} signatureId={signatureId} />
+      <DraggableSignatureId
+        id={`draggable-signature-id-${contextId}-${id}`}
+        signatureId={signatureId}
+      />
       <Tokens tokens={tokens} />
       <LinkFlexItem grow={false}>
         <DefaultDraggable
           data-test-subj="draggable-signature-link"
           field={SURICATA_SIGNATURE_FIELD_NAME}
-          id={`${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
+          id={`suricata-signature-default-draggable-${contextId}-${id}-${SURICATA_SIGNATURE_FIELD_NAME}`}
           name={name}
           value={signature}
         >

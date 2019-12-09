@@ -1,10 +1,10 @@
 [role="xpack"]
 [[metrics-explorer]]
-
 == Metrics Explorer
 
-Metrics Explorer allows you to visualize metrics data collected by Metricbeat and group it in various ways to visualize multiple metrics.
-It can be a starting point for further investigations.
+Metrics Explorer in the Metrics app in Kibana allows you to group and visualise multiple customisable metrics for one or more components in a graphical format.
+This can be a starting point for further investigations.
+You can also save your views and add them to {kibana-ref}/dashboard.html[dashboards].
 
 [role="screenshot"]
 image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kibana]
@@ -13,13 +13,13 @@ image::infrastructure/images/metrics-explorer-screen.png[Metrics Explorer in Kib
 [[metrics-explorer-requirements]]
 === Metrics Explorer requirements and considerations
 
-* The Metrics Explorer uses data collected from {metricbeat-ref}/metricbeat-overview.html[Metricbeat].
-* You need read permissions on `metricbeat-*` or the metric index specified in the Infrastructure configuration UI.
-* Metrics Explorer uses the timestamp field set in the Infrastructure configuration UI.
+* Metrics Explorer uses data collected from {metricbeat-ref}/metricbeat-overview.html[Metricbeat].
+* You need read permissions on `metricbeat-*` or the metric index specified in the Metrics configuration.
+* Metrics Explorer uses the timestamp field from the *Settings* tab.
 By default that is set to `@timestamp`.
 * The interval for the X Axis is set to `auto`.
 The bucket size is determined by the time range.
-* *Open in Visualize* requires you to have access to the Visualize app, otherwise it is not available.
+* To use *Open in Visualize* you need access to the Visualize app.
 
 [float]
 [[metrics-explorer-tutorial]]
@@ -30,7 +30,7 @@ After that, we'll filter down to a specific host and explore the outbound traffi
 Before we start, if you don't have any Metricbeat data, you'll need to head over to our
 {metricbeat-ref}/metricbeat-overview.html[Metricbeat documentation] to install Metricbeat and start collecting data.
 
-1. When you have Metricbeat running and collecting data, open Kibana and navigate to *Infrastructure*.
+1. When you have Metricbeat running and collecting data, open Kibana and navigate to *Metrics*.
 The *Inventory* tab shows the host or hosts you are monitoring.
 
 2. Select the *Metrics Explorer* tab.
@@ -49,7 +49,7 @@ If you only have metrics for a single host, you will see a single graph.
 Congratulations! Either way, you've explored your first metric.
 
 5. Let's explore a bit further.
-In the upper right hand corner of the graph for one of the hosts, select the *Actions* dropdown and click *Add Filter* to show ony the metrics for that host.
+In the upper right hand corner of the graph for one of the hosts, select the *Actions* dropdown and click *Add Filter* to show only the metrics for that host.
 This adds a {kibana-ref}/kuery-query.html[Kibana Query Language] filter for `host.name` in the second row of the Metrics Explorer configuration.
 If you only have one host, the graph will not change as you are already exploring metrics for a single host.
 

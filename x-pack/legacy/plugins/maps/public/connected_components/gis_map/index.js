@@ -9,8 +9,14 @@ import { GisMap } from './view';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import { exitFullScreen } from '../../actions/ui_actions';
 import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
-import { triggerRefreshTimer } from '../../actions/map_actions';
-import { areLayersLoaded, getRefreshConfig, getMapInitError } from '../../selectors/map_selectors';
+import { triggerRefreshTimer, cancelAllInFlightRequests } from '../../actions/map_actions';
+import {
+  areLayersLoaded,
+  getRefreshConfig,
+  getMapInitError,
+  getQueryableUniqueIndexPatternIds,
+  isToolbarOverlayHidden,
+} from '../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   const flyoutDisplay = getFlyoutDisplay(state);
@@ -22,6 +28,8 @@ function mapStateToProps(state = {}) {
     isFullScreen: getIsFullScreen(state),
     refreshConfig: getRefreshConfig(state),
     mapInitError: getMapInitError(state),
+    indexPatternIds: getQueryableUniqueIndexPatternIds(state),
+    hideToolbarOverlay: isToolbarOverlayHidden(state),
   };
 }
 
@@ -29,6 +37,7 @@ function mapDispatchToProps(dispatch) {
   return {
     triggerRefreshTimer: () => dispatch(triggerRefreshTimer()),
     exitFullScreen: () => dispatch(exitFullScreen()),
+    cancelAllInFlightRequests: () => dispatch(cancelAllInFlightRequests()),
   };
 }
 

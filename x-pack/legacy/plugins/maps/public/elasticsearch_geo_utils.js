@@ -7,7 +7,6 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parse } from 'wellknown';
-import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
 import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
@@ -18,6 +17,7 @@ import {
   LAT_INDEX,
 } from '../common/constants';
 import { getEsSpatialRelationLabel } from '../common/i18n_getters';
+import { SPATIAL_FILTER_TYPE } from './kibana_services';
 
 function ensureGeoField(type) {
   const expectedTypes = [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE];
@@ -80,7 +80,10 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
       features.push({
         type: 'Feature',
         geometry: tmpGeometriesAccumulator[j],
-        properties: properties
+        // _id is not unique across Kibana index pattern. Multiple ES indices could have _id collisions
+        // Need to prefix with _index to guarantee uniqueness
+        id: `${properties._index}:${properties._id}:${j}`,
+        properties,
       });
     }
   }
@@ -91,62 +94,29 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
   };
 }
 
-function pointGeometryFactory(lat, lon) {
-  return {
-    type: GEO_JSON_TYPE.POINT,
-    coordinates: [lon, lat]
-  };
-}
-
+// Parse geo_point docvalue_field
+// Either
+// 1) Array of latLon strings
+// 2) latLon string
 export function geoPointToGeometry(value, accumulator) {
   if (!value) {
     return;
   }
 
-  if (typeof value === 'string') {
-
-    const commaSplit = value.split(',');
-    let point;
-    if (commaSplit.length === 1) {
-      const geohash = decodeGeoHash(value);
-      point = pointGeometryFactory(geohash.latitude[2], geohash.longitude[2]);
-    } else {
-      const lat = parseFloat(commaSplit[0]);
-      const lon = parseFloat(commaSplit[1]);
-      point = pointGeometryFactory(lat, lon);
+  if (Array.isArray(value)) {
+    for (let i = 0; i < value.length; i++) {
+      geoPointToGeometry(value[i], accumulator);
     }
-    accumulator.push(point);
     return;
   }
 
-  if (typeof value === 'object' && _.has(value, 'lat') && _.has(value, 'lon')) {
-    accumulator.push(pointGeometryFactory(value.lat, value.lon));
-    return;
-  }
-
-  if (!Array.isArray(value)) {
-    const errorMessage = i18n.translate('xpack.maps.es_geo_utils.unsupportedGeoPointValueErrorMessage', {
-      defaultMessage: `Unsupported geo_point value: {geoPointValue}`,
-      values: {
-        geoPointValue: value
-      }
-    });
-    throw new Error(errorMessage);
-  }
-
-  if (value.length === 2
-      && typeof value[0] === 'number'
-      && typeof value[1] === 'number') {
-    const lat = value[LAT_INDEX];
-    const lon = value[LON_INDEX];
-    accumulator.push(pointGeometryFactory(lat, lon));
-    return;
-  }
-
-  // Geo-point expressed as an array of values
-  for (let i = 0; i < value.length; i++) {
-    geoPointToGeometry(value[i], accumulator);
-  }
+  const commaSplit = value.split(',');
+  const lat = parseFloat(commaSplit[0]);
+  const lon = parseFloat(commaSplit[1]);
+  accumulator.push({
+    type: GEO_JSON_TYPE.POINT,
+    coordinates: [lon, lat]
+  });
 }
 
 export function convertESShapeToGeojsonGeometry(value) {
@@ -252,6 +222,23 @@ function createGeoBoundBoxFilter(geometry, geoFieldName, filterProps = {}) {
   };
 }
 
+function createGeoPolygonFilter(polygonCoordinates, geoFieldName, filterProps = {}) {
+  return {
+    geo_polygon: {
+      ignore_unmapped: true,
+      [geoFieldName]: {
+        points: polygonCoordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map(coordinatePair => {
+          return {
+            lon: coordinatePair[LON_INDEX],
+            lat: coordinatePair[LAT_INDEX]
+          };
+        })
+      }
+    },
+    ...filterProps
+  };
+}
+
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   ensureGeoField(geoFieldType);
 
@@ -280,6 +267,7 @@ export function createSpatialFilterWithGeometry(options) {
 }
 
 function createGeometryFilterWithMeta({
+  preIndexedShape,
   geometry,
   geometryLabel,
   indexPatternId,
@@ -297,46 +285,53 @@ function createGeometryFilterWithMeta({
     })
     : getEsSpatialRelationLabel(relation);
   const meta = {
+    type: SPATIAL_FILTER_TYPE,
     negate: false,
     index: indexPatternId,
     alias: `${geoFieldName} ${relationLabel} ${geometryLabel}`
   };
 
   if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+    const shapeQuery = {
+      relation
+    };
+
+    if (preIndexedShape) {
+      shapeQuery.indexed_shape = preIndexedShape;
+    } else {
+      shapeQuery.shape = geometry;
+    }
+
     return {
       meta,
       geo_shape: {
         ignore_unmapped: true,
-        [geoFieldName]: {
-          shape: geometry,
-          relation
-        }
+        [geoFieldName]: shapeQuery
       }
     };
   }
 
   // geo_points supports limited geometry types
-  // TODO add support for multi_polygon
-  ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON]);
+  ensureGeometryType(geometry.type, [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON]);
+
+  if (geometry.type === GEO_JSON_TYPE.MULTI_POLYGON) {
+    return {
+      meta,
+      query: {
+        bool: {
+          should: geometry.coordinates.map(polygonCoordinates => {
+            return createGeoPolygonFilter(polygonCoordinates, geoFieldName);
+          })
+        }
+      }
+    };
+  }
 
   if (isBoundingBox) {
     return createGeoBoundBoxFilter(geometry, geoFieldName, { meta });
   }
 
-  return {
-    meta,
-    geo_polygon: {
-      ignore_unmapped: true,
-      [geoFieldName]: {
-        points: geometry.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX].map(coordinatePair => {
-          return {
-            lon: coordinatePair[LON_INDEX],
-            lat: coordinatePair[LAT_INDEX]
-          };
-        })
-      }
-    }
-  };
+  return createGeoPolygonFilter(geometry.coordinates, geoFieldName, { meta });
 }
 
 export function roundCoordinates(coordinates) {

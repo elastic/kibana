@@ -7,10 +7,9 @@
 // TODO: Remove once typescript definitions are in EUI
 
 declare module '@elastic/eui' {
-  export const EuiDescribedFormGroup: React.SFC<any>;
-  export const EuiCodeEditor: React.SFC<any>;
+  export const EuiDescribedFormGroup: React.FC<any>;
+  export const EuiCodeEditor: React.FC<any>;
   export const Query: any;
-  export const EuiCard: any;
 }
 
 declare module '@elastic/eui/lib/services' {

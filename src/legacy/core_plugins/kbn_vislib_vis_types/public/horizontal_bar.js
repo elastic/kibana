@@ -17,170 +17,159 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { i18n } from '@kbn/i18n';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import pointSeriesTemplate from './editors/point_series.html';
+import { AggGroupNames } from 'ui/vis/editors/default';
+import {
+  Positions,
+  ChartTypes,
+  ChartModes,
+  AxisTypes,
+  ScaleTypes,
+  AxisModes,
+  Rotates,
+  ThresholdLineStyles,
+  getConfigCollections,
+} from './utils/collections';
+import { getAreaOptionTabs, countLabel } from './utils/common_config';
+import { palettes } from '@elastic/eui/lib/services';
+import { vislibVisController } from './controller';
 
-export default function PointSeriesVisType(Private) {
-  const VisFactory = Private(VisFactoryProvider);
-
-  return VisFactory.createVislibVisualization({
-    name: 'horizontal_bar',
-    title: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', { defaultMessage: 'Horizontal Bar' }),
-    icon: 'visBarHorizontal',
-    description: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarDescription',
-      { defaultMessage: 'Assign a continuous variable to each axis' }
-    ),
-    visConfig: {
-      defaults: {
-        type: 'histogram',
-        grid: {
-          categoryLines: false,
-        },
-        categoryAxes: [
-          {
-            id: 'CategoryAxis-1',
-            type: 'category',
-            position: 'left',
-            show: true,
-            style: {
-            },
-            scale: {
-              type: 'linear'
-            },
-            labels: {
-              show: true,
-              rotate: 0,
-              filter: false,
-              truncate: 200
-            },
-            title: {}
-          }
-        ],
-        valueAxes: [
-          {
-            id: 'ValueAxis-1',
-            name: 'LeftAxis-1',
-            type: 'value',
-            position: 'bottom',
-            show: true,
-            style: {
-            },
-            scale: {
-              type: 'linear',
-              mode: 'normal'
-            },
-            labels: {
-              show: true,
-              rotate: 75,
-              filter: true,
-              truncate: 100
-            },
-            title: {
-              text: 'Count'
-            }
-          }
-        ],
-        seriesParams: [{
+export const horizontalBarDefinition = {
+  name: 'horizontal_bar',
+  title: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarTitle', { defaultMessage: 'Horizontal Bar' }),
+  icon: 'visBarHorizontal',
+  description: i18n.translate('kbnVislibVisTypes.horizontalBar.horizontalBarDescription',
+    { defaultMessage: 'Assign a continuous variable to each axis' }
+  ),
+  visualization: vislibVisController,
+  visConfig: {
+    defaults: {
+      type: 'histogram',
+      grid: {
+        categoryLines: false,
+      },
+      categoryAxes: [
+        {
+          id: 'CategoryAxis-1',
+          type: AxisTypes.CATEGORY,
+          position: Positions.LEFT,
           show: true,
-          type: 'histogram',
-          mode: 'normal',
-          data: {
-            label: 'Count',
-            id: '1'
+          style: {
           },
-          valueAxis: 'ValueAxis-1',
-          drawLinesBetweenPoints: true,
-          showCircles: true
-        }],
-        addTooltip: true,
-        addLegend: true,
-        legendPosition: 'right',
-        times: [],
-        addTimeMarker: false,
+          scale: {
+            type: ScaleTypes.LINEAR,
+          },
+          labels: {
+            show: true,
+            rotate: Rotates.HORIZONTAL,
+            filter: false,
+            truncate: 200
+          },
+          title: {}
+        }
+      ],
+      valueAxes: [
+        {
+          id: 'ValueAxis-1',
+          name: 'LeftAxis-1',
+          type: AxisTypes.VALUE,
+          position: Positions.BOTTOM,
+          show: true,
+          style: {
+          },
+          scale: {
+            type: ScaleTypes.LINEAR,
+            mode: AxisModes.NORMAL,
+          },
+          labels: {
+            show: true,
+            rotate: Rotates.ANGLED,
+            filter: true,
+            truncate: 100
+          },
+          title: {
+            text: countLabel,
+          }
+        }
+      ],
+      seriesParams: [{
+        show: true,
+        type: ChartTypes.HISTOGRAM,
+        mode: ChartModes.NORMAL,
+        data: {
+          label: countLabel,
+          id: '1'
+        },
+        valueAxis: 'ValueAxis-1',
+        drawLinesBetweenPoints: true,
+        lineWidth: 2,
+        showCircles: true
+      }],
+      addTooltip: true,
+      addLegend: true,
+      legendPosition: Positions.RIGHT,
+      times: [],
+      addTimeMarker: false,
+      labels: {},
+      thresholdLine: {
+        show: false,
+        value: 10,
+        width: 1,
+        style: ThresholdLineStyles.FULL,
+        color: palettes.euiPaletteColorBlind.colors[9]
       },
     },
-    editorConfig: {
-      collections: {
-        positions: ['top', 'left', 'right', 'bottom'],
-        chartTypes: [{
-          value: 'line',
-          text: 'line'
-        }, {
-          value: 'area',
-          text: 'area'
-        }, {
-          value: 'histogram',
-          text: 'bar'
-        }],
-        axisModes: ['normal', 'percentage', 'wiggle', 'silhouette'],
-        scaleTypes: ['linear', 'log', 'square root'],
-        chartModes: ['normal', 'stacked'],
-        interpolationModes: [{
-          value: 'linear',
-          text: 'straight',
-        }, {
-          value: 'cardinal',
-          text: 'smoothed',
-        }, {
-          value: 'step-after',
-          text: 'stepped',
-        }],
+  },
+  events: {
+    brush: { disabled: false },
+  },
+  editorConfig: {
+    collections: getConfigCollections(),
+    optionTabs: getAreaOptionTabs(),
+    schemas: new Schemas([
+      {
+        group: AggGroupNames.Metrics,
+        name: 'metric',
+        title: i18n.translate('kbnVislibVisTypes.horizontalBar.metricTitle', { defaultMessage: 'Y-axis' }),
+        min: 1,
+        aggFilter: ['!geo_centroid', '!geo_bounds'],
+        defaults: [
+          { schema: 'metric', type: 'count' }
+        ]
       },
-      optionTabs: [
-        {
-          name: 'advanced',
-          title: 'Metrics & Axes',
-          editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
-          '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
-        },
-        { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate },
-      ],
-      schemas: new Schemas([
-        {
-          group: 'metrics',
-          name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.metricTitle', { defaultMessage: 'Y-axis' }),
-          min: 1,
-          aggFilter: ['!geo_centroid', '!geo_bounds'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
-        },
-        {
-          group: 'metrics',
-          name: 'radius',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.radiusTitle', { defaultMessage: 'Dot size' }),
-          min: 0,
-          max: 1,
-          aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
-        },
-        {
-          group: 'buckets',
-          name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.segmentTitle', { defaultMessage: 'X-axis' }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        },
-        {
-          group: 'buckets',
-          name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.groupTitle', { defaultMessage: 'Split series' }),
-          min: 0,
-          max: 3,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        },
-        {
-          group: 'buckets',
-          name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.horizontalBar.splitTitle', { defaultMessage: 'Split chart' }),
-          min: 0,
-          max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        }
-      ])
-    }
-  });
-}
+      {
+        group: AggGroupNames.Metrics,
+        name: 'radius',
+        title: i18n.translate('kbnVislibVisTypes.horizontalBar.radiusTitle', { defaultMessage: 'Dot size' }),
+        min: 0,
+        max: 1,
+        aggFilter: ['count', 'avg', 'sum', 'min', 'max', 'cardinality']
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'segment',
+        title: i18n.translate('kbnVislibVisTypes.horizontalBar.segmentTitle', { defaultMessage: 'X-axis' }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'group',
+        title: i18n.translate('kbnVislibVisTypes.horizontalBar.groupTitle', { defaultMessage: 'Split series' }),
+        min: 0,
+        max: 3,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+      },
+      {
+        group: AggGroupNames.Buckets,
+        name: 'split',
+        title: i18n.translate('kbnVislibVisTypes.horizontalBar.splitTitle', { defaultMessage: 'Split chart' }),
+        min: 0,
+        max: 1,
+        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+      }
+    ])
+  }
+};

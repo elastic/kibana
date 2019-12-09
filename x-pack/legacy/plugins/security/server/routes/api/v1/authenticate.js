@@ -9,9 +9,15 @@ import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
 import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
-import { createCSPRuleString, generateCSPNonce } from '../../../../../../../../src/legacy/server/csp';
+import { createCSPRuleString } from '../../../../../../../../src/legacy/server/csp';
 
-export function initAuthenticateApi({ authc: { login, logout }, config }, server) {
+export function initAuthenticateApi({ authc: { login, logout }, __legacyCompat: { config } }, server) {
+  function prepareCustomResourceResponse(response, contentType) {
+    return response
+      .header('cache-control', 'private, no-cache, no-store')
+      .header('content-security-policy', createCSPRuleString(server.config().get('csp.rules')))
+      .type(contentType);
+  }
 
   server.route({
     method: 'POST',
@@ -52,37 +58,6 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
     }
   });
 
-  server.route({
-    method: 'POST',
-    path: '/api/security/v1/saml',
-    config: {
-      auth: false,
-      validate: {
-        payload: Joi.object({
-          SAMLResponse: Joi.string().required(),
-          RelayState: Joi.string().allow('')
-        })
-      }
-    },
-    async handler(request, h) {
-      try {
-        // When authenticating using SAML we _expect_ to redirect to the SAML Identity provider.
-        const authenticationResult = await login(KibanaRequest.from(request), {
-          provider: 'saml',
-          value: { samlResponse: request.payload.SAMLResponse }
-        });
-
-        if (authenticationResult.redirected()) {
-          return h.redirect(authenticationResult.redirectURL);
-        }
-
-        return Boom.unauthorized(authenticationResult.error);
-      } catch (err) {
-        return wrapError(err);
-      }
-    }
-  });
-
   /**
    * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
    * is used, so that we can extract authentication response from URL fragment and send it to
@@ -93,23 +68,36 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
     path: '/api/security/v1/oidc/implicit',
     config: { auth: false },
     async handler(request, h) {
-      const legacyConfig = server.config();
-      const basePath = legacyConfig.get('server.basePath');
+      return prepareCustomResourceResponse(
+        h.response(`
+          <!DOCTYPE html>
+          <title>Kibana OpenID Connect Login</title>
+          <script src="${server.config().get('server.basePath')}/api/security/v1/oidc/implicit.js"></script>
+        `),
+        'text/html'
+      );
+    }
+  });
 
-      const nonce = await generateCSPNonce();
-      const cspRulesHeader = createCSPRuleString(legacyConfig.get('csp.rules'), nonce);
-      return h.response(`
-        <!DOCTYPE html>
-        <title>Kibana OpenID Connect Login</title>
-        <script nonce="${nonce}">
+  /**
+   * The route that accompanies `/api/security/v1/oidc/implicit` and renders a JavaScript snippet
+   * that extracts fragment part from the URL and send it to the `/api/security/v1/oidc` route.
+   * We need this separate endpoint because of default CSP policy that forbids inline scripts.
+   */
+  server.route({
+    method: 'GET',
+    path: '/api/security/v1/oidc/implicit.js',
+    config: { auth: false },
+    async handler(request, h) {
+      return prepareCustomResourceResponse(
+        h.response(`
           window.location.replace(
-            '${basePath}/api/security/v1/oidc?authenticationResponseURI=' + encodeURIComponent(window.location.href)
+            '${server.config().get('server.basePath')}/api/security/v1/oidc?authenticationResponseURI=' + 
+              encodeURIComponent(window.location.href)
           );
-        </script>
-      `)
-        .header('cache-control', 'private, no-cache, no-store')
-        .header('content-security-policy', cspRulesHeader)
-        .type('text/html');
+        `),
+        'text/javascript'
+      );
     }
   });
 

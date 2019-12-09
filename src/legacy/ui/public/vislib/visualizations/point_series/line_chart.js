@@ -92,18 +92,18 @@ export class LineChart extends PointSeries {
       return yScale(y0 + y);
     }
 
-    function cColor(d) {
-      return color(d.series);
+    function cColor() {
+      return color(data.label);
     }
 
-    function colorCircle(d) {
+    function colorCircle() {
       const parent = d3.select(this).node().parentNode;
       const lengthOfParent = d3.select(parent).data()[0].length;
       const isVisible = (lengthOfParent === 1);
 
       // If only 1 point exists, show circle
       if (!showCircles && !isVisible) return 'none';
-      return cColor(d);
+      return cColor();
     }
 
     function getCircleRadiusFn(modifier) {
@@ -223,6 +223,10 @@ export class LineChart extends PointSeries {
         }
         const circles = self.addCircles(svg, self.chartData);
         self.addCircleEvents(circles);
+
+        if (self.thresholdLineOptions.show) {
+          self.addThresholdLine(self.chartEl);
+        }
 
         self.events.emit('rendered', {
           chart: self.chartData

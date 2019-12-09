@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createFailError } from '../../run';
+import { createFailError } from '@kbn/dev-utils';
 import {
   I18nConfig,
   matchEntriesWithExctractors,
@@ -42,7 +42,7 @@ export async function extractUntrackedMessagesTask({
   reporter: any;
 }) {
   const inputPaths = Array.isArray(path) ? path : [path || './'];
-  const availablePaths = Object.values(config.paths);
+  const availablePaths = Object.values(config.paths).flat();
   const ignore = availablePaths.concat([
     '**/build/**',
     '**/webpackShims/**',

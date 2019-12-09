@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { DirectionBadge } from '../direction';
@@ -39,7 +38,7 @@ Stats.displayName = 'Stats';
  * Renders a row of draggable badges containing fields from the
  * `Network` category of fields
  */
-export const Network = pure<{
+export const Network = React.memo<{
   bytes?: string[] | null;
   communityId?: string[] | null;
   contextId: string;
@@ -78,7 +77,7 @@ export const Network = pure<{
             <EuiFlexItemMarginRight grow={false} key={b}>
               <DefaultDraggable
                 field={NETWORK_BYTES_FIELD_NAME}
-                id={`${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
+                id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_BYTES_FIELD_NAME}-${b}`}
                 value={b}
               >
                 <Stats size="xs">
@@ -97,7 +96,7 @@ export const Network = pure<{
           <EuiFlexItemMarginRight grow={false} key={p}>
             <DefaultDraggable
               field={NETWORK_PACKETS_FIELD_NAME}
-              id={`${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
+              id={`network-default-draggable-${contextId}-${eventId}-${NETWORK_PACKETS_FIELD_NAME}-${p}`}
               value={p}
             >
               <Stats size="xs">

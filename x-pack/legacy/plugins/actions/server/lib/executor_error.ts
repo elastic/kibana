@@ -6,8 +6,8 @@
 
 export class ExecutorError extends Error {
   readonly data?: any;
-  readonly retry?: null | boolean | Date;
-  constructor(message?: string, data?: any, retry?: null | boolean | Date) {
+  readonly retry: boolean | Date;
+  constructor(message?: string, data?: any, retry: boolean | Date = false) {
     super(message);
     this.data = data;
     this.retry = retry;

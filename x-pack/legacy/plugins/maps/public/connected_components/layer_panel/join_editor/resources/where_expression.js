@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -14,11 +13,8 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { QueryBar } from 'plugins/data';
-import { Storage } from 'ui/storage';
-
-const settings = chrome.getUiSettingsClient();
-const localStorage = new Storage(window.localStorage);
+import { SearchBar } from 'plugins/data';
+import { npStart } from 'ui/new_platform';
 
 export class WhereExpression extends Component {
 
@@ -51,6 +47,8 @@ export class WhereExpression extends Component {
         defaultMessage: '-- add filter --'
       });
 
+    const { uiSettings } = npStart.core;
+
     return (
       <EuiPopover
         id="whereClausePopover"
@@ -78,14 +76,13 @@ export class WhereExpression extends Component {
               defaultMessage="Use a query to narrow right source."
             />
           </EuiFormHelpText>
-          <QueryBar
-            uiSettings={settings}
-            query={whereQuery ? whereQuery : { language: settings.get('search:queryLanguage'), query: '' }}
-            onSubmit={this._onQueryChange}
-            appName="maps"
+          <SearchBar
+            showFilterBar={false}
             showDatePicker={false}
+            showQueryInput={true}
+            query={whereQuery ? whereQuery : { language: uiSettings.get('search:queryLanguage'), query: '' }}
+            onQuerySubmit={this._onQueryChange}
             indexPatterns={[indexPattern]}
-            store={localStorage}
             customSubmitButton={
               <EuiButton
                 fill

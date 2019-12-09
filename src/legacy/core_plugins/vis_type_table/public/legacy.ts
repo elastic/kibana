@@ -18,20 +18,15 @@
  */
 
 import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from 'ui/new_platform';
+import { npSetup, npStart } from './legacy_imports';
 import { plugin } from '.';
 
 import { TablePluginSetupDependencies } from './plugin';
-import { visualizations } from '../../visualizations/public';
-import { LegacyDependenciesPlugin } from './shim';
+import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
 
 const plugins: Readonly<TablePluginSetupDependencies> = {
-  visualizations,
-  data: npSetup.plugins.data,
-
-  // Temporary solution
-  // It will be removed when all dependent services are migrated to the new platform.
-  __LEGACY: new LegacyDependenciesPlugin(),
+  expressions: npSetup.plugins.expressions,
+  visualizations: visualizationsSetup,
 };
 
 const pluginInstance = plugin({} as PluginInitializerContext);

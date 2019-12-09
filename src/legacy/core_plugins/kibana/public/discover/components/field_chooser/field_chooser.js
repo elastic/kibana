@@ -16,22 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import 'ui/directives/css_truncate';
-import { i18n } from '@kbn/i18n';
-import 'ui/directives/field_name';
-import './discover_field';
-import 'ui/angular_ui_select';
 import _ from 'lodash';
 import $ from 'jquery';
 import rison from 'rison-node';
 import { fieldCalculator } from './lib/field_calculator';
-import { FieldList } from 'ui/index_patterns';
-import { uiModules } from 'ui/modules';
+import './discover_field';
+import './discover_field_search_directive';
+import './discover_index_pattern_directive';
+import { FieldList } from '../../../../../../../plugins/data/public';
 import fieldChooserTemplate from './field_chooser.html';
-const app = uiModules.get('apps/discover');
 
-app.directive('discFieldChooser', function ($location, config, $route) {
+export function createFieldChooserDirective($location, config, $route) {
   return {
     restrict: 'E',
     scope: {
@@ -47,22 +42,15 @@ app.directive('discFieldChooser', function ($location, config, $route) {
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
-      $scope.$parent.$watch('showFilter', () =>{
-        $scope.toggleFieldFilterButtonAriaLabel = $scope.$parent.showFilter
-          ? i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonHideAriaLabel', {
-            defaultMessage: 'Hide field settings',
-          })
-          : i18n.translate('kbn.discover.fieldChooser.toggleFieldFilterButtonShowAriaLabel', {
-            defaultMessage: 'Show field settings',
-          });
-      });
+      $scope.showFilter = false;
+      $scope.toggleShowFilter = () => ($scope.showFilter = !$scope.showFilter);
 
       $scope.selectedIndexPattern = $scope.indexPatternList.find(
-        (pattern) => pattern.id === $scope.indexPattern.id
+        pattern => pattern.id === $scope.indexPattern.id
       );
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
-      $scope.setIndexPattern = function (pattern) {
-        $scope.state.index = pattern.id;
+      $scope.setIndexPattern = function (id) {
+        $scope.state.index = id;
         $scope.state.save();
       };
 
@@ -71,70 +59,80 @@ app.directive('discFieldChooser', function ($location, config, $route) {
         $route.reload();
       });
 
-      const filter = $scope.filter = {
-        props: [
-          'type',
-          'aggregatable',
-          'searchable',
-          'missing',
-          'name'
-        ],
+      const filter = ($scope.filter = {
+        props: ['type', 'aggregatable', 'searchable', 'missing', 'name'],
         defaults: {
           missing: true,
-          type: 'any'
+          type: 'any',
+          name: '',
         },
         boolOpts: [
           { label: 'any', value: undefined },
           { label: 'yes', value: true },
-          { label: 'no', value: false }
+          { label: 'no', value: false },
         ],
-        toggleVal: function (name, def) {
-          if (filter.vals[name] !== def) filter.vals[name] = def;
-          else filter.vals[name] = undefined;
-        },
         reset: function () {
           filter.vals = _.clone(filter.defaults);
         },
-        isFieldSelected: function (field) {
-          return field.display;
+        /**
+         * filter for fields that are displayed / selected for the data table
+         */
+        isFieldFilteredAndDisplayed: function (field) {
+          return field.display && isFieldFiltered(field);
         },
-        isFieldFiltered: function (field) {
-          const matchFilter = (filter.vals.type === 'any' || field.type === filter.vals.type);
-          const isAggregatable = (filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable);
-          const isSearchable = (filter.vals.searchable == null || field.searchable === filter.vals.searchable);
-          const scriptedOrMissing = (!filter.vals.missing || field.scripted || field.rowCount > 0);
-          const matchName = (!filter.vals.name || field.name.indexOf(filter.vals.name) !== -1);
-
-          return !field.display
-            && matchFilter
-            && isAggregatable
-            && isSearchable
-            && scriptedOrMissing
-            && matchName
-          ;
-        },
-        popularity: function (field) {
-          return field.count > 0;
+        /**
+         * filter for fields that are not displayed / selected for the data table
+         */
+        isFieldFilteredAndNotDisplayed: function (field) {
+          return !field.display && isFieldFiltered(field) && field.type !== '_source';
         },
         getActive: function () {
           return _.some(filter.props, function (prop) {
             return filter.vals[prop] !== filter.defaults[prop];
           });
-        }
+        },
+      });
+
+      function isFieldFiltered(field) {
+        const matchFilter = filter.vals.type === 'any' || field.type === filter.vals.type;
+        const isAggregatable =
+          filter.vals.aggregatable == null || field.aggregatable === filter.vals.aggregatable;
+        const isSearchable =
+          filter.vals.searchable == null || field.searchable === filter.vals.searchable;
+        const scriptedOrMissing =
+          !filter.vals.missing || field.type === '_source' || field.scripted || field.rowCount > 0;
+        const matchName = !filter.vals.name || field.name.indexOf(filter.vals.name) !== -1;
+
+        return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
+      }
+
+      $scope.setFilterValue = (name, value) => {
+        filter.vals[name] = value;
       };
+
+      $scope.filtersActive = 0;
 
       // set the initial values to the defaults
       filter.reset();
 
       $scope.$watchCollection('filter.vals', function () {
         filter.active = filter.getActive();
+        if (filter.vals) {
+          let count = 0;
+          Object.keys(filter.vals).forEach(key => {
+            if (key === 'missing' || key === 'name') {
+              return;
+            }
+            const value = filter.vals[key];
+            if ((value && value !== 'any') || value === false) {
+              count++;
+            }
+          });
+          $scope.filtersActive = count;
+        }
       });
 
-      $scope.$watchMulti([
-        '[]fieldCounts',
-        '[]columns',
-        '[]hits'
-      ], function (cur, prev) {
+      $scope.$watchMulti(['[]fieldCounts', '[]columns', '[]hits'], function (cur, prev) {
         const newHits = cur[2] !== prev[2];
         let fields = $scope.fields;
         const columns = $scope.columns || [];
@@ -184,7 +182,9 @@ app.directive('discFieldChooser', function ($location, config, $route) {
       };
 
       function getVisualizeUrl(field) {
-        if (!$scope.state) {return '';}
+        if (!$scope.state) {
+          return '';
+        }
 
         let agg = {};
         const isGeoPoint = field.type === 'geo_point';
@@ -197,18 +197,17 @@ app.directive('discFieldChooser', function ($location, config, $route) {
             schema: 'segment',
             params: {
               field: field.name,
-              interval: 'auto'
-            }
+              interval: 'auto',
+            },
           };
-
         } else if (isGeoPoint) {
           agg = {
             type: 'geohash_grid',
             schema: 'segment',
             params: {
               field: field.name,
-              precision: 3
-            }
+              precision: 3,
+            },
           };
         } else {
           agg = {
@@ -217,26 +216,28 @@ app.directive('discFieldChooser', function ($location, config, $route) {
             params: {
               field: field.name,
               size: parseInt(config.get('discover:aggs:terms:size'), 10),
-              orderBy: '2'
-            }
+              orderBy: '2',
+            },
           };
         }
 
-        return '#/visualize/create?' + $.param(_.assign(_.clone($location.search()), {
-          indexPattern: $scope.state.index,
-          type: type,
-          _a: rison.encode({
-            filters: $scope.state.filters || [],
-            query: $scope.state.query || undefined,
-            vis: {
+        return (
+          '#/visualize/create?' +
+          $.param(
+            _.assign(_.clone($location.search()), {
+              indexPattern: $scope.state.index,
               type: type,
-              aggs: [
-                { schema: 'metric', type: 'count', 'id': '2' },
-                agg,
-              ]
-            }
-          })
-        }));
+              _a: rison.encode({
+                filters: $scope.state.filters || [],
+                query: $scope.state.query || undefined,
+                vis: {
+                  type: type,
+                  aggs: [{ schema: 'metric', type: 'count', id: '2' }, agg],
+                },
+              }),
+            })
+          )
+        );
       }
 
       $scope.computeDetails = function (field, recompute) {
@@ -247,7 +248,7 @@ app.directive('discFieldChooser', function ($location, config, $route) {
               hits: $scope.hits,
               field: field,
               count: 5,
-              grouped: false
+              grouped: false,
             }),
           };
           _.each(field.details.buckets, function (bucket) {
@@ -269,26 +270,27 @@ app.directive('discFieldChooser', function ($location, config, $route) {
 
         const fieldSpecs = indexPattern.fields.slice(0);
         const fieldNamesInDocs = _.keys(fieldCounts);
-        const fieldNamesInIndexPattern = _.keys(indexPattern.fields.byName);
+        const fieldNamesInIndexPattern = _.map(indexPattern.fields, 'name');
 
-        _.difference(fieldNamesInDocs, fieldNamesInIndexPattern)
-          .forEach(function (unknownFieldName) {
-            fieldSpecs.push({
-              name: unknownFieldName,
-              type: 'unknown'
-            });
+        _.difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach(function (
+          unknownFieldName
+        ) {
+          fieldSpecs.push({
+            name: unknownFieldName,
+            type: 'unknown',
           });
+        });
 
         const fields = new FieldList(indexPattern, fieldSpecs);
 
         if (prevFields) {
           fields.forEach(function (field) {
-            field.details = _.get(prevFields, ['byName', field.name, 'details']);
+            field.details = (prevFields.getByName(field.name) || {}).details;
           });
         }
 
         return fields;
       }
-    }
+    },
   };
-});
+}

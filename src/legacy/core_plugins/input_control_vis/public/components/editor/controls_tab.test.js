@@ -17,7 +17,27 @@
  * under the License.
  */
 
-jest.mock('ui/new_platform');
+jest.mock('../../../../../core_plugins/data/public/legacy', () => ({
+  indexPatterns: {
+    indexPatterns: {
+      get: jest.fn(),
+    }
+  }
+}));
+
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        ui: {
+          IndexPatternSelect: () => {
+            return <div/>;
+          }
+        }
+      }
+    },
+  },
+}));
 
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';

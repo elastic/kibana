@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { AutocompleteSuggestion } from '../../../../../../../src/plugins/data/public';
 
 import euiStyled from '../../../../../common/eui_styled_components';
 import { composeStateUpdaters } from '../../utils/typed_react';
@@ -101,7 +101,7 @@ export class AutocompleteField extends React.Component<
     }
   }
 
-  public componentDidUpdate(prevProps: AutocompleteFieldProps, prevState: AutocompleteFieldState) {
+  public componentDidUpdate(prevProps: AutocompleteFieldProps) {
     const hasNewValue = prevProps.value !== this.props.value;
     const hasNewSuggestions = prevProps.suggestions !== this.props.suggestions;
 
@@ -302,22 +302,20 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const FixedEuiFieldSearch: React.SFC<
-  React.InputHTMLAttributes<HTMLInputElement> &
-    EuiFieldSearchProps & {
-      inputRef?: (element: HTMLInputElement | null) => void;
-      onSearch: (value: string) => void;
-    }
-> = EuiFieldSearch as any;
+const FixedEuiFieldSearch: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
+  EuiFieldSearchProps & {
+    inputRef?: (element: HTMLInputElement | null) => void;
+    onSearch: (value: string) => void;
+  }> = EuiFieldSearch as any;
 
 const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = euiStyled(EuiPanel).attrs({
+const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   hasShadow: true,
-})`
+}))`
   position: absolute;
   width: 100%;
   margin-top: 2px;

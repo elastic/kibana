@@ -49,6 +49,12 @@ for example, `logstash-*`.
 *Impact:* To restore the previous behavior, in kibana.yml set `logging.timezone: UTC`.
 
 [float]
+==== Responses are never logged by default
+*Details:* Previously responses would be logged if either `logging.json` was true, `logging.dest` was specified, or a `TTY` was detected.
+
+*Impact:* To restore the previous behavior, in kibana.yml set `logging.events.response=*`.
+
+[float]
 ==== `xpack.security.authProviders` is no longer valid
 *Details:* The deprecated `xpack.security.authProviders` setting in the `kibana.yml` file has been removed.
 
@@ -67,5 +73,11 @@ specified explicitly.
 *Details:* The deprecated `xpack.security.public` setting in the `kibana.yml` file has been removed.
 
 *Impact:* Define `xpack.security.authc.saml.realm` when using the SAML authentication provider instead.
+
+[float]
+=== `optimize` directory is now in the `data` folder
+*Details:* Generated bundles have moved to the configured `path.data` folder.
+
+*Impact:* Any workflow that involved manually clearing generated bundles will have to be updated with the new path.
 
 // end::notable-breaking-changes[]

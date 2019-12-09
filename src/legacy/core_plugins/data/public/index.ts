@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup } from './plugin';
+import { DataPlugin as Plugin, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,28 +27,17 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export type DataSetup = DataSetup;
-export { ExpressionRenderer, ExpressionRendererProps, ExpressionRunner } from './expressions';
+export { DataStart };
 
-/** @public types */
-export { IndexPattern, IndexPatterns, StaticIndexPattern, Field } from './index_patterns';
-export { Query, QueryBar, QueryBarInput } from './query';
-export { FilterBar, ApplyFiltersPopover } from './filter';
+export { Field, FieldType, IFieldList, IndexPattern } from './index_patterns';
 export { SearchBar, SearchBarProps } from './search';
 export {
-  FilterManager,
-  FilterStateManager,
-  uniqFilters,
-  onlyDisabledFiltersChanged,
-} from './filter/filter_manager';
+  SavedQueryAttributes,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../plugins/data/public';
 
 /** @public static code */
-export { dateHistogramInterval } from '../common/date_histogram_interval';
-/** @public static code */
-export {
-  isValidEsInterval,
-  InvalidEsCalendarIntervalError,
-  InvalidEsIntervalFormatError,
-  parseEsInterval,
-  ParsedInterval,
-} from '../common/parse_es_interval';
+export * from '../common';
+export { FilterStateManager } from './filter/filter_manager';
+export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';

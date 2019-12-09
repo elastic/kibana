@@ -18,43 +18,28 @@
  */
 import { Stream } from 'stream';
 import Boom from 'boom';
-
 import supertest from 'supertest';
-import { BehaviorSubject } from 'rxjs';
-import { ByteSizeValue, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { HttpService } from '../http_service';
 
-import { CoreContext } from '../../core_context';
-import { Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
-import { configServiceMock } from '../../config/config_service.mock';
+import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { createHttpServer } from '../test_utils';
 
 let server: HttpService;
 
 let logger: ReturnType<typeof loggingServiceMock.create>;
-let env: Env;
-let coreContext: CoreContext;
-const configService = configServiceMock.create();
+const contextSetup = contextServiceMock.createSetupContract();
 
-configService.atPath.mockReturnValue(
-  new BehaviorSubject({
-    hosts: ['localhost'],
-    maxPayload: new ByteSizeValue(1024),
-    autoListen: true,
-    ssl: {
-      enabled: false,
-    },
-  } as any)
-);
+const setupDeps = {
+  context: contextSetup,
+};
 
 beforeEach(() => {
   logger = loggingServiceMock.create();
-  env = Env.createDefault(getEnvOptions());
 
-  coreContext = { coreId: Symbol('core'), env, logger, configService: configService as any };
-  server = new HttpService(coreContext);
+  server = createHttpServer({ logger });
 });
 
 afterEach(async () => {
@@ -63,7 +48,7 @@ afterEach(async () => {
 
 describe('Handler', () => {
   it("Doesn't expose error details if handler throws", async () => {
-    const { server: innerServer, createRouter } = await server.setup();
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -86,7 +71,7 @@ describe('Handler', () => {
   });
 
   it('returns 500 Server error if handler throws Boom error', async () => {
-    const { server: innerServer, createRouter } = await server.setup();
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -109,7 +94,7 @@ describe('Handler', () => {
   });
 
   it('returns 500 Server error if handler returns unexpected result', async () => {
-    const { server: innerServer, createRouter } = await server.setup();
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
     const router = createRouter('/');
     router.get({ path: '/', validate: false }, (context, req, res) => 'ok' as any);
@@ -130,7 +115,7 @@ describe('Handler', () => {
   });
 
   it('returns 400 Bad request if request validation failed', async () => {
-    const { server: innerServer, createRouter } = await server.setup();
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
     router.get(
@@ -159,14 +144,61 @@ describe('Handler', () => {
   });
 });
 
+describe('handleLegacyErrors', () => {
+  it('properly convert Boom errors', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get(
+      { path: '/', validate: false },
+      router.handleLegacyErrors((context, req, res) => {
+        throw Boom.notFound();
+      })
+    );
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(404);
+
+    expect(result.body.message).toBe('Not Found');
+  });
+
+  it('returns default error when non-Boom errors are thrown', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get(
+      {
+        path: '/',
+        validate: false,
+      },
+      router.handleLegacyErrors((context, req, res) => {
+        throw new Error('Unexpected');
+      })
+    );
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
+
+    expect(result.body).toEqual({
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred.',
+      statusCode: 500,
+    });
+  });
+});
+
 describe('Response factory', () => {
   describe('Success', () => {
     it('supports answering with json object', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({ key: 'value' });
+        return res.ok({ body: { key: 'value' } });
       });
 
       await server.start();
@@ -180,11 +212,11 @@ describe('Response factory', () => {
     });
 
     it('supports answering with string', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('result');
+        return res.ok({ body: 'result' });
       });
 
       await server.start();
@@ -198,7 +230,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with undefined', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -213,7 +245,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with Stream', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -226,7 +258,7 @@ describe('Response factory', () => {
           },
         });
 
-        return res.ok(stream);
+        return res.ok({ body: stream });
       });
 
       await server.start();
@@ -240,7 +272,7 @@ describe('Response factory', () => {
     });
 
     it('supports answering with chunked Stream', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -252,7 +284,7 @@ describe('Response factory', () => {
           stream.end();
         }, 100);
 
-        return res.ok(stream);
+        return res.ok({ body: stream });
       });
 
       await server.start();
@@ -266,13 +298,14 @@ describe('Response factory', () => {
     });
 
     it('supports answering with Buffer', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const buffer = Buffer.alloc(1028, '.');
 
-        return res.ok(buffer, {
+        return res.ok({
+          body: buffer,
           headers: {
             'content-encoding': 'binary',
           },
@@ -292,13 +325,14 @@ describe('Response factory', () => {
     });
 
     it('supports answering with Buffer text', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        const buffer = new Buffer('abc');
+        const buffer = Buffer.from('abc');
 
-        return res.ok(buffer, {
+        return res.ok({
+          body: buffer,
           headers: {
             'content-type': 'text/plain',
           },
@@ -318,11 +352,12 @@ describe('Response factory', () => {
     });
 
     it('supports configuring standard headers', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('value', {
+        return res.ok({
+          body: 'value',
           headers: {
             etag: '1234',
           },
@@ -340,11 +375,12 @@ describe('Response factory', () => {
     });
 
     it('supports configuring non-standard headers', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('value', {
+        return res.ok({
+          body: 'value',
           headers: {
             etag: '1234',
             'x-kibana': 'key',
@@ -364,11 +400,12 @@ describe('Response factory', () => {
     });
 
     it('accepted headers are case-insensitive.', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('value', {
+        return res.ok({
+          body: 'value',
           headers: {
             ETag: '1234',
           },
@@ -385,11 +422,12 @@ describe('Response factory', () => {
     });
 
     it('accept array of headers', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok('value', {
+        return res.ok({
+          body: 'value',
           headers: {
             'set-cookie': ['foo', 'bar'],
           },
@@ -406,13 +444,13 @@ describe('Response factory', () => {
     });
 
     it('throws if given invalid json object as response payload', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const payload: any = { key: {} };
         payload.key.payload = payload;
-        return res.ok(payload);
+        return res.ok({ body: payload });
       });
 
       await server.start();
@@ -426,11 +464,11 @@ describe('Response factory', () => {
     });
 
     it('200 OK with body', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.ok({ key: 'value' });
+        return res.ok({ body: { key: 'value' } });
       });
 
       await server.start();
@@ -444,11 +482,11 @@ describe('Response factory', () => {
     });
 
     it('202 Accepted with body', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.accepted({ location: 'somewhere' });
+        return res.accepted({ body: { location: 'somewhere' } });
       });
 
       await server.start();
@@ -462,7 +500,7 @@ describe('Response factory', () => {
     });
 
     it('204 No content', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -481,11 +519,12 @@ describe('Response factory', () => {
 
   describe('Redirection', () => {
     it('302 supports redirection to configured URL', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.redirected('The document has moved', {
+        return res.redirected({
+          body: 'The document has moved',
           headers: {
             location: '/new-url',
             'x-kibana': 'tag',
@@ -505,11 +544,11 @@ describe('Response factory', () => {
     });
 
     it('throws if redirection url not provided', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.redirected(undefined, {
+        return res.redirected({
           headers: {
             'x-kibana': 'tag',
           },
@@ -535,12 +574,12 @@ describe('Response factory', () => {
 
   describe('Error', () => {
     it('400 Bad request', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
-        return res.badRequest(error);
+        return res.badRequest({ body: error });
       });
 
       await server.start();
@@ -557,7 +596,7 @@ describe('Response factory', () => {
     });
 
     it('400 Bad request with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -578,11 +617,13 @@ describe('Response factory', () => {
     });
 
     it('400 Bad request with additional data', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.badRequest({ message: 'some message', meta: { data: ['good', 'bad'] } });
+        return res.badRequest({
+          body: { message: 'some message', attributes: { data: ['good', 'bad'] } },
+        });
       });
 
       await server.start();
@@ -594,7 +635,7 @@ describe('Response factory', () => {
       expect(result.body).toEqual({
         error: 'Bad Request',
         message: 'some message',
-        meta: {
+        attributes: {
           data: ['good', 'bad'],
         },
         statusCode: 400,
@@ -602,12 +643,13 @@ describe('Response factory', () => {
     });
 
     it('401 Unauthorized', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('no access');
-        return res.unauthorized(error, {
+        return res.unauthorized({
+          body: error,
           headers: {
             'WWW-Authenticate': 'challenge',
           },
@@ -625,7 +667,7 @@ describe('Response factory', () => {
     });
 
     it('401 Unauthorized with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -642,12 +684,12 @@ describe('Response factory', () => {
     });
 
     it('403 Forbidden', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('reason');
-        return res.forbidden(error);
+        return res.forbidden({ body: error });
       });
 
       await server.start();
@@ -660,7 +702,7 @@ describe('Response factory', () => {
     });
 
     it('403 Forbidden with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -677,12 +719,12 @@ describe('Response factory', () => {
     });
 
     it('404 Not Found', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('file is not found');
-        return res.notFound(error);
+        return res.notFound({ body: error });
       });
 
       await server.start();
@@ -695,7 +737,7 @@ describe('Response factory', () => {
     });
 
     it('404 Not Found with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -712,12 +754,12 @@ describe('Response factory', () => {
     });
 
     it('409 Conflict', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('stale version');
-        return res.conflict(error);
+        return res.conflict({ body: error });
       });
 
       await server.start();
@@ -730,7 +772,7 @@ describe('Response factory', () => {
     });
 
     it('409 Conflict with default message', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
@@ -747,12 +789,13 @@ describe('Response factory', () => {
     });
 
     it('Custom error response', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
 
       const router = createRouter('/');
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
-        return res.customError(error, {
+        return res.customError({
+          body: error,
           statusCode: 418,
         });
       });
@@ -771,13 +814,14 @@ describe('Response factory', () => {
     });
 
     it('Custom error response for server error', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
 
-        return res.customError(error, {
+        return res.customError({
+          body: error,
           statusCode: 500,
         });
       });
@@ -796,13 +840,14 @@ describe('Response factory', () => {
     });
 
     it('Custom error response for Boom server error', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
 
-        return res.customError(Boom.boomify(error), {
+        return res.customError({
+          body: Boom.boomify(error),
           statusCode: 500,
         });
       });
@@ -821,12 +866,13 @@ describe('Response factory', () => {
     });
 
     it('Custom error response requires error status code', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('some message');
-        return res.customError(error, {
+        return res.customError({
+          body: error,
           statusCode: 200,
         });
       });
@@ -854,11 +900,12 @@ describe('Response factory', () => {
 
   describe('Custom', () => {
     it('creates success response', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(undefined, {
+        return res.custom({
+          body: undefined,
           statusCode: 201,
           headers: {
             location: 'somewhere',
@@ -876,11 +923,12 @@ describe('Response factory', () => {
     });
 
     it('creates redirect response', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom('The document has moved', {
+        return res.custom({
+          body: 'The document has moved',
           headers: {
             location: '/new-url',
           },
@@ -898,11 +946,12 @@ describe('Response factory', () => {
     });
 
     it('throws if redirects without location header to be set', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom('The document has moved', {
+        return res.custom({
+          body: 'The document has moved',
           headers: {},
           statusCode: 301,
         });
@@ -924,12 +973,13 @@ describe('Response factory', () => {
     });
 
     it('creates error response', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('unauthorized');
-        return res.custom(error, {
+        return res.custom({
+          body: error,
           statusCode: 401,
         });
       });
@@ -944,19 +994,17 @@ describe('Response factory', () => {
     });
 
     it('creates error response with additional data', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(
-          {
+        return res.custom({
+          body: {
             message: 'unauthorized',
-            meta: { errorCode: 'K401' },
+            attributes: { errorCode: 'K401' },
           },
-          {
-            statusCode: 401,
-          }
-        );
+          statusCode: 401,
+        });
       });
 
       await server.start();
@@ -968,25 +1016,23 @@ describe('Response factory', () => {
       expect(result.body).toEqual({
         error: 'Unauthorized',
         message: 'unauthorized',
-        meta: { errorCode: 'K401' },
+        attributes: { errorCode: 'K401' },
         statusCode: 401,
       });
     });
 
     it('creates error response with additional data and error object', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(
-          {
+        return res.custom({
+          body: {
             message: new Error('unauthorized'),
-            meta: { errorCode: 'K401' },
+            attributes: { errorCode: 'K401' },
           },
-          {
-            statusCode: 401,
-          }
-        );
+          statusCode: 401,
+        });
       });
 
       await server.start();
@@ -998,18 +1044,19 @@ describe('Response factory', () => {
       expect(result.body).toEqual({
         error: 'Unauthorized',
         message: 'unauthorized',
-        meta: { errorCode: 'K401' },
+        attributes: { errorCode: 'K401' },
         statusCode: 401,
       });
     });
 
     it('creates error response with Boom error', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = Boom.unauthorized();
-        return res.custom(error, {
+        return res.custom({
+          body: error,
           statusCode: 401,
         });
       });
@@ -1024,11 +1071,12 @@ describe('Response factory', () => {
     });
 
     it("Doesn't log details of created 500 Server error response", async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom('reason', {
+        return res.custom({
+          body: 'reason',
           statusCode: 500,
         });
       });
@@ -1044,16 +1092,14 @@ describe('Response factory', () => {
     });
 
     it('throws an error if not valid error is provided', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(
-          { error: 'error-message' },
-          {
-            statusCode: 401,
-          }
-        );
+        return res.custom({
+          body: { error: 'error-message' },
+          statusCode: 401,
+        });
       });
 
       await server.start();
@@ -1073,13 +1119,13 @@ describe('Response factory', () => {
     });
 
     it('throws if an error not provided', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        return res.custom(undefined, {
+        return res.custom({
           statusCode: 401,
-        });
+        } as any); // requires error message
       });
 
       await server.start();
@@ -1099,12 +1145,12 @@ describe('Response factory', () => {
     });
 
     it('throws an error if statusCode is not specified', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('error message');
-        return res.custom(error, undefined as any); // options.statusCode is required
+        return res.custom({ body: error } as any); // options.statusCode is required
       });
 
       await server.start();
@@ -1124,12 +1170,12 @@ describe('Response factory', () => {
     });
 
     it('throws an error if statusCode is not valid', async () => {
-      const { server: innerServer, createRouter } = await server.setup();
+      const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
         const error = new Error('error message');
-        return res.custom(error, { statusCode: 20 });
+        return res.custom({ body: error, statusCode: 20 });
       });
 
       await server.start();

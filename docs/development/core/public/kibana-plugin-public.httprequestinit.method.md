@@ -4,6 +4,8 @@
 
 ## HttpRequestInit.method property
 
+HTTP method, which is "GET" by default.
+
 <b>Signature:</b>
 
 ```typescript

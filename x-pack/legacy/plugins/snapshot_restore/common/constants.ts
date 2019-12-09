@@ -53,3 +53,11 @@ export const APP_REQUIRED_CLUSTER_PRIVILEGES = [
   'cluster:admin/repository',
 ];
 export const APP_RESTORE_INDEX_PRIVILEGES = ['monitor'];
+export const APP_SLM_CLUSTER_PRIVILEGES = ['manage_slm'];
+
+export const TIME_UNITS: { [key: string]: 'd' | 'h' | 'm' | 's' } = {
+  DAY: 'd',
+  HOUR: 'h',
+  MINUTE: 'm',
+  SECOND: 's',
+};

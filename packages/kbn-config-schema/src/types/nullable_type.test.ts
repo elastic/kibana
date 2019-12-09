@@ -19,19 +19,66 @@
 
 import { schema } from '..';
 
-test('returns value if specified', () => {
+test('returns string value when passed string', () => {
   const type = schema.nullable(schema.string());
-  expect(type.validate('test')).toEqual('test');
+  expect(type.validate('test')).toBe('test');
 });
 
-test('returns null if null', () => {
-  const type = schema.nullable(schema.string());
-  expect(type.validate(null)).toEqual(null);
+test('returns number value when passed number', () => {
+  const type = schema.nullable(schema.number());
+  expect(type.validate(42)).toBe(42);
 });
 
-test('returns null if undefined', () => {
+test('returns boolean value when passed boolean', () => {
+  const type = schema.nullable(schema.boolean());
+  expect(type.validate(true)).toBe(true);
+});
+
+test('returns object value when passed object', () => {
+  const type = schema.nullable(
+    schema.object({
+      foo: schema.number(),
+      bar: schema.boolean(),
+      baz: schema.string(),
+    })
+  );
+  const object = {
+    foo: 666,
+    bar: true,
+    baz: 'foo bar baz',
+  };
+
+  expect(type.validate(object)).toEqual(object);
+});
+
+test('returns null if null for string', () => {
   const type = schema.nullable(schema.string());
-  expect(type.validate(undefined)).toEqual(null);
+  expect(type.validate(null)).toBe(null);
+});
+
+test('returns null if null for number', () => {
+  const type = schema.nullable(schema.number());
+  expect(type.validate(null)).toBe(null);
+});
+
+test('returns null if null for boolean', () => {
+  const type = schema.nullable(schema.boolean());
+  expect(type.validate(null)).toBe(null);
+});
+
+test('returns null if undefined for string', () => {
+  const type = schema.nullable(schema.string());
+  expect(type.validate(undefined)).toBe(null);
+});
+
+test('returns null if undefined for number', () => {
+  const type = schema.nullable(schema.number());
+  expect(type.validate(undefined)).toBe(null);
+});
+
+test('returns null if undefined for boolean', () => {
+  const type = schema.nullable(schema.boolean());
+  expect(type.validate(undefined)).toBe(null);
 });
 
 test('returns null even if contained type has a default value', () => {
@@ -41,7 +88,7 @@ test('returns null even if contained type has a default value', () => {
     })
   );
 
-  expect(type.validate(undefined)).toEqual(null);
+  expect(type.validate(undefined)).toBe(null);
 });
 
 test('validates contained type', () => {
@@ -54,6 +101,27 @@ test('validates basic type', () => {
   const type = schema.nullable(schema.string());
 
   expect(() => type.validate(666)).toThrowErrorMatchingSnapshot();
+});
+
+test('validates type in object', () => {
+  const type = schema.object({
+    foo: schema.nullable(schema.string({ maxLength: 1 })),
+    bar: schema.nullable(schema.boolean()),
+  });
+
+  expect(type.validate({ foo: 'a' })).toEqual({ foo: 'a', bar: null });
+  expect(type.validate({ foo: null })).toEqual({ foo: null, bar: null });
+  expect(type.validate({})).toEqual({ foo: null, bar: null });
+  expect(type.validate({ bar: null })).toEqual({ foo: null, bar: null });
+});
+
+test('validates type errors in object', () => {
+  const type = schema.object({
+    foo: schema.nullable(schema.string({ maxLength: 1 })),
+    bar: schema.nullable(schema.boolean()),
+  });
+
+  expect(() => type.validate({ foo: 'ab' })).toThrowErrorMatchingSnapshot();
 });
 
 test('includes namespace in failure', () => {

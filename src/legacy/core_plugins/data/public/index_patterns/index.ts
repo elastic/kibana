@@ -17,15 +17,17 @@
  * under the License.
  */
 
+import { IFieldType, indexPatterns } from '../../../../../plugins/data/public';
+
+const getFromSavedObject = indexPatterns.getFromSavedObject;
+const getRoutes = indexPatterns.getRoutes;
+const flattenHitWrapper = indexPatterns.flattenHitWrapper;
+
+export { getFromSavedObject, getRoutes, flattenHitWrapper };
+export { IFieldType as FieldType };
 export {
-  IndexPatternsService,
-  IndexPatterns,
-  fixtures,
-  utils,
-  // types
-  IndexPatternsSetup,
-  IndexPattern,
-  StaticIndexPattern,
   Field,
-  FieldType,
-} from './index_patterns_service';
+  IFieldList,
+  IndexPattern,
+  IndexPatternsContract,
+} from '../../../../../plugins/data/public';

@@ -5,25 +5,28 @@
  */
 
 import {
+  ERROR_LOG_LEVEL,
   PROCESSOR_EVENT,
   TRACE_ID,
   TRANSACTION_ID
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../helpers/range_filter';
-import { Setup } from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export interface ErrorsPerTransaction {
   [transactionId: string]: number;
 }
 
+const includedLogLevels = ['critical', 'error', 'fatal'];
+
 export async function getTraceErrorsPerTransaction(
   traceId: string,
-  setup: Setup
+  setup: Setup & SetupTimeRange
 ): Promise<ErrorsPerTransaction> {
-  const { start, end, client, config } = setup;
+  const { start, end, client, indices } = setup;
 
   const params = {
-    index: config.get<string>('apm_oss.errorIndices'),
+    index: indices['apm_oss.errorIndices'],
     body: {
       size: 0,
       query: {
@@ -32,6 +35,10 @@ export async function getTraceErrorsPerTransaction(
             { term: { [TRACE_ID]: traceId } },
             { term: { [PROCESSOR_EVENT]: 'error' } },
             { range: rangeFilter(start, end) }
+          ],
+          should: [
+            { bool: { must_not: [{ exists: { field: ERROR_LOG_LEVEL } }] } },
+            { terms: { [ERROR_LOG_LEVEL]: includedLogLevels } }
           ]
         }
       },
@@ -47,7 +54,7 @@ export async function getTraceErrorsPerTransaction(
 
   const resp = await client.search(params);
 
-  return resp.aggregations.transactions.buckets.reduce(
+  return (resp.aggregations?.transactions.buckets || []).reduce(
     (acc, bucket) => ({
       ...acc,
       [bucket.key]: bucket.doc_count

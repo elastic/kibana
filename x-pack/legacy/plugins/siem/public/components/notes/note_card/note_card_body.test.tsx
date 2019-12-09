@@ -7,6 +7,8 @@
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+import { ThemeProvider } from 'styled-components';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 
 import { NoteCardBody } from './note_card_body';
 
@@ -14,14 +16,23 @@ describe('NoteCardBody', () => {
   const markdownHeaderPrefix = '# '; // translates to an h1 in markdown
   const noteText = 'This is a note';
   const rawNote = `${markdownHeaderPrefix} ${noteText}`;
+  const theme = () => ({ eui: euiDarkVars, darkMode: true });
 
   test('renders correctly against snapshot', () => {
-    const wrapper = shallow(<NoteCardBody rawNote={rawNote} />);
+    const wrapper = shallow(
+      <ThemeProvider theme={theme}>
+        <NoteCardBody rawNote={rawNote} />
+      </ThemeProvider>
+    );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 
   test('it renders the text of the note in an h1', () => {
-    const wrapper = mount(<NoteCardBody rawNote={rawNote} />);
+    const wrapper = mount(
+      <ThemeProvider theme={theme}>
+        <NoteCardBody rawNote={rawNote} />
+      </ThemeProvider>
+    );
 
     expect(
       wrapper

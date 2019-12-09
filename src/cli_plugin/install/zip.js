@@ -19,8 +19,7 @@
 
 import yauzl from 'yauzl';
 import path from 'path';
-import mkdirp from 'mkdirp';
-import { createWriteStream } from 'fs';
+import { createWriteStream, mkdir } from 'fs';
 import { get } from 'lodash';
 
 /**
@@ -112,7 +111,7 @@ export function extractArchive(archive, targetDir, extractPath) {
         }
 
         if (_isDirectory(fileName)) {
-          mkdirp(fileName, function (err) {
+          mkdir(fileName, { recursive: true }, function (err) {
             if (err) {
               return reject(err);
             }
@@ -127,7 +126,7 @@ export function extractArchive(archive, targetDir, extractPath) {
             }
 
             // ensure parent directory exists
-            mkdirp(path.dirname(fileName), function (err) {
+            mkdir(path.dirname(fileName), { recursive: true }, function (err) {
               if (err) {
                 return reject(err);
               }

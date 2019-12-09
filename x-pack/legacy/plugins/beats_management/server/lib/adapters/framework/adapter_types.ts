@@ -75,9 +75,14 @@ export const RuntimeFrameworkInfo = t.interface(
       version: t.string,
     }),
     license: t.type({
-      type: t.union(
-        ['oss', 'trial', 'standard', 'basic', 'gold', 'platinum'].map(s => t.literal(s))
-      ),
+      type: t.keyof({
+        oss: null,
+        trial: null,
+        standard: null,
+        basic: null,
+        gold: null,
+        platinum: null,
+      }),
       expired: t.boolean,
       expiry_date_in_millis: t.number,
     }),

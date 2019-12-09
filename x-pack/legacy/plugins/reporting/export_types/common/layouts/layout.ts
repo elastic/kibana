@@ -5,6 +5,7 @@
  */
 
 import { HeadlessChromiumDriver } from '../../../server/browsers/chromium/driver';
+import { LevelLogger } from '../../../server/lib';
 
 export interface ViewZoomWidthHeight {
   zoom: number;
@@ -25,8 +26,7 @@ export interface LayoutSelectorDictionary {
   screenshot: string;
   renderComplete: string;
   itemsCountAttribute: string;
-  timefilterFromAttribute: string;
-  timefilterToAttribute: string;
+  timefilterDurationAttribute: string;
   toastHeader: string;
 }
 
@@ -34,6 +34,14 @@ export interface PdfImageSize {
   width: number;
   height?: number;
 }
+
+export const getDefaultLayoutSelectors = (): LayoutSelectorDictionary => ({
+  screenshot: '[data-shared-items-container]',
+  renderComplete: '[data-shared-item]',
+  itemsCountAttribute: 'data-shared-items-count',
+  timefilterDurationAttribute: 'data-shared-timefilter-duration',
+  toastHeader: '[data-test-subj="euiToastHeader"]',
+});
 
 export abstract class Layout {
   public id: string = '';
@@ -71,5 +79,5 @@ export type LayoutInstance = Layout & {
   // Fields that are not part of Layout: the instances
   // independently implement these fields on their own
   selectors: LayoutSelectorDictionary;
-  positionElements?: (browser: HeadlessChromiumDriver) => Promise<void>;
+  positionElements?: (browser: HeadlessChromiumDriver, logger: LevelLogger) => Promise<void>;
 };

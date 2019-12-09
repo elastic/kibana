@@ -20,9 +20,9 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
+import { createFailError, run } from '@kbn/dev-utils';
 import { ErrorReporter, integrateLocaleFiles } from './i18n';
 import { extractDefaultMessages, mergeConfigs } from './i18n/tasks';
-import { createFailError, run } from './run';
 
 run(
   async ({
@@ -88,7 +88,7 @@ run(
           new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true }),
       },
       {
-        title: 'Intregrating Locale File',
+        title: 'Integrating Locale File',
         task: async ({ messages, config }) => {
           await integrateLocaleFiles(messages, {
             sourceFileName: source,

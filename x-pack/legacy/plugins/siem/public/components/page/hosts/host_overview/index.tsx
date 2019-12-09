@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiDescriptionList, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
 import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React, { useContext, useState } from 'react';
-import styled from 'styled-components';
 
+import { DEFAULT_DARK_MODE } from '../../../../../common/constants';
 import { DescriptionList } from '../../../../../common/utility_types';
+import { useKibanaUiSetting } from '../../../../lib/settings/use_kibana_ui_setting';
 import { getEmptyTagValue } from '../../../empty_value';
 import { DefaultFieldRenderer, hostIdRenderer } from '../../../field_renderers/field_renderers';
 import { InspectButton } from '../../../inspect';
@@ -22,11 +23,10 @@ import { MlCapabilitiesContext } from '../../../ml/permissions/ml_capabilities_p
 import { hasMlUserPermissions } from '../../../ml/permissions/has_ml_user_permissions';
 import { AnomalyScores } from '../../../ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../ml/types';
-import { OverviewWrapper } from '../../index';
+import { DescriptionListStyled, OverviewWrapper } from '../../index';
 import { FirstLastSeenHost, FirstLastSeenHostType } from '../first_last_seen_host';
 
 import * as i18n from './translations';
-import { KibanaConfigContext } from '../../../../lib/adapters/framework/kibana_framework_adapter';
 
 interface HostSummaryProps {
   data: HostItem;
@@ -38,16 +38,6 @@ interface HostSummaryProps {
   endDate: number;
   narrowDateRange: NarrowDateRange;
 }
-
-const DescriptionListStyled = styled(EuiDescriptionList)`
-  ${({ theme }) => `
-    dt {
-      font-size: ${theme.eui.euiFontSizeXS} !important;
-    }
-  `}
-`;
-
-DescriptionListStyled.displayName = 'DescriptionListStyled';
 
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => (
   <EuiFlexItem key={key}>
@@ -69,7 +59,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     const [showInspect, setShowInspect] = useState(false);
     const capabilities = useContext(MlCapabilitiesContext);
     const userPermissions = hasMlUserPermissions(capabilities);
-    const config = useContext(KibanaConfigContext);
+    const [darkMode] = useKibanaUiSetting(DEFAULT_DARK_MODE);
 
     const getDefaultRenderer = (fieldName: string, fieldData: HostItem) => (
       <DefaultFieldRenderer
@@ -195,7 +185,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           <Loader
             overlay
             overlayBackground={
-              config.darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
+              darkMode ? darkTheme.euiPageBackgroundColor : lightTheme.euiPageBackgroundColor
             }
             size="xl"
           />
