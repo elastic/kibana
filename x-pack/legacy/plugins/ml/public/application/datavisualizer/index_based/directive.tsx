@@ -12,7 +12,7 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import { I18nContext } from 'ui/i18n';
-import { IndexPatterns } from 'ui/index_patterns';
+import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
 import { InjectorService } from '../../../../common/types/angular';
 
 import { KibanaConfigTypeFix, KibanaContext } from '../../contexts/kibana/kibana_context';
@@ -25,7 +25,7 @@ module.directive('mlDataVisualizer', ($injector: InjectorService) => {
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
+      const indexPatterns = $injector.get<IndexPatternsContract>('indexPatterns');
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
       const $route = $injector.get<any>('$route');
 
