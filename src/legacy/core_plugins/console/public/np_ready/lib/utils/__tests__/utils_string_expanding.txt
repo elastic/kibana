@@ -40,3 +40,15 @@ Correctly parse with JSON embedded inside values
   "content\\\\": """ { "json": "inside\\" ok!  1
   "  } """
 }
+==========
+Correctly handle new lines in triple quotes
+-------------------------------------
+{
+  "query": "\n    SELECT * FROM \"TABLE\"\n    "
+}
+-------------------------------------
+{
+  "query": """
+    SELECT * FROM "TABLE"
+    """
+}
