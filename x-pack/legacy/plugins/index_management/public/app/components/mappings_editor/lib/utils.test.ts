@@ -23,6 +23,7 @@ const createFieldById = ({
   hasChildFields = false,
   hasMultiFields = false,
   parentId,
+  childFields,
 }: NormalizedField) => {
   return {
     id,
@@ -37,6 +38,7 @@ const createFieldById = ({
     hasChildFields,
     hasMultiFields,
     parentId,
+    childFields,
   };
 };
 
@@ -51,58 +53,134 @@ const createFieldMetadata = (type: string) => ({
 
 describe('utils', () => {
   describe('deNormalize()', () => {
-    const {
-      id: rootBooleanFieldId,
-      name: rootBooleanFieldName,
-      source: rootBooleanSource,
-    } = createFieldMetadata('boolean');
-
-    const {
-      id: rootKeywordFieldId,
-      name: rootKeywordFieldName,
-      source: rootKeywordSource,
-    } = createFieldMetadata('keyword');
-
-    const fieldsState = {
-      rootLevelFields: [rootBooleanFieldId, rootKeywordFieldId],
-      byId: {
-        [rootBooleanFieldId]: createFieldById({
-          id: rootBooleanFieldId,
-          path: rootBooleanFieldName,
-          source: rootBooleanSource,
-        }),
-        [rootKeywordFieldId]: createFieldById({
-          id: rootKeywordFieldId,
-          path: rootKeywordFieldName,
-          source: rootKeywordSource,
-        }),
-      },
-      aliases: {},
-    } as NormalizedFields;
-
     it('handles base case', () => {
+      const {
+        id: rootBooleanFieldId,
+        name: rootBooleanFieldName,
+        source: rootBooleanSource,
+      } = createFieldMetadata('boolean');
+
+      const {
+        id: rootKeywordFieldId,
+        name: rootKeywordFieldName,
+        source: rootKeywordSource,
+      } = createFieldMetadata('keyword');
+
+      const fieldsState = {
+        rootLevelFields: [rootBooleanFieldId, rootKeywordFieldId],
+        byId: {
+          [rootBooleanFieldId]: createFieldById({
+            id: rootBooleanFieldId,
+            path: rootBooleanFieldName,
+            source: rootBooleanSource,
+          }),
+          [rootKeywordFieldId]: createFieldById({
+            id: rootKeywordFieldId,
+            path: rootKeywordFieldName,
+            source: rootKeywordSource,
+          }),
+        },
+        aliases: {},
+      } as NormalizedFields;
+
       const { name: booleanName, ...normalizedBooleanField } = rootBooleanSource;
       const { name: keywordName, ...normalizedKeywordField } = rootKeywordSource;
+
       expect(deNormalize(fieldsState)).toEqual({
         [rootBooleanFieldName]: normalizedBooleanField,
         [rootKeywordFieldName]: normalizedKeywordField,
       });
     });
 
-    // it('handles alias field', () => {
-    //   const { name, ...result } = source;
-    //   expect(deNormalize(fieldsState)).toEqual({
-    //     [fieldName]: result,
-    //   });
-    // });
+    it('handles alias field', () => {
+      const {
+        id: rootAliasFieldId,
+        name: rootAliasFieldName,
+        source: rootAliasSource,
+      } = createFieldMetadata('alias');
 
-    // it('handles child fields', () => {
-    //   const { name, ...result } = source;
-    //   expect(deNormalize(fieldsState)).toEqual({
-    //     [fieldName]: result,
-    //   });
-    // });
+      const {
+        id: rootKeywordFieldId,
+        name: rootKeywordFieldName,
+        source: rootKeywordSource,
+      } = createFieldMetadata('keyword');
+
+      const fieldsState = {
+        rootLevelFields: [rootAliasFieldId, rootKeywordFieldId],
+        byId: {
+          [rootAliasFieldId]: createFieldById({
+            id: rootAliasFieldId,
+            path: rootAliasFieldName,
+            source: rootAliasSource,
+          }),
+          [rootKeywordFieldId]: createFieldById({
+            id: rootKeywordFieldId,
+            path: rootKeywordFieldName,
+            source: rootKeywordSource,
+          }),
+        },
+        aliases: {
+          [rootKeywordFieldId]: [rootAliasFieldId],
+        },
+      } as NormalizedFields;
+
+      const { name: keywordName, ...normalizedKeywordField } = rootKeywordSource;
+
+      expect(deNormalize(fieldsState)).toEqual({
+        [rootAliasFieldName]: {
+          path: keywordName,
+          type: 'alias',
+        },
+        [rootKeywordFieldName]: normalizedKeywordField,
+      });
+    });
+
+    it('handles child fields', () => {
+      const {
+        id: rootObjectFieldId,
+        name: rootObjectFieldName,
+        source: rootObjectSource,
+      } = createFieldMetadata('object');
+
+      const {
+        id: childTextFieldId,
+        name: childTextFieldName,
+        source: childTextFieldSource,
+      } = createFieldMetadata('text');
+
+      const fieldsState = {
+        rootLevelFields: [rootObjectFieldId],
+        byId: {
+          [rootObjectFieldId]: createFieldById({
+            id: rootObjectFieldId,
+            path: rootObjectFieldName,
+            source: rootObjectSource,
+            canHaveChildFields: true,
+            childFieldsName: 'properties',
+            childFields: [childTextFieldId],
+          }),
+          [childTextFieldId]: createFieldById({
+            id: childTextFieldId,
+            path: childTextFieldName,
+            source: childTextFieldSource,
+          }),
+        },
+        aliases: {},
+      } as NormalizedFields;
+
+      const { name: textName, ...normalizedTextField } = childTextFieldSource;
+
+      expect(deNormalize(fieldsState)).toEqual({
+        [rootObjectFieldName]: {
+          type: 'object',
+          properties: {
+            [textName]: normalizedTextField,
+          },
+        },
+      });
+    });
   });
+
   describe('isStateValid()', () => {
     let components: any;
     it('handles base case', () => {
