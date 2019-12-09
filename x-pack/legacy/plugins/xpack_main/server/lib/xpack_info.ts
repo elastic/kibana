@@ -7,8 +7,36 @@
 import { createHash } from 'crypto';
 import moment from 'moment';
 import { get, has } from 'lodash';
+import { APICaller } from 'src/core/server';
+import { Legacy } from 'kibana';
+
 import { Poller } from '../../../../common/poller';
 import { XPackInfoLicense } from './xpack_info_license';
+
+import {
+  ElasticsearchError,
+  RawLicense,
+  RawFeatures,
+} from '../../../../../plugins/licensing/server';
+
+export interface XPackInfoOptions {
+  clusterSource?: string;
+  pollFrequencyInMillis: number;
+}
+
+type LicenseGeneratorCheck = (xpackInfo: XPackInfo) => any;
+
+export interface XPackFeature {
+  isAvailable(): boolean;
+  isEnabled(): boolean;
+  registerLicenseCheckResultsGenerator(generator: LicenseGeneratorCheck): void;
+  getLicenseCheckResults(): any;
+}
+
+interface LicenseResponse {
+  license?: RawLicense;
+  features?: RawFeatures;
+}
 
 /**
  * A helper that provides a convenient way to access XPack Info returned by Elasticsearch.
@@ -19,23 +47,21 @@ export class XPackInfo {
    * @type {XPackInfoLicense}
    * @private
    */
-  _license;
+  _license: XPackInfoLicense;
 
   /**
    * Feature name <-> feature license check generator function mapping.
    * @type {Map<string, Function>}
    * @private
    */
-  _featureLicenseCheckResultsGenerators = new Map();
-
+  _featureLicenseCheckResultsGenerators = new Map<string, LicenseGeneratorCheck>();
 
   /**
    * Set of listener functions that will be called whenever the license
    * info changes
    * @type {Set<Function>}
    */
-  _licenseInfoChangedListeners = new Set();
-
+  _licenseInfoChangedListeners = new Set<() => void>();
 
   /**
    * Cache that may contain last xpack info API response or error, json representation
@@ -43,22 +69,33 @@ export class XPackInfo {
    * @type {{response: Object|undefined, error: Object|undefined, json: Object|undefined, signature: string|undefined}}
    * @private
    */
-  _cache = {};
+  private _cache: {
+    response?: LicenseResponse;
+    error?: ElasticsearchError;
+    json?: Record<string, any>;
+    signature?: string;
+  };
 
   /**
    * XPack info poller.
    * @type {Poller}
    * @private
    */
-  _poller;
+  _poller: Poller;
 
   /**
    * XPack License instance.
    * @returns {XPackInfoLicense}
    */
-  get license() {
+  public get license() {
     return this._license;
   }
+
+  private readonly _log: any;
+  private readonly _cluster: {
+    callWithInternalUser: APICaller;
+  };
+  private readonly _clusterSource: string;
 
   /**
    * Constructs XPack info object.
@@ -69,7 +106,10 @@ export class XPackInfo {
    * @property {number} options.pollFrequencyInMillis Polling interval used to automatically
    * refresh XPack Info by the internal poller.
    */
-  constructor(server, { clusterSource = 'data', pollFrequencyInMillis }) {
+  constructor(
+    server: Legacy.Server,
+    { clusterSource = 'data', pollFrequencyInMillis }: XPackInfoOptions
+  ) {
     this._log = server.log.bind(server);
     this._cluster = server.plugins.elasticsearch.getCluster(clusterSource);
     this._clusterSource = clusterSource;
@@ -79,12 +119,14 @@ export class XPackInfo {
       functionToPoll: () => this.refreshNow(),
       trailing: true,
       pollFrequencyInMillis,
-      continuePollingOnError: true
+      continuePollingOnError: true,
     });
 
     server.events.on('stop', () => {
       this._poller.stop();
     });
+
+    this._cache = {};
 
     this._license = new XPackInfoLicense(
       () => this._cache.response && this._cache.response.license
@@ -123,7 +165,7 @@ export class XPackInfo {
     return this._cache.error;
   }
 
-  onLicenseInfoChange(handler) {
+  onLicenseInfoChange(handler: () => void) {
     this._licenseInfoChangedListeners.add(handler);
   }
 
@@ -132,9 +174,12 @@ export class XPackInfo {
    * @returns {Promise.<XPackInfo>}
    */
   async refreshNow() {
-    this._log(['license', 'debug', 'xpack'], (
-      `Calling [${this._clusterSource}] Elasticsearch _xpack API. Polling frequency: ${this._poller.getPollFrequency()}`
-    ));
+    this._log(
+      ['license', 'debug', 'xpack'],
+      `Calling [${
+        this._clusterSource
+      }] Elasticsearch _xpack API. Polling frequency: ${this._poller.getPollFrequency()}`
+    );
 
     // We can reset polling timer since we force refresh here.
     this._poller.stop();
@@ -142,7 +187,7 @@ export class XPackInfo {
     try {
       const response = await this._cluster.callWithInternalUser('transport.request', {
         method: 'GET',
-        path: '/_xpack'
+        path: '/_xpack',
       });
 
       const licenseInfoChanged = this._hasLicenseInfoChanged(response);
@@ -163,7 +208,7 @@ export class XPackInfo {
         this._log(
           ['license', 'info', 'xpack'],
           `Imported ${this._cache.response ? 'changed ' : ''}license information` +
-          ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
+            ` from Elasticsearch for the [${this._clusterSource}] cluster: ${licenseInfo}`
         );
       }
 
@@ -175,12 +220,11 @@ export class XPackInfo {
           listener();
         }
       }
-
-    } catch(error) {
+    } catch (error) {
       this._log(
         ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-        ` for the [${this._clusterSource}] cluster. ${error}`
+          ` for the [${this._clusterSource}] cluster. ${error}`
       );
 
       this._cache = { error };
@@ -197,7 +241,7 @@ export class XPackInfo {
    * @param {string} name Name of the feature to get a wrapper for.
    * @returns {Object}
    */
-  feature(name) {
+  feature(name: string): XPackFeature {
     return {
       /**
        * Checks whether feature is available (permitted by the current license).
@@ -221,7 +265,7 @@ export class XPackInfo {
        * in XPackInfo JSON representation and can be accessed with `getLicenseCheckResults`.
        * @param {Function} generator Function to call whenever XPackInfo changes.
        */
-      registerLicenseCheckResultsGenerator: (generator) => {
+      registerLicenseCheckResultsGenerator: (generator: LicenseGeneratorCheck) => {
         this._featureLicenseCheckResultsGenerators.set(name, generator);
 
         // Since JSON representation and signature are cached we should invalidate them to
@@ -234,7 +278,7 @@ export class XPackInfo {
        * Returns license check results that were previously produced by the `generator` function.
        * @returns {Object}
        */
-      getLicenseCheckResults: () => this.toJSON().features[name]
+      getLicenseCheckResults: () => this.toJSON().features[name],
     };
   }
 
@@ -267,9 +311,9 @@ export class XPackInfo {
       license: {
         type: this.license.getType(),
         isActive: this.license.isActive(),
-        expiryDateInMillis: this.license.getExpiryDateInMillis()
+        expiryDateInMillis: this.license.getExpiryDateInMillis(),
       },
-      features: {}
+      features: {},
     };
 
     // Set response elements specific to each feature. To do this,
@@ -291,11 +335,11 @@ export class XPackInfo {
    * the one we already have.
    * @private
    */
-  _hasLicenseInfoChanged(response) {
-    const newLicense = get(response, 'license') || {};
-    const cachedLicense = get(this._cache.response, 'license') || {};
+  _hasLicenseInfoChanged(response: LicenseResponse) {
+    const newLicense: RawLicense = response?.license || (({} as unknown) as RawLicense);
+    const cachedLicense: RawLicense = this._cache.response?.license || ({} as RawLicense);
 
-    if (newLicense.mode !== cachedLicense.mode) {
+    if (newLicense.type !== cachedLicense.type) {
       return true;
     }
 

@@ -21,6 +21,7 @@ function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
     uid: 'uid-000000001234',
     status: 'active',
     type: 'basic',
+    mode: 'basic',
     expiry_date_in_millis: 1000,
   };
   return Object.assign(defaultRawLicense, options);

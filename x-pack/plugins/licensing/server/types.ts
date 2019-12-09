@@ -34,6 +34,7 @@ export interface RawLicense {
   status: LicenseStatus;
   expiry_date_in_millis: number;
   type: LicenseType;
+  mode: LicenseType;
 }
 
 declare module 'src/core/server' {
