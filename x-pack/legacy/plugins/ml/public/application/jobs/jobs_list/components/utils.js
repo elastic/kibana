@@ -8,6 +8,7 @@ import { each } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { mlMessageBarService } from '../../../components/messagebar';
 import rison from 'rison-node';
+import chrome from 'ui/chrome';
 
 import { mlJobService } from '../../../services/job_service';
 import { ml } from '../../../services/ml_api_service';
@@ -330,7 +331,7 @@ export function getJobIdUrl(jobId) {
   const encoded = rison.encode(settings);
   const url = `?mlManagement=${encoded}`;
 
-  return `#/jobs${url}`;
+  return `${chrome.getBasePath()}/app/ml#/jobs${url}`;
 }
 
 function getUrlVars(url) {
