@@ -29,7 +29,6 @@ import {
   VisEditorTypesRegistryProvider,
 } from './legacy_imports';
 import { VisualizePlugin, LegacyAngularInjectedDependencies } from './plugin';
-import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as navigation } from '../../../navigation/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
@@ -64,8 +63,7 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   });
   instance.start(npStart.core, {
     ...npStart.plugins,
-    data,
-    npData: npStart.plugins.data,
+    data: npStart.plugins.data,
     embeddables,
     navigation,
     visualizations,

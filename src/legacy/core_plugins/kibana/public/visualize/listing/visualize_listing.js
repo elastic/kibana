@@ -46,7 +46,7 @@ export function VisualizeListingController($injector, createNewVis) {
     legacyChrome,
     savedObjectRegistry,
     savedObjectsClient,
-    npDataStart: {
+    data: {
       query: {
         timefilter: { timefilter },
       },

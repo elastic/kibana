@@ -34,9 +34,8 @@ import 'uiExports/visualize';
 
 import { i18n } from '@kbn/i18n';
 
-import { capabilities } from 'ui/capabilities';
-
 import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 
 import { Legacy } from 'kibana';
 
@@ -109,7 +108,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           if (!visType) {
             return false;
           }
-          if (chrome.getUiSettingsClient().get('visualize:enableLabs')) {
+          if (npStart.core.uiSettings.get('visualize:enableLabs')) {
             return true;
           }
           return visType.stage !== 'experimental';
@@ -121,7 +120,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
   }
 
   public isEditable() {
-    return capabilities.get().visualize.save as boolean;
+    return npStart.core.application.capabilities.visualize.save as boolean;
   }
 
   public getDisplayName() {
@@ -143,7 +142,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
       const visId = savedObject.id as string;
 
       const editUrl = visId
-        ? chrome.addBasePath(`/app/kibana${savedVisualizations.urlFor(visId)}`)
+        ? npStart.core.http.basePath.prepend(`/app/kibana${savedVisualizations.urlFor(visId)}`)
         : '';
       const isLabsEnabled = config.get<boolean>('visualize:enableLabs');
 
@@ -199,8 +198,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
         {
           editorParams: ['addToDashboard'],
         },
-        chrome.addBasePath,
-        chrome.getUiSettingsClient()
+        npStart.core.http.basePath.prepend,
+        npStart.core.uiSettings
       );
     }
     return undefined;

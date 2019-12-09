@@ -25,21 +25,19 @@ import {
   IUiSettingsClient,
 } from 'kibana/public';
 
-import { DataStart, IndexPatterns } from '../../../data/public';
-
 import { NavigationStart } from '../../../navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
+import { DataPublicPluginStart, IndexPatterns } from '../../../../../plugins/data/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
 import { SavedVisualizations } from './types';
 
 export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;
   chrome: ChromeStart;
   core: LegacyCoreStart;
-  dataStart: DataStart;
+  data: DataPublicPluginStart;
   editorTypes: any;
   embeddables: IEmbeddableStart;
   getBasePath: () => string;
@@ -47,11 +45,10 @@ export interface VisualizeKibanaServices {
   legacyChrome: any;
   localStorage: Storage;
   navigation: NavigationStart;
-  npDataStart: NpDataStart;
   toastNotifications: ToastsStart;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectRegistry: any;
-  savedQueryService: NpDataStart['query']['savedQueries'];
+  savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   savedVisualizations: SavedVisualizations;
   share: SharePluginStart;
   uiSettings: IUiSettingsClient;

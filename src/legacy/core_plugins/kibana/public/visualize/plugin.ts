@@ -28,8 +28,7 @@ import {
 } from 'kibana/public';
 
 import { Storage } from '../../../../../plugins/kibana_utils/public';
-import { DataStart } from '../../../data/public';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { NavigationStart } from '../../../navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
@@ -54,8 +53,7 @@ export interface LegacyAngularInjectedDependencies {
 }
 
 export interface VisualizePluginStartDependencies {
-  data: DataStart;
-  npData: NpDataStart;
+  data: DataPublicPluginStart;
   embeddables: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
@@ -72,8 +70,7 @@ export interface VisualizePluginSetupDependencies {
 
 export class VisualizePlugin implements Plugin {
   private startDependencies: {
-    dataStart: DataStart;
-    npDataStart: NpDataStart;
+    data: DataPublicPluginStart;
     embeddables: IEmbeddableStart;
     navigation: NavigationStart;
     savedObjectsClient: SavedObjectsClientContract;
@@ -94,12 +91,11 @@ export class VisualizePlugin implements Plugin {
         }
 
         const {
-          dataStart,
           savedObjectsClient,
           embeddables,
           navigation,
           visualizations,
-          npDataStart,
+          data,
           share,
         } = this.startDependencies;
 
@@ -109,15 +105,14 @@ export class VisualizePlugin implements Plugin {
           addBasePath: contextCore.http.basePath.prepend,
           core: contextCore as LegacyCoreStart,
           chrome: contextCore.chrome,
-          dataStart,
+          data,
           embeddables,
           getBasePath: core.http.basePath.get,
-          indexPatterns: dataStart.indexPatterns.indexPatterns,
+          indexPatterns: data.indexPatterns.indexPatterns,
           localStorage: new Storage(localStorage),
           navigation,
-          npDataStart,
           savedObjectsClient,
-          savedQueryService: npDataStart.query.savedQueries,
+          savedQueryService: data.query.savedQueries,
           share,
           toastNotifications: contextCore.notifications.toasts,
           uiSettings: contextCore.uiSettings,
@@ -149,18 +144,10 @@ export class VisualizePlugin implements Plugin {
 
   public start(
     { savedObjects: { client: savedObjectsClient } }: CoreStart,
-    {
-      data: dataStart,
-      embeddables,
-      navigation,
-      npData,
-      share,
-      visualizations,
-    }: VisualizePluginStartDependencies
+    { embeddables, navigation, data, share, visualizations }: VisualizePluginStartDependencies
   ) {
     this.startDependencies = {
-      dataStart,
-      npDataStart: npData,
+      data,
       embeddables,
       navigation,
       savedObjectsClient,

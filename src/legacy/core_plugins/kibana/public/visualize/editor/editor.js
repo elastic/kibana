@@ -82,7 +82,7 @@ function VisualizeAppController(
     localStorage,
     visualizeCapabilities,
     share,
-    npDataStart: {
+    data: {
       query: {
         filterManager,
         timefilter: { timefilter },

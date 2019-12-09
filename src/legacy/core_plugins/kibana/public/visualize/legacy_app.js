@@ -40,12 +40,12 @@ export function initVisualizeApp(app, deps) {
   initVisualizeAppDirective(app, deps);
 
   app.run(globalState => {
-    syncOnMount(globalState, deps.npDataStart);
+    syncOnMount(globalState, deps.data);
   });
 
   app.run((globalState, $rootScope) => {
     registerTimefilterWithGlobalStateFactory(
-      deps.npDataStart.query.timefilter.timefilter,
+      deps.data.query.timefilter.timefilter,
       globalState,
       $rootScope
     );
@@ -81,7 +81,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => false,
-          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.dataStart, $rootScope, kbnUrl),
+          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
         },
       })
       .when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
@@ -92,7 +92,7 @@ export function initVisualizeApp(app, deps) {
         controllerAs: 'listingController',
         resolve: {
           createNewVis: () => true,
-          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.dataStart, $rootScope, kbnUrl),
+          hasDefaultIndex: ($rootScope, kbnUrl) => ensureDefaultIndexPattern(deps.core, deps.data, $rootScope, kbnUrl),
         },
       })
       .when(VisualizeConstants.CREATE_PATH, {
@@ -101,7 +101,7 @@ export function initVisualizeApp(app, deps) {
         k7Breadcrumbs: getCreateBreadcrumbs,
         resolve: {
           savedVis: function (redirectWhenMissing, $route, $rootScope, kbnUrl) {
-            const { core, dataStart, savedVisualizations, visualizations } = deps;
+            const { core, data, savedVisualizations, visualizations } = deps;
             const visTypes = visualizations.types.all();
             const visType = find(visTypes, { name: $route.current.params.type });
             const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
@@ -114,7 +114,7 @@ export function initVisualizeApp(app, deps) {
               );
             }
 
-            return ensureDefaultIndexPattern(core, dataStart, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
+            return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
               .then(savedVis => {
                 if (savedVis.vis.type.setup) {
                   return savedVis.vis.type.setup(savedVis)
@@ -134,8 +134,8 @@ export function initVisualizeApp(app, deps) {
         k7Breadcrumbs: getEditBreadcrumbs,
         resolve: {
           savedVis: function (redirectWhenMissing, $route, $rootScope, kbnUrl) {
-            const { chrome, core, dataStart, savedVisualizations } = deps;
-            return ensureDefaultIndexPattern(core, dataStart, $rootScope, kbnUrl)
+            const { chrome, core, data, savedVisualizations } = deps;
+            return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
               .then(() => savedVisualizations.get($route.current.params.id))
               .then(savedVis => {
                 chrome.recentlyAccessed.add(
