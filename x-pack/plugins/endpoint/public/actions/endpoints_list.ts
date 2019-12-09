@@ -37,7 +37,13 @@ export const actions = {
   >('userPaginatedOrSortedEndpointListTable'),
 };
 
+export type EndpointListServerData = ReturnType<typeof actions.serverReturnedEndpointListData>;
+export type EndpointListFilteredData = ReturnType<typeof actions.userFilteredEndpointListData>;
+export type EndpointListPageAndSortedData = ReturnType<
+  typeof actions.userPaginatedOrSortedEndpointListTable
+>;
+
 export type EndpointListActions =
-  | ReturnType<typeof actions.serverReturnedEndpointListData>
-  | ReturnType<typeof actions.userFilteredEndpointListData>
-  | ReturnType<typeof actions.userPaginatedOrSortedEndpointListTable>;
+  | EndpointListServerData
+  | EndpointListFilteredData
+  | EndpointListPageAndSortedData;
