@@ -54,7 +54,9 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
     // eslint-disable-next-line no-console
     console.error('Could not parse global or app state');
   }
-  appState.mlTimeSeriesExplorer = {};
+  if (appState.mlTimeSeriesExplorer === undefined) {
+    appState.mlTimeSeriesExplorer = {};
+  }
   globalState.fetch = () => {};
   globalState.on = () => {};
   globalState.off = () => {};
