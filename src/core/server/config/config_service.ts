@@ -40,6 +40,7 @@ export type IConfigService = PublicMethodsOf<ConfigService>;
 /** @internal */
 export class ConfigService {
   private readonly log: Logger;
+  private readonly deprecationLog: Logger;
 
   private readonly config$: Observable<Config>;
 
@@ -57,6 +58,7 @@ export class ConfigService {
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
+    this.deprecationLog = logger.get('config', 'deprecations');
 
     this.config$ = combineLatest([this.rawConfigProvider.getConfig$(), this.deprecations]).pipe(
       map(([rawConfig, deprecations]) => {
@@ -204,7 +206,7 @@ export class ConfigService {
     const logger = (msg: string) => deprecationMessages.push(msg);
     applyDeprecations(rawConfig, deprecations, logger);
     deprecationMessages.forEach(msg => {
-      this.log.warn(msg);
+      this.deprecationLog.warn(msg);
     });
   }
 
