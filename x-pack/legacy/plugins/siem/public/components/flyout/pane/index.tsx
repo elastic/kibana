@@ -5,11 +5,12 @@
  */
 
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiToolTip } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 import { Resizable, ResizeCallback } from 're-resizable';
+import { throttle } from 'lodash/fp';
 
 import { TimelineResizeHandle } from './timeline_resize_handle';
 import { FlyoutHeader } from '../header';
@@ -122,20 +123,26 @@ const FlyoutPaneComponent = React.memo<Props>(
     usersViewing,
     width,
   }) => {
+    const [lastDelta, setLastDelta] = useState(0);
     const onResizeStop: ResizeCallback = useCallback(
       (e, direction, ref, delta) => {
         const bodyClientWidthPixels = document.body.clientWidth;
 
-        applyDeltaToWidth({
-          bodyClientWidthPixels,
-          delta: -delta.width,
-          id: timelineId,
-          maxWidthPercent,
-          minWidthPixels,
-        });
+        if (delta.width) {
+          applyDeltaToWidth({
+            bodyClientWidthPixels,
+            delta: -(delta.width - lastDelta),
+            id: timelineId,
+            maxWidthPercent,
+            minWidthPixels,
+          });
+          setLastDelta(delta.width);
+        }
       },
-      [applyDeltaToWidth, maxWidthPercent, minWidthPixels]
+      [applyDeltaToWidth, maxWidthPercent, minWidthPixels, lastDelta]
     );
+    const resetLastDelta = useCallback(() => setLastDelta(0), [setLastDelta]);
+    const throttledResize = throttle(100, onResizeStop);
 
     return (
       <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane">
@@ -160,7 +167,8 @@ const FlyoutPaneComponent = React.memo<Props>(
                 <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
               ),
             }}
-            onResizeStop={onResizeStop}
+            onResizeStart={resetLastDelta}
+            onResize={throttledResize}
           >
             <EuiFlyoutHeader
               className="timeline-flyout-header"
