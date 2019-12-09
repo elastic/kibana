@@ -9,24 +9,25 @@ import {
   createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
-} from './__mocks__/_mock_server';
+} from '../__mocks__/_mock_server';
 
-import { readRulesRoute } from './read_rules_route';
+import { deleteRulesRoute } from './delete_rules_route';
 import { ServerInjectOptions } from 'hapi';
 import {
   getFindResult,
   getResult,
-  getReadRequest,
+  getDeleteRequest,
   getFindResultWithSingleHit,
-} from './__mocks__/request_responses';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+  getDeleteRequestById,
+} from '../__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
-describe('read_signals', () => {
+describe('delete_rules', () => {
   let { server, alertsClient } = createMockServer();
 
   beforeEach(() => {
     ({ server, alertsClient } = createMockServer());
-    readRulesRoute(server);
+    deleteRulesRoute(server);
   });
 
   afterEach(() => {
@@ -34,24 +35,41 @@ describe('read_signals', () => {
   });
 
   describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when reading a single rule with a valid actionClient and alertClient', async () => {
+    test('returns 200 when deleting a single rule with a valid actionClient and alertClient by alertId', async () => {
       alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
       alertsClient.get.mockResolvedValue(getResult());
-      const { statusCode } = await server.inject(getReadRequest());
+      alertsClient.delete.mockResolvedValue({});
+      const { statusCode } = await server.inject(getDeleteRequest());
       expect(statusCode).toBe(200);
+    });
+
+    test('returns 200 when deleting a single rule with a valid actionClient and alertClient by id', async () => {
+      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.delete.mockResolvedValue({});
+      const { statusCode } = await server.inject(getDeleteRequestById());
+      expect(statusCode).toBe(200);
+    });
+
+    test('returns 404 when deleting a single rule that does not exist with a valid actionClient and alertClient', async () => {
+      alertsClient.find.mockResolvedValue(getFindResult());
+      alertsClient.get.mockResolvedValue(getResult());
+      alertsClient.delete.mockResolvedValue({});
+      const { statusCode } = await server.inject(getDeleteRequest());
+      expect(statusCode).toBe(404);
     });
 
     test('returns 404 if actionClient is not available on the route', async () => {
       const { serverWithoutActionClient } = createMockServerWithoutActionClientDecoration();
-      readRulesRoute(serverWithoutActionClient);
-      const { statusCode } = await serverWithoutActionClient.inject(getReadRequest());
+      deleteRulesRoute(serverWithoutActionClient);
+      const { statusCode } = await serverWithoutActionClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
       const { serverWithoutAlertClient } = createMockServerWithoutAlertClientDecoration();
-      readRulesRoute(serverWithoutAlertClient);
-      const { statusCode } = await serverWithoutAlertClient.inject(getReadRequest());
+      deleteRulesRoute(serverWithoutAlertClient);
+      const { statusCode } = await serverWithoutAlertClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
 
@@ -59,8 +77,8 @@ describe('read_signals', () => {
       const {
         serverWithoutActionOrAlertClient,
       } = createMockServerWithoutActionOrAlertClientDecoration();
-      readRulesRoute(serverWithoutActionOrAlertClient);
-      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getReadRequest());
+      deleteRulesRoute(serverWithoutActionOrAlertClient);
+      const { statusCode } = await serverWithoutActionOrAlertClient.inject(getDeleteRequest());
       expect(statusCode).toBe(404);
     });
   });
@@ -71,7 +89,7 @@ describe('read_signals', () => {
       alertsClient.get.mockResolvedValue(getResult());
       alertsClient.delete.mockResolvedValue({});
       const request: ServerInjectOptions = {
-        method: 'GET',
+        method: 'DELETE',
         url: DETECTION_ENGINE_RULES_URL,
       };
       const { statusCode } = await server.inject(request);

@@ -6,16 +6,17 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { getIdError, transformOrError } from './utils';
+import { transformError } from '../utils';
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { deleteRules } from '../alerts/delete_rules';
-import { ServerFacade } from '../../../types';
-import { queryRulesSchema } from './schemas';
-import { QueryRequest } from '../alerts/types';
-import { getIdError, transformOrError, transformError } from './utils';
+import { readRules } from '../../alerts/read_rules';
+import { ServerFacade } from '../../../../types';
+import { queryRulesSchema } from '../schemas/query_rules_schema';
+import { QueryRequest } from '../../alerts/types';
 
-export const createDeleteRulesRoute: Hapi.ServerRoute = {
-  method: 'DELETE',
+export const createReadRulesRoute: Hapi.ServerRoute = {
+  method: 'GET',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:siem'],
@@ -31,18 +32,15 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
-    if (alertsClient == null || actionsClient == null) {
+    if (!alertsClient || !actionsClient) {
       return headers.response().code(404);
     }
-
     try {
-      const rule = await deleteRules({
-        actionsClient,
+      const rule = await readRules({
         alertsClient,
         id,
         ruleId,
       });
-
       if (rule != null) {
         return transformOrError(rule);
       } else {
@@ -54,6 +52,6 @@ export const createDeleteRulesRoute: Hapi.ServerRoute = {
   },
 };
 
-export const deleteRulesRoute = (server: ServerFacade): void => {
-  server.route(createDeleteRulesRoute);
+export const readRulesRoute = (server: ServerFacade) => {
+  server.route(createReadRulesRoute);
 };

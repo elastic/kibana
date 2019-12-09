@@ -8,14 +8,15 @@ import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import Boom from 'boom';
 import uuid from 'uuid';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { createRules } from '../alerts/create_rules';
-import { RulesRequest } from '../alerts/types';
-import { createRulesSchema } from './schemas';
-import { ServerFacade } from '../../../types';
-import { readRules } from '../alerts/read_rules';
-import { transformOrError, transformError, getIndex, callWithRequestFactory } from './utils';
-import { getIndexExists } from '../index/get_index_exists';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { createRules } from '../../alerts/create_rules';
+import { RulesRequest } from '../../alerts/types';
+import { createRulesSchema } from '../schemas/create_rules_schema';
+import { ServerFacade } from '../../../../types';
+import { readRules } from '../../alerts/read_rules';
+import { transformOrError } from './utils';
+import { getIndexExists } from '../../index/get_index_exists';
+import { callWithRequestFactory, getIndex, transformError } from '../utils';
 
 export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute => {
   return {

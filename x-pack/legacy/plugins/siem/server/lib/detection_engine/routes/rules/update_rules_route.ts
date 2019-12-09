@@ -6,12 +6,13 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { updateRules } from '../alerts/update_rules';
-import { UpdateRulesRequest } from '../alerts/types';
-import { updateRulesSchema } from './schemas';
-import { ServerFacade } from '../../../types';
-import { getIdError, transformOrError, transformError } from './utils';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { updateRules } from '../../alerts/update_rules';
+import { UpdateRulesRequest } from '../../alerts/types';
+import { updateRulesSchema } from '../schemas/update_rules_schema';
+import { ServerFacade } from '../../../../types';
+import { getIdError, transformOrError } from './utils';
+import { transformError } from '../utils';
 
 export const createUpdateRulesRoute: Hapi.ServerRoute = {
   method: 'PUT',

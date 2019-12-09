@@ -6,16 +6,17 @@
 
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { getIdError, transformOrError, transformError } from './utils';
 
-import { readRules } from '../alerts/read_rules';
-import { ServerFacade } from '../../../types';
-import { queryRulesSchema } from './schemas';
-import { QueryRequest } from '../alerts/types';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { deleteRules } from '../../alerts/delete_rules';
+import { ServerFacade } from '../../../../types';
+import { queryRulesSchema } from '../schemas/query_rules_schema';
+import { QueryRequest } from '../../alerts/types';
+import { getIdError, transformOrError } from './utils';
+import { transformError } from '../utils';
 
-export const createReadRulesRoute: Hapi.ServerRoute = {
-  method: 'GET',
+export const createDeleteRulesRoute: Hapi.ServerRoute = {
+  method: 'DELETE',
   path: DETECTION_ENGINE_RULES_URL,
   options: {
     tags: ['access:siem'],
@@ -31,15 +32,18 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
     const alertsClient = isFunction(request.getAlertsClient) ? request.getAlertsClient() : null;
     const actionsClient = isFunction(request.getActionsClient) ? request.getActionsClient() : null;
 
-    if (!alertsClient || !actionsClient) {
+    if (alertsClient == null || actionsClient == null) {
       return headers.response().code(404);
     }
+
     try {
-      const rule = await readRules({
+      const rule = await deleteRules({
+        actionsClient,
         alertsClient,
         id,
         ruleId,
       });
+
       if (rule != null) {
         return transformOrError(rule);
       } else {
@@ -51,6 +55,6 @@ export const createReadRulesRoute: Hapi.ServerRoute = {
   },
 };
 
-export const readRulesRoute = (server: ServerFacade) => {
-  server.route(createReadRulesRoute);
+export const deleteRulesRoute = (server: ServerFacade): void => {
+  server.route(createDeleteRulesRoute);
 };

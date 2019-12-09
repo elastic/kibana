@@ -9,12 +9,12 @@ import {
   createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
-} from './__mocks__/_mock_server';
+} from '../__mocks__/_mock_server';
 
 import { findRulesRoute } from './find_rules_route';
 import { ServerInjectOptions } from 'hapi';
-import { getFindResult, getResult, getFindRequest } from './__mocks__/request_responses';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+import { getFindResult, getResult, getFindRequest } from '../__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('find_rules', () => {
   let { server, alertsClient, actionsClient } = createMockServer();

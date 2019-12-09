@@ -9,7 +9,7 @@ import {
   createMockServerWithoutActionClientDecoration,
   createMockServerWithoutAlertClientDecoration,
   createMockServerWithoutActionOrAlertClientDecoration,
-} from './__mocks__/_mock_server';
+} from '../__mocks__/_mock_server';
 import { createRulesRoute } from './create_rules_route';
 import { ServerInjectOptions } from 'hapi';
 import {
@@ -18,8 +18,8 @@ import {
   createActionResult,
   getCreateRequest,
   typicalPayload,
-} from './__mocks__/request_responses';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+} from '../__mocks__/request_responses';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 
 describe('create_rules', () => {
   let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
