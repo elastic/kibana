@@ -24,6 +24,7 @@ import { readRulesRoute } from './lib/detection_engine/routes/read_rules_route';
 import { findRulesRoute } from './lib/detection_engine/routes/find_rules_route';
 import { deleteRulesRoute } from './lib/detection_engine/routes/delete_rules_route';
 import { updateRulesRoute } from './lib/detection_engine/routes/update_rules_route';
+import { setSignalsStatusRoute } from './lib/detection_engine/routes/signals/open_close_signals_route';
 import { ServerFacade } from './types';
 import { deleteIndexRoute } from './lib/detection_engine/routes/index/delete_index_route';
 
@@ -53,6 +54,11 @@ export const initServerWithKibana = (
   updateRulesRoute(kbnServer);
   deleteRulesRoute(kbnServer);
   findRulesRoute(kbnServer);
+
+  // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
+  // POST /api/detection_engine/signals/status
+  // Example usage can be found in siem/server/lib/detection_engine/scripts/signals
+  setSignalsStatusRoute(kbnServer);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
