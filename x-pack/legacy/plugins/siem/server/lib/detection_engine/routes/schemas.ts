@@ -11,7 +11,6 @@ import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 const description = Joi.string();
 const enabled = Joi.boolean();
 const false_positives = Joi.array().items(Joi.string());
-const filter = Joi.object();
 const filters = Joi.array();
 const from = Joi.string();
 const immutable = Joi.boolean();
@@ -34,7 +33,7 @@ const risk_score = Joi.number()
 const severity = Joi.string();
 const status = Joi.string().valid('open', 'closed');
 const to = Joi.string();
-const type = Joi.string().valid('filter', 'query', 'saved_query');
+const type = Joi.string().valid('query', 'saved_query');
 const queryFilter = Joi.string();
 const references = Joi.array()
   .items(Joi.string())
@@ -85,46 +84,14 @@ export const createRulesSchema = Joi.object({
   description: description.required(),
   enabled: enabled.default(true),
   false_positives: false_positives.default([]),
-  filter: filter.when('type', { is: 'filter', then: Joi.required(), otherwise: Joi.forbidden() }),
-  filters: Joi.when('type', {
-    is: 'query',
-    then: filters.optional(),
-    otherwise: Joi.when('type', {
-      is: 'saved_query',
-      then: filters.optional(),
-      otherwise: Joi.forbidden(),
-    }),
-  }),
+  filters,
   from: from.required(),
   rule_id,
   immutable: immutable.default(false),
   index,
   interval: interval.default('5m'),
-  query: Joi.when('type', {
-    is: 'query',
-    then: Joi.when('filters', {
-      is: Joi.exist(),
-      then: query
-        .optional()
-        .allow('')
-        .default(''),
-      otherwise: Joi.required(),
-    }),
-    otherwise: Joi.when('type', {
-      is: 'saved_query',
-      then: query.optional(),
-      otherwise: Joi.forbidden(),
-    }),
-  }),
-  language: Joi.when('type', {
-    is: 'query',
-    then: language.required(),
-    otherwise: Joi.when('type', {
-      is: 'saved_query',
-      then: language.optional(),
-      otherwise: Joi.forbidden(),
-    }),
-  }),
+  query: query.allow('').default(''),
+  language: language.default('kuery'),
   output_index,
   saved_id: saved_id.when('type', {
     is: 'saved_query',
@@ -147,46 +114,17 @@ export const updateRulesSchema = Joi.object({
   description,
   enabled,
   false_positives,
-  filter: filter.when('type', { is: 'filter', then: Joi.optional(), otherwise: Joi.forbidden() }),
-  filters: Joi.when('type', {
-    is: 'query',
-    then: filters.optional(),
-    otherwise: Joi.when('type', {
-      is: 'saved_query',
-      then: filters.optional(),
-      otherwise: Joi.forbidden(),
-    }),
-  }),
+  filters,
   from,
   rule_id,
   id,
   immutable,
   index,
   interval,
-  query: Joi.when('type', {
-    is: 'query',
-    then: query.optional(),
-    otherwise: Joi.when('type', {
-      is: 'saved_query',
-      then: query.optional(),
-      otherwise: Joi.forbidden(),
-    }),
-  }),
-  language: Joi.when('type', {
-    is: 'query',
-    then: language.optional(),
-    otherwise: Joi.when('type', {
-      is: 'saved_query',
-      then: language.optional(),
-      otherwise: Joi.forbidden(),
-    }),
-  }),
+  query: query.allow(''),
+  language,
   output_index,
-  saved_id: saved_id.when('type', {
-    is: 'saved_query',
-    then: Joi.optional(),
-    otherwise: Joi.forbidden(),
-  }),
+  saved_id,
   meta,
   risk_score,
   max_signals,
