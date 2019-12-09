@@ -12,7 +12,7 @@ import {
   EuiLoadingContent,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { Component } from 'react';
+import React, { Component, ReactElement } from 'react';
 import { Capabilities } from 'src/core/public';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
@@ -87,7 +87,7 @@ class SpacesMenuUI extends Component<Props, State> {
     return filteredSpaces;
   };
 
-  private renderSpacesListPanel = (items: JSX.Element[], searchTerm: string) => {
+  private renderSpacesListPanel = (items: ReactElement[], searchTerm: string) => {
     if (items.length === 0) {
       return (
         <EuiText color="subdued" className="eui-textCenter">

@@ -5,7 +5,7 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { plugin } from './index';
+import { plugin } from '.';
 import { SpacesPlugin, PluginsSetup } from './plugin';
 
 const spacesPlugin: SpacesPlugin = plugin();
