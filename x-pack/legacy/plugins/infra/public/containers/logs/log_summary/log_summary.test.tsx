@@ -13,7 +13,7 @@ import { fetchLogSummary } from './api/log_summary';
 // Typescript doesn't know that `fetchLogSummary` is a jest mock.
 // We use a second variable with a type cast to help the compiler further down the line.
 jest.mock('./api/log_summary', () => ({ fetchLogSummary: jest.fn() }));
-const fetchLogSummaryMock = fetchLogSummary as jest.Mock;
+const fetchLogSummaryMock = fetchLogSummary as jest.MockedFunction<typeof fetchLogSummary>;
 
 describe('useLogSummary hook', () => {
   beforeEach(() => {
@@ -176,4 +176,4 @@ describe('useLogSummary hook', () => {
 
 const createMockResponse = (
   buckets: Array<{ start: number; end: number; entriesCount: number }>
-) => ({ data: { buckets } });
+) => ({ data: { buckets, start: Number.NEGATIVE_INFINITY, end: Number.POSITIVE_INFINITY } });
