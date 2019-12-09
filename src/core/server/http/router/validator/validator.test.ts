@@ -35,8 +35,9 @@ describe('Router validator', () => {
     expect(() => validator.getParams({ foo: 1 })).toThrowError('[foo]: Not a string');
     expect(() => validator.getParams({})).toThrowError('[foo]: Not a string');
 
-    // Despite the undefined, the pre-validation enforces an empty object
-    expect(() => validator.getParams(undefined)).toThrowError('[foo]: Not a string');
+    expect(() => validator.getParams(undefined)).toThrowError(
+      `Cannot read property 'foo' of undefined`
+    );
     expect(() => validator.getParams({}, 'myField')).toThrowError('[myField.foo]: Not a string');
 
     expect(validator.getBody(undefined)).toStrictEqual({});
@@ -79,7 +80,7 @@ describe('Router validator', () => {
       'expected value of type [Buffer] but got [Object]'
     );
     expect(() => schemaValidation.getParams(undefined)).toThrowError(
-      `expected value of type [Buffer] but got [Object]` // Because of the initial "safe-ish" validation it cannot be undefined
+      `expected value of type [Buffer] but got [undefined]`
     );
     expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(
       '[myField]: expected value of type [Buffer] but got [Object]'
