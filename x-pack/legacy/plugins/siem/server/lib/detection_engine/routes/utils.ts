@@ -28,8 +28,8 @@ export const getIndex = (request: RequestFacade, server: ServerFacade): string =
   return `${signalsIndex}-${spaceId}`;
 };
 
-export const callWithRequestFactory = (request: RequestFacade) => {
-  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+export const callWithRequestFactory = (request: RequestFacade, server: ServerFacade) => {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   return <T, U>(endpoint: string, params: T, options?: U) => {
     return callWithRequest(request, endpoint, params, options);
   };
