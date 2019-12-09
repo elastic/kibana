@@ -43,6 +43,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthResultParams](./kibana-plugin-server.authresultparams.md) | Result of an incoming request authentication. |
 |  [AuthToolkit](./kibana-plugin-server.authtoolkit.md) | A tool set defining an outcome of Auth interceptor for incoming request. |
 |  [CallAPIOptions](./kibana-plugin-server.callapioptions.md) | The set of options that defines how API call should be made and result be processed. |
+|  [Capabilities](./kibana-plugin-server.capabilities.md) | The read-only set of capabilities available for the current UI session. Capabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID, and the boolean is a flag indicating if the capability is enabled or disabled. |
+|  [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) | APIs to manage the [Capabilities](./kibana-plugin-server.capabilities.md) that will be used by the application.<!-- -->Plugins relying on capabilities to toggle some of their features should register them during the setup phase using the <code>registerProvider</code> method.<!-- -->Plugins having the responsibility to restrict capabilities depending on a given context should register their capabilities switcher using the <code>registerSwitcher</code> method.<!-- -->Refers to the methods documentation for complete description and examples. |
+|  [CapabilitiesStart](./kibana-plugin-server.capabilitiesstart.md) | APIs to access the application [Capabilities](./kibana-plugin-server.capabilities.md)<!-- -->. |
 |  [ContextSetup](./kibana-plugin-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
@@ -74,6 +77,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [LogMeta](./kibana-plugin-server.logmeta.md) | Contextual metadata |
 |  [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md) | A tool set defining an outcome of OnPostAuth interceptor for incoming request. |
 |  [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
+|  [OnPreResponseExtensions](./kibana-plugin-server.onpreresponseextensions.md) | Additional data to extend a response. |
+|  [OnPreResponseInfo](./kibana-plugin-server.onpreresponseinfo.md) | Response status code. |
+|  [OnPreResponseToolkit](./kibana-plugin-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [PackageInfo](./kibana-plugin-server.packageinfo.md) |  |
 |  [Plugin](./kibana-plugin-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginConfigDescriptor](./kibana-plugin-server.pluginconfigdescriptor.md) | Describes a plugin configuration schema and capabilities. |
@@ -144,6 +150,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-server.authheaders.md) | Auth Headers map |
 |  [AuthResult](./kibana-plugin-server.authresult.md) |  |
+|  [CapabilitiesProvider](./kibana-plugin-server.capabilitiesprovider.md) | See [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
+|  [CapabilitiesSwitcher](./kibana-plugin-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-server.capabilitiessetup.md) |
 |  [ConfigPath](./kibana-plugin-server.configpath.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [GetAuthHeaders](./kibana-plugin-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
@@ -168,6 +176,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [MutatingOperationRefreshSetting](./kibana-plugin-server.mutatingoperationrefreshsetting.md) | Elasticsearch Refresh setting for mutating operation |
 |  [OnPostAuthHandler](./kibana-plugin-server.onpostauthhandler.md) | See [OnPostAuthToolkit](./kibana-plugin-server.onpostauthtoolkit.md)<!-- -->. |
 |  [OnPreAuthHandler](./kibana-plugin-server.onpreauthhandler.md) | See [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md)<!-- -->. |
+|  [OnPreResponseHandler](./kibana-plugin-server.onpreresponsehandler.md) | See [OnPreAuthToolkit](./kibana-plugin-server.onpreauthtoolkit.md)<!-- -->. |
 |  [PluginConfigSchema](./kibana-plugin-server.pluginconfigschema.md) | Dedicated type for plugin configuration schema. |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |

@@ -46,6 +46,7 @@ import { DiscoveredPlugin } from '../plugins';
 import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
+import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
 
@@ -69,6 +70,7 @@ beforeEach(() => {
 
   setupDeps = {
     core: {
+      capabilities: capabilitiesServiceMock.createSetupContract(),
       context: contextServiceMock.createSetupContract(),
       elasticsearch: { legacy: {} } as any,
       uiSettings: uiSettingsServiceMock.createSetupContract(),
@@ -93,6 +95,7 @@ beforeEach(() => {
 
   startDeps = {
     core: {
+      capabilities: capabilitiesServiceMock.createStartContract(),
       savedObjects: savedObjectsServiceMock.createStartContract(),
       plugins: { contracts: new Map() },
     },
@@ -130,8 +133,8 @@ describe('once LegacyService is set up with connection info', () => {
 
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: { autoListen: true }, server: { autoListen: true } },
+      { path: { autoListen: true }, server: { autoListen: true } }, // Because of the mock, path also gets the value
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
@@ -156,8 +159,8 @@ describe('once LegacyService is set up with connection info', () => {
 
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: { autoListen: false }, server: { autoListen: true } },
+      { path: { autoListen: false }, server: { autoListen: true } },
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
@@ -293,8 +296,8 @@ describe('once LegacyService is set up without connection info', () => {
   test('creates legacy kbnServer with `autoListen: false`.', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: {}, server: { autoListen: true } },
+      { path: {}, server: { autoListen: true } },
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
