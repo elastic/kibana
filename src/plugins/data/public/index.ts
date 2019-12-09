@@ -22,7 +22,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
 }
 
-
 export * from '../common';
 
 export * from './autocomplete_provider';
