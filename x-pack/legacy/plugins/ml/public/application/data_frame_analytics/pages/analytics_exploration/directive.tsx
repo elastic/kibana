@@ -11,8 +11,8 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { IndexPatterns } from 'ui/index_patterns';
 import { I18nContext } from 'ui/i18n';
+import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
 
 import { InjectorService } from '../../../../../common/types/angular';
 import { createSearchItems } from '../../../jobs/new_job/utils/new_job_utils';
@@ -29,7 +29,7 @@ module.directive('mlDataFrameAnalyticsExploration', ($injector: InjectorService)
       const globalState = $injector.get<any>('globalState');
       globalState.fetch();
 
-      const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
+      const indexPatterns = $injector.get<IndexPatternsContract>('indexPatterns');
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
       const $route = $injector.get<any>('$route');
 
