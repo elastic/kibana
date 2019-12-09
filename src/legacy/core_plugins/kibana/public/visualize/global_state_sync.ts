@@ -18,7 +18,7 @@
  */
 
 import { State } from './legacy_imports';
-import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
+import { DataPublicPluginStart as DataStart } from '../../../../../plugins/data/public';
 
 /**
  * Helper function to sync the global state with the various state providers
@@ -41,7 +41,7 @@ export function syncOnMount(
       filterManager,
       timefilter: { timefilter },
     },
-  }: NpDataStart
+  }: DataStart
 ) {
   // pull in global state information from the URL
   globalState.fetch();
