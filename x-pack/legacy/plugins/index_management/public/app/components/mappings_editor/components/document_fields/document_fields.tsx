@@ -47,7 +47,12 @@ export const DocumentFields = () => {
     return (
       <>
         <EuiSpacer />
-        <EuiButtonEmpty disabled={isDisabled} onClick={addField} iconType="plusInCircleFilled">
+        <EuiButtonEmpty
+          disabled={isDisabled}
+          onClick={addField}
+          iconType="plusInCircleFilled"
+          data-test-subj="addFieldButton"
+        >
           {i18n.translate('xpack.idxMgmt.mappingsEditor.addFieldButtonLabel', {
             defaultMessage: 'Add field',
           })}

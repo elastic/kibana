@@ -53,6 +53,7 @@ export const TypeParameter = ({ onTypeChange, isMultiField, docLink }: Props) =>
             selectedOptions={typeField.value as ComboBoxOption[]}
             onChange={onTypeChange}
             isClearable={false}
+            data-test-subj="fieldTypeComboBox"
           />
         </EuiFormRow>
       );

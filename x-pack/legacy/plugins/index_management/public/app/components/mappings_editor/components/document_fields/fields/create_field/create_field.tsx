@@ -221,7 +221,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {isCancelable !== false && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={cancel}>
+          <EuiButtonEmpty onClick={cancel} data-test-subj="cancelButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel', {
               defaultMessage: 'Cancel',
             })}
@@ -229,7 +229,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButton color="primary" fill onClick={submitForm} type="submit">
+        <EuiButton
+          color="primary"
+          fill
+          onClick={submitForm}
+          type="submit"
+          data-test-subj="addButton"
+        >
           {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addButtonLabel', {
             defaultMessage: 'Add',
           })}
@@ -266,6 +272,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 : paddingLeft
             }px`,
           }}
+          data-test-subj="createFieldWrapper"
         >
           <div className="mappingsEditor__createFieldContent">
             <EuiFlexGroup gutterSize="s" alignItems="center">

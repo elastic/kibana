@@ -32,5 +32,16 @@ export const NameParameter = () => {
     ],
   };
 
-  return <UseField path="name" config={nameConfig} component={TextField} />;
+  return (
+    <UseField
+      path="name"
+      config={nameConfig}
+      component={TextField}
+      componentProps={{
+        euiFieldProps: {
+          'data-test-subj': 'nameParameterInput',
+        },
+      }}
+    />
+  );
 };

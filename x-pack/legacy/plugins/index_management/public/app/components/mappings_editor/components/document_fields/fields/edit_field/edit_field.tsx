@@ -146,7 +146,14 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                   </EuiFlyoutHeader>
 
                   <EuiFlyoutBody>
-                    <EditFieldSection title="Field definition">
+                    <EditFieldSection
+                      title={i18n.translate(
+                        'xpack.idxMgmt.mappingsEditor.editFieldLyout.fieldDefinitionTitle',
+                        {
+                          defaultMessage: 'Field definition',
+                        }
+                      )}
+                    >
                       <EditFieldHeaderForm
                         type={type}
                         defaultValue={field.source}
@@ -192,6 +199,7 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                           onClick={getSubmitForm(updateField)}
                           type="submit"
                           disabled={form.isSubmitted && !form.isValid}
+                          data-test-subj="editFieldUpdateButton"
                         >
                           {i18n.translate(
                             'xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel',
