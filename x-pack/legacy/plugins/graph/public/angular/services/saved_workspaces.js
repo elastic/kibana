@@ -5,18 +5,18 @@
  */
 
 import _ from 'lodash';
-
+import { npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { i18n } from '@kbn/i18n';
 
-import { SavedWorkspaceProvider } from './saved_workspace';
+import { createSavedWorkspaceClass } from './saved_workspace';
 
+export function SavedWorkspacesProvider() {
+  const savedObjectsClient = npStart.core.savedObjects.client;
+  const indexPatterns = npStart.plugins.data.indexPatterns;
 
-export function SavedWorkspacesProvider(kbnUrl, Private, Promise) {
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
-  const SavedWorkspace = Private(SavedWorkspaceProvider);
+  const SavedWorkspace = createSavedWorkspaceClass(savedObjectsClient, indexPatterns);
 
   this.type = SavedWorkspace.type;
   this.Class = SavedWorkspace;
@@ -38,14 +38,12 @@ export function SavedWorkspacesProvider(kbnUrl, Private, Promise) {
   };
 
   this.urlFor = function (id) {
-    return chrome.addBasePath(kbnUrl.eval('/app/graph#/workspace/{{id}}', { id }));
+    return chrome.addBasePath(`/app/graph#/workspace/${encodeURIComponent(id)}`);
   };
 
   this.delete = function (ids) {
     ids = !_.isArray(ids) ? [ids] : ids;
-    return Promise.map(ids, function (id) {
-      return (new SavedWorkspace(id)).delete();
-    });
+    return Promise.all(ids.map(id => (new SavedWorkspace(id)).delete()));
   };
 
   this.mapHits = function (hit) {
