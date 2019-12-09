@@ -1227,6 +1227,7 @@ In server code, `core` can be accessed from either `server.newPlatform` or `kbnS
 | `request.getBasePath()`                            | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.basepath.md)                       |                                                                             |
 | `server.plugins.elasticsearch.getCluster('data')`  | [`core.elasticsearch.dataClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.dataclient_.md)   | Handlers will also include a pre-configured client                          |
 | `server.plugins.elasticsearch.getCluster('admin')` | [`core.elasticsearch.adminClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.adminclient_.md) | Handlers will also include a pre-configured client                          |
+| `xpackMainPlugin.info.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md) | |
 
 _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
 

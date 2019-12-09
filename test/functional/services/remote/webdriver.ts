@@ -133,6 +133,20 @@ async function attemptToCreateCommand(
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.headless();
         }
+
+        // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
+        if (process.platform === 'win32') {
+          const session = await new Builder()
+            .forBrowser(browserType)
+            .setFirefoxOptions(firefoxOptions)
+            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+            .build();
+          return {
+            session,
+            consoleLog$: Rx.EMPTY,
+          };
+        }
+
         const { input, chunk$, cleanup } = await createStdoutSocket();
         lifecycle.on('cleanup', cleanup);
 

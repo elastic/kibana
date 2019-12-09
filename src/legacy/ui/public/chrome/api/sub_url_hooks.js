@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import {
-  unhashUrl,
-} from '../../state_management/state_hashing';
+import { unhashUrl } from '../../../../../plugins/kibana_utils/public';
+import { toastNotifications } from '../../notify/toasts';
 
 export function registerSubUrlHooks(angularModule, internals) {
   angularModule.run(($rootScope, Private) => {
@@ -27,8 +26,14 @@ export function registerSubUrlHooks(angularModule, internals) {
 
     function updateSubUrls() {
       const urlWithHashes = window.location.href;
-      const urlWithStates = unhashUrl(urlWithHashes);
-      internals.trackPossibleSubUrl(urlWithStates);
+      let urlWithStates;
+      try {
+        urlWithStates = unhashUrl(urlWithHashes);
+      } catch (e) {
+        toastNotifications.addDanger(e.message);
+      }
+
+      internals.trackPossibleSubUrl(urlWithStates || urlWithHashes);
     }
 
     function onRouteChange($event) {
