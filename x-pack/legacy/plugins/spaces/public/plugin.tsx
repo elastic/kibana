@@ -11,7 +11,7 @@ import { initSpacesNavControl } from './views/nav_control';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 
 export interface SpacesPluginStart {
-  spacesManager: SpacesManager;
+  spacesManager: SpacesManager | null;
 }
 
 export interface PluginsSetup {
@@ -19,13 +19,16 @@ export interface PluginsSetup {
 }
 
 export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetup> {
-  private spacesManager?: SpacesManager;
+  private spacesManager: SpacesManager | null = null;
 
   public async start(core: CoreStart) {
     const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
-    this.spacesManager = new SpacesManager(serverBasePath, core.http);
+    const spacesEnabled = core.injectedMetadata.getInjectedVar('spacesEnabled') as boolean;
 
-    initSpacesNavControl(this.spacesManager, core);
+    if (spacesEnabled) {
+      this.spacesManager = new SpacesManager(serverBasePath, core.http);
+      initSpacesNavControl(this.spacesManager, core);
+    }
 
     return {
       spacesManager: this.spacesManager,

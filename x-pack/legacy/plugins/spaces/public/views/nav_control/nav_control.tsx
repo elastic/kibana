@@ -5,10 +5,10 @@
  */
 
 import { SpacesManager } from 'plugins/spaces/lib/spaces_manager';
-import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreStart } from 'src/core/public';
+import { NavControlPopover } from './nav_control_popover';
 
 export function initSpacesNavControl(spacesManager: SpacesManager, core: CoreStart) {
   const I18nContext = core.i18n.Context;
