@@ -288,6 +288,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       };
     }
 
+    async getSharedItemContainers() {
+      const cssSelector = '[data-shared-items-container]';
+      return find.allByCssSelector(cssSelector);
+    }
+
     async ensureModalOverlayHidden() {
       return retry.try(async () => {
         const shown = await testSubjects.exists('confirmModalTitleText');
@@ -424,6 +429,15 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
       const data = await response.json();
       return get(data, 'usage.cloud.is_cloud_enabled', false);
+    }
+
+    async waitForSaveModalToClose() {
+      log.debug('Waiting for save modal to close');
+      await retry.try(async () => {
+        if (await testSubjects.exists('savedObjectSaveModal')) {
+          throw new Error('save modal still open');
+        }
+      });
     }
   }
 
