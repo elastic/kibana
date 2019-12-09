@@ -36,19 +36,17 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share';
-import { timefilter } from 'ui/timefilter';
 
 // Saved objects
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 // @ts-ignore
-import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { SavedObject, SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
-import { start as data } from '../../../data/public/legacy';
 import { start as embeddables } from '../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
+import { start as data } from '../../../data/public/legacy';
 
 const services = {
   // new platform
@@ -61,7 +59,10 @@ const services = {
   savedObjectsClient: npStart.core.savedObjects.client,
   toastNotifications: npStart.core.notifications.toasts,
   uiSettings: npStart.core.uiSettings,
+  core: npStart.core,
 
+  share: npStart.plugins.share,
+  npData: npStart.plugins.data,
   data,
   embeddables,
   visualizations,
@@ -77,8 +78,7 @@ const services = {
   SavedObjectProvider,
   SavedObjectRegistryProvider,
   SavedObjectsClientProvider,
-  ShareContextMenuExtensionsRegistryProvider,
-  timefilter,
+  timefilter: npStart.plugins.data.query.timefilter.timefilter,
   uiModules,
   uiRoutes,
   wrapInI18nContext,
@@ -96,17 +96,14 @@ export { getFromSavedObject } from 'ui/index_patterns';
 export { PersistedState } from 'ui/persisted_state';
 // @ts-ignore
 export { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
-// @ts-ignore
-export { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-export { showShareContextMenu } from 'ui/share';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 export { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
-export { getVisualizeLoader } from 'ui/visualize/loader';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
+export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export {
   Container,
   Embeddable,
@@ -118,15 +115,10 @@ export {
 
 // export types
 export { METRIC_TYPE };
-export { StaticIndexPattern } from 'ui/index_patterns';
 export { AppState } from 'ui/state_management/app_state';
 export { VisType } from 'ui/vis';
-export { VisualizeLoader } from 'ui/visualize/loader';
-export {
-  VisSavedObject,
-  VisualizeLoaderParams,
-  VisualizeUpdateParams,
-} from 'ui/visualize/loader/types';
 
 // export const
 export { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+
+export { VisSavedObject } from './embeddable/visualize_embeddable';

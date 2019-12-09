@@ -86,8 +86,10 @@ export const ProfileQueryEditor = memo(() => {
                 <EuiFieldText
                   disabled={!licenseEnabled}
                   inputRef={ref => {
-                    indexInputRef.current = ref!;
-                    ref!.value = DEFAULT_INDEX_VALUE;
+                    if (ref) {
+                      indexInputRef.current = ref;
+                      ref.value = DEFAULT_INDEX_VALUE;
+                    }
                   }}
                 />
               </EuiFormRow>

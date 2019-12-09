@@ -70,18 +70,18 @@ class VisEditorVisualizationUI extends Component {
       return;
     }
 
-    const { timeRange, appState, savedObj, onDataChange } = this.props;
+    const { timeRange, savedObj, onDataChange } = this.props;
 
     this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(savedObj, {
       vis: {},
       timeRange: timeRange,
-      filters: appState.filters || [],
+      filters: [],
     });
-    this._handler.render(this._visEl.current);
+    await this._handler.render(this._visEl.current);
 
     this._subscription = this._handler.handler.data$.subscribe(data => {
-      this.setPanelInterval(data.visData);
-      onDataChange(data);
+      this.setPanelInterval(data.value.visData);
+      onDataChange(data.value);
     });
   }
 
@@ -287,7 +287,6 @@ VisEditorVisualizationUI.propTypes = {
   timeRange: PropTypes.object,
   dirty: PropTypes.bool,
   autoApply: PropTypes.bool,
-  appState: PropTypes.object,
 };
 
 export const VisEditorVisualization = injectI18n(VisEditorVisualizationUI);

@@ -28,12 +28,17 @@ export const AnalyzeInMlButton: React.FunctionComponent<{
   return typeof partition === 'string' ? (
     <EuiButton
       fill={false}
+      size="s"
       href={getPartitionSpecificSingleMetricViewerLink(pathname, jobId, partition, timeRange)}
     >
       {buttonLabel}
     </EuiButton>
   ) : (
-    <EuiButton fill={true} href={getOverallAnomalyExplorerLink(pathname, jobId, timeRange)}>
+    <EuiButton
+      fill={true}
+      size="s"
+      href={getOverallAnomalyExplorerLink(pathname, jobId, timeRange)}
+    >
       {buttonLabel}
     </EuiButton>
   );

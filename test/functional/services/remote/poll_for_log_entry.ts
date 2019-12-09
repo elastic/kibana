@@ -95,10 +95,7 @@ export function pollForLogEntry$(
               [new logging.Entry('SEVERE', `ERROR FETCHING BROWSR LOGS: ${error.message}`)],
 
               // pause 10 seconds then resubscribe
-              Rx.of(1).pipe(
-                delay(10 * 1000),
-                mergeMapTo(resubscribe)
-              )
+              Rx.of(1).pipe(delay(10 * 1000), mergeMapTo(resubscribe))
             );
           })
         )

@@ -17,7 +17,6 @@ import { EuiProgress } from '@elastic/eui';
 import { documentField } from './document_field';
 
 jest.mock('ui/new_platform');
-jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
@@ -329,10 +328,10 @@ describe('IndexPattern Data Panel', () => {
         act(() => {
           ((inst.setProps as unknown) as (props: unknown) => {})({
             ...props,
-            ...(propChanges || {}),
+            ...((propChanges as object) || {}),
             state: {
               ...props.state,
-              ...(stateChanges || {}),
+              ...((stateChanges as object) || {}),
             },
           });
           inst.update();

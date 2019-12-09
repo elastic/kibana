@@ -17,7 +17,7 @@ import { registerLegacy } from './legacy';
 export function registerRoutes(server: ServerFacade, logger: Logger) {
   const config = server.config();
   const DOWNLOAD_BASE_URL = config.get('server.basePath') + `${API_BASE_URL}/jobs/download`;
-  // @ts-ignore
+  // @ts-ignore TODO
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
   const enqueueJob = enqueueJobFactory(server);
 
@@ -26,11 +26,10 @@ export function registerRoutes(server: ServerFacade, logger: Logger) {
    */
   async function handler(
     exportTypeId: string,
-    jobParams: any,
+    jobParams: object,
     request: RequestFacade,
     h: ReportingResponseToolkit
   ) {
-    // @ts-ignore
     const user = request.pre.user;
     const headers = request.headers;
 

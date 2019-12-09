@@ -14,7 +14,6 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   getLogEntryRateSeriesForPartition,
   getAnnotationsForPartition,
-  formatAnomalyScore,
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
 import { AnalyzeInMlButton } from '../analyze_in_ml_button';
@@ -26,7 +25,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   jobId: string;
-}> = ({ results, timeRange, setTimeRange, topAnomalyScore, partitionId, jobId }) => {
+}> = ({ results, timeRange, setTimeRange, partitionId, jobId }) => {
   const logEntryRateSeries = useMemo(
     () =>
       results && results.histogramBuckets
@@ -65,8 +64,10 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
         />
       </EuiFlexItem>
       <EuiFlexItem>
+        <EuiSpacer size="m" />
         <EuiStat
           title={numeral(totalNumberOfLogEntries).format('0.00a')}
+          titleSize="m"
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription',
             {
@@ -75,17 +76,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           )}
           reverse
         />
-        <EuiStat
-          title={formatAnomalyScore(topAnomalyScore)}
-          description={i18n.translate(
-            'xpack.infra.logs.analysis.anomaliesExpandedRowTopAnomalyScoreDescription',
-            {
-              defaultMessage: 'Max anomaly score',
-            }
-          )}
-          reverse
-        />
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} partition={partitionId} />
