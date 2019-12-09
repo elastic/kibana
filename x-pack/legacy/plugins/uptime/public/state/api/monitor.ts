@@ -7,18 +7,34 @@
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { getApiPath } from '../../lib/helper';
 import { MonitorDetailsType, MonitorDetails } from '../../../common/runtime_types';
+import { BaseParams } from './types';
 
 interface ApiRequest {
   monitorId: string;
   basePath: string;
 }
 
+export type MonitorQueryParams = BaseParams & ApiRequest;
+
 export const fetchMonitorDetails = async ({
   monitorId,
   basePath,
-}: ApiRequest): Promise<MonitorDetails> => {
-  const url = getApiPath(`/api/uptime/monitor/details?monitorId=${monitorId}`, basePath);
-  const response = await fetch(url);
+  dateStart,
+  dateEnd,
+  filters,
+  statusFilter,
+}: MonitorQueryParams): Promise<MonitorDetails> => {
+  const url = getApiPath(`/api/uptime/monitor/details`, basePath);
+  const params = {
+    monitorId,
+    dateStart,
+    dateEnd,
+    ...(filters && { filters }),
+    ...(statusFilter && { statusFilter }),
+  };
+  const urlParams = new URLSearchParams(params).toString();
+  const response = await fetch(`${url}?${urlParams}`);
+
   if (!response.ok) {
     throw new Error(response.statusText);
   }

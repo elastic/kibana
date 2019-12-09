@@ -16,6 +16,8 @@ import { MostRecentError } from './most_recent_error';
 import { getMonitorDetails } from '../../../../state/selectors';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails } from '../../../../../common/runtime_types';
+import { useUrlParams } from '../../../../hooks';
+import { MonitorDetailsActionPayload } from '../../../../state/actions/types';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -51,9 +53,24 @@ export function MonitorListDrawerComponent({
   if (!summary || !summary.state.checks) {
     return null;
   }
+  const { monitor_id: monitorId } = summary;
+  const [getUrlParams] = useUrlParams();
+  const {
+    dateRangeStart: dateStart,
+    dateRangeEnd: dateEnd,
+    statusFilter,
+    filters,
+  } = getUrlParams();
+
   useEffect(() => {
-    loadMonitorDetails(summary.monitor_id);
-  }, []);
+    loadMonitorDetails({
+      dateStart,
+      dateEnd,
+      statusFilter,
+      filters,
+      monitorId,
+    });
+  }, [dateStart, dateEnd, statusFilter, filters]);
 
   const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
 
@@ -85,7 +102,8 @@ const mapStateToProps = (state: AppState, { summary }: any) => ({
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
-  loadMonitorDetails: (monitorId: string) => dispatch(fetchMonitorDetails(monitorId)),
+  loadMonitorDetails: (actionPayload: MonitorDetailsActionPayload) =>
+    dispatch(fetchMonitorDetails(actionPayload)),
 });
 
 export const MonitorListDrawer = connect(

@@ -273,7 +273,14 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     };
   }
 
-  public async getMonitorDetails(request: any, monitorId: string): Promise<MonitorDetails> {
+  public async getMonitorDetails(
+    request: any,
+    monitorId: string,
+    dateStart: string,
+    dateEnd: string,
+    filters?: string,
+    statusFilter?: string
+  ): Promise<MonitorDetails> {
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -289,11 +296,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               },
             ],
             filter: [
-              {
-                term: {
-                  'monitor.id': monitorId,
-                },
-              },
+              { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
+              { term: { 'monitor.id': monitorId } },
             ],
           },
         },

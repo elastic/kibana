@@ -16,5 +16,12 @@ export interface UMMonitorsAdapter {
   ): Promise<MonitorChart>;
   getFilterBar(request: any, dateRangeStart: string, dateRangeEnd: string): Promise<any>;
   getMonitorPageTitle(request: any, monitorId: string): Promise<MonitorPageTitle | null>;
-  getMonitorDetails(request: any, monitorId: string): Promise<any>;
+  getMonitorDetails(
+    request: any,
+    monitorId: string,
+    dateStart: string,
+    dateEnd: string,
+    filters?: string,
+    statusFilter?: string
+  ): Promise<any>;
 }

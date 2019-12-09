@@ -13,12 +13,26 @@ import {
 } from '../actions/monitor';
 import { fetchMonitorDetails } from '../api';
 import { getBasePath } from '../selectors';
+import { MonitorDetailsActionPayload } from '../actions/types';
 
 function* monitorDetailsEffect(action: Action<any>) {
-  const monitorId: string = action.payload;
+  const {
+    monitorId,
+    dateStart,
+    dateEnd,
+    statusFilter,
+    filters,
+  }: MonitorDetailsActionPayload = action.payload;
   try {
     const basePath = yield select(getBasePath);
-    const response = yield call(fetchMonitorDetails, { monitorId, basePath });
+    const response = yield call(fetchMonitorDetails, {
+      monitorId,
+      basePath,
+      dateStart,
+      dateEnd,
+      statusFilter,
+      filters,
+    });
     yield put({ type: FETCH_MONITOR_DETAILS_SUCCESS, payload: response });
   } catch (error) {
     yield put({ type: FETCH_MONITOR_DETAILS_FAIL, payload: error.message });
