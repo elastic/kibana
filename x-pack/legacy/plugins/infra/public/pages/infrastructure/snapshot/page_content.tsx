@@ -21,7 +21,7 @@ export const SnapshotPageContent: React.FC = () => (
           <WithWaffleFilter indexPattern={createDerivedIndexPattern('metrics')}>
             {({ filterQueryAsJson, applyFilterQuery }) => (
               <WithWaffleTime>
-                {({ currentTimeRange, currentTime }) => (
+                {({ currentTime }) => (
                   <WithWaffleOptions>
                     {({
                       metric,
@@ -39,7 +39,6 @@ export const SnapshotPageContent: React.FC = () => (
                         groupBy={groupBy}
                         nodeType={nodeType}
                         sourceId={sourceId}
-                        timeRange={currentTimeRange}
                         options={{
                           ...wafflemap,
                           metric,

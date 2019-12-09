@@ -6,16 +6,17 @@
 
 import { uniq } from 'lodash';
 import { idx } from '@kbn/elastic-idx';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
+import { RequestHandlerContext } from 'kibana/server';
 import { InfraSnapshotRequestOptions } from './types';
 import { InfraTimerangeInput } from '../../../public/graphql/types';
 import { getMetricsAggregations } from './query_helpers';
 import { calculateMetricInterval } from '../../utils/calculate_metric_interval';
 import { SnapshotModel, SnapshotModelMetricAggRT } from '../../../common/inventory_models/types';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 
 export const createTimeRangeWithInterval = async (
-  framework: InfraBackendFrameworkAdapter,
-  request: InfraFrameworkRequest,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext,
   options: InfraSnapshotRequestOptions
 ): Promise<InfraTimerangeInput> => {
   const aggregations = getMetricsAggregations(options);
@@ -23,7 +24,7 @@ export const createTimeRangeWithInterval = async (
   const interval =
     (await calculateMetricInterval(
       framework,
-      request,
+      requestContext,
       {
         indexPattern: options.sourceConfiguration.metricAlias,
         timestampField: options.sourceConfiguration.fields.timestamp,
