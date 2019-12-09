@@ -39,6 +39,7 @@ export function get(workpadId) {
   });
 }
 
+// TODO: I think this function is never used.  Look into and remove the corresponding route as well
 export function update(id, workpad) {
   return fetch.put(`${getApiPath()}/${id}`, workpad);
 }
