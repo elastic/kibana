@@ -46,7 +46,6 @@ export const rulesAlertType = ({
         maxSignals: schema.number({ defaultValue: DEFAULT_MAX_SIGNALS }),
         riskScore: schema.number(),
         severity: schema.string(),
-        tags: schema.arrayOf(schema.string(), { defaultValue: [] }),
         threats: schema.nullable(schema.arrayOf(schema.object({}, { allowUnknowns: true }))),
         to: schema.string(),
         type: schema.string(),
@@ -70,6 +69,7 @@ export const rulesAlertType = ({
       // TODO: Remove this hard extraction of name once this is fixed: https://github.com/elastic/kibana/issues/50522
       const savedObject = await services.savedObjectsClient.get('alert', alertId);
       const name: string = savedObject.attributes.name;
+      const tags: string[] = savedObject.attributes.tags;
 
       const createdBy: string = savedObject.attributes.createdBy;
       const updatedBy: string = savedObject.attributes.updatedBy;
@@ -134,6 +134,7 @@ export const rulesAlertType = ({
           interval,
           enabled,
           pageSize: searchAfterSize,
+          tags,
         });
 
         if (bulkIndexResult) {
