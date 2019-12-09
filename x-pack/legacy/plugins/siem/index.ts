@@ -29,6 +29,7 @@ import {
   DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
+import { initServerWithKibana } from './server/kibana.index';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -136,43 +137,24 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const {
-        config,
-        getInjectedUiAppVars,
-        indexPatternsServiceFactory,
-        injectUiAppVars,
-        newPlatform,
-        plugins,
-        route,
-        savedObjects,
-      } = server;
-
-      const {
-        env,
-        coreContext: { logger },
-        setup,
-      } = newPlatform;
-      const initializerContext = { logger, env };
+      const { config, newPlatform, plugins, route } = server;
+      const { coreContext, env, setup } = newPlatform;
+      const initializerContext = { ...coreContext, env } as PluginInitializerContext;
 
       const serverFacade = {
         config,
-        getInjectedUiAppVars,
-        indexPatternsServiceFactory,
-        injectUiAppVars,
         plugins: {
           alerting: plugins.alerting,
-          xpack_main: plugins.xpack_main,
+          elasticsearch: plugins.elasticsearch,
           spaces: plugins.spaces,
         },
         route: route.bind(server),
-        savedObjects,
       };
 
-      plugin(initializerContext as PluginInitializerContext).setup(
-        setup.core,
-        setup.plugins,
-        serverFacade
-      );
+      // @ts-ignore-next-line: setup.plugins is too loosely typed
+      plugin(initializerContext).setup(setup.core, setup.plugins);
+
+      initServerWithKibana(initializerContext, serverFacade);
     },
     config(Joi: Root) {
       return Joi.object()
