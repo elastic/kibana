@@ -84,12 +84,9 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
               precision_threshold: 40000,
             }
           },
-          by_status: {
-            filters: {
-              filters: {
-                up: {match: {"monitor.status": "up"}},
-                down: {match: {"monitor.status": "down"}},
-              }
+          down: {
+            filter: {
+              match: {"monitor.status": "down"},
             },
             aggs: {
               unique: {
@@ -107,35 +104,17 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
     console.log("QUERY", JSON.stringify(params.body));
 
     const statistics = await context.database.search(context.request, params);
-    const uniqueUp = statistics.aggregations.by_status.buckets.up.unique.value;
-    const uniqueDown = statistics.aggregations.by_status.buckets.down.unique.value;
+    const uniqueDown = statistics.aggregations.down.unique.value;
     const total = statistics.aggregations.unique.value;
 
-    console.log("ROUGH U/D", uniqueUp, uniqueDown);
+    console.log("ROUGH U/D",total-uniqueDown, uniqueDown);
 
-    // Use the iterator to count the lower cardinality of up or down. Since these precise counts are expensive
-    // it's cheaper to count whichever one is most likely to be lower
-    context.statusFilter = uniqueUp < uniqueDown ? 'up' : 'down';
-    console.log("STATUS SEARCH", context.statusFilter);
-    const iterator = new MonitorGroupIterator(context);
-    let iterCount = 0;
-    while (await iterator.next()) {
-      iterCount++;
+    return {
+      total,
+      up: total-uniqueDown,
+      down: uniqueDown,
+      mixed: 0,
     }
-
-    console.log("DO IT")
-    const res = {total, mixed: 0};
-    if (context.statusFilter === 'up') {
-      res.up = iterCount;
-      res.down = total - iterCount;
-    } else {
-      res.up = total - iterCount;
-      res.down = iterCount;
-    }
-
-    console.log("RES IS", res);
-
-    return res;
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
