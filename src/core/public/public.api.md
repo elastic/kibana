@@ -63,6 +63,7 @@ export interface AppMountContext {
         i18n: I18nStart;
         notifications: NotificationsStart;
         overlays: OverlayStart;
+        savedObjects: SavedObjectsStart;
         uiSettings: IUiSettingsClient;
         injectedMetadata: {
             getInjectedVar: (name: string, defaultValue?: any) => unknown;
