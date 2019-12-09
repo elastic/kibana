@@ -54,7 +54,6 @@ const {
   chrome,
   chromeLegacy,
   npData,
-  data,
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,
@@ -86,7 +85,7 @@ uiRoutes
           );
         }
 
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
+        return ensureDefaultIndexPattern(core, npData, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
               return savedVis.vis.type.setup(savedVis)
@@ -105,7 +104,7 @@ uiRoutes
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
       savedVis: function (savedVisualizations, redirectWhenMissing, $route, $rootScope, kbnUrl) {
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+        return ensureDefaultIndexPattern(core, npData, $rootScope, kbnUrl)
           .then(() => savedVisualizations.get($route.current.params.id))
           .then((savedVis) => {
             chrome.recentlyAccessed.add(
