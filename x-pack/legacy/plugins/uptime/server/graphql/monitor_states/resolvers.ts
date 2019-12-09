@@ -41,7 +41,7 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
       async getMonitorStates(
         _resolver,
         { dateRangeStart, dateRangeEnd, filters, pagination, statusFilter },
-        { callAsCurrentUser }
+        { APICaller }
       ): Promise<MonitorSummaryResult> {
         const decodedPagination = pagination
           ? JSON.parse(decodeURIComponent(pagination))
@@ -50,9 +50,9 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           totalSummaryCount,
           { summaries, nextPagePagination, prevPagePagination },
         ] = await Promise.all([
-          libs.pings.getDocCount({ callES: callAsCurrentUser }),
+          libs.pings.getDocCount({ callES: APICaller }),
           libs.monitorStates.getMonitorStates({
-            callES: callAsCurrentUser,
+            callES: APICaller,
             dateRangeStart,
             dateRangeEnd,
             pagination: decodedPagination,
@@ -67,8 +67,8 @@ export const createMonitorStatesResolvers: CreateUMGraphQLResolvers = (
           totalSummaryCount,
         };
       },
-      async getStatesIndexStatus(_resolver, {}, { callAsCurrentUser }): Promise<StatesIndexStatus> {
-        return await libs.monitorStates.statesIndexExists({ callES: callAsCurrentUser });
+      async getStatesIndexStatus(_resolver, {}, { APICaller }): Promise<StatesIndexStatus> {
+        return await libs.monitorStates.statesIndexExists({ callES: APICaller });
       },
     },
   };

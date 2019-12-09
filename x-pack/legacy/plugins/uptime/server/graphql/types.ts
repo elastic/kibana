@@ -8,7 +8,7 @@ import { RequestHandlerContext, CallAPIOptions } from 'kibana/server';
 import { UMServerLibs } from '../lib/lib';
 
 export type UMContext = RequestHandlerContext & {
-  callAsCurrentUser: (
+  APICaller: (
     endpoint: string,
     clientParams?: Record<string, any>,
     options?: CallAPIOptions | undefined

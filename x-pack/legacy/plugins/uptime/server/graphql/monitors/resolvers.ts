@@ -73,10 +73,10 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     async getSnapshotHistogram(
       _resolver,
       { dateRangeStart, dateRangeEnd, filters, monitorId, statusFilter },
-      { callAsCurrentUser }
+      { APICaller }
     ): Promise<HistogramResult> {
       return await libs.pings.getPingHistogram({
-        callES: callAsCurrentUser,
+        callES: APICaller,
         dateRangeStart,
         dateRangeEnd,
         filters,
@@ -87,10 +87,10 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     async getMonitorChartsData(
       _resolver,
       { monitorId, dateRangeStart, dateRangeEnd, location },
-      { callAsCurrentUser }
+      { APICaller }
     ): Promise<MonitorChart> {
       return await libs.monitors.getMonitorChartsData({
-        callES: callAsCurrentUser,
+        callES: APICaller,
         monitorId,
         dateRangeStart,
         dateRangeEnd,
@@ -100,10 +100,10 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     async getLatestMonitors(
       _resolver,
       { dateRangeStart, dateRangeEnd, monitorId, location },
-      { callAsCurrentUser }
+      { APICaller }
     ): Promise<Ping[]> {
       return await libs.pings.getLatestMonitorDocs({
-        callES: callAsCurrentUser,
+        callES: APICaller,
         dateRangeStart,
         dateRangeEnd,
         monitorId,
@@ -113,10 +113,10 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     async getFilterBar(
       _resolver,
       { dateRangeStart, dateRangeEnd },
-      { callAsCurrentUser }
+      { APICaller }
     ): Promise<FilterBar> {
       return await libs.monitors.getFilterBar({
-        callES: callAsCurrentUser,
+        callES: APICaller,
         dateRangeStart,
         dateRangeEnd,
       });
@@ -124,9 +124,9 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     async getMonitorPageTitle(
       _resolver: any,
       { monitorId },
-      { callAsCurrentUser }
+      { APICaller }
     ): Promise<MonitorPageTitle | null> {
-      return await libs.monitors.getMonitorPageTitle({ callES: callAsCurrentUser, monitorId });
+      return await libs.monitors.getMonitorPageTitle({ callES: APICaller, monitorId });
     },
   },
 });
