@@ -35,6 +35,8 @@ import { JobSelectorBadge } from '../../../components/job_selector/job_selector_
 import { toLocaleString } from '../../../util/string_utils';
 import { getSeverityColor } from '../../../../common/util/anomaly_utils';
 
+const MlInMemoryTable = mlInMemoryTableFactory<Group>();
+
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
   id = 'id',
@@ -44,8 +46,6 @@ export enum AnomalyDetectionListColumns {
   docsProcessed = 'docs_processed',
   jobsInGroup = 'jobs_in_group',
 }
-
-const MlInMemoryTable = mlInMemoryTableFactory<Group>();
 
 interface Props {
   items: GroupsDictionary;
