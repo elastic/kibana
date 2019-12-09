@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, Fragment, useCallback } from 'react';
-import styled from 'styled-components';
-import { EuiPanel, EuiSteps, EuiButton, EuiHorizontalRule } from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiPanel, EuiSteps } from '@elastic/eui';
+import React, { Fragment, useCallback, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import { StepOneTemplate } from './step_one';
+import styled from 'styled-components';
 import { installDatasource } from '../../data';
 import { useCore, useLinks } from '../../hooks';
+import { StepOneTemplate } from './step_one';
 
 const StyledSteps = styled.div`
   .euiStep__titleWrapper {

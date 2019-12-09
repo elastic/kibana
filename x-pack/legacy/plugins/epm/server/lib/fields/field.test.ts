@@ -5,10 +5,10 @@
  */
 
 import { readFileSync } from 'fs';
-import path from 'path';
-import { safeLoad } from 'js-yaml';
-import { Field, processFields } from './field';
 import glob from 'glob';
+import { safeLoad } from 'js-yaml';
+import path from 'path';
+import { Field, processFields } from './field';
 
 // Add our own serialiser to just do JSON.stringify
 expect.addSnapshotSerializer({

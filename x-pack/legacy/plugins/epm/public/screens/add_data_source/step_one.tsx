@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
 import {
-  EuiForm,
   EuiDescribedFormGroup,
-  EuiFormRow,
   EuiFieldText,
+  EuiForm,
+  EuiFormRow,
   EuiHorizontalRule,
-  EuiSwitch,
   EuiSpacer,
+  EuiSwitch,
 } from '@elastic/eui';
+import React, { Fragment } from 'react';
 
 export const StepOneTemplate = () => {
   return (
