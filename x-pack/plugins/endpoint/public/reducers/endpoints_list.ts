@@ -8,9 +8,9 @@ import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import {
   EndpointListActions,
   actions,
-  EndpointListServerData,
-  EndpointListFilteredData,
-  EndpointListPageAndSortedData,
+  EndpointListServerDataAction,
+  EndpointListFilteredDataAction,
+  EndpointListPageAndSortedDataAction,
 } from '../actions/endpoints_list';
 import { EndpointData } from '../../server/types';
 
@@ -64,10 +64,10 @@ export function endpointListReducer(
 ): EndpointsListState {
   switch (action.type) {
     case actions.serverReturnedEndpointListData.type:
-      return { ...state, data: (action as EndpointListServerData).payload[0] };
+      return { ...state, data: (action as EndpointListServerDataAction).payload[0] };
 
     case actions.userFilteredEndpointListData.type:
-      const { filteredData, isFiltered } = (action as EndpointListFilteredData).payload[0];
+      const { filteredData, isFiltered } = (action as EndpointListFilteredDataAction).payload[0];
       return { ...state, filteredData, isFiltered };
 
     case actions.userPaginatedOrSortedEndpointListTable.type:
@@ -76,7 +76,7 @@ export function endpointListReducer(
         pageSize,
         sortField,
         sortDirection,
-      } = (action as EndpointListPageAndSortedData).payload[0];
+      } = (action as EndpointListPageAndSortedDataAction).payload[0];
       return {
         ...state,
         pageIndex,

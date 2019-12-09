@@ -9,7 +9,6 @@ import { actionCreatorFactory } from '../lib/action_creator';
 import { EndpointData } from '../../server/types';
 import { EndpointsListState } from '../reducers/endpoints_list';
 
-// TODO: Type return value
 export const actions = {
   serverReturnedEndpointListData: actionCreatorFactory<
     'serverReturnedEndpointListData',
@@ -37,13 +36,17 @@ export const actions = {
   >('userPaginatedOrSortedEndpointListTable'),
 };
 
-export type EndpointListServerData = ReturnType<typeof actions.serverReturnedEndpointListData>;
-export type EndpointListFilteredData = ReturnType<typeof actions.userFilteredEndpointListData>;
-export type EndpointListPageAndSortedData = ReturnType<
+export type EndpointListServerDataAction = ReturnType<
+  typeof actions.serverReturnedEndpointListData
+>;
+export type EndpointListFilteredDataAction = ReturnType<
+  typeof actions.userFilteredEndpointListData
+>;
+export type EndpointListPageAndSortedDataAction = ReturnType<
   typeof actions.userPaginatedOrSortedEndpointListTable
 >;
 
 export type EndpointListActions =
-  | EndpointListServerData
-  | EndpointListFilteredData
-  | EndpointListPageAndSortedData;
+  | EndpointListServerDataAction
+  | EndpointListFilteredDataAction
+  | EndpointListPageAndSortedDataAction;
