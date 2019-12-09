@@ -184,5 +184,5 @@ export interface LicensingPluginSetup {
   /**
    * Triggers licensing information re-fetch.
    */
-  refresh(): void;
+  refresh(): Promise<ILicense>;
 }
