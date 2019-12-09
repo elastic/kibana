@@ -5,8 +5,8 @@
  */
 
 import { readFileSync } from 'fs';
-import path from 'path';
 import { safeLoad } from 'js-yaml';
+import path from 'path';
 import { Field, processFields } from '../../fields/field';
 import { generateMappings, getTemplate } from './template';
 

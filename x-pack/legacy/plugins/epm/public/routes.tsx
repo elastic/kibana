@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { Detail, DetailProps } from './screens/detail';
-import { AddDataSource, AddDataSourceProps } from './screens/add_data_source';
-import { Home } from './screens/home';
 import { PLUGIN } from '../common/constants';
+import { AddDataSource, AddDataSourceProps } from './screens/add_data_source';
+import { Detail, DetailProps } from './screens/detail';
+import { Home } from './screens/home';
 
 // patterns are used by React Router and are relative to `APP_ROOT`
 export const patterns = {

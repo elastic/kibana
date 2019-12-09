@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiButtonEmpty } from '@elastic/eui';
-import styled from 'styled-components';
 import React from 'react';
+import styled from 'styled-components';
 import { useCore } from '../hooks';
 
 export function NavButtonBack({ href, text }: { href: string; text: string }) {

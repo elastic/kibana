@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import { EuiCard, EuiIcon, ICON_TYPES } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
+import { PackageInfo, PackageListItem } from '../../common/types';
 import { useLinks } from '../hooks';
-import { PackageListItem, PackageInfo } from '../../common/types';
 
 export interface BadgeProps {
   showInstalledBadge?: boolean;

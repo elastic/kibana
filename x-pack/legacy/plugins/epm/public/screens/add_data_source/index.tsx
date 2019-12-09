@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useEffect } from 'react';
-import { ICON_TYPES, EuiPageHeader, EuiTitle, EuiFlexGroup, EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiPageHeader, EuiPanel, EuiTitle, ICON_TYPES } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { NavButtonBack } from '../../components/nav_button_back';
-import { useLinks } from '../../hooks';
 import { PackageInfo } from '../../../common/types';
+import { NavButtonBack } from '../../components/nav_button_back';
 import { getPackageInfoByKey } from '../../data';
+import { useLinks } from '../../hooks';
 import { AddDataSourceSteps } from './add_data_source_steps';
 
 export interface AddDataSourceProps {

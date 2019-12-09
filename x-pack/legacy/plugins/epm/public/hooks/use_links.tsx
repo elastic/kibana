@@ -5,10 +5,10 @@
  */
 
 import { generatePath } from 'react-router-dom';
+import { useCore } from '.';
 import { PLUGIN } from '../../common/constants';
 import { getFilePath, getInfoPath } from '../../common/routes';
 import { patterns } from '../routes';
-import { useCore } from '.';
 import { DetailViewPanelName } from '..';
 
 // TODO: get this from server/packages/handlers.ts (move elsewhere?)

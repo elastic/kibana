@@ -7,10 +7,10 @@
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
 import { AssetReference, InstallationAttributes, KibanaAssetType } from '../../common/types';
+import { installIndexPattern } from '../lib/kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getObject } from './get_objects';
 import { getInstallationObject } from './index';
-import { installIndexPattern } from '../lib/kibana/index_pattern/install';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;

@@ -12,8 +12,8 @@ import {
   CategoryId,
   CategorySummaryList,
   KibanaAssetType,
-  RegistrySearchResults,
   RegistryPackage,
+  RegistrySearchResults,
 } from '../../common/types';
 import { epmConfigStore } from '../config';
 import { cacheGet, cacheSet } from './cache';

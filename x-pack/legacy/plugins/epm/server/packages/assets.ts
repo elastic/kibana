@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RegistryPackage } from '../../common/types';
 import * as Registry from '../registry';
 import { cacheHas } from '../registry/cache';
-import { RegistryPackage } from '../../common/types';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // paths for ArchiveEntry are routes to the assets in the archive
