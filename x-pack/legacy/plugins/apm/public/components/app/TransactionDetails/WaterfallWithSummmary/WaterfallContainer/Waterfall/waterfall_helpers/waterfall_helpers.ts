@@ -269,8 +269,8 @@ export function getWaterfall(
     entryTransactionId
   );
 
-  const isLegacyWaterfall = !waterfallItems.some(
-    waterfallItem => !isEmpty(waterfallItem.parentId)
+  const isLegacyWaterfall = waterfallItems.every(waterfallItem =>
+    isEmpty(waterfallItem.parentId)
   );
 
   let items;
