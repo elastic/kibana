@@ -19,7 +19,6 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { createSearchBar, StatetfulSearchBarProps } from './search';
-import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
 import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
@@ -30,18 +29,12 @@ import {
 } from './filter/action/apply_filter_action';
 import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setFieldFormats } from '../../../../plugins/data/public/services';
+
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
   uiActions: IUiActionsSetup;
-}
-
-/**
- * Interface for this plugin's returned `setup` contract.
- *
- * @public
- */
-export interface DataSetup {
-  indexPatterns: IndexPatternsSetup;
 }
 
 /**
@@ -50,7 +43,6 @@ export interface DataSetup {
  * @public
  */
 export interface DataStart {
-  indexPatterns: IndexPatternsStart;
   ui: {
     SearchBar: React.ComponentType<StatetfulSearchBarProps>;
   };
@@ -68,34 +60,17 @@ export interface DataStart {
  * or static code.
  */
 
-export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginStartDependencies> {
-  private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
-
-  private setupApi!: DataSetup;
+export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
   private storage!: IStorageWrapper;
 
-  public setup(core: CoreSetup): DataSetup {
+  public setup(core: CoreSetup) {
     this.storage = new Storage(window.localStorage);
-
-    this.setupApi = {
-      indexPatterns: this.indexPatterns.setup(),
-    };
-
-    return this.setupApi;
   }
 
   public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
-    const { uiSettings, http, notifications, savedObjects } = core;
-
-    const indexPatternsService = this.indexPatterns.start({
-      uiSettings,
-      savedObjectsClient: savedObjects.client,
-      http,
-      notifications,
-      fieldFormats: data.fieldFormats,
-    });
-
-    initLegacyModule(indexPatternsService.indexPatterns);
+    // This is required for when Angular code uses Field and FieldList.
+    setFieldFormats(data.fieldFormats);
+    initLegacyModule(data.indexPatterns);
 
     const SearchBar = createSearchBar({
       core,
@@ -108,22 +83,18 @@ export class DataPlugin implements Plugin<DataSetup, DataStart, {}, DataPluginSt
         core.overlays,
         data.query.filterManager,
         data.query.timefilter.timefilter,
-        indexPatternsService
+        data.indexPatterns
       )
     );
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
     return {
-      ...this.setupApi!,
-      indexPatterns: indexPatternsService,
       ui: {
         SearchBar,
       },
     };
   }
 
-  public stop() {
-    this.indexPatterns.stop();
-  }
+  public stop() {}
 }

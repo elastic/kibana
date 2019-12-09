@@ -63,7 +63,7 @@ describe('Pane', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="eui-flyout"]').get(0).props.maxWidth).toEqual('95%');
+    expect(wrapper.find('Resizable').get(0).props.maxWidth).toEqual('95vw');
   });
 
   test('it applies timeline styles to the EuiFlyout', () => {
