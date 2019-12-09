@@ -35,11 +35,7 @@ import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
-import { hashedItemStore } from '../../../../plugins/kibana_utils/public';
-import {
-  createStateHash,
-  isStateHash
-} from './state_hashing';
+import { hashedItemStore, isStateHash, createStateHash } from '../../../../plugins/kibana_utils/public';
 
 export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
