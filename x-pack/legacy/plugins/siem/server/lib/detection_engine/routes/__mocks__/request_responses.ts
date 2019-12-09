@@ -45,12 +45,12 @@ export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams>
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsRestParams> => ({
+export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
   query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
   status: 'closed',
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsRestParams> => ({
+export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
   status: 'closed',
 });
 
