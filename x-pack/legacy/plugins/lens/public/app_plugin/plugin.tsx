@@ -73,7 +73,7 @@ export class AppPlugin {
     editorFrameSetupInterface.registerVisualization(xyVisualization);
     editorFrameSetupInterface.registerVisualization(datatableVisualization);
     editorFrameSetupInterface.registerVisualization(metricVisualization);
-    editorFrameSetupInterface.registerDatasource('indexpattern', indexPattern);
+    editorFrameSetupInterface.registerDatasource(indexPattern);
 
     kibana_legacy.registerLegacyApp({
       id: 'lens',
