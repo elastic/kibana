@@ -34,7 +34,6 @@ describe('Header', () => {
         header={columnHeader}
         onColumnRemoved={jest.fn()}
         onColumnSorted={jest.fn()}
-        setIsResizing={jest.fn()}
         sort={sort}
         timelineId={timelineId}
       />
@@ -50,7 +49,6 @@ describe('Header', () => {
             header={columnHeader}
             onColumnRemoved={jest.fn()}
             onColumnSorted={jest.fn()}
-            setIsResizing={jest.fn()}
             sort={sort}
             timelineId={timelineId}
           />
