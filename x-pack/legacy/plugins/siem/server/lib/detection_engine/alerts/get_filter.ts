@@ -42,7 +42,6 @@ export const getQueryFilter = (
 
 interface GetFilterArgs {
   type: RuleAlertParams['type'];
-  filter: Record<string, {}> | undefined | null;
   filters: PartialFilter[] | undefined | null;
   language: string | undefined | null;
   query: string | undefined | null;
@@ -52,7 +51,6 @@ interface GetFilterArgs {
 }
 
 export const getFilter = async ({
-  filter,
   filters,
   index,
   language,
@@ -94,9 +92,6 @@ export const getFilter = async ({
       } else {
         throw new TypeError('savedId parameter should be defined');
       }
-    }
-    case 'filter': {
-      return filter;
     }
   }
   return assertUnreachable(type);

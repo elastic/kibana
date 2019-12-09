@@ -47,7 +47,6 @@ export const buildRule = ({
     risk_score: ruleParams.riskScore,
     output_index: ruleParams.outputIndex,
     description: ruleParams.description,
-    filter: ruleParams.filter,
     from: ruleParams.from,
     immutable: ruleParams.immutable,
     index: ruleParams.index,
@@ -207,7 +206,9 @@ export const singleBulkCreate = async ({
     body: bulkBody,
   });
   const time2 = performance.now();
-  logger.debug(`individual bulk process time took: ${time2 - time1} milliseconds`);
+  logger.debug(
+    `individual bulk process time took: ${Number(time2 - time1).toFixed(2)} milliseconds`
+  );
   logger.debug(`took property says bulk took: ${firstResult.took} milliseconds`);
   if (firstResult.errors) {
     // go through the response status errors and see what
@@ -241,6 +242,7 @@ interface SingleSearchAfterParams {
   services: AlertServices;
   logger: Logger;
   pageSize: number;
+  filter: unknown;
 }
 
 // utilize search_after for paging results into bulk.
@@ -248,6 +250,7 @@ export const singleSearchAfter = async ({
   searchAfterSortId,
   ruleParams,
   services,
+  filter,
   logger,
   pageSize,
 }: SingleSearchAfterParams): Promise<SignalSearchResponse> => {
@@ -259,7 +262,7 @@ export const singleSearchAfter = async ({
       index: ruleParams.index,
       from: ruleParams.from,
       to: ruleParams.to,
-      filter: ruleParams.filter,
+      filter,
       size: pageSize,
       searchAfterSortId,
     });
@@ -287,6 +290,7 @@ interface SearchAfterAndBulkCreateParams {
   interval: string;
   enabled: boolean;
   pageSize: number;
+  filter: unknown;
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -297,6 +301,7 @@ export const searchAfterAndBulkCreate = async ({
   logger,
   id,
   signalsIndex,
+  filter,
   name,
   createdBy,
   updatedBy,
@@ -353,6 +358,7 @@ export const searchAfterAndBulkCreate = async ({
         ruleParams,
         services,
         logger,
+        filter,
         pageSize, // maximum number of docs to receive per search result.
       });
       if (searchAfterResult.hits.hits.length === 0) {

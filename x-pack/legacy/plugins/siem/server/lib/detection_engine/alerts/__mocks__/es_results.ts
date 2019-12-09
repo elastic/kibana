@@ -31,7 +31,6 @@ export const sampleRuleAlertParams = (
   references: ['http://google.com'],
   riskScore: riskScore ? riskScore : 50,
   maxSignals: maxSignals ? maxSignals : 10000,
-  filter: undefined,
   filters: undefined,
   savedId: undefined,
   meta: undefined,

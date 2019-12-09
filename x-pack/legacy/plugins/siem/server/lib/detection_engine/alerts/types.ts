@@ -35,7 +35,6 @@ export interface RuleAlertParams {
   description: string;
   enabled: boolean;
   falsePositives: string[];
-  filter: Record<string, {}> | undefined | null;
   filters: PartialFilter[] | undefined | null;
   from: string;
   immutable: boolean;
@@ -55,7 +54,7 @@ export interface RuleAlertParams {
   tags: string[];
   to: string;
   threats: ThreatParams[] | undefined | null;
-  type: 'filter' | 'query' | 'saved_query';
+  type: 'query' | 'saved_query';
 }
 
 export type RuleAlertParamsRest = Omit<
@@ -68,6 +67,16 @@ export type RuleAlertParamsRest = Omit<
   max_signals: RuleAlertParams['maxSignals'];
   risk_score: RuleAlertParams['riskScore'];
   output_index: RuleAlertParams['outputIndex'];
+};
+
+export interface SignalsParams {
+  signalIds: string[] | undefined | null;
+  query: object | undefined | null;
+  status: 'open' | 'closed';
+}
+
+export type SignalsRestParams = Omit<SignalsParams, 'signalIds'> & {
+  signal_ids: SignalsParams['signalIds'];
 };
 
 export type OutputRuleAlertRest = RuleAlertParamsRest & {
@@ -148,6 +157,10 @@ export type RuleAlertType = Alert & {
 
 export interface RulesRequest extends RequestFacade {
   payload: RuleAlertParamsRest;
+}
+
+export interface SignalsRequest extends RequestFacade {
+  payload: SignalsRestParams;
 }
 
 export interface UpdateRulesRequest extends RequestFacade {
