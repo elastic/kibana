@@ -15,7 +15,11 @@ import {
 } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, CREATED_BY_LABEL, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';
+import {
+  JOB_TYPE,
+  CREATED_BY_LABEL,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+} from '../../../../../../common/constants/new_job';
 import { ml } from '../../../../services/ml_api_service';
 import { getRichDetectors } from './util/general';
 

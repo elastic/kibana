@@ -11,7 +11,7 @@ import { MultiMetricJobCreator } from './multi_metric_job_creator';
 import { PopulationJobCreator } from './population_job_creator';
 import { AdvancedJobCreator } from './advanced_job_creator';
 
-import { JOB_TYPE } from './util/constants';
+import { JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export const jobCreatorFactory = (jobType: JOB_TYPE) => (
   indexPattern: IndexPattern,

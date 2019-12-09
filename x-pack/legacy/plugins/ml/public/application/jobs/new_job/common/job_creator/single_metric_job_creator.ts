@@ -15,7 +15,7 @@ import {
   ML_JOB_AGGREGATION,
   ES_AGGREGATION,
 } from '../../../../../../common/constants/aggregation_types';
-import { JOB_TYPE, CREATED_BY_LABEL } from './util/constants';
+import { JOB_TYPE, CREATED_BY_LABEL } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
 
 export class SingleMetricJobCreator extends JobCreator {

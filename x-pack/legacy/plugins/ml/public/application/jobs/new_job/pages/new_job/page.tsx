@@ -16,7 +16,7 @@ import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
   DEFAULT_BUCKET_SPAN,
-} from '../../common/job_creator/util/constants';
+} from '../../../../../../common/constants/new_job';
 import { ChartLoader } from '../../common/chart_loader';
 import { ResultsLoader } from '../../common/results_loader';
 import { JobValidator } from '../../common/job_validator';

@@ -8,7 +8,7 @@ import { IndexPatternsContract } from '../../../../../../../../../../src/plugins
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { CombinedJob } from '../../common/job_creator/configs';
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../common/job_creator/util/constants';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(indexPatterns: IndexPatternsContract) {
   const { job } = mlJobService.tempJobCloningObjects;

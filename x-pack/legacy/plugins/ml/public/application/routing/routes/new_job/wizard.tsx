@@ -13,7 +13,7 @@ import { basicResolvers } from '../../resolvers';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/new_job';
-import { JOB_TYPE } from '../../../jobs/new_job/common/job_creator/util/constants';
+import { JOB_TYPE } from '../../../../../common/constants/new_job';
 import { mlJobService } from '../../../services/job_service';
 import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_service';
 import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';

@@ -15,7 +15,11 @@ import { Aggregation, Field } from '../../../../../../common/types/fields';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
-import { JOB_TYPE, CREATED_BY_LABEL, SHARED_RESULTS_INDEX_NAME } from './util/constants';
+import {
+  JOB_TYPE,
+  CREATED_BY_LABEL,
+  SHARED_RESULTS_INDEX_NAME,
+} from '../../../../../../common/constants/new_job';
 import { isSparseDataJob } from './util/general';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
