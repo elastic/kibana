@@ -313,7 +313,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     div.setAttribute('data-test-subj', 'visualizationLoader');
     div.setAttribute('data-shared-item', '');
-    div.setAttribute('data-shared-item-container', '');
     div.setAttribute('data-rendering-count', '0');
     div.setAttribute('data-render-complete', 'false');
 
