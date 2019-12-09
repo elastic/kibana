@@ -13,7 +13,6 @@ import { isColorDark, hexToRgb } from '@elastic/eui';
 
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
-import { addAppRedirectMessageToUrl } from 'ui/notify';
 
 import appTemplate from './angular/templates/index.html';
 import listingTemplate from './angular/templates/listing_ng_wrapper.html';
@@ -59,22 +58,9 @@ export function initGraphApp(angularModule, deps) {
     Storage,
     canEditDrillDownUrls,
     graphSavePolicy,
-    licensing,
   } = deps;
 
   const app = angularModule;
-
-
-  licensing.license$.subscribe(license => {
-    const info = checkLicense(license);
-    const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
-
-    if (!licenseAllowsToShowThisPage) {
-      const newUrl = addAppRedirectMessageToUrl(addBasePath(kbnBaseUrl), info.message);
-      window.location.href = newUrl;
-      throw new Error('Graph license error');
-    }
-  });
 
   app.directive('vennDiagram', function (reactDirective) {
     return reactDirective(VennDiagram);
