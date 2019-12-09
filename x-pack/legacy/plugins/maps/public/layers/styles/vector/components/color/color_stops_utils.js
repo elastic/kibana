@@ -14,6 +14,30 @@ export function removeRow(colorStops, index) {
   return [...colorStops.slice(0, index), ...colorStops.slice(index + 1)];
 }
 
+export function addTermRow(colorStops, index) {
+  // const currentStop = colorStops[index].stop;
+  // if (index === colorStops.length - 1) {
+  //   // Adding row to end of list.
+  //   if (index !== 0) {
+  //     const prevStop = colorStops[index - 1].stop;
+  //   }
+  // } else {
+  //   // Adding row in middle of list.
+  //   const nextStop = colorStops[index + 1].stop;
+  // }
+
+  const newRow = {
+    stop: 'foobar',
+    color: '#FF0000',
+  };
+  return [
+    ...colorStops.slice(0, index + 1),
+    newRow,
+    ...colorStops.slice(index + 1),
+  ];
+}
+
+
 export function addRow(colorStops, index) {
   const currentStop = colorStops[index].stop;
   let delta = 1;

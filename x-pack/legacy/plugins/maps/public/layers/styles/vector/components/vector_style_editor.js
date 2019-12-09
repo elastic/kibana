@@ -28,6 +28,7 @@ export class VectorStyleEditor extends Component {
   state = {
     dateFields: [],
     numberFields: [],
+    stringFields: [],
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
@@ -55,7 +56,8 @@ export class VectorStyleEditor extends Component {
       return {
         label: await field.getLabel(),
         name: field.getName(),
-        origin: field.getOrigin()
+        origin: field.getOrigin(),
+        dataType: await field.getDataType()
       };
     };
     const dateFields = await this.props.layer.getDateFields();
@@ -74,6 +76,12 @@ export class VectorStyleEditor extends Component {
       this.setState({ numberFields: numberFieldsArray });
     }
 
+    const stringFields = await this.props.layer.getStringFields();
+    const stringFieldPromises = stringFields.map(getFieldMeta);
+    const stringFieldsArray = await Promise.all(stringFieldPromises);
+    if (this._isMounted && !_.isEqual(stringFieldsArray, this.state.stringFields)) {
+      this.setState({ stringFields: stringFieldsArray });
+    }
   }
 
   async _loadSupportedFeatures() {
@@ -125,6 +133,10 @@ export class VectorStyleEditor extends Component {
     this.props.onIsTimeAwareChange(event.target.checked);
   };
 
+  _getOrdinalAndStringFields() {
+    return [...this.state.dateFields, ...this.state.numberFields, ...this.state.stringFields];
+  }
+
   _renderFillColor() {
     return (
       <VectorStyleColorEditor
@@ -132,6 +144,7 @@ export class VectorStyleEditor extends Component {
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.fillColor}
         ordinalFields={this._getOrdinalFields()}
+        ordinalAndStringFields={this._getOrdinalAndStringFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.fillColor.options}
       />
@@ -145,6 +158,7 @@ export class VectorStyleEditor extends Component {
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.lineColor}
         ordinalFields={this._getOrdinalFields()}
+        ordinalAndStringFields={this._getOrdinalAndStringFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineColor.options}
       />

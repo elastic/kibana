@@ -54,7 +54,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   supportsFeatureState() {
-    return true;
+    return this._options.type !== 'term';
   }
 
   isScaled() {
@@ -62,6 +62,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   _getMbColor() {
+
     const isDynamicConfigComplete = _.has(this._options, 'field.name') && _.has(this._options, 'color');
     if (!isDynamicConfigComplete) {
       return null;
@@ -71,32 +72,53 @@ export class DynamicColorProperty extends DynamicStyleProperty {
       return null;
     }
 
-    return this._getMBDataDrivenColor({
-      targetName: getComputedFieldName(this._styleName, this._options.field.name),
-      colorStops: this._getMBColorStops(),
-      isSteps: this._options.useCustomColorRamp,
-    });
+    return this._getMBDataDrivenColor();
   }
 
-  _getMBDataDrivenColor({ targetName, colorStops, isSteps }) {
-    if (isSteps) {
-      const firstStopValue = colorStops[0];
-      const lessThenFirstStopValue = firstStopValue - 1;
-      return [
-        'step',
-        ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
-        'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
-        ...colorStops
+  _getMBDataDrivenColor() {
+    const targetName = getComputedFieldName(this._styleName, this._options.field.name);
+    const colorStops = this._getMBColorStops();
+
+    if (this._options.type === 'term') {
+
+      const mbStops = [];
+      if (this._options.customColorRamp) {
+        this._options.customColorRamp.forEach((stop) => {
+          mbStops.push(stop.stop);
+          mbStops.push(stop.color);
+        });
+      }
+      mbStops.push('rgba(0,0,0,0)');
+      const expression = [
+        'match', ['get', this._options.field.name],
+        ...mbStops,
       ];
+      return expression;
+
+    } else {
+
+      if (this._options.useCustomColorRamp) {
+        const firstStopValue = colorStops[0];
+        const lessThenFirstStopValue = firstStopValue - 1;
+        return [
+          'step',
+          ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
+          'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
+          ...colorStops
+        ];
+      } else {
+        return [
+          'interpolate',
+          ['linear'],
+          ['coalesce', ['feature-state', targetName], -1],
+          -1, 'rgba(0,0,0,0)',
+          ...colorStops
+        ];
+      }
+
     }
 
-    return [
-      'interpolate',
-      ['linear'],
-      ['coalesce', ['feature-state', targetName], -1],
-      -1, 'rgba(0,0,0,0)',
-      ...colorStops
-    ];
+
   }
 
 
@@ -112,14 +134,19 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   renderHeader() {
-    if (this._options.color) {
-      return (<ColorGradient colorRampName={this._options.color}/>);
+    if  (this._options.type === 'term') {
+      return (<span>Must show legend</span>);
     } else {
-      return null;
+      if (this._options.color) {
+        return (<ColorGradient colorRampName={this._options.color}/>);
+      } else {
+        return null;
+      }
     }
   }
 
 }
+
 
 
 

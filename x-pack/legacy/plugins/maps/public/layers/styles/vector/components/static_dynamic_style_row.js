@@ -78,6 +78,7 @@ export class StaticDynamicStyleRow extends Component {
       return (
         <Fragment>
           <DynamicSelector
+            ordinalAndStringFields={this.props.ordinalAndStringFields}
             ordinalFields={this.props.ordinalFields}
             onChange={this._onDynamicStyleChange}
             styleOptions={this._getStyleOptions()}

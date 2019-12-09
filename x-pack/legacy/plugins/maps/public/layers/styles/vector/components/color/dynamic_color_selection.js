@@ -12,33 +12,53 @@ import { FieldSelect, fieldShape } from '../field_select';
 import { ColorRampSelect } from './color_ramp_select';
 import { EuiSpacer } from '@elastic/eui';
 
-export function DynamicColorSelection({ ordinalFields, onChange, styleOptions }) {
-  const onFieldChange = ({ field }) => {
-    onChange({ ...styleOptions, field });
+export class DynamicColorSelection extends React.Component {
+
+
+  onFieldChange = ({ field }) => {
+    if (field.dataType === 'string') {
+      this.props.onChange({ ...this.props.styleOptions, field });
+    } else {
+      this.props.onChange({ ...this.props.styleOptions, field });
+    }
   };
 
-  const onColorChange = colorOptions => {
-    onChange({ ...styleOptions, ...colorOptions });
+  onColorChange = colorOptions => {
+    this.props.onChange({ ...this.props.styleOptions, ...colorOptions });
   };
 
-  return (
-    <Fragment>
+  _renderColorRampSelect() {
+    if (!this.props.styleOptions.field) {
+      return null;
+    }
+
+    return (
       <ColorRampSelect
-        onChange={onColorChange}
-        color={styleOptions.color}
-        customColorRamp={styleOptions.customColorRamp}
-        useCustomColorRamp={_.get(styleOptions, 'useCustomColorRamp', false)}
+        fieldDataType={this.props.styleOptions.field.dataType}
+        onChange={this.onColorChange}
+        color={this.props.styleOptions.color}
+        customColorRamp={this.props.styleOptions.customColorRamp}
+        useCustomColorRamp={_.get(this.props.styleOptions, 'useCustomColorRamp', false)}
         compressed
       />
-      <EuiSpacer size="s" />
-      <FieldSelect
-        fields={ordinalFields}
-        selectedFieldName={_.get(styleOptions, 'field.name')}
-        onChange={onFieldChange}
-        compressed
-      />
-    </Fragment>
-  );
+    );
+  }
+
+  render() {
+    const { ordinalAndStringFields, styleOptions } = this.props;
+    return (
+      <Fragment>
+        <FieldSelect
+          fields={ordinalAndStringFields}
+          selectedFieldName={_.get(styleOptions, 'field.name')}
+          onChange={this.onFieldChange}
+          compressed
+        />
+        <EuiSpacer size="s"/>
+        {this._renderColorRampSelect()}
+      </Fragment>
+    );
+  }
 }
 
 DynamicColorSelection.propTypes = {

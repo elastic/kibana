@@ -15,45 +15,77 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
+  EuiFieldText
 } from '@elastic/eui';
-import { addRow, removeRow, isColorInvalid, isStopInvalid, isInvalid } from './color_stops_utils';
+import { addRow, removeRow, isColorInvalid, isStopInvalid, isInvalid, addTermRow } from './color_stops_utils';
 
 const DEFAULT_COLOR = '#FF0000';
 
-export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], onChange }) => {
+export const ColorStops = ({ fieldDataType, colorStops, onChange }) => {
+
+  if (!colorStops) {
+    if (fieldDataType === 'string') {
+      colorStops = [{ stop: 'foobar', color: DEFAULT_COLOR }];
+    } else {
+      colorStops = [{ stop: 0, color: DEFAULT_COLOR }];
+    }
+  }
+
   function getStopInput(stop, index) {
     const onStopChange = e => {
       const newColorStops = _.cloneDeep(colorStops);
-      const sanitizedValue = parseFloat(e.target.value);
-      newColorStops[index].stop = isNaN(sanitizedValue) ? '' : sanitizedValue;
+      let sanitizedValue;
+      let isInvalidBool = false;
+      if (fieldDataType === 'string') {
+        sanitizedValue = e.target.value;
+      } else {
+        sanitizedValue = parseFloat(e.target.value);
+        sanitizedValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
+        isInvalidBool = isInvalid(newColorStops);
+      }
+      newColorStops[index].stop = sanitizedValue;
       onChange({
         colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
+        isInvalid: isInvalidBool
       });
     };
 
     let error;
-    if (isStopInvalid(stop)) {
-      error = 'Stop must be a number';
-    } else if (index !== 0 && colorStops[index - 1].stop >= stop) {
-      error = 'Stop must be greater than previous stop value';
+    if (fieldDataType !== 'string') {
+      if (isStopInvalid(stop)) {
+        error = 'Stop must be a number';
+      } else if (index !== 0 && colorStops[index - 1].stop >= stop) {
+        error = 'Stop must be greater than previous stop value';
+      }
+      return {
+        stopError: error,
+        stopInput: (
+          <EuiFieldNumber aria-label="Stop" value={stop} onChange={onStopChange} compressed />
+        ),
+      };
+    } else {
+      return {
+        stopError: null,
+        stopInput: (
+          <EuiFieldText aria-label="Stop" value={stop} onChange={onStopChange} compressed/>
+        )
+      };
     }
-
-    return {
-      stopError: error,
-      stopInput: (
-        <EuiFieldNumber aria-label="Stop" value={stop} onChange={onStopChange} compressed />
-      ),
-    };
   }
 
   function getColorInput(color, index) {
     const onColorChange = color => {
       const newColorStops = _.cloneDeep(colorStops);
       newColorStops[index].color = color;
+
+      let isInvalidBool = false;
+      if (fieldDataType !== 'string') {
+        isInvalidBool = isInvalid(newColorStops);
+      }
+
       onChange({
         colorStops: newColorStops,
-        isInvalid: isInvalid(newColorStops),
+        isInvalid: isInvalidBool,
       });
     };
 
@@ -83,7 +115,12 @@ export const ColorStops = ({ colorStops = [{ stop: 0, color: DEFAULT_COLOR }], o
     };
 
     const onAdd = () => {
-      const newColorStops = addRow(colorStops, index);
+      let newColorStops;
+      if (fieldDataType === 'string') {
+        newColorStops = addTermRow(colorStops, index);
+      } else {
+        newColorStops = addRow(colorStops, index);
+      }
 
       onChange({
         colorStops: newColorStops,

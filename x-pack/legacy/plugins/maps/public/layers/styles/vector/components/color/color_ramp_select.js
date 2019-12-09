@@ -15,7 +15,9 @@ import { ColorStops } from './color_stops';
 const CUSTOM_COLOR_RAMP = 'CUSTOM_COLOR_RAMP';
 
 export class ColorRampSelect extends Component {
-  state = {};
+  state = {
+    customColorRamp: undefined
+  };
 
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.customColorRamp !== prevState.prevPropsCustomColorRamp) {
@@ -44,11 +46,24 @@ export class ColorRampSelect extends Component {
     }
 
     this.props.onChange({
+      type: 'ordinal',
       customColorRamp: colorStops,
     });
   };
 
-  render() {
+  _onCustomStringColorRampChange = ({ colorStops, isInvalid }) => {
+    // Manage invalid custom color ramp in local state
+    if (isInvalid) {
+      this.setState({ customColorRamp: colorStops });
+      return;
+    }
+    this.props.onChange({
+      type: 'term',
+      customColorRamp: colorStops,
+    });
+  };
+
+  _renderOrdinalColorRampSelection() {
     const {
       color,
       onChange, // eslint-disable-line no-unused-vars
@@ -95,6 +110,33 @@ export class ColorRampSelect extends Component {
         {colorStopsInput}
       </Fragment>
     );
+  }
+
+  _renderStringColorRampSelection() {
+    const colorStopsInput = (
+      <Fragment>
+        <EuiSpacer size="s" />
+        <ColorStops
+          colorStops={this.state.customColorRamp}
+          onChange={this._onCustomStringColorRampChange}
+          fieldDataType={this.props.fieldDataType}
+        />
+      </Fragment>
+    );
+
+    return (
+      <Fragment>
+        {colorStopsInput}
+      </Fragment>
+    );
+  }
+
+  render() {
+    if (this.props.fieldDataType === 'string') {
+      return this._renderStringColorRampSelection();
+    } else {
+      return this._renderOrdinalColorRampSelection();
+    }
   }
 }
 

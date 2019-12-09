@@ -191,6 +191,10 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
+  async getStringFields() {
+    return await this._source.getStringFields();
+  }
+
   async getDateFields() {
     return await this._source.getDateFields();
   }

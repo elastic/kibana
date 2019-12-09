@@ -119,6 +119,20 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
+  async getStringFields() {
+    try {
+      const indexPattern = await this.getIndexPattern();
+      const aggFields = indexPattern.fields.getByType('string').filter(field => {
+        return field.aggregatable;
+      });
+      return aggFields.map(field => {
+        return this.createField({ fieldName: field.name });
+      });
+    } catch (error) {
+      return [];
+    }
+  }
+
   getFieldNames() {
     return [this._descriptor.geoField];
   }
