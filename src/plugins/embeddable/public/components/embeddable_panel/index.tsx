@@ -17,9 +17,13 @@
  * under the License.
  */
 
-export const storybookAliases = {
-  canvas: 'x-pack/legacy/plugins/canvas/scripts/storybook_new.js',
-  embeddable: 'src/plugins/embeddable/scripts/storybook.js',
-  infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
-  siem: 'x-pack/legacy/plugins/siem/scripts/storybook.js',
+import { EuiPanel } from '@elastic/eui';
+import * as React from 'react';
+
+export const EmbeddablePanel = () => {
+  return (
+    <EuiPanel data-test-subj="embeddablePanel" paddingSize="none" role="figure">
+      Hello world
+    </EuiPanel>
+  );
 };

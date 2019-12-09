@@ -17,9 +17,10 @@
  * under the License.
  */
 
-export const storybookAliases = {
-  canvas: 'x-pack/legacy/plugins/canvas/scripts/storybook_new.js',
-  embeddable: 'src/plugins/embeddable/scripts/storybook.js',
-  infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
-  siem: 'x-pack/legacy/plugins/siem/scripts/storybook.js',
-};
+import { join } from 'path';
+
+// eslint-disable-next-line
+require('@kbn/storybook').runStorybookCli({
+  name: 'embeddable',
+  storyGlobs: [join(__dirname, '..', 'public', 'components', '**', '*.examples.tsx')],
+});

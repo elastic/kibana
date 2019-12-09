@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export const storybookAliases = {
-  canvas: 'x-pack/legacy/plugins/canvas/scripts/storybook_new.js',
-  embeddable: 'src/plugins/embeddable/scripts/storybook.js',
-  infra: 'x-pack/legacy/plugins/infra/scripts/storybook.js',
-  siem: 'x-pack/legacy/plugins/siem/scripts/storybook.js',
-};
+import * as React from 'react';
+import { storiesOf } from '@storybook/react';
+import { EmbeddablePanel } from '..';
+
+storiesOf('components/EmbeddablePanel', module).add('default', () => <EmbeddablePanel />);
