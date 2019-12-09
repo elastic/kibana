@@ -143,7 +143,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     const hasItems = items.length > 0;
     return (
       <ScrollableLogTextStreamViewWrapper>
-        {isReloading ? (
+        {isReloading && (!isStreaming || !hasItems) ? (
           <InfraLoadingPanel
             width="100%"
             height="100%"

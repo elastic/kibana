@@ -5,7 +5,7 @@
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
 import createContainer from 'constate';
-import { pick } from 'lodash';
+import { pick, throttle } from 'lodash';
 import { useGraphQLQueries } from './gql_queries';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
 import { InfraLogEntry } from './types';
@@ -38,16 +38,17 @@ type ActionObj = ReceiveEntriesAction | FetchOrErrorAction;
 
 type Dispatch = (action: ActionObj) => void;
 
-interface LogEntriesFetchParams {
+interface LogEntriesProps {
   filterQuery: string | null;
   timeKey: TimeKey | null;
   pagesBeforeStart: number | null;
   pagesAfterEnd: number | null;
   sourceId: string;
+  isAutoReloading: boolean;
 }
 
-type FetchEntriesParams = LogEntriesFetchParams;
-type FetchMoreEntriesParams = Pick<LogEntriesFetchParams, 'pagesBeforeStart' | 'pagesAfterEnd'>;
+type FetchEntriesParams = Omit<LogEntriesProps, 'isAutoReloading'>;
+type FetchMoreEntriesParams = Pick<LogEntriesProps, 'pagesBeforeStart' | 'pagesAfterEnd'>;
 
 export interface LogEntriesResponse {
   entries: InfraLogEntry[];
@@ -119,16 +120,17 @@ const shouldFetchMoreEntries = (
 const useFetchEntriesEffect = (
   state: LogEntriesStateParams,
   dispatch: Dispatch,
-  params: FetchEntriesParams
+  props: LogEntriesProps
 ) => {
   const { getLogEntriesAround, getLogEntriesBefore, getLogEntriesAfter } = useGraphQLQueries();
 
-  const [prevParams, cachePrevParams] = useState(params);
+  const [prevParams, cachePrevParams] = useState(props);
+  const [startedStreaming, setStartedStreaming] = useState(false);
 
   const runFetchNewEntriesRequest = async () => {
     dispatch({ type: Action.FetchingNewEntries });
     try {
-      const payload = await getLogEntriesAround(params);
+      const payload = await getLogEntriesAround(props);
       dispatch({ type: Action.ReceiveNewEntries, payload });
     } catch (e) {
       dispatch({ type: Action.ErrorOnNewEntries });
@@ -143,7 +145,7 @@ const useFetchEntriesEffect = (
       : state.entries[state.entries.length - 1].key;
     const getMoreLogEntries = getEntriesBefore ? getLogEntriesBefore : getLogEntriesAfter;
     try {
-      const payload = await getMoreLogEntries({ ...params, timeKey });
+      const payload = await getMoreLogEntries({ ...props, timeKey });
       dispatch({
         type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
         payload,
@@ -154,22 +156,23 @@ const useFetchEntriesEffect = (
   };
 
   const fetchNewEntriesEffectDependencies = Object.values(
-    pick(params, ['sourceId', 'filterQuery', 'timeKey'])
+    pick(props, ['sourceId', 'filterQuery', 'timeKey'])
   );
   const fetchNewEntriesEffect = () => {
-    if (shouldFetchNewEntries({ ...params, ...state, prevParams })) {
+    if (props.isAutoReloading) return;
+    if (shouldFetchNewEntries({ ...props, ...state, prevParams })) {
       runFetchNewEntriesRequest();
     }
-    cachePrevParams(params);
+    cachePrevParams(props);
   };
 
   const fetchMoreEntriesEffectDependencies = [
-    ...Object.values(pick(params, ['pagesAfterEnd', 'pagesBeforeStart'])),
+    ...Object.values(pick(props, ['pagesAfterEnd', 'pagesBeforeStart'])),
     Object.values(pick(state, ['hasMoreBeforeStart', 'hasMoreAfterEnd'])),
   ];
   const fetchMoreEntriesEffect = () => {
-    if (state.isLoadingMore) return;
-    const direction = shouldFetchMoreEntries(params, state);
+    if (state.isLoadingMore || props.isAutoReloading) return;
+    const direction = shouldFetchMoreEntries(props, state);
     switch (direction) {
       case ShouldFetchMoreEntries.Before:
       case ShouldFetchMoreEntries.After:
@@ -179,22 +182,41 @@ const useFetchEntriesEffect = (
         break;
     }
   };
+
+  const fetchNewerEntries = useCallback(
+    throttle(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), 500),
+    [props]
+  );
+
+  const streamEntriesEffectDependencies = [props.isAutoReloading, state.isLoadingMore];
+  const streamEntriesEffect = () => {
+    (async () => {
+      if (props.isAutoReloading && !state.isLoadingMore) {
+        if (startedStreaming) {
+          await new Promise(res => setTimeout(res, 5000));
+        } else {
+          setStartedStreaming(true);
+        }
+        fetchNewerEntries();
+      } else if (!props.isAutoReloading) {
+        setStartedStreaming(false);
+      }
+    })();
+  };
+
   useEffect(fetchNewEntriesEffect, fetchNewEntriesEffectDependencies);
   useEffect(fetchMoreEntriesEffect, fetchMoreEntriesEffectDependencies);
+  useEffect(streamEntriesEffect, streamEntriesEffectDependencies);
 
-  return {
-    fetchNewerEntries: useCallback(() => runFetchMoreEntriesRequest(ShouldFetchMoreEntries.After), [
-      params,
-    ]),
-  };
+  return { fetchNewerEntries };
 };
 
 export const useLogEntriesState: (
-  params: LogEntriesFetchParams
-) => [LogEntriesStateParams, LogEntriesCallbacks] = params => {
+  props: LogEntriesProps
+) => [LogEntriesStateParams, LogEntriesCallbacks] = props => {
   const [state, dispatch] = useReducer(logEntriesStateReducer, logEntriesInitialState);
 
-  const { fetchNewerEntries } = useFetchEntriesEffect(state, dispatch, params);
+  const { fetchNewerEntries } = useFetchEntriesEffect(state, dispatch, props);
   const callbacks = { fetchNewerEntries };
 
   return [state, callbacks];
@@ -207,24 +229,26 @@ const logEntriesStateReducer = (prevState: LogEntriesStateParams, action: Action
     case Action.ReceiveEntriesBefore: {
       const prevEntries = cleanDuplicateItems(prevState.entries, action.payload.entries);
       const newEntries = [...action.payload.entries, ...prevEntries];
-      const { hasMoreBeforeStart, entriesStart } = action.payload;
+      const { hasMoreBeforeStart, entriesStart, lastLoadedTime } = action.payload;
       const update = {
         entries: newEntries,
         isLoadingMore: false,
         hasMoreBeforeStart,
         entriesStart,
+        lastLoadedTime,
       };
       return { ...prevState, ...update };
     }
     case Action.ReceiveEntriesAfter: {
       const prevEntries = cleanDuplicateItems(prevState.entries, action.payload.entries);
       const newEntries = [...prevEntries, ...action.payload.entries];
-      const { hasMoreAfterEnd, entriesEnd } = action.payload;
+      const { hasMoreAfterEnd, entriesEnd, lastLoadedTime } = action.payload;
       const update = {
         entries: newEntries,
         isLoadingMore: false,
         hasMoreAfterEnd,
         entriesEnd,
+        lastLoadedTime,
       };
       return { ...prevState, ...update };
     }
