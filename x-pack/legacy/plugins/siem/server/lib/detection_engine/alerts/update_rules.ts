@@ -53,7 +53,6 @@ export const updateRules = async ({
   savedId,
   meta,
   filters,
-  filter,
   from,
   immutable,
   id,
@@ -88,7 +87,6 @@ export const updateRules = async ({
     {
       description,
       falsePositives,
-      filter,
       from,
       immutable,
       query,
