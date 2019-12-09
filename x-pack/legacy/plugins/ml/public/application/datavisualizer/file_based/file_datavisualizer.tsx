@@ -5,8 +5,8 @@
  */
 
 import React, { FC, Fragment } from 'react';
-import { IndexPatterns } from 'ui/index_patterns';
 import { timefilter } from 'ui/timefilter';
+import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
 
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
@@ -15,7 +15,7 @@ import { NavigationMenu } from '../../components/navigation_menu';
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
 
 export interface FileDataVisualizerPageProps {
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatternsContract;
   kibanaConfig: KibanaConfigTypeFix;
 }
 
