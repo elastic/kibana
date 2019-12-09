@@ -14,20 +14,16 @@ import ServerMock from 'mock-http-server';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
+  const supertest = getService('supertest');
   describe('data source installation', () => {
     const registryMock = new ServerMock({ host: 'localhost', port: 6666 });
-    beforeEach(() => {
+    beforeEach(async () => {
       registryMock.start(() => {});
-    });
-    afterEach(() => {
-      registryMock.stop(() => {});
-    });
-    it('works with a package with only an ingest pipeline', async () => {
       const packageResponse = readFileSync(
-        path.join(__dirname, '/fixtures/data_sources/package/yamlpipeline_1.0.0')
+        path.join(__dirname, '/fixtures/packages/package/yamlpipeline_1.0.0')
       ).toString();
       const fileResponse = readFileSync(
-        path.join(__dirname, '/fixtures/data_sources/epr/yamlpipeline_1.0.0.tar.gz')
+        path.join(__dirname, '/fixtures/packages/epr/yamlpipeline_1.0.0.tar.gz')
       );
       registryMock.on({
         method: 'GET',
@@ -49,7 +45,6 @@ export default function({ getService }: FtrProviderContext) {
         },
       });
 
-      const supertest = getService('supertest');
       const installPackage = async () => {
         const response = await supertest
           .get('/api/epm/install/yamlpipeline-1.0.0')
@@ -57,14 +52,31 @@ export default function({ getService }: FtrProviderContext) {
           .expect(200);
         return response.body;
       };
+      // commment for debugging
+      await installPackage();
 
-      const packageInstallResponse = await installPackage();
-      console.log('packageInstallResponse is: ', packageInstallResponse);
-      console.log(
-        'requests are',
-        registryMock.requests().map(r => r.url)
-      );
-
+      // uncomment for debugging
+      // const packageInstallResponse = await installPackage();
+      // console.log('packageInstallResponse is: ', packageInstallResponse);
+      // console.log(
+      //   'requests are',
+      //   registryMock.requests().map(r => r.url)
+      // );
+    });
+    afterEach(() => {
+      registryMock.stop(() => {});
+    });
+    it('test setup works', async () => {
+      const readPackageSavedObject = async () => {
+        const response = await supertest
+          .get('/api/saved_objects/epm-package/yamlpipeline-1.0.0')
+          .expect(200);
+        return response.body;
+      };
+      const savedObjectResponse = await readPackageSavedObject();
+      expect(savedObjectResponse.id).to.be('yamlpipeline-1.0.0');
+    });
+    it('works with a package with only an ingest pipeline', async () => {
       expect(true).to.be(true);
     });
   });
