@@ -25,13 +25,13 @@ import moment from 'moment';
 import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore formatNumber
 import { formatNumber } from '@elastic/eui/lib/services/format';
-import { Ping, PingResults } from '../../../common/graphql/types';
-import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
-import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
-import { pingsQuery } from '../../queries';
-import { LocationName } from './location_name';
-import { Criteria, Pagination } from './monitor_list';
-import { PingListExpandedRowComponent } from './ping_list/expanded_row';
+import { Ping, PingResults } from '../../../../common/graphql/types';
+import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../../lib/helper';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../../higher_order';
+import { pingsQuery } from '../../../queries';
+import { LocationName } from './../location_name';
+import { Criteria, Pagination } from './../monitor_list';
+import { PingListExpandedRowComponent } from './expanded_row';
 
 interface PingListQueryResult {
   allPings?: PingResults;
@@ -83,6 +83,10 @@ export const PingListComponent = ({
   selectedLocation,
 }: Props) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
+
+  useEffect(() => {
+    onUpdateApp();
+  }, [selectedOption]);
 
   const statusOptions: EuiComboBoxOptionProps[] = [
     {
@@ -142,8 +146,7 @@ export const PingListComponent = ({
       ),
     },
     {
-      align: 'left',
-      dataType: 'number',
+      align: 'center',
       field: 'observer.geo.name',
       name: i18n.translate('xpack.uptime.pingList.locationNameColumnLabel', {
         defaultMessage: 'Location',
@@ -171,36 +174,31 @@ export const PingListComponent = ({
         }),
     },
     {
-      align: 'left',
+      align: 'right',
       field: 'error.type',
       name: i18n.translate('xpack.uptime.pingList.errorTypeColumnLabel', {
         defaultMessage: 'Error type',
       }),
+      render: (error: string) => error ?? '-',
     },
   ];
-  useEffect(() => {
-    onUpdateApp();
-  }, [selectedOption]);
-  let pings: Ping[] = [];
-  if (data && data.allPings && data.allPings.pings) {
-    pings = data.allPings.pings;
-    const hasStatus: boolean = pings.reduce(
-      (hasHttpStatus: boolean, currentPing: Ping) =>
-        hasHttpStatus || !!get(currentPing, 'http.response.status_code'),
-      false
-    );
-    if (hasStatus) {
-      columns.push({
-        field: 'http.response.status_code',
-        // @ts-ignore "align" property missing on type definition for column type
-        align: 'right',
-        name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
-          defaultMessage: 'Response code',
-        }),
-        render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
-      });
-    }
+
+  const pings: Ping[] = data?.allPings?.pings ?? [];
+
+  const hasStatus: boolean = pings.some(
+    (currentPing: Ping) => !!currentPing?.http?.response?.status_code
+  );
+  if (hasStatus) {
+    columns.push({
+      field: 'http.response.status_code',
+      align: 'right',
+      name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
+        defaultMessage: 'Response code',
+      }),
+      render: (statusCode: string) => <EuiBadge>{statusCode}</EuiBadge>,
+    });
   }
+
   columns.push({
     align: 'right',
     width: '40px',

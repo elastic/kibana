@@ -27,10 +27,7 @@ export { getFromSavedObject, getRoutes, flattenHitWrapper };
 export { IFieldType as FieldType };
 export {
   Field,
-  FieldListInterface,
+  IFieldList,
   IndexPattern,
-  IndexPatterns,
-  IndexPatternsStart,
-  IndexPatternsSetup,
-  IndexPatternsService,
+  IndexPatternsContract,
 } from '../../../../../plugins/data/public';
