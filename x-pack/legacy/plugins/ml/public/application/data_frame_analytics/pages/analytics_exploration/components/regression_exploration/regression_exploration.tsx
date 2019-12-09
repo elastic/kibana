@@ -5,31 +5,26 @@
  */
 
 import React, { FC, Fragment, useState, useEffect } from 'react';
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiCallOut, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
 import { DataFrameAnalyticsConfig } from '../../../../common';
 import { EvaluatePanel } from './evaluate_panel';
 import { ResultsTable } from './results_table';
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
-import { RegressionResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
+import { ResultsSearchQuery, defaultSearchQuery } from '../../../../common/analytics';
+import { LoadingPanel } from '../loading_panel';
 
 interface GetDataFrameAnalyticsResponse {
   count: number;
   data_frame_analytics: DataFrameAnalyticsConfig[];
 }
 
-const LoadingPanel: FC = () => (
-  <EuiPanel className="eui-textCenter">
-    <EuiLoadingSpinner size="xl" />
-  </EuiPanel>
-);
-
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-        defaultMessage: 'Regression job ID {jobId}',
+        defaultMessage: 'Destination index for regression job ID {jobId}',
         values: { jobId },
       })}
     </span>
@@ -45,7 +40,7 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
-  const [searchQuery, setSearchQuery] = useState<RegressionResultsSearchQuery>(defaultSearchQuery);
+  const [searchQuery, setSearchQuery] = useState<ResultsSearchQuery>(defaultSearchQuery);
 
   const loadJobConfig = async () => {
     setIsLoadingJobConfig(true);

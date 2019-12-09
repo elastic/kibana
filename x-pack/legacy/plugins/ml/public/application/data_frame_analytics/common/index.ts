@@ -20,6 +20,7 @@ export {
   RegressionEvaluateResponse,
   getValuesFromResponse,
   loadEvalData,
+  loadDocsCount,
   Eval,
   getPredictedFieldName,
   INDEX_STATUS,

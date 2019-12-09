@@ -172,11 +172,30 @@ export const isClassificationAnalysis = (arg: any): arg is ClassificationAnalysi
   return keys.length === 1 && keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION;
 };
 
-export const isRegressionResultsSearchBoolQuery = (
-  arg: any
-): arg is RegressionResultsSearchBoolQuery => {
+export const isResultsSearchBoolQuery = (arg: any): arg is ResultsSearchBoolQuery => {
   const keys = Object.keys(arg);
   return keys.length === 1 && keys[0] === 'bool';
+};
+
+export const isRegressionEvaluateResponse = (arg: any): arg is RegressionEvaluateResponse => {
+  const keys = Object.keys(arg);
+  return (
+    keys.length === 1 &&
+    keys[0] === ANALYSIS_CONFIG_TYPE.REGRESSION &&
+    arg?.regression?.mean_squared_error !== undefined &&
+    arg?.regression?.r_squared !== undefined
+  );
+};
+
+export const isClassificationEvaluateResponse = (
+  arg: any
+): arg is ClassificationEvaluateResponse => {
+  const keys = Object.keys(arg);
+  return (
+    keys.length === 1 &&
+    keys[0] === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
+    arg?.classification?.multiclass_confusion_matrix !== undefined
+  );
 };
 
 export interface DataFrameAnalyticsConfig {
@@ -273,17 +292,14 @@ export function getValuesFromResponse(response: RegressionEvaluateResponse) {
 
   return { meanSquaredError, rSquared };
 }
-interface RegressionResultsSearchBoolQuery {
+interface ResultsSearchBoolQuery {
   bool: Dictionary<any>;
 }
-interface RegressionResultsSearchTermQuery {
+interface ResultsSearchTermQuery {
   term: Dictionary<any>;
 }
 
-export type RegressionResultsSearchQuery =
-  | RegressionResultsSearchBoolQuery
-  | RegressionResultsSearchTermQuery
-  | SavedSearchQuery;
+export type ResultsSearchQuery = ResultsSearchBoolQuery | ResultsSearchTermQuery | SavedSearchQuery;
 
 export function getEvalQueryBody({
   resultsField,
@@ -293,16 +309,16 @@ export function getEvalQueryBody({
 }: {
   resultsField: string;
   isTraining: boolean;
-  searchQuery?: RegressionResultsSearchQuery;
+  searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
 }) {
-  let query: RegressionResultsSearchQuery = {
+  let query: ResultsSearchQuery = {
     term: { [`${resultsField}.is_training`]: { value: isTraining } },
   };
 
   if (searchQuery !== undefined && ignoreDefaultQuery === true) {
     query = searchQuery;
-  } else if (searchQuery !== undefined && isRegressionResultsSearchBoolQuery(searchQuery)) {
+  } else if (searchQuery !== undefined && isResultsSearchBoolQuery(searchQuery)) {
     const searchQueryClone = cloneDeep(searchQuery);
     searchQueryClone.bool.must.push(query);
     query = searchQueryClone;
@@ -325,7 +341,7 @@ export const loadEvalData = async ({
   dependentVariable: string;
   resultsField: string;
   predictionFieldName?: string;
-  searchQuery?: RegressionResultsSearchQuery;
+  searchQuery?: ResultsSearchQuery;
   ignoreDefaultQuery?: boolean;
   jobType: ANALYSIS_CONFIG_TYPE;
 }) => {
@@ -371,5 +387,55 @@ export const loadEvalData = async ({
   } catch (e) {
     results.error = getErrorMessage(e);
     return results;
+  }
+};
+
+interface TrackTotalHitsSearchResponse {
+  hits: {
+    total: {
+      value: number;
+      relation: string;
+    };
+    hits: any[];
+  };
+}
+
+export const loadDocsCount = async ({
+  ignoreDefaultQuery = true,
+  isTraining,
+  searchQuery,
+  resultsField,
+  destIndex,
+}: {
+  ignoreDefaultQuery?: boolean;
+  isTraining: boolean;
+  searchQuery: SavedSearchQuery;
+  resultsField: string;
+  destIndex: string;
+}): Promise<{
+  docsCount: number | null;
+  success: boolean;
+}> => {
+  const query = getEvalQueryBody({ resultsField, isTraining, ignoreDefaultQuery, searchQuery });
+
+  try {
+    const body: SearchQuery = {
+      track_total_hits: true,
+      query,
+    };
+
+    const resp: TrackTotalHitsSearchResponse = await ml.esSearch({
+      index: destIndex,
+      size: 0,
+      body,
+    });
+
+    const docsCount = resp.hits.total && resp.hits.total.value;
+    return { docsCount, success: true };
+  } catch (e) {
+    return {
+      docsCount: null,
+      success: false,
+    };
   }
 };
