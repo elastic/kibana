@@ -5,6 +5,10 @@
  */
 
 import { Plugin, CoreStart } from 'src/core/public';
+// @ts-ignore
+import { wrapInI18nContext } from 'ui/i18n';
+import { MapListing } from './components/map_listing';
+// @ts-ignore
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -16,7 +20,12 @@ export type MapsPluginStart = ReturnType<MapsPlugin['start']>;
 
 /** @internal */
 export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
-  public setup() {}
+  public setup(core: any, plugins: any) {
+    const app = plugins.__LEGACY.uiModules.get('app/maps', ['ngRoute', 'react']);
+    app.directive('mapListing', function(reactDirective: any) {
+      return reactDirective(wrapInI18nContext(MapListing));
+    });
+  }
 
-  public start(core: CoreStart) {}
+  public start(core: CoreStart, plugins: any) {}
 }
