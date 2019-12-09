@@ -16,13 +16,11 @@ export async function loadAlerts({
   http,
   page,
   searchText,
-  tagsFilter,
   typesFilter,
 }: {
   http: HttpServiceBase;
   page: { index: number; size: number };
   searchText?: string;
-  tagsFilter?: string[];
   typesFilter?: string[];
 }): Promise<{
   page: number;
@@ -31,9 +29,6 @@ export async function loadAlerts({
   data: Alert[];
 }> {
   const filters = [];
-  if (tagsFilter && tagsFilter.length) {
-    filters.push(`alert.attributes.tags:(${tagsFilter.join(' and ')})`);
-  }
   if (typesFilter && typesFilter.length) {
     filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
   }
@@ -41,9 +36,10 @@ export async function loadAlerts({
     query: {
       page: page.index + 1,
       per_page: page.size,
-      search_fields: searchText ? 'name' : undefined,
+      search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
       search: searchText,
       filter: filters.length ? filters.join(' and ') : undefined,
+      default_search_operator: 'AND',
     },
   });
 }

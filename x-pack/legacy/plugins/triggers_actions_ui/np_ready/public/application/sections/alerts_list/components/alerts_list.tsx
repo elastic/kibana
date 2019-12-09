@@ -16,7 +16,6 @@ import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../t
 import { AlertAdd } from '../../alert_add';
 import { BulkActionPopover } from './bulk_action_popover';
 import { CollapsedItemActions } from './collapsed_item_actions';
-import { TagsFilter } from './tags_filter';
 import { TypeFilter } from './type_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
 
@@ -37,14 +36,13 @@ export const AlertsList: React.FunctionComponent = () => {
   const [totalItemCount, setTotalItemCount] = useState<number>(0);
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
-  const [tagsFilter, setTagsFilter] = useState<string[]>([]);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   useEffect(() => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, searchText, tagsFilter, typesFilter]);
+  }, [page, searchText, typesFilter]);
 
   useEffect(() => {
     (async () => {
@@ -88,7 +86,7 @@ export const AlertsList: React.FunctionComponent = () => {
   async function loadAlertsData() {
     setIsLoadingAlerts(true);
     try {
-      const alertsResponse = await loadAlerts({ http, page, searchText, tagsFilter, typesFilter });
+      const alertsResponse = await loadAlerts({ http, page, searchText, typesFilter });
       setAlerts(alertsResponse.data);
       setTotalItemCount(alertsResponse.total);
     } catch (e) {
@@ -188,7 +186,6 @@ export const AlertsList: React.FunctionComponent = () => {
                   }))
                   .sort((a, b) => a.name.localeCompare(b.name))}
               />,
-              <TagsFilter key="tags-filter" onChange={(tags: string[]) => setTagsFilter(tags)} />,
               <EuiButton
                 key="create-alert"
                 data-test-subj="createAlertButton"
