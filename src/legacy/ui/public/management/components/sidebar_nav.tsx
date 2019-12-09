@@ -21,8 +21,9 @@ import { EuiIcon, EuiSideNav, IconType, EuiScreenReaderOnly } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IndexedArray } from 'ui/indexed_array';
+// import { IndexedArray } from 'ui/indexed_array';
 
+/*
 interface Subsection {
   disabled: boolean;
   visible: boolean;
@@ -31,15 +32,26 @@ interface Subsection {
   url?: string;
   icon?: IconType;
 }
-interface Section extends Subsection {
-  visibleItems: IndexedArray<Subsection>;
+*/
+
+interface Subsection {
+  // disabled: boolean;
+  // visible: boolean;
+  id: string;
+  title: string;
+  url?: string;
+  euiIconType?: IconType;
 }
 
-const sectionVisible = (section: Subsection) => !section.disabled && section.visible;
-const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Subsection) => ({
+interface Section extends Subsection {
+  apps: Subsection[];
+}
+
+// const sectionVisible = (section: Subsection) => !section.disabled && section.visible;
+const sectionToNav = (selectedId: string) => ({ title, id, url, euiIconType }: Subsection) => ({
   id,
-  name: display,
-  icon: icon ? <EuiIcon type={icon} /> : null,
+  name: title,
+  icon: euiIconType ? <EuiIcon type={euiIconType} /> : null,
   isSelected: selectedId === id,
   href: url,
   'data-test-subj': id,
@@ -47,10 +59,11 @@ const sectionToNav = (selectedId: string) => ({ display, id, url, icon }: Subsec
 
 export const sideNavItems = (sections: Section[], selectedId: string) =>
   sections
-    .filter(sectionVisible)
-    .filter(section => section.visibleItems.filter(sectionVisible).length)
+    // .filter(sectionVisible)
+    // .filter(section => section.items.filter(sectionVisible).length)
     .map(section => ({
-      items: section.visibleItems.filter(sectionVisible).map(sectionToNav(selectedId)),
+      // items: section.items.filter(sectionVisible).map(sectionToNav(selectedId)),
+      items: section.apps.map(sectionToNav(selectedId)),
       ...sectionToNav(selectedId)(section),
     }));
 
