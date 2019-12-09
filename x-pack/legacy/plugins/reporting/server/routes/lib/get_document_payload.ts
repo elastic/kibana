@@ -13,7 +13,6 @@ import {
   JobDocExecuted,
   JobDocOutputExecuted,
 } from '../../../types';
-import { oncePerServer } from '../../lib/once_per_server';
 import { CSV_JOB_TYPE } from '../../../common/constants';
 
 interface ICustomHeaders {
@@ -22,10 +21,12 @@ interface ICustomHeaders {
 
 const DEFAULT_TITLE = 'report';
 
-const getTitle = (exportType: ExportTypeDefinition, title?: string): string =>
+type ExportTypeType = ExportTypeDefinition<any, any, any, any>;
+
+const getTitle = (exportType: ExportTypeType, title?: string): string =>
   `${title || DEFAULT_TITLE}.${exportType.jobContentExtension}`;
 
-const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTypeDefinition) => {
+const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTypeType) => {
   const metaDataHeaders: ICustomHeaders = {};
 
   if (exportType.jobType === CSV_JOB_TYPE) {
@@ -39,10 +40,10 @@ const getReportingHeaders = (output: JobDocOutputExecuted, exportType: ExportTyp
   return metaDataHeaders;
 };
 
-function getDocumentPayloadFn(server: ServerFacade) {
+export function getDocumentPayloadFactory(server: ServerFacade) {
   const exportTypesRegistry = server.plugins.reporting!.exportTypesRegistry;
 
-  function encodeContent(content: string | null, exportType: ExportTypeDefinition) {
+  function encodeContent(content: string | null, exportType: ExportTypeType) {
     switch (exportType.jobContentEncoding) {
       case 'base64':
         return content ? Buffer.from(content, 'base64') : content; // Buffer.from rejects null
@@ -52,9 +53,7 @@ function getDocumentPayloadFn(server: ServerFacade) {
   }
 
   function getCompleted(output: JobDocOutputExecuted, jobType: string, title: string) {
-    const exportType = exportTypesRegistry.get(
-      (item: ExportTypeDefinition) => item.jobType === jobType
-    );
+    const exportType = exportTypesRegistry.get((item: ExportTypeType) => item.jobType === jobType);
     const filename = getTitle(exportType, title);
     const headers = getReportingHeaders(output, exportType);
 
@@ -89,9 +88,11 @@ function getDocumentPayloadFn(server: ServerFacade) {
     };
   }
 
-  return function getDocumentPayload(doc: { _source: JobDocExecuted }) {
+  return function getDocumentPayload(doc: {
+    _source: JobDocExecuted<{ output: JobDocOutputExecuted }>;
+  }) {
     const { status, jobtype: jobType, payload: { title } = { title: '' } } = doc._source;
-    const { output } = doc._source as { output: JobDocOutputExecuted };
+    const { output } = doc._source;
 
     if (status === 'completed') {
       return getCompleted(output, jobType, title);
@@ -105,5 +106,3 @@ function getDocumentPayloadFn(server: ServerFacade) {
     return getIncomplete(status);
   };
 }
-
-export const getDocumentPayloadFactory = oncePerServer(getDocumentPayloadFn);

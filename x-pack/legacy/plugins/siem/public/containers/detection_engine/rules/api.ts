@@ -6,14 +6,41 @@
 
 import chrome from 'ui/chrome';
 import {
+  AddRulesProps,
   DeleteRulesProps,
   DuplicateRulesProps,
   EnableRulesProps,
   FetchRulesProps,
   FetchRulesResponse,
+  NewRule,
   Rule,
 } from './types';
 import { throwIfNotOk } from '../../../hooks/api/api';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
+
+/**
+ * Add provided Rule
+ *
+ * @param rule to add
+ * @param kbnVersion current Kibana Version to use for headers
+ * @param signal to cancel request
+ */
+export const addRule = async ({ rule, kbnVersion, signal }: AddRulesProps): Promise<NewRule> => {
+  const response = await fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: {
+      'content-type': 'application/json',
+      'kbn-version': kbnVersion,
+      'kbn-xsrf': kbnVersion,
+    },
+    body: JSON.stringify(rule),
+    signal,
+  });
+
+  await throwIfNotOk(response);
+  return response.json();
+};
 
 /**
  * Fetches all rules or single specified rule from the Detection Engine API
@@ -22,6 +49,7 @@ import { throwIfNotOk } from '../../../hooks/api/api';
  * @param pagination desired pagination options (e.g. page/perPage)
  * @param id if specified, will return specific rule if exists
  * @param kbnVersion current Kibana Version to use for headers
+ * @param signal to cancel request
  */
 export const fetchRules = async ({
   filterOptions = {
@@ -50,17 +78,11 @@ export const fetchRules = async ({
 
   const endpoint =
     id != null
-      ? `${chrome.getBasePath()}/api/detection_engine/rules?id="${id}"`
-      : `${chrome.getBasePath()}/api/detection_engine/rules/_find?${queryParams.join('&')}`;
+      ? `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id="${id}"`
+      : `${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}/_find?${queryParams.join('&')}`;
 
   const response = await fetch(endpoint, {
     method: 'GET',
-    credentials: 'same-origin',
-    headers: {
-      'content-type': 'application/json',
-      'kbn-version': kbnVersion,
-      'kbn-xsrf': kbnVersion,
-    },
     signal,
   });
   await throwIfNotOk(response);
@@ -87,7 +109,7 @@ export const enableRules = async ({
   kbnVersion,
 }: EnableRulesProps): Promise<Rule[]> => {
   const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
+    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
       method: 'PUT',
       credentials: 'same-origin',
       headers: {
@@ -115,7 +137,7 @@ export const enableRules = async ({
 export const deleteRules = async ({ ids, kbnVersion }: DeleteRulesProps): Promise<Rule[]> => {
   // TODO: Don't delete if immutable!
   const requests = ids.map(id =>
-    fetch(`${chrome.getBasePath()}/api/detection_engine/rules?id=${id}`, {
+    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}?id=${id}`, {
       method: 'DELETE',
       credentials: 'same-origin',
       headers: {
@@ -144,7 +166,7 @@ export const duplicateRules = async ({
   kbnVersion,
 }: DuplicateRulesProps): Promise<Rule[]> => {
   const requests = rules.map(rule =>
-    fetch(`${chrome.getBasePath()}/api/detection_engine/rules`, {
+    fetch(`${chrome.getBasePath()}${DETECTION_ENGINE_RULES_URL}`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: {

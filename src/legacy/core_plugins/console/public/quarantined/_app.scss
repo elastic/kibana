@@ -1,5 +1,8 @@
 // TODO: Move all of the styles here (should be modularised by, e.g., CSS-in-JS or CSS modules).
+@import '@elastic/eui/src/components/header/variables';
+
 #consoleRoot {
+  height: calc(100vh - calc(#{$euiHeaderChildSize} * 2));
   display: flex;
   flex: 1 1 auto;
   // Make sure the editor actions don't create scrollbars on this container
@@ -30,6 +33,7 @@
   flex: 1 1 1px;
 }
 
+.conApp__textAreaLabelHack,
 .conApp__editorContent,
 .conApp__outputContent {
   height: 100%;
