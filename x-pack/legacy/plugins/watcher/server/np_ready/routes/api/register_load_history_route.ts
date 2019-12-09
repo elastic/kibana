@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../lib/is_es_error_factory';
+import { isEsError } from '../../lib/is_es_error';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 import { RouteDependencies, ServerShim } from '../../types';
@@ -29,7 +29,6 @@ function fetchHistoryItem(callWithRequest: any, watchHistoryItemId: string) {
 }
 
 export function registerLoadHistoryRoute(deps: RouteDependencies, legacy: ServerShim) {
-  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const id = request.params.id;

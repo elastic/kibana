@@ -5,7 +5,7 @@
  */
 
 import { IClusterClient, RequestHandler } from 'src/core/server';
-import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
+import { isEsError } from '../../../lib/is_es_error';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Settings } from '../../../models/settings';
@@ -19,7 +19,6 @@ function fetchClusterSettings(client: IClusterClient) {
 }
 
 export function registerLoadRoute(deps: RouteDependencies, legacy: ServerShim) {
-  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
       const settings = await fetchClusterSettings(deps.elasticsearch);

@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../../../lib/call_with_request_factory';
-import { isEsErrorFactory } from '../../../../lib/is_es_error_factory';
+import { isEsError } from '../../../../lib/is_es_error';
 import { licensePreRoutingFactory } from '../../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { WatchStatus } from '../../../../models/watch_status';
@@ -22,7 +22,6 @@ function acknowledgeAction(callWithRequest: any, watchId: string, actionId: stri
 }
 
 export function registerAcknowledgeRoute(deps: RouteDependencies, legacy: ServerShim) {
-  const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const { watchId, actionId } = request.params;
