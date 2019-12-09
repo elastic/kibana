@@ -27,6 +27,5 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./siem'));
     loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
-    loadTestFile(require.resolve('./licensing'));
   });
 }

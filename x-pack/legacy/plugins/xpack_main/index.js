@@ -63,9 +63,6 @@ export const xpackMain = (kibana) => {
           value: null
         }
       },
-      hacks: [
-        'plugins/xpack_main/hacks/check_xpack_info_change',
-      ],
       replaceInjectedVars,
       injectDefaultVars(server) {
         const config = server.config();
