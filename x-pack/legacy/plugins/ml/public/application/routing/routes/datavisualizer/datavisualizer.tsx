@@ -11,8 +11,6 @@
 
 import React, { FC } from 'react';
 
-// @ts-ignore
-import queryString from 'query-string';
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { DatavisualizerSelector } from '../../../datavisualizer';

@@ -7,7 +7,10 @@
 import React from 'react';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
+import {
+  IndexPattern,
+  IndexPatternsContract,
+} from '../../../../../../../../src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 
 // set() method is missing in original d.ts
@@ -17,9 +20,9 @@ export interface KibanaConfigTypeFix extends KibanaConfig {
 
 export interface KibanaContextValue {
   combinedQuery: any;
-  currentIndexPattern: IndexPattern; // TODO this should be or null
+  currentIndexPattern: IndexPattern; // TODO this should be IndexPattern or null
   currentSavedSearch: SavedSearchSavedObject | null;
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatternsContract;
   kibanaConfig: KibanaConfigTypeFix;
 }
 

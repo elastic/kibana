@@ -58,10 +58,7 @@ const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
     globalState = decode(_g);
   } catch (error) {
     // eslint-disable-next-line no-console
-    // console.error('Could not parse global state');
-    // window.location.href = '#data_frame_analytics';
-    // globalState = {};
-    // appState = {};
+    console.error('Could not parse global or app state');
   }
   appState.mlTimeSeriesExplorer = {};
   appState.fetch = () => {};

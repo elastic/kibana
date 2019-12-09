@@ -6,7 +6,6 @@
 
 import React, { FC, Fragment } from 'react';
 import { timefilter } from 'ui/timefilter';
-import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
 
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';

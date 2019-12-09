@@ -10,27 +10,28 @@ import ReactDOM from 'react-dom';
 import 'uiExports/savedObjectTypes';
 
 import 'ui/autoload/all';
-import { IndexPatterns } from 'ui/index_patterns';
 
 // needed to make syntax highlighting work in ace editors
 import 'ace';
 
 import { AppMountContext, AppMountParameters } from 'kibana/public';
-import { DataStart } from 'src/legacy/core_plugins/data/public';
+import {
+  IndexPatternsContract,
+  Plugin as DataPlugin,
+} from '../../../../../../src/plugins/data/public';
 
-import { Plugin as DataPlugin } from '../../../../../../src/plugins/data/public';
 import { KibanaConfigTypeFix } from './contexts/kibana';
 
 import { MlRouter } from './routing';
 
 export interface MlDependencies extends AppMountParameters {
   npData: ReturnType<DataPlugin['start']>;
-  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
+  indexPatterns: IndexPatternsContract;
 }
 
 interface AppProps {
   context: AppMountContext;
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatternsContract;
 }
 
 const App: FC<AppProps> = ({ context, indexPatterns }) => {
@@ -39,7 +40,7 @@ const App: FC<AppProps> = ({ context, indexPatterns }) => {
   return (
     <MlRouter
       config={config}
-      setBreadCrumbs={context.core.chrome.setBreadcrumbs}
+      setBreadcrumbs={context.core.chrome.setBreadcrumbs}
       indexPatterns={indexPatterns}
     />
   );

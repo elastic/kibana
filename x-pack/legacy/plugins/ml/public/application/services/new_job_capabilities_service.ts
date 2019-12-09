@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
-
 import {
   Field,
   Aggregation,
@@ -27,7 +25,7 @@ import { getIndexPatternAndSavedSearch } from '../util/index_utils';
 export function loadNewJobCapabilities(
   indexPatternId: string,
   savedSearchId: string,
-  indexPatterns: IndexPatterns
+  indexPatterns: IndexPatternsContract
 ) {
   return new Promise(async (resolve, reject) => {
     if (indexPatternId !== undefined) {

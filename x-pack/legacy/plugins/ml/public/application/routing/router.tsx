@@ -9,7 +9,7 @@ import { HashRouter, Route, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 import { I18nContext } from 'ui/i18n';
 
-import { IndexPatterns } from 'ui/index_patterns';
+import { IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { KibanaContext, KibanaConfigTypeFix, KibanaContextValue } from '../contexts/kibana';
 import { ChromeBreadcrumb } from '../../../../../../../src/core/public';
 
@@ -33,7 +33,7 @@ export interface PageProps {
 }
 
 export interface PageDependencies {
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatternsContract;
 }
 
 export const PageLoader: FC<{ context: KibanaContextValue }> = ({ context, children }) => {
@@ -46,9 +46,9 @@ export const PageLoader: FC<{ context: KibanaContextValue }> = ({ context, child
 
 export const MlRouter: FC<{
   config: KibanaConfigTypeFix;
-  setBreadCrumbs: any;
-  indexPatterns: IndexPatterns;
-}> = ({ config, setBreadCrumbs, indexPatterns }) => {
+  setBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => void;
+  indexPatterns: IndexPatternsContract;
+}> = ({ config, setBreadcrumbs, indexPatterns }) => {
   return (
     <HashRouter>
       <div>
@@ -59,7 +59,7 @@ export const MlRouter: FC<{
             exact
             render={props => {
               window.setTimeout(() => {
-                setBreadCrumbs(route.breadcrumbs);
+                setBreadcrumbs(route.breadcrumbs);
               });
               return route.render(props, config, { indexPatterns });
             }}

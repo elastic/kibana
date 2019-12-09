@@ -27,7 +27,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         const { renderApp } = await import('./application/app');
         return renderApp(context, {
           ...params,
-          indexPatterns: npData.indexPatterns.indexPatterns,
+          indexPatterns: npData.indexPatterns,
           npData,
         });
       },

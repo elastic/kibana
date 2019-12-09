@@ -6,16 +6,16 @@
 
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import chrome from 'ui/chrome';
 import { Query } from 'src/plugins/data/public';
+import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 
 let indexPatternCache: IndexPatternSavedObject[] = [];
 let savedSearchesCache: SavedSearchSavedObject[] = [];
-let indexPatternsContract: IndexPatterns | null = null;
+let indexPatternsContract: IndexPatternsContract | null = null;
 
-export function loadIndexPatterns(indexPatterns: IndexPatterns) {
+export function loadIndexPatterns(indexPatterns: IndexPatternsContract) {
   indexPatternsContract = indexPatterns;
   const savedObjectsClient = chrome.getSavedObjectsClient();
   return savedObjectsClient

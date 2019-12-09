@@ -8,7 +8,6 @@ import { loadIndexPatterns, loadSavedSearches } from '../util/index_utils';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
 import { getMlNodeCount } from '../ml_nodes_check/check_ml_nodes';
-// import { getJobManagementBreadcrumbs } from './jobs/breadcrumbs';
 import { loadMlServerInfo } from '../services/ml_server_info';
 import { PageDependencies } from './router';
 
@@ -25,5 +24,4 @@ export const basicResolvers = (deps: PageDependencies): Resolvers => ({
   loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
   checkGetJobsPrivilege,
   loadSavedSearches,
-  // getJobManagementBreadcrumbs(),
 });

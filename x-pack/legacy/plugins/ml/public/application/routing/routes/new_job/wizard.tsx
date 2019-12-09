@@ -25,7 +25,7 @@ interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
 }
 
-const singleMetricBreadCrumbs = [
+const singleMetricBreadcrumbs = [
   ...baseBreadcrumbs,
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.singleMetricLabel', {
@@ -35,7 +35,7 @@ const singleMetricBreadCrumbs = [
   },
 ];
 
-const multiMetricBreadCrumbs = [
+const multiMetricBreadcrumbs = [
   ...baseBreadcrumbs,
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.multiMetricLabel', {
@@ -45,7 +45,7 @@ const multiMetricBreadCrumbs = [
   },
 ];
 
-const populationBreadCrumbs = [
+const populationBreadcrumbs = [
   ...baseBreadcrumbs,
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.populationLabel', {
@@ -55,7 +55,7 @@ const populationBreadCrumbs = [
   },
 ];
 
-const advancedBreadCrumbs = [
+const advancedBreadcrumbs = [
   ...baseBreadcrumbs,
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.advancedConfigurationLabel', {
@@ -70,7 +70,7 @@ export const singleMetricRoute: MlRoute = {
   render: (props, config, deps) => (
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.SINGLE_METRIC} deps={deps} />
   ),
-  breadcrumbs: singleMetricBreadCrumbs,
+  breadcrumbs: singleMetricBreadcrumbs,
 };
 
 export const multiMetricRoute: MlRoute = {
@@ -78,7 +78,7 @@ export const multiMetricRoute: MlRoute = {
   render: (props, config, deps) => (
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.MULTI_METRIC} deps={deps} />
   ),
-  breadcrumbs: multiMetricBreadCrumbs,
+  breadcrumbs: multiMetricBreadcrumbs,
 };
 
 export const populationRoute: MlRoute = {
@@ -86,7 +86,7 @@ export const populationRoute: MlRoute = {
   render: (props, config, deps) => (
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.POPULATION} deps={deps} />
   ),
-  breadcrumbs: populationBreadCrumbs,
+  breadcrumbs: populationBreadcrumbs,
 };
 
 export const advancedRoute: MlRoute = {
@@ -94,7 +94,7 @@ export const advancedRoute: MlRoute = {
   render: (props, config, deps) => (
     <PageWrapper config={config} {...props} jobType={JOB_TYPE.ADVANCED} deps={deps} />
   ),
-  breadcrumbs: advancedBreadCrumbs,
+  breadcrumbs: advancedBreadcrumbs,
 };
 
 const PageWrapper: FC<WizardPageProps> = ({ location, config, jobType, deps }) => {

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IndexPatternsContract } from '../../../../../../../../../../src/plugins/data/public';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { CombinedJob } from '../../common/job_creator/configs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../common/job_creator/util/constants';
 
-export async function preConfiguredJobRedirect(indexPatterns: IndexPatterns) {
+export async function preConfiguredJobRedirect(indexPatterns: IndexPatternsContract) {
   const { job } = mlJobService.tempJobCloningObjects;
   if (job) {
     try {
