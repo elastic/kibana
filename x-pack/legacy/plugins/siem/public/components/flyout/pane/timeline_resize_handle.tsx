@@ -8,15 +8,11 @@ import styled from 'styled-components';
 
 export const TIMELINE_RESIZE_HANDLE_WIDTH = 2; // px
 
-export const CommonResizeHandle = styled.div`
+export const TimelineResizeHandle = styled.div<{ height: number }>`
   cursor: col-resize;
   height: 100%;
   min-height: 20px;
   width: 0;
-`;
-CommonResizeHandle.displayName = 'CommonResizeHandle';
-
-export const TimelineResizeHandle = styled(CommonResizeHandle)<{ height: number }>`
   border: ${TIMELINE_RESIZE_HANDLE_WIDTH}px solid ${props => props.theme.eui.euiColorLightShade};
   z-index: 2;
   height: ${({ height }) => `${height}px`};

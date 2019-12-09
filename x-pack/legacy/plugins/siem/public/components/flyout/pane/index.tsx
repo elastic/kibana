@@ -9,13 +9,13 @@ import React, { useCallback } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
+import { Resizable, ResizeCallback } from 're-resizable';
 
-import { TimelineResizeHandle } from '../../resize_handle/styled_handles';
+import { TimelineResizeHandle } from './timeline_resize_handle';
 import { FlyoutHeader } from '../header';
 
 import * as i18n from './translations';
 import { timelineActions } from '../../../store/actions';
-import { Resizable, ResizeCallback } from 're-resizable';
 
 const minWidthPixels = 550; // do not allow the flyout to shrink below this width (pixels)
 const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view
@@ -122,19 +122,20 @@ const FlyoutPaneComponent = React.memo<Props>(
     usersViewing,
     width,
   }) => {
-    const onResize: ResizeCallback = (e, direction, ref, delta) => {
-      const bodyClientWidthPixels = document.body.clientWidth;
+    const onResizeStop: ResizeCallback = useCallback(
+      (e, direction, ref, delta) => {
+        const bodyClientWidthPixels = document.body.clientWidth;
 
-      console.error('aa', delta);
-
-      applyDeltaToWidth({
-        bodyClientWidthPixels,
-        delta: -delta.width,
-        id: timelineId,
-        maxWidthPercent,
-        minWidthPixels,
-      });
-    };
+        applyDeltaToWidth({
+          bodyClientWidthPixels,
+          delta: -delta.width,
+          id: timelineId,
+          maxWidthPercent,
+          minWidthPixels,
+        });
+      },
+      [applyDeltaToWidth, maxWidthPercent, minWidthPixels]
+    );
 
     return (
       <EuiFlyoutContainer headerHeight={headerHeight} data-test-subj="flyout-pane">
@@ -143,14 +144,13 @@ const FlyoutPaneComponent = React.memo<Props>(
           className="timeline-flyout"
           data-test-subj="eui-flyout"
           hideCloseButton={true}
-          maxWidth={`${maxWidthPercent}%`}
           onClose={onClose}
           size="l"
         >
           <Resizable
             enable={{ left: true }}
             defaultSize={{
-              width: width,
+              width,
               height: 'auto',
             }}
             minWidth={minWidthPixels}
@@ -160,7 +160,7 @@ const FlyoutPaneComponent = React.memo<Props>(
                 <TimelineResizeHandle data-test-subj="flyout-resize-handle" height={flyoutHeight} />
               ),
             }}
-            // onResize={onResize}
+            onResizeStop={onResizeStop}
           >
             <EuiFlyoutHeader
               className="timeline-flyout-header"
