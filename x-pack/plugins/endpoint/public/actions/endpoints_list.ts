@@ -6,15 +6,24 @@
 
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { actionCreatorFactory } from '../lib/action_creator';
+import { EndpointData } from '../../server/types';
+import { EndpointsListState } from '../reducers/endpoints_list';
 
 // TODO: Type return value
 export const actions = {
-  serverReturnedEndpointListData: actionCreatorFactory<'serverReturnedEndpointListData', [any]>(
-    'serverReturnedEndpointListData'
-  ),
-  userFilteredEndpointListData: actionCreatorFactory<'userFilteredEndpointListData', [any]>(
-    'userFilteredEndpointListData'
-  ),
+  serverReturnedEndpointListData: actionCreatorFactory<
+    'serverReturnedEndpointListData',
+    [EndpointsListState['data']]
+  >('serverReturnedEndpointListData'),
+  userFilteredEndpointListData: actionCreatorFactory<
+    'userFilteredEndpointListData',
+    [
+      {
+        filteredData: EndpointData[];
+        isFiltered: boolean;
+      }
+    ]
+  >('userFilteredEndpointListData'),
   userPaginatedOrSortedEndpointListTable: actionCreatorFactory<
     'userPaginatedOrSortedEndpointListTable',
     [

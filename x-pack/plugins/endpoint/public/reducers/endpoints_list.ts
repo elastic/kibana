@@ -60,7 +60,8 @@ export function endpointListReducer(
     case actions.serverReturnedEndpointListData.type:
       return { ...state, data: action.payload[0] };
     case actions.userFilteredEndpointListData.type:
-      return { ...state, ...action.payload[0] };
+      const { filteredData, isFiltered } = action.payload[0];
+      return { ...state, filteredData, isFiltered };
     case actions.userPaginatedOrSortedEndpointListTable.type:
       const { pageIndex, pageSize, sortField, sortDirection } = action.payload[0];
       return {
