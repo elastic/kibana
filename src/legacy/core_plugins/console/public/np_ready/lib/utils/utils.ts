@@ -31,7 +31,7 @@ export function jsonToString(data: any, indent: number) {
   return JSON.stringify(data, null, indent ? 2 : 0);
 }
 
-export function reformatData(data: any[], indent: boolean) {
+export function formatRequestBodyDoc(data: string[], indent: boolean) {
   let changed = false;
   const formattedData = [];
   for (let i = 0; i < data.length; i++) {
