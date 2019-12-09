@@ -145,3 +145,5 @@ export class IndexPatterns {
     return indexPattern.init();
   };
 }
+
+export type IndexPatternsContract = PublicMethodsOf<IndexPatterns>;
