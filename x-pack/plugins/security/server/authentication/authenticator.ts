@@ -31,6 +31,7 @@ import {
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
+import { durationToMs } from '../utils';
 import { SessionInfo } from '../../public/types';
 
 /**
@@ -225,9 +226,8 @@ export class Authenticator {
     );
     this.serverBasePath = this.options.basePath.serverBasePath || '/';
 
-    // only set these vars if they are defined in options (otherwise coalesce to existing/default)
-    this.idleTimeout = this.options.config.session.idleTimeout;
-    this.lifespan = this.options.config.session.lifespan;
+    this.idleTimeout = durationToMs(this.options.config.session.idleTimeout);
+    this.lifespan = durationToMs(this.options.config.session.lifespan);
   }
 
   /**

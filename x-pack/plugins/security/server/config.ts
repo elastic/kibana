@@ -36,8 +36,8 @@ export const ConfigSchema = schema.object(
     ),
     sessionTimeout: schema.maybe(schema.oneOf([schema.number(), schema.literal(null)])), // DEPRECATED
     session: schema.object({
-      idleTimeout: schema.oneOf([schema.number(), schema.literal(null)], { defaultValue: null }),
-      lifespan: schema.oneOf([schema.number(), schema.literal(null)], { defaultValue: null }),
+      idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], { defaultValue: null }),
+      lifespan: schema.oneOf([schema.duration(), schema.literal(null)], { defaultValue: null }),
     }),
     secureCookies: schema.boolean({ defaultValue: false }),
     authc: schema.object({

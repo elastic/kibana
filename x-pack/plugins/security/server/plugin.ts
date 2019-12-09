@@ -25,6 +25,7 @@ import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
 import { createConfig$ } from './config';
 import { defineRoutes } from './routes';
+import { durationToMs } from './utils';
 import { SecurityLicenseService, SecurityLicense } from './licensing';
 import { setupSavedObjects } from './saved_objects';
 import { SecurityAuditLogger } from './audit';
@@ -206,8 +207,8 @@ export class Plugin {
         config: {
           loginAssistanceMessage: config.loginAssistanceMessage,
           session: {
-            idleTimeout: config.session.idleTimeout,
-            lifespan: config.session.lifespan,
+            idleTimeout: durationToMs(config.session.idleTimeout),
+            lifespan: durationToMs(config.session.lifespan),
           },
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
