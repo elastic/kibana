@@ -6,7 +6,6 @@
 
 import React, { Component, Fragment } from 'react';
 import {
-  EuiCallOut,
   EuiForm,
   EuiPageContent,
   EuiSpacer,
@@ -41,8 +40,6 @@ interface State {
   hasCompatibleRealms: boolean;
   canUseStoredScripts: boolean;
   canUseInlineScripts: boolean;
-  mode: 'roles' | 'templates';
-  loadError: any;
   formError: {
     isInvalid: boolean;
     error?: string;
@@ -66,8 +63,6 @@ export class EditRoleMappingPage extends Component<Props, State> {
       hasCompatibleRealms: true,
       canUseStoredScripts: true,
       canUseInlineScripts: true,
-      mode: 'roles',
-      loadError: undefined,
       saveInProgress: false,
       rulesValid: true,
       validateForm: false,
@@ -82,7 +77,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
   }
 
   public render() {
-    const { permissionDenied, isLoadingApp, loadError: error } = this.state;
+    const { permissionDenied, isLoadingApp } = this.state;
 
     if (permissionDenied) {
       return <PermissionDenied />;
@@ -92,29 +87,6 @@ export class EditRoleMappingPage extends Component<Props, State> {
       return (
         <EuiPageContent>
           <SectionLoading />
-        </EuiPageContent>
-      );
-    }
-
-    if (error) {
-      const {
-        body: { error: errorTitle, message, statusCode },
-      } = error;
-
-      return (
-        <EuiPageContent>
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.security.management.editRoleMapping.table.loadingRoleMappingErrorTitle"
-                defaultMessage="Error loading Role mapping"
-              />
-            }
-            color="danger"
-            iconType="alert"
-          >
-            {statusCode}: {errorTitle} - {message}
-          </EuiCallOut>
         </EuiPageContent>
       );
     }
@@ -307,32 +279,24 @@ export class EditRoleMappingPage extends Component<Props, State> {
         hasCompatibleRealms,
       } = features;
 
-      const { role_templates: roleTemplates = [] } = roleMapping;
-      const mode = roleTemplates.length > 0 ? 'templates' : 'roles';
-
       this.setState({
         permissionDenied: !canManageRoleMappings,
         hasCompatibleRealms,
         canUseStoredScripts,
         canUseInlineScripts,
         isLoadingApp: false,
-        mode,
         roleMapping,
       });
     } catch (e) {
-      if (_.get(e, 'body.statusCode') === 403) {
-        this.setState({ permissionDenied: true, isLoadingApp: false });
-      } else {
-        toastNotifications.addDanger(
-          i18n.translate(
-            'xpack.security.management.editRoleMapping.table.fetchingRoleMappingsErrorMessage',
-            {
-              defaultMessage: 'Error checking privileges: {message}',
-              values: { message: _.get(e, 'body.message', '') },
-            }
-          )
-        );
-      }
+      toastNotifications.addDanger(
+        i18n.translate(
+          'xpack.security.management.editRoleMapping.table.fetchingRoleMappingsErrorMessage',
+          {
+            defaultMessage: 'Error loading role mapping editor: {message}',
+            values: { message: _.get(e, 'body.message', '') },
+          }
+        )
+      );
     }
   }
 
