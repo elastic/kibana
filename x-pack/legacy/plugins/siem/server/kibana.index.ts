@@ -43,7 +43,7 @@ export const initServerWithKibana = (context: PluginInitializerContext, __legacy
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in siem/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(kbnServer);
+  setSignalsStatusRoute(__legacy);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
