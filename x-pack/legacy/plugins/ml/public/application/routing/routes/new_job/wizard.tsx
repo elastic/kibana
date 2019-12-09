@@ -19,11 +19,18 @@ import { loadNewJobCapabilities } from '../../../services/new_job_capabilities_s
 import { checkCreateJobsPrivilege } from '../../../privilege/check_privilege';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';
 
-const baseBreadcrumbs = [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB];
-
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
 }
+
+const createJobBreadcrumbs = {
+  text: i18n.translate('xpack.ml.jobsBreadcrumbs.createJobLabel', {
+    defaultMessage: 'Create job',
+  }),
+  href: '#/jobs/new_job',
+};
+
+const baseBreadcrumbs = [ML_BREADCRUMB, ANOMALY_DETECTION_BREADCRUMB, createJobBreadcrumbs];
 
 const singleMetricBreadcrumbs = [
   ...baseBreadcrumbs,
