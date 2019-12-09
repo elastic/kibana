@@ -6,7 +6,7 @@ recommended for the development of all Kibana plugins.
 Besides the content in this style guide, the following style guides may also apply
 to all development within the Kibana project. Please make sure to also read them:
 
-- [Accessibility style guide](style_guides/accessibility_guide.md)
+- [Accessibility style guide](https://elastic.github.io/eui/#/guidelines/accessibility)
 - [SASS style guide](https://elastic.github.io/eui/#/guidelines/sass)
 
 ## General
