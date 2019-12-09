@@ -28,14 +28,14 @@ export interface UMFrameworkRouteOptions<
   validate: any;
 }
 
-type CallElasticsearchAsCurrentUser = (
+type APICaller = (
   endpoint: string,
   clientParams: Record<string, any>,
   options?: CallAPIOptions
 ) => Promise<any>;
 
 export type UMElasticsearchQueryFn<P, R = any> = (
-  params: { callES: CallElasticsearchAsCurrentUser } & P
+  params: { callES: APICaller } & P
 ) => Promise<R> | R;
 
 export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
