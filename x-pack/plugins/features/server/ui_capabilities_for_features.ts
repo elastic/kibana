@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../src/core/public';
+import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { Feature } from './feature';
 
 const ELIGIBLE_FLAT_MERGE_KEYS = ['catalogue'];
@@ -56,27 +56,21 @@ function getCapabilitiesFromFeature(feature: Feature): FeatureCapabilities {
 }
 
 function buildCapabilities(...allFeatureCapabilities: FeatureCapabilities[]): UICapabilities {
-  return allFeatureCapabilities.reduce<UICapabilities>(
-    (acc, capabilities) => {
-      const mergableCapabilities: UICapabilities = _.omit(
-        capabilities,
-        ...ELIGIBLE_FLAT_MERGE_KEYS
-      );
+  return allFeatureCapabilities.reduce<UICapabilities>((acc, capabilities) => {
+    const mergableCapabilities: UICapabilities = _.omit(capabilities, ...ELIGIBLE_FLAT_MERGE_KEYS);
 
-      const mergedFeatureCapabilities = {
-        ...mergableCapabilities,
-        ...acc,
+    const mergedFeatureCapabilities = {
+      ...mergableCapabilities,
+      ...acc,
+    };
+
+    ELIGIBLE_FLAT_MERGE_KEYS.forEach(key => {
+      mergedFeatureCapabilities[key] = {
+        ...mergedFeatureCapabilities[key],
+        ...capabilities[key],
       };
+    });
 
-      ELIGIBLE_FLAT_MERGE_KEYS.forEach(key => {
-        mergedFeatureCapabilities[key] = {
-          ...mergedFeatureCapabilities[key],
-          ...capabilities[key],
-        };
-      });
-
-      return mergedFeatureCapabilities;
-    },
-    {} as UICapabilities
-  );
+    return mergedFeatureCapabilities;
+  }, {} as UICapabilities);
 }

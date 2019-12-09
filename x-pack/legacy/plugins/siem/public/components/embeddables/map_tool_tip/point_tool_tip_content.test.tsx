@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { FeatureProperty } from '../types';
-import { getRenderedFieldValue, PointToolTipContent } from './point_tool_tip_content';
+import { getRenderedFieldValue, PointToolTipContentComponent } from './point_tool_tip_content';
 import { TestProviders } from '../../../mock';
 import { getEmptyStringTag } from '../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
@@ -24,7 +24,13 @@ describe('PointToolTipContent', () => {
     {
       _propertyKey: 'host.name',
       _rawValue: 'testPropValue',
-      getESFilters: () => new Promise(resolve => setTimeout(resolve)),
+    },
+  ];
+
+  const mockFeaturePropsArrayValue: FeatureProperty[] = [
+    {
+      _propertyKey: 'host.name',
+      _rawValue: ['testPropValue1', 'testPropValue2'],
     },
   ];
 
@@ -33,14 +39,40 @@ describe('PointToolTipContent', () => {
 
     const wrapper = shallow(
       <TestProviders>
-        <PointToolTipContent
+        <PointToolTipContentComponent
           contextId={'contextId'}
           featureProps={mockFeatureProps}
           closeTooltip={closeTooltip}
         />
       </TestProviders>
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(toJson(wrapper.find('PointToolTipContentComponent'))).toMatchSnapshot();
+  });
+
+  test('renders array filter correctly', () => {
+    const closeTooltip = jest.fn();
+
+    const wrapper = mount(
+      <TestProviders>
+        <PointToolTipContentComponent
+          contextId={'contextId'}
+          featureProps={mockFeaturePropsArrayValue}
+          closeTooltip={closeTooltip}
+        />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="add-to-kql-host.name"]').prop('filter')).toEqual({
+      meta: {
+        alias: null,
+        disabled: false,
+        key: 'host.name',
+        negate: false,
+        params: { query: 'testPropValue1' },
+        type: 'phrase',
+        value: 'testPropValue1',
+      },
+      query: { match: { 'host.name': { query: 'testPropValue1', type: 'phrase' } } },
+    });
   });
 
   describe('#getRenderedFieldValue', () => {

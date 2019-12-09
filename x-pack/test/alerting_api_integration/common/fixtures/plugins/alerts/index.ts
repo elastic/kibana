@@ -15,6 +15,13 @@ export default function(kibana: any) {
     name: 'alerts',
     init(server: any) {
       // Action types
+      const noopActionType: ActionType = {
+        id: 'test.noop',
+        name: 'Test: Noop',
+        async executor() {
+          return { status: 'ok' };
+        },
+      };
       const indexRecordActionType: ActionType = {
         id: 'test.index-record',
         name: 'Test: Index Record',
@@ -158,6 +165,7 @@ export default function(kibana: any) {
           };
         },
       };
+      server.plugins.actions.setup.registerType(noopActionType);
       server.plugins.actions.setup.registerType(indexRecordActionType);
       server.plugins.actions.setup.registerType(failingActionType);
       server.plugins.actions.setup.registerType(rateLimitedActionType);
@@ -311,7 +319,7 @@ export default function(kibana: any) {
       const noopAlertType: AlertType = {
         id: 'test.noop',
         name: 'Test: Noop',
-        actionGroups: [],
+        actionGroups: ['default'],
         async executor({ services, params, state }: AlertExecutorOptions) {},
       };
       server.plugins.alerting.setup.registerType(alwaysFiringAlertType);

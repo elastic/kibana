@@ -23,7 +23,8 @@ export function systemRoutes({
   elasticsearchPlugin,
   route,
   xpackMainPlugin,
-  spacesPlugin
+  spacesPlugin,
+  cloud,
 }) {
   const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
 
@@ -168,10 +169,16 @@ export function systemRoutes({
   route({
     method: 'GET',
     path: '/api/ml/info',
-    handler(request) {
+    async handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      return callWithRequest('ml.info')
-        .catch(resp => wrapError(resp));
+
+      try {
+        const info = await callWithRequest('ml.info');
+        const cloudId = cloud && cloud.cloudId;
+        return { ...info, cloudId };
+      } catch (error) {
+        return wrapError(error);
+      }
     },
     config: {
       ...commonRouteConfig

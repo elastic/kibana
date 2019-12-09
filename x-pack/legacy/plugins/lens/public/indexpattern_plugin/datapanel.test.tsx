@@ -14,9 +14,9 @@ import { IndexPatternPrivateState } from './types';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress } from '@elastic/eui';
+import { documentField } from './document_field';
 
 jest.mock('ui/new_platform');
-jest.mock('../../../../../../src/legacy/ui/public/registry/field_formats');
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [],
@@ -121,6 +121,7 @@ const initialState: IndexPatternPrivateState = {
           aggregatable: true,
           searchable: true,
         },
+        documentField,
       ],
     },
     '2': {
@@ -174,6 +175,7 @@ const initialState: IndexPatternPrivateState = {
             },
           },
         },
+        documentField,
       ],
     },
     '3': {
@@ -199,6 +201,7 @@ const initialState: IndexPatternPrivateState = {
           aggregatable: true,
           searchable: true,
         },
+        documentField,
       ],
     },
   },
@@ -325,10 +328,10 @@ describe('IndexPattern Data Panel', () => {
         act(() => {
           ((inst.setProps as unknown) as (props: unknown) => {})({
             ...props,
-            ...(propChanges || {}),
+            ...((propChanges as object) || {}),
             state: {
               ...props.state,
-              ...(stateChanges || {}),
+              ...((stateChanges as object) || {}),
             },
           });
           inst.update();
@@ -565,6 +568,7 @@ describe('IndexPattern Data Panel', () => {
       );
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'client',
         'memory',
@@ -630,6 +634,7 @@ describe('IndexPattern Data Panel', () => {
         .simulate('click');
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'client',
         'memory',
@@ -698,6 +703,7 @@ describe('IndexPattern Data Panel', () => {
       const wrapper = shallowWithIntl(<InnerIndexPatternDataPanel {...props} />);
 
       expect(wrapper.find(FieldItem).map(fieldItem => fieldItem.prop('field').name)).toEqual([
+        'Records',
         'bytes',
         'memory',
       ]);

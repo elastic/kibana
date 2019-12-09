@@ -89,6 +89,7 @@ export default function({ getService }: FtrProviderContext) {
     this.tags(['smoke', 'mlqa']);
     before(async () => {
       await esArchiver.load('ml/ecommerce');
+      await ml.api.createCalendar('wizard-test-calendar');
     });
 
     after(async () => {
@@ -106,7 +107,7 @@ export default function({ getService }: FtrProviderContext) {
     });
 
     it('job creation loads the job type selection page', async () => {
-      await ml.jobSourceSelection.selectSource('ecommerce');
+      await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob('ecommerce');
     });
 
     it('job creation loads the population job wizard page', async () => {
@@ -197,6 +198,18 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroups);
     });
 
+    it('job creation opens the additional settings section', async () => {
+      await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+    });
+
+    it('job creation adds a new custom url', async () => {
+      await ml.jobWizardCommon.addCustomUrl({ label: 'check-kibana-dashboard' });
+    });
+
+    it('job creation assigns calendars', async () => {
+      await ml.jobWizardCommon.addCalendar('wizard-test-calendar');
+    });
+
     it('job creation opens the advanced section', async () => {
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
     });
@@ -248,6 +261,12 @@ export default function({ getService }: FtrProviderContext) {
       );
     });
 
+    it('job creation has detector results', async () => {
+      for (let i = 0; i < detectors.length; i++) {
+        await ml.api.assertDetectorResultsExist(jobId, i);
+      }
+    });
+
     it('job cloning clicks the clone action and loads the population wizard', async () => {
       await ml.jobTable.clickCloneJobAction(jobId);
       await ml.jobTypeSelection.assertPopulationJobWizardOpen();
@@ -275,14 +294,16 @@ export default function({ getService }: FtrProviderContext) {
 
     it('job cloning pre-fills the population field', async () => {
       await ml.jobWizardPopulation.assertPopulationFieldInputExists();
-      await ml.jobWizardPopulation.assertPopulationFieldSelection(populationField);
+      await ml.jobWizardPopulation.assertPopulationFieldSelection([populationField]);
     });
 
     it('job cloning pre-fills detectors and shows preview with split cards', async () => {
       for (const [index, detector] of detectors.entries()) {
         await ml.jobWizardCommon.assertDetectorPreviewExists(detector.identifier, index, 'SCATTER');
 
-        await ml.jobWizardPopulation.assertDetectorSplitFieldSelection(index, detector.splitField);
+        await ml.jobWizardPopulation.assertDetectorSplitFieldSelection(index, [
+          detector.splitField,
+        ]);
         await ml.jobWizardPopulation.assertDetectorSplitExists(index);
         await ml.jobWizardPopulation.assertDetectorSplitFrontCardTitle(
           index,
@@ -336,6 +357,18 @@ export default function({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.assertJobGroupSelection(jobGroupsClone);
     });
 
+    it('job cloning opens the additional settings section', async () => {
+      await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
+    });
+
+    it('job cloning persists custom urls', async () => {
+      await ml.customUrls.assertCustomUrlItem(0, 'check-kibana-dashboard');
+    });
+
+    it('job cloning persists assigned calendars', async () => {
+      await ml.jobWizardCommon.assertCalendarsSelection(['wizard-test-calendar']);
+    });
+
     it('job cloning opens the advanced section', async () => {
       await ml.jobWizardCommon.ensureAdvancedSectionOpen();
     });
@@ -386,6 +419,12 @@ export default function({ getService }: FtrProviderContext) {
         getExpectedCounts(jobIdClone),
         getExpectedModelSizeStats(jobIdClone)
       );
+    });
+
+    it('job cloning has detector results', async () => {
+      for (let i = 0; i < detectors.length; i++) {
+        await ml.api.assertDetectorResultsExist(jobId, i);
+      }
     });
   });
 }

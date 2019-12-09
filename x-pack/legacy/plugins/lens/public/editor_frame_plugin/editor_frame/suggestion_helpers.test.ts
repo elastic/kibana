@@ -16,6 +16,7 @@ const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSu
     layerId,
     changeType: 'unchanged',
   },
+  keptLayerIds: [layerId],
 });
 
 let datasourceMap: Record<string, DatasourceMock>;
@@ -235,8 +236,8 @@ describe('suggestion helpers', () => {
       changeType: 'unchanged',
     };
     datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
-      { state: {}, table: table1 },
-      { state: {}, table: table2 },
+      { state: {}, table: table1, keptLayerIds: ['first'] },
+      { state: {}, table: table2, keptLayerIds: ['first'] },
     ]);
     getSuggestions({
       visualizationMap: {
@@ -342,46 +343,5 @@ describe('suggestion helpers', () => {
         state: currentState,
       })
     );
-  });
-
-  it('should drop other layers only on visualization switch', () => {
-    const mockVisualization1 = createMockVisualization();
-    const mockVisualization2 = createMockVisualization();
-    datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
-      generateSuggestion(),
-    ]);
-    datasourceMap.mock.getLayers.mockReturnValue(['first', 'second']);
-    const suggestions = getSuggestions({
-      visualizationMap: {
-        vis1: {
-          ...mockVisualization1,
-          getSuggestions: () => [
-            {
-              score: 0.8,
-              title: 'Test2',
-              state: {},
-              previewIcon: 'empty',
-            },
-          ],
-        },
-        vis2: {
-          ...mockVisualization2,
-          getSuggestions: () => [
-            {
-              score: 0.6,
-              title: 'Test3',
-              state: {},
-              previewIcon: 'empty',
-            },
-          ],
-        },
-      },
-      activeVisualizationId: 'vis1',
-      visualizationState: {},
-      datasourceMap,
-      datasourceStates,
-    });
-    expect(suggestions[0].keptLayerIds).toEqual(['first', 'second']);
-    expect(suggestions[1].keptLayerIds).toEqual(['first']);
   });
 });

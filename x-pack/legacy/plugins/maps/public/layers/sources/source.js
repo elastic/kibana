@@ -95,8 +95,16 @@ export class AbstractSource {
     return null;
   }
 
+  getApplyGlobalQuery() {
+    return !!this._descriptor.applyGlobalQuery;
+  }
+
   getIndexPatternIds() {
-    return  [];
+    return [];
+  }
+
+  getQueryableIndexPatternIds() {
+    return [];
   }
 
   getGeoGridPrecision() {
@@ -115,11 +123,7 @@ export class AbstractSource {
     return AbstractSource.isIndexingSource;
   }
 
-  isInjectedData() {
-    return false;
-  }
-
-  supportsElasticsearchFilters() {
+  isESSource() {
     return false;
   }
 
@@ -131,6 +135,10 @@ export class AbstractSource {
   // Returns function used to format value
   async getFieldFormatter(/* fieldName */) {
     return null;
+  }
+
+  async loadStylePropsMeta() {
+    throw new Error(`Source#loadStylePropsMeta not implemented`);
   }
 }
 

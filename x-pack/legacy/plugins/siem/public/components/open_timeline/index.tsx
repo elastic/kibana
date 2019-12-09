@@ -22,7 +22,7 @@ import {
 } from '../../store/timeline/actions';
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById, dispatchUpdateTimeline } from './helpers';
-import { OpenTimelineModal } from './open_timeline_modal/open_timeline_modal';
+import { OpenTimelineModalBody } from './open_timeline_modal/open_timeline_modal_body';
 import {
   DeleteTimelines,
   EuiSearchBarQuery,
@@ -42,6 +42,7 @@ import {
 } from './types';
 import { DEFAULT_SORT_FIELD, DEFAULT_SORT_DIRECTION } from './constants';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
+import { timelineDefaults } from '../../store/timeline/model';
 
 interface OwnProps<TCache = object> {
   apolloClient: ApolloClient<TCache>;
@@ -281,7 +282,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               totalSearchResultsCount={totalCount}
             />
           ) : (
-            <OpenTimelineModal
+            <OpenTimelineModalBody
               data-test-subj={'open-timeline-modal'}
               deleteTimelines={onDeleteOneTimeline}
               defaultPageSize={defaultPageSize}
@@ -315,7 +316,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const mapStateToProps = (state: State) => {
-    const timeline = getTimeline(state, 'timeline-1');
+    const timeline = getTimeline(state, 'timeline-1') ?? timelineDefaults;
 
     return {
       timeline,

@@ -17,6 +17,7 @@ import { I18nContext } from 'ui/i18n';
 import { CODE_PATH_LICENSE } from '../../../common/constants';
 import { MonitoringViewBaseController } from '../base_controller';
 import { i18n } from '@kbn/i18n';
+import { npSetup } from 'ui/new_platform';
 
 export class NoDataController extends MonitoringViewBaseController {
 
@@ -96,10 +97,17 @@ export class NoDataController extends MonitoringViewBaseController {
 
   render(enabler) {
     const props = this;
+    const { cloud } = npSetup.plugins;
+    const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
 
     this.renderReact(
       <I18nContext>
-        <NoData {...props} enabler={enabler} changePath={this.changePath} />
+        <NoData
+          {...props}
+          enabler={enabler}
+          changePath={this.changePath}
+          isCloudEnabled={isCloudEnabled}
+        />
       </I18nContext>
     );
   }

@@ -6,14 +6,12 @@
 
 import React, { useState, Fragment } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
@@ -69,12 +67,15 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             </EuiLink>
             &nbsp;&nbsp;
             {managedRepository === name ? (
-              <EuiBadge color="primary">
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
-                  defaultMessage="Managed"
-                />
-              </EuiBadge>
+              <EuiIconTip
+                content={
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
+                    defaultMessage="This is a managed repository"
+                  />
+                }
+                position="right"
+              />
             ) : null}
           </Fragment>
         );
@@ -235,36 +236,32 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     ) : (
       undefined
     ),
-    toolsRight: (
-      <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-        <EuiFlexItem>
-          <EuiButton
-            color="secondary"
-            iconType="refresh"
-            onClick={reload}
-            data-test-subj="reloadButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
-              defaultMessage="Reload"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButton
-            href={linkToAddRepository()}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="registerRepositoryButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
-              defaultMessage="Register a repository"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+    toolsRight: [
+      <EuiButton
+        key="reloadButton"
+        color="secondary"
+        iconType="refresh"
+        onClick={reload}
+        data-test-subj="reloadButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryList.table.reloadRepositoriesButton"
+          defaultMessage="Reload"
+        />
+      </EuiButton>,
+      <EuiButton
+        key="registerRepo"
+        href={linkToAddRepository()}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="registerRepositoryButton"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryList.addRepositoryButtonLabel"
+          defaultMessage="Register a repository"
+        />
+      </EuiButton>,
+    ],
     box: {
       incremental: true,
       schema: true,

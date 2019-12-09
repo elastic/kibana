@@ -46,11 +46,21 @@ export default function ({ getService }) {
           });
       });
 
-      it(`doesn't use compression when there is a referer`, async () => {
+      it(`uses compression when there is a whitelisted referer`, async () => {
         await supertest
           .get('/app/kibana')
           .set('accept-encoding', 'gzip')
-          .set('referer', 'https://www.google.com')
+          .set('referer', 'https://some-host.com')
+          .then(response => {
+            expect(response.headers).to.have.property('content-encoding', 'gzip');
+          });
+      });
+
+      it(`doesn't use compression when there is a non-whitelisted referer`, async () => {
+        await supertest
+          .get('/app/kibana')
+          .set('accept-encoding', 'gzip')
+          .set('referer', 'https://other.some-host.com')
           .then(response => {
             expect(response.headers).not.to.have.property('content-encoding');
           });

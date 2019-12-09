@@ -29,11 +29,10 @@ export default function ({ getService, getPageObjects }) {
   const visualTesting = getService('visualTesting');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'discover:sampleSize': 1
   };
 
   describe('discover', function describeIndexTests() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     before(async function () {
       log.debug('load kibana index with default index pattern');
@@ -44,15 +43,17 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('query', function () {
       this.tags(['skipFirefox']);
+      let renderCounter = 0;
 
       it('should show bars in the correct time zone', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -62,6 +63,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Hourly');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -71,6 +73,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Daily');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -80,6 +83,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Weekly');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -93,6 +97,7 @@ export default function ({ getService, getPageObjects }) {
         });
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -102,6 +107,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Monthly');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -111,6 +117,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Yearly');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -120,6 +127,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Auto');
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -131,9 +139,10 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForChartLoadingComplete(1);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });

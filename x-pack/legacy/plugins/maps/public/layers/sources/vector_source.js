@@ -7,7 +7,7 @@
 
 import { VectorLayer } from '../vector_layer';
 import { TooltipProperty } from '../tooltips/tooltip_property';
-import { VectorStyle } from '../styles/vector_style';
+import { VectorStyle } from '../styles/vector/vector_style';
 import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
@@ -48,6 +48,10 @@ export class AbstractVectorSource extends AbstractSource {
     }));
   }
 
+  createField() {
+    throw new Error(`Should implemement ${this.constructor.type} ${this}`);
+  }
+
   _createDefaultLayerDescriptor(options, mapColors) {
     return VectorLayer.createDescriptor(
       {
@@ -55,6 +59,10 @@ export class AbstractVectorSource extends AbstractSource {
         ...options
       },
       mapColors);
+  }
+
+  _getTooltipPropertyNames()  {
+    return this._tooltipFields.map(field => field.getName());
   }
 
   createDefaultLayer(options, mapColors) {
@@ -131,4 +139,5 @@ export class AbstractVectorSource extends AbstractSource {
   getSourceTooltipContent(/* sourceDataRequest */) {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
+
 }

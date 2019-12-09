@@ -75,13 +75,23 @@ async function attemptToCreateCommand(
       case 'chrome': {
         const chromeCapabilities = Capabilities.chrome();
         const chromeOptions = [
-          'disable-translate',
-          'new-window',
+          // Disables the sandbox for all process types that are normally sandboxed.
           'no-sandbox',
+          // Launches URL in new browser window.
+          'new-window',
+          // By default, file:// URIs cannot read other file:// URIs. This is an override for developers who need the old behavior for testing.
           'allow-file-access-from-files',
+          // Use fake device for Media Stream to replace actual camera and microphone.
           'use-fake-device-for-media-stream',
+          // Bypass the media stream infobar by selecting the default device for media streams (e.g. WebRTC). Works with --use-fake-device-for-media-stream.
           'use-fake-ui-for-media-stream',
         ];
+        if (process.platform === 'linux') {
+          // The /dev/shm partition is too small in certain VM environments, causing
+          // Chrome to fail or crash. Use this flag to work-around this issue
+          // (a temporary directory will always be used to create anonymous shared memory files).
+          chromeOptions.push('disable-dev-shm-usage');
+        }
         if (headlessBrowser === '1') {
           // Use --disable-gpu to avoid an error from a missing Mesa library, as per
           // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
@@ -126,6 +136,20 @@ async function attemptToCreateCommand(
           // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
           firefoxOptions.headless();
         }
+
+        // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
+        if (process.platform === 'win32') {
+          const session = await new Builder()
+            .forBrowser(browserType)
+            .setFirefoxOptions(firefoxOptions)
+            .setFirefoxService(new firefox.ServiceBuilder(geckoDriver.path))
+            .build();
+          return {
+            session,
+            consoleLog$: Rx.EMPTY,
+          };
+        }
+
         const { input, chunk$, cleanup } = await createStdoutSocket();
         lifecycle.on('cleanup', cleanup);
 

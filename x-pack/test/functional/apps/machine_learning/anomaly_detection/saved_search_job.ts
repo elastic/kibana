@@ -294,7 +294,7 @@ export default function({ getService }: FtrProviderContext) {
         });
 
         it('job creation loads the job type selection page', async () => {
-          await ml.jobSourceSelection.selectSource(testData.jobSource);
+          await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(testData.jobSource);
         });
 
         it('job creation loads the multi metric job wizard page', async () => {
@@ -467,6 +467,12 @@ export default function({ getService }: FtrProviderContext) {
               timestamp: testData.expected.modelSizeStats.timestamp,
             }
           );
+        });
+
+        it('has detector results', async () => {
+          for (let i = 0; i < testData.aggAndFieldIdentifiers.length; i++) {
+            await ml.api.assertDetectorResultsExist(testData.jobId, i);
+          }
         });
       });
     }

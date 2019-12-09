@@ -5,23 +5,24 @@
  */
 
 import { PLUGIN_ID } from '../../common/constants';
+import { CancellationToken } from '../../common/cancellation_token';
 import {
   ESQueueInstance,
   QueueConfig,
   ExportTypeDefinition,
   ESQueueWorkerExecuteFn,
-  ImmediateExecuteFn,
-  JobDoc,
   JobDocPayload,
+  ImmediateExecuteFn,
   JobSource,
+  RequestFacade,
   ServerFacade,
 } from '../../types';
 // @ts-ignore untyped dependency
 import { events as esqueueEvents } from './esqueue';
 import { LevelLogger } from './level_logger';
-import { oncePerServer } from './once_per_server';
 
-function createWorkerFn(server: ServerFacade) {
+export function createWorkerFactory<JobParamsType>(server: ServerFacade) {
+  type JobDocPayloadType = JobDocPayload<JobParamsType>;
   const config = server.config();
   const logger = LevelLogger.createForServer(server, [PLUGIN_ID, 'queue-worker']);
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
@@ -30,28 +31,47 @@ function createWorkerFn(server: ServerFacade) {
   const { exportTypesRegistry } = server.plugins.reporting!;
 
   // Once more document types are added, this will need to be passed in
-  return function createWorker(queue: ESQueueInstance) {
+  return function createWorker(queue: ESQueueInstance<JobParamsType, JobDocPayloadType>) {
     // export type / execute job map
-    const jobExecutors: Map<string, ESQueueWorkerExecuteFn | ImmediateExecuteFn> = new Map();
+    const jobExecutors: Map<
+      string,
+      ImmediateExecuteFn<JobParamsType> | ESQueueWorkerExecuteFn<JobDocPayloadType>
+    > = new Map();
 
-    for (const exportType of exportTypesRegistry.getAll() as ExportTypeDefinition[]) {
+    for (const exportType of exportTypesRegistry.getAll() as Array<
+      ExportTypeDefinition<JobParamsType, any, any, any>
+    >) {
       const executeJobFactory = exportType.executeJobFactory(server);
       jobExecutors.set(exportType.jobType, executeJobFactory);
     }
 
-    const workerFn = (job: JobSource, jobdoc: JobDocPayload | JobDoc, cancellationToken?: any) => {
+    const workerFn = (jobSource: JobSource<JobParamsType>, ...workerRestArgs: any[]) => {
+      const {
+        _id: jobId,
+        _source: { jobtype: jobType },
+      } = jobSource;
+
+      const jobTypeExecutor = jobExecutors.get(jobType);
       // pass the work to the jobExecutor
-      if (!jobExecutors.get(job._source.jobtype)) {
-        throw new Error(`Unable to find a job executor for the claimed job: [${job._id}]`);
+      if (!jobTypeExecutor) {
+        throw new Error(`Unable to find a job executor for the claimed job: [${jobId}]`);
       }
-      if (job._id) {
-        const jobExecutor = jobExecutors.get(job._source.jobtype) as ESQueueWorkerExecuteFn;
-        return jobExecutor(job._id, jobdoc as JobDoc, cancellationToken);
+
+      if (jobId) {
+        const jobExecutorWorker = jobTypeExecutor as ESQueueWorkerExecuteFn<JobDocPayloadType>;
+        return jobExecutorWorker(
+          jobId,
+          ...(workerRestArgs as [JobDocPayloadType, CancellationToken])
+        );
       } else {
-        const jobExecutor = jobExecutors.get(job._source.jobtype) as ImmediateExecuteFn;
-        return jobExecutor(null, jobdoc as JobDocPayload, cancellationToken);
+        const jobExecutorImmediate = jobExecutors.get(jobType) as ImmediateExecuteFn<JobParamsType>;
+        return jobExecutorImmediate(
+          null,
+          ...(workerRestArgs as [JobDocPayload<JobParamsType>, RequestFacade])
+        );
       }
     };
+
     const workerOptions = {
       kibanaName,
       kibanaId,
@@ -71,5 +91,3 @@ function createWorkerFn(server: ServerFacade) {
     });
   };
 }
-
-export const createWorkerFactory = oncePerServer(createWorkerFn);

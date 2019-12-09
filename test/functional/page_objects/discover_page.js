@@ -31,6 +31,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
   const comboBox = getService('comboBox');
+  const elasticChart = getService('elasticChart');
 
   class DiscoverPage {
     async getQueryField() {
@@ -283,21 +284,18 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async openSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (!fieldFilterFormExists) {
-        await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.existOrFail('discoverFieldFilter');
-      }
+      await testSubjects.click('toggleFieldFilterButton');
+      await testSubjects.existOrFail('filterSelectionPanel');
     }
 
     async closeSidebarFieldFilter() {
-      const fieldFilterFormExists = await testSubjects.exists('discoverFieldFilter');
-      if (fieldFilterFormExists) {
-        await testSubjects.click('toggleFieldFilterButton');
-        await testSubjects.missingOrFail('discoverFieldFilter', { allowHidden: true });
-      }
+      await testSubjects.click('toggleFieldFilterButton');
+      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
     }
 
+    async waitForChartLoadingComplete(renderCount) {
+      await elasticChart.waitForRenderingCount('discoverChart', renderCount);
+    }
   }
 
   return new DiscoverPage();

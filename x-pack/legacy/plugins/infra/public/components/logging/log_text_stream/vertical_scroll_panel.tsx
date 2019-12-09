@@ -30,6 +30,7 @@ interface VerticalScrollPanelProps<Child> {
   hideScrollbar?: boolean;
   'data-test-subj'?: string;
   isLocked: boolean;
+  entriesCount: number;
 }
 
 interface VerticalScrollPanelSnapshot<Child> {
@@ -79,18 +80,15 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   public updateChildDimensions = () => {
     this.childDimensions = new Map<Child, Rect>(
       sortDimensionsByTop(
-        Array.from(this.childRefs.entries()).reduce(
-          (accumulatedDimensions, [key, child]) => {
-            const currentOffsetRect = child.getOffsetRect();
+        Array.from(this.childRefs.entries()).reduce((accumulatedDimensions, [key, child]) => {
+          const currentOffsetRect = child.getOffsetRect();
 
-            if (currentOffsetRect !== null) {
-              accumulatedDimensions.push([key, currentOffsetRect]);
-            }
+          if (currentOffsetRect !== null) {
+            accumulatedDimensions.push([key, currentOffsetRect]);
+          }
 
-            return accumulatedDimensions;
-          },
-          [] as Array<[any, Rect]>
-        )
+          return accumulatedDimensions;
+        }, [] as Array<[any, Rect]>)
       )
     );
   };
@@ -226,7 +224,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     if (
       prevProps.height !== this.props.height ||
       prevProps.target !== this.props.target ||
-      React.Children.count(prevProps.children) !== React.Children.count(this.props.children)
+      prevProps.entriesCount !== this.props.entriesCount
     ) {
       this.handleUpdatedChildren(snapshot.scrollTarget, snapshot.scrollOffset);
     }
@@ -249,10 +247,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
         style={{ height, width: width + scrollbarOffset }}
         scrollbarOffset={scrollbarOffset}
         onScroll={this.handleScroll}
-        innerRef={
-          /* workaround for missing RefObject support in styled-components typings */
-          this.scrollRef as any
-        }
+        ref={this.scrollRef}
       >
         {typeof children === 'function' ? children(this.registerChild) : null}
       </ScrollPanelWrapper>
@@ -260,7 +255,11 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
   }
 }
 
-const ScrollPanelWrapper = euiStyled.div.attrs<{ scrollbarOffset?: number }>({})`
+interface ScrollPanelWrapperProps {
+  scrollbarOffset?: number;
+}
+
+const ScrollPanelWrapper = euiStyled.div<ScrollPanelWrapperProps>`
   overflow-x: hidden;
   overflow-y: scroll;
   position: relative;

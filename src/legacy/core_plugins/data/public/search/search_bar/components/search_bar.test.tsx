@@ -27,20 +27,18 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from '../../../../../../../../src/core/public/mocks';
 const startMock = coreMock.createStart();
 
-import { timefilterServiceMock } from '../../../timefilter/timefilter_service.mock';
 import { mount } from 'enzyme';
-const timefilterSetupMock = timefilterServiceMock.createSetupContract();
 
-jest.mock('../../../../../data/public', () => {
-  return {
-    FilterBar: () => <div className="filterBar"></div>,
-    QueryBarInput: () => <div className="queryBar"></div>,
-  };
-});
+const mockTimeHistory = {
+  get: () => {
+    return [];
+  },
+};
 
-jest.mock('../../../query/query_bar', () => {
+jest.mock('../../../../../../../plugins/data/public', () => {
   return {
-    QueryBarTopRow: () => <div className="queryBar"></div>,
+    FilterBar: () => <div className="filterBar" />,
+    QueryBarTopRow: () => <div className="queryBar" />,
   };
 });
 
@@ -56,7 +54,7 @@ const createMockWebStorage = () => ({
 });
 
 const createMockStorage = () => ({
-  store: createMockWebStorage(),
+  storage: createMockWebStorage(),
   get: jest.fn(),
   set: jest.fn(),
   remove: jest.fn(),
@@ -86,7 +84,7 @@ const kqlQuery = {
 function wrapSearchBarInContext(testProps: any) {
   const defaultOptions = {
     appName: 'test',
-    timeHistory: timefilterSetupMock.history,
+    timeHistory: mockTimeHistory,
     intl: null as any,
   };
 
@@ -95,7 +93,12 @@ function wrapSearchBarInContext(testProps: any) {
     savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
-    store: createMockStorage(),
+    storage: createMockStorage(),
+    data: {
+      query: {
+        savedQueries: {},
+      },
+    },
   };
 
   return (

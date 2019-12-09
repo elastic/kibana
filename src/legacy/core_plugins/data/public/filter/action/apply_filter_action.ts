@@ -18,21 +18,27 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Filter } from '@kbn/es-query';
-import { npStart } from 'ui/new_platform';
+import { CoreStart } from 'src/core/public';
+import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 import {
   IAction,
   createAction,
   IncompatibleActionError,
 } from '../../../../../../plugins/ui_actions/public';
-import { FilterManager } from '../../../../../../plugins/data/public';
-import { TimefilterContract, changeTimeFilter, extractTimeFilter } from '../../timefilter';
-import { applyFiltersPopover } from '../apply_filters/apply_filters_popover';
-import { IndexPatternsStart } from '../../index_patterns';
+import {
+  esFilters,
+  FilterManager,
+  TimefilterContract,
+  applyFiltersPopover,
+  changeTimeFilter,
+  extractTimeFilter,
+  IndexPatternsContract,
+} from '../../../../../../plugins/data/public';
+
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 
 interface ActionContext {
-  filters: Filter[];
+  filters: esFilters.Filter[];
   timeFieldName?: string;
 }
 
@@ -41,9 +47,10 @@ async function isCompatible(context: ActionContext) {
 }
 
 export function createFilterAction(
+  overlays: CoreStart['overlays'],
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
-  indexPatternsService: IndexPatternsStart
+  indexPatternsService: IndexPatternsContract
 ): IAction<ActionContext> {
   return createAction<ActionContext>({
     type: GLOBAL_APPLY_FILTER_ACTION,
@@ -63,28 +70,30 @@ export function createFilterAction(
         throw new IncompatibleActionError();
       }
 
-      let selectedFilters: Filter[] = filters;
+      let selectedFilters: esFilters.Filter[] = filters;
 
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
           filters.map(filter => {
-            return indexPatternsService.indexPatterns.get(filter.meta.index);
+            return indexPatternsService.get(filter.meta.index!);
           })
         );
 
-        const filterSelectionPromise: Promise<Filter[]> = new Promise(resolve => {
-          const overlay = npStart.core.overlays.openModal(
-            applyFiltersPopover(
-              filters,
-              indexPatterns,
-              () => {
-                overlay.close();
-                resolve([]);
-              },
-              (filterSelection: Filter[]) => {
-                overlay.close();
-                resolve(filterSelection);
-              }
+        const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
+          const overlay = overlays.openModal(
+            toMountPoint(
+              applyFiltersPopover(
+                filters,
+                indexPatterns,
+                () => {
+                  overlay.close();
+                  resolve([]);
+                },
+                (filterSelection: esFilters.Filter[]) => {
+                  overlay.close();
+                  resolve(filterSelection);
+                }
+              )
             ),
             {
               'data-test-subj': 'test',

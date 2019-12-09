@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { EncryptedSavedObjectsStartContract } from '../shim';
+import { PluginStartContract as EncryptedSavedObjectsStartContract } from '../../../../../plugins/encrypted_saved_objects/server';
 import { LegacySpacesPlugin as SpacesPluginStartContract } from '../../../spaces';
 import { Logger } from '../../../../../../src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
@@ -67,7 +67,7 @@ export class ActionExecutor {
 
     // Ensure user can read the action before processing
     const {
-      attributes: { actionTypeId, config, description },
+      attributes: { actionTypeId, config, name },
     } = await services.savedObjectsClient.get<RawAction>('action', actionId);
     // Only get encrypted attributes here, the remaining attributes can be fetched in
     // the savedObjectsClient call
@@ -95,7 +95,7 @@ export class ActionExecutor {
     }
 
     let result: ActionTypeExecutorResult | null = null;
-    const actionLabel = `${actionId} - ${actionTypeId} - ${description}`;
+    const actionLabel = `${actionId} - ${actionTypeId} - ${name}`;
 
     try {
       result = await actionType.executor({

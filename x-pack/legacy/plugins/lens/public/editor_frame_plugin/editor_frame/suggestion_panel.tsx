@@ -24,7 +24,7 @@ import classNames from 'classnames';
 import { Action, PreviewState } from './state_management';
 import { Datasource, Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import { ExpressionRenderer } from '../../../../../../../src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from '../../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression, prependKibanaContext } from './expression_helpers';
 import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
@@ -70,6 +70,8 @@ const PreviewRenderer = ({
       })}
     >
       <ExpressionRendererComponent
+        className="lnsSuggestionPanel__expressionRenderer"
+        padding="s"
         expression={expression}
         renderError={() => {
           return (
@@ -367,7 +369,12 @@ function getPreviewExpression(
     const changedLayers = datasource.getLayers(visualizableState.datasourceState);
     changedLayers.forEach(layerId => {
       if (updatedLayerApis[layerId]) {
-        updatedLayerApis[layerId] = datasource.getPublicAPI(datasourceState, () => {}, layerId);
+        updatedLayerApis[layerId] = datasource.getPublicAPI({
+          layerId,
+          dateRange: frame.dateRange,
+          state: datasourceState,
+          setState: () => {},
+        });
       }
     });
   }

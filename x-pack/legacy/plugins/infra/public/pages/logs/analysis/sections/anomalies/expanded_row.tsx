@@ -9,12 +9,11 @@ import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { EuiFlexGroup, EuiFlexItem, EuiStat, EuiSpacer } from '@elastic/eui';
 import { AnomaliesChart } from './chart';
-import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
+import { LogRateResults } from '../../../../../containers/logs/log_analysis/log_analysis_results';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   getLogEntryRateSeriesForPartition,
   getAnnotationsForPartition,
-  formatAnomalyScore,
   getTotalNumberOfLogEntriesForPartition,
 } from '../helpers/data_formatters';
 import { AnalyzeInMlButton } from '../analyze_in_ml_button';
@@ -22,11 +21,11 @@ import { AnalyzeInMlButton } from '../analyze_in_ml_button';
 export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   partitionId: string;
   topAnomalyScore: number;
-  results: GetLogEntryRateSuccessResponsePayload['data'];
+  results: LogRateResults;
   setTimeRange: (timeRange: TimeRange) => void;
   timeRange: TimeRange;
   jobId: string;
-}> = ({ results, timeRange, setTimeRange, topAnomalyScore, partitionId, jobId }) => {
+}> = ({ results, timeRange, setTimeRange, partitionId, jobId }) => {
   const logEntryRateSeries = useMemo(
     () =>
       results && results.histogramBuckets
@@ -65,8 +64,10 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
         />
       </EuiFlexItem>
       <EuiFlexItem>
+        <EuiSpacer size="m" />
         <EuiStat
           title={numeral(totalNumberOfLogEntries).format('0.00a')}
+          titleSize="m"
           description={i18n.translate(
             'xpack.infra.logs.analysis.anomaliesExpandedRowNumberOfLogEntriesDescription',
             {
@@ -75,17 +76,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
           )}
           reverse
         />
-        <EuiStat
-          title={formatAnomalyScore(topAnomalyScore)}
-          description={i18n.translate(
-            'xpack.infra.logs.analysis.anomaliesExpandedRowTopAnomalyScoreDescription',
-            {
-              defaultMessage: 'Max anomaly score',
-            }
-          )}
-          reverse
-        />
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <AnalyzeInMlButton jobId={jobId} timeRange={timeRange} partition={partitionId} />

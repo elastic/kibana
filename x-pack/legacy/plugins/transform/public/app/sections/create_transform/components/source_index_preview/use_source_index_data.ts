@@ -8,7 +8,7 @@ import React, { useEffect, useState } from 'react';
 
 import { SearchResponse } from 'elasticsearch';
 
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { useApi } from '../../../../hooks/use_api';
 import { getNestedProperty } from '../../../../../../common/utils/object_utils';
@@ -56,7 +56,7 @@ export interface UseSourceIndexDataReturnType {
 }
 
 export const useSourceIndexData = (
-  indexPattern: StaticIndexPattern,
+  indexPattern: IIndexPattern,
   query: PivotQuery,
   selectedFields: EsFieldName[],
   setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
@@ -131,6 +131,8 @@ export const useSourceIndexData = (
 
   useEffect(() => {
     getSourceIndexData();
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern.title, JSON.stringify(query)]);
   return { errorMessage, status, tableItems };
 };

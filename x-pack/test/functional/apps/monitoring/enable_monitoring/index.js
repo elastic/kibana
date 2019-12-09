@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.monitoring.navigateTo();
+      await PageObjects.monitoring.navigateTo(true);
       await noData.isOnNoDataPage();
     });
 

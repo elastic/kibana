@@ -18,14 +18,8 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { SearchService, SearchStart, createSearchBar, StatetfulSearchBarProps } from './search';
-import { QueryService, QuerySetup } from './query';
-import { TimefilterService, TimefilterSetup } from './timefilter';
-import { IndexPatternsService, IndexPatternsSetup, IndexPatternsStart } from './index_patterns';
-import {
-  LegacyDependenciesPluginSetup,
-  LegacyDependenciesPluginStart,
-} from './shim/legacy_dependencies_plugin';
+import { createSearchBar, StatetfulSearchBarProps } from './search';
+import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
@@ -35,30 +29,12 @@ import {
 } from './filter/action/apply_filter_action';
 import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
 
-/**
- * Interface for any dependencies on other plugins' `setup` contracts.
- *
- * @internal
- */
-export interface DataPluginSetupDependencies {
-  __LEGACY: LegacyDependenciesPluginSetup;
-}
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { setFieldFormats } from '../../../../plugins/data/public/services';
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
   uiActions: IUiActionsSetup;
-  __LEGACY: LegacyDependenciesPluginStart;
-}
-
-/**
- * Interface for this plugin's returned `setup` contract.
- *
- * @public
- */
-export interface DataSetup {
-  query: QuerySetup;
-  timefilter: TimefilterSetup;
-  indexPatterns: IndexPatternsSetup;
 }
 
 /**
@@ -67,10 +43,6 @@ export interface DataSetup {
  * @public
  */
 export interface DataStart {
-  query: QuerySetup;
-  timefilter: TimefilterSetup;
-  indexPatterns: IndexPatternsStart;
-  search: SearchStart;
   ui: {
     SearchBar: React.ComponentType<StatetfulSearchBarProps>;
   };
@@ -87,78 +59,42 @@ export interface DataStart {
  * in the setup/start interfaces. The remaining items exported here are either types,
  * or static code.
  */
-export class DataPlugin
-  implements
-    Plugin<DataSetup, DataStart, DataPluginSetupDependencies, DataPluginStartDependencies> {
-  private readonly indexPatterns: IndexPatternsService = new IndexPatternsService();
-  private readonly query: QueryService = new QueryService();
-  private readonly search: SearchService = new SearchService();
-  private readonly timefilter: TimefilterService = new TimefilterService();
 
-  private setupApi!: DataSetup;
+export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
+  private storage!: IStorageWrapper;
 
-  public setup(core: CoreSetup, { __LEGACY }: DataPluginSetupDependencies): DataSetup {
-    const { uiSettings } = core;
-
-    const timefilterService = this.timefilter.setup({
-      uiSettings,
-      store: __LEGACY.storage,
-    });
-    this.setupApi = {
-      indexPatterns: this.indexPatterns.setup(),
-      query: this.query.setup(),
-      timefilter: timefilterService,
-    };
-
-    return this.setupApi;
+  public setup(core: CoreSetup) {
+    this.storage = new Storage(window.localStorage);
   }
 
-  public start(
-    core: CoreStart,
-    { __LEGACY, data, uiActions }: DataPluginStartDependencies
-  ): DataStart {
-    const { uiSettings, http, notifications, savedObjects } = core;
-
-    const indexPatternsService = this.indexPatterns.start({
-      uiSettings,
-      savedObjectsClient: savedObjects.client,
-      http,
-      notifications,
-    });
-
-    initLegacyModule(indexPatternsService.indexPatterns);
+  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+    // This is required for when Angular code uses Field and FieldList.
+    setFieldFormats(data.fieldFormats);
+    initLegacyModule(data.indexPatterns);
 
     const SearchBar = createSearchBar({
       core,
       data,
-      store: __LEGACY.storage,
-      timefilter: this.setupApi.timefilter,
+      storage: this.storage,
     });
 
     uiActions.registerAction(
       createFilterAction(
+        core.overlays,
         data.query.filterManager,
-        this.setupApi.timefilter.timefilter,
-        indexPatternsService
+        data.query.timefilter.timefilter,
+        data.indexPatterns
       )
     );
 
     uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
     return {
-      ...this.setupApi!,
-      indexPatterns: indexPatternsService,
-      search: this.search.start(savedObjects.client),
       ui: {
         SearchBar,
       },
     };
   }
 
-  public stop() {
-    this.indexPatterns.stop();
-    this.query.stop();
-    this.search.stop();
-    this.timefilter.stop();
-  }
+  public stop() {}
 }

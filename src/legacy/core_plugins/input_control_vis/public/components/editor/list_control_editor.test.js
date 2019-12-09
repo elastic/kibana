@@ -17,12 +17,24 @@
  * under the License.
  */
 
-jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        ui: {
+          IndexPatternSelect: () => {
+            return <div/>;
+          }
+        }
+      }
+    },
+  },
+}));
 
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
+
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
@@ -236,7 +248,7 @@ test('handleCheckboxOptionChange - multiselect', async () => {
   component.update();
 
   const checkbox = findTestSubject(component, 'listControlMultiselectInput');
-  checkbox.simulate('change', { target: { checked: true } });
+  checkbox.simulate('click');
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
   sinon.assert.notCalled(handleNumberOptionChange);
@@ -247,7 +259,9 @@ test('handleCheckboxOptionChange - multiselect', async () => {
     expectedControlIndex,
     expectedOptionName,
     sinon.match((evt) => {
-      if (evt.target.checked === true) {
+      // Synthetic `evt.target.checked` does not get altered by EuiSwitch,
+      // but its aria attribute is correctly updated
+      if (evt.target.getAttribute('aria-checked') === 'true') {
         return true;
       }
       return false;

@@ -32,7 +32,8 @@ interface EsMappingType {
   type: ES_FIELD_TYPES;
 }
 
-type PreviewData = Array<Dictionary<any>>;
+export type PreviewItem = Dictionary<any>;
+type PreviewData = PreviewItem[];
 interface PreviewMappings {
   properties: Dictionary<EsMappingType>;
 }
@@ -91,11 +92,14 @@ export const usePivotPreviewData = (
 
   useEffect(() => {
     getPreviewData();
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
   }, [
     indexPattern.title,
     JSON.stringify(aggsArr),
     JSON.stringify(groupByArr),
     JSON.stringify(query),
+    /* eslint-enable react-hooks/exhaustive-deps */
   ]);
 
   return { errorMessage, status, previewData, previewMappings, previewRequest };

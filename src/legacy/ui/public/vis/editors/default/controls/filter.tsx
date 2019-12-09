@@ -20,10 +20,10 @@
 import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Query, QueryBarInput } from 'plugins/data';
 import { AggConfig } from '../../..';
 import { npStart } from '../../../../new_platform';
-import { Storage } from '../../../../storage';
+import { Query, QueryStringInput } from '../../../../../../../plugins/data/public';
+import { Storage } from '../../../../../../../plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../../plugins/kibana_react/public';
 const localStorage = new Storage(window.localStorage);
 
@@ -94,12 +94,12 @@ function FilterRow({
         <KibanaContextProvider
           services={{
             appName: 'filtersAgg',
-            store: localStorage,
+            storage: localStorage,
             data: npStart.plugins.data,
             ...npStart.core,
           }}
         >
-          <QueryBarInput
+          <QueryStringInput
             query={value}
             indexPatterns={[agg.getIndexPattern()]}
             onChange={(query: Query) => onChangeValue(id, query, customLabel)}

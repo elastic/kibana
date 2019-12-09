@@ -10,7 +10,7 @@ describe('existingFields', () => {
   function field(name: string, parent?: string) {
     return {
       name,
-      parent,
+      subType: parent ? { multi: { parent } } : undefined,
       aggregatable: true,
       esTypes: [],
       readFromDocValues: true,

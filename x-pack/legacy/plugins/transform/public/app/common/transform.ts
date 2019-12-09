@@ -95,6 +95,8 @@ export const useRefreshTransformList = (
     return () => {
       subscriptions.map(sub => sub.unsubscribe());
     };
+    // The effect should only be called once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
