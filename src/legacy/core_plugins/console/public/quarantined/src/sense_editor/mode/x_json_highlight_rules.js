@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import ace from 'brace';
 const _ = require('lodash');
 
-const { SqlHighlightRules } = ace.acequire('ace/mode/sql_highlight_rules');
+import { ElasticsearchSqlHighlightRules } from './elasticsearch_sql_highlight_rules';
 const { ScriptHighlightRules } = require('./script_highlight_rules');
 
 const jsonRules = function (root) {
@@ -140,7 +139,7 @@ export function addToRules(otherRules, embedUnder) {
     regex: '"""',
     next: 'pop',
   }]);
-  otherRules.embedRules(SqlHighlightRules, 'sql-', [{
+  otherRules.embedRules(ElasticsearchSqlHighlightRules, 'sql-', [{
     token: 'punctuation.end_triple_quote',
     regex: '"""',
     next: 'pop',
