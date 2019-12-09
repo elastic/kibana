@@ -63,5 +63,5 @@ export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { configureAppAngularModule } from 'ui/legacy_compat';
 export { stateMonitorFactory, StateMonitor } from 'ui/state_management/state_monitor_factory';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { unhashUrl } from 'ui/state_management/state_hashing';
+export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export { IInjector } from 'ui/chrome';
