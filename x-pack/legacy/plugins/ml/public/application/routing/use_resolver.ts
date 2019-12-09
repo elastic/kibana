@@ -61,7 +61,7 @@ export const useResolver = (
       } catch (error) {
         // quietly fail. Let the resolvers handle the redirection if any fail to resolve
         // eslint-disable-next-line no-console
-        console.error(error);
+        console.error('ML page loading resolver', error);
       }
     })();
   }, []);
