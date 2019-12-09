@@ -46,7 +46,7 @@ export function AddDataSource({ pkgkey }: AddDataSourceProps) {
 
   useEffect(() => {
     getPackageInfoByKey(pkgkey).then(response => {
-      setInfo({ ...response });
+      setInfo(response);
     });
   }, [pkgkey]);
 
