@@ -63,7 +63,10 @@ export function createTaskPoller<T, H>({
     // buffer all requests in a single set (to remove duplicates) as we don't want
     // work to take place in parallel (it could cause Task Manager to pull in the same
     // task twice)
-    mergeScan((queue, requests) => of(pushOptionalValuesIntoSet(queue, requests)), new Set<T>()),
+    mergeScan<Array<Option<T>>, Set<T>>(
+      (queue, requests) => of(pushOptionalValuesIntoSet(queue, requests)),
+      new Set<T>()
+    ),
     // take as many argumented calls as we have capacity for and call `work` with
     // those arguments. If the queue is empty this will still trigger work to be done
     concatMap(async (set: Set<T>) => {
@@ -82,6 +85,12 @@ export function createTaskPoller<T, H>({
   );
 }
 
+/**
+ * Cycles through an array of optionals and any optional that contains a value in unwrapped and its value
+ * is pushed into the Set
+ * @param set A Set of generic type T
+ * @param values An array of either empty optionals or optionals contianing a generic type T
+ */
 function pushOptionalValuesIntoSet<T>(set: Set<T>, values: Array<Option<T>>): Set<T> {
   values.forEach(optionalValue => {
     pipe(
