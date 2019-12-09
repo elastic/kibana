@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { Plugin, LegacyCoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/public';
+
+interface StatusPageConfig {
+  isStatusPageAnonymous: boolean;
+}
 
 export class StatusPagePlugin implements Plugin<StatusPagePluginSetup, StatusPagePluginStart> {
-  public setup(core: LegacyCoreSetup) {
-    const isStatusPageAnonymous = core.injectedMetadata.getInjectedVar(
-      'isStatusPageAnonymous'
-    ) as boolean;
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup) {
+    const { isStatusPageAnonymous } = this.initializerContext.config.get<StatusPageConfig>();
 
     if (isStatusPageAnonymous) {
       core.http.anonymousPaths.register('/status');
