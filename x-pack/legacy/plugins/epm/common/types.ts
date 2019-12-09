@@ -156,8 +156,7 @@ export type PackageListItem = Installable<RegistrySearchResult & PackageAddition
 export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
 export type PackageInfo = Installable<RegistryPackage & PackageAdditions>;
 
-export type Installation = SavedObject<InstallationAttributes>;
-export interface InstallationAttributes extends SavedObjectAttributes {
+export interface Installation extends SavedObjectAttributes {
   installed: AssetReference[];
 }
 
@@ -165,7 +164,7 @@ export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
   status: InstallationStatus.installed;
-  savedObject: Installation;
+  savedObject: SavedObject<Installation>;
 };
 
 export type NotInstalled<T = {}> = T & {
