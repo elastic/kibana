@@ -4,62 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { connect } from 'react-redux';
-
+import React, { useContext } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { logFilterActions, logFilterSelectors, State } from '../../store';
-import { FilterQuery } from '../../store/local/log_filter';
+import { LogFilterState, LogFilterStateParams, FilterQuery } from './log_filter';
+
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
-import { asChildFunctionRenderer } from '../../utils/typed_react';
-import { bindPlainActionCreators } from '../../utils/typed_redux';
+import { RendererFunction } from '../../utils/typed_react';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
 
 interface WithLogFilterProps {
   indexPattern: IIndexPattern;
+  children: RendererFunction<
+    LogFilterStateParams & {
+      applyFilterQuery: (query: FilterQuery) => void;
+      applyFilterQueryFromKueryExpression: (expression: string) => void;
+      setFilterQueryDraft: (expression: FilterQuery) => void;
+      setFilterQueryDraftFromKueryExpression: (expression: string) => void;
+    }
+  >;
 }
 
-export const withLogFilter = connect(
-  (state: State) => ({
-    filterQuery: logFilterSelectors.selectLogFilterQuery(state),
-    serializedFilterQuery: logFilterSelectors.selectLogFilterQueryAsJson(state),
-    filterQueryDraft: logFilterSelectors.selectLogFilterQueryDraft(state),
-    isFilterQueryDraftValid: logFilterSelectors.selectIsLogFilterQueryDraftValid(state),
-  }),
-  (dispatch, ownProps: WithLogFilterProps) =>
-    bindPlainActionCreators({
-      applyFilterQuery: (query: FilterQuery) =>
-        logFilterActions.applyLogFilterQuery({
-          query,
-          serializedQuery: convertKueryToElasticSearchQuery(
-            query.expression,
-            ownProps.indexPattern
-          ),
-        }),
-      applyFilterQueryFromKueryExpression: (expression: string) =>
-        logFilterActions.applyLogFilterQuery({
-          query: {
-            kind: 'kuery',
-            expression,
-          },
-          serializedQuery: convertKueryToElasticSearchQuery(expression, ownProps.indexPattern),
-        }),
-      setFilterQueryDraft: logFilterActions.setLogFilterQueryDraft,
-      setFilterQueryDraftFromKueryExpression: (expression: string) =>
-        logFilterActions.setLogFilterQueryDraft({
+export const WithLogFilter: React.FC<WithLogFilterProps> = ({ children, indexPattern }) => {
+  const [logFilterState, logFilterCallbacks] = useContext(LogFilterState.Context);
+  return children({
+    ...logFilterState,
+    applyFilterQuery: (query: FilterQuery) =>
+      logFilterCallbacks.applyLogFilterQuery({
+        query,
+        serializedQuery: convertKueryToElasticSearchQuery(query.expression, indexPattern),
+      }),
+    applyFilterQueryFromKueryExpression: (expression: string) =>
+      logFilterCallbacks.applyLogFilterQuery({
+        query: {
           kind: 'kuery',
           expression,
-        }),
-    })(dispatch)
-);
-
-export const WithLogFilter = asChildFunctionRenderer(withLogFilter);
+        },
+        serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+      }),
+    setFilterQueryDraft: logFilterCallbacks.setLogFilterQueryDraft,
+    setFilterQueryDraftFromKueryExpression: (expression: string) =>
+      logFilterCallbacks.setLogFilterQueryDraft({
+        kind: 'kuery',
+        expression,
+      }),
+  });
+};
 
 /**
  * Url State
  */
 
-type LogFilterUrlState = ReturnType<typeof logFilterSelectors.selectLogFilterQuery>;
+type LogFilterUrlState = LogFilterStateParams['filterQuery'];
 
 type WithLogFilterUrlStateProps = WithLogFilterProps;
 
@@ -85,7 +80,7 @@ export const WithLogFilterUrlState: React.FC<WithLogFilterUrlStateProps> = ({ in
   </WithLogFilter>
 );
 
-const mapToFilterQuery = (value: any): LogFilterUrlState | undefined =>
+const mapToFilterQuery = (value: any): FilterQuery | null | undefined =>
   value && value.kind === 'kuery' && typeof value.expression === 'string'
     ? {
         kind: value.kind,
