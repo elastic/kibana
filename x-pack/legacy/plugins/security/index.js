@@ -82,7 +82,8 @@ export const security = (kibana) => new kibana.Plugin({
     }],
     hacks: [
       'plugins/security/hacks/on_session_timeout',
-      'plugins/security/hacks/on_unauthorized_response'
+      'plugins/security/hacks/on_unauthorized_response',
+      'plugins/security/hacks/register_account_management_app'
     ],
     home: ['plugins/security/register_feature'],
     injectDefaultVars: (server) => {

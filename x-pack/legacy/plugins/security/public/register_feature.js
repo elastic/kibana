@@ -8,8 +8,6 @@
 
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-import './views/account/account';
-
 import { i18n } from '@kbn/i18n';
 
 FeatureCatalogueRegistryProvider.register(() => {
