@@ -8,7 +8,7 @@ import 'brace';
 import 'brace/mode/json';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { AdvancedRuleEditor } from './advanced_rule_editor';
 import { EuiCodeEditor } from '@elastic/eui';
 import {

@@ -25,7 +25,8 @@ describe('validateRoleMappingName', () => {
 
 describe('validateRoleMappingRoles', () => {
   it('requires a value', () => {
-    expect(validateRoleMappingRoles({ roles: [] } as RoleMapping)).toMatchInlineSnapshot(`
+    expect(validateRoleMappingRoles(({ roles: [] } as unknown) as RoleMapping))
+      .toMatchInlineSnapshot(`
       Object {
         "error": "At least one role is required.",
         "isInvalid": true,
@@ -36,7 +37,7 @@ describe('validateRoleMappingRoles', () => {
 
 describe('validateRoleMappingRoleTemplates', () => {
   it('requires a value', () => {
-    expect(validateRoleMappingRoleTemplates({ role_templates: [] } as RoleMapping))
+    expect(validateRoleMappingRoleTemplates(({ role_templates: [] } as unknown) as RoleMapping))
       .toMatchInlineSnapshot(`
       Object {
         "error": "At least one role template is required.",

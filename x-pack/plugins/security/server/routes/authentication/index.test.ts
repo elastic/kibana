@@ -14,6 +14,7 @@ import {
 } from '../../../../../../src/core/server/mocks';
 import { authenticationMock } from '../../authentication/index.mock';
 import { authorizationMock } from '../../authorization/index.mock';
+import { LegacyAPI } from '../../plugin';
 
 describe('Authentication routes', () => {
   it('does not register any SAML related routes if SAML auth provider is not enabled', () => {
@@ -27,7 +28,7 @@ describe('Authentication routes', () => {
       config: { authc: { providers: ['basic'] } } as ConfigType,
       authc: authenticationMock.create(),
       authz: authorizationMock.create(),
-      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' }),
+      getLegacyAPI: () => ({ cspRules: 'test-csp-rule' } as LegacyAPI),
     });
 
     const samlRoutePathPredicate = ([{ path }]: [{ path: string }, any]) =>

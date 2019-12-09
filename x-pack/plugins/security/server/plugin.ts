@@ -164,7 +164,6 @@ export class Plugin {
       config,
       authc,
       authz,
-      clusterClient: this.clusterClient,
       getLegacyAPI: this.getLegacyAPI,
     });
 
