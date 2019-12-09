@@ -14,7 +14,6 @@ import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
 import uiRoutes from 'ui/routes';
-import { IndexPatterns } from 'ui/index_patterns';
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { getFileDataVisualizerBreadcrumbs } from './breadcrumbs';
 import { InjectorService } from '../../../../common/types/angular';
@@ -24,6 +23,7 @@ import { getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { loadMlServerInfo } from '../../services/ml_server_info';
 import { loadIndexPatterns } from '../../util/index_utils';
 import { FileDataVisualizerPage, FileDataVisualizerPageProps } from './file_datavisualizer';
+import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
 
 const template = `
   <div class="euiSpacer euiSpacer--s" />
@@ -47,7 +47,7 @@ module.directive('fileDatavisualizerPage', function($injector: InjectorService) 
     scope: {},
     restrict: 'E',
     link: (scope: ng.IScope, element: ng.IAugmentedJQuery) => {
-      const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
+      const indexPatterns = $injector.get<IndexPatternsContract>('indexPatterns');
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
 
       const props: FileDataVisualizerPageProps = {
