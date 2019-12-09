@@ -56,11 +56,8 @@ export default {
     '!src/legacy/ui/public/{agg_types,vis}/**/*.d.ts',
   ],
   moduleNameMapper: {
-<<<<<<< HEAD
     '^plugins/watcher/models/(.*)': '<rootDir>/x-pack/legacy/plugins/watcher/public/models/$1',
-=======
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
->>>>>>> master
     '^plugins/([^\/.]*)(.*)': '<rootDir>/src/legacy/core_plugins/$1/public$2',
     '^ui/(.*)': '<rootDir>/src/legacy/ui/public/$1',
     '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
@@ -70,6 +67,7 @@ export default {
 
     '^legacy/plugins/xpack_main/(.*);': '<rootDir>/x-pack/legacy/plugins/xpack_main/public/$1',
     '^src/core/(.*)': `<rootDir>/src/core/$1`,
+    '^src/legacy/(.*)': `<rootDir>/src/legacy/$1`,
 
   },
   setupFiles: [

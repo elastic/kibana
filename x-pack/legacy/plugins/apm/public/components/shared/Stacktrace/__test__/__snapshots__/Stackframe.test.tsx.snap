@@ -1,109 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Stackframe when stackframe has source lines should render correctly 1`] = `
-.c0 {
-  color: #69707d;
-  padding: 8px 0;
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
-  font-size: 14px;
-}
-
-.c1 {
-  color: #000000;
-}
-
-.c3 {
-  position: relative;
-  border-radius: 4px;
-}
-
-.c4 {
-  position: absolute;
-  width: 100%;
-  height: 18px;
-  top: 36px;
-  pointer-events: none;
-  background-color: #fef6e5;
-}
-
-.c5 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 4px;
-  background: #f5f7fa;
-}
-
-.c6 {
-  position: relative;
-  min-width: 42px;
-  padding-left: 8px;
-  padding-right: 4px;
-  color: #98a2b3;
-  line-height: 18px;
-  text-align: right;
-  border-right: 1px solid #d3dae6;
-}
-
-.c6:last-of-type {
-  border-radius: 0 0 0 4px;
-}
-
-.c7 {
-  position: relative;
-  min-width: 42px;
-  padding-left: 8px;
-  padding-right: 4px;
-  color: #98a2b3;
-  line-height: 18px;
-  text-align: right;
-  border-right: 1px solid #d3dae6;
-  background-color: #fef6e5;
-}
-
-.c7:last-of-type {
-  border-radius: 0 0 0 4px;
-}
-
-.c8 {
-  overflow: auto;
-  margin: 0 0 0 42px;
-  padding: 0;
-  background-color: #ffffff;
-}
-
-.c8:last-of-type {
-  border-radius: 0 0 4px 0;
-}
-
-.c9 {
-  margin: 0;
-  color: inherit;
-  background: inherit;
-  border: 0;
-  border-radius: 0;
-  overflow: initial;
-  padding: 0 18px;
-  line-height: 18px;
-}
-
-.c10 {
-  position: relative;
-  padding: 0;
-  margin: 0;
-  white-space: pre;
-  z-index: 2;
-}
-
-.c2 {
-  position: relative;
-  font-family: "SFMono-Regular",Consolas,"Liberation Mono",Menlo,Courier,monospace;
-  font-size: 14px;
-  border: 1px solid #d3dae6;
-  border-radius: 4px;
-  background: #f5f7fa;
-}
-
 <Stackframe
   id="test"
   stackframe={
@@ -230,11 +127,11 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
             >
               <styled.div>
                 <div
-                  className="c0"
+                  className="sc-AykKC ajoUB"
                 >
                   <styled.span>
                     <span
-                      className="c1"
+                      className="sc-AykKE kaVSMd"
                     >
                       server/routes.js
                     </span>
@@ -243,7 +140,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                    
                   <styled.span>
                     <span
-                      className="c1"
+                      className="sc-AykKE kaVSMd"
                     >
                       &lt;anonymous&gt;
                     </span>
@@ -251,7 +148,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                    at 
                   <styled.span>
                     <span
-                      className="c1"
+                      className="sc-AykKE kaVSMd"
                     >
                       line 
                       307
@@ -287,7 +184,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                 isLibraryFrame={false}
               >
                 <div
-                  className="c2"
+                  className="sc-fzXfLR gaIDga"
                 >
                   <Context
                     isLibraryFrame={false}
@@ -317,27 +214,27 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                   >
                     <styled.div>
                       <div
-                        className="c3"
+                        className="sc-AykKF iZdsBD"
                       >
                         <styled.div
                           lineNumber={2}
                         >
                           <div
-                            className="c4"
+                            className="sc-AykKG bqFQUl"
                           />
                         </styled.div>
                         <styled.div
                           isLibraryFrame={false}
                         >
                           <div
-                            className="c5"
+                            className="sc-AykKH cROKnE"
                           >
                             <styled.div
                               highlight={false}
                               key="    })0"
                             >
                               <div
-                                className="c6"
+                                className="sc-AykKI hFhgqz"
                               >
                                 305
                                 .
@@ -348,7 +245,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                               key="1"
                             >
                               <div
-                                className="c6"
+                                className="sc-AykKI hFhgqz"
                               >
                                 306
                                 .
@@ -359,7 +256,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                               key="    client.query('SELECT id FROM customers WHERE id=$1', [req.body.customer_id], next())2"
                             >
                               <div
-                                className="c7"
+                                className="sc-AykKI ipzmen"
                               >
                                 307
                                 .
@@ -370,7 +267,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                               key="    req.body.lines.forEach(function (line) {3"
                             >
                               <div
-                                className="c6"
+                                className="sc-AykKI hFhgqz"
                               >
                                 308
                                 .
@@ -381,7 +278,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                               key="      client.query('SELECT id FROM products WHERE id=$1', [line.id], next())4"
                             >
                               <div
-                                className="c6"
+                                className="sc-AykKI hFhgqz"
                               >
                                 309
                                 .
@@ -391,7 +288,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                         </styled.div>
                         <styled.div>
                           <div
-                            className="c8"
+                            className="sc-AykKJ LWPoH"
                           >
                             <SyntaxHighlighter
                               CodeTag={
@@ -595,7 +492,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 }
                               >
                                 <pre
-                                  className="c9"
+                                  className="sc-AykKK fNlxHz"
                                   style={
                                     Object {
                                       "background": "#fff",
@@ -608,7 +505,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 >
                                   <styled.code>
                                     <code
-                                      className="c10"
+                                      className="sc-fzXfLO hTNplc"
                                     >
                                           })
                                     </code>
@@ -818,7 +715,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 }
                               >
                                 <pre
-                                  className="c9"
+                                  className="sc-AykKK fNlxHz"
                                   style={
                                     Object {
                                       "background": "#fff",
@@ -831,7 +728,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 >
                                   <styled.code>
                                     <code
-                                      className="c10"
+                                      className="sc-fzXfLO hTNplc"
                                     >
                                       
 
@@ -1042,7 +939,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 }
                               >
                                 <pre
-                                  className="c9"
+                                  className="sc-AykKK fNlxHz"
                                   style={
                                     Object {
                                       "background": "#fff",
@@ -1055,7 +952,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 >
                                   <styled.code>
                                     <code
-                                      className="c10"
+                                      className="sc-fzXfLO hTNplc"
                                     >
                                           client.query(
                                       <span
@@ -1276,7 +1173,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 }
                               >
                                 <pre
-                                  className="c9"
+                                  className="sc-AykKK fNlxHz"
                                   style={
                                     Object {
                                       "background": "#fff",
@@ -1289,7 +1186,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 >
                                   <styled.code>
                                     <code
-                                      className="c10"
+                                      className="sc-fzXfLO hTNplc"
                                     >
                                           req.body.lines.forEach(
                                       <span
@@ -1527,7 +1424,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 }
                               >
                                 <pre
-                                  className="c9"
+                                  className="sc-AykKK fNlxHz"
                                   style={
                                     Object {
                                       "background": "#fff",
@@ -1540,7 +1437,7 @@ exports[`Stackframe when stackframe has source lines should render correctly 1`]
                                 >
                                   <styled.code>
                                     <code
-                                      className="c10"
+                                      className="sc-fzXfLO hTNplc"
                                     >
                                             client.query(
                                       <span
