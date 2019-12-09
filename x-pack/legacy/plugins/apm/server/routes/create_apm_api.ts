@@ -37,12 +37,14 @@ import {
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
 import { tracesRoute, tracesByIdRoute } from './traces';
+import { transactionByTraceIdRoute } from './transaction';
 import {
   transactionGroupsBreakdownRoute,
   transactionGroupsChartsRoute,
   transactionGroupsDistributionRoute,
   transactionGroupsRoute,
-  transactionGroupsAvgDurationByCountry
+  transactionGroupsAvgDurationByCountry,
+  transactionGroupsAvgDurationByBrowser
 } from './transaction_groups';
 import {
   errorGroupsLocalFiltersRoute,
@@ -102,6 +104,7 @@ const createApmApi = () => {
     .add(transactionGroupsChartsRoute)
     .add(transactionGroupsDistributionRoute)
     .add(transactionGroupsRoute)
+    .add(transactionGroupsAvgDurationByBrowser)
     .add(transactionGroupsAvgDurationByCountry)
 
     // UI filters
@@ -113,7 +116,10 @@ const createApmApi = () => {
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
-    .add(serviceMapRoute);
+    .add(serviceMapRoute)
+
+    // Transaction
+    .add(transactionByTraceIdRoute);
 
   return api;
 };

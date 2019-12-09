@@ -5,7 +5,7 @@
  */
 
 import { EuiContextMenuPanel, EuiText } from '@elastic/eui';
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 import { Capabilities } from 'src/core/public';
 import { ManageSpacesButton } from '../../../components';
 import { getSpacesFeatureDescription } from '../../../lib/constants';
@@ -15,7 +15,7 @@ interface Props {
   capabilities: Capabilities;
 }
 
-export const SpacesDescription: SFC<Props> = (props: Props) => {
+export const SpacesDescription: FC<Props> = (props: Props) => {
   const panelProps = {
     className: 'spcDescription',
     title: 'Spaces',

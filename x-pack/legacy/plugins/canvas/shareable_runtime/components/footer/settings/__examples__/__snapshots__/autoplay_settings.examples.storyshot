@@ -27,9 +27,10 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
     >
       <button
         aria-checked={false}
-        aria-describedby="generated-id"
+        aria-labelledby="generated-id"
         className="euiSwitch__button"
         id="cycle"
+        name="cycle"
         onClick={[Function]}
         role="switch"
         type="button"
@@ -195,9 +196,10 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
     >
       <button
         aria-checked={true}
-        aria-describedby="generated-id"
+        aria-labelledby="generated-id"
         className="euiSwitch__button"
         id="cycle"
+        name="cycle"
         onClick={[Function]}
         role="switch"
         type="button"
@@ -363,9 +365,10 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
     >
       <button
         aria-checked={false}
-        aria-describedby="generated-id"
+        aria-labelledby="generated-id"
         className="euiSwitch__button"
         id="cycle"
+        name="cycle"
         onClick={[Function]}
         role="switch"
         type="button"
