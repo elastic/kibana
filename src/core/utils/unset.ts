@@ -42,7 +42,7 @@ export function unset<OBJ extends { [k: string]: any }>(obj: OBJ, atPath: string
     return;
   }
   const property = paths.pop() as string;
-  const parent = get(obj, paths) as any;
+  const parent = get(obj, paths as any) as any;
   if (parent !== undefined) {
     delete parent[property];
   }
