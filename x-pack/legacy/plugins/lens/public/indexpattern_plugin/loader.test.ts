@@ -129,7 +129,19 @@ const sampleIndexPatterns = {
 };
 
 function indexPatternSavedObject({ id }: { id: keyof typeof sampleIndexPatterns }) {
-  const pattern = sampleIndexPatterns[id];
+  const pattern = {
+    ...sampleIndexPatterns[id],
+    fields: [
+      ...sampleIndexPatterns[id].fields,
+      {
+        name: 'description',
+        type: 'string',
+        aggregatable: false,
+        searchable: true,
+        esTypes: ['text'],
+      },
+    ],
+  };
   return {
     id,
     type: 'index-pattern',
@@ -177,6 +189,16 @@ describe('loader', () => {
         cache: {
           b: sampleIndexPatterns.b,
         },
+        patterns: ['a', 'b'],
+        savedObjectsClient: mockClient(),
+      });
+
+      expect(cache).toMatchObject(sampleIndexPatterns);
+    });
+
+    it('should not allow full text fields', async () => {
+      const cache = await loadIndexPatterns({
+        cache: {},
         patterns: ['a', 'b'],
         savedObjectsClient: mockClient(),
       });
