@@ -19,7 +19,7 @@ const coreMock = {
 
 jest.spyOn(kibanaCore, 'useKibanaCore').mockReturnValue(coreMock);
 
-const routes = getRoutes({ apmServiceMapEnabled: true });
+const routes = getRoutes({ serviceMapEnabled: true });
 
 function expectBreadcrumbToMatchSnapshot(route, params = '') {
   mount(
