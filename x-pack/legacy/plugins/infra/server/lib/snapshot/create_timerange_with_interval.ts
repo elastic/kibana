@@ -5,7 +5,6 @@
  */
 
 import { uniq } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import { RequestHandlerContext } from 'kibana/server';
 import { InfraSnapshotRequestOptions } from './types';
 import { InfraTimerangeInput } from '../../../public/graphql/types';
@@ -45,7 +44,7 @@ const aggregationsToModules = (aggregations: SnapshotModel): string[] => {
     Object.values(aggregations)
       .reduce((modules, agg) => {
         if (SnapshotModelMetricAggRT.is(agg)) {
-          return modules.concat(Object.values(agg).map(a => idx(a, _ => _.field)));
+          return modules.concat(Object.values(agg).map(a => a?.field));
         }
         return modules;
       }, [] as Array<string | undefined>)

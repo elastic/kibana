@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { idx } from '@kbn/elastic-idx';
 import { findInventoryModel, findInventoryFields } from '../../../common/inventory_models/index';
 import { InfraSnapshotRequestOptions } from './types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
@@ -48,7 +47,7 @@ export const getMetricsSources = (options: InfraSnapshotRequestOptions) => {
 
 export const getMetricsAggregations = (options: InfraSnapshotRequestOptions): SnapshotModel => {
   const model = findInventoryModel(options.nodeType);
-  const aggregation = idx(model, _ => _.metrics.snapshot[options.metric.type]);
+  const aggregation = model.metrics.snapshot?.[options.metric.type];
   if (!SnapshotModelRT.is(aggregation)) {
     throw new Error(
       i18n.translate('xpack.infra.snapshot.missingSnapshotMetricError', {
