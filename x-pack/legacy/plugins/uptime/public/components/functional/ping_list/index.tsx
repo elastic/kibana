@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createSnapshotResolvers } from './resolvers';
-export { snapshotSchema } from './schema.gql';
+export * from './ping_list';

@@ -18,22 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
-import {
-  IAction,
-  createAction,
-  IncompatibleActionError,
-} from '../../../../../../plugins/ui_actions/public';
+import { toMountPoint } from '../../../kibana_react/public';
+import { IAction, createAction, IncompatibleActionError } from '../../../ui_actions/public';
+import { getOverlays, getIndexPatterns } from '../services';
+import { applyFiltersPopover } from '../ui/apply_filters';
 import {
   esFilters,
   FilterManager,
   TimefilterContract,
-  applyFiltersPopover,
   changeTimeFilter,
   extractTimeFilter,
-  IndexPatternsStart,
-} from '../../../../../../plugins/data/public';
+} from '..';
 
 export const GLOBAL_APPLY_FILTER_ACTION = 'GLOBAL_APPLY_FILTER_ACTION';
 
@@ -47,10 +42,8 @@ async function isCompatible(context: ActionContext) {
 }
 
 export function createFilterAction(
-  overlays: CoreStart['overlays'],
   filterManager: FilterManager,
-  timeFilter: TimefilterContract,
-  indexPatternsService: IndexPatternsStart
+  timeFilter: TimefilterContract
 ): IAction<ActionContext> {
   return createAction<ActionContext>({
     type: GLOBAL_APPLY_FILTER_ACTION,
@@ -75,12 +68,12 @@ export function createFilterAction(
       if (selectedFilters.length > 1) {
         const indexPatterns = await Promise.all(
           filters.map(filter => {
-            return indexPatternsService.indexPatterns.get(filter.meta.index!);
+            return getIndexPatterns().get(filter.meta.index!);
           })
         );
 
         const filterSelectionPromise: Promise<esFilters.Filter[]> = new Promise(resolve => {
-          const overlay = overlays.openModal(
+          const overlay = getOverlays().openModal(
             toMountPoint(
               applyFiltersPopover(
                 filters,

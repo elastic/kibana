@@ -17,16 +17,4 @@
  * under the License.
  */
 
-import { NotificationsStart, HttpStart } from 'src/core/public';
-import { createGetterSetter } from '../../../kibana_utils/public';
-import { FieldFormatsStart } from '../field_formats_provider';
-
-export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
-  'Notifications'
-);
-
-export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
-  'FieldFormats'
-);
-
-export const [getHttp, setHttp] = createGetterSetter<HttpStart>('Http');
+export { GLOBAL_APPLY_FILTER_ACTION, createFilterAction } from './apply_filter_action';

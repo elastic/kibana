@@ -172,13 +172,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {
-                "FieldList": Object {},
-                "IndexPatternSelect": [MockFunction],
-                "flattenHitWrapper": [MockFunction],
-                "formatHitProvider": [MockFunction],
-                "indexPatterns": [MockFunction],
-              },
+              "indexPatterns": Object {},
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -798,13 +792,7 @@ exports[`QueryStringInput Should disable autoFocus on EuiFieldText when disableA
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {
-                        "FieldList": Object {},
-                        "IndexPatternSelect": [MockFunction],
-                        "flattenHitWrapper": [MockFunction],
-                        "formatHitProvider": [MockFunction],
-                        "indexPatterns": [MockFunction],
-                      },
+                      "indexPatterns": Object {},
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -1412,13 +1400,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {
-                "FieldList": Object {},
-                "IndexPatternSelect": [MockFunction],
-                "flattenHitWrapper": [MockFunction],
-                "formatHitProvider": [MockFunction],
-                "indexPatterns": [MockFunction],
-              },
+              "indexPatterns": Object {},
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -2035,13 +2017,7 @@ exports[`QueryStringInput Should pass the query language to the language switche
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {
-                        "FieldList": Object {},
-                        "IndexPatternSelect": [MockFunction],
-                        "flattenHitWrapper": [MockFunction],
-                        "formatHitProvider": [MockFunction],
-                        "indexPatterns": [MockFunction],
-                      },
+                      "indexPatterns": Object {},
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
@@ -2649,13 +2625,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                 "register": [MockFunction],
               },
               "getSuggestions": [MockFunction],
-              "indexPatterns": Object {
-                "FieldList": Object {},
-                "IndexPatternSelect": [MockFunction],
-                "flattenHitWrapper": [MockFunction],
-                "formatHitProvider": [MockFunction],
-                "indexPatterns": [MockFunction],
-              },
+              "indexPatterns": Object {},
               "query": Object {
                 "filterManager": [MockFunction],
                 "savedQueries": [MockFunction],
@@ -3272,13 +3242,7 @@ exports[`QueryStringInput Should render the given query 1`] = `
                         "register": [MockFunction],
                       },
                       "getSuggestions": [MockFunction],
-                      "indexPatterns": Object {
-                        "FieldList": Object {},
-                        "IndexPatternSelect": [MockFunction],
-                        "flattenHitWrapper": [MockFunction],
-                        "formatHitProvider": [MockFunction],
-                        "indexPatterns": [MockFunction],
-                      },
+                      "indexPatterns": Object {},
                       "query": Object {
                         "filterManager": [MockFunction],
                         "savedQueries": [MockFunction],
