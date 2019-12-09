@@ -18,6 +18,12 @@ export * from './handlers';
 export * from './install';
 export * from './remove';
 
+export class PackageNotInstalledError extends Error {
+  constructor(pkgkey: string) {
+    super(`${pkgkey} is not installed`);
+  }
+}
+
 // only Kibana Assets use Saved Objects at this point
 export const savedObjectTypes: AssetType[] = Object.values(KibanaAssetType);
 

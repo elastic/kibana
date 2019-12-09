@@ -12,15 +12,8 @@ import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
 import { installTemplates } from '../lib/elasticsearch/template/install';
-import { getPackageInfo } from '../packages';
+import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
-
-const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
-export class PackageNotInstalledError extends Error {
-  constructor(pkgkey: string) {
-    super(`${pkgkey} is not installed`);
-  }
-}
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -85,7 +78,7 @@ async function saveDatasourceReferences(options: {
   const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
   const datasource: Datasource = createFakeDatasource(pkg, toInstall);
   await savedObjectsClient.create<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, datasource, {
-    id: pkgToPkgKey(pkg),
+    id: Registry.pkgToPkgKey(pkg),
     overwrite: true,
   });
 
@@ -98,7 +91,7 @@ async function getDatasource(options: {
 }) {
   const { savedObjectsClient, pkg } = options;
   const datasource = await savedObjectsClient
-    .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, pkgToPkgKey(pkg))
+    .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, Registry.pkgToPkgKey(pkg))
     .catch(e => undefined);
 
   return datasource?.attributes;
@@ -106,7 +99,7 @@ async function getDatasource(options: {
 
 function createFakeDatasource(pkg: RegistryPackage, assets: Asset[] = []): Datasource {
   return {
-    id: pkgToPkgKey(pkg),
+    id: Registry.pkgToPkgKey(pkg),
     name: 'name',
     read_alias: 'read_alias',
     package: {
