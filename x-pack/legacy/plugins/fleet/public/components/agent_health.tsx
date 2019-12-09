@@ -64,13 +64,18 @@ export const AgentHealth: React.FC<Props> = ({ agent }) => {
       position="top"
       content={
         msLastCheckIn ? (
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.checkInTooltipText"
-            defaultMessage="Last checked in {lastCheckIn}"
-            values={{
-              lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
-            }}
-          />
+          <>
+            <FormattedMessage
+              id="xpack.fleet.agentHealth.checkInTooltipText"
+              defaultMessage="Last checked in {lastCheckIn}"
+              values={{
+                lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
+              }}
+            />
+            {agent.current_errors_events.map((event, idx) => (
+              <p key={idx}>{event.message}</p>
+            ))}
+          </>
         ) : (
           <FormattedMessage
             id="xpack.fleet.agentHealth.noCheckInTooltipText"

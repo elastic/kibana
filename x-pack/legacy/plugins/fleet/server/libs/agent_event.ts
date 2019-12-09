@@ -7,6 +7,7 @@
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 import { AgentEventsRepository } from '../repositories/agent_events/default';
 import { AgentEvent } from '../repositories/agent_events/types';
+import { Agent } from '../repositories/agents/types';
 
 /**
  * This is the server lib to manage everything related to policies and agents
@@ -14,21 +15,51 @@ import { AgentEvent } from '../repositories/agent_events/types';
 export class AgentEventLib {
   constructor(private readonly agentEventsRepository: AgentEventsRepository) {}
 
-  public async processEventsForCheckin(user: FrameworkUser, agentId: string, events: AgentEvent[]) {
-    let acknowledgedActionIds: string[] = [];
-    if (events.length > 0) {
-      acknowledgedActionIds = events
-        .filter(
-          e => e.type === 'ACTION' && (e.subtype === 'ACKNOWLEDGED' || e.subtype === 'UNKNOWN')
-        )
-        .map(e => e.action_id as string);
+  /**
+   * This function process and persit events during agent checkin,
+   * looking at acknowledge action or errors reported by agents
+   */
+  public async processEventsForCheckin(user: FrameworkUser, agent: Agent, events: AgentEvent[]) {
+    const acknowledgedActionIds: string[] = [];
+    const updatedErrorEvents = [...agent.current_errors_events];
+    for (const event of events) {
+      assignPolicyId(agent, event);
 
-      await this.agentEventsRepository.createEventsForAgent(user, agentId, events);
+      if (isActionEvent(event)) {
+        acknowledgedActionIds.push(event.action_id as string);
+      }
+
+      if (isErrorOrState(event)) {
+        // Remove any global or specific to a stream event
+        const existingEventIndex = updatedErrorEvents.findIndex(
+          e => e.stream_id === event.stream_id
+        );
+        if (existingEventIndex >= 0) {
+          updatedErrorEvents.splice(existingEventIndex, 1);
+        }
+        if (event.type === 'ERROR') {
+          updatedErrorEvents.push(event);
+        }
+      }
+    }
+
+    if (events.length > 0) {
+      await this.agentEventsRepository.createEventsForAgent(user, agent.id, events);
     }
 
     return {
       acknowledgedActionIds,
+      updatedErrorEvents,
     };
+  }
+
+  public async getEventsCountForPolicyId(user: FrameworkUser<any>, policyId: string) {
+    const { total } = await this.agentEventsRepository.list(user, {
+      perPage: 0,
+      search: `agent_events.policy_id:${policyId}`,
+    });
+
+    return total;
   }
 
   public async deleteEventsForAgent(user: FrameworkUser, agentId: string) {
@@ -48,4 +79,18 @@ export class AgentEventLib {
       perPage,
     });
   }
+}
+
+function assignPolicyId(agent: Agent, event: AgentEvent) {
+  event.policy_id = agent.policy_id;
+}
+
+function isErrorOrState(event: AgentEvent) {
+  return event.type === 'STATE' || event.type === 'ERROR';
+}
+
+function isActionEvent(event: AgentEvent) {
+  return (
+    event.type === 'ACTION' && (event.subtype === 'ACKNOWLEDGED' || event.subtype === 'UNKNOWN')
+  );
 }

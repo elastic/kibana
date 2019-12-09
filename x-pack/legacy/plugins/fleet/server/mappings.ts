@@ -43,6 +43,9 @@ export const mappings = {
       updated_at: {
         type: 'date',
       },
+      current_errors_events: {
+        type: 'text',
+      },
       actions: {
         type: 'nested',
         properties: {
@@ -106,9 +109,11 @@ export const mappings = {
   agent_events: {
     properties: {
       type: { type: 'keyword' },
+      subtype: { type: 'keyword' },
       agent_id: { type: 'keyword' },
       action_id: { type: 'keyword' },
-      subtype: { type: 'keyword' },
+      policy_id: { type: 'keyword' },
+      stream_id: { type: 'keyword' },
       timestamp: { type: 'date' },
       message: { type: 'text' },
       payload: { type: 'text' },

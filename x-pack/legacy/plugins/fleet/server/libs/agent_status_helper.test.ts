@@ -12,6 +12,7 @@ import {
 } from '../../common/constants';
 import { Agent } from '../repositories/agents/types';
 import { AgentStatusHelper } from './agent_status_helper';
+import { AgentEvent } from '../repositories/agent_events/types';
 
 describe('AgentStatusHelper', () => {
   describe('getAgentStatus', () => {
@@ -26,6 +27,7 @@ describe('AgentStatusHelper', () => {
           active: true,
           type: AGENT_TYPE_EPHEMERAL,
           last_checkin: new Date().toISOString(),
+          current_errors_events: [] as AgentEvent[],
         } as Agent);
 
         expect(status).toBe('online');
@@ -35,6 +37,7 @@ describe('AgentStatusHelper', () => {
           active: true,
           type: AGENT_TYPE_EPHEMERAL,
           last_checkin: new Date(Date.now() - 10 * AGENT_POLLING_THRESHOLD_MS).toISOString(),
+          current_errors_events: [] as AgentEvent[],
         } as Agent);
 
         expect(status).toBe('inactive');
@@ -46,6 +49,7 @@ describe('AgentStatusHelper', () => {
           active: true,
           type: AGENT_TYPE_TEMPORARY,
           last_checkin: new Date().toISOString(),
+          current_errors_events: [] as AgentEvent[],
         } as Agent);
 
         expect(status).toBe('online');
@@ -55,6 +59,7 @@ describe('AgentStatusHelper', () => {
           active: true,
           type: AGENT_TYPE_TEMPORARY,
           last_checkin: new Date(Date.now() - 10 * AGENT_POLLING_THRESHOLD_MS).toISOString(),
+          current_errors_events: [] as AgentEvent[],
         } as Agent);
 
         expect(status).toBe('offline');
@@ -66,6 +71,7 @@ describe('AgentStatusHelper', () => {
           active: true,
           type: AGENT_TYPE_PERMANENT,
           last_checkin: new Date().toISOString(),
+          current_errors_events: [] as AgentEvent[],
         } as Agent);
 
         expect(status).toBe('online');
@@ -75,6 +81,7 @@ describe('AgentStatusHelper', () => {
           active: true,
           type: AGENT_TYPE_PERMANENT,
           last_checkin: new Date(Date.now() - 2 * AGENT_POLLING_THRESHOLD_MS).toISOString(),
+          current_errors_events: [] as AgentEvent[],
         } as Agent);
 
         expect(status).toBe('warning');
@@ -84,6 +91,23 @@ describe('AgentStatusHelper', () => {
           active: true,
           type: AGENT_TYPE_PERMANENT,
           last_checkin: new Date(Date.now() - 5 * AGENT_POLLING_THRESHOLD_MS).toISOString(),
+          current_errors_events: [] as AgentEvent[],
+        } as Agent);
+
+        expect(status).toBe('error');
+      });
+      it('return error if the agent has currently errors', () => {
+        const status = AgentStatusHelper.getAgentStatus({
+          active: true,
+          type: AGENT_TYPE_PERMANENT,
+          last_checkin: new Date(Date.now()).toISOString(),
+          current_errors_events: [
+            {
+              message: 'Invalid path /foo',
+              type: 'ERROR',
+              subtype: 'CONFIG',
+            } as AgentEvent,
+          ],
         } as Agent);
 
         expect(status).toBe('error');
