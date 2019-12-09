@@ -81,7 +81,6 @@ export function createSagaMiddleware(
     });
     return (next: Dispatch<StoreAction>) => (action: StoreAction) => {
       // Call the next dispatch method in the middleware chain.
-
       const returnValue = next(action);
 
       enqueue({

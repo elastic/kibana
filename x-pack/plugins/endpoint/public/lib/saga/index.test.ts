@@ -6,14 +6,14 @@
 import { createSagaMiddleware, SagaContext } from './index';
 import { applyMiddleware, createStore, Reducer } from 'redux';
 
-// TODO: follow up - middleware seems to be running AFTER reducers - is this correct? I thought it was suppose to be before (ref: https://redux.js.org/advanced/middleware )
-
 describe('saga', () => {
   const INCREMENT_COUNTER = 'INCREMENT';
   const DELAYED_INCREMENT_COUNTER = 'DELAYED INCREMENT COUNTER';
+  const STOP_SAGA_PROCESSING = 'BREAK ASYNC ITERATOR';
 
   const sleep = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms));
   let reducerA: Reducer;
+  let sideAffect: (a: unknown, s: unknown) => void;
   let sagaExe: (sagaContext: SagaContext) => Promise<void>;
 
   beforeEach(() => {
@@ -26,10 +26,18 @@ describe('saga', () => {
       }
     });
 
+    sideAffect = jest.fn();
+
     sagaExe = jest.fn(async ({ actionsAndState, dispatch }: SagaContext) => {
       for await (const { action, state } of actionsAndState()) {
         expect(action).toBeDefined();
         expect(state).toBeDefined();
+
+        if (action.type === STOP_SAGA_PROCESSING) {
+          break;
+        }
+
+        sideAffect(action, state);
 
         if (action.type === DELAYED_INCREMENT_COUNTER) {
           await sleep(1);
@@ -51,6 +59,7 @@ describe('saga', () => {
     expect(store.getState().count).toEqual(0);
     expect(reducerA).toHaveBeenCalled();
     expect(sagaExe).not.toHaveBeenCalled();
+    expect(sideAffect).not.toHaveBeenCalled();
     expect(store.getState()).toEqual({ count: 0 });
   });
   test('it updates store once running', async () => {
@@ -66,6 +75,30 @@ describe('saga', () => {
 
     await sleep(100);
 
+    expect(sideAffect).toHaveBeenCalled();
     expect(store.getState()).toEqual({ count: 1 });
+  });
+  test('it stops processing if break out of loop', async () => {
+    const sagaMiddleware = createSagaMiddleware(sagaExe);
+    const store = createStore(reducerA, applyMiddleware(sagaMiddleware));
+    sagaMiddleware.run();
+
+    store.dispatch({ type: DELAYED_INCREMENT_COUNTER });
+    await sleep(100);
+
+    expect(store.getState()).toEqual({ count: 1 });
+    expect(sideAffect).toHaveBeenCalledTimes(2);
+
+    store.dispatch({ type: STOP_SAGA_PROCESSING });
+    await sleep(100);
+
+    expect(store.getState()).toEqual({ count: 1 });
+    expect(sideAffect).toHaveBeenCalledTimes(2);
+
+    store.dispatch({ type: DELAYED_INCREMENT_COUNTER });
+    await sleep(100);
+
+    expect(store.getState()).toEqual({ count: 1 });
+    expect(sideAffect).toHaveBeenCalledTimes(2);
   });
 });
