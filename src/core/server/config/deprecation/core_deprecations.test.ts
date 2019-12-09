@@ -23,10 +23,10 @@ import { applyDeprecations } from './apply_deprecations';
 
 const initialEnv = { ...process.env };
 
-const applyCoreDeprecations = (settings: Record<string, any> = {}): string[] => {
+const applyCoreDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = coreDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
-  applyDeprecations(
+  const migrated = applyDeprecations(
     settings,
     deprecations.map(deprecation => ({
       deprecation,
@@ -34,7 +34,10 @@ const applyCoreDeprecations = (settings: Record<string, any> = {}): string[] => 
     })),
     msg => deprecationMessages.push(msg)
   );
-  return deprecationMessages;
+  return {
+    messages: deprecationMessages,
+    migrated,
+  };
 };
 
 describe('core deprecations', () => {
@@ -45,7 +48,7 @@ describe('core deprecations', () => {
   describe('configPath', () => {
     it('logs a warning if CONFIG_PATH environ variable is set', () => {
       process.env.CONFIG_PATH = 'somepath';
-      const messages = applyCoreDeprecations();
+      const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
           "Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder",
@@ -55,7 +58,7 @@ describe('core deprecations', () => {
 
     it('does not log a warning if CONFIG_PATH environ variable is unset', () => {
       delete process.env.CONFIG_PATH;
-      const messages = applyCoreDeprecations();
+      const { messages } = applyCoreDeprecations();
       expect(messages).toHaveLength(0);
     });
   });
@@ -63,7 +66,7 @@ describe('core deprecations', () => {
   describe('dataPath', () => {
     it('logs a warning if DATA_PATH environ variable is set', () => {
       process.env.DATA_PATH = 'somepath';
-      const messages = applyCoreDeprecations();
+      const { messages } = applyCoreDeprecations();
       expect(messages).toMatchInlineSnapshot(`
         Array [
           "Environment variable \\"DATA_PATH\\" will be removed.  It has been replaced with kibana.yml setting \\"path.data\\"",
@@ -73,14 +76,14 @@ describe('core deprecations', () => {
 
     it('does not log a warning if DATA_PATH environ variable is unset', () => {
       delete process.env.DATA_PATH;
-      const messages = applyCoreDeprecations();
+      const { messages } = applyCoreDeprecations();
       expect(messages).toHaveLength(0);
     });
   });
 
   describe('rewriteBasePath', () => {
     it('logs a warning is server.basePath is set and server.rewriteBasePath is not', () => {
-      const messages = applyCoreDeprecations({
+      const { messages } = applyCoreDeprecations({
         server: {
           basePath: 'foo',
         },
@@ -93,20 +96,116 @@ describe('core deprecations', () => {
     });
 
     it('does not log a warning if both server.basePath and server.rewriteBasePath are unset', () => {
-      const messages = applyCoreDeprecations({
+      const { messages } = applyCoreDeprecations({
         server: {},
       });
       expect(messages).toHaveLength(0);
     });
 
     it('does not log a warning if both server.basePath and server.rewriteBasePath are set', () => {
-      const messages = applyCoreDeprecations({
+      const { messages } = applyCoreDeprecations({
         server: {
           basePath: 'foo',
           rewriteBasePath: true,
         },
       });
       expect(messages).toHaveLength(0);
+    });
+  });
+
+  describe('cspRulesDeprecation', () => {
+    describe('with nonce source', () => {
+      it('logs a warning', () => {
+        const settings = {
+          csp: {
+            rules: [`script-src 'self' 'nonce-{nonce}'`],
+          },
+        };
+        const { messages } = applyCoreDeprecations(settings);
+        expect(messages).toMatchInlineSnapshot(`
+            Array [
+              "csp.rules no longer supports the {nonce} syntax. Replacing with 'self' in script-src",
+            ]
+        `);
+      });
+
+      it('replaces a nonce', () => {
+        expect(
+          applyCoreDeprecations({ csp: { rules: [`script-src 'nonce-{nonce}'`] } }).migrated.csp
+            .rules
+        ).toEqual([`script-src 'self'`]);
+        expect(
+          applyCoreDeprecations({ csp: { rules: [`script-src 'unsafe-eval' 'nonce-{nonce}'`] } })
+            .migrated.csp.rules
+        ).toEqual([`script-src 'unsafe-eval' 'self'`]);
+      });
+
+      it('removes a quoted nonce', () => {
+        expect(
+          applyCoreDeprecations({ csp: { rules: [`script-src 'self' 'nonce-{nonce}'`] } }).migrated
+            .csp.rules
+        ).toEqual([`script-src 'self'`]);
+        expect(
+          applyCoreDeprecations({ csp: { rules: [`script-src 'nonce-{nonce}' 'self'`] } }).migrated
+            .csp.rules
+        ).toEqual([`script-src 'self'`]);
+      });
+
+      it('removes a non-quoted nonce', () => {
+        expect(
+          applyCoreDeprecations({ csp: { rules: [`script-src 'self' nonce-{nonce}`] } }).migrated
+            .csp.rules
+        ).toEqual([`script-src 'self'`]);
+        expect(
+          applyCoreDeprecations({ csp: { rules: [`script-src nonce-{nonce} 'self'`] } }).migrated
+            .csp.rules
+        ).toEqual([`script-src 'self'`]);
+      });
+
+      it('removes a strange nonce', () => {
+        expect(
+          applyCoreDeprecations({ csp: { rules: [`script-src 'self' blah-{nonce}-wow`] } }).migrated
+            .csp.rules
+        ).toEqual([`script-src 'self'`]);
+      });
+
+      it('removes multiple nonces', () => {
+        expect(
+          applyCoreDeprecations({
+            csp: {
+              rules: [
+                `script-src 'nonce-{nonce}' 'self' blah-{nonce}-wow`,
+                `style-src 'nonce-{nonce}' 'self'`,
+              ],
+            },
+          }).migrated.csp.rules
+        ).toEqual([`script-src 'self'`, `style-src 'self'`]);
+      });
+    });
+
+    describe('without self source', () => {
+      it('logs a warning', () => {
+        const { messages } = applyCoreDeprecations({
+          csp: { rules: [`script-src 'unsafe-eval'`] },
+        });
+        expect(messages).toMatchInlineSnapshot(`
+              Array [
+                "csp.rules must contain the 'self' source. Automatically adding to script-src.",
+              ]
+        `);
+      });
+
+      it('adds self', () => {
+        expect(
+          applyCoreDeprecations({ csp: { rules: [`script-src 'unsafe-eval'`] } }).migrated.csp.rules
+        ).toEqual([`script-src 'unsafe-eval' 'self'`]);
+      });
+    });
+
+    it('does not add self to other policies', () => {
+      expect(
+        applyCoreDeprecations({ csp: { rules: [`worker-src blob:`] } }).migrated.csp.rules
+      ).toEqual([`worker-src blob:`]);
     });
   });
 });
