@@ -32,7 +32,7 @@ routes.when('/management/spaces/list', {
       render(
         <I18nContext>
           <SpacesGridPage
-            spacesManager={spacesManager}
+            spacesManager={spacesManager!}
             capabilities={npStart.core.application.capabilities}
           />
         </I18nContext>,
@@ -62,7 +62,7 @@ routes.when('/management/spaces/create', {
       render(
         <I18nContext>
           <ManageSpacePage
-            spacesManager={spacesManager}
+            spacesManager={spacesManager!}
             capabilities={npStart.core.application.capabilities}
           />
         </I18nContext>,
@@ -99,7 +99,7 @@ routes.when('/management/spaces/edit/:spaceId', {
         <I18nContext>
           <ManageSpacePage
             spaceId={spaceId}
-            spacesManager={spacesManager}
+            spacesManager={spacesManager!}
             setBreadcrumbs={npStart.core.chrome.setBreadcrumbs}
             capabilities={npStart.core.application.capabilities}
           />

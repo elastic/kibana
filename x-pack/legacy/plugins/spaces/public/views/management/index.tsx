@@ -49,7 +49,7 @@ routes.defaults(/\/management/, {
 
         // Customize Saved Objects Management
         spacesNPStart.then(({ spacesManager }) => {
-          const action = new CopyToSpaceSavedObjectsManagementAction(spacesManager);
+          const action = new CopyToSpaceSavedObjectsManagementAction(spacesManager!);
           // This route resolve function executes any time the management screen is loaded, and we want to ensure
           // that this action is only registered once.
           if (!managementSetup.savedObjects.registry.has(action.id)) {
@@ -59,7 +59,7 @@ routes.defaults(/\/management/, {
 
         const getActiveSpace = async () => {
           const { spacesManager } = await spacesNPStart;
-          return spacesManager.getActiveSpace();
+          return spacesManager!.getActiveSpace();
         };
 
         const PageTitle = () => <AdvancedSettingsTitle getActiveSpace={getActiveSpace} />;

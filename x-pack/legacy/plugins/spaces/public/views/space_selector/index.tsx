@@ -26,7 +26,7 @@ module.controller('spacesSelectorController', ($scope: any) => {
 
     render(
       <I18nContext>
-        <SpaceSelector spacesManager={spacesManager} />
+        <SpaceSelector spacesManager={spacesManager!} />
       </I18nContext>,
       domNode
     );
