@@ -71,11 +71,7 @@ test(`fails if URLs are file-protocols for PDF`, async () => {
   await expect(
     getFullUrls({
       job: {
-        objects: [
-          {
-            relativeUrl,
-          },
-        ],
+        relativeUrls: [relativeUrl],
         forceNow,
       },
       server: mockServer,
@@ -92,11 +88,7 @@ test(`fails if URLs are absolute for PDF`, async () => {
   await expect(
     getFullUrls({
       job: {
-        objects: [
-          {
-            relativeUrl,
-          },
-        ],
+        relativeUrls: [relativeUrl],
         forceNow,
       },
       server: mockServer,
@@ -108,28 +100,21 @@ test(`fails if URLs are absolute for PDF`, async () => {
 
 test(`fails if any URLs are absolute or file's for PDF`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
-  const objects = [
-    {
-      relativeUrl: '/app/kibana#/something_aaa',
-    },
-    {
-      relativeUrl:
-        'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something',
-    },
-    {
-      relativeUrl: 'file://etc/passwd/#/something',
-    },
+  const relativeUrls = [
+    '/app/kibana#/something_aaa',
+    'http://169.254.169.254/latest/meta-data/iam/security-credentials/profileName/#/something',
+    'file://etc/passwd/#/something',
   ];
   await expect(
     getFullUrls({
       job: {
-        objects,
+        relativeUrls,
         forceNow,
       },
       server: mockServer,
     } as FullUrlsOpts)
   ).rejects.toMatchInlineSnapshot(
-    `[Error: Found invalid URL(s), all URLs must be relative: ${objects[1].relativeUrl} ${objects[2].relativeUrl}]`
+    `[Error: Found invalid URL(s), all URLs must be relative: ${relativeUrls[1]} ${relativeUrls[2]}]`
   );
 });
 
@@ -192,11 +177,11 @@ test(`adds forceNow to each of multiple urls`, async () => {
   const forceNow = '2000-01-01T00:00:00.000Z';
   const { urls } = await getFullUrls({
     job: {
-      objects: [
-        { relativeUrl: '/app/kibana#/something_aaa' },
-        { relativeUrl: '/app/kibana#/something_bbb' },
-        { relativeUrl: '/app/kibana#/something_ccc' },
-        { relativeUrl: '/app/kibana#/something_ddd' },
+      relativeUrls: [
+        '/app/kibana#/something_aaa',
+        '/app/kibana#/something_bbb',
+        '/app/kibana#/something_ccc',
+        '/app/kibana#/something_ddd',
       ],
       forceNow,
     },

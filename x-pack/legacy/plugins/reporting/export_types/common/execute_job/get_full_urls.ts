@@ -20,7 +20,7 @@ function isPngJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloa
   return (job as JobDocPayloadPNG).relativeUrl !== undefined;
 }
 function isPdfJob(job: JobDocPayloadPNG | JobDocPayloadPDF): job is JobDocPayloadPDF {
-  return (job as JobDocPayloadPDF).objects !== undefined;
+  return (job as JobDocPayloadPDF).relativeUrls !== undefined;
 }
 
 export async function getFullUrls<JobDocPayloadType>({
@@ -48,7 +48,7 @@ export async function getFullUrls<JobDocPayloadType>({
   if (isPngJob(job)) {
     relativeUrls = [job.relativeUrl];
   } else if (isPdfJob(job)) {
-    relativeUrls = job.objects.map(obj => obj.relativeUrl);
+    relativeUrls = job.relativeUrls;
   } else {
     throw new Error(
       `No valid URL fields found in Job Params! Expected \`job.relativeUrl\` or \`job.objects[{ relativeUrl }]\``

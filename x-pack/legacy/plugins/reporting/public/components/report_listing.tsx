@@ -430,7 +430,7 @@ class ReportListingUi extends Component<Props, State> {
             return {
               id: job._id,
               type: source.jobtype,
-              object_type: source.payload.type,
+              object_type: source.payload.objectType,
               object_title: source.payload.title,
               created_by: source.created_by,
               created_at: source.created_at,
