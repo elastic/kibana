@@ -22,11 +22,15 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('create_rules', () => {
-  let { server, alertsClient, actionsClient } = createMockServer();
+  let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient } = createMockServer());
+    ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
+    elasticsearch.getCluster = jest.fn().mockImplementation(() => ({
+      callWithRequest: jest.fn().mockImplementation(() => true),
+    }));
+
     createRulesRoute(server);
   });
 

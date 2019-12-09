@@ -10,6 +10,10 @@ import { APMOSSConfig } from 'src/plugins/apm_oss/server';
 import { APMPlugin } from './plugin';
 
 export const config = {
+  exposeToBrowser: {
+    serviceMapEnabled: true,
+    ui: true,
+  },
   schema: schema.object({
     serviceMapEnabled: schema.boolean({ defaultValue: false }),
     autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),

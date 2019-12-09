@@ -5,12 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
 
   describe('feature controls', () => {
     const kibanaUsername = 'kibana_user';
