@@ -800,7 +800,9 @@ export interface IndexSettingsDeprecationInfo {
 
 // @public
 export interface IRenderingProvider {
-    render(pluginId?: string, includeUserProvidedConfig?: boolean): Promise<string>;
+    render(pluginId?: string, options?: {
+        includeUserSettings?: boolean;
+    }): Promise<string>;
 }
 
 // @public
@@ -906,51 +908,50 @@ export type KnownHeaders = KnownKeys<IncomingHttpHeaders>;
 export interface LegacyRequest extends Request {
 }
 
-// @internal (undocumented)
+// @internal @deprecated (undocumented)
 export interface LegacyServiceDiscoverPlugins {
+    // Warning: (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
     disabledPluginSpecs: LegacyPluginSpec[];
+    // Warning: (ae-forgotten-export) The symbol "Spec" needs to be exported by the entry point index.d.ts
+    // 
     // (undocumented)
-    navLinks: Array<Record<string, unknown>>;
+    navLinks: Spec[];
     // Warning: (ae-forgotten-export) The symbol "LegacyConfig" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
     pluginExtendedConfig: LegacyConfig;
-    // Warning: (ae-forgotten-export) The symbol "LegacyPluginSpec" needs to be exported by the entry point index.d.ts
-    // 
     // (undocumented)
     pluginSpecs: LegacyPluginSpec[];
-    // (undocumented)
-    settings: Record<string, any>;
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsLegacyUiExports" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "Vars" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    uiExports: SavedObjectsLegacyUiExports;
+    settings: Vars;
+    // Warning: (ae-forgotten-export) The symbol "LegacyUiExports" needs to be exported by the entry point index.d.ts
+    // 
+    // (undocumented)
+    uiExports: LegacyUiExports;
 }
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceSetupDeps {
-    // Warning: (ae-forgotten-export) The symbol "InternalCoreSetup" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "LegacyCoreSetup" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    core: InternalCoreSetup & {
-        plugins: PluginsServiceSetup;
-        rendering: RenderingServiceSetup;
-    };
+    core: LegacyCoreSetup;
     // (undocumented)
-    plugins: Record<string, unknown>;
+    plugins: Spec;
 }
 
 // @public @deprecated (undocumented)
 export interface LegacyServiceStartDeps {
-    // Warning: (ae-forgotten-export) The symbol "InternalCoreStart" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-forgotten-export) The symbol "LegacyCoreStart" needs to be exported by the entry point index.d.ts
     // 
     // (undocumented)
-    core: InternalCoreStart & {
-        plugins: PluginsServiceStart;
-    };
+    core: LegacyCoreStart;
     // (undocumented)
-    plugins: Record<string, unknown>;
+    plugins: Spec;
 }
 
 // Warning: (ae-forgotten-export) The symbol "lifecycleResponseFactory" needs to be exported by the entry point index.d.ts
@@ -1191,12 +1192,8 @@ export type RedirectResponseOptions = HttpResponseOptions & {
 
 // @public (undocumented)
 export interface RenderingServiceSetup {
-    // Warning: (ae-forgotten-export) The symbol "GetRenderingProviderParams" needs to be exported by the entry point index.d.ts
-    getRenderingProvider: (params: GetRenderingProviderParams) => IRenderingProvider;
-    // Warning: (ae-forgotten-export) The symbol "PluginVariables" needs to be exported by the entry point index.d.ts
-    getVarsFor: (id: string) => Promise<PluginVariables>;
-    // Warning: (ae-forgotten-export) The symbol "VarProvider" needs to be exported by the entry point index.d.ts
-    registerVarProvider: (id: string, provider: VarProvider) => void;
+    // Warning: (ae-forgotten-export) The symbol "RenderingProviderParams" needs to be exported by the entry point index.d.ts
+    getRenderingProvider: (params: RenderingProviderParams) => IRenderingProvider;
 }
 
 // @public

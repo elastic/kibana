@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
+import {
+  CoreSetup,
+  CoreStart,
+  LegacyCoreSetup,
+  LegacyNavLink,
+  Plugin,
+  UiSettingsState,
+} from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -78,7 +85,7 @@ export class HomePlugin implements Plugin {
           http: contextCore.http,
           toastNotifications: core.notifications.toasts,
           banners: contextCore.overlays.banners,
-          getInjected: core.injectedMetadata.getInjectedVar,
+          getInjected: (core as LegacyCoreSetup).injectedMetadata.getInjectedVar,
           docLinks: contextCore.docLinks,
           savedObjectsClient: this.savedObjectsClient!,
           chrome: contextCore.chrome,

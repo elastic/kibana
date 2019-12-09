@@ -70,9 +70,6 @@ export interface AppMountContext {
         overlays: OverlayStart;
         savedObjects: SavedObjectsStart;
         uiSettings: IUiSettingsClient;
-        injectedMetadata: {
-            getInjectedVar: (name: string, defaultValue?: any) => unknown;
-        };
     };
 }
 
@@ -293,10 +290,6 @@ export interface CoreSetup<TPluginsStart extends object = object> {
     getStartServices(): Promise<[CoreStart, TPluginsStart]>;
     // (undocumented)
     http: HttpSetup;
-    // @deprecated
-    injectedMetadata: {
-        getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -315,10 +308,6 @@ export interface CoreStart {
     http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
-    // @deprecated
-    injectedMetadata: {
-        getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
     // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)

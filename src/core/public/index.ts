@@ -178,16 +178,6 @@ export interface CoreSetup<TPluginsStart extends object = object> {
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
   /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
-   * @deprecated
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
-
-  /**
    * Allows plugins to get access to APIs available in start inside async
    * handlers, such as {@link App.mount}. Promise will not resolve until Core
    * and plugin dependencies have completed `start`.
@@ -223,15 +213,6 @@ export interface CoreStart {
   overlays: OverlayStart;
   /** {@link IUiSettingsClient} */
   uiSettings: IUiSettingsClient;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
-   * @deprecated
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
 }
 
 /**

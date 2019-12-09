@@ -15,7 +15,5 @@ export interface RenderingServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [getRenderingProvider](./kibana-plugin-server.renderingservicesetup.getrenderingprovider.md) | <code>(params: GetRenderingProviderParams) =&gt; IRenderingProvider</code> | Generate a client for independently rendering HTML |
-|  [getVarsFor](./kibana-plugin-server.renderingservicesetup.getvarsfor.md) | <code>(id: string) =&gt; Promise&lt;PluginVariables&gt;</code> | Get the metadata variables for a particular plugin |
-|  [registerVarProvider](./kibana-plugin-server.renderingservicesetup.registervarprovider.md) | <code>(id: string, provider: VarProvider) =&gt; void</code> | Register a function that returns metadata variables to inject for a particular plugin |
+|  [getRenderingProvider](./kibana-plugin-server.renderingservicesetup.getrenderingprovider.md) | <code>(params: RenderingProviderParams) =&gt; IRenderingProvider</code> | Generate a client for independently rendering HTML |
 

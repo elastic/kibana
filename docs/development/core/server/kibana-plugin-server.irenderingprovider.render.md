@@ -11,7 +11,9 @@ Generate a KibanaResponse which renders an HTML page bootstrapped with the core 
 <b>Signature:</b>
 
 ```typescript
-render(pluginId?: string, includeUserProvidedConfig?: boolean): Promise<string>;
+render(pluginId?: string, options?: {
+        includeUserSettings?: boolean;
+    }): Promise<string>;
 ```
 
 ## Parameters
@@ -19,7 +21,7 @@ render(pluginId?: string, includeUserProvidedConfig?: boolean): Promise<string>;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  pluginId | <code>string</code> |  |
-|  includeUserProvidedConfig | <code>boolean</code> |  |
+|  options | <code>{</code><br/><code>        includeUserSettings?: boolean;</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 

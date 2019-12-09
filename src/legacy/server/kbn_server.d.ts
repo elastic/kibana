@@ -41,7 +41,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { SavedObjectsManagement } from '../../core/server/saved_objects/management';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LegacyConfig } from '../../core/server/legacy';
+import { LegacyConfig, ILegacyService } from '../../core/server/legacy';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 import { UsageCollectionSetup } from '../../plugins/usage_collection/server';
@@ -130,6 +130,7 @@ export interface Platform {
     uiPlugins: LegacyServiceSetupDeps['core']['plugins']['uiPlugins'];
     uiSettings: LegacyServiceSetupDeps['core']['uiSettings'];
     rendering: LegacyServiceSetupDeps['core']['rendering'];
+    legacy: Pick<ILegacyService, 'injectUiAppVars' | 'getInjectedUiAppVars'>;
   };
   logger: LoggerFactory;
 }

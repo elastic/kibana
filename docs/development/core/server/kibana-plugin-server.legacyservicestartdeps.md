@@ -18,6 +18,6 @@ export interface LegacyServiceStartDeps
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [core](./kibana-plugin-server.legacyservicestartdeps.core.md) | <code>InternalCoreStart &amp; {</code><br/><code>        plugins: PluginsServiceStart;</code><br/><code>    }</code> |  |
-|  [plugins](./kibana-plugin-server.legacyservicestartdeps.plugins.md) | <code>Record&lt;string, unknown&gt;</code> |  |
+|  [core](./kibana-plugin-server.legacyservicestartdeps.core.md) | <code>LegacyCoreStart</code> |  |
+|  [plugins](./kibana-plugin-server.legacyservicestartdeps.plugins.md) | <code>Spec</code> |  |
 

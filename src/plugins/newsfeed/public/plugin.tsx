@@ -32,10 +32,12 @@ export type Start = void;
 
 export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   private readonly kibanaVersion: string;
+  private readonly config: NewsfeedPluginInjectedConfig;
   private readonly stop$ = new Rx.ReplaySubject(1);
 
   constructor(initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.config = initializerContext.config.get<NewsfeedPluginInjectedConfig>();
   }
 
   public setup(core: CoreSetup): Setup {}
@@ -53,12 +55,7 @@ export class NewsfeedPublicPlugin implements Plugin<Setup, Start> {
   }
 
   private fetchNewsfeed(core: CoreStart) {
-    const { http, injectedMetadata } = core;
-    const config = injectedMetadata.getInjectedVar(
-      'newsfeed'
-    ) as NewsfeedPluginInjectedConfig['newsfeed'];
-
-    return getApi(http, config, this.kibanaVersion).pipe(
+    return getApi(core.http, this.config.newsfeed, this.kibanaVersion).pipe(
       takeUntil(this.stop$), // stop the interval when stop method is called
       catchError(() => Rx.of(null)) // do not throw error
     );

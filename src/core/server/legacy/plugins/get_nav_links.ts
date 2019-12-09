@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { SavedObjectsLegacyUiExports } from '../../types';
+import { LegacyUiExports } from '../../types';
 
-export function getNavLinks(uiExports: SavedObjectsLegacyUiExports) {
+export function getNavLinks(uiExports: LegacyUiExports) {
   const navLinkSpecs =
     uiExports.navLinkSpecs?.map(spec => ({
       order: 0,

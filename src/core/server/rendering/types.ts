@@ -19,25 +19,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CspOptions, InternalHttpServiceSetup, KibanaRequest } from '../http';
+import { CspOptions, InternalHttpServiceSetup, KibanaRequest, LegacyRequest } from '../http';
 import { IUiSettingsClient, UserProvidedValues } from '../ui_settings';
 import { Env } from '../config';
 import { PluginsServiceSetup, DiscoveredPlugin } from '../plugins';
-import { LegacyServiceDiscoverPlugins } from '../legacy';
-
-/**
- * @internal
- * Just a convenience to unify places where we pass around
- * common plugin variables.
- */
-export type PluginVariables = Record<string, any>;
-
-/** @internal */
-export type UserVariables = Record<string, UserProvidedValues>;
+import { ILegacyService, LegacyServiceDiscoverPlugins } from '../legacy';
 
 /** @internal */
 export interface RenderingMetadata {
-  strictCsp: boolean;
+  strictCsp: CspOptions['strict'];
   uiPublicUrl: string;
   bootstrapScriptUrl: string;
   i18n: typeof i18n.translate;
@@ -54,7 +44,7 @@ export interface RenderingMetadata {
       translationsUrl: string;
     };
     csp: Pick<CspOptions, 'warnLegacyBrowsers'>;
-    vars: PluginVariables;
+    vars: Record<string, any>;
     uiPlugins: Array<{
       id: string;
       plugin: DiscoveredPlugin;
@@ -72,7 +62,7 @@ export interface RenderingMetadata {
       devMode: boolean;
       basePath: string;
       uiSettings: {
-        defaults: PluginVariables;
+        defaults: Record<string, any>;
         user: Record<string, UserProvidedValues<any>>;
       };
     };
@@ -81,25 +71,21 @@ export interface RenderingMetadata {
 
 /** @internal */
 export interface RenderingSetupDeps {
-  plugins: PluginsServiceSetup;
   http: InternalHttpServiceSetup;
+  legacy: ILegacyService;
   legacyPlugins: LegacyServiceDiscoverPlugins;
+  plugins: PluginsServiceSetup;
 }
 
 /** @internal */
-export interface GetRenderingProviderParams {
-  request: KibanaRequest;
+export interface RenderingProviderParams {
+  request: KibanaRequest | LegacyRequest;
   uiSettings: IUiSettingsClient;
   /**
    * @deprecated legacy
    */
-  injectedVarsOverrides?: PluginVariables;
+  injectedVarsOverrides?: Record<string, any>;
 }
-
-/** @internal */
-export type RenderingProviderParams = RenderingSetupDeps &
-  GetRenderingProviderParams &
-  Pick<RenderingServiceSetup, 'getVarsFor'> & { env: Env };
 
 /**
  * @public
@@ -129,29 +115,13 @@ export interface IRenderingProvider {
    * @param injectedVarsOverrides Provide optional variables to inject in the page.
    * @param includeUserProvidedConfig Optionally disable injecting user-provided settings in the page
    */
-  render(pluginId?: string, includeUserProvidedConfig?: boolean): Promise<string>;
+  render(pluginId?: string, options?: { includeUserSettings?: boolean }): Promise<string>;
 }
-
-/** @internal */
-export type VarProvider = (
-  server: InternalHttpServiceSetup['server']
-) => PluginVariables | Promise<PluginVariables>;
 
 /** @public */
 export interface RenderingServiceSetup {
   /**
    * Generate a client for independently rendering HTML
    */
-  getRenderingProvider: (params: GetRenderingProviderParams) => IRenderingProvider;
-
-  /**
-   * Register a function that returns metadata variables to inject for a particular plugin
-   * @param spec specify the ID
-   */
-  registerVarProvider: (id: string, provider: VarProvider) => void;
-
-  /**
-   * Get the metadata variables for a particular plugin
-   */
-  getVarsFor: (id: string) => Promise<PluginVariables>;
+  getRenderingProvider: (params: RenderingProviderParams) => IRenderingProvider;
 }

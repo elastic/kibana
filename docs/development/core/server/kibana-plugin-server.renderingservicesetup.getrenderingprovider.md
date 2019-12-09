@@ -9,5 +9,5 @@ Generate a client for independently rendering HTML
 <b>Signature:</b>
 
 ```typescript
-getRenderingProvider: (params: GetRenderingProviderParams) => IRenderingProvider;
+getRenderingProvider: (params: RenderingProviderParams) => IRenderingProvider;
 ```

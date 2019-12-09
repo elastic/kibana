@@ -17,20 +17,16 @@
  * under the License.
  */
 
-import { RenderingProvider } from '../rendering_provider';
 import { RenderingService as Service } from '../rendering_service';
 import { RenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams, mockRenderingProviderParams } from './params';
+import { mockRenderingServiceParams } from './params';
 
-type IRenderingService = { [Public in keyof Service]: Service[Public] };
+type IRenderingService = Pick<Service, keyof Service>;
 
-export const mockGetRenderingProvider = jest
-  .fn()
-  .mockResolvedValue(new RenderingProvider(mockRenderingProviderParams));
 export const setupMock: jest.Mocked<RenderingServiceSetup> = {
-  getRenderingProvider: mockGetRenderingProvider,
-  getVarsFor: jest.fn().mockResolvedValue({}),
-  registerVarProvider: jest.fn(),
+  getRenderingProvider: jest.fn().mockReturnValue({
+    render: jest.fn(),
+  }),
 };
 export const mockSetup = jest.fn().mockResolvedValue(setupMock);
 export const mockStart = jest.fn();

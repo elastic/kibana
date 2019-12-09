@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import {
-  LegacyService,
-  LegacyServiceDiscoverPlugins,
-  LegacyServiceSetupDeps,
-} from './legacy_service';
+import { LegacyService } from './legacy_service';
+import { LegacyServiceDiscoverPlugins, LegacyServiceSetupDeps } from './types';
 
 type LegacyServiceMock = jest.Mocked<PublicMethodsOf<LegacyService> & { legacyId: symbol }>;
 
@@ -38,6 +35,9 @@ const createDiscoverPluginsMock = (): LegacyServiceDiscoverPlugins => ({
 });
 const createLegacyServiceMock = (): LegacyServiceMock => ({
   legacyId: Symbol(),
+  getVars: jest.fn().mockResolvedValue({}),
+  injectUiAppVars: jest.fn(),
+  getInjectedUiAppVars: jest.fn().mockReturnValue({}),
   discoverPlugins: jest.fn().mockResolvedValue(createDiscoverPluginsMock()),
   setup: jest.fn(),
   start: jest.fn(),

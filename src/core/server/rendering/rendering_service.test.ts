@@ -17,12 +17,13 @@
  * under the License.
  */
 
-jest.unmock('./rendering_service');
+import { load } from 'cheerio';
 
+import { INJECTED_METADATA } from '../test_utils';
 import {
   mockRenderingServiceParams,
   mockRenderingSetupDeps,
-  mockGetRenderingProviderParams,
+  mockRenderingProviderParams,
 } from './__mocks__/params';
 import { RenderingServiceSetup } from './types';
 import { RenderingService } from './rendering_service';
@@ -32,6 +33,13 @@ describe('RenderingService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRenderingProviderParams.uiSettings.getAll.mockResolvedValue({ all: 'settings' });
+    mockRenderingProviderParams.uiSettings.getUserProvided.mockResolvedValue({
+      providedBy: {
+        isOverridden: true,
+        value: 'user',
+      },
+    });
     service = new RenderingService(mockRenderingServiceParams);
   });
 
@@ -49,33 +57,41 @@ describe('RenderingService', () => {
         rendering = await service.setup(mockRenderingSetupDeps);
       });
 
-      it('creates instance of RenderingProvider', async () => {
-        const provider = rendering.getRenderingProvider(mockGetRenderingProviderParams);
+      it('creates rendering provider', async () => {
+        const provider = rendering.getRenderingProvider(mockRenderingProviderParams);
 
         expect(provider.render).toBeInstanceOf(Function);
       });
-    });
 
-    describe('variable providers', () => {
-      let rendering: RenderingServiceSetup;
+      describe('render()', () => {
+        it('renders "core" page', async () => {
+          const { render } = rendering.getRenderingProvider(mockRenderingProviderParams);
+          const dom = load(await render());
+          const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
-      beforeEach(async () => {
-        rendering = await service.setup(mockRenderingSetupDeps);
-      });
+          expect(data).toMatchSnapshot(INJECTED_METADATA);
+        });
 
-      it('registers variable providers and returns provided variables', async () => {
-        const varProvider = jest.fn().mockResolvedValue({ providedBy: 'core' });
+        it('renders with custom injectedVarsOverrides', async () => {
+          const { render } = rendering.getRenderingProvider({
+            ...mockRenderingProviderParams,
+            injectedVarsOverrides: {
+              fake: '__TEST_TOKEN__',
+            },
+          });
+          const dom = load(await render());
+          const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
-        rendering.registerVarProvider('core', varProvider);
+          expect(data).toMatchSnapshot(INJECTED_METADATA);
+        });
 
-        const vars = await rendering.getVarsFor('core');
+        it('renders with excluded user settings', async () => {
+          const { render } = rendering.getRenderingProvider(mockRenderingProviderParams);
+          const dom = load(await render(undefined, { includeUserSettings: false }));
+          const data = JSON.parse(dom('kbn-injected-metadata').attr('data'));
 
-        expect(varProvider).toHaveBeenCalled();
-        expect(vars).toMatchInlineSnapshot(`
-          Object {
-            "providedBy": "core",
-          }
-        `);
+          expect(data).toMatchSnapshot(INJECTED_METADATA);
+        });
       });
     });
   });

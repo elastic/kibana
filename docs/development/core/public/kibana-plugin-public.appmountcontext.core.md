@@ -19,8 +19,5 @@ core: {
         overlays: OverlayStart;
         savedObjects: SavedObjectsStart;
         uiSettings: IUiSettingsClient;
-        injectedMetadata: {
-            getInjectedVar: (name: string, defaultValue?: any) => unknown;
-        };
     };
 ```

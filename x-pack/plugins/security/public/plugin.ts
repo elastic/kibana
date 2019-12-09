@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Plugin, CoreSetup, CoreStart } from 'src/core/public';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import {
   SessionExpired,
@@ -19,6 +19,12 @@ export interface PluginSetupDependencies {
   licensing: LicensingPluginSetup;
 }
 
+interface SecurityConfig {
+  session: {
+    tenant?: string;
+  };
+}
+
 export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPluginStart> {
   private sessionTimeout!: SessionTimeout;
 
@@ -26,14 +32,17 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
 
   private securityLicenseService!: SecurityLicenseService;
 
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
   public setup(core: CoreSetup, { licensing }: PluginSetupDependencies) {
-    const { http, notifications, injectedMetadata } = core;
+    const { http, notifications } = core;
     const { basePath, anonymousPaths } = http;
+    const config = this.initializerContext.config.get<SecurityConfig>();
     anonymousPaths.register('/login');
     anonymousPaths.register('/logout');
     anonymousPaths.register('/logged_out');
 
-    const tenant = `${injectedMetadata.getInjectedVar('session.tenant', '')}`;
+    const { tenant = '' } = config.session;
     const sessionExpired = new SessionExpired(basePath, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
     this.sessionTimeout = new SessionTimeout(notifications, sessionExpired, http, tenant);

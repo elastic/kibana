@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { mergeVariables } from './merge_variables';
+import { mergeVars } from './merge_vars';
 
-describe('mergeVariables', () => {
+describe('mergeVars', () => {
   it('merges two objects together', () => {
     const first = {
       otherName: 'value',
@@ -36,7 +36,7 @@ describe('mergeVariables', () => {
       },
     };
 
-    expect(mergeVariables(first, second)).toEqual({
+    expect(mergeVars(first, second)).toEqual({
       name: 'value',
       canFoo: true,
       nested: {
@@ -70,7 +70,7 @@ describe('mergeVariables', () => {
       var4: 'fourth',
     };
 
-    mergeVariables(first, second, third, fourth);
+    mergeVars(first, second, third, fourth);
 
     expect(first).toEqual({ var1: 'first' });
     expect(second).toEqual({ var1: 'second', var2: 'second' });
@@ -98,7 +98,7 @@ describe('mergeVariables', () => {
       var1: 'fourth',
     };
 
-    expect(mergeVariables(first, second, third, fourth)).toEqual({
+    expect(mergeVars(first, second, third, fourth)).toEqual({
       var1: 'fourth',
       var2: 'third',
       var3: 'second',
@@ -120,7 +120,7 @@ describe('mergeVariables', () => {
       },
     };
 
-    expect(mergeVariables(first, second)).toEqual({
+    expect(mergeVars(first, second)).toEqual({
       name: 'value',
       canFoo: true,
       nested: {
@@ -152,7 +152,7 @@ describe('mergeVariables', () => {
       },
     };
 
-    expect(mergeVariables(first, second, third)).toEqual({
+    expect(mergeVars(first, second, third)).toEqual({
       name: 'value',
       canFoo: true,
       uiCapabilities: {
@@ -184,7 +184,7 @@ describe('mergeVariables', () => {
       },
     };
 
-    expect(mergeVariables(first, second)).toEqual({
+    expect(mergeVars(first, second)).toEqual({
       name: 'value',
       canFoo: true,
       uiCapabilities: {

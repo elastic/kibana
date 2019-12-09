@@ -24,7 +24,6 @@ import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
-import { KibanaRequest } from '../../../core/server';
 
 /**
  * @typedef {import('../../server/kbn_server').default} KbnServer
@@ -184,11 +183,11 @@ export function uiRenderMixin(kbnServer, server, config) {
     const { http } = kbnServer.newPlatform.setup.core;
     const { rendering } = kbnServer.newPlatform.__internals;
     const provider = rendering.getRenderingProvider({
-      request: KibanaRequest.from(h.request),
+      request: h.request,
       uiSettings: h.request.getUiSettingsService(),
       injectedVarsOverrides,
     });
-    const content = await provider.render(app.getId(), includeUserProvidedConfig);
+    const content = await provider.render(app.getId(), { includeUserSettings: includeUserProvidedConfig });
 
     return h
       .response(content)

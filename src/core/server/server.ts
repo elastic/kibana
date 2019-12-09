@@ -148,9 +148,10 @@ export class Server {
     const pluginsSetup = await this.plugins.setup(coreSetup);
 
     const renderingSetup = await this.rendering.setup({
-      plugins: pluginsSetup,
-      legacyPlugins,
       http: httpSetup,
+      legacy: this.legacy,
+      legacyPlugins,
+      plugins: pluginsSetup,
     });
 
     await this.legacy.setup({

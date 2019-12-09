@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, LegacyCoreSetup } from 'kibana/public';
 
 export class StatusPagePlugin implements Plugin<StatusPagePluginSetup, StatusPagePluginStart> {
-  public setup(core: CoreSetup) {
+  public setup(core: LegacyCoreSetup) {
     const isStatusPageAnonymous = core.injectedMetadata.getInjectedVar(
       'isStatusPageAnonymous'
     ) as boolean;

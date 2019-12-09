@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RenderingProvider render() renders "core" page 1`] = `
+exports[`RenderingService setup() getRenderingProvider() render() renders "core" page 1`] = `
 Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -74,7 +74,7 @@ Object {
 }
 `;
 
-exports[`RenderingProvider render() renders with custom injectedVarsOverrides 1`] = `
+exports[`RenderingService setup() getRenderingProvider() render() renders with custom injectedVarsOverrides 1`] = `
 Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
@@ -143,14 +143,12 @@ Object {
   },
   "legacyMode": false,
   "uiPlugins": Array [],
-  "vars": Object {
-    "fake": "__TEST_TOKEN__",
-  },
+  "vars": Object {},
   "version": Any<String>,
 }
 `;
 
-exports[`RenderingProvider render() renders with excluded user settings 1`] = `
+exports[`RenderingService setup() getRenderingProvider() render() renders with excluded user settings 1`] = `
 Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,

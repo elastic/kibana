@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { KibanaRequest, InternalHttpServiceSetup } from '../http';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsMapping } from './mappings';
 import { MigrationDefinition } from './migrations/core/document_migrator';
@@ -232,31 +231,13 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  */
 export type SavedObjectsClientContract = Pick<SavedObjectsClient, keyof SavedObjectsClient>;
 
-type VarReplacer = (
-  vars: Record<string, any>,
-  request: KibanaRequest,
-  server: InternalHttpServiceSetup['server']
-) => Promise<any>;
-
-interface VarProvider {
-  fn: (server: InternalHttpServiceSetup['server'], options: any) => Record<string, any>;
-  pluginSpec: {
-    readConfigValue(config: any, key: string | string[]): any;
-  };
-}
-
 /**
  * @internal
  * @deprecated
  */
 export interface SavedObjectsLegacyUiExports {
-  unknown: [{ pluginSpec: { getId: () => unknown }; type: unknown }] | undefined;
   savedObjectMappings: SavedObjectsMapping[];
   savedObjectMigrations: MigrationDefinition;
   savedObjectSchemas: SavedObjectsSchemaDefinition;
   savedObjectValidations: PropertyValidators;
-  uiAppSpecs?: Array<Record<string, unknown> | undefined>;
-  navLinkSpecs?: Array<Record<string, unknown>>;
-  injectedVarsReplacers?: VarReplacer[];
-  defaultInjectedVarProviders?: VarProvider[];
 }

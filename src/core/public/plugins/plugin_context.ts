@@ -104,9 +104,6 @@ export function createPluginSetupContext<
     http: deps.http,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
-    injectedMetadata: {
-      getInjectedVar: deps.injectedMetadata.getInjectedVar,
-    },
     getStartServices: () => plugin.startDependencies,
   };
 }
@@ -147,8 +144,5 @@ export function createPluginStartContext<
     overlays: deps.overlays,
     uiSettings: deps.uiSettings,
     savedObjects: deps.savedObjects,
-    injectedMetadata: {
-      getInjectedVar: deps.injectedMetadata.getInjectedVar,
-    },
   };
 }

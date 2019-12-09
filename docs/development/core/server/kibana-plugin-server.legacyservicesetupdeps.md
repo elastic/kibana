@@ -18,6 +18,6 @@ export interface LegacyServiceSetupDeps
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [core](./kibana-plugin-server.legacyservicesetupdeps.core.md) | <code>InternalCoreSetup &amp; {</code><br/><code>        plugins: PluginsServiceSetup;</code><br/><code>        rendering: RenderingServiceSetup;</code><br/><code>    }</code> |  |
-|  [plugins](./kibana-plugin-server.legacyservicesetupdeps.plugins.md) | <code>Record&lt;string, unknown&gt;</code> |  |
+|  [core](./kibana-plugin-server.legacyservicesetupdeps.core.md) | <code>LegacyCoreSetup</code> |  |
+|  [plugins](./kibana-plugin-server.legacyservicesetupdeps.plugins.md) | <code>Spec</code> |  |
 

@@ -16,5 +16,5 @@ export interface IRenderingProvider
 
 |  Method | Description |
 |  --- | --- |
-|  [render(pluginId, includeUserProvidedConfig)](./kibana-plugin-server.irenderingprovider.render.md) | Generate a KibanaResponse which renders an HTML page bootstrapped with the core bundle or the ID of another specified bundle. Intended as a response body for HTTP route handlers.<!-- -->\* |
+|  [render(pluginId, options)](./kibana-plugin-server.irenderingprovider.render.md) | Generate a KibanaResponse which renders an HTML page bootstrapped with the core bundle or the ID of another specified bundle. Intended as a response body for HTTP route handlers.<!-- -->\* |
 

@@ -18,5 +18,4 @@
  */
 
 export { RenderingService } from './rendering_service';
-export { mergeVariables } from './merge_variables';
 export * from './types';

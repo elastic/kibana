@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializer } from 'src/core/public';
+import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
 import { SecurityPlugin, SecurityPluginSetup, SecurityPluginStart } from './plugin';
 export { SessionInfo } from './types';
 
-export const plugin: PluginInitializer<SecurityPluginSetup, SecurityPluginStart> = () =>
-  new SecurityPlugin();
+export const plugin: PluginInitializer<SecurityPluginSetup, SecurityPluginStart> = (
+  initializerContext: PluginInitializerContext
+) => new SecurityPlugin(initializerContext);

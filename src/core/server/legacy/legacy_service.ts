@@ -19,25 +19,32 @@
 
 import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, tap } from 'rxjs/operators';
+
 import { CoreService } from '../../types';
-import { CoreSetup, CoreStart } from '../';
-import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { SavedObjectsLegacyUiExports } from '../types';
-import { Config, ConfigDeprecationProvider } from '../config';
+import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
+import { BasePathProxyServer, HttpConfig, HttpConfigType, LegacyRequest, config as httpConfig } from '../http';
 import { Logger } from '../logging';
-import { RenderingServiceSetup } from '../rendering';
-import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
+import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
-import { PathConfigType } from '../path';
 import { LegacyConfig, convertLegacyDeprecationProvider } from './config';
+import { mergeVars } from './merge_vars';
+import {
+  LegacyServiceSetupDeps,
+  LegacyServiceStartDeps,
+  LegacyServiceDiscoverPlugins,
+  LegacyUiExports,
+  VarsInjector,
+} from './types';
+import { CoreSetup, CoreStart } from '..';
+
+type Vars = Record<string, any>;
 
 interface LegacyKbnServer {
-  applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
+  applyLoggingConfiguration: (settings: Readonly<Vars>) => void;
   listen: () => Promise<void>;
   ready: () => Promise<void>;
   close: () => Promise<void>;
@@ -54,41 +61,10 @@ function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
 
   return {
     ...rawConfig,
-    path: pathConfig, // We rely heavily in the default value of 'path.data' in the legacy world and, since it has been moved to NP, it won't show up in RawConfig
+    // We rely heavily in the default value of 'path.data' in the legacy world and,
+    // since it has been moved to NP, it won't show up in RawConfig.
+    path: pathConfig,
   };
-}
-
-/**
- * @public
- * @deprecated
- */
-export interface LegacyServiceSetupDeps {
-  core: InternalCoreSetup & {
-    plugins: PluginsServiceSetup;
-    rendering: RenderingServiceSetup;
-  };
-  plugins: Record<string, unknown>;
-}
-
-/**
- * @public
- * @deprecated
- */
-export interface LegacyServiceStartDeps {
-  core: InternalCoreStart & {
-    plugins: PluginsServiceStart;
-  };
-  plugins: Record<string, unknown>;
-}
-
-/** @internal */
-export interface LegacyServiceDiscoverPlugins {
-  pluginSpecs: LegacyPluginSpec[];
-  disabledPluginSpecs: LegacyPluginSpec[];
-  uiExports: SavedObjectsLegacyUiExports;
-  pluginExtendedConfig: LegacyConfig;
-  settings: Record<string, any>;
-  navLinks: Array<Record<string, unknown>>;
 }
 
 /** @internal */
@@ -98,23 +74,23 @@ export type ILegacyService = Pick<LegacyService, keyof LegacyService>;
 export class LegacyService implements CoreService {
   /** Symbol to represent the legacy platform as a fake "plugin". Used by the ContextService */
   public readonly legacyId = Symbol();
+  private hasDiscovered = false;
+  private readonly varsInjectors = new Map<string, Set<VarsInjector>>();
   private readonly log: Logger;
   private readonly devConfig$: Observable<DevConfig>;
   private readonly httpConfig$: Observable<HttpConfig>;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
-  private update$: ConnectableObservable<[Config, PathConfigType]> | undefined;
-  private legacyRawConfig: LegacyConfig | undefined;
-  private legacyPlugins:
-    | {
-        pluginSpecs: LegacyPluginSpec[];
-        disabledPluginSpecs: LegacyPluginSpec[];
-        uiExports: SavedObjectsLegacyUiExports;
-        navLinks: Array<Record<string, unknown>>;
-      }
-    | undefined;
-  private settings: Record<string, any> | undefined;
+  private update$?: ConnectableObservable<[Config, PathConfigType]>;
+  private legacyRawConfig?: LegacyConfig;
+  private legacyPlugins?: {
+    pluginSpecs: LegacyPluginSpec[];
+    disabledPluginSpecs: LegacyPluginSpec[];
+    uiExports: LegacyUiExports;
+    navLinks: Array<Record<string, unknown>>;
+  };
+  private settings?: Vars;
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -127,6 +103,70 @@ export class LegacyService implements CoreService {
       configService.atPath<HttpConfigType>(httpConfig.path),
       configService.atPath<CspConfigType>(cspConfig.path)
     ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+  }
+
+  private getDefaultVars(): Vars {
+    const { server } = this.setupDeps!.core.http;
+    const { defaultInjectedVarProviders = [] } = this.legacyPlugins!.uiExports;
+    const config = (server as any).config();
+
+    return defaultInjectedVarProviders.reduce(
+      (vars, { fn, pluginSpec }) =>
+        mergeVars(fn(server, pluginSpec.readConfigValue(config, [])), vars),
+      {}
+    );
+  }
+
+  private replaceVars(vars: Vars, request: LegacyRequest) {
+    const { server } = this.setupDeps!.core.http;
+    const { injectedVarsReplacers = [] } = this.legacyPlugins!.uiExports;
+
+    return injectedVarsReplacers.reduce(
+      async (injected, replacer) => await replacer(injected, request, server),
+      vars
+    );
+  }
+
+  public getInjectedUiAppVars(id: string) {
+    const { server } = this.setupDeps!.core.http;
+
+    return [...(this.varsInjectors.get(id) || [])].reduce(
+      async (promise, injector) => ({ ...(await promise), ...(await injector(server)) }),
+      Promise.resolve({} as Record<string, any>)
+    );
+  }
+
+  public injectUiAppVars(id: string, injector: VarsInjector) {
+    if (!this.varsInjectors.has(id)) {
+      this.varsInjectors.set(id, new Set());
+    }
+
+    this.varsInjectors.get(id)!.add(injector);
+  }
+
+  /**
+   * Get the metadata variables for a particular plugin
+   */
+  public async getVars(
+    id: string,
+    request: LegacyRequest,
+    pluginConfigs: Vars[],
+    injected: Vars = {}
+  ) {
+    if (!this.setupDeps) {
+      throw new Error(
+        'Legacy service has not been set up yet. Ensure LegacyService.setup() is called before LegacyService.getVars()'
+      );
+    }
+
+    const vars = mergeVars(
+      this.getDefaultVars(),
+      ...pluginConfigs,
+      await this.getInjectedUiAppVars(id),
+      injected
+    );
+
+    return this.replaceVars(vars, request);
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
@@ -190,6 +230,8 @@ export class LegacyService implements CoreService {
       );
     }
 
+    this.hasDiscovered = true;
+
     return {
       pluginSpecs,
       disabledPluginSpecs,
@@ -202,7 +244,7 @@ export class LegacyService implements CoreService {
 
   public async setup(setupDeps: LegacyServiceSetupDeps) {
     this.log.debug('setting up legacy service');
-    if (!this.legacyRawConfig || !this.legacyPlugins || !this.settings) {
+    if (!this.hasDiscovered) {
       throw new Error(
         'Legacy service has not discovered legacy plugins yet. Ensure LegacyService.discoverPlugins() is called before LegacyService.setup()'
       );
@@ -215,7 +257,7 @@ export class LegacyService implements CoreService {
 
   public async start(startDeps: LegacyServiceStartDeps) {
     const { setupDeps } = this;
-    if (!setupDeps || !this.legacyRawConfig || !this.legacyPlugins || !this.settings) {
+    if (!setupDeps || !this.hasDiscovered) {
       throw new Error('Legacy service is not setup yet.');
     }
     this.log.debug('starting legacy service');
@@ -223,14 +265,14 @@ export class LegacyService implements CoreService {
     // Receive initial config and create kbnServer/ClusterManager.
 
     if (this.coreContext.env.isDevClusterMaster) {
-      await this.createClusterManager(this.legacyRawConfig);
+      await this.createClusterManager(this.legacyRawConfig!);
     } else {
       this.kbnServer = await this.createKbnServer(
-        this.settings,
-        this.legacyRawConfig,
+        this.settings!,
+        this.legacyRawConfig!,
         setupDeps,
         startDeps,
-        this.legacyPlugins
+        this.legacyPlugins!
       );
     }
   }
@@ -270,14 +312,14 @@ export class LegacyService implements CoreService {
   }
 
   private async createKbnServer(
-    settings: Record<string, any>,
+    settings: Vars,
     config: LegacyConfig,
     setupDeps: LegacyServiceSetupDeps,
     startDeps: LegacyServiceStartDeps,
     legacyPlugins: {
       pluginSpecs: LegacyPluginSpec[];
       disabledPluginSpecs: LegacyPluginSpec[];
-      uiExports: SavedObjectsLegacyUiExports;
+      uiExports: LegacyUiExports;
     }
   ) {
     const coreSetup: CoreSetup = {
@@ -348,6 +390,11 @@ export class LegacyService implements CoreService {
           rendering: setupDeps.core.rendering,
           uiSettings: setupDeps.core.uiSettings,
           savedObjectsClientProvider: startDeps.core.savedObjects.clientProvider,
+          legacy: {
+            injectUiAppVars: (id: string, injector: VarsInjector) =>
+              this.injectUiAppVars(id, injector),
+            getInjectedUiAppVars: (id: string) => this.getInjectedUiAppVars(id),
+          },
         },
         logger: this.coreContext.logger,
       },

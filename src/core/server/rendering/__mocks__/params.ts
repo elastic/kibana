@@ -25,23 +25,19 @@ import { legacyServiceMock } from '../../legacy/legacy_service.mock';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 
 const context = mockCoreContext.create();
-const plugins = pluginServiceMock.createSetupContract();
-const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
 const http = httpServiceMock.createSetupContract();
+const plugins = pluginServiceMock.createSetupContract();
+const legacy = legacyServiceMock.create();
+const legacyPlugins = legacyServiceMock.createDiscoverPlugins();
 
 export const mockRenderingServiceParams = context;
 export const mockRenderingSetupDeps = {
-  plugins,
-  legacyPlugins,
   http,
-};
-export const mockGetRenderingProviderParams = {
-  request: httpServerMock.createKibanaRequest(),
-  uiSettings: uiSettingsServiceMock.createClient(),
+  legacy,
+  legacyPlugins,
+  plugins,
 };
 export const mockRenderingProviderParams = {
-  ...mockGetRenderingProviderParams,
-  ...mockRenderingSetupDeps,
-  getVarsFor: jest.fn().mockResolvedValue({}),
-  env: context.env,
+  request: httpServerMock.createKibanaRequest(),
+  uiSettings: uiSettingsServiceMock.createClient(),
 };

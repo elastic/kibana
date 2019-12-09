@@ -57,11 +57,11 @@ export function uiAppsMixin(kbnServer, server) {
   server.decorate('server', 'getUiAppById', id => appsById.get(id));
   server.decorate('server', 'getHiddenUiAppById', id => hiddenAppsById.get(id));
   server.decorate('server', 'injectUiAppVars', (appId, provider) =>
-    kbnServer.newPlatform.__internals.rendering.registerVarProvider(appId, provider)
+    kbnServer.newPlatform.__internals.legacy.injectUiAppVars(appId, provider)
   );
   server.decorate(
     'server',
     'getInjectedUiAppVars',
-    async appId => await kbnServer.newPlatform.__internals.rendering.getVarsFor(appId)
+    async appId => await kbnServer.newPlatform.__internals.legacy.getInjectedUiAppVars(appId)
   );
 }
