@@ -61,10 +61,7 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
           (<strong>{space.name}</strong>)
         </span>
       );
-      const deleteText = intl.formatMessage({
-        id: 'xpack.spaces.management.confirmDeleteModal.deleteText',
-        defaultMessage: 'DELETE',
-      });
+
       warning = (
         <>
           <EuiSpacer />
@@ -89,6 +86,11 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
       className: 'spcConfirmDeleteModal',
       initialFocus: 'input[name="confirmDeleteSpaceInput"]',
     };
+
+    const deleteText = intl.formatMessage({
+      id: 'xpack.spaces.management.confirmDeleteModal.deleteText',
+      defaultMessage: 'DELETE',
+    });
 
     return (
       <EuiOverlayMask>
@@ -124,10 +126,13 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
               </p>
 
               <EuiFormRow
-                label={intl.formatMessage({
-                  id: 'xpack.spaces.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
-                  defaultMessage: 'Please type {delete} to confirm this action.',
-                })}
+                label={intl.formatMessage(
+                  {
+                    id: 'xpack.spaces.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
+                    defaultMessage: 'Please type {DeleteText} to confirm this action.',
+                  },
+                  { DeleteText: deleteText }
+                )}
                 isInvalid={!!this.state.error}
                 error={intl.formatMessage({
                   id: 'xpack.spaces.management.confirmDeleteModal.spaceNamesDoNoMatchErrorMessage',
@@ -189,7 +194,12 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
   };
 
   private onConfirm = async () => {
-    if (this.state.confirmDelete === 'DELETE') {
+    const { intl } = this.props;
+    const deleteText = intl.formatMessage({
+      id: 'xpack.spaces.management.confirmDeleteModal.deleteText',
+      defaultMessage: 'DELETE',
+    });
+    if (this.state.confirmDelete === deleteText) {
       const needsRedirect = isDeletingCurrentSpace(this.props.space, this.props.spacesNavState);
       const spacesManager = this.props.spacesManager;
 
