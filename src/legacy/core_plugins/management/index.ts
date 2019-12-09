@@ -17,7 +17,21 @@
  * under the License.
  */
 
-import './register';
-export { IndexPatternListFactory } from './index_pattern_list';
-export { IndexPatternListConfig } from './index_pattern_list_config';
-export { IndexPatternListConfigRegistry } from './index_pattern_list_config_registry';
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
+
+// eslint-disable-next-line import/no-default-export
+export default function ManagementPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'management',
+    publicDir: resolve(__dirname, 'public'),
+    config: (Joi: any) => {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      }).default();
+    },
+    init: (server: Legacy.Server) => ({}),
+  };
+
+  return new kibana.Plugin(config);
+}
