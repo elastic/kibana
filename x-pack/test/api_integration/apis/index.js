@@ -29,5 +29,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./licensing'));
     loadTestFile(require.resolve('./endpoint'));
+    loadTestFile(require.resolve('./ml'));
   });
 }
