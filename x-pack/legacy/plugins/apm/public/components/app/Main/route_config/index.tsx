@@ -43,9 +43,9 @@ const renderAsRedirectTo = (to: string) => {
 };
 
 export function getRoutes({
-  apmServiceMapEnabled
+  serviceMapEnabled
 }: {
-  apmServiceMapEnabled: boolean;
+  serviceMapEnabled: boolean;
 }): BreadcrumbRoute[] {
   const routes: BreadcrumbRoute[] = [
     {
@@ -201,7 +201,7 @@ export function getRoutes({
     }
   ];
 
-  if (apmServiceMapEnabled) {
+  if (serviceMapEnabled) {
     routes.push(
       {
         exact: true,

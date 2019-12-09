@@ -11,7 +11,6 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 import { timefilter } from 'ui/timefilter';
-import { IndexPatterns } from 'ui/index_patterns';
 
 import { I18nContext } from 'ui/i18n';
 import { InjectorService } from '../../../../../../common/types/angular';
@@ -19,6 +18,7 @@ import { createSearchItems } from '../../utils/new_job_utils';
 import { Page } from './page';
 
 import { KibanaContext, KibanaConfigTypeFix } from '../../../../contexts/kibana';
+import { IndexPatternsContract } from '../../../../../../../../../../src/plugins/data/public';
 
 module.directive('mlJobTypePage', ($injector: InjectorService) => {
   return {
@@ -29,7 +29,7 @@ module.directive('mlJobTypePage', ($injector: InjectorService) => {
       timefilter.disableTimeRangeSelector();
       timefilter.disableAutoRefreshSelector();
 
-      const indexPatterns = $injector.get<IndexPatterns>('indexPatterns');
+      const indexPatterns = $injector.get<IndexPatternsContract>('indexPatterns');
       const kibanaConfig = $injector.get<KibanaConfigTypeFix>('config');
       const $route = $injector.get<any>('$route');
 
