@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { IndexPatternsService } from './index_patterns_service';
+import { NotificationsStart } from 'src/core/public';
+import { FieldFormatsStart } from '.';
+import { createGetterSetter } from '../../kibana_utils/public';
 
-export type IndexPatternsSetup = ReturnType<IndexPatternsService['setup']>;
-export type IndexPatternsStart = ReturnType<IndexPatternsService['start']>;
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
+);
+
+export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
+  'FieldFormats'
+);
