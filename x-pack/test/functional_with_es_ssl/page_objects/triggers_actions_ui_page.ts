@@ -63,7 +63,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         .map(row => {
           return {
             name: $(row)
-              .findTestSubject('lertsTableCell-name')
+              .findTestSubject('alertsTableCell-name')
               .find('.euiTableCellContent')
               .text(),
             tagsText: $(row)

@@ -81,7 +81,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
       expect(searchResultsBeforeEdit.length).to.eql(1);
 
-      const editConnectorBtn = await testSubjects.find('edit');
+      const editConnectorBtn = await find.byCssSelector(
+        '[data-test-subj="connectorsTableCell-name"] button'
+      );
       await editConnectorBtn.click();
 
       const nameInputToUpdate = await testSubjects.find('nameInput');

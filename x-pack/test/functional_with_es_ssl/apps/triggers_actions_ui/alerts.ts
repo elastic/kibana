@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
+  const retry = getService('retry');
 
   async function createAlert() {
     const { body: createdAlert } = await supertest
@@ -52,7 +53,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'test',
+          alertType: 'Test',
+          interval: '1m',
+        },
+      ]);
+    });
+
+    it('should search for tags', async () => {
+      const createdAlert = await createAlert();
+
+      await pageObjects.triggersActionsUI.searchAlerts(`${createdAlert.name} foo`);
+
+      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResults).to.eql([
+        {
+          name: createdAlert.name,
+          tagsText: 'foo, bar',
+          alertType: 'Test',
           interval: '1m',
         },
       ]);
@@ -158,7 +175,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('false');
     });
 
-    // TODO: wait for delete to finish
     it('should delete single alert', async () => {
       const createdAlert = await createAlert();
 
@@ -170,10 +186,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const deleteBtn = await testSubjects.find('deleteAlert');
       await deleteBtn.click();
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      retry.try(async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults.length).to.eql(0);
+        const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(searchResults.length).to.eql(0);
+      });
     });
 
     it('should mute all selection', async () => {
@@ -290,7 +308,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(isChecked).to.eql('true');
     });
 
-    // TODO: wait for delete to finish
     it('should delete all selection', async () => {
       const createdAlert = await createAlert();
 
@@ -305,10 +322,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const deleteAllBtn = await testSubjects.find('deleteAll');
       await deleteAllBtn.click();
 
-      await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
+      retry.try(async () => {
+        await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
-      expect(searchResults.length).to.eql(0);
+        const searchResults = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(searchResults.length).to.eql(0);
+      });
     });
   });
 };
