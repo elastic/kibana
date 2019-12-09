@@ -5,7 +5,7 @@
  */
 
 import { deepFreeze } from '../../../../../src/core/utils';
-import { ILicense } from '../../../licensing/server';
+import { ILicense } from '../../../licensing/common/types';
 import { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
