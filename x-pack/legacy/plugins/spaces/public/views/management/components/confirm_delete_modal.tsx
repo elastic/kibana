@@ -129,9 +129,9 @@ class ConfirmDeleteModalUI extends Component<Props, State> {
                 label={intl.formatMessage(
                   {
                     id: 'xpack.spaces.management.confirmDeleteModal.confirmSpaceNameFormRowLabel',
-                    defaultMessage: 'Please type {DeleteText} to confirm this action.',
+                    defaultMessage: 'Please type {deleteConfirm} to confirm this action.',
                   },
-                  { DeleteText: deleteText }
+                  { deleteConfirm: deleteText }
                 )}
                 isInvalid={!!this.state.error}
                 error={intl.formatMessage({
