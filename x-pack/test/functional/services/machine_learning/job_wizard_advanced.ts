@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MachineLearningCommonProvider } from './common';
 
-export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProviderContext) {
+export function MachineLearningJobWizardAdvancedProvider(
+  { getService }: FtrProviderContext,
+  mlCommon: ProvidedType<typeof MachineLearningCommonProvider>
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -44,7 +49,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async setQueryDelay(queryDelay: string) {
-      await testSubjects.setValueWithChecks('mlJobWizardInputQueryDelay', queryDelay, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputQueryDelay', queryDelay, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -61,7 +66,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async setFrequency(frequency: string) {
-      await testSubjects.setValueWithChecks('mlJobWizardInputFrequency', frequency, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputFrequency', frequency, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -78,7 +83,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async setScrollSize(scrollSize: string) {
-      await testSubjects.setValueWithChecks('mlJobWizardInputScrollSize', scrollSize, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputScrollSize', scrollSize, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -257,7 +262,7 @@ export function MachineLearningJobWizardAdvancedProvider({ getService }: FtrProv
     },
 
     async setDetectorDescription(description: string) {
-      await testSubjects.setValueWithChecks('mlAdvancedDetectorDescriptionInput', description, {
+      await mlCommon.setValueWithChecks('mlAdvancedDetectorDescriptionInput', description, {
         clearWithKeyboard: true,
       });
       await this.assertDetectorDescriptionValue(description);

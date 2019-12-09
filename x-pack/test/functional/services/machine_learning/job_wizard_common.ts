@@ -7,10 +7,12 @@ import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MachineLearningCommonProvider } from './common';
 import { MachineLearningCustomUrlsProvider } from './custom_urls';
 
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
+  mlCommon: ProvidedType<typeof MachineLearningCommonProvider>,
   customUrls: ProvidedType<typeof MachineLearningCustomUrlsProvider>
 ) {
   const comboBox = getService('comboBox');
@@ -113,7 +115,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setBucketSpan(bucketSpan: string) {
-      await testSubjects.setValueWithChecks('mlJobWizardInputBucketSpan', bucketSpan, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputBucketSpan', bucketSpan, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -130,7 +132,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setJobId(jobId: string) {
-      await testSubjects.setValueWithChecks('mlJobWizardInputJobId', jobId, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputJobId', jobId, {
         clearWithKeyboard: true,
       });
       await this.assertJobIdValue(jobId);
@@ -148,7 +150,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async setJobDescription(jobDescription: string) {
-      await testSubjects.setValueWithChecks('mlJobWizardInputJobDescription', jobDescription, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputJobDescription', jobDescription, {
         clearWithKeyboard: true,
       });
       await this.assertJobDescriptionValue(jobDescription);
@@ -309,7 +311,7 @@ export function MachineLearningJobWizardCommonProvider(
         await this.ensureAdvancedSectionOpen();
         subj = advancedSectionSelector(subj);
       }
-      await testSubjects.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
+      await mlCommon.setValueWithChecks(subj, modelMemoryLimit, { clearWithKeyboard: true });
       await this.assertModelMemoryLimitValue(modelMemoryLimit, {
         withAdvancedSection: sectionOptions.withAdvancedSection,
       });
