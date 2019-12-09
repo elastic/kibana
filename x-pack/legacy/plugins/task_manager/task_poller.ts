@@ -8,8 +8,10 @@
  * This module contains the logic for polling the task manager index for new work.
  */
 
+import { performance } from 'perf_hooks';
+import { after } from 'lodash';
 import { Subject, merge, partition, interval, of, Observable } from 'rxjs';
-import { mapTo, buffer, filter, mergeScan, concatMap } from 'rxjs/operators';
+import { mapTo, buffer, filter, mergeScan, concatMap, tap } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, map as mapOptional, isSome } from 'fp-ts/lib/Option';
@@ -70,6 +72,7 @@ export function createTaskPoller<T, H>({
     // take as many argumented calls as we have capacity for and call `work` with
     // those arguments. If the queue is empty this will still trigger work to be done
     concatMap(async (set: Set<T>) => {
+      closeSleepPerf();
       const workArguments = pullFromSet(set, getCapacity());
       try {
         const workResult = await work(...workArguments);
@@ -81,9 +84,20 @@ export function createTaskPoller<T, H>({
           }: ${err}`
         );
       }
-    })
+    }),
+    tap(openSleepPerf)
   );
 }
+
+const openSleepPerf = () => {
+  performance.mark('TaskPoller.sleep');
+};
+// we only want to close after an open has been called, as we're counting the time *between* work cycles
+// so we'll ignore the first call to `closeSleepPerf` but we will run every subsequent call
+const closeSleepPerf = after(2, () => {
+  performance.mark('TaskPoller.poll');
+  performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
+});
 
 /**
  * Cycles through an array of optionals and any optional that contains a value in unwrapped and its value
