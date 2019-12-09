@@ -33,7 +33,7 @@ function saveWatch(callWithRequest: any, id: string, body: any) {
 export function registerSaveRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(legacy, request);
+    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const { id } = request.params;
     const { type, isNew, ...watchConfig } = request.body;
 

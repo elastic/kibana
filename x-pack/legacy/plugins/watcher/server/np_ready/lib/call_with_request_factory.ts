@@ -4,19 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ElasticsearchServiceSetup } from 'src/core/server';
 import { once } from 'lodash';
 import { elasticsearchJsPlugin } from './elasticsearch_js_plugin';
 import { ServerShim } from '../types';
 
-const callWithRequest = once((server: any) => {
+const callWithRequest = once((elasticsearchService: ElasticsearchServiceSetup) => {
   const config = { plugins: [elasticsearchJsPlugin] };
-  const cluster = server.plugins.elasticsearch.createCluster('watcher', config);
-
-  return cluster.callWithRequest;
+  return elasticsearchService.createClient('watcher', config);
 });
 
-export const callWithRequestFactory = (server: ServerShim, request: any) => {
+export const callWithRequestFactory = (
+  elasticsearchService: ElasticsearchServiceSetup,
+  request: any
+) => {
   return (...args: any[]) => {
-    return callWithRequest(server)(request, ...args);
+    return callWithRequest(elasticsearchService)
+      .asScoped(request)
+      .callAsCurrentUser(...args);
   };
 };

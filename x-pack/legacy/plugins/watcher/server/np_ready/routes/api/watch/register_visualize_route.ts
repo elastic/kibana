@@ -31,7 +31,7 @@ function fetchVisualizeData(callWithRequest: any, index: any, body: any) {
 export function registerVisualizeRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(legacy, request);
+    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
     const watch = Watch.fromDownstreamJson(request.body.watch);
     const options = VisualizeOptions.fromDownstreamJson(request.body.options);
     const body = watch.getVisualizeQuery(options);

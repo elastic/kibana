@@ -39,7 +39,7 @@ function deleteWatches(callWithRequest: any, watchIds: string[]) {
 
 export function registerDeleteRoute(deps: RouteDependencies, legacy: ServerShim) {
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(legacy, request);
+    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
 
     try {
       const results = await deleteWatches(callWithRequest, request.body.watchIds);

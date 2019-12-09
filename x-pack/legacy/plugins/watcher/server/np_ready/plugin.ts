@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { first } from 'rxjs/operators';
 import { Plugin, CoreSetup } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN } from '../../common/constants';
@@ -18,9 +19,15 @@ import { registerListFieldsRoute } from './routes/api/register_list_fields_route
 import { registerLoadHistoryRoute } from './routes/api/register_load_history_route';
 
 export class WatcherServerPlugin implements Plugin<void, void, any, any> {
-  async setup({ http }: CoreSetup, { __LEGACY: serverShim }: { __LEGACY: ServerShim }) {
+  async setup(
+    { http, elasticsearch: elasticsearchService }: CoreSetup,
+    { __LEGACY: serverShim }: { __LEGACY: ServerShim }
+  ) {
+    const elasticsearch = await elasticsearchService.adminClient$.pipe(first()).toPromise();
     const router = http.createRouter();
     const routeDependencies: RouteDependencies = {
+      elasticsearch,
+      elasticsearchService,
       router,
     };
     // Register license checker

@@ -23,7 +23,7 @@ function fetchWatch(callWithRequest: any, watchId: string) {
 export function registerLoadRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
-    const callWithRequest = callWithRequestFactory(legacy, request);
+    const callWithRequest = callWithRequestFactory(deps.elasticsearchService, request);
 
     const id = request.params.id;
 

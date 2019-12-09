@@ -4,16 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandler } from 'src/core/server';
-import { callWithInternalUserFactory } from '../../../lib/call_with_internal_user_factory';
+import { IClusterClient, RequestHandler } from 'src/core/server';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 // @ts-ignore
 import { Settings } from '../../../models/settings';
 import { RouteDependencies, ServerShim } from '../../../types';
 
-function fetchClusterSettings(callWithInternalUser: any) {
-  return callWithInternalUser('cluster.getSettings', {
+function fetchClusterSettings(client: IClusterClient) {
+  return client.callAsInternalUser('cluster.getSettings', {
     includeDefaults: true,
     filterPath: '**.xpack.notification',
   });
@@ -23,7 +22,7 @@ export function registerLoadRoute(deps: RouteDependencies, legacy: ServerShim) {
   const isEsError = isEsErrorFactory(legacy);
   const handler: RequestHandler<any, any, any> = async (ctx, request, response) => {
     try {
-      const settings = await fetchClusterSettings(callWithInternalUser);
+      const settings = await fetchClusterSettings(deps.elasticsearch);
       return response.ok({ body: Settings.fromUpstreamJson(settings).downstreamJson });
     } catch (e) {
       // Case: Error from Elasticsearch JS client
@@ -35,8 +34,6 @@ export function registerLoadRoute(deps: RouteDependencies, legacy: ServerShim) {
       return response.internalError({ body: e });
     }
   };
-  const callWithInternalUser = callWithInternalUserFactory(legacy);
-
   deps.router.get(
     {
       path: '/api/watcher/settings',
