@@ -68,7 +68,7 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
 
       try {
         const finalIndex = outputIndex != null ? outputIndex : getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request);
+        const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, finalIndex);
         if (!indexExists) {
           return new Boom(
@@ -120,6 +120,6 @@ export const createCreateRulesRoute = (server: ServerFacade): Hapi.ServerRoute =
   };
 };
 
-export const createRulesRoute = (server: ServerFacade) => {
+export const createRulesRoute = (server: ServerFacade): void => {
   server.route(createCreateRulesRoute(server));
 };
