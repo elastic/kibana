@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Timefilter } from 'ui/timefilter';
 import { FC } from 'react';
 
-// declare const TimeSeriesExplorer: FC<{
-//   appStateHandler: any;
-//   dateFormatTz: any;
-//   globalState: any;
-//   timefilter: any;
-// }>;
-
-export function TimeSeriesExplorer(props: any): any;
+declare const TimeSeriesExplorer: FC<{
+  appStateHandler: (action: string, payload: any) => void;
+  dateFormatTz: string;
+  globalState: any;
+  timefilter: Timefilter;
+}>;
