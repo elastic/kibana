@@ -28,14 +28,7 @@ import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
 
 import { useDispatch } from '../../../../mappings_state';
 import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import {
-  Field,
-  MainType,
-  SubType,
-  NormalizedFields,
-  ComboBoxOption,
-  DataType,
-} from '../../../../types';
+import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
 import { NameParameter, TypeParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
@@ -138,7 +131,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     if (nextType.length) {
       const { subTypeOptions } = getSubTypeMeta(nextType[0].value as MainType);
-      form.setFieldValue('subType', subTypeOptions ? subTypeOptions : undefined);
+      form.setFieldValue('subType', subTypeOptions ? [subTypeOptions[0]] : undefined);
     }
   };
 
@@ -162,7 +155,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               <TypeParameter
                 isMultiField={isMultiField}
                 onTypeChange={onTypeChange}
-                docLink={subTypeOptions ? undefined : docLink} // if subType, docLink will render under the subType select and not here
+                docLink={subTypeOptions ? undefined : docLink} // if subType, the doc link will render under the subType select and not here
               />
             </EuiFlexItem>
             {/* Field sub type (if any) */}
@@ -189,7 +182,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                           <EuiText size="xs">
                             <EuiLink href={docLink} target="_blank">
                               {i18n.translate(
-                                'xpack.idxMgmt.mappingsEditor.createField.typeDocumentation',
+                                'xpack.idxMgmt.mappingsEditor.createField.documentationLinkLabel',
                                 {
                                   defaultMessage: 'Learn more',
                                 }
@@ -200,7 +193,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                       >
                         <EuiComboBox
                           placeholder={i18n.translate(
-                            'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',
+                            'xpack.idxMgmt.mappingsEditor.createField.typePlaceholderLabel',
                             {
                               defaultMessage: 'Select a type',
                             }
@@ -229,7 +222,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       {isCancelable !== false && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={cancel}>
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.createFieldCancelButtonLabel', {
+            {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
@@ -237,7 +230,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       )}
       <EuiFlexItem grow={false}>
         <EuiButton color="primary" fill onClick={submitForm} type="submit">
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.createFieldAddButtonLabel', {
+          {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addButtonLabel', {
             defaultMessage: 'Add',
           })}
         </EuiButton>

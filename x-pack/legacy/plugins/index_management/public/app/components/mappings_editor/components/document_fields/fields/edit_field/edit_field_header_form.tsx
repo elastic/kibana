@@ -50,7 +50,8 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
          * (e.g. "numeric" with subType "float"), and we change the type to another one that also has subTypes (e.g. "range"),
          * the old value would be kept on the subType.
          */
-        form.setFieldValue('subType', nextTypeDefinition.subTypes!.types[0]);
+        const subTypeValue = nextTypeDefinition.subTypes!.types[0];
+        form.setFieldValue('subType', [TYPE_DEFINITION[subTypeValue]]);
       }
     }
   };
@@ -100,21 +101,6 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
               );
             }}
           </UseField>
-          {/* <UseField
-            path="subType"
-            config={{
-              ...getFieldConfig('type'),
-              label: typeDefinition.subTypes!.label,
-            }}
-            defaultValue={defaultValueSubType}
-            component={SelectField}
-            componentProps={{
-              euiFieldProps: {
-                options: isMultiField ? filterTypesForMultiField(subTypeOptions!) : subTypeOptions,
-                hasNoInitialSelection: false,
-              },
-            }}
-          /> */}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

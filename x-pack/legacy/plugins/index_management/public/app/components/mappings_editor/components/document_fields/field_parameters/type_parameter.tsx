@@ -34,7 +34,7 @@ export const TypeParameter = ({ onTypeChange, isMultiField, docLink }: Props) =>
             docLink ? (
               <EuiText size="xs">
                 <EuiLink href={docLink} target="_blank">
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.editField.typeDocumentation', {
+                  {i18n.translate('xpack.idxMgmt.mappingsEditor.typeField.documentationLinkLabel', {
                     defaultMessage: 'Learn more',
                   })}
                 </EuiLink>
