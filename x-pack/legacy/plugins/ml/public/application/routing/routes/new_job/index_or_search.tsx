@@ -6,7 +6,8 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MlRoute, PageLoader, useResolver, PageDependencies } from '../../router';
+import { MlRoute, PageLoader, PageDependencies } from '../../router';
+import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../../breadcrumbs';

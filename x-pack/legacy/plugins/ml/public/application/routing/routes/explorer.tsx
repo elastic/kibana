@@ -12,12 +12,11 @@ import { Subscription } from 'rxjs';
 // @ts-ignore
 import queryString from 'query-string';
 import { timefilter } from 'ui/timefilter';
-// import { AppState as IAppState, AppStateClass } from 'ui/state_management/app_state';
-import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
+import { MlRoute, PageLoader, PageProps } from '../router';
+import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { Explorer } from '../../explorer';
 import { mlJobService } from '../../services/job_service';
-// import { APP_STATE_ACTION } from '../../timeseriesexplorer/timeseriesexplorer_constants';
 import { getExplorerDefaultAppState, ExplorerAppState } from '../../explorer/reducers';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
 import { jobSelectServiceFactory } from '../../components/job_selector/job_select_service_utils';

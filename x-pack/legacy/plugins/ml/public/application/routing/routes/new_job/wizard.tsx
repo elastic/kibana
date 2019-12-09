@@ -10,7 +10,8 @@ import { i18n } from '@kbn/i18n';
 import queryString from 'query-string';
 
 import { basicResolvers } from '../../resolvers';
-import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
+import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useResolver } from '../../use_resolver';
 import { Page } from '../../../jobs/new_job/pages/new_job';
 import { JOB_TYPE } from '../../../jobs/new_job/common/job_creator/util/constants';
 import { mlJobService } from '../../../services/job_service';

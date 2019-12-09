@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 
 // @ts-ignore
 import queryString from 'query-string';
-import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
+import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useResolver } from '../../use_resolver';
 import { Page } from '../../../datavisualizer/index_based';
 
 import { checkBasicLicense } from '../../../license/check_license';

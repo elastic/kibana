@@ -8,7 +8,8 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { Redirect } from 'react-router-dom';
-import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
+import { MlRoute, PageLoader, PageProps } from '../router';
+import { useResolver } from '../use_resolver';
 import { OverviewPage } from '../../overview';
 
 import { checkFullLicense } from '../../license/check_license';

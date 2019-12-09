@@ -6,7 +6,8 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
+import { MlRoute, PageLoader, PageProps } from '../router';
+import { useResolver } from '../use_resolver';
 import { Page } from '../../access_denied';
 
 const breadcrumbs = [

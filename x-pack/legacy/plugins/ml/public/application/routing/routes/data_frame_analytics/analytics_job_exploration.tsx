@@ -10,7 +10,8 @@ import { decode } from 'rison-node';
 
 // @ts-ignore
 import queryString from 'query-string';
-import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
+import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_exploration';
 import { ANALYSIS_CONFIG_TYPE } from '../../../data_frame_analytics/common/analytics';

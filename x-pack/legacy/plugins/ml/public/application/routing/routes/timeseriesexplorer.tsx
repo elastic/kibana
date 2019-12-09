@@ -13,7 +13,8 @@ import { Subscription } from 'rxjs';
 // @ts-ignore
 import queryString from 'query-string';
 import { timefilter } from 'ui/timefilter';
-import { MlRoute, PageLoader, useResolver, PageProps } from '../router';
+import { MlRoute, PageLoader, PageProps } from '../router';
+import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
 import { TimeSeriesExplorer } from '../../timeseriesexplorer';
 import { mlJobService } from '../../services/job_service';

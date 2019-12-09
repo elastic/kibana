@@ -12,7 +12,8 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
+import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useResolver } from '../../use_resolver';
 
 import { checkFullLicense } from '../../../license/check_license';
 import { checkGetJobsPrivilege, checkPermission } from '../../../privilege/check_privilege';

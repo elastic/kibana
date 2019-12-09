@@ -7,7 +7,8 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { MlRoute, PageLoader, useResolver, PageProps } from '../../router';
+import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page } from '../../../data_frame_analytics/pages/analytics_management';
 import { ML_BREADCRUMB } from '../../breadcrumbs';
