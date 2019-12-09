@@ -7,8 +7,8 @@
 import { Plugin, CoreStart } from 'src/core/public';
 // @ts-ignore
 import { wrapInI18nContext } from 'ui/i18n';
-import { MapListing } from './components/map_listing';
 // @ts-ignore
+import { MapListing } from './components/map_listing';
 
 /**
  * These are the interfaces with your public contracts. You should export these
