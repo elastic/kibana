@@ -94,7 +94,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<EsFieldName[]>(indexPatternFields);
 
-  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
 
   const { errorMessage, status, rowCount, tableItems: data } = useSourceIndexData(
     indexPattern,
@@ -103,7 +103,25 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
   );
 
   // EuiDataGrid State
-  const dataGridColumns = indexPatternFields.map(id => ({ id }));
+  const dataGridColumns = indexPatternFields.map(id => {
+    const field = indexPattern.fields.getByName(id);
+
+    let schema = 'string';
+
+    switch (field?.type) {
+      case 'date':
+        schema = 'datetime';
+        break;
+      case 'geo_point':
+        schema = 'json';
+        break;
+      case 'number':
+        schema = 'numeric';
+        break;
+    }
+
+    return { id, schema };
+  });
 
   const onChangeItemsPerPage = useCallback(pageSize => setPagination(p => ({ ...p, pageSize })), [
     setPagination,
@@ -244,7 +262,7 @@ export const SourceIndexPreview: React.FC<Props> = React.memo(({ query }) => {
           }}
           pagination={{
             ...pagination,
-            pageSizeOptions: [10, 50, 100],
+            pageSizeOptions: [5, 10, 25],
             onChangeItemsPerPage,
             onChangePage,
           }}
