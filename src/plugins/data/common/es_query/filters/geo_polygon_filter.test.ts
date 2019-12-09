@@ -17,24 +17,29 @@
  * under the License.
  */
 
-import { Filter, FilterMeta, LatLon } from './meta_filter';
+import { getGeoPolygonFilterField } from './geo_polygon_filter';
 
-export type GeoPolygonFilterMeta = FilterMeta & {
-  params: {
-    points: LatLon[];
-  };
-};
-
-export type GeoPolygonFilter = Filter & {
-  meta: GeoPolygonFilterMeta;
-  geo_polygon: any;
-};
-
-export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
-  filter && filter.geo_polygon;
-
-export const getGeoPolygonFilterField = (filter: GeoPolygonFilter) => {
-  return (
-    filter.geo_polygon && Object.keys(filter.geo_polygon).find(key => key !== 'ignore_unmapped')
-  );
-};
+describe('geo_polygon filter', function() {
+  describe('getGeoPolygonFilterField', function() {
+    it('should return the name of the field a geo_polygon query is targeting', () => {
+      const filter = {
+        geo_polygon: {
+          geoPointField: {
+            points: [{ lat: 1, lon: 1 }],
+          },
+          ignore_unmapped: true,
+        },
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+          params: {
+            points: [{ lat: 1, lon: 1 }],
+          },
+        },
+      };
+      const result = getGeoPolygonFilterField(filter);
+      expect(result).toBe('geoPointField');
+    });
+  });
+});
