@@ -21,8 +21,9 @@ import './angular/services/gis_map_saved_object_loader';
 import './angular/map_controller';
 import './routes';
 // @ts-ignore
+import { PluginInitializerContext } from 'kibana/public';
 import { MapsPlugin } from './plugin';
 
-export function plugin() {
+export const plugin = (initializerContext: PluginInitializerContext) => {
   return new MapsPlugin();
-}
+};

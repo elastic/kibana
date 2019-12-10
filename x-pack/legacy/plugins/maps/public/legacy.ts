@@ -5,11 +5,12 @@
  */
 
 import { npSetup, npStart } from 'ui/new_platform';
-import { plugin } from '.';
 // @ts-ignore Untyped Module
-import { uiModules } from 'ui/modules'; // eslint-disable-line import/order
+import { uiModules } from 'ui/modules';
+import { PluginInitializerContext } from 'kibana/public'; // eslint-disable-line import/order
+import { plugin } from '.';
 
-const pluginInstance = plugin();
+const pluginInstance = plugin({} as PluginInitializerContext);
 
 const setupPlugins = {
   __LEGACY: {
