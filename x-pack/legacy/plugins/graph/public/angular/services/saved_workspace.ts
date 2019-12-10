@@ -3,17 +3,31 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { i18n } from '@kbn/i18n';
 import { extractReferences, injectReferences } from './saved_workspace_references';
 
-export function createSavedWorkspaceClass(savedObjectClient, indexPatterns) {
+export function createSavedWorkspaceClass(services: SavedObjectKibanaServices) {
   // SavedWorkspace constructor. Usually you'd interact with an instance of this.
   // ID is option, without it one will be generated on save.
-  const SavedObject = createSavedObjectClass(savedObjectClient, indexPatterns);
+  const SavedObject = createSavedObjectClass(services);
   class SavedWorkspace extends SavedObject {
-    constructor(id) {
+    public static type: string = 'graph-workspace';
+    // if type:workspace has no mapping, we push this mapping into ES
+    public static mapping: Record<string, string> = {
+      title: 'text',
+      description: 'text',
+      numLinks: 'integer',
+      numVertices: 'integer',
+      version: 'integer',
+      wsState: 'json',
+    };
+    public static source: boolean = false;
+    // Order these fields to the top, the rest are alphabetical
+    public static fieldOrder = ['title', 'description'];
+    public static searchSource = true;
+    constructor(id: string) {
       // Gives our SavedWorkspace the properties of a SavedObject
       super({
         type: SavedWorkspace.type,
@@ -42,19 +56,5 @@ export function createSavedWorkspaceClass(savedObjectClient, indexPatterns) {
       };
     }
   }
-
-  SavedWorkspace.type = 'graph-workspace';
-
-  // if type:workspace has no mapping, we push this mapping into ES
-  SavedWorkspace.mapping = {
-    title: 'text',
-    description: 'text',
-    numLinks: 'integer',
-    numVertices: 'integer',
-    version: 'integer',
-    wsState: 'json',
-  };
-
-  SavedWorkspace.searchsource = false;
   return SavedWorkspace;
 }

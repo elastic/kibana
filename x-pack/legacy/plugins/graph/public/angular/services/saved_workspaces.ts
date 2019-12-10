@@ -12,10 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { createSavedWorkspaceClass } from './saved_workspace';
 
 export function SavedWorkspacesProvider() {
-  const savedObjectsClient = npStart.core.savedObjects.client;
-  const indexPatterns = npStart.plugins.data.indexPatterns;
+  const services = {
+    savedObjectsClient: npStart.core.savedObjects.client,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  };
 
-  const SavedWorkspace = createSavedWorkspaceClass(savedObjectsClient, indexPatterns);
+  const SavedWorkspace = createSavedWorkspaceClass(services);
 
   this.type = SavedWorkspace.type;
   this.Class = SavedWorkspace;
