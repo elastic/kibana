@@ -11,7 +11,7 @@ import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
 
 import { License } from '../common/license';
-import { licenseMock } from '../common/license.mock';
+import { licenseMock } from '../common/licensing.mock';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpInterceptor } from 'src/core/public';
 
@@ -147,7 +147,7 @@ describe('licensing plugin', () => {
 
         expect(sessionStorage.setItem.mock.calls[0][0]).toBe(licensingSessionStorageKey);
         expect(sessionStorage.setItem.mock.calls[0][1]).toMatchInlineSnapshot(
-          `"{\\"license\\":{\\"uid\\":\\"fresh\\",\\"status\\":\\"active\\",\\"type\\":\\"basic\\",\\"expiryDateInMillis\\":5000},\\"features\\":{\\"ccr\\":{\\"isEnabled\\":true,\\"isAvailable\\":true},\\"ml\\":{\\"isEnabled\\":false,\\"isAvailable\\":true}},\\"signature\\":\\"xxxxxxxxx\\"}"`
+          `"{\\"license\\":{\\"uid\\":\\"fresh\\",\\"status\\":\\"active\\",\\"type\\":\\"basic\\",\\"mode\\":\\"basic\\",\\"expiryDateInMillis\\":5000},\\"features\\":{\\"ccr\\":{\\"isEnabled\\":true,\\"isAvailable\\":true},\\"ml\\":{\\"isEnabled\\":false,\\"isAvailable\\":true}},\\"signature\\":\\"xxxxxxxxx\\"}"`
         );
 
         const saved = JSON.parse(sessionStorage.setItem.mock.calls[0][1]);

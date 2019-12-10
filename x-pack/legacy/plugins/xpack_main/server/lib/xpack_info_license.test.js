@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { licenseMock } from '../../../../../plugins/licensing/server/license.mock';
+import { licenseMock } from '../../../../../plugins/licensing/server/licensing.mock';
 import { XPackInfoLicense } from './xpack_info_license';
 
 function getXPackInfoLicense(getRawLicense) {
