@@ -24,18 +24,21 @@ describe('Nav', () => {
 
     expect(toJson(wrapper)).toMatchSnapshot();
 
+    const allNavItems = wrapper.find('.euiSideNavItem__items EuiSideNavItem');
+
     [
-      { loc: '/', subj: 'navHomeItem' },
-      { loc: '/management', subj: 'navManagementItem' },
-      { loc: '/endpoints', subj: 'navEndpointsItem' },
-      { loc: '/alerts', subj: 'navalertsItem' },
-    ].forEach(({ loc, subj }, index) => {
-      wrapper
-        .find(`button[data-test-subj="${subj}"]`)
-        .first()
-        .simulate('click');
+      { loc: '/', id: 'home' },
+      { loc: '/management', id: 'management' },
+      { loc: '/endpoints', id: 'endpoints' },
+      { loc: '/alerts', id: 'alerts' },
+    ].forEach(({ loc, id }, index) => {
+      const menuItem = allNavItems
+        .findWhere(navItem => navItem.key() === id)
+        .find('button')
+        .at(0);
+      menuItem.simulate('click');
       expect(history.push).toHaveBeenCalledTimes(index + 1);
-      expect(pushMock.mock.calls[index][0]).toEqual(loc);
+      expect(pushMock).toHaveBeenLastCalledWith(loc);
     });
   });
 });

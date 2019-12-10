@@ -70,25 +70,21 @@ exports[`Nav it renders 1`] = `
               "id": "endpoint",
               "items": Array [
                 Object {
-                  "data-test-subj": "navHomeItem",
                   "id": "home",
                   "name": "Home",
                   "onClick": [Function],
                 },
                 Object {
-                  "data-test-subj": "navManagementItem",
                   "id": "management",
                   "name": "Management",
                   "onClick": [Function],
                 },
                 Object {
-                  "data-test-subj": "navEndpointsItem",
                   "id": "endpoints",
                   "name": "Endpoints",
                   "onClick": [Function],
                 },
                 Object {
-                  "data-test-subj": "navalertsItem",
                   "id": "alerts",
                   "name": "Alerts",
                   "onClick": [Function],
@@ -149,7 +145,6 @@ exports[`Nav it renders 1`] = `
               items={
                 Array [
                   <EuiSideNavItem
-                    data-test-subj="navHomeItem"
                     depth={1}
                     isParent={false}
                     onClick={[Function]}
@@ -157,7 +152,6 @@ exports[`Nav it renders 1`] = `
                     Home
                   </EuiSideNavItem>,
                   <EuiSideNavItem
-                    data-test-subj="navManagementItem"
                     depth={1}
                     isParent={false}
                     onClick={[Function]}
@@ -165,7 +159,6 @@ exports[`Nav it renders 1`] = `
                     Management
                   </EuiSideNavItem>,
                   <EuiSideNavItem
-                    data-test-subj="navEndpointsItem"
                     depth={1}
                     isParent={false}
                     onClick={[Function]}
@@ -173,7 +166,6 @@ exports[`Nav it renders 1`] = `
                     Endpoints
                   </EuiSideNavItem>,
                   <EuiSideNavItem
-                    data-test-subj="navalertsItem"
                     depth={1}
                     isParent={false}
                     onClick={[Function]}
@@ -204,7 +196,6 @@ exports[`Nav it renders 1`] = `
                   className="euiSideNavItem__items"
                 >
                   <EuiSideNavItem
-                    data-test-subj="navHomeItem"
                     depth={1}
                     isParent={false}
                     key="home"
@@ -215,7 +206,6 @@ exports[`Nav it renders 1`] = `
                     >
                       <button
                         className="euiSideNavItemButton euiSideNavItemButton--isClickable"
-                        data-test-subj="navHomeItem"
                         onClick={[Function]}
                         type="button"
                       >
@@ -232,7 +222,6 @@ exports[`Nav it renders 1`] = `
                     </div>
                   </EuiSideNavItem>
                   <EuiSideNavItem
-                    data-test-subj="navManagementItem"
                     depth={1}
                     isParent={false}
                     key="management"
@@ -243,7 +232,6 @@ exports[`Nav it renders 1`] = `
                     >
                       <button
                         className="euiSideNavItemButton euiSideNavItemButton--isClickable"
-                        data-test-subj="navManagementItem"
                         onClick={[Function]}
                         type="button"
                       >
@@ -260,7 +248,6 @@ exports[`Nav it renders 1`] = `
                     </div>
                   </EuiSideNavItem>
                   <EuiSideNavItem
-                    data-test-subj="navEndpointsItem"
                     depth={1}
                     isParent={false}
                     key="endpoints"
@@ -271,7 +258,6 @@ exports[`Nav it renders 1`] = `
                     >
                       <button
                         className="euiSideNavItemButton euiSideNavItemButton--isClickable"
-                        data-test-subj="navEndpointsItem"
                         onClick={[Function]}
                         type="button"
                       >
@@ -288,7 +274,6 @@ exports[`Nav it renders 1`] = `
                     </div>
                   </EuiSideNavItem>
                   <EuiSideNavItem
-                    data-test-subj="navalertsItem"
                     depth={1}
                     isParent={false}
                     key="alerts"
@@ -299,7 +284,6 @@ exports[`Nav it renders 1`] = `
                     >
                       <button
                         className="euiSideNavItemButton euiSideNavItemButton--isClickable"
-                        data-test-subj="navalertsItem"
                         onClick={[Function]}
                         type="button"
                       >
