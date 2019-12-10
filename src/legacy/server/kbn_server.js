@@ -31,7 +31,6 @@ import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
 import { statusMixin } from './status';
 import pidMixin from './pid';
-import { transformDeprecations } from './config/transform_deprecations';
 import configCompleteMixin from './config/complete';
 import optimizeMixin from '../../optimize';
 import * as Plugins from './plugins';
@@ -196,7 +195,7 @@ export default class KbnServer {
   applyLoggingConfiguration(settings) {
     const config = new Config(
       this.config.getSchema(),
-      transformDeprecations(settings)
+      settings
     );
 
     const loggingOptions = loggingConfiguration(config);
