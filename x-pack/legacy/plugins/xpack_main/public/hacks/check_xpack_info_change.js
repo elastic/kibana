@@ -36,7 +36,7 @@ module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
       // cached info, so we need to refresh it.
       // Intentionally swallowing this error
       // because nothing catches it and it's an ugly console error.
-      xpackInfo.refresh($injector);
+      xpackInfo.refresh($injector).catch(() => {});
     }
 
     return handleResponse(response);
