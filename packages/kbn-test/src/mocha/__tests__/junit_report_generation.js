@@ -25,6 +25,7 @@ import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
 import expect from '@kbn/expect';
+import { makeJunitReportPath } from '@kbn/test';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
 
@@ -50,17 +51,7 @@ describe('dev/mocha/junit report generation', () => {
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise(resolve => mocha.run(resolve));
     const report = await fcb(cb =>
-      parseString(
-        readFileSync(
-          resolve(
-            PROJECT_DIR,
-            'target/junit',
-            process.env.JOB || '.',
-            `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}test.xml`
-          )
-        ),
-        cb
-      )
+      parseString(readFileSync(makeJunitReportPath(PROJECT_DIR, 'test')), cb)
     );
 
     // test case results are wrapped in <testsuites></testsuites>

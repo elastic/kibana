@@ -22,7 +22,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 
 import xmlBuilder from 'xmlbuilder';
 
-import { escapeCdata, JUNIT_REPORT_TAG } from '@kbn/test';
+import { escapeCdata, makeJunitReportPath } from '@kbn/test';
 
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
@@ -102,13 +102,7 @@ export default class JestJUnitReporter {
       });
     });
 
-    const reportPath = resolve(
-      rootDirectory,
-      'target/junit',
-      JUNIT_REPORT_TAG || '.',
-      `TEST-${JUNIT_REPORT_TAG}${reportName}.xml`
-    );
-
+    const reportPath = makeJunitReportPath(rootDirectory, reportName);
     const reportXML = root.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');

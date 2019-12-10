@@ -17,6 +17,16 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 const job = process.env.JOB ? `job-${process.env.JOB}-` : '';
 const num = process.env.CI_WORKER_NUMBER ? `worker-${process.env.CI_WORKER_NUMBER}-` : '';
-export const JUNIT_REPORT_TAG = `${job}${num}`;
+
+export function makeJunitReportPath(rootDirectory: string, reportName: string) {
+  return resolve(
+    rootDirectory,
+    'target/junit',
+    process.env.JOB || '.',
+    `TEST-${job}${num}${reportName}.xml`
+  );
+}
