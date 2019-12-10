@@ -254,11 +254,13 @@ export const AlertsList: React.FunctionComponent = () => {
               totalItemCount,
             }}
             selection={
-              canDelete && {
-                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
-                },
-              }
+              canDelete
+                ? {
+                    onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+                      setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+                    },
+                  }
+                : null
             }
             onChange={({ page: changedPage }: { page: Pagination }) => {
               setPage(changedPage);
