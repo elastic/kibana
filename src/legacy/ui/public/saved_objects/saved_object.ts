@@ -27,7 +27,7 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObjectsClient, SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from 'kibana/public';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectConfig, SavedObjectSaveOpts } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
@@ -60,7 +60,7 @@ export function createSavedObjectClass(
         this,
         config,
         indexPatterns,
-        savedObjectsClient as SavedObjectsClient
+        savedObjectsClient
       );
     }
   }
