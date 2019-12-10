@@ -85,9 +85,7 @@ export class ApplicationService {
 
           appBox = {
             app,
-            mount: isAppMountDeprecated(app.mount)
-              ? this.mountContext!.createHandler(plugin, app.mount)
-              : app.mount,
+            mount: this.mountContext!.createHandler(plugin, app.mount),
           };
         } else {
           appBox = { app, mount: app.mount };
