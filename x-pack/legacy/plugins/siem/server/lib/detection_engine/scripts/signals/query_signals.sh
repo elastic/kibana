@@ -11,10 +11,10 @@ set -e
 
 # Example: ./set_status_with_id.sh closed
 # Example: ./set_status_with_id.sh open
-  curl -s -k \
+  curl -v -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X GET ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals \
-  -d '{"search_query": { "query": { "match_all": {} } } }' \
-  | jq .
+  -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/search \
+  -d '{"search_query": { "query": { "match_all": {} } } }'
+  #| jq .

@@ -224,5 +224,5 @@ export const setSignalsStatusSchema = Joi.object({
 }).xor('signal_ids', 'query');
 
 export const querySignalsSchema = Joi.object({
-  search_query: Joi.object(),
+  search_query: Joi.object().required(),
 });

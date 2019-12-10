@@ -8,8 +8,15 @@ import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
 import { SignalsRestParams } from '../../signals/types';
 import {
+  RuleAlertParamsRest,
+  RuleAlertType,
+  SignalsStatusRestParams,
+  SignalsQueryRestParams,
+} from '../../alerts/types';
+import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '../../../../../common/constants';
 import { RuleAlertType } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
@@ -48,6 +55,10 @@ export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams>
 export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
   query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
   status: 'closed',
+});
+
+export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+  search_query: { query: { match_all: {} } },
 });
 
 export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
@@ -132,6 +143,12 @@ export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
   payload: {
     ...typicalSetStatusSignalByQueryPayload(),
   },
+});
+
+export const getSignalsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQuery() },
 });
 
 export const createActionResult = (): ActionResult => ({

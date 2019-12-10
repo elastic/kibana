@@ -5,7 +5,7 @@
  */
 
 import Hapi from 'hapi';
-import { DETECTION_ENGINE_SIGNALS_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { SignalsQueryRequest } from '../../alerts/types';
 import { querySignalsSchema } from '../schemas';
 import { ServerFacade } from '../../../../types';
@@ -13,19 +13,19 @@ import { transformError, getIndex } from '../utils';
 
 export const querySignalsRouteDef = (server: ServerFacade): Hapi.ServerRoute => {
   return {
-    method: 'GET',
-    path: DETECTION_ENGINE_SIGNALS_URL,
+    method: 'POST',
+    path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
     options: {
       tags: ['access:siem'],
       validate: {
         options: {
           abortEarly: false,
         },
-        query: querySignalsSchema,
+        payload: querySignalsSchema,
       },
     },
     async handler(request: SignalsQueryRequest, _headers) {
-      const { query: searchQuery } = request;
+      const { search_query: searchQuery } = request.payload;
       const index = getIndex(request, server);
       const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
       try {
