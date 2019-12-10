@@ -16,7 +16,7 @@ import { mapTo, filter, scan, concatMap, tap, catchError } from 'rxjs/operators'
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 import { pullFromSet } from './lib/pull_from_set';
-import { Result, Err, map as mapResult, asOk, asErr } from './lib/result_type';
+import { Result, Err, map as mapResult, asOk, asErr, promiseResult } from './lib/result_type';
 
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
@@ -85,7 +85,13 @@ export function createTaskPoller<T, H>({
     // those arguments. If the queue is empty this will still trigger work to be done
     concatMap(async (set: Set<T>) => {
       closeSleepPerf();
-      return asOk(await work(...pullFromSet(set, getCapacity())));
+      return mapResult<H, Error, Result<H, PollingError<T>>>(
+        await promiseResult<H, Error>(work(...pullFromSet(set, getCapacity()))),
+        workResult => asOk(workResult),
+        (err: Error) => {
+          return asPollingError<T>(err, PollingErrorType.WorkError);
+        }
+      );
     }),
     tap(openSleepPerf),
     // catch errors during polling for work

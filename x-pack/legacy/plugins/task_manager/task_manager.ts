@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Subject, Observable, Subscription, merge } from 'rxjs';
+import { Subject, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { performance } from 'perf_hooks';

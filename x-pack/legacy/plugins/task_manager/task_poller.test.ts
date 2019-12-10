@@ -304,6 +304,54 @@ describe('TaskPoller', () => {
   );
 
   test(
+    'continues polling after work fails',
+    fakeSchedulers(async advance => {
+      const pollInterval = 100;
+      const bufferCapacity = 2;
+
+      const handler = jest.fn();
+      const pollRequests$ = new Subject<Option<string>>();
+      let callCount = 0;
+      const work = jest.fn(async () => {
+        callCount++;
+        if (callCount === 2) {
+          throw new Error('failed to work');
+        }
+        return callCount;
+      });
+      createTaskPoller<string, number>({
+        pollInterval,
+        bufferCapacity,
+        work,
+        getCapacity: () => 5,
+        pollRequests$,
+      }).subscribe(handler);
+
+      advance(pollInterval);
+      await sleep(0);
+
+      expect(handler).toHaveBeenCalledWith(asOk(1));
+
+      advance(pollInterval);
+      await sleep(0);
+
+      const expectedError = new PollingError<string>(
+        'Failed to poll for work: Error: failed to work',
+        PollingErrorType.WorkError,
+        none
+      );
+      expect(handler).toHaveBeenCalledWith(asErr(expectedError));
+      expect(handler.mock.calls[1][0].error.type).toEqual(PollingErrorType.WorkError);
+      expect(handler).not.toHaveBeenCalledWith(asOk(2));
+
+      advance(pollInterval);
+      await sleep(0);
+
+      expect(handler).toHaveBeenCalledWith(asOk(3));
+    })
+  );
+
+  test(
     'returns a request capcity error when new request is emitted but the poller is at buffer capacity',
     fakeSchedulers(async advance => {
       const pollInterval = 1000;
