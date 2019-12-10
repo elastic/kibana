@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServiceConnection } from './run_service_map_task';
+import { TraceConnection } from './run_service_map_task';
 import { TIMESTAMP } from '../../../common/elasticsearch_fieldnames';
 
-export function mapServiceConnectionToBulkIndex({
+export function mapTraceToBulkServiceConnection({
   serviceConnsDestinationIndex,
   serviceConnsDestinationPipeline,
   servicesInTrace
@@ -16,41 +16,38 @@ export function mapServiceConnectionToBulkIndex({
   serviceConnsDestinationPipeline: string;
   servicesInTrace: string[];
 }) {
-  return (serviceConnection: ServiceConnection) => {
+  return (traceConnection: TraceConnection) => {
     const indexAction = {
       index: {
         _index:
           serviceConnsDestinationIndex ||
-          (serviceConnection.caller._index as string)
+          (traceConnection.caller._index as string)
       },
       pipeline: serviceConnsDestinationPipeline || undefined // TODO is this even necessary?
     };
 
     const source = {
-      [TIMESTAMP]: serviceConnection.caller.timestamp,
+      [TIMESTAMP]: traceConnection.caller.timestamp,
       observer: { version_major: 7 }, // TODO get stack version from NP api
       service: {
-        name: serviceConnection.caller.service_name,
-        environment: serviceConnection.caller.environment
+        name: traceConnection.caller.service_name,
+        environment: traceConnection.caller.environment
       },
-      callee: serviceConnection.callee
+      callee: traceConnection.callee
         ? {
-            name: serviceConnection.callee.service_name,
-            environment: serviceConnection.callee.environment
+            name: traceConnection.callee.service_name,
+            environment: traceConnection.callee.environment
           }
         : undefined,
       connection: {
         upstream: {
-          list: serviceConnection.upstream,
-          keyword: serviceConnection.upstream.join('->') // TODO is this even used/necessary?
+          list: traceConnection.upstream
         },
         in_trace: servicesInTrace,
-        type: serviceConnection.caller.span_type,
-        subtype: serviceConnection.caller.span_subtype
+        type: traceConnection.caller.span_type,
+        subtype: traceConnection.caller.span_subtype
       },
-      destination: serviceConnection.caller.destination
-        ? { address: serviceConnection.caller.destination }
-        : undefined
+      destination: { address: traceConnection.caller.destination }
     };
     return [indexAction, source];
   };

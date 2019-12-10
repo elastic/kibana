@@ -96,7 +96,7 @@ exports[`Error SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Error SPAN_TYPE 1`] = `undefined`;
 
-exports[`Error TIMESTAMP 1`] = `"Mon Dec 09 2019 16:37:20 GMT-0800 (Pacific Standard Time)"`;
+exports[`Error TIMESTAMP 1`] = `"Wed Dec 31 1969 16:00:01 GMT-0800 (Pacific Standard Time)"`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
@@ -218,7 +218,7 @@ exports[`Span SPAN_SUBTYPE 1`] = `"my subtype"`;
 
 exports[`Span SPAN_TYPE 1`] = `"span type"`;
 
-exports[`Span TIMESTAMP 1`] = `"Mon Dec 09 2019 16:37:20 GMT-0800 (Pacific Standard Time)"`;
+exports[`Span TIMESTAMP 1`] = `"Wed Dec 31 1969 16:00:01 GMT-0800 (Pacific Standard Time)"`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
@@ -340,7 +340,7 @@ exports[`Transaction SPAN_SUBTYPE 1`] = `undefined`;
 
 exports[`Transaction SPAN_TYPE 1`] = `undefined`;
 
-exports[`Transaction TIMESTAMP 1`] = `"Mon Dec 09 2019 16:37:20 GMT-0800 (Pacific Standard Time)"`;
+exports[`Transaction TIMESTAMP 1`] = `"Wed Dec 31 1969 16:00:01 GMT-0800 (Pacific Standard Time)"`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 

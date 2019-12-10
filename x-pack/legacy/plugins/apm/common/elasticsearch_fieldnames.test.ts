@@ -13,7 +13,7 @@ import * as fieldnames from './elasticsearch_fieldnames';
 
 describe('Transaction', () => {
   const transaction: AllowUnknownProperties<Transaction> = {
-    '@timestamp': new Date().toString(),
+    '@timestamp': new Date(1337).toString(),
     '@metadata': 'whatever',
     observer: 'whatever',
     agent: {
@@ -61,7 +61,7 @@ describe('Transaction', () => {
 
 describe('Span', () => {
   const span: AllowUnknownProperties<Span> = {
-    '@timestamp': new Date().toString(),
+    '@timestamp': new Date(1337).toString(),
     '@metadata': 'whatever',
     observer: 'whatever',
     agent: {
@@ -125,7 +125,7 @@ describe('Error', () => {
       id: 'error id',
       grouping_key: 'grouping key'
     },
-    '@timestamp': new Date().toString(),
+    '@timestamp': new Date(1337).toString(),
     host: {
       hostname: 'my hostname'
     },

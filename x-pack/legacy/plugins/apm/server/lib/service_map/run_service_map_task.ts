@@ -11,10 +11,10 @@ import { getSearchClient, SearchClient } from '../helpers/es_client';
 import { Span } from '../../../typings/es_schemas/ui/Span';
 import { getNextTransactionSamples } from './get_next_transaction_samples';
 import { getServiceConnections } from './get_service_connections';
-import { mapServiceConnectionToBulkIndex } from './map_service_connection_to_bulk_index';
+import { mapTraceToBulkServiceConnection } from './map_trace_to_bulk_service_connection';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 
-interface MappedSpan {
+interface MappedDocument {
   transaction?: boolean;
   id: string; // span or transaction id
   parent?: string; // parent.id
@@ -23,13 +23,13 @@ interface MappedSpan {
   _index?: string; // _index // TODO should this be required?
   span_type?: Span['span']['type'];
   span_subtype?: Span['span']['subtype'];
-  timestamp: Span['@timestamp'];
+  timestamp: string;
   service_name: Span['service']['name'];
 }
 
-export interface ServiceConnection {
-  caller: MappedSpan;
-  callee?: MappedSpan;
+export interface TraceConnection {
+  caller: MappedDocument;
+  callee?: MappedDocument;
   upstream: string[]; // [`${service_name}/${environment}`]
 }
 
@@ -41,7 +41,10 @@ async function indexLatestConnections(
   latestTransactionTime = 0,
   afterKey?: object
 ): Promise<{ latestTransactionTime: number }> {
-  const apmIdxPattern = config.get<string>('apm_oss.indexPattern');
+  const targetApmIndices = [
+    config.get<string>('apm_oss.transactionIndices'),
+    config.get<string>('apm_oss.spanIndices')
+  ];
   const serviceConnsDestinationIndex = config.get<string>(
     'xpack.apm.serviceMapDestinationIndex'
   );
@@ -53,7 +56,7 @@ async function indexLatestConnections(
     latestTransactionTime: latestSampleTransactionTime,
     traceIds
   } = await getNextTransactionSamples({
-    apmIdxPattern,
+    targetApmIndices,
     startTimeInterval: startTimeInterval || 'now-1h',
     afterKey,
     searchClient
@@ -66,21 +69,21 @@ async function indexLatestConnections(
     latestSampleTransactionTime
   );
   const traceConnectionsBuckets = await getServiceConnections({
-    apmIdxPattern,
+    targetApmIndices,
     traceIds,
     searchClient
   });
   const bulkIndexConnectionDocs = traceConnectionsBuckets.flatMap(bucket => {
-    const serviceConnections = bucket.connections.value as ServiceConnection[];
+    const traceConnections = bucket.connections.value as TraceConnection[];
     const servicesInTrace = uniq(
-      serviceConnections.map(
+      traceConnections.map(
         serviceConnection =>
           `${serviceConnection.caller.service_name}/${serviceConnection.caller
             .environment || ENVIRONMENT_NOT_DEFINED}`
       )
     );
-    return serviceConnections.flatMap(
-      mapServiceConnectionToBulkIndex({
+    return traceConnections.flatMap(
+      mapTraceToBulkServiceConnection({
         serviceConnsDestinationIndex,
         serviceConnsDestinationPipeline,
         servicesInTrace

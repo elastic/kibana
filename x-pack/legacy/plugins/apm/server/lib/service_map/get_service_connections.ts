@@ -17,11 +17,11 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 
 export async function getServiceConnections({
-  apmIdxPattern,
+  targetApmIndices,
   traceIds,
   searchClient
 }: {
-  apmIdxPattern: string;
+  targetApmIndices: string[];
   traceIds: string[];
   searchClient: SearchClient;
 }) {
@@ -29,7 +29,7 @@ export async function getServiceConnections({
     term: { [TRACE_ID]: traceId }
   }));
   const params = {
-    index: apmIdxPattern,
+    index: targetApmIndices,
     body: {
       size: 0,
       query: {
@@ -43,7 +43,7 @@ export async function getServiceConnections({
         }
       },
       aggs: {
-        trace_id: {
+        traces: {
           terms: {
             field: TRACE_ID,
             order: { _key: 'asc' as const },
@@ -65,6 +65,6 @@ export async function getServiceConnections({
   };
   const serviceConnectionsResponse = await searchClient(params);
   const traceConnectionsBuckets =
-    serviceConnectionsResponse.aggregations?.trace_id.buckets ?? [];
+    serviceConnectionsResponse.aggregations?.traces.buckets ?? [];
   return traceConnectionsBuckets;
 }

@@ -19,18 +19,18 @@ import {
 } from '../../../common/elasticsearch_fieldnames';
 
 export async function getNextTransactionSamples({
-  apmIdxPattern,
+  targetApmIndices,
   startTimeInterval,
   afterKey,
   searchClient
 }: {
-  apmIdxPattern: string;
+  targetApmIndices: string[];
   startTimeInterval: string | number;
   afterKey?: object;
   searchClient: SearchClient;
 }) {
   const params = {
-    index: apmIdxPattern,
+    index: targetApmIndices,
     body: {
       size: 0,
       query: {
@@ -71,6 +71,7 @@ export async function getNextTransactionSamples({
           },
           aggs: {
             smpl: {
+              // get sample within a 0.1 second range
               diversified_sampler: {
                 shard_size: 20,
                 script: {

@@ -27,16 +27,18 @@ export interface IEnvOptions {
   environment?: string;
 }
 
-interface ServiceMapElement {
-  data:
-    | {
-        id: string;
-      }
-    | {
-        id: string;
-        source: string;
-        target: string;
-      };
+interface CyNode {
+  id: string;
+}
+
+interface CyEdge {
+  id: string;
+  source: string;
+  target: string;
+}
+
+interface CyElement {
+  data: CyNode | CyEdge;
 }
 
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
@@ -124,45 +126,40 @@ export async function getServiceMap({
     return [];
   }
 
-  const initialServiceMapNode: ServiceMapElement = {
+  const initialServiceMapNode: CyElement = {
     data: {
       id: buckets[0].key[SERVICE_NAME]
     }
   };
 
-  return buckets.reduce(
-    (acc: ServiceMapElement[], { key: connection, dests }) => {
-      const connectionServiceName = connection[SERVICE_NAME];
+  return buckets.reduce((acc: CyElement[], { key: connection, dests }) => {
+    const connectionServiceName = connection[SERVICE_NAME];
 
-      const destinationNames =
-        dests.buckets.length === 0
-          ? [connection[DESTINATION_ADDRESS]]
-          : dests.buckets.map(
-              ({ key: destinationName }) => destinationName as string
-            );
+    const destinationNames =
+      dests.buckets.length === 0
+        ? [connection[DESTINATION_ADDRESS]]
+        : dests.buckets.map(
+            ({ key: destinationName }) => destinationName as string
+          );
 
-      const serviceMapConnections = destinationNames.flatMap(
-        destinationName => [
-          {
-            data: {
-              id: destinationName
-            }
-          },
-          {
-            data: {
-              id: `${connectionServiceName}~${destinationName}`,
-              source: connectionServiceName,
-              target: destinationName
-            }
-          }
-        ]
-      );
-
-      if (acc.length === 0) {
-        return [initialServiceMapNode, ...serviceMapConnections];
+    const serviceMapConnections = destinationNames.flatMap(destinationName => [
+      {
+        data: {
+          id: destinationName
+        }
+      },
+      {
+        data: {
+          id: `${connectionServiceName}~${destinationName}`,
+          source: connectionServiceName,
+          target: destinationName
+        }
       }
-      return [...acc, ...serviceMapConnections];
-    },
-    []
-  );
+    ]);
+
+    if (acc.length === 0) {
+      return [initialServiceMapNode, ...serviceMapConnections];
+    }
+    return [...acc, ...serviceMapConnections];
+  }, []);
 }
