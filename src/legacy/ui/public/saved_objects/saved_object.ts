@@ -29,11 +29,9 @@
  */
 import { SavedObjectsClient, SavedObjectsClientContract } from 'kibana/public';
 import { npStart } from 'ui/new_platform';
-import { start as data } from '../../../core_plugins/data/public/legacy';
 import { SavedObjectConfig, SavedObjectSaveOpts } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
-import { IndexPatterns } from '../../../../plugins/data/public';
-
+import { IndexPatternsContract } from '../../../../plugins/data/public';
 export { SavedObjectSaveOpts as SaveOptions } from './types';
 
 export interface SavedObject {
@@ -44,7 +42,7 @@ export interface SavedObject {
 
 export function createSavedObjectClass(
   savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatterns
+  indexPatterns: IndexPatternsContract
 ) {
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
@@ -71,5 +69,8 @@ export function createSavedObjectClass(
 }
 // the old angular way, should be removed once no longer used
 export function SavedObjectProvider() {
-  return createSavedObjectClass(npStart.core.savedObjects.client, data.indexPatterns.indexPatterns);
+  return createSavedObjectClass(
+    npStart.core.savedObjects.client,
+    npStart.plugins.data.indexPatterns
+  );
 }
