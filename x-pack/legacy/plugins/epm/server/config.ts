@@ -34,7 +34,10 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
 
 const DEFAULT_CONFIG = {
   enabled: true,
-  registryUrl: 'http://package-registry.app.elstc.co',
+  // This is the staging url and should be later switched to https://epr.elastic.co for production
+  // Both are behind a CDN with caching, so upgrading the registry will not immidiately invalidate
+  // all the cached information.
+  registryUrl: 'https://epr.ea-web.elastic.dev',
 };
 
 // As of 2019, this is a Singleton because of the way JavaScript modules are specified.
