@@ -20,6 +20,7 @@
 import { join } from 'path';
 import { run, createFlagError } from '@kbn/dev-utils';
 import { storybookAliases } from './aliases';
+import { clean } from './commands/clean';
 
 const rootDir = join(__dirname, '..', '..', '..');
 
@@ -29,6 +30,15 @@ run(
     const {
       _: [alias],
     } = flags;
+
+    if (flags.verbose) {
+      log.info('Flags:', flags);
+    }
+
+    if (flags.clean) {
+      await clean({ log, rootDir });
+      return;
+    }
 
     if (!alias) {
       throw createFlagError('missing alias');
@@ -58,10 +68,12 @@ run(
       Add your alias in src/dev/storybook/aliases.ts
     `,
     flags: {
-      boolean: ['fix'],
-      default: {
-        fix: false,
-      },
+      default: {},
+      string: [],
+      boolean: ['clean'],
+      help: `
+      --clean            Clean Storybook build folder.
+    `,
     },
   }
 );
