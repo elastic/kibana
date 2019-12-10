@@ -21,7 +21,7 @@ export interface SpanRaw extends APMBaseDoc {
   span: {
     action?: string;
     duration: { us: number };
-    start?: { us: number };
+    start?: { us: number }; // This will only be used by legacy data.
     id: string;
     name: string;
     stacktrace?: IStackframe[];

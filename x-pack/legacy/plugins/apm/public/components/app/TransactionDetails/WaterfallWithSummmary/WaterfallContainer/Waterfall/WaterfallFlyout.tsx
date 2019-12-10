@@ -46,7 +46,9 @@ export const WaterfallFlyout: React.FC<Props> = ({
         <TransactionFlyout
           transaction={currentItem.transaction}
           onClose={() => toggleFlyout({ location })}
-          rootTransactionDuration={waterfall.rootTransaction?.duration}
+          rootTransactionDuration={
+            waterfall.rootTransaction?.transaction.duration.us
+          }
           errorCount={currentItem.errorCount}
         />
       );

@@ -9,7 +9,7 @@ import { Span } from '../../../../../../../../../typings/es_schemas/ui/Span';
 import { Transaction } from '../../../../../../../../../typings/es_schemas/ui/Transaction';
 import {
   getClockSkew,
-  sortWaterfall,
+  sortWaterfallByParentId,
   getWaterfall,
   IWaterfallItem
 } from '../waterfall_helpers';
@@ -329,7 +329,7 @@ describe('waterfall_helpers', () => {
       );
       const entryTransactionItem = childrenByParentId.root[0];
       expect(
-        sortWaterfall(childrenByParentId, entryTransactionItem)
+        sortWaterfallByParentId(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
 
@@ -343,7 +343,7 @@ describe('waterfall_helpers', () => {
       );
       const entryTransactionItem = childrenByParentId.root[0];
       expect(
-        sortWaterfall(childrenByParentId, entryTransactionItem)
+        sortWaterfallByParentId(childrenByParentId, entryTransactionItem)
       ).toMatchSnapshot();
     });
   });

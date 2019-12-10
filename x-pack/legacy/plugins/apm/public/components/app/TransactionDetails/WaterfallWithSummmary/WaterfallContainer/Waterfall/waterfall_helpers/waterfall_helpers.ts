@@ -29,10 +29,7 @@ export interface IWaterfall {
   duration: number;
   serviceColors: IServiceColors;
   entryTransaction?: Transaction;
-  rootTransaction?: {
-    item?: Transaction;
-    duration?: number;
-  };
+  rootTransaction?: Transaction;
   errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'];
   items: IWaterfallItem[];
   getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
@@ -50,7 +47,9 @@ interface IWaterfallItemBase {
   duration: number;
 
   /**
-   * Start in us
+   * Start in us.
+   * This will only be used by legacy data.
+   * When the parent.id is missing on all waterfall
    */
   start?: number;
 
@@ -94,7 +93,7 @@ function getTransactionItem(
     serviceName: transaction.service.name,
     name: transaction.transaction.name,
     duration: transaction.transaction.duration.us,
-    start: transaction.transaction.start?.us,
+    start: transaction.transaction.start?.us || 0,
     timestamp: transaction.timestamp.us,
     offset: 0,
     skew: 0,
@@ -111,7 +110,7 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
     serviceName: span.service.name,
     name: span.span.name,
     duration: span.span.duration.us,
-    start: span.span.start?.us,
+    start: span.span.start?.us || 0,
     timestamp: span.timestamp.us,
     offset: 0,
     skew: 0,
@@ -150,10 +149,13 @@ export function getClockSkew(
   }
 }
 
-export function sortWaterfall(
+export function sortWaterfallByParentId(
   childrenByParentId: IWaterfallGroup,
-  entryWaterfallTransaction: IWaterfallItem
+  entryWaterfallTransaction?: IWaterfallItem
 ) {
+  if (!entryWaterfallTransaction) {
+    return [];
+  }
   const visitedWaterfallItemSet = new Set();
   function getSortedChildren(
     item: IWaterfallItem,
@@ -166,7 +168,8 @@ export function sortWaterfall(
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
     item.childIds = children.map(child => child.id);
-    item.offset = item.timestamp - entryWaterfallTransaction.timestamp;
+    const entryTransactionTimestamp = entryWaterfallTransaction?.timestamp || 0;
+    item.offset = item.timestamp - entryTransactionTimestamp;
     item.skew = getClockSkew(item, parentItem);
 
     const deepChildren = flatten(
@@ -178,7 +181,7 @@ export function sortWaterfall(
   return getSortedChildren(entryWaterfallTransaction);
 }
 
-function getTraceRootTransaction(childrenByParentId: IWaterfallGroup) {
+function getRootTransaction(childrenByParentId: IWaterfallGroup) {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
     return item.transaction;
@@ -239,15 +242,12 @@ const findWaterfallTransactionById = (
       waterfallItem.docType === 'transaction' && waterfallItem.id === id
   ) as IWaterfallItemTransaction;
 
-const sortWaterfallWithoutParent = (
+const sortWaterfallByStartTime = (
   waterfallItems: Array<IWaterfallItemSpan | IWaterfallItemTransaction>
 ) => {
   const items = sortBy(waterfallItems, 'start');
 
-  items.forEach(item => {
-    item.offset = item.start || 0;
-  });
-  return items;
+  return items.map(item => ({ ...item, offset: item.start || 0 }));
 };
 
 export function getWaterfall(
@@ -275,22 +275,15 @@ export function getWaterfall(
     isEmpty(waterfallItem.parentId)
   );
 
-  let items;
-  let traceRootTransaction;
+  const childrenByParentId = groupBy(waterfallItems, item =>
+    item.parentId ? item.parentId : 'root'
+  );
 
-  if (isParentMissing) {
-    items = sortWaterfallWithoutParent(waterfallItems);
-  } else {
-    const childrenByParentId = groupBy(waterfallItems, item =>
-      item.parentId ? item.parentId : 'root'
-    );
+  const rootTransaction = getRootTransaction(childrenByParentId);
 
-    items = entryWaterfallTransaction
-      ? sortWaterfall(childrenByParentId, entryWaterfallTransaction)
-      : [];
-
-    traceRootTransaction = getTraceRootTransaction(childrenByParentId);
-  }
+  const items = isParentMissing
+    ? sortWaterfallByStartTime(waterfallItems)
+    : sortWaterfallByParentId(childrenByParentId, entryWaterfallTransaction);
 
   const getTransactionById = (id?: IWaterfallItem['id']) =>
     findWaterfallTransactionById(waterfallItems, id)?.transaction;
@@ -299,10 +292,7 @@ export function getWaterfall(
     duration: getWaterfallDuration(items),
     serviceColors: getServiceColors(items),
     entryTransaction: entryWaterfallTransaction?.transaction,
-    rootTransaction: {
-      item: traceRootTransaction,
-      duration: traceRootTransaction?.transaction.duration.us
-    },
+    rootTransaction,
     errorsPerTransaction,
     items,
     getTransactionById

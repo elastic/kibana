@@ -141,7 +141,7 @@ export const WaterfallWithSummmary: React.FC<Props> = ({
 
       <TransactionSummary
         errorCount={sum(Object.values(errorsPerTransaction))}
-        parentDuration={rootTransaction?.duration}
+        parentDuration={rootTransaction?.transaction.duration.us}
         transaction={entryTransaction}
       />
       <EuiSpacer size="s" />

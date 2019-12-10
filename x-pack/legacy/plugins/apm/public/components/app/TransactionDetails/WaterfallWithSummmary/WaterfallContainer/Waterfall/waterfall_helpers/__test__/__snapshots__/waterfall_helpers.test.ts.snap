@@ -265,8 +265,28 @@ Object {
     },
   ],
   "rootTransaction": Object {
-    "duration": undefined,
-    "item": undefined,
+    "processor": Object {
+      "event": "transaction",
+    },
+    "service": Object {
+      "name": "opbeans-node",
+    },
+    "timestamp": Object {
+      "us": 1549324795784006,
+    },
+    "trace": Object {
+      "id": "myTraceId",
+    },
+    "transaction": Object {
+      "duration": Object {
+        "us": 49660,
+      },
+      "id": "myTransactionId1",
+      "name": "GET /api",
+      "start": Object {
+        "us": 1000,
+      },
+    },
   },
   "serviceColors": Object {
     "opbeans-node": "#3185fc",
@@ -318,7 +338,7 @@ Object {
       "parentId": undefined,
       "serviceName": "opbeans-node",
       "skew": 0,
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795784006,
       "transaction": Object {
         "processor": Object {
@@ -381,7 +401,7 @@ Object {
           "id": "myTransactionId1",
         },
       },
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795785760,
     },
     Object {
@@ -397,7 +417,7 @@ Object {
       "parentId": "mySpanIdD",
       "serviceName": "opbeans-ruby",
       "skew": 0,
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795823304,
       "transaction": Object {
         "parent": Object {
@@ -464,7 +484,7 @@ Object {
           "id": "myTransactionId2",
         },
       },
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795824504,
     },
     Object {
@@ -504,7 +524,7 @@ Object {
           "id": "myTransactionId2",
         },
       },
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795825633,
     },
     Object {
@@ -544,32 +564,29 @@ Object {
           "id": "myTransactionId2",
         },
       },
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795827905,
     },
   ],
   "rootTransaction": Object {
-    "duration": 49660,
-    "item": Object {
-      "processor": Object {
-        "event": "transaction",
+    "processor": Object {
+      "event": "transaction",
+    },
+    "service": Object {
+      "name": "opbeans-node",
+    },
+    "timestamp": Object {
+      "us": 1549324795784006,
+    },
+    "trace": Object {
+      "id": "myTraceId",
+    },
+    "transaction": Object {
+      "duration": Object {
+        "us": 49660,
       },
-      "service": Object {
-        "name": "opbeans-node",
-      },
-      "timestamp": Object {
-        "us": 1549324795784006,
-      },
-      "trace": Object {
-        "id": "myTraceId",
-      },
-      "transaction": Object {
-        "duration": Object {
-          "us": 49660,
-        },
-        "id": "myTransactionId1",
-        "name": "GET /api",
-      },
+      "id": "myTransactionId1",
+      "name": "GET /api",
     },
   },
   "serviceColors": Object {
@@ -625,7 +642,7 @@ Object {
       "parentId": "mySpanIdD",
       "serviceName": "opbeans-ruby",
       "skew": 0,
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795823304,
       "transaction": Object {
         "parent": Object {
@@ -692,7 +709,7 @@ Object {
           "id": "myTransactionId2",
         },
       },
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795824504,
     },
     Object {
@@ -732,7 +749,7 @@ Object {
           "id": "myTransactionId2",
         },
       },
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795825633,
     },
     Object {
@@ -772,32 +789,29 @@ Object {
           "id": "myTransactionId2",
         },
       },
-      "start": undefined,
+      "start": 0,
       "timestamp": 1549324795827905,
     },
   ],
   "rootTransaction": Object {
-    "duration": 49660,
-    "item": Object {
-      "processor": Object {
-        "event": "transaction",
+    "processor": Object {
+      "event": "transaction",
+    },
+    "service": Object {
+      "name": "opbeans-node",
+    },
+    "timestamp": Object {
+      "us": 1549324795784006,
+    },
+    "trace": Object {
+      "id": "myTraceId",
+    },
+    "transaction": Object {
+      "duration": Object {
+        "us": 49660,
       },
-      "service": Object {
-        "name": "opbeans-node",
-      },
-      "timestamp": Object {
-        "us": 1549324795784006,
-      },
-      "trace": Object {
-        "id": "myTraceId",
-      },
-      "transaction": Object {
-        "duration": Object {
-          "us": 49660,
-        },
-        "id": "myTransactionId1",
-        "name": "GET /api",
-      },
+      "id": "myTransactionId1",
+      "name": "GET /api",
     },
   },
   "serviceColors": Object {

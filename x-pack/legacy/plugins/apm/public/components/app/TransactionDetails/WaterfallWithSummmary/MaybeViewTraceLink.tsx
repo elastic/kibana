@@ -24,7 +24,7 @@ export const MaybeViewTraceLink = ({
       defaultMessage: 'View full trace'
     }
   );
-  const rootTransaction = waterfall.rootTransaction?.item;
+  const { rootTransaction } = waterfall;
   // the traceRootTransaction cannot be found, so we cannot link to it
   if (!rootTransaction) {
     return (
