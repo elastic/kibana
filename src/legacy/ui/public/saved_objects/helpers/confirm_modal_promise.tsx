@@ -17,12 +17,17 @@
  * under the License.
  */
 import React from 'react';
+import { OverlayStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
-import { npStart } from 'ui/new_platform';
 import { toMountPoint } from '../../../../../plugins/kibana_react/public';
 
-export function confirmModalPromise(message = '', title = '', confirmBtnText = ''): Promise<true> {
+export function confirmModalPromise(
+  message = '',
+  title = '',
+  confirmBtnText = '',
+  overlays: OverlayStart
+): Promise<true> {
   return new Promise((resolve, reject) => {
     const cancelButtonText = i18n.translate(
       'common.ui.savedObjects.confirmModal.cancelButtonLabel',
@@ -31,7 +36,7 @@ export function confirmModalPromise(message = '', title = '', confirmBtnText = '
       }
     );
 
-    const modal = npStart.core.overlays.openModal(
+    const modal = overlays.openModal(
       toMountPoint(
         <EuiConfirmModal
           onCancel={() => {

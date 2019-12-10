@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchSource } from 'ui/courier';
+import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
+import { SearchSource, SearchSourceContract } from 'ui/courier';
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
+import { IndexPatternsContract } from '../../../../plugins/data/public';
 import { IndexPattern } from '../../../core_plugins/data/public';
 
 export interface SavedObject {
@@ -33,14 +35,14 @@ export interface SavedObject {
   getEsType: () => string;
   getFullPath: () => string;
   hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
-  id?: string | null;
+  id?: string;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;
   isTitleChanged: () => boolean;
   lastSavedTitle: string;
   migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  searchSource?: SearchSource;
+  searchSource?: SearchSourceContract;
   showInRecentlyAccessed: boolean;
   title: string;
 }
@@ -54,6 +56,13 @@ export interface SavedObjectSaveOpts {
 export interface SavedObjectCreationOpts {
   references?: SavedObjectReference[];
   overwrite?: boolean;
+}
+
+export interface SavedObjectKibanaServices {
+  savedObjectsClient: SavedObjectsClientContract;
+  indexPatterns: IndexPatternsContract;
+  chrome: ChromeStart;
+  overlays: OverlayStart;
 }
 
 export interface SavedObjectConfig {

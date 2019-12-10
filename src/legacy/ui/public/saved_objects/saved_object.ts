@@ -27,23 +27,11 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObjectsClient, SavedObjectsClientContract } from 'kibana/public';
 import { npStart } from 'ui/new_platform';
-import { SavedObjectConfig, SavedObjectSaveOpts } from './types';
+import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
-import { IndexPatternsContract } from '../../../../plugins/data/public';
-export { SavedObjectSaveOpts as SaveOptions } from './types';
 
-export interface SavedObject {
-  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  copyOnSave: boolean;
-  id?: string;
-}
-
-export function createSavedObjectClass(
-  savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsContract
-) {
+export function createSavedObjectClass(services: SavedObjectKibanaServices) {
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
    * provides additional functionality besides loading/saving/deleting/etc.
@@ -53,24 +41,26 @@ export function createSavedObjectClass(
    * which returns instances of SimpleSavedObject which don't introduce additional type-specific complexity.
    * @param {*} config
    */
-  class SavedObject {
+  class SavedObjectClass {
     constructor(config: SavedObjectConfig = {}) {
       buildSavedObject(
         // @ts-ignore
         this,
         config,
-        indexPatterns,
-        savedObjectsClient as SavedObjectsClient
+        services
       );
     }
   }
 
-  return SavedObject;
+  return SavedObjectClass as new (config: SavedObjectConfig) => SavedObject;
 }
 // the old angular way, should be removed once no longer used
 export function SavedObjectProvider() {
-  return createSavedObjectClass(
-    npStart.core.savedObjects.client,
-    npStart.plugins.data.indexPatterns
-  );
+  const services = {
+    savedObjectsClient: npStart.core.savedObjects.client,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  };
+  return createSavedObjectClass(services);
 }

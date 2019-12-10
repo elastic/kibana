@@ -16,15 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
-import { SavedObjectsClientContract } from 'kibana/public';
-import { IndexPatternsContract } from '../../../../../../plugins/data/public';
 
-export function createSavedSearchClass(
-  savedObjectClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsContract
-) {
-  const SavedObjectClass = createSavedObjectClass(savedObjectClient, indexPatterns);
+export function createSavedSearchClass(services: SavedObjectKibanaServices) {
+  const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedSearch extends SavedObjectClass {
     public static type: string = 'search';
@@ -67,10 +63,7 @@ export function createSavedSearchClass(
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-    }
-
-    public getFullPath() {
-      return `/app/kibana#/discover/${String(this.id)}`;
+      this.getFullPath = () => `/app/kibana#/discover/${String(id)}`;
     }
   }
 

@@ -16,9 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npStart } from 'ui/new_platform';
-import { SavedObjectsClientContract } from 'kibana/public';
-import { SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from '../types';
+import {
+  SavedObject,
+  SavedObjectConfig,
+  SavedObjectKibanaServices,
+  SavedObjectSaveOpts,
+} from '../types';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../constants';
 import { createSource } from './create_source';
 import { checkForDuplicateTitle } from './check_for_duplicate_title';
@@ -37,7 +40,6 @@ function isErrorNonFatal(error: { message: string }) {
  *
  * @param {string} [esType]
  * @param {SavedObject} [savedObject]
- * @param {SavedObjectsClient} [savedObjectsClient]
  * @param {SavedObjectConfig} [config]
  * @param {object} [options={}]
  * @property {boolean} [options.confirmOverwrite=false] - If true, attempts to create the source so it
@@ -45,19 +47,22 @@ function isErrorNonFatal(error: { message: string }) {
  * @property {boolean} [options.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
  * @property {func} [options.onTitleDuplicate] - function called if duplicate title exists.
  * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
+ * @param {SavedObjectKibanaServices} [services]
  * @return {Promise}
  * @resolved {String} - The id of the doc
  */
 export async function saveSavedObject(
   savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClientContract,
   config: SavedObjectConfig,
   {
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
-  }: SavedObjectSaveOpts = {}
+  }: SavedObjectSaveOpts = {},
+  services: SavedObjectKibanaServices
 ): Promise<string> {
+  const { savedObjectsClient, chrome } = services;
+
   const esType = config.type || '';
   const extractReferences = config.extractReferences;
   // Save the original id in case the save fails.
@@ -69,7 +74,7 @@ export async function saveSavedObject(
   // to expect a 'save as' flow during a rename, we are keeping the logic the same until a better
   // UI/UX can be worked out.
   if (savedObject.copyOnSave) {
-    savedObject.id = null;
+    delete savedObject.id;
   }
 
   // Here we want to extract references and set them within "references" attribute
@@ -82,18 +87,18 @@ export async function saveSavedObject(
   try {
     await checkForDuplicateTitle(
       savedObject,
-      savedObjectsClient,
       isTitleDuplicateConfirmed,
-      onTitleDuplicate
+      onTitleDuplicate,
+      services
     );
     savedObject.isSaving = true;
     const resp = confirmOverwrite
       ? await createSource(
           attributes,
           savedObject,
-          savedObjectsClient,
           esType,
-          savedObject.creationOpts({ references })
+          savedObject.creationOpts({ references }),
+          services
         )
       : await savedObjectsClient.create(
           esType,
@@ -103,7 +108,7 @@ export async function saveSavedObject(
 
     savedObject.id = resp.id;
     if (savedObject.showInRecentlyAccessed && savedObject.getFullPath) {
-      npStart.core.chrome.recentlyAccessed.add(
+      chrome.recentlyAccessed.add(
         savedObject.getFullPath(),
         savedObject.title,
         String(savedObject.id)
