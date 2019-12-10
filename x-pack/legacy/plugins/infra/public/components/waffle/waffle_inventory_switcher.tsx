@@ -11,7 +11,6 @@ import {
   EuiFilterGroup,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
