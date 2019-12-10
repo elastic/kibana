@@ -55,7 +55,8 @@ describe('<Settings />', () => {
     expect(popover(wrapper).prop('isOpen')).toEqual(false);
   });
 
-  test('can navigate Autoplay Settings', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/48058
+  test.skip('can navigate Autoplay Settings', async () => {
     trigger(wrapper).simulate('click');
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
     await tick(20);
@@ -66,7 +67,8 @@ describe('<Settings />', () => {
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
   });
 
-  test('can navigate Toolbar Settings, closes when activated', async () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/48058
+  test.skip('can navigate Toolbar Settings, closes when activated', async () => {
     trigger(wrapper).simulate('click');
     expect(takeMountedSnapshot(portal(wrapper))).toMatchSnapshot();
     menuItems(wrapper)

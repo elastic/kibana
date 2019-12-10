@@ -23,10 +23,7 @@ describe('Scroll to top', () => {
     Object.defineProperty(globalNode.window, 'scroll', { value: spyScroll });
     mount(<HookWrapper hook={() => scrollToTop()} />);
 
-    expect(spyScroll).toHaveBeenCalledWith({
-      top: 0,
-      left: 0,
-    });
+    expect(spyScroll).toHaveBeenCalledWith(0, 0);
   });
 
   test('scrollTo have been called', () => {

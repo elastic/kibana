@@ -2,6 +2,10 @@
 
 set -e
 
+if [[ "$CI_ENV_SETUP" ]]; then
+  return 0
+fi
+
 installNode=$1
 
 dir="$(pwd)"
@@ -17,6 +21,15 @@ C_RESET='\033[0m' # Reset color
 ### to enable color support in Chalk and other related modules.
 ###
 export FORCE_COLOR=1
+
+###
+### The @babel/register cache collects the build output from each file in
+### a map, in memory, and then when the process exits it writes that to the
+### babel cache file as a JSON encoded object. Stringifying that object
+### causes OOMs on CI regularly enough that we need to find another solution,
+### and until we do we need to disable the cache
+###
+export BABEL_DISABLE_CACHE=true
 
 ###
 ### check that we seem to be in a kibana project
@@ -152,3 +165,5 @@ if [[ -d "$ES_DIR" && -f "$ES_JAVA_PROP_PATH" ]]; then
   echo "Setting JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA"
   export JAVA_HOME=$HOME/.java/$ES_BUILD_JAVA
 fi
+
+export CI_ENV_SETUP=true

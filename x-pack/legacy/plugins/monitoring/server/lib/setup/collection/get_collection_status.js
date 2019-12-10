@@ -145,6 +145,21 @@ const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid, nod
   return await callWithRequest(req, 'search', params);
 };
 
+async function doesIndexExist(req, index) {
+  const params = {
+    index,
+    size: 0,
+    terminate_after: 1,
+    ignoreUnavailable: true,
+    filterPath: [
+      'hits.total.value'
+    ],
+  };
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
+  const response = await callWithRequest(req, 'search', params);
+  return get(response, 'hits.total.value', 0) > 0;
+}
+
 async function detectProducts(req, isLiveCluster) {
   const result = {
     [KIBANA_SYSTEM_ID]: {
@@ -188,10 +203,9 @@ async function detectProducts(req, isLiveCluster) {
   ];
 
   if (isLiveCluster) {
-    const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
     for (const { id, indices } of detectionSearch) {
-      const response = await callWithRequest(req, 'cat.indices', { index: indices, format: 'json' });
-      if (response.length) {
+      const exists = await doesIndexExist(req, indices.join(','));
+      if (exists) {
         result[id].mightExist = true;
       }
     }
@@ -221,6 +235,19 @@ function isBeatFromAPM(bucket) {
   }
 
   return get(beatType, 'buckets[0].key') === 'apm-server';
+}
+
+async function hasNecessaryPermissions(req) {
+  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
+  const response = await callWithRequest(req, 'transport.request', {
+    method: 'POST',
+    path: '/_security/user/_has_privileges',
+    body: {
+      cluster: ['monitor'],
+    }
+  });
+  // If there is some problem, assume they do not have access
+  return get(response, 'has_all_requested', false);
 }
 
 /**
@@ -316,6 +343,14 @@ async function getLiveElasticsearchCollectionEnabled(req) {
 export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
+  const hasPermissions = await hasNecessaryPermissions(req);
+  if (!hasPermissions) {
+    return {
+      _meta: {
+        hasPermissions: false
+      }
+    };
+  }
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
   const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 
@@ -547,6 +582,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
   status._meta = {
     secondsAgo: NUMBER_OF_SECONDS_AGO_TO_LOOK,
     liveClusterUuid,
+    hasPermissions,
   };
 
   return status;

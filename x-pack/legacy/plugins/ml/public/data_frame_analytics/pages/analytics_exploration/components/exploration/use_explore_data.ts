@@ -31,7 +31,7 @@ export enum INDEX_STATUS {
   ERROR,
 }
 
-type TableItem = Record<string, any>;
+export type TableItem = Record<string, any>;
 
 interface LoadExploreDataArg {
   field: string;

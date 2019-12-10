@@ -12,6 +12,7 @@ import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { GetLogEntryRateSuccessResponsePayload } from '../../../../../../common/http_api/log_analysis/results/log_entry_rate';
 import { AnomaliesTableExpandedRow } from './expanded_row';
 import { getTopAnomalyScoresByPartition, formatAnomalyScore } from '../helpers/data_formatters';
+import euiStyled from '../../../../../../../../common/eui_styled_components';
 
 interface TableItem {
   id: string;
@@ -151,7 +152,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   ];
 
   return (
-    <EuiBasicTable
+    <StyledEuiBasicTable
       items={sortedTableItems}
       itemId="id"
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
@@ -163,3 +164,9 @@ export const AnomaliesTable: React.FunctionComponent<{
     />
   );
 };
+
+const StyledEuiBasicTable = euiStyled(EuiBasicTable)`
+  & .euiTable {
+    table-layout: auto;
+  }
+`;

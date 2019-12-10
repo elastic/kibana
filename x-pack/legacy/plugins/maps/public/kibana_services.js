@@ -9,7 +9,9 @@ import { SearchSourceProvider } from 'ui/courier';
 import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
+import { FILTERS } from '@kbn/es-query';
 
+export const SPATIAL_FILTER_TYPE = FILTERS.SPATIAL_FILTER;
 export const indexPatternService = data.indexPatterns.indexPatterns;
 
 export let SearchSource;

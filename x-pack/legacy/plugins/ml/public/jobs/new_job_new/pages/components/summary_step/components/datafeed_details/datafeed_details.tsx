@@ -11,14 +11,14 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../common/util/job_utils';
 import { DEFAULT_QUERY_DELAY } from '../../../../../common/job_creator/util/constants';
-import { newJobDefaults } from '../../../../../utils/new_job_defaults';
+import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import { ListItems, defaultLabel, Italic } from '../common';
 
 const EDITOR_HEIGHT = '200px';
 
 export const DatafeedDetails: FC = () => {
   const { jobCreator } = useContext(JobCreatorContext);
-  const { datafeeds } = newJobDefaults();
+  const { datafeeds } = getNewJobDefaults();
 
   const queryString = JSON.stringify(jobCreator.query, null, 2);
   const defaultFrequency = calculateDatafeedFrequencyDefaultSeconds(jobCreator.bucketSpanMs / 1000);
