@@ -14,7 +14,6 @@ import { CustomElementSchema } from './custom_element_schema';
 import { CustomElementAttributes } from './custom_element_attributes';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
-import { CustomElement } from '../../../../../legacy/plugins/canvas/types';
 
 export function initializeCreateCustomElementRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
@@ -32,11 +31,7 @@ export function initializeCreateCustomElementRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      if (!request.body) {
-        return response.badRequest({ body: 'A custom element payload is required' });
-      }
-
-      const customElement = request.body as CustomElement;
+      const customElement = request.body;
 
       const now = new Date().toISOString();
       const { id, ...payload } = customElement;
