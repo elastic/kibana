@@ -473,7 +473,7 @@ Do **not** add the agent as a dependency to your application.',
     }),
     commands: `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
      -Delastic.apm.service_name=my-application \\
-     -Delastic.apm.server_url=${apmServerUrl || 'http://localhost:8200'} \\
+     -Delastic.apm.server_urls=${apmServerUrl || 'http://localhost:8200'} \\
      -Delastic.apm.secret_token=${secretToken} \\
      -Delastic.apm.application_packages=org.example \\
      -jar my-application.jar`.split('\n'),
