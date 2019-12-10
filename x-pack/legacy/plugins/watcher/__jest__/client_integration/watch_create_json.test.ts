@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { act } from 'react-dom/test-utils';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchCreateJsonTestBed } from './helpers/watch_create_json.helpers';
 import { WATCH } from './helpers/constants';
 import defaultWatchJson from '../../public/np_ready/application/models/watch/default_watch.json';
 import { getExecuteDetails } from '../../test/fixtures';
 
 const { setup } = pageHelpers.watchCreateJson;
-
-const wrapBodyResponse = (obj: object) => JSON.stringify({ body: JSON.stringify(obj) });
 
 describe('<JsonWatchEdit /> create route', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();

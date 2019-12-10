@@ -10,6 +10,12 @@ import { init as initHttpRequests } from './http_requests';
 import { setHttpClient, setSavedObjectsClient } from '../../../public/np_ready/application/lib/api';
 
 const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+mockHttpClient.interceptors.response.use(
+  res => {
+    return res.data;
+  },
+  rej => rej
+);
 
 const mockSavedObjectsClient = () => {
   return {

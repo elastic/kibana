@@ -11,36 +11,37 @@ import {
   docLinksServiceMock,
   uiSettingsServiceMock,
   notificationServiceMock,
+  httpServiceMock,
 } from '../../../../../../../src/core/public/mocks';
 import { AppContextProvider } from '../../../public/np_ready/application/app_context';
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
   return (
     <AppContextProvider
-      value={
-        {
-          docLinks: docLinksServiceMock.createStartContract(),
-          chrome: chromeServiceMock.createStartContract(),
-          legacy: {
-            TimeBuckets: class MockTimeBuckes {
-              setBounds(_domain: any) {
-                return {};
-              }
-              getInterval() {
-                return {
-                  expression: {},
-                };
-              }
-            },
-            MANAGEMENT_BREADCRUMB: { text: 'test' },
-            savedObjects: {
-              create: jest.fn(),
-            } as any,
+      value={{
+        docLinks: docLinksServiceMock.createStartContract(),
+        chrome: chromeServiceMock.createStartContract(),
+        legacy: {
+          TimeBuckets: class MockTimeBuckes {
+            setBounds(_domain: any) {
+              return {};
+            }
+            getInterval() {
+              return {
+                expression: {},
+              };
+            }
           },
-          uiSettings: uiSettingsServiceMock.createSetupContract(),
-          toasts: notificationServiceMock.createSetupContract().toasts,
-        } as any
-      }
+          MANAGEMENT_BREADCRUMB: { text: 'test' },
+          licenseStatus: {},
+        },
+        uiSettings: uiSettingsServiceMock.createSetupContract(),
+        toasts: notificationServiceMock.createSetupContract().toasts,
+        euiUtils: {
+          useChartsTheme: jest.fn(),
+        },
+        http: httpServiceMock.createSetupContract(),
+      }}
     >
       <Component {...props} />
     </AppContextProvider>
