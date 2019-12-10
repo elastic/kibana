@@ -42,7 +42,7 @@ const mockFilterManager: BaseFilterManager = {
   getIndexPattern: () => {
     return 'mockIndexPattern';
   },
-} as BaseFilterManager;
+} as any;
 
 class ControlMock extends Control<BaseFilterManager> {
   fetch() {
