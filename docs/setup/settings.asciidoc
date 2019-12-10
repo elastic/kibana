@@ -65,6 +65,8 @@ connects to this Kibana instance.
 `elasticsearch.requestHeadersWhitelist:`:: *Default: `[ 'authorization' ]`* List
 of Kibana client-side headers to send to Elasticsearch. To send *no* client-side
 headers, set this value to [] (an empty list).
+Removing the `authorization` header from being whitelisted means that you cannot 
+use <<basic-authentication, basic authentication>> in Kibana.
 
 `elasticsearch.requestTimeout:`:: *Default: 30000* Time in milliseconds to wait
 for responses from the back end or Elasticsearch. This value must be a positive
