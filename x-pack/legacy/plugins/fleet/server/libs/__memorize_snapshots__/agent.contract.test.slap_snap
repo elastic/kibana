@@ -3730,7 +3730,7 @@ exports['Agent lib checkin should persist new events - update:agents (7)'] = {
     "version": "WzI3LDFd",
     "attributes": {
       "last_checkin": "2019-12-09T16:09:19.567Z",
-      "current_errors_events": "[]"
+      "current_error_events": "[]"
     }
   }
 }
@@ -3760,7 +3760,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
           "access_api_key_id": "key1",
           "local_metadata": "{}",
           "user_provided_metadata": "{}",
-          "current_errors_events": "[]",
+          "current_error_events": "[]",
           "last_checkin": "2019-12-09T16:09:19.567Z"
         },
         "references": [],
@@ -5292,7 +5292,7 @@ exports['Agent lib checkin should persist new events - update:agents (7)'] = {
     "version": "WzI3LDFd",
     "attributes": {
       "last_checkin": "2019-12-09T16:15:10.539Z",
-      "current_errors_events": "[]"
+      "current_error_events": "[]"
     }
   }
 }
@@ -5322,7 +5322,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
           "access_api_key_id": "key1",
           "local_metadata": "{}",
           "user_provided_metadata": "{}",
-          "current_errors_events": "[]",
+          "current_error_events": "[]",
           "last_checkin": "2019-12-09T16:15:10.539Z"
         },
         "references": [],
@@ -6862,7 +6862,7 @@ exports['Agent lib checkin should persist new events - update:agents (7)'] = {
     "version": "WzI4LDFd",
     "attributes": {
       "last_checkin": "2019-12-09T16:25:57.498Z",
-      "current_errors_events": "[]"
+      "current_error_events": "[]"
     }
   }
 }
@@ -6908,7 +6908,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
           "access_api_key_id": "key1",
           "local_metadata": "{}",
           "user_provided_metadata": "{}",
-          "current_errors_events": "[]",
+          "current_error_events": "[]",
           "last_checkin": "2019-12-09T16:25:57.498Z"
         },
         "references": [],
@@ -8452,7 +8452,7 @@ exports['Agent lib checkin should persist new events - update:agents (7)'] = {
     "version": "WzI4LDFd",
     "attributes": {
       "last_checkin": "2019-12-09T18:34:19.041Z",
-      "current_errors_events": "[]"
+      "current_error_events": "[]"
     }
   }
 }
@@ -8498,7 +8498,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
           "access_api_key_id": "key1",
           "local_metadata": "{}",
           "user_provided_metadata": "{}",
-          "current_errors_events": "[]",
+          "current_error_events": "[]",
           "last_checkin": "2019-12-09T18:34:19.041Z"
         },
         "references": [],
@@ -8564,7 +8564,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
     "version": "WzMxLDFd",
     "attributes": {
       "last_checkin": "2019-12-09T18:34:23.138Z",
-      "current_errors_events": "[]"
+      "current_error_events": "[]"
     }
   }
 }
@@ -8582,7 +8582,7 @@ exports['Agent lib checkin should not update agent metadata if none are provided
       "active": true,
       "policy_id": "policy:1",
       "access_api_key_id": "key1",
-      "current_errors_events": "[]",
+      "current_error_events": "[]",
       "last_checkin": "2019-12-09T18:34:23.138Z"
     },
     "references": []
@@ -8605,7 +8605,7 @@ exports['Agent lib checkin should update agent metadata if provided - find:"agen
           "active": true,
           "policy_id": "policy:1",
           "access_api_key_id": "key1",
-          "current_errors_events": "[]",
+          "current_error_events": "[]",
           "last_checkin": "2019-12-09T18:34:23.138Z"
         },
         "references": [],
@@ -8671,7 +8671,7 @@ exports['Agent lib checkin should update agent metadata if provided - update:age
     "version": "WzM0LDFd",
     "attributes": {
       "last_checkin": "2019-12-09T18:34:26.190Z",
-      "current_errors_events": "[]",
+      "current_error_events": "[]",
       "local_metadata": "{\"key\":\"local2\"}"
     }
   }
@@ -8690,7 +8690,7 @@ exports['Agent lib checkin should update agent metadata if provided - get:agents
       "active": true,
       "policy_id": "policy:1",
       "access_api_key_id": "key1",
-      "current_errors_events": "[]",
+      "current_error_events": "[]",
       "last_checkin": "2019-12-09T18:34:26.190Z"
     },
     "references": []
@@ -8713,7 +8713,7 @@ exports['Agent lib checkin should return new actions - find:"agents" (1)'] = {
           "active": true,
           "policy_id": "policy:1",
           "access_api_key_id": "key1",
-          "current_errors_events": "[]",
+          "current_error_events": "[]",
           "last_checkin": "2019-12-09T18:34:26.190Z"
         },
         "references": [],
@@ -8803,7 +8803,7 @@ exports['Agent lib checkin should return new actions - update:agents (5)'] = {
     "version": "WzM3LDFd",
     "attributes": {
       "last_checkin": "2019-12-09T18:34:29.239Z",
-      "current_errors_events": "[]"
+      "current_error_events": "[]"
     }
   }
 }
@@ -8836,7 +8836,7 @@ exports['Agent lib unenroll should set the list of agents as inactive - find:"ag
           ],
           "local_metadata": "{}",
           "user_provided_metadata": "{}",
-          "current_errors_events": "[]",
+          "current_error_events": "[]",
           "last_checkin": "2019-12-09T18:34:29.239Z"
         },
         "references": [],

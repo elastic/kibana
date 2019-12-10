@@ -230,7 +230,7 @@ export class AgentLib {
     }
 
     if (updatedErrorEvents) {
-      updateData.current_errors_events = updatedErrorEvents;
+      updateData.current_error_events = updatedErrorEvents;
     }
 
     await this.agentsRepository.update(internalUser, agent.id, updateData);

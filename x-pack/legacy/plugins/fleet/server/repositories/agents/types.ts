@@ -79,7 +79,7 @@ export const RuntimeAgent = t.intersection([
     ...newAgentProperties,
     id: t.string,
     actions: t.array(RuntimeAgentAction),
-    current_errors_events: t.array(RuntimeAgentEvent),
+    current_error_events: t.array(RuntimeAgentEvent),
   }),
   t.partial({
     last_updated: t.string,
@@ -97,7 +97,7 @@ export const RuntimeSavedObjectAgentAttributes = t.intersection([
     parent_id: t.string,
     version: t.string,
     enrolled_at: t.string,
-    current_errors_events: t.string,
+    current_error_events: t.string,
   }),
   t.interface({
     ...newAgentProperties,

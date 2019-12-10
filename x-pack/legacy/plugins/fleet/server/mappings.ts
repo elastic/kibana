@@ -43,7 +43,7 @@ export const mappings = {
       updated_at: {
         type: 'date',
       },
-      current_errors_events: {
+      current_error_events: {
         type: 'text',
       },
       actions: {

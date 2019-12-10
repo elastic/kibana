@@ -34,7 +34,7 @@ export class AgentStatusHelper {
       return 'inactive';
     }
 
-    if (agent.current_errors_events.length > 0) {
+    if (agent.current_error_events.length > 0) {
       return 'error';
     }
 

@@ -121,11 +121,11 @@ export class AgentsRepository implements AgentsRepositoryType {
    * @param newData
    */
   public async update(user: FrameworkUser, id: string, newData: Partial<Agent>) {
-    const { local_metadata, user_provided_metadata, current_errors_events, ...data } = newData;
+    const { local_metadata, user_provided_metadata, current_error_events, ...data } = newData;
     const updateData: Partial<SavedObjectAgentAttributes> = { ...data };
 
-    if (newData.current_errors_events) {
-      updateData.current_errors_events = JSON.stringify(newData.current_errors_events);
+    if (newData.current_error_events) {
+      updateData.current_error_events = JSON.stringify(newData.current_error_events);
     }
     if (newData.local_metadata) {
       updateData.local_metadata = JSON.stringify(newData.local_metadata);
@@ -152,11 +152,11 @@ export class AgentsRepository implements AgentsRepositoryType {
     updates: Array<{ id: string; newData: Partial<Agent> }>
   ) {
     const bulkUpdateData = updates.map(({ id, newData }) => {
-      const { local_metadata, user_provided_metadata, current_errors_events, ...data } = newData;
+      const { local_metadata, user_provided_metadata, current_error_events, ...data } = newData;
       const updateData: Partial<SavedObjectAgentAttributes> = { ...data };
 
-      if (newData.current_errors_events) {
-        updateData.current_errors_events = JSON.stringify(newData.current_errors_events);
+      if (newData.current_error_events) {
+        updateData.current_error_events = JSON.stringify(newData.current_error_events);
       }
       if (newData.local_metadata) {
         updateData.local_metadata = JSON.stringify(newData.local_metadata);
@@ -271,8 +271,8 @@ export class AgentsRepository implements AgentsRepositoryType {
     return {
       id: so.id,
       ...so.attributes,
-      current_errors_events: so.attributes.current_errors_events
-        ? JSON.parse(so.attributes.current_errors_events)
+      current_error_events: so.attributes.current_error_events
+        ? JSON.parse(so.attributes.current_error_events)
         : [],
       local_metadata: JSON.parse(so.attributes.local_metadata),
       user_provided_metadata: JSON.parse(so.attributes.user_provided_metadata),

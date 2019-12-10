@@ -21,9 +21,9 @@ export class AgentEventLib {
    */
   public async processEventsForCheckin(user: FrameworkUser, agent: Agent, events: AgentEvent[]) {
     const acknowledgedActionIds: string[] = [];
-    const updatedErrorEvents = [...agent.current_errors_events];
+    const updatedErrorEvents = [...agent.current_error_events];
     for (const event of events) {
-      assignPolicyId(agent, event);
+      event.policy_id = agent.policy_id;
 
       if (isActionEvent(event)) {
         acknowledgedActionIds.push(event.action_id as string);
@@ -79,10 +79,6 @@ export class AgentEventLib {
       perPage,
     });
   }
-}
-
-function assignPolicyId(agent: Agent, event: AgentEvent) {
-  event.policy_id = agent.policy_id;
 }
 
 function isErrorOrState(event: AgentEvent) {

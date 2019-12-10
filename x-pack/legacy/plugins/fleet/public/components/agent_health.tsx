@@ -72,7 +72,7 @@ export const AgentHealth: React.FC<Props> = ({ agent }) => {
                 lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
               }}
             />
-            {agent.current_errors_events.map((event, idx) => (
+            {agent.current_error_events.map((event, idx) => (
               <p key={idx}>{event.message}</p>
             ))}
           </>
