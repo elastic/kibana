@@ -18,6 +18,7 @@ export {
   getCategories,
   getFile,
   getInstallationObject,
+  getInstallation,
   getPackageInfo,
   getPackages,
   SearchParams,
