@@ -187,7 +187,15 @@ describe('run tests CLI', () => {
 
       await runTestsCli(['foo']);
 
-      expect(exitMock).not.toHaveBeenCalled();
+      expect(exitMock).toHaveBeenCalledWith(1);
+    });
+
+    it('accepts headless option', async () => {
+      global.process.argv.push('--headless');
+
+      await runTestsCli(['foo']);
+
+      expect(exitMock).toHaveBeenCalledWith(1);
     });
 
     it('accepts extra server options', async () => {
