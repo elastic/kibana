@@ -20,7 +20,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { I18nContext } from 'ui/i18n';
+import { I18nProvider } from '@kbn/i18n/react';
+import { IUiSettingsClient } from 'kibana/public';
 import { NewVisModal } from './new_vis_modal';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
@@ -30,7 +31,9 @@ interface ShowNewVisModalParams {
 
 export function showNewVisModal(
   visTypeRegistry: TypesStart,
-  { editorParams = [] }: ShowNewVisModalParams = {}
+  { editorParams = [] }: ShowNewVisModalParams = {},
+  addBasePath: (path: string) => string,
+  uiSettings: IUiSettingsClient
 ) {
   const container = document.createElement('div');
   const onClose = () => {
@@ -40,14 +43,16 @@ export function showNewVisModal(
 
   document.body.appendChild(container);
   const element = (
-    <I18nContext>
+    <I18nProvider>
       <NewVisModal
         isOpen={true}
         onClose={onClose}
         visTypesRegistry={visTypeRegistry}
         editorParams={editorParams}
+        addBasePath={addBasePath}
+        uiSettings={uiSettings}
       />
-    </I18nContext>
+    </I18nProvider>
   );
   ReactDOM.render(element, container);
 }
