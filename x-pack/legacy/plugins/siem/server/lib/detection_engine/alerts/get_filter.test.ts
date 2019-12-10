@@ -385,26 +385,9 @@ describe('get_filter', () => {
   });
 
   describe('getFilter', () => {
-    test('returns a filter if given a type of filter as is', async () => {
-      const filter = await getFilter({
-        type: 'filter',
-        filter: { something: '1' },
-        filters: undefined,
-        language: undefined,
-        query: undefined,
-        savedId: undefined,
-        services: servicesMock,
-        index: ['auditbeat-*'],
-      });
-      expect(filter).toEqual({
-        something: '1',
-      });
-    });
-
     test('returns a query if given a type of query', async () => {
       const filter = await getFilter({
         type: 'query',
-        filter: undefined,
         filters: undefined,
         language: 'kuery',
         query: 'host.name: siem',
@@ -439,7 +422,6 @@ describe('get_filter', () => {
       await expect(
         getFilter({
           type: 'query',
-          filter: undefined,
           filters: undefined,
           language: undefined,
           query: 'host.name: siem',
@@ -454,7 +436,6 @@ describe('get_filter', () => {
       await expect(
         getFilter({
           type: 'query',
-          filter: undefined,
           filters: undefined,
           language: 'kuery',
           query: undefined,
@@ -469,7 +450,6 @@ describe('get_filter', () => {
       await expect(
         getFilter({
           type: 'query',
-          filter: undefined,
           filters: undefined,
           language: 'kuery',
           query: 'host.name: siem',
@@ -483,7 +463,6 @@ describe('get_filter', () => {
     test('returns a saved query if given a type of query', async () => {
       const filter = await getFilter({
         type: 'saved_query',
-        filter: undefined,
         filters: undefined,
         language: undefined,
         query: undefined,
@@ -507,7 +486,6 @@ describe('get_filter', () => {
       await expect(
         getFilter({
           type: 'saved_query',
-          filter: undefined,
           filters: undefined,
           language: undefined,
           query: undefined,
@@ -522,7 +500,6 @@ describe('get_filter', () => {
       await expect(
         getFilter({
           type: 'saved_query',
-          filter: undefined,
           filters: undefined,
           language: undefined,
           query: undefined,
