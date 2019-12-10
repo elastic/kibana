@@ -26,8 +26,8 @@ PUT _watcher/watch/error_report
           "error_report.pdf" : {
             "reporting" : {
               "url": "http://0.0.0.0:5601/api/reporting/generate/printablePdf?jobParams=...", <2>
-              "retries":6, <3>
-              "interval":"1s", <4>
+              "retries":40, <3>
+              "interval":"15s", <4>
               "auth":{ <5>
                 "basic":{
                   "username":"elastic",
@@ -44,7 +44,7 @@ PUT _watcher/watch/error_report
 ---------------------------------------------------------
 // CONSOLE
 
-<1> You must configure at least one email account to enable Watcher to send email.
+<1> You must configure at least one email account to enable {watcher} to send email.
 For more information, see
 {ref}/actions-email.html#configuring-email[Configuring email accounts].
 <2> This is an example POST URL. You can copy and paste the URL for any
@@ -56,7 +56,7 @@ report from the Kibana UI.
 //For more information, see <<secure-reporting>>.
 //<<reporting-app-users, Setting up a Reporting Role>>.
 
-NOTE: Reporting is integrated with Watcher only as an email attachment type.
+NOTE: Reporting is integrated with {watcher} only as an email attachment type.
 
 For more information about configuring watches, see
-{stack-ov}/how-watcher-works.html[How Watcher Works].
+{ref}/how-watcher-works.html[How {watcher} works].

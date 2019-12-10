@@ -38,6 +38,8 @@ This section summarizes the changes in each release.
 === Breaking changes
 See also <<breaking-changes-7.5, breaking changes in 7.5>>.
 
+Code::
+* Removes experimental code app {pull}49404[#49404]
 Platform::
 * Default to _search instead of _msearch in courier {pull}45174[#45174]
 

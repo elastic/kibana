@@ -51,6 +51,14 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
     store: {
       get: () => {},
     },
+    data: {
+      query: {
+        savedQueries: {},
+      },
+      autocomplete: {
+        getProvider: () => undefined,
+      },
+    },
   };
 
   return (

@@ -71,34 +71,38 @@ const getInitialSorting = (columns: any, sorting: any) => {
   };
 };
 
-import { MlInMemoryTableBasic } from './types';
+import { mlInMemoryTableBasicFactory } from './types';
 
-export class MlInMemoryTable extends MlInMemoryTableBasic {
-  static getDerivedStateFromProps(nextProps: any, prevState: any) {
-    const derivedState = {
-      ...prevState.prevProps,
-      pageIndex: nextProps.pagination.initialPageIndex,
-      pageSize: nextProps.pagination.initialPageSize,
-    };
+export function mlInMemoryTableFactory<T>() {
+  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<T>();
 
-    if (nextProps.items !== prevState.prevProps.items) {
-      Object.assign(derivedState, {
-        prevProps: {
-          items: nextProps.items,
-        },
-      });
+  return class MlInMemoryTable extends MlInMemoryTableBasic {
+    static getDerivedStateFromProps(nextProps: any, prevState: any) {
+      const derivedState = {
+        ...prevState.prevProps,
+        pageIndex: nextProps.pagination.initialPageIndex,
+        pageSize: nextProps.pagination.initialPageSize,
+      };
+
+      if (nextProps.items !== prevState.prevProps.items) {
+        Object.assign(derivedState, {
+          prevProps: {
+            items: nextProps.items,
+          },
+        });
+      }
+
+      const { sortName, sortDirection } = getInitialSorting(nextProps.columns, nextProps.sorting);
+      if (
+        sortName !== prevState.prevProps.sortName ||
+        sortDirection !== prevState.prevProps.sortDirection
+      ) {
+        Object.assign(derivedState, {
+          sortName,
+          sortDirection,
+        });
+      }
+      return derivedState;
     }
-
-    const { sortName, sortDirection } = getInitialSorting(nextProps.columns, nextProps.sorting);
-    if (
-      sortName !== prevState.prevProps.sortName ||
-      sortDirection !== prevState.prevProps.sortDirection
-    ) {
-      Object.assign(derivedState, {
-        sortName,
-        sortDirection,
-      });
-    }
-    return derivedState;
-  }
+  };
 }

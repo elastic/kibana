@@ -28,7 +28,7 @@ import { getColumns } from './columns';
 import { ExpandedRow } from './expanded_row';
 import {
   ProgressBar,
-  MlInMemoryTable,
+  mlInMemoryTableFactory,
   OnTableChangeArg,
   SortDirection,
   SORT_DIRECTION,
@@ -57,6 +57,8 @@ function stringMatch(str: string | undefined, substr: string) {
     (str.toLowerCase().match(substr.toLowerCase()) === null) === false
   );
 }
+
+const MlInMemoryTable = mlInMemoryTableFactory<DataFrameAnalyticsListRow>();
 
 interface Props {
   isManagementTable?: boolean;

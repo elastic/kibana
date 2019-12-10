@@ -123,9 +123,16 @@ Visualize.
 `kibana.defaultAppId:`:: *Default: "home"* The default application to load.
 
 `kibana.index:`:: *Default: ".kibana"* Kibana uses an index in Elasticsearch to
-store saved searches, visualizations and dashboards. Kibana creates a new index
+store saved searches, visualizations, and dashboards. Kibana creates a new index
 if the index doesn’t already exist. If you configure a custom index, the name must
 be lowercase, and conform to {es} {ref}/indices-create-index.html[index name limitations].
++
+When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`, 
+you cannot use the `kibana_user` or `kibana_dashboard_only_user` roles 
+to grant access to {kib}. 
+You must create custom roles that authorize the user for that specific tenant. 
+Although multi-tenant installations are supported, the recommended approach 
+to securing access to {kib} segments is to grant users access to specific spaces.
 
 `kibana.autocompleteTimeout:`:: *Default: "1000"* Time in milliseconds to wait
 for autocomplete suggestions from Elasticsearch. This value must be a whole number
@@ -257,6 +264,12 @@ not saved in Elasticsearch.
 running behind a proxy. Use the `server.rewriteBasePath` setting to tell Kibana
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
+
+[[server-compression]]`server.compression.enabled:`:: *Default: `true`* Set to `false` to disable HTTP compression for all responses.
+
+`server.compression.referrerWhitelist:`:: *Default: none* Specifies an array of trusted hostnames, such as the Kibana host, or a reverse
+proxy sitting in front of it. This determines whether HTTP compression may be used for responses, based on the request's `Referer` header.
+This setting may not be used when `server.compression.enabled` is set to `false`.
 
 [[server-cors]]`server.cors:`:: *Default: `false`* Set to `true` to enable CORS support. This setting is required to configure `server.cors.origin`.
 
