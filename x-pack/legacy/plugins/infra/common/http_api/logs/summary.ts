@@ -7,7 +7,7 @@
 import * as rt from 'io-ts';
 
 export const LOGS_SUMMARY_PATH = '/api/logs/summary';
-export const LOGS_SUMMARY_HIGHLIGHTS_PATH = '/api/logs/summary/highlights';
+export const LOGS_SUMMARY_HIGHLIGHTS_PATH = '/api/logs/summary_highlights';
 
 // const esDate = rt.union([rt.string, rt.number]);
 
