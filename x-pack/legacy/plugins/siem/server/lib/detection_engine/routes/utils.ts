@@ -52,7 +52,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     meta: alert.params.meta,
     severity: alert.params.severity,
     updated_by: alert.updatedBy,
-    tags: alert.params.tags,
+    tags: alert.tags,
     to: alert.params.to,
     type: alert.params.type,
     threats: alert.params.threats,

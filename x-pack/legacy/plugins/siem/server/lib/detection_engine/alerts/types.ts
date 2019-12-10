@@ -148,7 +148,7 @@ export interface ReadRuleByRuleId {
   ruleId: string;
 }
 
-export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval'>;
+export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
 
 export type RuleAlertType = Alert & {
   id: string;
