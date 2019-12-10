@@ -29,16 +29,9 @@
  */
 import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { npStart } from 'ui/new_platform';
-import { SavedObjectConfig, SavedObjectSaveOpts } from './types';
+import { SavedObject, SavedObjectConfig } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
 import { IndexPatternsContract } from '../../../../plugins/data/public';
-export { SavedObjectSaveOpts as SaveOptions } from './types';
-
-export interface SavedObject {
-  save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  copyOnSave: boolean;
-  id?: string;
-}
 
 export function createSavedObjectClass(
   savedObjectsClient: SavedObjectsClientContract,
@@ -55,7 +48,7 @@ export function createSavedObjectClass(
    * which returns instances of SimpleSavedObject which don't introduce additional type-specific complexity.
    * @param {*} config
    */
-  class SavedObject {
+  class SavedObjectClass {
     constructor(config: SavedObjectConfig = {}) {
       buildSavedObject(
         // @ts-ignore
@@ -69,7 +62,7 @@ export function createSavedObjectClass(
     }
   }
 
-  return SavedObject;
+  return SavedObjectClass as new (config: SavedObjectConfig) => SavedObject;
 }
 // the old angular way, should be removed once no longer used
 export function SavedObjectProvider() {

@@ -74,10 +74,7 @@ export function createSavedSearchClass(
       });
       this.showInRecentlyAccessed = true;
       this.id = id;
-    }
-
-    public getFullPath() {
-      return `/app/kibana#/discover/${String(this.id)}`;
+      this.getFullPath = () => `/app/kibana#/discover/${String(id)}`;
     }
   }
 

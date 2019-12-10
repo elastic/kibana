@@ -40,7 +40,7 @@ import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue'
 // Saved objects
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 // @ts-ignore
-import { SavedObject, SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 import { createUiStatsReporter, METRIC_TYPE } from '../../../ui_metric/public';

@@ -72,7 +72,7 @@ export async function saveSavedObject(
   // to expect a 'save as' flow during a rename, we are keeping the logic the same until a better
   // UI/UX can be worked out.
   if (savedObject.copyOnSave) {
-    savedObject.id = null;
+    delete savedObject.id;
   }
 
   // Here we want to extract references and set them within "references" attribute

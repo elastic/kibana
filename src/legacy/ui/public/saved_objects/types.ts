@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchSource } from 'ui/courier';
+import { SearchSource, SearchSourceContract } from 'ui/courier';
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
 import { IndexPattern } from '../../../core_plugins/data/public';
 
@@ -33,14 +33,14 @@ export interface SavedObject {
   getEsType: () => string;
   getFullPath: () => string;
   hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
-  id?: string | null;
+  id?: string;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;
   isTitleChanged: () => boolean;
   lastSavedTitle: string;
   migrationVersion?: Record<string, any>;
   save: (saveOptions: SavedObjectSaveOpts) => Promise<string>;
-  searchSource?: SearchSource;
+  searchSource?: SearchSourceContract;
   showInRecentlyAccessed: boolean;
   title: string;
 }
