@@ -99,7 +99,6 @@ export const updateRules = async ({
       maxSignals,
       riskScore,
       severity,
-      tags,
       threats,
       to,
       type,
@@ -112,11 +111,10 @@ export const updateRules = async ({
   } else if (!rule.enabled && enabled) {
     await alertsClient.enable({ id: rule.id });
   }
-
   return alertsClient.update({
     id: rule.id,
     data: {
-      tags: [],
+      tags: tags != null ? tags : [],
       name: calculateName({ updatedName: name, originalName: rule.name }),
       interval: calculateInterval(interval, rule.interval),
       actions,
