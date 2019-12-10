@@ -13,13 +13,9 @@ import { throwErrors, createPlainError } from '../../../../../common/runtime_typ
 
 import {
   LOGS_SUMMARY_PATH,
-  LOGS_SUMMARY_HIGHLIGHTS_PATH,
   LogsSummaryRequest,
   logsSummaryRequestRT,
   logsSummaryResponseRT,
-  LogsSummaryHighlightsRequest,
-  logsSummaryHighlightsRequestRT,
-  logsSummaryHighlightsResponseRT,
 } from '../../../../../common/http_api';
 
 export const fetchLogSummary = async (requestArgs: LogsSummaryRequest) => {
@@ -31,19 +27,6 @@ export const fetchLogSummary = async (requestArgs: LogsSummaryRequest) => {
 
   return pipe(
     logsSummaryResponseRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
-};
-
-export const fetchLogSummaryHighlights = async (requestArgs: LogsSummaryHighlightsRequest) => {
-  const response = await kfetch({
-    method: 'POST',
-    pathname: LOGS_SUMMARY_HIGHLIGHTS_PATH,
-    body: JSON.stringify(logsSummaryHighlightsRequestRT.encode(requestArgs)),
-  });
-
-  return pipe(
-    logsSummaryHighlightsResponseRT.decode(response),
     fold(throwErrors(createPlainError), identity)
   );
 };

@@ -8,11 +8,11 @@ import { renderHook } from '@testing-library/react-hooks';
 
 import { useLogSummary } from './log_summary';
 
-import { fetchLogSummary } from './api/log_summary';
+import { fetchLogSummary } from './api/fetch_log_summary';
 
 // Typescript doesn't know that `fetchLogSummary` is a jest mock.
 // We use a second variable with a type cast to help the compiler further down the line.
-jest.mock('./api/log_summary', () => ({ fetchLogSummary: jest.fn() }));
+jest.mock('./api/fetch_log_summary', () => ({ fetchLogSummary: jest.fn() }));
 const fetchLogSummaryMock = fetchLogSummary as jest.MockedFunction<typeof fetchLogSummary>;
 
 describe('useLogSummary hook', () => {

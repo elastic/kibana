@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash';
 
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
-import { fetchLogSummaryHighlights } from '../log_summary/api/log_summary';
+import { fetchLogSummaryHighlights } from './api/fetch_log_summary_highlights';
 import { LogsSummaryHighlightsResponse } from '../../../../common/http_api';
 
 export const useLogSummaryHighlights = (

@@ -8,7 +8,7 @@ import { useState } from 'react';
 
 import { useCancellableEffect } from '../../../utils/cancellable_effect';
 import { useLogSummaryBufferInterval } from './use_log_summary_buffer_interval';
-import { fetchLogSummary } from './api/log_summary';
+import { fetchLogSummary } from './api/fetch_log_summary';
 import { LogsSummaryResponse } from '../../../../common/http_api';
 
 export type LogSummaryBuckets = LogsSummaryResponse['data']['buckets'];
