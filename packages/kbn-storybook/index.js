@@ -19,8 +19,6 @@
 
 const fs = require('fs');
 const { join } = require('path');
-const mkdirp = require('mkdirp'); // eslint-disable-line
-const { promisify } = require('util');
 const Rx = require('rxjs');
 const { first } = require('rxjs/operators');
 const storybook = require('@storybook/react/standalone');
@@ -28,8 +26,6 @@ const { run } = require('@kbn/dev-utils');
 const { generateStorybookEntry } = require('./lib/storybook_entry');
 const { REPO_ROOT, CURRENT_CONFIG } = require('./lib/constants');
 const { buildDll } = require('./lib/dll');
-
-const mkdirpAsync = promisify(mkdirp);
 
 exports.runStorybookCli = config => {
   const { name, storyGlobs } = config;
@@ -39,7 +35,7 @@ exports.runStorybookCli = config => {
 
       const currentConfig = JSON.stringify(config, null, 2);
       const currentConfigDir = join(CURRENT_CONFIG, '..');
-      await mkdirpAsync(currentConfigDir);
+      await fs.promises.mkdir(currentConfigDir, { recursive: true });
       log.info('Writing currentConfig:\n', CURRENT_CONFIG + '\n', currentConfig);
       await fs.promises.writeFile(CURRENT_CONFIG, `exports.currentConfig = ${currentConfig};`);
 
