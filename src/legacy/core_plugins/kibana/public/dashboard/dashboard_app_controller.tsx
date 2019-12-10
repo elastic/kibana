@@ -53,7 +53,8 @@ import {
   isErrorEmbeddable,
   ErrorEmbeddable,
   ViewMode,
-  openAddPanelFlyout, EmbeddableFactoryNotFoundError,
+  openAddPanelFlyout,
+  EmbeddableFactoryNotFoundError,
 } from '../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 

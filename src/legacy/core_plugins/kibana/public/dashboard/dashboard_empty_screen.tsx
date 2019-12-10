@@ -43,7 +43,13 @@ export function DashboardEmptyScreen({
 }: DashboardEmptyScreenProps) {
   const linkToVisualizeParagraph = (
     <p data-test-subj="linkToVisualizeParagraph">
-      <EuiButton iconSide="right" fill iconType="arrowDown" onClick={onVisualizeClick} data-test-subj="addVisualizationButton">
+      <EuiButton
+        iconSide="right"
+        fill
+        iconType="arrowDown"
+        onClick={onVisualizeClick}
+        data-test-subj="addVisualizationButton"
+      >
         <FormattedMessage
           id="embeddableApi.addPanel.createNewDefaultOption"
           defaultMessage="Create new"
