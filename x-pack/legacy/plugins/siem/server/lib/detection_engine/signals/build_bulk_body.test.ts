@@ -28,6 +28,7 @@ describe('buildBulkBody', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -62,7 +63,7 @@ describe('buildBulkBody', () => {
           query: 'user.name: root or user.name: admin',
           references: ['http://google.com'],
           severity: 'high',
-          tags: ['some fake tag'],
+          tags: ['some fake tag 1', 'some fake tag 2'],
           type: 'query',
           to: 'now',
           enabled: true,
@@ -91,6 +92,7 @@ describe('buildBulkBody', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -134,7 +136,7 @@ describe('buildBulkBody', () => {
           query: 'user.name: root or user.name: admin',
           references: ['http://google.com'],
           severity: 'high',
-          tags: ['some fake tag'],
+          tags: ['some fake tag 1', 'some fake tag 2'],
           type: 'query',
           to: 'now',
           enabled: true,
@@ -162,6 +164,7 @@ describe('buildBulkBody', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -204,7 +207,7 @@ describe('buildBulkBody', () => {
           query: 'user.name: root or user.name: admin',
           references: ['http://google.com'],
           severity: 'high',
-          tags: ['some fake tag'],
+          tags: ['some fake tag 1', 'some fake tag 2'],
           type: 'query',
           to: 'now',
           enabled: true,
@@ -230,6 +233,7 @@ describe('buildBulkBody', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     // Timestamp will potentially always be different so remove it for the test
     delete fakeSignalSourceHit['@timestamp'];
@@ -267,7 +271,7 @@ describe('buildBulkBody', () => {
           query: 'user.name: root or user.name: admin',
           references: ['http://google.com'],
           severity: 'high',
-          tags: ['some fake tag'],
+          tags: ['some fake tag 1', 'some fake tag 2'],
           type: 'query',
           to: 'now',
           enabled: true,

@@ -154,6 +154,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(successfulsingleBulkCreate).toEqual(true);
   });
@@ -181,6 +182,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(successfulsingleBulkCreate).toEqual(true);
   });
@@ -200,6 +202,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(successfulsingleBulkCreate).toEqual(true);
   });
@@ -219,6 +222,7 @@ describe('singleBulkCreate', () => {
       updatedBy: 'elastic',
       interval: '5m',
       enabled: true,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(successfulsingleBulkCreate).toEqual(true);

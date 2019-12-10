@@ -24,6 +24,7 @@ interface SingleBulkCreateParams {
   updatedBy: string;
   interval: string;
   enabled: boolean;
+  tags: string[];
 }
 
 // Bulk Index documents.
@@ -39,6 +40,7 @@ export const singleBulkCreate = async ({
   updatedBy,
   interval,
   enabled,
+  tags,
 }: SingleBulkCreateParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
@@ -64,7 +66,7 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled }),
+    buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled, tags }),
   ]);
   const time1 = performance.now();
   const firstResult: BulkResponse = await services.callCluster('bulk', {

@@ -34,6 +34,7 @@ describe('buildRule', () => {
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: 'some interval',
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     const expected: Partial<OutputRuleAlertRest> = {
       created_by: 'elastic',
@@ -54,7 +55,7 @@ describe('buildRule', () => {
       risk_score: 50,
       rule_id: 'rule-1',
       severity: 'high',
-      tags: ['some fake tag'],
+      tags: ['some fake tag 1', 'some fake tag 2'],
       to: 'now',
       type: 'query',
       updated_by: 'elastic',
@@ -84,6 +85,7 @@ describe('buildRule', () => {
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: 'some interval',
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     const expected: Partial<OutputRuleAlertRest> = {
       created_by: 'elastic',
@@ -104,7 +106,7 @@ describe('buildRule', () => {
       risk_score: 50,
       rule_id: 'rule-1',
       severity: 'high',
-      tags: ['some fake tag'],
+      tags: ['some fake tag 1', 'some fake tag 2'],
       to: 'now',
       type: 'query',
       updated_by: 'elastic',
@@ -123,6 +125,7 @@ describe('buildRule', () => {
       createdBy: 'elastic',
       updatedBy: 'elastic',
       interval: 'some interval',
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     const expected: Partial<OutputRuleAlertRest> = {
       created_by: 'elastic',
@@ -143,7 +146,7 @@ describe('buildRule', () => {
       risk_score: 50,
       rule_id: 'rule-1',
       severity: 'high',
-      tags: ['some fake tag'],
+      tags: ['some fake tag 1', 'some fake tag 2'],
       to: 'now',
       type: 'query',
       updated_by: 'elastic',

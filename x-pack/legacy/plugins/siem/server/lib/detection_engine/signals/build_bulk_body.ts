@@ -19,6 +19,7 @@ interface BuildBulkBodyParams {
   updatedBy: string;
   interval: string;
   enabled: boolean;
+  tags: string[];
 }
 
 // format search_after result for signals index.
@@ -31,6 +32,7 @@ export const buildBulkBody = ({
   updatedBy,
   interval,
   enabled,
+  tags,
 }: BuildBulkBodyParams): SignalHit => {
   const rule = buildRule({
     ruleParams,
@@ -40,6 +42,7 @@ export const buildBulkBody = ({
     createdBy,
     updatedBy,
     interval,
+    tags,
   });
   const signal = buildSignal(doc, rule);
   const event = buildEventTypeSignal(doc);

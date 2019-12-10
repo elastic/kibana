@@ -15,6 +15,7 @@ interface BuildRuleParams {
   createdBy: string;
   updatedBy: string;
   interval: string;
+  tags: string[];
 }
 
 export const buildRule = ({
@@ -25,6 +26,7 @@ export const buildRule = ({
   createdBy,
   updatedBy,
   interval,
+  tags,
 }: BuildRuleParams): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     id,
@@ -45,7 +47,7 @@ export const buildRule = ({
     query: ruleParams.query,
     references: ruleParams.references,
     severity: ruleParams.severity,
-    tags: ruleParams.tags,
+    tags,
     type: ruleParams.type,
     to: ruleParams.to,
     enabled,

@@ -46,7 +46,7 @@ export interface RuleAlertParams {
   type: 'query' | 'saved_query';
 }
 
-export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval'>;
+export type RuleTypeParams = Omit<RuleAlertParams, 'name' | 'enabled' | 'interval' | 'tags'>;
 
 export type RuleAlertParamsRest = Omit<
   RuleAlertParams,

@@ -46,6 +46,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(0);
     expect(result).toEqual(true);
@@ -97,6 +98,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(mockService.callCluster).toHaveBeenCalledTimes(5);
     expect(result).toEqual(true);
@@ -119,6 +121,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result).toEqual(false);
@@ -148,6 +151,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(mockLogger.error).toHaveBeenCalled();
     expect(result).toEqual(false);
@@ -177,6 +181,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(result).toEqual(true);
   });
@@ -208,6 +213,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(result).toEqual(true);
   });
@@ -239,6 +245,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(result).toEqual(true);
   });
@@ -272,6 +279,7 @@ describe('searchAfterAndBulkCreate', () => {
       enabled: true,
       pageSize: 1,
       filter: undefined,
+      tags: ['some fake tag 1', 'some fake tag 2'],
     });
     expect(result).toEqual(false);
   });
