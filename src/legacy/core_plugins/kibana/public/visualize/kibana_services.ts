@@ -29,7 +29,7 @@ import { NavigationStart } from '../../../navigation/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
-import { DataPublicPluginStart, IndexPatterns } from '../../../../../plugins/data/public';
+import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plugins/data/public';
 import { VisualizationsStart } from '../../../visualizations/public';
 import { SavedVisualizations } from './types';
 
@@ -41,7 +41,7 @@ export interface VisualizeKibanaServices {
   editorTypes: any;
   embeddables: IEmbeddableStart;
   getBasePath: () => string;
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatternsContract;
   legacyChrome: any;
   localStorage: Storage;
   navigation: NavigationStart;
