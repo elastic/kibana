@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import Boom from 'boom';
-import { boomify } from 'boom';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
@@ -14,30 +14,43 @@ import { throwErrors } from '../../../common/runtime_types';
 import { getAWSMetadata } from './lib/get_aws_metadata';
 import {
   InventoryMetaRequestRT,
-  InventoryMetaWrappedRequest,
-  InventoryMetaResponse,
   InventoryMetaResponseRT,
 } from '../../../common/http_api/inventory_meta_api';
+
+const escapeHatch = schema.object({}, { allowUnknowns: true });
 
 export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
   const { framework } = libs;
 
-  framework.registerRoute<InventoryMetaWrappedRequest, Promise<InventoryMetaResponse>>({
-    method: 'POST',
-    path: '/api/infra/inventory/meta',
-    handler: async req => {
-      const { sourceId } = pipe(
-        InventoryMetaRequestRT.decode(req.payload),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
-
-      const { configuration } = await libs.sources.getSourceConfiguration(req, sourceId);
-      const awsMetadata = await getAWSMetadata(framework, req, configuration);
-
-      return pipe(
-        InventoryMetaResponseRT.decode(awsMetadata),
-        fold(throwErrors(Boom.badImplementation), identity)
-      );
+  framework.registerRoute(
+    {
+      method: 'post',
+      path: '/api/infra/inventory/meta',
+      validate: {
+        body: escapeHatch,
+      },
     },
-  });
+    async (requestContext, request, response) => {
+      try {
+        const { sourceId } = pipe(
+          InventoryMetaRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+
+        const { configuration } = await libs.sources.getSourceConfiguration(
+          requestContext,
+          sourceId
+        );
+        const awsMetadata = await getAWSMetadata(framework, requestContext, configuration);
+
+        return response.ok({
+          body: InventoryMetaResponseRT.encode(awsMetadata),
+        });
+      } catch (error) {
+        return response.internalError({
+          body: error.message,
+        });
+      }
+    }
+  );
 };

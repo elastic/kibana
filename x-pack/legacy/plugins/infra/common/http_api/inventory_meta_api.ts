@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
 
 const AWSAccountRT = rt.type({
   value: rt.string,
@@ -23,6 +22,5 @@ export const InventoryMetaRequestRT = rt.type({
 });
 
 export type InventoryMetaRequest = rt.TypeOf<typeof InventoryMetaRequestRT>;
-export type InventoryMetaWrappedRequest = InfraWrappableRequest<InventoryMetaRequest>;
 export type InventoryMetaResponse = rt.TypeOf<typeof InventoryMetaResponseRT>;
 export type InventoryAWSAccount = rt.TypeOf<typeof AWSAccountRT>;
