@@ -14,19 +14,26 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
 
-jest.mock('ui/new_platform', () => ({
-  npStart: {
-    core: {
-      uiSettings: {
-        get: (path: string) => {
-          if (path === 'histogram:maxBars') {
-            return 10;
-          }
+jest.mock('ui/new_platform', () => {
+  const { coreMock } = require('src/core/public/mocks'); // eslint-disable-line @typescript-eslint/no-var-requires
+  return {
+    npSetup: {
+      core: coreMock.createSetup(),
+    },
+    npStart: {
+      core: {
+        ...coreMock.createStart(),
+        uiSettings: {
+          get: (path: string) => {
+            if (path === 'histogram:maxBars') {
+              return 10;
+            }
+          },
         },
       },
     },
-  },
-}));
+  };
+});
 
 const defaultOptions = {
   storage: {} as IStorageWrapper,
