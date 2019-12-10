@@ -16,10 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
-import { IRouter, RequestHandlerContext } from 'src/core/server';
-import { PluginInitializerContext } from 'src/core/server';
+import { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -30,17 +28,12 @@ import {
 import { loadData } from '../lib/load_data';
 import { SampleDataUsageTracker } from '../usage/usage';
 
-const querySchema = {
-  query: Joi.object().keys({ now: Joi.date().iso() }),
-};
-
 const insertDataIntoIndex = (
   dataIndexConfig: any,
   index: string,
   nowReference: string,
   context: RequestHandlerContext,
-  // TODO don't pass init context but an initialized logger
-  initContext: PluginInitializerContext
+  logger: Logger
 ) => {
   const bulkInsert = async (docs: any) => {
     function updateTimestamps(doc: any) {
@@ -77,7 +70,7 @@ const insertDataIntoIndex = (
         null,
         ''
       )}`;
-      initContext.logger.get().debug(errMsg, ['warning']);
+      logger.warn(errMsg);
       return Promise.reject(
         new Error(`Unable to load sample data into index "${index}", see kibana logs for details`)
       );
@@ -89,8 +82,7 @@ const insertDataIntoIndex = (
 export function createInstallRoute(
   router: IRouter,
   sampleDatasets: SampleDatasetSchema[],
-  // TODO don't pass init context but an initialized logger
-  initContext: PluginInitializerContext,
+  logger: Logger,
   usageTracker: SampleDataUsageTracker
 ): void {
   router.post(
@@ -98,36 +90,18 @@ export function createInstallRoute(
       path: '/api/sample_data/{id}',
       validate: {
         params: schema.object({ id: schema.string() }),
-        query: schema.object({}, { allowUnknowns: true }),
+        // TODO validate now as date
+        query: schema.object({ now: schema.maybe(schema.string()) }),
       },
     },
     async (context, req, res) => {
       const { params, query } = req;
-      /*
-        We have to use a custom validation for optional query because @kbn/config-schema
-        doesn't have a date validation and using schema.maybe effectively returns
-        validate: false,
-        preventing us from accessing the params, query and body
-      */
-      const validDate = Joi.validate(query, querySchema);
-      if (!validDate) {
-        /*
-        TODO: add optional query item to @kbn/config-schema
-        Having to use a custom Joi validation and over-ride the IRouter config-schema requirements,
-        we end up with query: Readonly<{}>.
-        Once we have an optional query item in config-schema,
-        we can remove this ignore.Property 'now' does not exist on type 'Readonly<{}>'
-        */
-        //  @ts-ignore
-        const errMsg = `Invalid date supplied "${query.now}", using current date`;
-        initContext.logger.get().debug(errMsg, ['warning']);
-      }
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
         return res.notFound();
       }
       //  @ts-ignore Custom query validation used
-      const now = query.now ? query.now : new Date();
+      const now = query.now ? new Date(query.now) : new Date();
       const nowReference = dateToIso8601IgnoringTime(now);
       const counts = {};
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
@@ -157,7 +131,7 @@ export function createInstallRoute(
           );
         } catch (err) {
           const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
-          initContext.logger.get().debug(errMsg, ['warning']);
+          logger.warn(errMsg);
           return res.customError({ body: errMsg, statusCode: err.status });
         }
 
@@ -167,12 +141,12 @@ export function createInstallRoute(
             index,
             nowReference,
             context,
-            initContext
+            logger
           );
           (counts as any)[index] = count;
         } catch (err) {
           const errMsg = `sample_data install errors while loading data. Error: ${err}`;
-          initContext.logger.get().debug(errMsg, ['warning']);
+          logger.warn(errMsg);
           return res.internalError({ body: errMsg });
         }
       }
@@ -185,7 +159,7 @@ export function createInstallRoute(
         );
       } catch (err) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
-        initContext.logger.get().debug(errMsg, ['warning']);
+        logger.warn(errMsg);
         return res.internalError({ body: errMsg });
       }
       const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
@@ -195,7 +169,7 @@ export function createInstallRoute(
         const errMsg = `sample_data install errors while loading saved objects. Errors: ${errors.join(
           ','
         )}`;
-        initContext.logger.get().debug(errMsg, ['warning']);
+        logger.warn(errMsg);
         return res.customError({ body: errMsg, statusCode: 403 });
       }
       usageTracker.addInstall(params.id);

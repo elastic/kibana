@@ -62,7 +62,6 @@ export function createUninstallRoute(
         } catch (err) {
           return response.customError({
             statusCode: err.status,
-            // TODO check whether this gets picked up on the client correctly
             body: {
               message: `Unable to delete sample data index "${index}", error: ${err.message}`,
             },
