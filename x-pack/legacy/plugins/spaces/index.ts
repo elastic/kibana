@@ -7,11 +7,13 @@
 import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Legacy } from 'kibana';
+import { KibanaRequest } from '../../../../src/core/server';
 import { SpacesServiceSetup } from '../../../plugins/spaces/server/spaces_service/spaces_service';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 import mappings from './mappings.json';
+import { wrapError } from './server/lib/errors';
 import { migrateToKibana660 } from './server/lib/migrations';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
@@ -75,6 +77,35 @@ export const spaces = (kibana: Record<string, any>) =>
         return {
           serverBasePath: server.config().get('server.basePath'),
         };
+      },
+      async replaceInjectedVars(
+        vars: Record<string, any>,
+        request: Legacy.Request,
+        server: Server
+      ) {
+        // NOTICE: use of `activeSpace` is deprecated and will not be made available in the New Platform.
+        // Known usages:
+        // - x-pack/legacy/plugins/infra/public/utils/use_kibana_space_id.ts
+        const spacesPlugin = server.newPlatform.setup.plugins.spaces as SpacesPluginSetup;
+        if (!spacesPlugin) {
+          throw new Error('New Platform XPack Spaces plugin is not available.');
+        }
+        const kibanaRequest = KibanaRequest.from(request);
+        const spaceId = spacesPlugin.spacesService.getSpaceId(kibanaRequest);
+        const spacesClient = await spacesPlugin.spacesService.scopedClient(kibanaRequest);
+        try {
+          vars.activeSpace = {
+            valid: true,
+            space: await spacesClient.get(spaceId),
+          };
+        } catch (e) {
+          vars.activeSpace = {
+            valid: false,
+            error: wrapError(e).output.payload,
+          };
+        }
+
+        return vars;
       },
     },
 
