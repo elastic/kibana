@@ -18,8 +18,8 @@
  */
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'ui/saved_objects/types';
-import { OverlayStart, SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/public';
+import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
+import { SavedObjectAttributes } from 'kibana/public';
 import { OVERWRITE_REJECTED } from 'ui/saved_objects/constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
@@ -29,10 +29,9 @@ import { confirmModalPromise } from './confirm_modal_promise';
  * @param source - serialized version of this object (return value from this._serialize())
  * What will be indexed into elasticsearch.
  * @param savedObject - savedObject
- * @param savedObjectsClient - client to create a new saved object
  * @param esType - type of the saved object
  * @param options - options to pass to the saved object create method
- * @param overlays - options to pass to the saved object create method
+ * @param services - provides Kibana services savedObjectsClient and overlays
  * @returns {Promise} - A promise that is resolved with the objects id if the object is
  * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
  * a confirmRejected = true parameter so that case can be handled differently than
@@ -42,11 +41,11 @@ import { confirmModalPromise } from './confirm_modal_promise';
 export async function createSource(
   source: SavedObjectAttributes,
   savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClientContract,
   esType: string,
   options = {},
-  overlays: OverlayStart
+  services: SavedObjectKibanaServices
 ) {
+  const { savedObjectsClient, overlays } = services;
   try {
     return await savedObjectsClient.create(esType, source, options);
   } catch (err) {

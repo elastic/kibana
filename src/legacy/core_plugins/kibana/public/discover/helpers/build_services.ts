@@ -51,18 +51,18 @@ export interface DiscoverServices {
   share: SharePluginStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  // legacy
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
   uiSettings: IUiSettingsClient;
 }
 export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugins) {
-  const savedObjectService = createSavedSearchesService(
-    core.savedObjects.client,
-    plugins.data.indexPatterns,
-    core.chrome,
-    core.overlays
-  );
+  const services = {
+    savedObjectsClient: core.savedObjects.client,
+    indexPatterns: plugins.data.indexPatterns,
+    chrome: core.chrome,
+    overlays: core.overlays,
+  };
+  const savedObjectService = createSavedSearchesService(services);
   return {
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,

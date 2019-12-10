@@ -16,8 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { SearchSource, SearchSourceContract } from 'ui/courier';
 import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
+import { IndexPatternsContract } from '../../../../plugins/data/public';
 import { IndexPattern } from '../../../core_plugins/data/public';
 
 export interface SavedObject {
@@ -54,6 +56,13 @@ export interface SavedObjectSaveOpts {
 export interface SavedObjectCreationOpts {
   references?: SavedObjectReference[];
   overwrite?: boolean;
+}
+
+export interface SavedObjectKibanaServices {
+  savedObjectsClient: SavedObjectsClientContract;
+  indexPatterns: IndexPatternsContract;
+  chrome: ChromeStart;
+  overlays: OverlayStart;
 }
 
 export interface SavedObjectConfig {

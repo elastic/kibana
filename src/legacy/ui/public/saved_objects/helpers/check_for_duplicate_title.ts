@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { OverlayStart, SavedObjectsClientContract } from 'kibana/public';
-import { SavedObject } from '../types';
+import { SavedObject, SavedObjectKibanaServices } from '../types';
 import { findObjectByTitle } from './find_object_by_title';
 import { SAVE_DUPLICATE_REJECTED } from '../constants';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
@@ -27,18 +26,17 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
  * returns Promise<true> when it's no duplicate, or the modal displaying the warning
  * that's there's a duplicate is confirmed, else it returns a rejected Promise<ErrorMsg>
  * @param savedObject
- * @param savedObjectsClient
  * @param isTitleDuplicateConfirmed
  * @param onTitleDuplicate
- * @param overlays
+ * @param services
  */
 export async function checkForDuplicateTitle(
   savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClientContract,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
-  overlays: OverlayStart
+  services: SavedObjectKibanaServices
 ): Promise<true> {
+  const { savedObjectsClient, overlays } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
     return true;

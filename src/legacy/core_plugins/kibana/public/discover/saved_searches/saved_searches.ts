@@ -19,12 +19,12 @@
 import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
 // @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 import { createSavedSearchClass } from './_saved_search';
-import { IndexPatternsContract } from '../../../../../../plugins/data/public';
+
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
 savedObjectManagementRegistry.register({
@@ -32,19 +32,13 @@ savedObjectManagementRegistry.register({
   title: 'searches',
 });
 
-export function createSavedSearchesService(
-  savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsContract,
-  chrome: ChromeStart,
-  overlays: OverlayStart
-) {
-  const SavedSearchClass = createSavedSearchClass(
-    savedObjectsClient,
-    indexPatterns,
-    chrome,
-    overlays
+export function createSavedSearchesService(services: SavedObjectKibanaServices) {
+  const SavedSearchClass = createSavedSearchClass(services);
+  const savedSearchLoader = new SavedObjectLoader(
+    SavedSearchClass,
+    services.savedObjectsClient,
+    services.chrome
   );
-  const savedSearchLoader = new SavedObjectLoader(SavedSearchClass, savedObjectsClient, chrome);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',
@@ -58,11 +52,12 @@ export function createSavedSearchesService(
 }
 // this is needed for saved object management
 const module = uiModules.get('discover/saved_searches');
-module.service('savedSearches', () =>
-  createSavedSearchesService(
-    npStart.core.savedObjects.client,
-    npStart.plugins.data.indexPatterns,
-    npStart.core.chrome,
-    npStart.core.overlays
-  )
-);
+module.service('savedSearches', () => {
+  const services = {
+    savedObjectsClient: npStart.core.savedObjects.client,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  };
+  return createSavedSearchesService(services);
+});
