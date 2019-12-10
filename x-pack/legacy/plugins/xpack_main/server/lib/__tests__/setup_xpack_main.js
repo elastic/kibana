@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
 import { setupXPackMain } from '../setup_xpack_main';
 import * as InjectXPackInfoSignatureNS from '../inject_xpack_info_signature';
+
 
 describe('setupXPackMain()', () => {
   const sandbox = sinon.createSandbox();
@@ -39,7 +41,7 @@ describe('setupXPackMain()', () => {
         elasticsearch: mockElasticsearchPlugin,
         xpack_main: mockXPackMainPlugin
       },
-      newPlatform: { setup: { plugins: { features: {} } } },
+      newPlatform: { setup: { plugins: { features: {}, licensing: { license$: new BehaviorSubject() } } } },
       events: { on() {} },
       log() {},
       config() {},
