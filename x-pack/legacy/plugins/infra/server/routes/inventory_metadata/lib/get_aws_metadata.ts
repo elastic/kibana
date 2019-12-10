@@ -89,6 +89,7 @@ export const getAWSMetadata = async (
       if (b.accountNames.buckets.length) {
         accounts.push({
           value: b.key,
+          // There should only be one account name for each account id.
           name: b.accountNames.buckets[0].key,
         });
       }
