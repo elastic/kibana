@@ -10,18 +10,19 @@
 
 import { performance } from 'perf_hooks';
 import { after } from 'lodash';
-import { Subject, merge, partition, interval, of, Observable } from 'rxjs';
-import { mapTo, filter, mergeScan, concatMap, tap } from 'rxjs/operators';
+import { Subject, merge, interval, of, Observable } from 'rxjs';
+import { mapTo, filter, scan, concatMap, tap, catchError } from 'rxjs/operators';
 
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Option, none, map as mapOptional, isSome, getOrElse } from 'fp-ts/lib/Option';
+import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 import { pullFromSet } from './lib/pull_from_set';
-import { Result, asOk, asErr } from './lib/result_type';
+import { Result, Err, map as mapResult, asOk, asErr } from './lib/result_type';
 
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
 interface Opts<T, H> {
   pollInterval: number;
+  bufferCapacity: number;
   getCapacity: () => number;
   pollRequests$: Subject<Option<T>>;
   work: WorkFn<T, H>;
@@ -40,53 +41,101 @@ interface Opts<T, H> {
  */
 export function createTaskPoller<T, H>({
   pollRequests$,
+  bufferCapacity,
   pollInterval,
   getCapacity,
   work,
-}: Opts<T, H>): Observable<Result<H, string>> {
-  const [
-    // requests have arguments to be passed to polling events
-    requests$,
-    // nudge rquests try to cause a polling event early (prior to an interval expiring)
-    // but if there is no capacity, they are ignored
-    nudgeRequests$,
-  ] = partition(pollRequests$, req => isSome(req));
-
+}: Opts<T, H>): Observable<Result<H, PollingError<T>>> {
   const hasCapacity = () => getCapacity() > 0;
 
-  // emit an event on a fixed interval, but only if there's capacity
-  const pollOnInterval$ = interval(pollInterval).pipe(mapTo(none));
-  return merge(
-    // buffer all requests, releasing them whenever an interval expires & there's capacity
-    requests$,
-    // emit an event when we're nudged to poll for work, as long as there's capacity
-    merge(pollOnInterval$, nudgeRequests$).pipe(filter(hasCapacity))
+  const errors$ = new Subject<Err<PollingError<T>>>();
+
+  const requestWorkProcessing$ = merge(
+    // emit a polling event on demand
+    pollRequests$,
+    // emit a polling event on a fixed interval
+    interval(pollInterval).pipe(mapTo(none))
   ).pipe(
     // buffer all requests in a single set (to remove duplicates) as we don't want
     // work to take place in parallel (it could cause Task Manager to pull in the same
     // task twice)
-    mergeScan<Option<T>, Set<T>>(
-      (queue, request) => of(pushOptionalIntoSet(queue, request)),
+    scan<Option<T>, Set<T>>(
+      (queue, request) =>
+        mapResult(
+          pushOptionalIntoSet(queue, bufferCapacity, request),
+          // value has been successfully pushed into buffer
+          () => queue,
+          // value wasnt pushed into buffer, we must be at capacity
+          () => {
+            errors$.next(
+              asPollingError<T>(
+                `request capacity reached`,
+                PollingErrorType.RequestCapacityReached,
+                request
+              )
+            );
+            return queue;
+          }
+        ),
       new Set<T>()
     ),
+    // only emit polling events when there's capacity to handle them
+    filter(hasCapacity),
     // take as many argumented calls as we have capacity for and call `work` with
     // those arguments. If the queue is empty this will still trigger work to be done
     concatMap(async (set: Set<T>) => {
       closeSleepPerf();
-      const workArguments = pullFromSet(set, getCapacity());
-      try {
-        const workResult = await work(...workArguments);
-        return asOk(workResult);
-      } catch (err) {
-        return asErr(
-          `Failed to poll for work${
-            workArguments.length ? ` [${workArguments.join()}]` : ``
-          }: ${err}`
-        );
-      }
+      return asOk(await work(...pullFromSet(set, getCapacity())));
     }),
-    tap(openSleepPerf)
+    tap(openSleepPerf),
+    // catch
+    catchError((err: Error) => of(asPollingError<T>(err, PollingErrorType.WorkError)))
   );
+
+  return merge(requestWorkProcessing$, errors$);
+}
+/**
+ * Unwraps optional values and pushes them into a set
+ * @param set A Set of generic type T
+ * @param maxCapacity How many values are we allowed to push into the set
+ * @param value An optional T to push into the set if it is there
+ */
+function pushOptionalIntoSet<T>(
+  set: Set<T>,
+  maxCapacity: number,
+  value: Option<T>
+): Result<Set<T>, Set<T>> {
+  return pipe(
+    value,
+    mapOptional<T, Result<Set<T>, Set<T>>>(req => {
+      if (set.size >= maxCapacity) {
+        return asErr(set);
+      }
+      set.add(req);
+      return asOk(set);
+    }),
+    getOrElse(() => asOk(set) as Result<Set<T>, Set<T>>)
+  );
+}
+
+export enum PollingErrorType {
+  WorkError,
+  RequestCapacityReached,
+}
+
+function asPollingError<T>(err: string | Error, type: PollingErrorType, data: Option<T> = none) {
+  return asErr(new PollingError<T>(`Failed to poll for work: ${err}`, type, data));
+}
+
+export class PollingError<T> extends Error {
+  public readonly type: PollingErrorType;
+  public readonly data: Option<T>;
+  constructor(message: string, type: PollingErrorType, data: Option<T>) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.type = type;
+    this.data = data;
+  }
 }
 
 const openSleepPerf = () => {
@@ -98,19 +147,3 @@ const closeSleepPerf = after(2, () => {
   performance.mark('TaskPoller.poll');
   performance.measure('TaskPoller.sleepDuration', 'TaskPoller.sleep', 'TaskPoller.poll');
 });
-
-/**
- * Unwraps optional values and pushes them into a set
- * @param set A Set of generic type T
- * @param value An optional T to push into the set if it is there
- */
-function pushOptionalIntoSet<T>(set: Set<T>, value: Option<T>): Set<T> {
-  return pipe(
-    value,
-    mapOptional<T, Set<T>>(req => {
-      set.add(req);
-      return set;
-    }),
-    getOrElse(() => set)
-  );
-}

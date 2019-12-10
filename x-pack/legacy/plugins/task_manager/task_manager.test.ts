@@ -8,7 +8,12 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import { Subject } from 'rxjs';
 
-import { asTaskMarkRunningEvent, asTaskRunEvent, asTaskClaimEvent } from './task_events';
+import {
+  asTaskMarkRunningEvent,
+  asTaskRunEvent,
+  asTaskClaimEvent,
+  asTaskRunRequestEvent,
+} from './task_events';
 import {
   TaskManager,
   claimAvailableTasks,
@@ -373,6 +378,23 @@ describe('TaskManager', () => {
         );
 
         expect(getLifecycle).toHaveBeenCalledWith(id);
+      });
+
+      test('rejects when the task run fails due to capacity', async () => {
+        const events$ = new Subject<TaskLifecycleEvent>();
+        const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+        const getLifecycle = jest.fn(async () => TaskStatus.Idle);
+
+        const result = awaitTaskRunResult(id, events$, getLifecycle);
+
+        events$.next(asTaskRunRequestEvent(id, asErr(new Error('failed to buffer request'))));
+
+        await expect(result).rejects.toEqual(
+          new Error(
+            `Failed to run task "${id}" as Task Manager is at capacity, please try again later`
+          )
+        );
+        expect(getLifecycle).not.toHaveBeenCalled();
       });
 
       test('when a task claim fails we return the underlying error if the task is idle', async () => {

@@ -6,12 +6,13 @@
 
 import { ConcreteTaskInstance } from './task';
 
-import { Result } from './lib/result_type';
+import { Result, Err } from './lib/result_type';
 
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
   TASK_MARK_RUNNING = 'TASK_MARK_RUNNING',
   TASK_RUN = 'TASK_RUN',
+  TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
 }
 
 export interface TaskEvent<T, E> {
@@ -22,6 +23,7 @@ export interface TaskEvent<T, E> {
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskClaim = TaskEvent<ConcreteTaskInstance, Error>;
+export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 
 export function asTaskMarkRunningEvent(
   id: string,
@@ -53,6 +55,18 @@ export function asTaskClaimEvent(
   };
 }
 
+export function asTaskRunRequestEvent(
+  id: string,
+  // we only emit a TaskRunRequest event when it fails
+  event: Err<Error>
+): TaskRunRequest {
+  return {
+    id,
+    type: TaskEventType.TASK_RUN_REQUEST,
+    event,
+  };
+}
+
 export function isTaskMarkRunningEvent(
   taskEvent: TaskEvent<any, any>
 ): taskEvent is TaskMarkRunning {
@@ -63,4 +77,7 @@ export function isTaskRunEvent(taskEvent: TaskEvent<any, any>): taskEvent is Tas
 }
 export function isTaskClaimEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskClaim {
   return taskEvent.type === TaskEventType.TASK_CLAIM;
+}
+export function isTaskRunRequestEvent(taskEvent: TaskEvent<any, any>): taskEvent is TaskRunRequest {
+  return taskEvent.type === TaskEventType.TASK_RUN_REQUEST;
 }

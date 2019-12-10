@@ -9,16 +9,20 @@ import { filter } from 'rxjs/operators';
 import { performance } from 'perf_hooks';
 import { SavedObjectsClientContract, SavedObjectsSerializer } from 'src/core/server';
 
-import { Option, none, some } from 'fp-ts/lib/Option';
-import { Result, either, map, mapErr, promiseResult } from './lib/result_type';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { Option, none, some, map as mapOptional } from 'fp-ts/lib/Option';
+import { Result, asErr, either, map, mapErr, promiseResult } from './lib/result_type';
 
 import { Logger } from './types';
 import {
   TaskMarkRunning,
   TaskRun,
   TaskClaim,
+  TaskRunRequest,
   isTaskRunEvent,
   isTaskClaimEvent,
+  isTaskRunRequestEvent,
+  asTaskRunRequestEvent,
 } from './task_events';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import { addMiddlewareToChain, BeforeSaveMiddlewareParams, Middleware } from './lib/middleware';
@@ -35,7 +39,7 @@ import {
   TaskLifecycleResult,
   TaskStatus,
 } from './task';
-import { createTaskPoller } from './task_poller';
+import { createTaskPoller, PollingError, PollingErrorType } from './task_poller';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_runner';
 import {
@@ -61,7 +65,7 @@ interface RunNowResult {
   id: string;
 }
 
-export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim;
+export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRunRequest;
 
 /*
  * The TaskManager is the public interface into the task manager system. This glues together
@@ -85,7 +89,7 @@ export class TaskManager {
   private events$: Subject<TaskLifecycleEvent>;
   private claimRequests$: Subject<Option<string>>;
   private pollingSubscription: Subscription;
-  private poller$: Observable<Result<FillPoolResult, string>>;
+  private poller$: Observable<Result<FillPoolResult, PollingError<string>>>;
 
   private startQueue: Array<() => void> = [];
   private middleware = {
@@ -137,6 +141,7 @@ export class TaskManager {
     this.pollingSubscription = Subscription.EMPTY;
     this.poller$ = createTaskPoller<string, FillPoolResult>({
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
+      bufferCapacity: opts.config.get('xpack.task_manager.request_capacity'),
       getCapacity: () => this.pool.availableWorkers,
       pollRequests$: this.claimRequests$,
       work: this.pollForWork,
@@ -194,7 +199,15 @@ export class TaskManager {
       this.startQueue = [];
 
       this.pollingSubscription = this.poller$.subscribe(
-        mapErr((error: string) => this.logger.error(error))
+        mapErr((error: PollingError<string>) => {
+          if (error.type === PollingErrorType.RequestCapacityReached) {
+            pipe(
+              error.data,
+              mapOptional(id => this.emitEvent(asTaskRunRequestEvent(id, asErr(error))))
+            );
+          }
+          this.logger.error(error.message);
+        })
       );
     }
   }
@@ -409,29 +422,34 @@ export async function awaitTaskRunResult(
           async (error: Error) => {
             // reject if any error event takes place for the requested task
             subscription.unsubscribe();
-            return reject(
-              isTaskClaimEvent(taskEvent)
-                ? map(
-                    // if the error happened in the Claim phase - we try to provide better insight
-                    // into why we failed to claim by getting the task's current lifecycle status
-                    await promiseResult<TaskLifecycle, Error>(getLifecycle(taskId)),
-                    (taskLifecycleStatus: TaskLifecycle) => {
-                      if (taskLifecycleStatus === TaskLifecycleResult.NotFound) {
-                        return new Error(`Failed to run task "${taskId}" as it does not exist`);
-                      } else if (
-                        taskLifecycleStatus === TaskStatus.Running ||
-                        taskLifecycleStatus === TaskStatus.Claiming
-                      ) {
-                        return new Error(
-                          `Failed to run task "${taskId}" as it is currently running`
-                        );
-                      }
-                      return error;
-                    },
-                    () => error
-                  )
-                : error
-            );
+            if (isTaskRunRequestEvent(taskEvent)) {
+              return reject(
+                new Error(
+                  `Failed to run task "${taskId}" as Task Manager is at capacity, please try again later`
+                )
+              );
+            } else if (isTaskClaimEvent(taskEvent)) {
+              reject(
+                map(
+                  // if the error happened in the Claim phase - we try to provide better insight
+                  // into why we failed to claim by getting the task's current lifecycle status
+                  await promiseResult<TaskLifecycle, Error>(getLifecycle(taskId)),
+                  (taskLifecycleStatus: TaskLifecycle) => {
+                    if (taskLifecycleStatus === TaskLifecycleResult.NotFound) {
+                      return new Error(`Failed to run task "${taskId}" as it does not exist`);
+                    } else if (
+                      taskLifecycleStatus === TaskStatus.Running ||
+                      taskLifecycleStatus === TaskStatus.Claiming
+                    ) {
+                      return new Error(`Failed to run task "${taskId}" as it is currently running`);
+                    }
+                    return error;
+                  },
+                  () => error
+                )
+              );
+            }
+            return reject(error);
           }
         );
       });

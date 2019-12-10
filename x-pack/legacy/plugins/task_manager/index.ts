@@ -38,6 +38,11 @@ export function taskManager(kibana: any) {
           .description('How often, in milliseconds, the task manager will look for more work.')
           .min(100)
           .default(3000),
+        request_capacity: Joi.number()
+          .description('How many requests can Task Manager buffer before it rejects new requests.')
+          .min(1)
+          // a nice round contrived number, feel free to change as we learn how it behaves
+          .default(1000),
         index: Joi.string()
           .description('The name of the index used to store task information.')
           .default('.kibana_task_manager')
