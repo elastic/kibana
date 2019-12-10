@@ -356,10 +356,16 @@ supported protocols with versions. Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2
 setting this to `true` enables unauthenticated users to access the Kibana
 server status API and status page.
 
-`telemetry.allowChangingOptInStatus`:: *Default: true*. If `true`, 
-users are able to change the telemetry setting at a later time in 
-<<advanced-options, Advanced Settings>>.  If `false`, 
-{kib} looks at the value of `telemetry.optIn` to determine whether to send 
+`telemetry.enabled`:: *Default: true* Set to `true` to send cluster statistics
+to Elastic. Reporting your cluster statistics helps us improve your user
+experience. Your data is never shared with anyone. Set to `false` to disable
+statistics reporting. You can also opt out through the *Advanced Settings* in
+{kib}.
+
+`telemetry.allowChangingOptInStatus`:: *Default: true*. If `true`,
+users are able to change the telemetry setting at a later time in
+<<advanced-options, Advanced Settings>>.  If `false`,
+{kib} looks at the value of `telemetry.optIn` to determine whether to send
 telemetry data or not. `telemetry.allowChangingOptInStatus` and `telemetry.optIn`
 cannot be `false` at the same time.
 
