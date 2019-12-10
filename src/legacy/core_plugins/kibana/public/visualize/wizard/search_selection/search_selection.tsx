@@ -22,8 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { VisType, getServices } from '../../kibana_services';
+import { getServices } from '../../kibana_services';
 import { SavedObjectFinderUi } from '../../../../../../../plugins/kibana_react/public';
+import { VisType } from '../../legacy_imports';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;

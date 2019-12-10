@@ -53,7 +53,6 @@ export const updateRules = async ({
   savedId,
   meta,
   filters,
-  filter,
   from,
   immutable,
   id,
@@ -88,7 +87,6 @@ export const updateRules = async ({
     {
       description,
       falsePositives,
-      filter,
       from,
       immutable,
       query,
@@ -101,7 +99,6 @@ export const updateRules = async ({
       maxSignals,
       riskScore,
       severity,
-      tags,
       threats,
       to,
       type,
@@ -114,11 +111,10 @@ export const updateRules = async ({
   } else if (!rule.enabled && enabled) {
     await alertsClient.enable({ id: rule.id });
   }
-
   return alertsClient.update({
     id: rule.id,
     data: {
-      tags: [],
+      tags: tags != null ? tags : [],
       name: calculateName({ updatedName: name, originalName: rule.name }),
       interval: calculateInterval(interval, rule.interval),
       actions,

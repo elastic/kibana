@@ -38,7 +38,7 @@ import {
   unhashUrl,
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
-import { Query, SavedQuery, IndexPatterns } from '../../../../../plugins/data/public';
+import { Query, SavedQuery, IndexPatternsContract } from '../../../../../plugins/data/public';
 
 import './dashboard_empty_screen_directive';
 
@@ -81,7 +81,7 @@ export interface DashboardAppControllerDependencies extends RenderDeps {
   $routeParams: any;
   getAppState: any;
   globalState: State;
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatternsContract;
   dashboardConfig: any;
   kbnUrl: KbnUrl;
   AppStateClass: TAppStateClass<DashboardAppState>;
