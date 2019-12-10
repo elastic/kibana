@@ -8,7 +8,7 @@ import { Server } from 'hapi';
 // @ts-ignore
 import { TaskManager, RunContext } from '../legacy/plugins/task_manager';
 import { runServiceMapTask } from './run_service_map_task';
-import { setupRequiredScripts } from './setup_required_scripts';
+import { setupIngestPipeline } from './setup_required_scripts';
 import {
   SERVICE_MAP_TASK_TYPE,
   SERVICE_MAP_TASK_ID
@@ -17,13 +17,20 @@ import {
 export async function initializeServiceMaps(server: Server) {
   const config = server.config();
 
-  setupRequiredScripts(server).catch(error => {
-    server.log(
-      'error',
-      'Unable to set up required scripts for APM Service Maps:'
-    );
-    server.log('error', error);
-  });
+  // TODO remove setupIngestPipeline when agents set destination.address (elastic/apm#115)
+  setupIngestPipeline(server)
+    .then(() => {
+      server.log(
+        ['info', 'plugins', 'apm'],
+        `Created ingest pipeline to extract destination.address from span names.`
+      );
+    })
+    .catch(error => {
+      server.log(
+        ['error', 'plugins', 'apm'],
+        `Unable to setup the ingest pipeline to extract destination.address from span names.\n${error.stack}`
+      );
+    });
 
   const taskManager = server.plugins.task_manager;
   if (taskManager) {
@@ -54,7 +61,7 @@ export async function initializeServiceMaps(server: Server) {
     return await taskManager.ensureScheduled({
       id: SERVICE_MAP_TASK_ID,
       taskType: SERVICE_MAP_TASK_TYPE,
-      interval: '10s',
+      interval: '30s',
       scope: ['apm'],
       params: {},
       state: {}

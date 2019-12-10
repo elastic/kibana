@@ -15,7 +15,7 @@ export async function getNextTransactionSamples({
   searchClient
 }: {
   apmIdxPattern: string;
-  startTimeInterval: string;
+  startTimeInterval: string | number;
   afterKey?: object;
   searchClient: SearchClient;
 }) {

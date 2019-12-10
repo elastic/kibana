@@ -5,6 +5,11 @@
  */
 
 import { SearchClient } from '../helpers/es_client';
+import {
+  mapServiceConnsScript,
+  combineServiceConnsScript,
+  reduceServiceConnsScript
+} from './setup_required_scripts';
 
 export async function getServiceConnections({
   apmIdxPattern,
@@ -43,9 +48,9 @@ export async function getServiceConnections({
             connections: {
               scripted_metric: {
                 init_script: 'state.spans = new HashMap();',
-                map_script: { id: 'map-service-conns' },
-                combine_script: { id: 'combine-service-conns' },
-                reduce_script: { id: 'reduce-service-conns' }
+                map_script: mapServiceConnsScript,
+                combine_script: combineServiceConnsScript,
+                reduce_script: reduceServiceConnsScript
               }
             }
           }

@@ -37,7 +37,7 @@ async function indexLatestConnections(
   config: ReturnType<Server['config']>,
   searchClient: SearchClient,
   bulkClient: (params: BulkIndexDocumentsParams) => Promise<any>,
-  startTimeInterval = 'now-1h',
+  startTimeInterval?: string | number,
   latestTransactionTime = 0,
   afterKey?: object
 ): Promise<{ latestTransactionTime: number }> {
@@ -48,33 +48,28 @@ async function indexLatestConnections(
   const serviceConnsDestinationPipeline = config.get<string>(
     'xpack.apm.serviceMapDestinationPipeline'
   );
-
   const {
     after_key: nextAfterKey,
     latestTransactionTime: latestSampleTransactionTime,
     traceIds
   } = await getNextTransactionSamples({
     apmIdxPattern,
-    startTimeInterval,
+    startTimeInterval: startTimeInterval || 'now-1h',
     afterKey,
     searchClient
   });
-
   if (traceIds.length === 0) {
     return { latestTransactionTime };
   }
-
   const nextLatestTransactionTime = Math.max(
     latestTransactionTime,
     latestSampleTransactionTime
   );
-
   const traceConnectionsBuckets = await getServiceConnections({
     apmIdxPattern,
     traceIds,
     searchClient
   });
-
   const bulkIndexConnectionDocs = traceConnectionsBuckets.flatMap(bucket => {
     const serviceConnections = bucket.connections.value as ServiceConnection[];
     const servicesInTrace = uniq(
@@ -92,7 +87,6 @@ async function indexLatestConnections(
       })
     );
   });
-
   await bulkClient({
     body: bulkIndexConnectionDocs
       .map(bulkObject => JSON.stringify(bulkObject))
@@ -111,7 +105,7 @@ async function indexLatestConnections(
 export async function runServiceMapTask(
   server: Server,
   config: ReturnType<Server['config']>,
-  startTimeInterval?: string
+  startTimeInterval?: string | number
 ) {
   const callCluster = server.plugins.elasticsearch.getCluster('data')
     .callWithInternalUser;

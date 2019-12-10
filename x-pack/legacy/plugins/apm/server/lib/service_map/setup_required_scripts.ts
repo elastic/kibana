@@ -7,144 +7,118 @@
 import { Legacy } from 'kibana';
 import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
 
-const MAP_SERVICE_CONNS_SCRIPT_ID = 'map-service-conns';
-const REDUCE_SERVICE_CONNS_SCRIPT_ID = 'reduce-service-conns';
-const COMBINE_SERVICE_CONNS_SCRIPT_ID = 'combine-service-conns';
-const EXTRACT_DESTINATION_INGEST_PIPELINE_ID = 'extract_destination';
+const EXTRACT_DESTINATION_INGEST_PIPELINE_ID = 'apm_extract_destination';
 const APM_INGEST_PIPELINE_ID = 'apm';
 
-async function putScriptMapServiceConns(callCluster: CallCluster) {
-  return await callCluster('putScript', {
-    id: MAP_SERVICE_CONNS_SCRIPT_ID,
-    body: {
-      script: {
-        lang: 'painless',
-        source: `
-          def s = new HashMap();
+export const mapServiceConnsScript = {
+  lang: 'painless',
+  source: `
+    def s = new HashMap();
 
-          if (!doc['span.id'].empty) {
-            s.id = doc['span.id'].value
+    if (!doc['span.id'].empty) {
+      s.id = doc['span.id'].value
+    } else {
+      s.id = doc['transaction.id'].value;
+      s.transaction = true;
+    }
+    if (!doc['parent.id'].empty) {
+      s.parent = doc['parent.id'].value;
+    }
+    if (!doc['service.environment'].empty) {
+      s.environment = doc['service.environment'].value;
+    }
+
+    if (!doc['destination.address'].empty) {
+      s.destination = doc['destination.address'].value;
+    }
+
+    if (!doc['_index'].empty) { // TODO is this ever empty?
+      s._index = doc['_index'].value;
+    }
+
+    if (!doc['span.type'].empty) {
+      s.span_type = doc['span.type'].value;
+    }
+
+    if (!doc['span.subtype'].empty) {
+      s.span_subtype = doc['span.subtype'].value;
+    }
+
+    s.timestamp = doc['@timestamp'].value;
+    s.service_name = doc['service.name'].value;
+    if(!state.spans.containsKey(s.parent)) {
+      state.spans.put(s.parent, new ArrayList())
+    }
+
+    if (s.parent != s.id) {
+      state.spans[s.parent].add(s)
+    }
+  `
+};
+
+export const reduceServiceConnsScript = {
+  lang: 'painless',
+  source: `
+    void extractChildren(def caller, def spans, def upstream, def conns, def count) {
+      // TODO: simplify this
+      if (spans.containsKey(caller.id)) {
+        for (s in spans[caller.id]) {
+          if (caller.span_type == 'external') {
+            upstream.add(caller.service_name + "/" + caller.environment);
+            def conn = new HashMap();
+            conn.caller = caller;
+            conn.callee = s;
+            conn.upstream = new ArrayList(upstream);
+            conns.add(conn);
+            extractChildren(s, spans, upstream, conns, count);
+            upstream.remove(upstream.size() - 1);
           } else {
-            s.id = doc['transaction.id'].value;
-            s.transaction = true;
+            extractChildren(s, spans, upstream, conns, count);
           }
-          if (!doc['parent.id'].empty) {
-            s.parent = doc['parent.id'].value;
-          }
-          if (!doc['service.environment'].empty) {
-            s.environment = doc['service.environment'].value;
-          }
-
-          if (!doc['destination.address'].empty) {
-            s.destination = doc['destination.address'].value;
-          }
-
-          if (!doc['_index'].empty) { // TODO is this ever empty?
-            s._index = doc['_index'].value;
-          }
-
-          if (!doc['span.type'].empty) {
-            s.span_type = doc['span.type'].value;
-          }
-
-          if (!doc['span.subtype'].empty) {
-            s.span_subtype = doc['span.subtype'].value;
-          }
-
-          s.timestamp = doc['@timestamp'].value;
-          s.service_name = doc['service.name'].value;
-          if(!state.spans.containsKey(s.parent)) {
-            state.spans.put(s.parent, new ArrayList())
-          }
-
-          if (s.parent != s.id) {
-            state.spans[s.parent].add(s)
-          }
-        `
+        }
+      } else {
+        // no connection found
+        def conn = new HashMap();
+        conn.caller = caller;
+        conn.upstream = new ArrayList(upstream);
+        conn.upstream.add(caller.service_name + "/" + caller.environment);
+        conns.add(conn);
       }
     }
-  });
-}
 
-async function putScriptReduceServiceConns(callCluster: CallCluster) {
-  return await callCluster('putScript', {
-    id: REDUCE_SERVICE_CONNS_SCRIPT_ID,
-    body: {
-      script: {
-        lang: 'painless',
-        source: `
-          void extractChildren(def caller, def spans, def upstream, def conns, def count) {
-            // TODO: simplify this
-            if (spans.containsKey(caller.id)) {
-              for(s in spans[caller.id]) {
-                  if (caller.span_type=='external') {
-                    upstream.add(caller.service_name+"/"+caller.environment);
+    def conns = new HashSet();
+    def spans = new HashMap();
 
-                    def conn = new HashMap();
-                    conn.caller = caller;
-                    conn.callee = s;
-                    conn.upstream = new ArrayList(upstream);
-                    conns.add(conn);
-
-                    extractChildren(s, spans, upstream, conns, count);
-                    upstream.remove(upstream.size()-1);
-                  } else {
-                    extractChildren(s, spans, upstream, conns, count);
-                  }
-              }
-            } else {
-              // no connection found
-              def conn = new HashMap();
-              conn.caller = caller;
-              conn.upstream = new ArrayList(upstream);
-              conn.upstream.add(caller.service_name+"/"+caller.environment);
-              conns.add(conn);
-            }
+    // merge results from shards
+    for (state in states) {
+      for (s in state.entrySet()) {
+        def v = s.getValue();
+        def k = s.getKey();
+        if (!spans.containsKey(k)) {
+          spans[k] = v;
+        } else {
+          for (p in v) {
+            spans[k].add(p);
           }
-          def conns = new HashSet();
-          def spans = new HashMap();
-
-          // merge results from shards
-          for(state in states) {
-            for(s in state.entrySet()) {
-              def v = s.getValue();
-              def k = s.getKey();
-              if(!spans.containsKey(k)) {
-                spans[k] = v;
-              } else {
-                for (p in v) {
-                  spans[k].add(p);
-                }
-              }
-            }
-          }
-
-          if (spans.containsKey(null) && spans[null].size() > 0) {
-            def node = spans[null][0];
-            def upstream = new ArrayList();
-
-            extractChildren(node, spans, upstream, conns, 0);
-
-            return new ArrayList(conns)
-          }
-          return [];
-        `
+        }
       }
     }
-  });
-}
 
-async function putScriptCombineServiceConns(callCluster: CallCluster) {
-  return await callCluster('putScript', {
-    id: COMBINE_SERVICE_CONNS_SCRIPT_ID,
-    body: {
-      script: {
-        lang: 'painless',
-        source: `return state.spans`
-      }
+    if (spans.containsKey(null) && spans[null].size() > 0) {
+      def node = spans[null][0];
+      def upstream = new ArrayList();
+      extractChildren(node, spans, upstream, conns, 0);
+      return new ArrayList(conns)
     }
-  });
-}
+
+    return [];
+  `
+};
+
+export const combineServiceConnsScript = {
+  lang: 'painless',
+  source: `return state.spans`
+};
 
 async function putIngestPipelineExtractDestination(callCluster: CallCluster) {
   return await callCluster('ingest.putPipeline', {
@@ -280,19 +254,10 @@ async function applyExtractDestinationToApm(callCluster: CallCluster) {
   ]);
 }
 
-export async function setupRequiredScripts(server: Legacy.Server) {
+// TODO remove this when agents set destination.address (elastic/apm#115)
+export async function setupIngestPipeline(server: Legacy.Server) {
   const callCluster = server.plugins.elasticsearch.getCluster('admin')
     .callWithInternalUser;
-
-  const putRequiredScriptsResults = await Promise.all([
-    putScriptMapServiceConns(callCluster),
-    putScriptReduceServiceConns(callCluster),
-    putScriptCombineServiceConns(callCluster),
-    putIngestPipelineExtractDestination(callCluster) // TODO remove this when agents set destination.address (elastic/apm#115)
-  ]);
-
-  return [
-    ...putRequiredScriptsResults,
-    await applyExtractDestinationToApm(callCluster) // TODO remove this when agents set destination.address (elastic/apm#115)
-  ];
+  await putIngestPipelineExtractDestination(callCluster);
+  return await applyExtractDestinationToApm(callCluster);
 }
