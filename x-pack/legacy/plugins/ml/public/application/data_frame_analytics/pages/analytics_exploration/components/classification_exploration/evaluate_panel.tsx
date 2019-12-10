@@ -165,12 +165,14 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     setCellProps: any;
   }) => {
     const cellValue = columnsData[rowIndex][columnId];
-    setCellProps({
-      style: {
-        backgroundColor: `rgba(0, 179, 164, ${cellValue})`,
-      },
-    });
-
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useEffect(() => {
+      setCellProps({
+        style: {
+          backgroundColor: `rgba(0, 179, 164, ${cellValue})`,
+        },
+      });
+    }, [rowIndex, columnId, setCellProps]);
     return <span>{typeof cellValue === 'number' ? `${cellValue * 100}%` : cellValue}</span>;
   };
 
@@ -246,7 +248,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                   </EuiFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {columns.length > 0 && (
+                  {columns.length > 0 && columnsData.length > 0 && (
                     <Fragment>
                       <EuiFlexGroup direction="column" justifyContent="center" gutterSize="s">
                         <EuiFlexItem grow={false}>
