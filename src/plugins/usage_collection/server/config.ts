@@ -23,7 +23,7 @@ import { PluginConfigDescriptor } from 'kibana/server';
 export const configSchema = schema.object({
   uiMetric: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    debug: schema.boolean({ defaultValue: true }),
+    debug: schema.boolean({ defaultValue: schema.contextRef('dev') }),
   }),
   maximumWaitTimeForAllCollectorsInS: schema.number({ defaultValue: 60 }),
 });

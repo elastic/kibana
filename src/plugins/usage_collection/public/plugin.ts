@@ -51,14 +51,14 @@ export function isUnauthenticated(http: HttpServiceBase) {
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
   private trackUserAgent: boolean = true;
   private reporter?: Reporter;
-  private config: ConfigType;
+  private config: PublicConfigType;
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfigType>();
   }
 
   public setup({ http }: CoreSetup): UsageCollectionSetup {
     const localStorage = new Storage(window.localStorage);
-    const debug = this.config.uiMetric.enabled;
+    const debug = this.config.uiMetric.debug;
 
     this.reporter = createReporter({
       localStorage,
