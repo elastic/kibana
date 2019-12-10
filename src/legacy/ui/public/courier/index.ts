@@ -27,7 +27,7 @@
 import { start as dataStart } from '../../../core_plugins/data/public/legacy';
 
 // runtime contracts
-export const { SearchSource } = dataStart.search;
+export const { defaultSearchStrategy, SearchSource } = dataStart.search;
 
 // types
 export {
