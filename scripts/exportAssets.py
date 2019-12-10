@@ -1,4 +1,9 @@
 #!/usr/bin/python
+
+# Copyright 2019 LogRhythm, Inc
+# Licensed under the LogRhythm Global End User License Agreement,
+# which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+
 import os
 import requests
 import sys
@@ -42,7 +47,7 @@ def asset_object_received(response_json):
 
 def get_search_title_json(es_type, es_title):
     es_field = es_type + '.title'
-      
+
     query = {
         'query': {
             'match_phrase': {
@@ -51,7 +56,7 @@ def get_search_title_json(es_type, es_title):
         }
     }
     return query
-   
+
 def get_search_id_json(es_type, es_id):
     query = {
         'query': {
@@ -61,11 +66,11 @@ def get_search_id_json(es_type, es_id):
         }
     }
     return query
-   
+
 def get_asset(es_query):
     try:
         url = 'http://localhost:9200/.kibana/_search'
-      
+
         session = requests.Session()
         # Retry on: Request Timeout (408), Internal Server Error (500), Bad Gateway (502), Service Unavailable (503),
         # and Gateway timeout (504)
@@ -167,12 +172,12 @@ def main(argv):
         help='Export a single search')
     argParser.add_argument('-o', '--outputdir', dest='directory', metavar='DIR_NAME', \
         help='Specify an output directory for the exported file')
-   
+
     args = argParser.parse_args()
 
     santize_input_args(arg_parser=argParser, args=args)
-   
-    output_dir = os.path.dirname(os.path.realpath(__file__)) 
+
+    output_dir = os.path.dirname(os.path.realpath(__file__))
     file_paths_and_contents = {}
 
     asset_type = ''
