@@ -6,7 +6,7 @@
 import { act } from 'react-dom/test-utils';
 import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import axios from 'axios';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, wrapBodyResponse } from './helpers';
 import { WatchEditTestBed } from './helpers/watch_edit.helpers';
 import { WATCH } from './helpers/constants';
 import defaultWatchJson from '../../public/np_ready/application/models/watch/default_watch.json';
@@ -30,7 +30,7 @@ jest.mock('../../public/np_ready/application/lib/api', () => ({
 
 const { setup } = pageHelpers.watchEdit;
 
-describe.skip('<WatchEdit />', () => {
+describe('<WatchEdit />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchEditTestBed;
 
@@ -91,7 +91,7 @@ describe.skip('<WatchEdit />', () => {
           'There are {{ctx.payload.hits.total}} documents in your index. Threshold is 10.';
 
         expect(latestRequest.requestBody).toEqual(
-          JSON.stringify({
+          wrapBodyResponse({
             id: watch.id,
             name: EDITED_WATCH_NAME,
             type: watch.type,
@@ -183,7 +183,7 @@ describe.skip('<WatchEdit />', () => {
         } = watch;
 
         expect(latestRequest.requestBody).toEqual(
-          JSON.stringify({
+          wrapBodyResponse({
             id,
             name: EDITED_WATCH_NAME,
             type,
