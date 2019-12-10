@@ -21,7 +21,6 @@ export interface UMMonitorsAdapter {
     monitorId: string,
     dateStart: string,
     dateEnd: string,
-    filters?: string,
-    statusFilter?: string
+    filters?: string
   ): Promise<any>;
 }

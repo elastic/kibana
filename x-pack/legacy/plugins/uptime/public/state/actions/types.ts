@@ -9,5 +9,4 @@ export interface MonitorDetailsActionPayload {
   dateStart: string;
   dateEnd: string;
   filters?: string;
-  statusFilter?: string;
 }

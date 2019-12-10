@@ -16,13 +16,7 @@ import { getBasePath } from '../selectors';
 import { MonitorDetailsActionPayload } from '../actions/types';
 
 function* monitorDetailsEffect(action: Action<any>) {
-  const {
-    monitorId,
-    dateStart,
-    dateEnd,
-    statusFilter,
-    filters,
-  }: MonitorDetailsActionPayload = action.payload;
+  const { monitorId, dateStart, dateEnd, filters }: MonitorDetailsActionPayload = action.payload;
   try {
     const basePath = yield select(getBasePath);
     const response = yield call(fetchMonitorDetails, {
@@ -30,7 +24,6 @@ function* monitorDetailsEffect(action: Action<any>) {
       basePath,
       dateStart,
       dateEnd,
-      statusFilter,
       filters,
     });
     yield put({ type: FETCH_MONITOR_DETAILS_SUCCESS, payload: response });

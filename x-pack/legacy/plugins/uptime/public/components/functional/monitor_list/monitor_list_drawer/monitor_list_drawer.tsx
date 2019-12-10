@@ -55,22 +55,16 @@ export function MonitorListDrawerComponent({
   }
   const { monitor_id: monitorId } = summary;
   const [getUrlParams] = useUrlParams();
-  const {
-    dateRangeStart: dateStart,
-    dateRangeEnd: dateEnd,
-    statusFilter,
-    filters,
-  } = getUrlParams();
+  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd, filters } = getUrlParams();
 
   useEffect(() => {
     loadMonitorDetails({
       dateStart,
       dateEnd,
-      statusFilter,
       filters,
       monitorId,
     });
-  }, [dateStart, dateEnd, statusFilter, filters]);
+  }, [dateStart, dateEnd, filters]);
 
   const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
 

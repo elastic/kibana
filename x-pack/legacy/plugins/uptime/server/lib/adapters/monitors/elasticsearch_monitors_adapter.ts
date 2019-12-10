@@ -278,9 +278,17 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     monitorId: string,
     dateStart: string,
     dateEnd: string,
-    filters?: string,
-    statusFilter?: string
+    filters?: string
   ): Promise<MonitorDetails> {
+    // Doing filtering by location, because only that matters here
+    // All of the other filters are already automatically applied by MonitorId
+
+    const queryFilters = [
+      { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
+      { term: { 'monitor.id': monitorId } },
+      ...(filters ? JSON.parse(filters) : []),
+    ];
+
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -295,10 +303,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                 },
               },
             ],
-            filter: [
-              { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
-              { term: { 'monitor.id': monitorId } },
-            ],
+            filter: queryFilters,
           },
         },
         sort: [

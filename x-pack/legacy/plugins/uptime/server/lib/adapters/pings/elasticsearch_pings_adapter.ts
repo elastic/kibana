@@ -198,14 +198,14 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     statusFilter?: string | null
   ): Promise<HistogramResult> {
     const boolFilters = parseFilterQuery(filters);
-    const additionaFilters = [];
+    const additionalFilters = [];
     if (monitorId) {
-      additionaFilters.push({ match: { 'monitor.id': monitorId } });
+      additionalFilters.push({ match: { 'monitor.id': monitorId } });
     }
     if (boolFilters) {
-      additionaFilters.push(boolFilters);
+      additionalFilters.push(boolFilters);
     }
-    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionaFilters);
+    const filter = getFilterClause(dateRangeStart, dateRangeEnd, additionalFilters);
     const interval = getHistogramInterval(dateRangeStart, dateRangeEnd);
     const intervalFormatted = getHistogramIntervalFormatted(dateRangeStart, dateRangeEnd);
 

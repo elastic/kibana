@@ -22,7 +22,6 @@ export const fetchMonitorDetails = async ({
   dateStart,
   dateEnd,
   filters,
-  statusFilter,
 }: MonitorQueryParams): Promise<MonitorDetails> => {
   const url = getApiPath(`/api/uptime/monitor/details`, basePath);
   const params = {
@@ -30,7 +29,6 @@ export const fetchMonitorDetails = async ({
     dateStart,
     dateEnd,
     ...(filters && { filters }),
-    ...(statusFilter && { statusFilter }),
   };
   const urlParams = new URLSearchParams(params).toString();
   const response = await fetch(`${url}?${urlParams}`);
