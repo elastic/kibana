@@ -109,7 +109,7 @@ transport.tcp.port: 9300 - 9400
 elasticsearch.hosts: ["http://localhost:9200"]
 --------
 
-=== Load Balancing Across Multiple Kibana instances
+=== Load Balancing Across Multiple Kibana Instances
 Multiple Kibana installations can be served behind a load balancer with configuration changes.  Descriptions can be referenced on the {kibana-ref}/settings.html[settings page].
 
 Settings unique across each Kibana instances:
