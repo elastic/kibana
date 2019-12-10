@@ -199,8 +199,12 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async selectValue(selector: string, value: string): Promise<void> {
-      await find.selectValue(`[data-test-subj="${selector}"]`, value);
+    public async selectValue(
+      selector: string,
+      value: string,
+      selectWithKeyboard: boolean = true
+    ): Promise<void> {
+      await find.selectValue(`[data-test-subj="${selector}"]`, value, selectWithKeyboard);
     }
 
     public async isEnabled(selector: string): Promise<boolean> {

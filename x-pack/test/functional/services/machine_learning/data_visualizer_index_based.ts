@@ -99,9 +99,11 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       filterFieldType: string,
       expectedCardCount: number
     ) {
-      await testSubjects.selectValue('mlDataVisualizerFieldTypesSelect', filterFieldType);
-      await this.assertFieldsPanelTypeInputValue(filterFieldType);
-      await this.assertFieldsPanelCardCount(panelFieldTypes, expectedCardCount);
+      await retry.tryForTime(10 * 1000, async () => {
+        await testSubjects.selectValue('mlDataVisualizerFieldTypesSelect', filterFieldType, false);
+        await this.assertFieldsPanelTypeInputValue(filterFieldType);
+        await this.assertFieldsPanelCardCount(panelFieldTypes, expectedCardCount);
+      });
     },
   };
 }
