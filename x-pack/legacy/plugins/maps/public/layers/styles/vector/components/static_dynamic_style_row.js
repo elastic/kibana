@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component, Fragment } from 'react';
 import { VectorStyle } from '../vector_style';
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FieldMetaOptionsPopover } from './field_meta_options_popover';
+import { getVectorStyleLabel } from './get_vector_style_label';
 
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiFormRow, EuiButtonToggle } from '@elastic/eui';
 
-export class StaticDynamicStyleRow extends React.Component {
+export class StaticDynamicStyleRow extends Component {
   // Store previous options locally so when type is toggled,
   // previous style options can be used.
   prevStaticStyleOptions = this.props.defaultStaticStyleOptions;
@@ -22,14 +23,22 @@ export class StaticDynamicStyleRow extends React.Component {
   }
 
   _isDynamic() {
-    if (!this.props.styleDescriptor) {
-      return false;
-    }
-    return this.props.styleDescriptor.type === VectorStyle.STYLE_TYPE.DYNAMIC;
+    return this.props.styleProperty.isDynamic();
   }
 
   _getStyleOptions() {
-    return _.get(this.props, 'styleDescriptor.options');
+    return this.props.styleProperty.getOptions();
+  }
+
+  _onFieldMetaOptionsChange = fieldMetaOptions => {
+    const styleDescriptor = {
+      type: VectorStyle.STYLE_TYPE.DYNAMIC,
+      options: {
+        ...this._getStyleOptions(),
+        fieldMetaOptions
+      }
+    };
+    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
   }
 
   _onStaticStyleChange = options => {
@@ -37,7 +46,7 @@ export class StaticDynamicStyleRow extends React.Component {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options,
     };
-    this.props.handlePropertyChange(this.props.property, styleDescriptor);
+    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
   };
 
   _onDynamicStyleChange = options => {
@@ -45,7 +54,7 @@ export class StaticDynamicStyleRow extends React.Component {
       type: VectorStyle.STYLE_TYPE.DYNAMIC,
       options,
     };
-    this.props.handlePropertyChange(this.props.property, styleDescriptor);
+    this.props.handlePropertyChange(this.props.styleProperty.getStyleName(), styleDescriptor);
   };
 
   _onTypeToggle = () => {
@@ -67,11 +76,17 @@ export class StaticDynamicStyleRow extends React.Component {
     if (this._isDynamic()) {
       const DynamicSelector = this.props.DynamicSelector;
       return (
-        <DynamicSelector
-          ordinalFields={this.props.ordinalFields}
-          onChange={this._onDynamicStyleChange}
-          styleOptions={this._getStyleOptions()}
-        />
+        <Fragment>
+          <DynamicSelector
+            ordinalFields={this.props.ordinalFields}
+            onChange={this._onDynamicStyleChange}
+            styleOptions={this._getStyleOptions()}
+          />
+          <FieldMetaOptionsPopover
+            styleProperty={this.props.styleProperty}
+            onChange={this._onFieldMetaOptionsChange}
+          />
+        </Fragment>
       );
     }
 
@@ -100,7 +115,10 @@ export class StaticDynamicStyleRow extends React.Component {
         <EuiFlexItem
           className={isDynamic ? 'mapStaticDynamicSylingOption__dynamicSizeHack' : undefined}
         >
-          <EuiFormRow label={this.props.label && this.props.label} display="rowCompressed">
+          <EuiFormRow
+            label={getVectorStyleLabel(this.props.styleProperty.getStyleName())}
+            display="rowCompressed"
+          >
             {this._renderStyleSelector()}
           </EuiFormRow>
         </EuiFlexItem>
