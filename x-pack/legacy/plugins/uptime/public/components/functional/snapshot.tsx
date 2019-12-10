@@ -70,7 +70,6 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
       height={SNAPSHOT_CHART_HEIGHT}
       width={SNAPSHOT_CHART_WIDTH}
     />
-    <EuiSpacer size="xs" />
   </ChartWrapper>
 );
 
