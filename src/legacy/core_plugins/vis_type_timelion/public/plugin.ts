@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import {
   CoreSetup,
   CoreStart,
@@ -27,15 +28,15 @@ import {
 import { Plugin as ExpressionsPlugin } from 'src/plugins/expressions/public';
 import { DataPublicPluginSetup, TimefilterContract } from 'src/plugins/data/public';
 import { VisualizationsSetup } from '../../visualizations/public/np_ready/public';
-import { getTimelionVisualizationConfig } from './timelion_vis_fn';
-import { getTimelionVisualization } from './vis';
 import { getTimeChart } from './panels/timechart/timechart';
 import { Panel } from './panels/panel';
-import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 import { setServices } from './kibana_services';
 
+import { getTimelionVisualizationConfig } from './timelion_vis_fn';
+import { getTimelionVisDefinition } from './timelion_vis_type';
+
 /** @internal */
-export interface TimelionVisualizationDependencies extends LegacyDependenciesPluginSetup {
+export interface TimelionVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timelionPanels: Map<string, Panel>;
@@ -47,13 +48,10 @@ export interface TimelionPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
-
-  // Temporary solution
-  __LEGACY: LegacyDependenciesPlugin;
 }
 
 /** @internal */
-export class TimelionPlugin implements Plugin<Promise<void>, void> {
+export class TimelionVisPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -62,7 +60,7 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { __LEGACY, expressions, visualizations, data }: TimelionPluginSetupDependencies
+    { expressions, visualizations, data }: TimelionPluginSetupDependencies
   ) {
     const timelionPanels: Map<string, Panel> = new Map();
 
@@ -72,13 +70,12 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
       http: core.http,
       timelionPanels,
       timefilter: data.query.timefilter.timefilter,
-      ...(await __LEGACY.setup(core, timelionPanels)),
     };
 
     this.registerPanels(dependencies);
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    // visualizations.types.createBaseVisualization(getTimelionVisualization(dependencies));
+    visualizations.types.createBaseVisualization(getTimelionVisDefinition(dependencies));
   }
 
   private registerPanels(dependencies: TimelionVisualizationDependencies) {
@@ -94,6 +91,4 @@ export class TimelionPlugin implements Plugin<Promise<void>, void> {
       core.chrome.navLinks.update('timelion', { hidden: true });
     }
   }
-
-  public stop(): void {}
 }
