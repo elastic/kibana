@@ -12,6 +12,55 @@ const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
 
+const testDataList = [
+  {
+    testTitleSuffix: 'with 1 field, 1 agg, no split',
+    requestBody: {
+      aggTypes: ['avg'],
+      duration: { start: 1560297859000, end: 1562975136000 },
+      fields: ['taxless_total_price'],
+      index: 'ecommerce',
+      query: { bool: { must: [{ match_all: {} }] } },
+      timeField: 'order_date',
+    },
+    expected: {
+      responseCode: 200,
+      responseBody: { name: '15m', ms: 900000 },
+    },
+  },
+  {
+    testTitleSuffix: 'with 2 fields, 2 aggs, no split',
+    requestBody: {
+      aggTypes: ['avg', 'sum'],
+      duration: { start: 1560297859000, end: 1562975136000 },
+      fields: ['products.base_price', 'products.base_unit_price'],
+      index: 'ecommerce',
+      query: { bool: { must: [{ match_all: {} }] } },
+      timeField: 'order_date',
+    },
+    expected: {
+      responseCode: 200,
+      responseBody: { name: '30m', ms: 1800000 },
+    },
+  },
+  {
+    testTitleSuffix: 'with 1 field, 1 agg, 1 split with cardinality 46',
+    requestBody: {
+      aggTypes: ['avg'],
+      duration: { start: 1560297859000, end: 1562975136000 },
+      fields: ['taxless_total_price'],
+      index: 'ecommerce',
+      query: { bool: { must: [{ match_all: {} }] } },
+      splitField: 'customer_first_name.keyword',
+      timeField: 'order_date',
+    },
+    expected: {
+      responseCode: 200,
+      responseBody: { name: '3h', ms: 10800000 },
+    },
+  },
+];
+
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -26,36 +75,16 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('ml/ecommerce');
     });
 
-    it('estimates the bucket span', async () => {
-      const { body } = await supertest
-        .post('/api/ml/validate/estimate_bucket_span')
-        .set(COMMON_HEADERS)
-        .send({
-          aggTypes: ['avg'],
-          duration: {
-            start: 1560297859000,
-            end: 1562975136000,
-          },
-          fields: ['taxless_total_price'],
-          index: 'ecommerce',
-          query: {
-            bool: {
-              must: [
-                {
-                  match_all: {},
-                },
-              ],
-            },
-          },
-          splitField: 'customer_first_name.keyword',
-          timeField: 'order_date',
-        })
-        .expect(200);
+    for (const testData of testDataList) {
+      it(`estimates the bucket span ${testData.testTitleSuffix}`, async () => {
+        const { body } = await supertest
+          .post('/api/ml/validate/estimate_bucket_span')
+          .set(COMMON_HEADERS)
+          .send(testData.requestBody)
+          .expect(testData.expected.responseCode);
 
-      expect(body).to.eql({
-        name: '3h',
-        ms: 10800000,
+        expect(body).to.eql(testData.expected.responseBody);
       });
-    });
+    }
   });
 };
