@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import Url from 'url';
+import { merge } from 'lodash';
+import { format } from 'url';
 
-import { merge } from '../../utils';
 import { IBasePath, HttpInterceptor, HttpHandler, HttpFetchOptions, IHttpResponse } from './types';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
@@ -99,7 +99,7 @@ export class FetchService {
       },
       options || {}
     );
-    const url = Url.format({
+    const url = format({
       pathname: shouldPrependBasePath ? this.params.basePath.prepend(path) : path,
       query,
     });

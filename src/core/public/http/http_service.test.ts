@@ -101,30 +101,30 @@ describe('http requests', () => {
 
   it('should return response', async () => {
     const { http } = setup();
-
     fetchMock.get('*', { foo: 'bar' });
-
     const json = await http.fetch('/my/path');
-
     expect(json).toEqual({ foo: 'bar' });
   });
 
   it('should prepend url with basepath by default', async () => {
     const { http } = setup();
-
     fetchMock.get('*', {});
     await http.fetch('/my/path');
-
     expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
   });
 
   it('should not prepend url with basepath when disabled', async () => {
     const { http } = setup();
-
     fetchMock.get('*', {});
     await http.fetch('my/path', { prependBasePath: false });
-
     expect(fetchMock.lastUrl()).toBe('/my/path');
+  });
+
+  it('should not include undefined query params', async () => {
+    const { http } = setup();
+    fetchMock.get('*', {});
+    await http.fetch('/my/path', { query: { a: undefined } });
+    expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
   });
 
   it('should make request with defaults', async () => {
