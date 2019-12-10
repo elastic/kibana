@@ -5,8 +5,9 @@
  */
 
 import { DocLinksStart } from '../../../../../../../src/core/public';
-import { DataType } from '../components/mappings_editor/types';
+import { DataType, ConfigType, DataTypeDefinition } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
+import { schema as CONFIG_DEFINITION } from '../components/mappings_editor/components/configuration_form/form.schema';
 
 class DocumentationService {
   private esDocsBase: string = '';
@@ -36,8 +37,15 @@ class DocumentationService {
     return `${this.kibanaDocsBase}/managing-indices.html`;
   }
 
-  public getTypeDocLink = (type: DataType, uri = 'main'): string | undefined => {
-    const typeDefinition = TYPE_DEFINITION[type];
+  public getTypeDocLink = (type: DataType | ConfigType, uri = 'main'): string | undefined => {
+    const TYPES = { ...CONFIG_DEFINITION, ...TYPE_DEFINITION } as {
+      [key: string]: any;
+      documentation?: {
+        [key: string]: string;
+      };
+    };
+    const typeDefinition = TYPES[type];
+
     if (!typeDefinition || !typeDefinition.documentation || !typeDefinition.documentation[uri]) {
       return undefined;
     }

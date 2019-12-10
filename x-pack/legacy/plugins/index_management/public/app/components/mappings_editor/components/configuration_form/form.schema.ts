@@ -16,10 +16,13 @@ export const schema: FormSchema<MappingsConfiguration> = {
       defaultMessage: 'Dynamic field',
     }),
     helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dynamicFieldDescription', {
-      defaultMessage: 'Allow new fields discovery in document.',
+      defaultMessage: 'Allow new fields discovery in a document.',
     }),
     type: FIELD_TYPES.SELECT,
     defaultValue: true,
+    documentation: {
+      main: '/dynamic-field-mapping.html',
+    },
   },
   date_detection: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldLabel', {
@@ -36,13 +39,13 @@ export const schema: FormSchema<MappingsConfiguration> = {
   },
   numeric_detection: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.numericFieldLabel', {
-      defaultMessage: 'Numeric field',
+      defaultMessage: 'Numeric detection',
     }),
     helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.numericFieldDescription', {
       defaultMessage: 'Check if the string field is a numeric value.',
     }),
     type: FIELD_TYPES.TOGGLE,
-    defaultValue: true,
+    defaultValue: false,
   },
   dynamic_date_formats: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldLabel', {
@@ -51,12 +54,11 @@ export const schema: FormSchema<MappingsConfiguration> = {
     helpText: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldDescription',
       {
-        defaultMessage:
-          'The dynamic_date_formats can be customised to support your own date formats.',
+        defaultMessage: 'This field can be customized to support your own date formats.',
       }
     ),
     type: FIELD_TYPES.COMBO_BOX,
-    defaultValue: [],
+    defaultValue: ['strict_date_optional_time', 'yyyy/MM/dd HH:mm:ss Z||yyyy/MM/dd Z'],
     validations: [
       {
         validator: containsCharsField({
