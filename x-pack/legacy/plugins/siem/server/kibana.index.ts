@@ -18,6 +18,7 @@ import { setSignalsStatusRoute } from './lib/detection_engine/routes/signals/ope
 import { ServerFacade } from './types';
 import { deleteIndexRoute } from './lib/detection_engine/routes/index/delete_index_route';
 import { isAlertExecutor } from './lib/detection_engine/signals/types';
+import { createReadPrivilegesRoute } from './lib/detection_engine/routes/privileges/read_privileges_route';
 
 const APP_ID = 'siem';
 
@@ -50,4 +51,7 @@ export const initServerWithKibana = (context: PluginInitializerContext, __legacy
   createIndexRoute(__legacy);
   readIndexRoute(__legacy);
   deleteIndexRoute(__legacy);
+
+  // Privileges API to get the generic user privileges
+  createReadPrivilegesRoute(__legacy);
 };
