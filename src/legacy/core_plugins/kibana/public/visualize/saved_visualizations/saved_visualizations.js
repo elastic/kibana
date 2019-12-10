@@ -35,7 +35,7 @@ savedObjectManagementRegistry.register({
   title: 'visualizations',
 });
 
-app.service('savedVisualizations', function (SavedVis, Private, kbnUrl) {
+app.service('savedVisualizations', function (SavedVis, Private) {
   const visTypes = visualizations.types;
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const saveVisualizationLoader = new SavedObjectLoader(
@@ -73,7 +73,7 @@ app.service('savedVisualizations', function (SavedVis, Private, kbnUrl) {
   };
 
   saveVisualizationLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
+    return `#/visualize/edit/${encodeURIComponent(id)}`;
   };
 
   // This behaves similarly to find, except it returns visualizations that are
