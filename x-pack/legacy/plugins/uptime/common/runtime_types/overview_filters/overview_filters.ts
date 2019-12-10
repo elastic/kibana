@@ -7,12 +7,10 @@
 import * as t from 'io-ts';
 
 export const OverviewFiltersType = t.type({
-  ids: t.array(t.string),
   locations: t.array(t.string),
   ports: t.array(t.number),
   schemes: t.array(t.string),
   tags: t.array(t.string),
-  urls: t.array(t.string),
 });
 
 export type OverviewFilters = t.TypeOf<typeof OverviewFiltersType>;
