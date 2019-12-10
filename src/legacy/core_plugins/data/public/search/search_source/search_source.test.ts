@@ -26,7 +26,7 @@ jest.mock('../fetch', () => ({
   fetchSoon: jest.fn().mockResolvedValue({}),
 }));
 
-jest.mock('../../chrome', () => ({
+jest.mock('ui/chrome', () => ({
   dangerouslyGetActiveInjector: () => ({
     get: jest.fn(),
   }),
