@@ -26,6 +26,7 @@ interface BuildRuleParams {
   createdBy: string;
   updatedBy: string;
   interval: string;
+  tags: string[];
 }
 
 export const buildRule = ({
@@ -36,6 +37,7 @@ export const buildRule = ({
   createdBy,
   updatedBy,
   interval,
+  tags,
 }: BuildRuleParams): Partial<OutputRuleAlertRest> => {
   return pickBy<OutputRuleAlertRest>((value: unknown) => value != null, {
     id,
@@ -47,7 +49,6 @@ export const buildRule = ({
     risk_score: ruleParams.riskScore,
     output_index: ruleParams.outputIndex,
     description: ruleParams.description,
-    filter: ruleParams.filter,
     from: ruleParams.from,
     immutable: ruleParams.immutable,
     index: ruleParams.index,
@@ -57,7 +58,7 @@ export const buildRule = ({
     query: ruleParams.query,
     references: ruleParams.references,
     severity: ruleParams.severity,
-    tags: ruleParams.tags,
+    tags,
     type: ruleParams.type,
     to: ruleParams.to,
     enabled,
@@ -95,6 +96,7 @@ interface BuildBulkBodyParams {
   updatedBy: string;
   interval: string;
   enabled: boolean;
+  tags: string[];
 }
 
 export const buildEventTypeSignal = (doc: SignalSourceHit): object => {
@@ -115,6 +117,7 @@ export const buildBulkBody = ({
   updatedBy,
   interval,
   enabled,
+  tags,
 }: BuildBulkBodyParams): SignalHit => {
   const rule = buildRule({
     ruleParams,
@@ -124,6 +127,7 @@ export const buildBulkBody = ({
     createdBy,
     updatedBy,
     interval,
+    tags,
   });
   const signal = buildSignal(doc, rule);
   const event = buildEventTypeSignal(doc);
@@ -148,6 +152,7 @@ interface SingleBulkCreateParams {
   updatedBy: string;
   interval: string;
   enabled: boolean;
+  tags: string[];
 }
 
 export const generateId = (
@@ -173,6 +178,7 @@ export const singleBulkCreate = async ({
   updatedBy,
   interval,
   enabled,
+  tags,
 }: SingleBulkCreateParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
@@ -198,7 +204,7 @@ export const singleBulkCreate = async ({
         ),
       },
     },
-    buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled }),
+    buildBulkBody({ doc, ruleParams, id, name, createdBy, updatedBy, interval, enabled, tags }),
   ]);
   const time1 = performance.now();
   const firstResult: BulkResponse = await services.callCluster('bulk', {
@@ -207,7 +213,9 @@ export const singleBulkCreate = async ({
     body: bulkBody,
   });
   const time2 = performance.now();
-  logger.debug(`individual bulk process time took: ${time2 - time1} milliseconds`);
+  logger.debug(
+    `individual bulk process time took: ${Number(time2 - time1).toFixed(2)} milliseconds`
+  );
   logger.debug(`took property says bulk took: ${firstResult.took} milliseconds`);
   if (firstResult.errors) {
     // go through the response status errors and see what
@@ -241,6 +249,7 @@ interface SingleSearchAfterParams {
   services: AlertServices;
   logger: Logger;
   pageSize: number;
+  filter: unknown;
 }
 
 // utilize search_after for paging results into bulk.
@@ -248,6 +257,7 @@ export const singleSearchAfter = async ({
   searchAfterSortId,
   ruleParams,
   services,
+  filter,
   logger,
   pageSize,
 }: SingleSearchAfterParams): Promise<SignalSearchResponse> => {
@@ -259,7 +269,7 @@ export const singleSearchAfter = async ({
       index: ruleParams.index,
       from: ruleParams.from,
       to: ruleParams.to,
-      filter: ruleParams.filter,
+      filter,
       size: pageSize,
       searchAfterSortId,
     });
@@ -287,6 +297,8 @@ interface SearchAfterAndBulkCreateParams {
   interval: string;
   enabled: boolean;
   pageSize: number;
+  filter: unknown;
+  tags: string[];
 }
 
 // search_after through documents and re-index using bulk endpoint.
@@ -297,12 +309,14 @@ export const searchAfterAndBulkCreate = async ({
   logger,
   id,
   signalsIndex,
+  filter,
   name,
   createdBy,
   updatedBy,
   interval,
   enabled,
   pageSize,
+  tags,
 }: SearchAfterAndBulkCreateParams): Promise<boolean> => {
   if (someResult.hits.hits.length === 0) {
     return true;
@@ -321,6 +335,7 @@ export const searchAfterAndBulkCreate = async ({
     updatedBy,
     interval,
     enabled,
+    tags,
   });
   const totalHits =
     typeof someResult.hits.total === 'number' ? someResult.hits.total : someResult.hits.total.value;
@@ -353,6 +368,7 @@ export const searchAfterAndBulkCreate = async ({
         ruleParams,
         services,
         logger,
+        filter,
         pageSize, // maximum number of docs to receive per search result.
       });
       if (searchAfterResult.hits.hits.length === 0) {
@@ -379,6 +395,7 @@ export const searchAfterAndBulkCreate = async ({
         updatedBy,
         interval,
         enabled,
+        tags,
       });
       logger.debug('finished next bulk index');
     } catch (exc) {

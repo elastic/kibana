@@ -27,14 +27,12 @@ import {
 import * as docViewsRegistry from 'ui/registry/doc_views';
 import chromeLegacy from 'ui/chrome';
 import { IPrivate } from 'ui/private';
-import { FilterManager, TimefilterContract } from 'src/plugins/data/public';
+import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
 // @ts-ignore
 import { createSavedSearchesService } from '../saved_searches/saved_searches';
 // @ts-ignore
 import { createSavedSearchFactory } from '../saved_searches/_saved_search';
 import { DiscoverStartPlugins } from '../plugin';
-import { start as legacyData } from '../../../../data/public/legacy';
-import { DataStart, IndexPatterns } from '../../../../data/public';
 import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
 import { SavedSearch } from '../types';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
@@ -44,12 +42,11 @@ export interface DiscoverServices {
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
-  data: DataStart;
   docLinks: DocLinksStart;
   docViewsRegistry: docViewsRegistry.DocViewsRegistry;
   eui_utils: EuiUtilsStart;
   filterManager: FilterManager;
-  indexPatterns: IndexPatterns;
+  indexPatterns: IndexPatternsContract;
   inspector: unknown;
   metadata: { branch: string };
   share: SharePluginStart;
@@ -93,7 +90,7 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     docViewsRegistry,
     eui_utils: plugins.eui_utils,
     filterManager: plugins.data.query.filterManager,
-    indexPatterns: legacyData.indexPatterns.indexPatterns,
+    indexPatterns: plugins.data.indexPatterns,
     inspector: plugins.inspector,
     // @ts-ignore
     metadata: core.injectedMetadata.getLegacyMetadata(),
