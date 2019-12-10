@@ -13,7 +13,6 @@ export const createRules = async ({
   description,
   enabled,
   falsePositives,
-  filter,
   from,
   query,
   language,
@@ -38,7 +37,7 @@ export const createRules = async ({
   return alertsClient.create({
     data: {
       name,
-      tags: [],
+      tags,
       alertTypeId: SIGNALS_ID,
       params: {
         description,
@@ -46,7 +45,6 @@ export const createRules = async ({
         index,
         falsePositives,
         from,
-        filter,
         immutable,
         query,
         language,
@@ -57,7 +55,6 @@ export const createRules = async ({
         maxSignals,
         riskScore,
         severity,
-        tags,
         threats,
         to,
         type,
