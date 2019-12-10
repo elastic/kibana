@@ -43,6 +43,21 @@ describe('connector_add_flyout', () => {
 
   it('renders action type menu with proper EuiCards for registered action types', () => {
     const onActionTypeChange = jest.fn();
+    const actionType = {
+      id: 'my-action-type',
+      iconClass: 'test',
+      selectMessage: 'test',
+      validateConnector: (): ValidationResult => {
+        return { errors: {} };
+      },
+      validateParams: (): ValidationResult => {
+        const validationResult = { errors: {} };
+        return validationResult;
+      },
+      actionConnectorFields: null,
+      actionParamsFields: null,
+    };
+    actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     const wrapper = mountWithIntl(
       <AppDependenciesProvider value={deps}>
@@ -65,21 +80,6 @@ describe('connector_add_flyout', () => {
         </ActionsConnectorsContext.Provider>
       </AppDependenciesProvider>
     );
-    const actionType = {
-      id: 'my-action-type',
-      iconClass: 'test',
-      selectMessage: 'test',
-      validateConnector: (): ValidationResult => {
-        return { errors: {} };
-      },
-      validateParams: (): ValidationResult => {
-        const validationResult = { errors: {} };
-        return validationResult;
-      },
-      actionConnectorFields: null,
-      actionParamsFields: null,
-    };
-    actionTypeRegistry.get.mockReturnValueOnce(actionType);
 
     expect(wrapper.find('[data-test-subj="first-action-type-card"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="second-action-type-card"]').exists()).toBeTruthy();
