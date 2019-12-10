@@ -445,6 +445,10 @@ export class ESSearchSource extends AbstractESSource {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 
+  isFilterByMapBoundsConfigurable() {
+    return true;
+  }
+
   async getLeftJoinFields() {
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
