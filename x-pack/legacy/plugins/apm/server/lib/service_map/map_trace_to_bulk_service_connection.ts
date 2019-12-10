@@ -6,39 +6,29 @@
 
 import { TraceConnection } from './run_service_map_task';
 import { TIMESTAMP } from '../../../common/elasticsearch_fieldnames';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
-export function mapTraceToBulkServiceConnection({
-  serviceConnsDestinationIndex,
-  serviceConnsDestinationPipeline,
-  servicesInTrace
-}: {
-  serviceConnsDestinationIndex: string;
-  serviceConnsDestinationPipeline: string;
-  servicesInTrace: string[];
-}) {
+export function mapTraceToBulkServiceConnection(
+  apmIndices: ApmIndicesConfig,
+  servicesInTrace: string[]
+) {
   return (traceConnection: TraceConnection) => {
     const indexAction = {
       index: {
-        _index:
-          serviceConnsDestinationIndex ||
-          (traceConnection.caller._index as string)
-      },
-      pipeline: serviceConnsDestinationPipeline || undefined // TODO is this even necessary?
+        _index: apmIndices.apmServiceConnectionsIndex
+      }
     };
 
     const source = {
       [TIMESTAMP]: traceConnection.caller.timestamp,
-      observer: { version_major: 7 }, // TODO get stack version from NP api
       service: {
         name: traceConnection.caller.service_name,
         environment: traceConnection.caller.environment
       },
-      callee: traceConnection.callee
-        ? {
-            name: traceConnection.callee.service_name,
-            environment: traceConnection.callee.environment
-          }
-        : undefined,
+      callee: {
+        name: traceConnection.callee?.service_name,
+        environment: traceConnection.callee?.environment
+      },
       connection: {
         upstream: {
           list: traceConnection.upstream

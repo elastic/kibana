@@ -7,12 +7,15 @@
 import { Server } from 'hapi';
 import { uniq } from 'lodash';
 import { BulkIndexDocumentsParams } from 'elasticsearch';
+import { APMPluginContract } from '../../../../../../plugins/apm/server/plugin';
 import { getSearchClient, SearchClient } from '../helpers/es_client';
 import { Span } from '../../../typings/es_schemas/ui/Span';
 import { getNextTransactionSamples } from './get_next_transaction_samples';
 import { getServiceConnections } from './get_service_connections';
 import { mapTraceToBulkServiceConnection } from './map_trace_to_bulk_service_connection';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
+import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 interface MappedDocument {
   transaction?: boolean;
@@ -20,7 +23,6 @@ interface MappedDocument {
   parent?: string; // parent.id
   environment?: string; // service.environment
   destination?: string; // destination.address
-  _index?: string; // _index // TODO should this be required?
   span_type?: Span['span']['type'];
   span_subtype?: Span['span']['subtype'];
   timestamp: string;
@@ -34,7 +36,7 @@ export interface TraceConnection {
 }
 
 async function indexLatestConnections(
-  config: ReturnType<Server['config']>,
+  apmIndices: ApmIndicesConfig,
   searchClient: SearchClient,
   bulkClient: (params: BulkIndexDocumentsParams) => Promise<any>,
   startTimeInterval?: string | number,
@@ -42,15 +44,9 @@ async function indexLatestConnections(
   afterKey?: object
 ): Promise<{ latestTransactionTime: number }> {
   const targetApmIndices = [
-    config.get<string>('apm_oss.transactionIndices'),
-    config.get<string>('apm_oss.spanIndices')
+    apmIndices['apm_oss.transactionIndices'],
+    apmIndices['apm_oss.spanIndices']
   ];
-  const serviceConnsDestinationIndex = config.get<string>(
-    'xpack.apm.serviceMapDestinationIndex'
-  );
-  const serviceConnsDestinationPipeline = config.get<string>(
-    'xpack.apm.serviceMapDestinationPipeline'
-  );
   const {
     after_key: nextAfterKey,
     latestTransactionTime: latestSampleTransactionTime,
@@ -83,11 +79,7 @@ async function indexLatestConnections(
       )
     );
     return traceConnections.flatMap(
-      mapTraceToBulkServiceConnection({
-        serviceConnsDestinationIndex,
-        serviceConnsDestinationPipeline,
-        servicesInTrace
-      })
+      mapTraceToBulkServiceConnection(apmIndices, servicesInTrace)
     );
   });
   await bulkClient({
@@ -96,7 +88,7 @@ async function indexLatestConnections(
       .join('\n')
   });
   return await indexLatestConnections(
-    config,
+    apmIndices,
     searchClient,
     bulkClient,
     startTimeInterval,
@@ -107,7 +99,6 @@ async function indexLatestConnections(
 
 export async function runServiceMapTask(
   server: Server,
-  config: ReturnType<Server['config']>,
   startTimeInterval?: string | number
 ) {
   const callCluster = server.plugins.elasticsearch.getCluster('data')
@@ -116,8 +107,13 @@ export async function runServiceMapTask(
   const bulkClient = (params: BulkIndexDocumentsParams) =>
     callCluster('bulk', params);
 
+  const apmPlugin = server.newPlatform.setup.plugins.apm as APMPluginContract;
+  const apmIndices = await apmPlugin.getApmIndices(
+    getInternalSavedObjectsClient(server)
+  );
+
   return await indexLatestConnections(
-    config,
+    apmIndices,
     searchClient,
     bulkClient,
     startTimeInterval

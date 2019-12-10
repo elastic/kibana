@@ -47,10 +47,10 @@ export async function getServiceMap({
   serviceName,
   environment
 }: IEnvOptions) {
-  const { start, end, client, config, uiFiltersES } = setup;
+  const { start, end, client, uiFiltersES, indices } = setup;
 
   const params = {
-    index: config['xpack.apm.serviceMapIndexPattern'],
+    index: indices.apmServiceConnectionsIndex,
     body: {
       size: 0,
       query: {

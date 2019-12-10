@@ -8,15 +8,14 @@ import { Server } from 'hapi';
 // @ts-ignore
 import { TaskManager, RunContext } from '../legacy/plugins/task_manager';
 import { runServiceMapTask } from './run_service_map_task';
-import { setupIngestPipeline } from './setup_required_scripts';
+import { setupIngestPipeline } from './service-connection-es-scripts';
 import {
   SERVICE_MAP_TASK_TYPE,
   SERVICE_MAP_TASK_ID
 } from '../../../common/service_map_constants';
+import { createServiceConnectionsIndex } from './create_service_connections_index';
 
 export async function initializeServiceMaps(server: Server) {
-  const config = server.config();
-
   // TODO remove setupIngestPipeline when agents set destination.address (elastic/apm#115)
   setupIngestPipeline(server)
     .then(() => {
@@ -32,13 +31,15 @@ export async function initializeServiceMaps(server: Server) {
       );
     });
 
+  await createServiceConnectionsIndex(server);
+
   const taskManager = server.plugins.task_manager;
   if (taskManager) {
     taskManager.registerTaskDefinitions({
-      serviceMap: {
-        title: 'ServiceMapTask',
+      [SERVICE_MAP_TASK_TYPE]: {
+        title: 'ApmServiceMapTask',
         type: SERVICE_MAP_TASK_TYPE,
-        description: 'Extract connections in traces for service maps',
+        description: 'Extract connections in traces for APM service maps',
         timeout: '5m',
         createTaskRunner({ taskInstance }: RunContext) {
           return {
@@ -47,7 +48,6 @@ export async function initializeServiceMaps(server: Server) {
 
               const { latestTransactionTime } = await runServiceMapTask(
                 server,
-                config,
                 state.latestTransactionTime
               );
 
@@ -61,7 +61,7 @@ export async function initializeServiceMaps(server: Server) {
     return await taskManager.ensureScheduled({
       id: SERVICE_MAP_TASK_ID,
       taskType: SERVICE_MAP_TASK_TYPE,
-      interval: '30s',
+      interval: '1m',
       scope: ['apm'],
       params: {},
       state: {}

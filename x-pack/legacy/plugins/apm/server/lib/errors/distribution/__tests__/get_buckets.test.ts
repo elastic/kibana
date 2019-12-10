@@ -53,7 +53,8 @@ describe('timeseriesFetcher', () => {
           'apm_oss.spanIndices': 'apm-*',
           'apm_oss.transactionIndices': 'apm-*',
           'apm_oss.metricsIndices': 'apm-*',
-          apmAgentConfigurationIndex: '.apm-agent-configuration'
+          apmAgentConfigurationIndex: '.apm-agent-configuration',
+          apmServiceConnectionsIndex: 'apm-service-connections'
         },
         dynamicIndexPattern: null as any
       }

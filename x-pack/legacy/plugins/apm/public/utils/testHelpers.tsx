@@ -118,6 +118,7 @@ interface MockSetup {
     'apm_oss.transactionIndices': string;
     'apm_oss.metricsIndices': string;
     apmAgentConfigurationIndex: string;
+    apmServiceConnectionsIndex: string;
   };
 }
 
@@ -175,7 +176,8 @@ export async function inspectSearchParams(
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
-      apmAgentConfigurationIndex: 'myIndex'
+      apmAgentConfigurationIndex: 'myIndex',
+      apmServiceConnectionsIndex: 'myIndex'
     },
     dynamicIndexPattern: null as any
   };

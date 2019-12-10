@@ -28,7 +28,8 @@ function getSetup() {
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
-      apmAgentConfigurationIndex: 'myIndex'
+      apmAgentConfigurationIndex: 'myIndex',
+      apmServiceConnectionsIndex: 'myIndex'
     },
     dynamicIndexPattern: null as any
   };

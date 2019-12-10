@@ -79,10 +79,7 @@ export const apm: LegacyPluginInitializer = kibana => {
 
         // service map
 
-        serviceMapEnabled: Joi.boolean().default(false),
-        serviceMapIndexPattern: Joi.string().default('apm-*'),
-        serviceMapDestinationIndex: Joi.string(),
-        serviceMapDestinationPipeline: Joi.string()
+        serviceMapEnabled: Joi.boolean().default(false)
       }).default();
     },
 

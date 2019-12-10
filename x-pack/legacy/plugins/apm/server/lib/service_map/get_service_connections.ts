@@ -9,7 +9,7 @@ import {
   mapServiceConnsScript,
   combineServiceConnsScript,
   reduceServiceConnsScript
-} from './setup_required_scripts';
+} from './service-connection-es-scripts';
 import {
   SPAN_ID,
   TRACE_ID,

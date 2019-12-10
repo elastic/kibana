@@ -32,10 +32,6 @@ export const mapServiceConnsScript = {
       s.destination = doc['destination.address'].value;
     }
 
-    if (!doc['_index'].empty) { // TODO is this ever empty?
-      s._index = doc['_index'].value;
-    }
-
     if (!doc['span.type'].empty) {
       s.span_type = doc['span.type'].value;
     }

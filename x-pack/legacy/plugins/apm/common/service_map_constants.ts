@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SERVICE_MAP_TASK_TYPE = 'serviceMap';
-export const SERVICE_MAP_TASK_ID = 'servicemap-processor';
+export const SERVICE_MAP_TASK_TYPE = 'apmServiceMap';
+export const SERVICE_MAP_TASK_ID = 'apm-servicemap-processor';
