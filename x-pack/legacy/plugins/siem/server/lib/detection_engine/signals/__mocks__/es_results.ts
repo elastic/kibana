@@ -19,7 +19,6 @@ export const sampleRuleAlertParams = (
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   type: 'query',
   from: 'now-6m',
-  tags: ['some fake tag'],
   to: 'now',
   severity: 'high',
   query: 'user.name: root or user.name: admin',
@@ -274,7 +273,7 @@ export const sampleRule = (): Partial<OutputRuleAlertRest> => {
     references: ['http://www.example.com', 'https://ww.example.com'],
     severity: 'high',
     updated_by: 'elastic',
-    tags: [],
+    tags: ['some fake tag 1', 'some fake tag 2'],
     to: 'now',
     type: 'query',
   };
