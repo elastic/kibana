@@ -17,4 +17,5 @@
  * under the License.
  */
 
-export { SearchBar, SearchBarOwnProps } from './search_bar';
+export { SearchBar, SearchBarOwnProps, SearchBarProps } from './search_bar';
+export { createSearchBar } from './create_search_bar';

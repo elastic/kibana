@@ -20,9 +20,9 @@
 import React from 'react';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { DataStart } from '../../../../core_plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 
-export function createTopNav(data: DataStart, extraConfig: TopNavMenuData[]) {
+export function createTopNav(data: DataPublicPluginStart, extraConfig: TopNavMenuData[]) {
   return (props: TopNavMenuProps) => {
     const config = (props.config || []).concat(extraConfig);
 

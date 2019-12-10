@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-import { createSearchBar, StatetfulSearchBarProps } from './search';
-import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
+import { CoreStart, Plugin } from 'kibana/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
 
@@ -28,17 +26,6 @@ import { setFieldFormats } from '../../../../plugins/data/public/services';
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-}
-
-/**
- * Interface for this plugin's returned `start` contract.
- *
- * @public
- */
-export interface DataStart {
-  ui: {
-    SearchBar: React.ComponentType<StatetfulSearchBarProps>;
-  };
 }
 
 /**
@@ -53,29 +40,13 @@ export interface DataStart {
  * or static code.
  */
 
-export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDependencies> {
-  private storage!: IStorageWrapper;
+export class DataPlugin implements Plugin<void, void, {}, DataPluginStartDependencies> {
+  public setup() {}
 
-  public setup(core: CoreSetup) {
-    this.storage = new Storage(window.localStorage);
-  }
-
-  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
+  public start(core: CoreStart, { data }: DataPluginStartDependencies) {
     // This is required for when Angular code uses Field and FieldList.
     setFieldFormats(data.fieldFormats);
     initLegacyModule(data.indexPatterns);
-
-    const SearchBar = createSearchBar({
-      core,
-      data,
-      storage: this.storage,
-    });
-
-    return {
-      ui: {
-        SearchBar,
-      },
-    };
   }
 
   public stop() {}

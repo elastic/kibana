@@ -37,12 +37,9 @@ import {
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
 import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
-const {
-  ui: { SearchBar },
-} = data;
-
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
 export const savedQueryService = npStart.plugins.data.query.savedQueries;
+const { SearchBar } = npStart.plugins.data.ui;
 
 interface SiemSearchBarRedux {
   end: number;
