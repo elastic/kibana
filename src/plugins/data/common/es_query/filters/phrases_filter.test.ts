@@ -17,24 +17,21 @@
  * under the License.
  */
 
-import { Filter, FilterMeta, LatLon } from './meta_filter';
+import { buildPhrasesFilter, getPhrasesFilterField } from './phrases_filter';
+import { IIndexPattern } from '../../index_patterns';
+import { fields } from '../../index_patterns/fields/fields.mocks.ts';
 
-export type GeoPolygonFilterMeta = FilterMeta & {
-  params: {
-    points: LatLon[];
-  };
-};
+describe('phrases filter', function() {
+  const indexPattern: IIndexPattern = ({
+    fields,
+  } as unknown) as IIndexPattern;
 
-export type GeoPolygonFilter = Filter & {
-  meta: GeoPolygonFilterMeta;
-  geo_polygon: any;
-};
-
-export const isGeoPolygonFilter = (filter: any): filter is GeoPolygonFilter =>
-  filter && filter.geo_polygon;
-
-export const getGeoPolygonFilterField = (filter: GeoPolygonFilter) => {
-  return (
-    filter.geo_polygon && Object.keys(filter.geo_polygon).find(key => key !== 'ignore_unmapped')
-  );
-};
+  describe('getPhrasesFilterField', function() {
+    it('should return the name of the field a phrases query is targeting', () => {
+      const field = indexPattern.fields.find(patternField => patternField.name === 'extension');
+      const filter = buildPhrasesFilter(field!, ['jpg', 'png'], indexPattern);
+      const result = getPhrasesFilterField(filter);
+      expect(result).toBe('extension');
+    });
+  });
+});
