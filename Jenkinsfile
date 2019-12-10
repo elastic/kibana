@@ -27,9 +27,9 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 'oss-ciGroup11': kibanaPipeline.getOssCiGroupWorker(11),
                 'oss-ciGroup12': kibanaPipeline.getOssCiGroupWorker(12),
                 'oss-accessibility': kibanaPipeline.getPostBuildWorker('accessibility', { runbld('./test/scripts/jenkins_accessibility.sh', 'Execute kibana-accessibility') }),
-                'oss-visualRegression': kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') }),
+                // 'oss-visualRegression': kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') }),
               ]),
-                 'kibana-xpack-agent': kibanaPipeline.withWorkers('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
+              'kibana-xpack-agent': kibanaPipeline.withWorkers('kibana-xpack-tests', { kibanaPipeline.buildXpack() }, [
                 'xpack-firefoxSmoke': kibanaPipeline.getPostBuildWorker('xpack-firefoxSmoke', { runbld('./test/scripts/jenkins_xpack_firefox_smoke.sh', 'Execute xpack-firefoxSmoke') }),
                 'xpack-ciGroup1': kibanaPipeline.getXpackCiGroupWorker(1),
                 'xpack-ciGroup2': kibanaPipeline.getXpackCiGroupWorker(2),
@@ -42,7 +42,7 @@ stage("Kibana Pipeline") { // This stage is just here to help the BlueOcean UI a
                 'xpack-ciGroup9': kibanaPipeline.getXpackCiGroupWorker(9),
                 'xpack-ciGroup10': kibanaPipeline.getXpackCiGroupWorker(10),
                 'xpack-accessibility': kibanaPipeline.getPostBuildWorker('xpack-accessibility', { runbld('./test/scripts/jenkins_xpack_accessibility.sh', 'Execute xpack-accessibility') }),
-                'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
+                // 'xpack-visualRegression': kibanaPipeline.getPostBuildWorker('xpack-visualRegression', { runbld('./test/scripts/jenkins_xpack_visual_regression.sh', 'Execute xpack-visualRegression') }),
               ]),
             ])
           }
