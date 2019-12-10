@@ -96,6 +96,7 @@
       "packages/*",
       "x-pack",
       "x-pack/legacy/plugins/*",
+      "examples/*",
       "test/plugin_functional/plugins/*",
       "test/interpreter_functional/plugins/*"
     ],
