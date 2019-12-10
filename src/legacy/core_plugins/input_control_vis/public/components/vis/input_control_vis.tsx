@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { CONTROL_TYPES } from '../../editor_utils';
@@ -46,7 +46,7 @@ interface InputControlVisProps {
   refreshControl: (controlIndex: number, query: any) => Promise<void>;
 }
 
-export class InputControlVis extends PureComponent<InputControlVisProps> {
+export class InputControlVis extends Component<InputControlVisProps> {
   constructor(props: InputControlVisProps) {
     super(props);
 

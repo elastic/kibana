@@ -113,7 +113,7 @@ export class InputControlVisController {
         const control = getControl(ancestorId);
 
         if (control) {
-          ancestors.push();
+          ancestors.push(control);
         }
       });
       const control = getControl(controlId);
@@ -200,13 +200,7 @@ export class InputControlVisController {
   }
 
   hasChanges = () => {
-    return this.controls
-      .map(control => {
-        return control.hasChanged();
-      })
-      .reduce((a, b) => {
-        return a || b;
-      });
+    return this.controls.map(control => control.hasChanged()).some(control => control);
   };
 
   hasValues = () => {
