@@ -108,11 +108,8 @@ export const FormattedFieldValue = React.memo<{
       <>{value}</>
     );
   } else {
-    const content = useMemo(() => {
-      const contentValue = getOrEmptyTagFromValue(value);
-
-      return truncate ? <TruncatableText>{content}</TruncatableText> : contentValue;
-    }, [value, truncate]);
+    const contentValue = getOrEmptyTagFromValue(value);
+    const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
 
     return (
       <DefaultDraggable

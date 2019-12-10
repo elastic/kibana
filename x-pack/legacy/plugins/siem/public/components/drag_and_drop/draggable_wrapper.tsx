@@ -43,7 +43,7 @@ const Wrapper = styled.div`
 Wrapper.displayName = 'Wrapper';
 
 const ProviderContentWrapper = styled.span`
-  > span {
+  > span.euiToolTipAnchor {
     display: block; /* allow EuiTooltip content to be truncatable */
   }
 `;
