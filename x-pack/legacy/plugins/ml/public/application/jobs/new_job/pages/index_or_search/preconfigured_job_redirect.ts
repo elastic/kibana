@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { mlJobService } from '../../../../services/job_service';
 import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
 import { CombinedJob } from '../../common/job_creator/configs';
@@ -29,7 +28,7 @@ export async function preConfiguredJobRedirect() {
 }
 
 function getWizardUrlFromCloningJob(job: CombinedJob) {
-  const created = idx(job, _ => _.custom_settings.created_by);
+  const created = job?.custom_settings?.created_by;
   let page = '';
 
   if (created === CREATED_BY_LABEL.SINGLE_METRIC) {
