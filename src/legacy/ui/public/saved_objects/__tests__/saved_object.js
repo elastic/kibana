@@ -98,7 +98,7 @@ describe('Saved Object', function () {
 
   beforeEach(ngMock.inject(function (es, Private, $window) {
     savedObjectsClientStub = Private(SavedObjectsClientProvider);
-    SavedObject = createSavedObjectClass(savedObjectsClientStub);
+    SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
     esDataStub = es;
     window = $window;
   }));
