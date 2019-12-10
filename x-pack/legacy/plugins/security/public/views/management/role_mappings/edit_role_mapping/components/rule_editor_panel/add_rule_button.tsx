@@ -35,13 +35,6 @@ export const AddRuleButton = (props: Props) => {
     </EuiButtonEmpty>
   );
 
-  const addRuleText = (
-    <FormattedMessage
-      id="xpack.security.management.editRoleMapping.addRuleOption"
-      defaultMessage="Add rule"
-    />
-  );
-
   const options = [
     <EuiContextMenuItem
       key="rule"
@@ -60,7 +53,7 @@ export const AddRuleButton = (props: Props) => {
     <EuiContextMenuItem
       key="ruleGroup"
       name="Add rule group"
-      icon="partial"
+      icon="list"
       onClick={() => {
         setIsMenuOpen(false);
         props.onClick(new AllRule([new FieldRule('username', '*')]));

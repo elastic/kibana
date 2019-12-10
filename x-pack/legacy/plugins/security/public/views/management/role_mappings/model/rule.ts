@@ -14,11 +14,6 @@ export abstract class Rule {
   abstract toRaw(): Record<string, any>;
 
   /**
-   * The type for this rule.
-   */
-  abstract getType(): string;
-
-  /**
    * The display title for this rule.
    */
   abstract getDisplayTitle(): string;

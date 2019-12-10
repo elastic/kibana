@@ -9,25 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { RuleGroup } from './rule_group';
 import { FieldRule } from './field_rule';
 import { Rule } from './rule';
-import { ExceptAllRule } from './except_all_rule';
-import { ExceptAnyRule } from './except_any_rule';
 
 /**
  * Represents a negated field rule {@link FieldRule}.
  */
 export class ExceptFieldRule extends RuleGroup {
-  constructor(private fieldRule: FieldRule = new FieldRule('username', '*')) {
+  constructor(private fieldRule: FieldRule | null = null) {
     super();
   }
 
   /** {@see RuleGroup.getRules} */
   public getRules() {
-    return [this.fieldRule];
-  }
-
-  /** {@see RuleGroup.getType} */
-  public getType() {
-    return `except`;
+    return this.fieldRule ? [this.fieldRule] : [];
   }
 
   /** {@see RuleGroup.replaceRule} */
@@ -37,17 +30,20 @@ export class ExceptFieldRule extends RuleGroup {
 
   /** {@see RuleGroup.removeRule} */
   public removeRule() {
-    throw new Error('removeRule intentionally not implemented.');
+    this.fieldRule = null;
   }
 
   /** {@see RuleGroup.addRule} */
   public addRule(rule: FieldRule) {
-    throw new Error('addRule intentionally not implemented.');
+    if (this.fieldRule) {
+      throw new Error('Rule already exists. Unable to add more to "ExceptFieldRule"');
+    }
+    this.fieldRule = rule;
   }
 
   /** {@see RuleGroup.canAddRule} */
   public canAddRule(): boolean {
-    return false;
+    return this.fieldRule === null;
   }
 
   /** {@see RuleGroup.canRemoveRule} */
@@ -55,11 +51,12 @@ export class ExceptFieldRule extends RuleGroup {
     return false;
   }
 
-  // FIXME
-  /** {@see RuleGroup.canContainRule} */
-  public canContainRule(rule: Rule) {
-    const forbiddenRules = [ExceptAllRule, ExceptAnyRule, ExceptFieldRule];
-    return forbiddenRules.every(forbiddenRule => !(rule instanceof forbiddenRule));
+  /** {@see RuleGroup.canContainRules} */
+  public canContainRules(rules: Rule[]) {
+    if (rules.length === 0) {
+      return true;
+    }
+    return this.fieldRule === null && rules.length === 1 && rules[0] instanceof FieldRule;
   }
 
   /** {@see RuleGroup.getDisplayTitle} */
@@ -74,13 +71,13 @@ export class ExceptFieldRule extends RuleGroup {
 
   /** {@see RuleGroup.clone} */
   public clone() {
-    return new ExceptFieldRule(this.fieldRule.clone());
+    return new ExceptFieldRule(this.fieldRule ? this.fieldRule.clone() : null);
   }
 
   /** {@see RuleGroup.toRaw} */
   public toRaw() {
     return {
-      except: this.fieldRule.toRaw(),
+      except: this.fieldRule ? this.fieldRule.toRaw() : {},
     };
   }
 }

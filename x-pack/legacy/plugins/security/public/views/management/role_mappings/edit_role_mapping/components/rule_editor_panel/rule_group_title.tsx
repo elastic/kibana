@@ -22,6 +22,7 @@ import {
   ExceptAllRule,
   ExceptAnyRule,
   ExceptFieldRule,
+  FieldRule,
 } from '../../../model';
 
 interface Props {
@@ -40,14 +41,13 @@ export const RuleGroupTitle = (props: Props) => {
   const [showConfirmChangeModal, setShowConfirmChangeModal] = useState(false);
   const [pendingNewRule, setPendingNewRule] = useState<RuleGroup | null>(null);
 
-  const canUseExcept =
-    props.parentRule && exceptRules.every(except => props.parentRule!.canContainRule(except));
+  const canUseExcept = props.parentRule && props.parentRule.canContainRules(exceptRules);
 
   const availableRuleTypes = [...rules, ...(canUseExcept ? exceptRules : [])];
 
   const onChange = (newRule: RuleGroup) => {
     const currentSubRules = props.rule.getRules();
-    const areSubRulesValid = currentSubRules.every(subRule => newRule.canContainRule(subRule));
+    const areSubRulesValid = newRule.canContainRules(currentSubRules);
     if (areSubRulesValid) {
       const clone = newRule.clone() as RuleGroup;
       currentSubRules.forEach(subRule => clone.addRule(subRule));
@@ -61,7 +61,13 @@ export const RuleGroupTitle = (props: Props) => {
   };
 
   const changeRuleDiscardingSubRules = (newRule: RuleGroup) => {
-    props.onChange(newRule.clone() as RuleGroup);
+    // Ensure a default sub rule is present when not carrying over the original sub rules
+    const newRuleInstance = newRule.clone() as RuleGroup;
+    if (newRuleInstance.getRules().length === 0) {
+      newRuleInstance.addRule(new FieldRule('username', '*'));
+    }
+
+    props.onChange(newRuleInstance);
     setIsMenuOpen(false);
   };
 

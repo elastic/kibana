@@ -62,7 +62,7 @@ describe('RuleGroupEditor', () => {
 
   it('warns when changing group types which would invalidate child rules', async () => {
     const props = {
-      rule: new AllRule([new ExceptFieldRule(new FieldRule('username', '*'))]),
+      rule: new AllRule([new ExceptFieldRule(new FieldRule('my_custom_field', 'foo*'))]),
       allowAdd: true,
       ruleDepth: 0,
       onChange: jest.fn(),
@@ -96,8 +96,8 @@ describe('RuleGroupEditor', () => {
     const [newRule] = props.onChange.mock.calls[0];
     expect(newRule).toBeInstanceOf(AnyRule);
 
-    // new rule should have no sub rules, as they are not valid for the new group type
-    expect(newRule.toRaw()).toEqual(new AnyRule([]).toRaw());
+    // new rule should a defaulted field sub rule, as the existing rules are not valid for the new type
+    expect(newRule.toRaw()).toEqual(new AnyRule([new FieldRule('username', '*')]).toRaw());
   });
 
   it('does not change groups when canceling the confirmation', async () => {

@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiSelect,
   EuiSpacer,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -230,6 +231,20 @@ export class FieldRuleEditor extends Component<Props, State> {
     valueIndex: number
   ) => {
     const isNullValue = rowRuleValue === null;
+
+    const inputField =
+      fieldType === 'text' ? (
+        <EuiFieldText
+          value={isNullValue ? '-- null --' : (rowRuleValue as string)}
+          onChange={this.onValueChange(valueIndex)}
+          disabled={isNullValue}
+        />
+      ) : (
+        <EuiFieldNumber
+          value={rowRuleValue as string}
+          onChange={this.onNumericValueChange(valueIndex)}
+        />
+      );
     return (
       <EuiFormRow
         label={i18n.translate(
@@ -240,16 +255,7 @@ export class FieldRuleEditor extends Component<Props, State> {
         )}
         key={valueIndex}
       >
-        <EuiFieldText
-          value={isNullValue ? '-- null --' : (rowRuleValue as string)}
-          onChange={
-            fieldType === 'number'
-              ? this.onNumericValueChange(valueIndex)
-              : this.onValueChange(valueIndex)
-          }
-          disabled={isNullValue}
-          type={fieldType}
-        />
+        {inputField}
       </EuiFormRow>
     );
   };

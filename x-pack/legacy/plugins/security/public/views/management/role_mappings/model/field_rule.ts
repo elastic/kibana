@@ -19,11 +19,6 @@ export class FieldRule extends Rule {
     super();
   }
 
-  /** {@see Rule.getType} */
-  public getType() {
-    return `field`;
-  }
-
   /** {@see Rule.getDisplayTitle} */
   public getDisplayTitle() {
     return i18n.translate('xpack.security.management.editRoleMapping.fieldRule.displayTitle', {

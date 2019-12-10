@@ -11,11 +11,12 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiFieldText,
-  EuiSwitch,
   EuiCallOut,
   EuiText,
   EuiButtonEmpty,
+  EuiSwitch,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { RoleTemplate } from '../../../../../../../common/model';
 import {
   isInlineRoleTemplate,
@@ -57,12 +58,13 @@ export const RoleTemplateEditor = ({
   );
 
   function getTemplateFormatSwitch() {
-    const returnsJsonLabel = (
-      <FormattedMessage
-        id="xpack.security.management.editRoleMapping.roleTemplateReturnsJson"
-        defaultMessage="Returns JSON"
-      />
+    const returnsJsonLabel = i18n.translate(
+      'xpack.security.management.editRoleMapping.roleTemplateReturnsJson',
+      {
+        defaultMessage: 'Returns JSON',
+      }
     );
+
     return (
       <EuiFormRow label={returnsJsonLabel}>
         <EuiSwitch

@@ -23,11 +23,6 @@ export class ExceptAnyRule extends RuleGroup {
     return [...this.rules];
   }
 
-  /** {@see RuleGroup.getType} */
-  public getType() {
-    return `any`;
-  }
-
   /** {@see RuleGroup.getDisplayTitle} */
   public getDisplayTitle() {
     return i18n.translate('xpack.security.management.editRoleMapping.exceptAnyRule.displayTitle', {
@@ -50,10 +45,12 @@ export class ExceptAnyRule extends RuleGroup {
     this.rules.push(rule);
   }
 
-  /** {@see RuleGroup.canContainRule} */
-  public canContainRule(rule: Rule) {
+  /** {@see RuleGroup.canContainRules} */
+  public canContainRules(rules: Rule[]) {
     const forbiddenRules = [ExceptAllRule, ExceptAnyRule, ExceptFieldRule];
-    return forbiddenRules.every(forbiddenRule => !(rule instanceof forbiddenRule));
+    return rules.every(
+      candidate => !forbiddenRules.some(forbidden => candidate instanceof forbidden)
+    );
   }
 
   /** {@see RuleGroup.clone} */

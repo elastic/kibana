@@ -35,6 +35,7 @@ interface Props {
   rawRules: RoleMapping['rules'];
   onChange: (rawRules: RoleMapping['rules']) => void;
   onValidityChange: (isValid: boolean) => void;
+  validateForm: boolean;
 }
 
 interface State {
@@ -58,7 +59,9 @@ export class RuleEditorPanel extends Component<Props, State> {
   }
 
   public render() {
-    const validationResult = validateRoleMappingRules({ rules: this.state.rules || {} });
+    const validationResult =
+      this.props.validateForm &&
+      validateRoleMappingRules({ rules: this.state.rules ? this.state.rules.toRaw() : {} });
 
     let validationWarning = null;
     if (validationResult && validationResult.error) {
@@ -91,7 +94,7 @@ export class RuleEditorPanel extends Component<Props, State> {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow fullWidth {...validationResult}>
+            <EuiFormRow fullWidth isInvalid={validationResult && validationResult.isInvalid}>
               <Fragment>
                 {validationWarning}
                 {this.getEditor()}
@@ -148,7 +151,7 @@ export class RuleEditorPanel extends Component<Props, State> {
               <FormattedMessage
                 id="xpack.security.management.editRoleMapping.switchToAdvancedEditorLink"
                 defaultMessage="Switch to advanced editor"
-              />
+              />{' '}
               <EuiIcon type="inputOutput" size="s" />
             </Fragment>
           </EuiLink>
@@ -165,7 +168,7 @@ export class RuleEditorPanel extends Component<Props, State> {
               <FormattedMessage
                 id="xpack.security.management.editRoleMapping.switchToVisualEditorLink"
                 defaultMessage="Switch to visual editor"
-              />
+              />{' '}
               <EuiIcon type="inputOutput" size="s" />
             </Fragment>
           </EuiLink>

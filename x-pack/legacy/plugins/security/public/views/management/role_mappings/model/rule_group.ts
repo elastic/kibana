@@ -35,10 +35,10 @@ export abstract class RuleGroup extends Rule {
   abstract addRule(rule: Rule): void;
 
   /**
-   * Determines if the provided rule is allowed to be contained within this group.
-   * @param rule the rule to test.
+   * Determines if the provided rules are allowed to be contained within this group.
+   * @param rules the rules to test.
    */
-  abstract canContainRule(rule: Rule): boolean;
+  abstract canContainRules(rules: Rule[]): boolean;
 
   /**
    * Determines if this group is currently capable of adding rules.

@@ -7,12 +7,12 @@
 import React, { Component, Fragment } from 'react';
 import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { FieldRuleEditor } from './field_rule_editor';
 import { AddRuleButton } from './add_rule_button';
 import { RuleGroupEditor } from './rule_group_editor';
 import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
 import { Rule, FieldRule, RuleGroup } from '../../../model';
+import { isRuleGroup } from '../../services/is_rule_group';
 
 interface Props {
   rules: Rule | null;
@@ -114,31 +114,25 @@ export class VisualRuleEditor extends Component<Props, {}> {
   };
 
   private getEditorForRuleType(rule: Rule, onChange: (updatedRule: Rule) => void) {
-    switch (rule.getType()) {
-      case 'field':
-        return (
-          <FieldRuleEditor
-            rule={rule as FieldRule}
-            onChange={value => onChange(value)}
-            allowAdd={this.canUseVisualEditor()}
-            allowDelete={true}
-            onDelete={this.onRuleDelete}
-          />
-        );
-      case 'except':
-      case 'any':
-      case 'all':
-        return (
-          <RuleGroupEditor
-            rule={rule as RuleGroup}
-            ruleDepth={0}
-            allowAdd={this.canUseVisualEditor()}
-            onChange={value => onChange(value)}
-            onDelete={this.onRuleDelete}
-          />
-        );
-      default:
-        throw new Error(`Unsupported rule type: ${rule.getType()}`);
+    if (isRuleGroup(rule)) {
+      return (
+        <RuleGroupEditor
+          rule={rule as RuleGroup}
+          ruleDepth={0}
+          allowAdd={this.canUseVisualEditor()}
+          onChange={value => onChange(value)}
+          onDelete={this.onRuleDelete}
+        />
+      );
     }
+    return (
+      <FieldRuleEditor
+        rule={rule as FieldRule}
+        onChange={value => onChange(value)}
+        allowAdd={this.canUseVisualEditor()}
+        allowDelete={true}
+        onDelete={this.onRuleDelete}
+      />
+    );
   }
 }

@@ -21,11 +21,6 @@ export class ExceptAllRule extends RuleGroup {
     return [...this.rules];
   }
 
-  /** {@see RuleGroup.getType} */
-  public getType() {
-    return `all`;
-  }
-
   /** {@see RuleGroup.getDisplayTitle} */
   public getDisplayTitle() {
     return i18n.translate('xpack.security.management.editRoleMapping.exceptAllRule.displayTitle', {
@@ -48,8 +43,8 @@ export class ExceptAllRule extends RuleGroup {
     this.rules.push(rule);
   }
 
-  /** {@see RuleGroup.canContainRule} */
-  public canContainRule(rule: Rule) {
+  /** {@see RuleGroup.canContainRules} */
+  public canContainRules() {
     return true;
   }
 

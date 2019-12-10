@@ -106,8 +106,9 @@ export class EditRoleMappingPage extends Component<Props, State> {
           />
           <EuiSpacer />
           <RuleEditorPanel
-            onValidityChange={this.onRuleValidityChange}
             rawRules={this.state.roleMapping!.rules}
+            validateForm={this.state.validateForm}
+            onValidityChange={this.onRuleValidityChange}
             onChange={rules =>
               this.setState({
                 roleMapping: {
