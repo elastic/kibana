@@ -22,8 +22,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
 
+import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
+const { SearchBar } = data.ui;
+
 import { npStart } from 'ui/new_platform';
-const { SearchBar } = npStart.plugins.data.ui;
 
 export class FilterEditor extends Component {
   state = {

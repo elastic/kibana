@@ -8,12 +8,11 @@ import { isEqual } from 'lodash/fp';
 import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import { IndexPattern } from 'ui/index_patterns';
 
+import { SavedQuery, SearchBar } from '../../../../../../../src/legacy/core_plugins/data/public';
 import {
   esFilters,
   IIndexPattern,
   FilterManager,
-  SearchBar,
-  SavedQuery,
   Query,
   TimeHistory,
   TimeRange,

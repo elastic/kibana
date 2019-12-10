@@ -13,11 +13,8 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SearchBar } from 'plugins/data';
 import { npStart } from 'ui/new_platform';
-
-import {
-  SearchBar,
-} from '../../../../../../../../../src/plugins/data/public';
 
 export class WhereExpression extends Component {
 

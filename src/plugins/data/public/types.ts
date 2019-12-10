@@ -27,7 +27,6 @@ import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
-import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
 
 export interface DataSetupDependencies {
   uiActions: IUiActionsSetup;
@@ -53,14 +52,11 @@ export interface DataPublicPluginStart {
   query: QueryStart;
   ui: {
     IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-    SearchBar: React.ComponentType<StatefulSearchBarProps>;
   };
 }
 
 export * from './autocomplete_provider/types';
 export { IGetSuggestions } from './suggestions_provider/types';
-
-export type IDataPluginNoUI = Omit<DataPublicPluginStart, 'ui'>;
 
 export interface IDataPluginServices extends Partial<CoreStart> {
   appName: string;
@@ -69,5 +65,5 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   storage: IStorageWrapper;
-  data: IDataPluginNoUI;
+  data: DataPublicPluginStart;
 }

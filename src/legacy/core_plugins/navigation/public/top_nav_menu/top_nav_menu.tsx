@@ -24,13 +24,13 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { SearchBarProps, DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { SearchBarProps, DataStart } from '../../../../core_plugins/data/public';
 
-export type TopNavMenuProps = SearchBarProps & {
+export type TopNavMenuProps = Partial<SearchBarProps> & {
   appName: string;
   config?: TopNavMenuData[];
   showSearchBar?: boolean;
-  data?: DataPublicPluginStart;
+  data?: DataStart;
 };
 
 /*
@@ -59,7 +59,6 @@ export function TopNavMenu(props: TopNavMenuProps) {
     // Validate presense of all required fields
     if (!showSearchBar || !props.data) return;
     const { SearchBar } = props.data.ui;
-    if (!searchBarProps) return;
     return <SearchBar {...searchBarProps} />;
   }
 
