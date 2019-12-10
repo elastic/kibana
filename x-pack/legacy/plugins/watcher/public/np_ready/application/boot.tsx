@@ -27,7 +27,7 @@ export const boot = (bootDeps: BootDeps) => {
 
   render(
     <I18nContext>
-      <App {...{ ...appDeps, legacy }} />
+      <App {...appDeps} legacy={legacy} />
     </I18nContext>,
     element
   );

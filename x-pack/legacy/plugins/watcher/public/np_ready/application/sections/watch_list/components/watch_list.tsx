@@ -48,8 +48,6 @@ export const WatchList = () => {
   const {
     chrome,
     legacy: { MANAGEMENT_BREADCRUMB },
-  } = useAppContext();
-  const {
     links: { watcherGettingStartedUrl },
   } = useAppContext();
   const [selection, setSelection] = useState([]);
