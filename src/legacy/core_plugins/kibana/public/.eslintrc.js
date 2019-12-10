@@ -20,22 +20,34 @@
 const path = require('path')
 
 function buildRestrictedPaths(shimmedPlugins) {
-  return shimmedPlugins.map(shimmedPlugin => ({
+  return shimmedPlugins.flatMap(shimmedPlugin => ([{
     target: [
-      `public/${shimmedPlugin}/**/*`,
-      `!public/${shimmedPlugin}/kibana_services.ts`,
-      `!public/${shimmedPlugin}/legacy_imports.ts`,
-      `!public/${shimmedPlugin}/**/__tests__/**/*`,
-      `!public/${shimmedPlugin}/index.ts`,
+      `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
+      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/kibana_services.ts`,
+      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/legacy_imports.ts`,
+      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/__tests__/**/*`,
+      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/index.ts`,
     ],
     from: [
       'ui/**/*',
-      'public/**/*',
-      `!public/${shimmedPlugin}/**/*`,
+      'src/legacy/core_plugins/kibana/public/**/*',
+      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
     ],
     allowSameFolder: false,
     errorMessage: `${shimmedPlugin} is a shimmed plugin that is not allowed to import modules from the legacy platform. If you need legacy modules for the transition period, import them either in the legacy_imports, kibana_services or index module.`,
-  }));
+  }, {
+    target: [
+      'src/**/*',
+      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
+      'x-pack/**/*'
+    ],
+    from: [
+      `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
+      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/index.ts`,
+    ],
+    allowSameFolder: false,
+    errorMessage: `kibana/public/${shimmedPlugin} is behaving like a NP plugin and does not allow deep imports. If you need something from within ${shimmedPlugin}, consider re-exporting it from the top level index module`
+}]));
 }
 
 module.exports = {
@@ -45,7 +57,7 @@ module.exports = {
     '@kbn/eslint/no-restricted-paths': [
       'error',
       {
-        basePath: path.resolve(__dirname, '../'),
+        basePath: path.resolve(__dirname, '../../../../../'),
         zones: buildRestrictedPaths(['visualize', 'discover', 'dashboard', 'devTools', 'home']),
       },
     ],
