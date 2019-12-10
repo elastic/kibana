@@ -13,10 +13,30 @@ import {
   KibanaAssetType,
 } from '../../common/types';
 
-export * from './get';
-export * from './handlers';
-export * from './install';
-export * from './remove';
+export {
+  getCategories,
+  getFile,
+  getInstallationObject,
+  getPackageInfo,
+  getPackages,
+  SearchParams,
+} from './get';
+export {
+  handleGetCategories,
+  handleGetFile,
+  handleGetInfo,
+  handleGetList,
+  handleRequestDelete,
+  handleRequestInstall,
+} from './handlers';
+export { installAssets, installPackage } from './install';
+export { removeInstallation } from './remove';
+
+export class PackageNotInstalledError extends Error {
+  constructor(pkgkey: string) {
+    super(`${pkgkey} is not installed`);
+  }
+}
 
 // only Kibana Assets use Saved Objects at this point
 export const savedObjectTypes: AssetType[] = Object.values(KibanaAssetType);

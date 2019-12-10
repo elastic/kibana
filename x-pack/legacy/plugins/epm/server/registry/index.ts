@@ -27,6 +27,8 @@ export interface SearchParams {
   category?: CategoryId;
 }
 
+export const pkgToPkgKey = ({ name, version }: RegistryPackage) => `${name}-${version}`;
+
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const { registryUrl } = epmConfigStore.getConfig();
   const url = new URL(`${registryUrl}/search`);
