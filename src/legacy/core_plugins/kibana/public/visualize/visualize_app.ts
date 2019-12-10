@@ -17,18 +17,15 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { IModule } from 'angular';
+import { VisualizeKibanaServices } from './kibana_services';
 
-export function addHelpMenuToAppChrome(chrome, docLinks) {
-  chrome.setHelpExtension({
-    appName: i18n.translate('kbn.visualize.helpMenu.appName', {
-      defaultMessage: 'Visualize',
-    }),
-    links: [
-      {
-        linkType: 'documentation',
-        href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/visualize.html`,
-      },
-    ],
-  });
+// @ts-ignore
+import { initEditorDirective } from './editor/editor';
+// @ts-ignore
+import { initListingDirective } from './listing/visualize_listing';
+
+export function initVisualizeAppDirective(app: IModule, deps: VisualizeKibanaServices) {
+  initEditorDirective(app, deps);
+  initListingDirective(app);
 }
