@@ -10,5 +10,5 @@ import { LicensingPlugin } from './plugin';
 export const plugin = (context: PluginInitializerContext) => new LicensingPlugin(context);
 
 export * from '../common/types';
-export { RawLicense, RawFeatures, ElasticsearchError } from './types';
+export * from './types';
 export { config } from './licensing_config';

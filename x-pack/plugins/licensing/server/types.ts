@@ -3,6 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Observable } from 'rxjs';
+import { IClusterClient } from 'src/core/server';
 import { ILicense, LicenseStatus, LicenseType } from '../common/types';
 
 export interface ElasticsearchError extends Error {
@@ -43,4 +45,21 @@ declare module 'src/core/server' {
       license: ILicense;
     };
   }
+}
+
+/** @public */
+export interface LicensingPluginSetup {
+  /**
+   * Steam of licensing information {@link ILicense}.
+   */
+  license$: Observable<ILicense>;
+  /**
+   * Triggers licensing information re-fetch.
+   */
+  refresh(): Promise<ILicense>;
+
+  createLicensePoller: (
+    clusterClient: IClusterClient,
+    pollingFrequency: number
+  ) => { license$: Observable<ILicense>; refresh(): Promise<ILicense> };
 }

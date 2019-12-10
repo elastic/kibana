@@ -6,7 +6,7 @@
 
 import { Observable, Subject, Subscription, timer } from 'rxjs';
 import { take } from 'rxjs/operators';
-import moment, { Duration } from 'moment';
+import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
@@ -19,7 +19,8 @@ import {
   IClusterClient,
 } from 'src/core/server';
 
-import { ILicense, LicensingPluginSetup, PublicLicense, PublicFeatures } from '../common/types';
+import { ILicense, PublicLicense, PublicFeatures } from '../common/types';
+import { LicensingPluginSetup } from './types';
 import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
@@ -92,7 +93,10 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     const config = await this.config$.pipe(take(1)).toPromise();
     const dataClient = await core.elasticsearch.dataClient$.pipe(take(1)).toPromise();
 
-    const { refresh, license$ } = this.createLicensePoller(dataClient, config.pollingFrequency);
+    const { refresh, license$ } = this.createLicensePoller(
+      dataClient,
+      config.pollingFrequency.asMilliseconds()
+    );
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
@@ -102,11 +106,12 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     return {
       refresh,
       license$,
+      createLicensePoller: this.createLicensePoller.bind(this),
     };
   }
 
-  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: Duration) {
-    const intervalRefresh$ = timer(0, pollingFrequency.asMilliseconds());
+  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: number) {
+    const intervalRefresh$ = timer(0, pollingFrequency);
 
     const { license$, refreshManually } = createLicenseUpdate(intervalRefresh$, this.stop$, () =>
       this.fetchLicense(clusterClient)
