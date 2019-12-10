@@ -5,7 +5,7 @@
  */
 
 import { DocLinksStart } from '../../../../../../../src/core/public';
-import { DataType, ConfigType, DataTypeDefinition } from '../components/mappings_editor/types';
+import { DataType, ConfigType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
 import { schema as CONFIG_DEFINITION } from '../components/mappings_editor/components/configuration_form/form.schema';
 
