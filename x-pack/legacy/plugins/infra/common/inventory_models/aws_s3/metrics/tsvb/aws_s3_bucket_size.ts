@@ -15,6 +15,7 @@ export const awsS3BucketSize: TSVBMetricModelCreator = (
   index_pattern: indexPattern,
   interval: '>=86400s',
   time_field: timeField,
+  drop_last_bucket: false,
   type: 'timeseries',
   series: [
     {
