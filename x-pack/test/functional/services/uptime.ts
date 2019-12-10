@@ -49,5 +49,14 @@ export function UptimeProvider({ getService }: FtrProviderContext) {
     async setStatusFilterDown() {
       await testSubjects.click('xpack.uptime.filterBar.filterStatusDown');
     },
+    async selectFilterItem(filterType: string, option: string) {
+      const popoverId = `filter-popover_${filterType}`;
+      const optionId = `filter-popover-item_${option}`;
+      await testSubjects.existOrFail(popoverId);
+      await testSubjects.click(popoverId);
+      await testSubjects.existOrFail(optionId);
+      await testSubjects.click(optionId);
+      await testSubjects.click(popoverId);
+    },
   };
 }
