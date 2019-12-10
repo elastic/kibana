@@ -7,7 +7,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Job } from '../../new_job/common/job_creator/configs';
-
 import { CustomUrlList, CustomUrlListProps } from './list';
 
 function prepareTest(setCustomUrlsFn: jest.Mock) {

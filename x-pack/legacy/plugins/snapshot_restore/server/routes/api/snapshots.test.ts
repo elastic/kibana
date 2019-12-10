@@ -96,13 +96,13 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
             ...defaultSnapshot,
             repository: 'fooRepository',
             snapshot: 'snapshot1',
-            isManagedRepository: false,
+            managedRepository: 'found-snapshots',
           },
           {
             ...defaultSnapshot,
             repository: 'barRepository',
             snapshot: 'snapshot2',
-            isManagedRepository: false,
+            managedRepository: 'found-snapshots',
           },
         ],
       };
@@ -160,7 +160,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         ...defaultSnapshot,
         snapshot,
         repository,
-        isManagedRepository: false,
+        managedRepository: 'found-snapshots',
       };
 
       const response = await getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit);

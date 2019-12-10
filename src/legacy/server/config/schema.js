@@ -20,12 +20,8 @@
 import Joi from 'joi';
 import os from 'os';
 
-import {
-  fromRoot
-} from '../../utils';
-import {
-  getData
-} from '../path';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import {
   DEFAULT_CSP_RULES,
   DEFAULT_CSP_STRICT,
@@ -139,7 +135,15 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-    timezone: Joi.string().allow(false).default('UTC')
+
+    timezone: Joi.string().allow(false).default('UTC'),
+    rotate: Joi.object().keys({
+      enabled: Joi.boolean().default(false),
+      everyBytes: Joi.number().greater(1024).default(10485760),
+      keepFiles: Joi.number().greater(2).less(1024).default(7),
+      pollingInterval: Joi.number().greater(5000).less(3600000).default(10000),
+      usePolling: Joi.boolean().default(false)
+    }).default()
   }).default(),
 
   ops: Joi.object({
@@ -152,9 +156,7 @@ export default () => Joi.object({
     initialize: Joi.boolean().default(true)
   }).default(),
 
-  path: Joi.object({
-    data: Joi.string().default(getData())
-  }).default(),
+  path: HANDLED_IN_NEW_PLATFORM,
 
   stats: Joi.object({
     maximumWaitTimeForAllCollectorsInS: Joi.number().default(60)
