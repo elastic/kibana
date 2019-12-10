@@ -114,10 +114,10 @@ describe('PUT custom element', () => {
     );
   });
 
-  it(`returns not found if existing workpad is not found`, async () => {
+  it(`returns not found if existing custom element is not found`, async () => {
     const request = httpServerMock.createKibanaRequest({
       method: 'put',
-      path: 'api/canvas/workpad/some-id',
+      path: 'api/canvas/custom-element/some-id',
       params: {
         id: 'not-found',
       },

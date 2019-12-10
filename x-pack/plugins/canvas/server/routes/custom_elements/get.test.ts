@@ -18,8 +18,6 @@ import {
   httpServerMock,
   loggingServiceMock,
 } from 'src/core/server/mocks';
-// import { workpadWithGroupAsElement } from '../../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
-// import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
 
 const mockRouteContext = ({
   core: {
@@ -43,7 +41,7 @@ describe('GET custom element', () => {
     routeHandler = router.get.mock.calls[0][1];
   });
 
-  it(`returns 200 when the workpad is found`, async () => {
+  it(`returns 200 when the custom element is found`, async () => {
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
       path: 'api/canvas/custom-element/123',
