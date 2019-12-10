@@ -31,15 +31,15 @@ def withWorkers(name, preWorkerClosure = {}, workerClosures = [:]) {
         }
 
         catchError {
+          runErrorReporter()
+        }
+
+        catchError {
           runbld.junit()
         }
 
         catchError {
           publishJunit()
-        }
-
-        catchError {
-          runErrorReporter()
         }
       }
     }
@@ -103,10 +103,10 @@ def legacyJobRunner(name) {
                 uploadAllGcsArtifacts(name)
               }
               catchError {
-                publishJunit()
+                runErrorReporter()
               }
               catchError {
-                runErrorReporter()
+                publishJunit()
               }
             }
           }
@@ -262,10 +262,13 @@ def buildXpack() {
 }
 
 def runErrorReporter() {
+  def status = buildUtils.getBuildStatus()
+  def dryRun = status != "ABORTED" ? "" : "--no-github-update"
+
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests
+      node scripts/report_failed_tests ${dryRun}
     """,
     "Report failed tests, if necessary"
   )
