@@ -271,7 +271,6 @@
             "monitor": {
               "id": null,
               "name": "elastic",
-              "status": "mixed",
               "type": null,
               "__typename": "MonitorState"
             },
@@ -377,7 +376,6 @@
             "monitor": {
               "id": null,
               "name": null,
-              "status": "mixed",
               "type": null,
               "__typename": "MonitorState"
             },

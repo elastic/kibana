@@ -21,7 +21,7 @@ describe('snapshot reducer', () => {
     expect(
       snapshotReducer(
         {
-          count: { down: 1, mixed: 0, total: 4, up: 3 },
+          count: { down: 1, total: 4, up: 3 },
           errors: [],
           loading: false,
         },
@@ -47,7 +47,6 @@ describe('snapshot reducer', () => {
       payload: {
         up: 10,
         down: 15,
-        mixed: 0,
         total: 25,
       },
     };

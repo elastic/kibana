@@ -120,7 +120,7 @@ const fastStatusCount = async (context: QueryContext): Promise<Snapshot> => {
           cardinality: { field: 'monitor.id', precision_threshold: 40000 },
         },
         down: {
-          filter: { match: { 'monitor.status': 'down' } },
+          filter: { range: { 'summary.down': { gt: 0 } } },
           aggs: {
             unique: { cardinality: { field: 'monitor.id', precision_threshold: 40000 } },
           },

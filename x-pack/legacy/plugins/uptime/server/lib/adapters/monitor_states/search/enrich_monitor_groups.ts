@@ -208,7 +208,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
                         Map monitor = new HashMap();
                         monitor.ip = ips;
                         monitor.name = name;
-                        monitor.status = summary.down > 0 ? (summary.up > 0 ? "mixed": "down") : "up";
+                        monitor.status = summary.down > 0 ? "down" : "up";
                         result.monitor = monitor;
 
                         Map observer = new HashMap();
