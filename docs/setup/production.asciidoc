@@ -5,7 +5,7 @@
 * <<csp-strict-mode>>
 * <<enabling-ssl>>
 * <<load-balancing>>
-* <<high-availability>>
+* <<high-availability-kibana>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
@@ -27,7 +27,7 @@ You can use {stack} {security-features} to control what {es} data users can
 access through Kibana.
 
 When {security-features} are enabled, Kibana users have to log in. They need to
-have a role granting <<kibana-privileges, Kibana privileges>> as well as access 
+have a role granting <<kibana-privileges, Kibana privileges>> as well as access
 to the indices they will be working with in Kibana.
 
 If a user loads a Kibana dashboard that accesses data in an index that they
@@ -107,6 +107,35 @@ transport.tcp.port: 9300 - 9400
 --------
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.hosts: ["http://localhost:9200"]
+--------
+
+=== Load Balancing Across Multiple Kibana instances
+Multiple Kibana installations can be served behind a load balancer with configuration changes.  Descriptions can be referenced on the {kibana-ref}/settings.html[settings page].
+
+Settings unique across each Kibana instances:
+--------
+server.uuid
+server.name
+--------
+
+Settings unique across each host (e.g. running multiple installations on the same virtual machine):
+--------
+logging.dest
+path.data
+pid.file
+server.port
+--------
+
+Settings that need to be the same:
+--------
+xpack.security.encryptionKey //decrypting session cookies
+xpack.reporting.encryptionKey //decrypting reports stored in Elasticsearch
+--------
+
+Separate configuration files can be used from the command line by using the `-c` flag:
+--------
+bin/kibana -c config/instance1.yml
+bin/kibana -c config/instance2.yml
 --------
 
 [float]
