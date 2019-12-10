@@ -223,6 +223,81 @@ describe('licensing plugin', () => {
       });
     });
 
+    describe('#createLicensePoller', () => {
+      let plugin: LicensingPlugin;
+
+      afterEach(async () => {
+        await plugin.stop();
+      });
+
+      it(`creates a poller fetching license from passed 'clusterClient' every 'pollingFrequency' ms`, async () => {
+        plugin = new LicensingPlugin(
+          coreMock.createPluginInitializerContext({
+            pollingFrequency: moment.duration(50000),
+          })
+        );
+
+        const dataClient = elasticsearchServiceMock.createClusterClient();
+        dataClient.callAsInternalUser.mockResolvedValue({
+          license: buildRawLicense(),
+          features: {},
+        });
+        const coreSetup = coreMock.createSetup();
+        coreSetup.elasticsearch.dataClient$ = new BehaviorSubject(dataClient);
+
+        const { createLicensePoller, license$ } = await plugin.setup(coreSetup);
+        const customClient = elasticsearchServiceMock.createClusterClient();
+        customClient.callAsInternalUser.mockResolvedValue({
+          license: buildRawLicense({ type: 'gold' }),
+          features: {},
+        });
+
+        const customPollingFrequency = 100;
+        const { license$: customLicense$ } = createLicensePoller(
+          customClient,
+          customPollingFrequency
+        );
+        expect(customClient.callAsInternalUser).toHaveBeenCalledTimes(0);
+
+        const customLicense = await customLicense$.pipe(take(1)).toPromise();
+        expect(customClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+
+        await flushPromises(customPollingFrequency * 1.5);
+        expect(customClient.callAsInternalUser).toHaveBeenCalledTimes(2);
+
+        expect(customLicense.isAvailable).toBe(true);
+        expect(customLicense.type).toBe('gold');
+
+        expect(await license$.pipe(take(1)).toPromise()).not.toBe(customLicense);
+      });
+
+      it('creates a poller with a manual refresh control', async () => {
+        plugin = new LicensingPlugin(
+          coreMock.createPluginInitializerContext({
+            pollingFrequency,
+          })
+        );
+
+        const coreSetup = coreMock.createSetup();
+        const { createLicensePoller } = await plugin.setup(coreSetup);
+
+        const customClient = elasticsearchServiceMock.createClusterClient();
+        customClient.callAsInternalUser.mockResolvedValue({
+          license: buildRawLicense({ type: 'gold' }),
+          features: {},
+        });
+
+        const { license$, refresh } = createLicensePoller(customClient, 10000);
+        expect(customClient.callAsInternalUser).toHaveBeenCalledTimes(0);
+
+        await refresh();
+
+        expect(customClient.callAsInternalUser).toHaveBeenCalledTimes(1);
+        const license = await license$.pipe(take(1)).toPromise();
+        expect(license.type).toBe('gold');
+      });
+    });
+
     describe('extends core contexts', () => {
       let plugin: LicensingPlugin;
 
