@@ -11,8 +11,7 @@ import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { fetchPage } from './search';
 import { MonitorGroupIterator } from './search/monitor_group_iterator';
 import { Snapshot } from '../../../../common/runtime_types';
-import {QueryContext} from "./search/query_context";
-
+import { QueryContext } from './search/query_context';
 
 export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter {
   constructor(private readonly database: DatabaseAdapter) {
@@ -38,7 +37,7 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       pagination,
       filters && filters !== '' ? JSON.parse(filters) : null,
       size,
-      statusFilter,
+      statusFilter
     );
 
     const page = await fetchPage(queryContext);
@@ -65,56 +64,25 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       CONTEXT_DEFAULTS.CURSOR_PAGINATION,
       filters && filters !== '' ? JSON.parse(filters) : null,
       CONTEXT_DEFAULTS.MAX_MONITORS_FOR_SNAPSHOT_COUNT,
-      statusFilter,
+      // ignore the supplied status filter, we apply it at the end
+      undefined
     );
 
-    console.log("SNAP COUNT");
+    // Calculate the total, up, and down counts.
+    const counts = await fastStatusCount(context);
 
-    const params = {
-      index: INDEX_NAMES.HEARTBEAT,
-      body: {
-        size: 0,
-        query: {
-          bool: { filter: (await context.dateAndCustomFilters()) },
-        },
-        aggs: {
-          unique: {
-            cardinality: {
-              field: "monitor.id",
-              precision_threshold: 40000,
-            }
-          },
-          down: {
-            filter: {
-              match: {"monitor.status": "down"},
-            },
-            aggs: {
-              unique: {
-                cardinality: {
-                  field: "monitor.id",
-                  precision_threshold: 40000,
-                }
-              }
-            }
-          }
-        }
-      }
-    };
-
-    console.log("QUERY", JSON.stringify(params.body));
-
-    const statistics = await context.database.search(context.request, params);
-    const uniqueDown = statistics.aggregations.down.unique.value;
-    const total = statistics.aggregations.unique.value;
-
-    console.log("ROUGH U/D",total-uniqueDown, uniqueDown);
-
-    return {
-      total,
-      up: total-uniqueDown,
-      down: uniqueDown,
-      mixed: 0,
+    // Check if the last count was accurate, if not, we need to perform a slower count with the
+    // MonitorGroupsIterator.
+    if (!(await context.hasTimespan())) {
+      // Figure out whether 'up' or 'down' is more common. It's faster to count the lower cardinality
+      // one then use subtraction to figure out its opposite.
+      const [leastCommonStatus, mostCommonStatus]: Array<'up' | 'down'> =
+        counts.up > counts.down ? ['down', 'up'] : ['up', 'down'];
+      counts[leastCommonStatus] = await slowStatusCount(context, leastCommonStatus);
+      counts[mostCommonStatus] = counts.total - counts[leastCommonStatus];
     }
+
+    return counts;
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {
@@ -139,4 +107,46 @@ const jsonifyPagination = (p: any): string | null => {
   }
 
   return JSON.stringify(p);
+};
+
+const fastStatusCount = async (context: QueryContext): Promise<Snapshot> => {
+  const params = {
+    index: INDEX_NAMES.HEARTBEAT,
+    body: {
+      size: 0,
+      query: { bool: { filter: await context.dateAndCustomFilters() } },
+      aggs: {
+        unique: {
+          cardinality: { field: 'monitor.id', precision_threshold: 40000 },
+        },
+        down: {
+          filter: { match: { 'monitor.status': 'down' } },
+          aggs: {
+            unique: { cardinality: { field: 'monitor.id', precision_threshold: 40000 } },
+          },
+        },
+      },
+    },
+  };
+
+  const statistics = await context.database.search(context.request, params);
+  const total = statistics.aggregations.unique.value;
+  const down = statistics.aggregations.down.unique.value;
+
+  return {
+    total,
+    down,
+    up: total - down,
+  };
+};
+
+const slowStatusCount = async (context: QueryContext, status: string): Promise<number> => {
+  const downContext = context.clone();
+  downContext.statusFilter = status;
+  const iterator = new MonitorGroupIterator(downContext);
+  let count = 0;
+  while (await iterator.next()) {
+    count++;
+  }
+  return count;
 };
