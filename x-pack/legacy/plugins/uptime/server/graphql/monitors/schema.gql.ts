@@ -7,22 +7,6 @@
 import gql from 'graphql-tag';
 
 export const monitorsSchema = gql`
-  "The data used to enrich the filter bar."
-  type FilterBar {
-    "A series of monitor IDs in the heartbeat indices."
-    ids: [String!]
-    "The location values users have configured for the agents."
-    locations: [String!]
-    "The ports of the monitored endpoints."
-    ports: [Int!]
-    "The schemes used by the monitors."
-    schemes: [String!]
-    "The possible status values contained in the indices."
-    statuses: [String!]
-    "The list of URLs"
-    urls: [String!]
-  }
-
   type HistogramDataPoint {
     upCount: Int
     downCount: Int
