@@ -24,12 +24,13 @@ import { readFileSync } from 'fs';
 import del from 'del';
 import execa from 'execa';
 import xml2js from 'xml2js';
+import { JUNIT_REPORT_TAG } from '@kbn/test';
 
 const MINUTE = 1000 * 60;
 const ROOT_DIR = resolve(__dirname, '../../../../');
 const FIXTURE_DIR = resolve(__dirname, '__fixtures__');
 const TARGET_DIR = resolve(FIXTURE_DIR, 'target');
-const XML_PATH = resolve(TARGET_DIR, 'junit', process.env.JOB || '.', `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}Jest Tests.xml`);
+const XML_PATH = resolve(TARGET_DIR, 'junit', JUNIT_REPORT_TAG || '.', `TEST-${JUNIT_REPORT_TAG}Jest Tests.xml`);
 
 afterAll(async () => {
   await del(TARGET_DIR);

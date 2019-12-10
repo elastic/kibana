@@ -49,3 +49,5 @@ export {
 } from './mocha';
 
 export { runFailedTestsReporterCli } from './failed_tests_reporter';
+
+export { JUNIT_REPORT_TAG } from './junit_report_tag';

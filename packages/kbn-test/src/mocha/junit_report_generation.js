@@ -22,6 +22,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
 
 import xmlBuilder from 'xmlbuilder';
+import { JUNIT_REPORT_TAG } from '@kbn/test';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../';
@@ -138,8 +139,8 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     const reportPath = resolve(
       rootDirectory,
       'target/junit',
-      process.env.JOB || '.',
-      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
+      JUNIT_REPORT_TAG || '.',
+      `TEST-${JUNIT_REPORT_TAG}${reportName}.xml`
     );
 
     const reportXML = builder.end();

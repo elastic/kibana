@@ -19,6 +19,7 @@
 
 import { resolve, dirname } from 'path';
 import { times } from 'lodash';
+import { JUNIT_REPORT_TAG } from '@kbn/test';
 
 const TOTAL_CI_SHARDS = 4;
 const ROOT = dirname(require.resolve('../../package.json'));
@@ -79,7 +80,7 @@ module.exports = function (grunt) {
       reporters: pickReporters(),
 
       junitReporter: {
-        outputFile: resolve(ROOT, 'target/junit', process.env.JOB || '.', `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}karma.xml`),
+        outputFile: resolve(ROOT, 'target/junit', JUNIT_REPORT_TAG || '.', `TEST-${JUNIT_REPORT_TAG}karma.xml`),
         useBrowserName: false,
         nameFormatter: (_, result) => [...result.suite, result.description].join(' '),
         classNameFormatter: (_, result) => {
