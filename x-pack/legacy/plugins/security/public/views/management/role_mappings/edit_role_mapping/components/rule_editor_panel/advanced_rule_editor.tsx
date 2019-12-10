@@ -9,6 +9,8 @@ import React, { useState, Fragment } from 'react';
 import 'brace/mode/json';
 import 'brace/theme/github';
 import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { Rule, RuleBuilderError, generateRulesFromRaw } from '../../../model';
 
 interface Props {
@@ -56,9 +58,13 @@ export const AdvancedRuleEditor = (props: Props) => {
       isInvalid={Boolean(ruleBuilderError)}
       error={
         ruleBuilderError &&
-        `Invalid rule definition at ${ruleBuilderError.ruleTrace.join('.')} : ${
-          ruleBuilderError.message
-        }`
+        i18n.translate('xpack.security.management.editRoleMapping.advancedEditorRuleError', {
+          defaultMessage: 'Invalid rule definition at {ruleLocation}: {errorMessage}',
+          values: {
+            ruleLocation: ruleBuilderError.ruleTrace.join('.'),
+            errorMessage: ruleBuilderError.message,
+          },
+        })
       }
       fullWidth
       data-test-subj="roleMappingsAdvancedEditor"
@@ -86,7 +92,10 @@ export const AdvancedRuleEditor = (props: Props) => {
         />
         <EuiSpacer size="s" />
         <EuiButton iconType="broom" onClick={reformatRules} size="s">
-          Auto-format
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.autoFormatRuleText"
+            defaultMessage="Auto-format"
+          />
         </EuiButton>
       </Fragment>
     </EuiFormRow>

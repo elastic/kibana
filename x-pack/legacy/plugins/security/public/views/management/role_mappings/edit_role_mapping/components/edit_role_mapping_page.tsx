@@ -171,11 +171,19 @@ export class EditRoleMappingPage extends Component<Props, State> {
             disabled={!this.state.rulesValid}
             data-test-subj="saveRoleMappingButton"
           >
-            Save role mapping
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.saveRoleMappingButton"
+              defaultMessage="Save role mapping"
+            />
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false} onClick={this.backToRoleMappingsList}>
-          <EuiButton>Cancel</EuiButton>
+          <EuiButton>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.cancelButton"
+              defaultMessage="Cancel"
+            />
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={true} />
         {this.editingExistingRoleMapping() && (

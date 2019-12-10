@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { FieldRule, FieldRuleValue } from './field_rule';
 import { AllRule } from './all_rule';
 import { AnyRule } from './any_rule';
@@ -43,7 +44,10 @@ function parseRawRules(
   }
   if (entries.length > 1) {
     throw new RuleBuilderError(
-      `Expected a single rule definition, but found ${entries.length}`,
+      i18n.translate('xpack.security.management.editRoleMapping.ruleBuilder.expectSingleRule', {
+        defaultMessage: `Expected a single rule definition, but found {numberOfRules}.`,
+        values: { numberOfRules: entries.length },
+      }),
       ruleTrace
     );
   }
@@ -78,18 +82,30 @@ function createRuleForType(
         fieldDataType = 'array';
       }
       if (fieldDataType !== 'object') {
-        throw new RuleBuilderError(`Expected an object, but found ${fieldDataType}`, [
-          ...ruleTrace,
-          ruleType,
-        ]);
+        throw new RuleBuilderError(
+          i18n.translate(
+            'xpack.security.management.editRoleMapping.ruleBuilder.expectedObjectForFieldRule',
+            {
+              defaultMessage: `Expected an object, but found {unexpectedType}.`,
+              values: { unexpectedType: fieldDataType },
+            }
+          ),
+          [...ruleTrace, ruleType]
+        );
       }
 
       const entries = Object.entries(fieldData);
       if (entries.length !== 1) {
-        throw new RuleBuilderError(`Expected a single field, but found ${entries.length}`, [
-          ...ruleTrace,
-          ruleType,
-        ]);
+        throw new RuleBuilderError(
+          i18n.translate(
+            'xpack.security.management.editRoleMapping.ruleBuilder.expectedObjectForFieldRule',
+            {
+              defaultMessage: `Expected a single field, but found {count}.`,
+              values: { count: entries.length },
+            }
+          ),
+          [...ruleTrace, ruleType]
+        );
       }
 
       const [field, value] = entries[0] as [string, FieldRuleValue];
@@ -98,7 +114,13 @@ function createRuleForType(
         const valueType = typeof fieldValue;
         if (fieldValue !== null && !['string', 'number'].includes(valueType)) {
           throw new RuleBuilderError(
-            `Invalid value type for field. Expected one of null, string, or number, but found ${valueType} (${value})`,
+            i18n.translate(
+              'xpack.security.management.editRoleMapping.ruleBuilder.invalidFieldValueType',
+              {
+                defaultMessage: `Invalid value type for field. Expected one of null, string, or number, but found {valueType} ({value}).`,
+                values: { valueType, value: JSON.stringify(value) },
+              }
+            ),
             [...ruleTrace, `field[${field}]`]
           );
         }
@@ -110,7 +132,13 @@ function createRuleForType(
     case 'all': {
       if (ruleDefinition != null && !Array.isArray(ruleDefinition)) {
         throw new RuleBuilderError(
-          `Expected an array of rules, but found ${typeof ruleDefinition}`,
+          i18n.translate(
+            'xpack.security.management.editRoleMapping.ruleBuilder.expectedArrayForAllRule',
+            {
+              defaultMessage: `Expected an array of rules, but found {type}.`,
+              values: { type: typeof ruleDefinition },
+            }
+          ),
           [...ruleTrace, ruleType]
         );
       }
@@ -137,7 +165,13 @@ function createRuleForType(
     case 'any': {
       if (ruleDefinition != null && !Array.isArray(ruleDefinition)) {
         throw new RuleBuilderError(
-          `Expected an array of rules, but found ${typeof ruleDefinition}`,
+          i18n.translate(
+            'xpack.security.management.editRoleMapping.ruleBuilder.expectedArrayForAnyRule',
+            {
+              defaultMessage: `Expected an array of rules, but found {type}.`,
+              values: { type: typeof ruleDefinition },
+            }
+          ),
           [...ruleTrace, 'any']
         );
       }
@@ -162,20 +196,37 @@ function createRuleForType(
     }
     case 'except': {
       if (ruleDefinition && typeof ruleDefinition !== 'object') {
-        throw new RuleBuilderError(`Expected an object, but found ${typeof ruleDefinition}`, [
-          ...ruleTrace,
-          'except',
-        ]);
+        throw new RuleBuilderError(
+          i18n.translate(
+            'xpack.security.management.editRoleMapping.ruleBuilder.expectedObjectForExceptRule',
+            {
+              defaultMessage: `Expected an object, but found {type}.`,
+              values: { type: typeof ruleDefinition },
+            }
+          ),
+          [...ruleTrace, 'except']
+        );
       }
       if (parentRuleType !== 'all') {
-        throw new RuleBuilderError(`'except' can only exist within an 'all' rule`, [
-          ...ruleTrace,
-          ruleType,
-        ]);
+        throw new RuleBuilderError(
+          i18n.translate(
+            'xpack.security.management.editRoleMapping.ruleBuilder.exceptOnlyInAllRule',
+            {
+              defaultMessage: `"except" rule can only exist within an "all" rule.`,
+            }
+          ),
+          [...ruleTrace, ruleType]
+        );
       }
       return parseRawRules(ruleDefinition || {}, ruleType, [...ruleTrace, ruleType], depth);
     }
     default:
-      throw new RuleBuilderError(`Unknown rule type: ${ruleType}`, [...ruleTrace, ruleType]);
+      throw new RuleBuilderError(
+        i18n.translate('xpack.security.management.editRoleMapping.ruleBuilder.unknownRuleType', {
+          defaultMessage: `Unknown rule type: {ruleType}.`,
+          values: { ruleType },
+        }),
+        [...ruleTrace, ruleType]
+      );
   }
 }

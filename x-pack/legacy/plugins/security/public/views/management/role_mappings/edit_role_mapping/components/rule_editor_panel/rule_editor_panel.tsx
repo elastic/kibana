@@ -20,6 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { RoleMapping } from '../../../../../../../common/model';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { AdvancedRuleEditor } from './advanced_rule_editor';
@@ -60,10 +61,10 @@ export class RuleEditorPanel extends Component<Props, State> {
     const validationResult = validateRoleMappingRules({ rules: this.state.rules || {} });
 
     let validationWarning = null;
-    if (validationResult) {
+    if (validationResult && validationResult.error) {
       validationWarning = (
         <Fragment>
-          <EuiCallOut color="danger" title={validationResult.error || 'FIXME YO'} size="s" />
+          <EuiCallOut color="danger" title={validationResult.error} size="s" />
         </Fragment>
       );
     }
@@ -71,7 +72,12 @@ export class RuleEditorPanel extends Component<Props, State> {
     return (
       <EuiPanel>
         <EuiTitle>
-          <h2>Mapping rules</h2>
+          <h2>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.mappingRulesPanelTitle"
+              defaultMessage="Mapping rules"
+            />
+          </h2>
         </EuiTitle>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
@@ -114,8 +120,17 @@ export class RuleEditorPanel extends Component<Props, State> {
   private getModeToggle() {
     if (this.state.mode === 'advanced' && this.state.maxDepth > VISUAL_MAX_RULE_DEPTH) {
       return (
-        <EuiCallOut size="s" title="Visual editor unavailable">
-          Rule definition is too complex for the visual editor
+        <EuiCallOut
+          size="s"
+          title={i18n.translate(
+            'xpack.security.management.editRoleMapping.visualEditorUnavailableTitle',
+            { defaultMessage: 'Visual editor unavailable' }
+          )}
+        >
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.visualEditorUnavailableMessage"
+            defaultMessage="Rule definition is too complex for the visual editor."
+          />
         </EuiCallOut>
       );
     }
@@ -129,7 +144,13 @@ export class RuleEditorPanel extends Component<Props, State> {
               this.trySwitchEditorMode('advanced');
             }}
           >
-            Switch to advanced editor <EuiIcon type="inputOutput" size="s" />
+            <Fragment>
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.switchToAdvancedEditorLink"
+                defaultMessage="Switch to advanced editor"
+              />
+              <EuiIcon type="inputOutput" size="s" />
+            </Fragment>
           </EuiLink>
         );
       case 'advanced':
@@ -140,7 +161,13 @@ export class RuleEditorPanel extends Component<Props, State> {
               this.trySwitchEditorMode('visual');
             }}
           >
-            Switch to visual editor <EuiIcon type="inputOutput" size="s" />
+            <Fragment>
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.switchToVisualEditorLink"
+                defaultMessage="Switch to visual editor"
+              />
+              <EuiIcon type="inputOutput" size="s" />
+            </Fragment>
           </EuiLink>
         );
       default:
@@ -179,18 +206,35 @@ export class RuleEditorPanel extends Component<Props, State> {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={'Switch with invalid rules?'}
+          title={
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.confirmModeChangePromptTitle"
+              defaultMessage="Switch with invalid rules?"
+            />
+          }
           onCancel={() => this.setState({ showConfirmModeChange: false })}
           onConfirm={() => {
             this.setState({ mode: 'visual', showConfirmModeChange: false });
             this.onValidityChange(true);
           }}
-          cancelButtonText={'Cancel'}
-          confirmButtonText={'Switch anyway'}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.confirmModeChangePromptCancelButton"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.confirmModeChangePromptConfirmButton"
+              defaultMessage="Switch anyway"
+            />
+          }
         >
           <p>
-            The rules defined are not valid, and cannot be translated to the visual editor. You may
-            lost some or all of your changes during the conversion. Do you wish to continue?
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.confirmModeChangePromptBody"
+              defaultMessage="The rules defined are not valid, and cannot be translated to the visual editor. You may lose some or all of your changes during the conversion. Do you wish to continue?"
+            />
           </p>
         </EuiConfirmModal>
       </EuiOverlayMask>

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiComboBox } from '@elastic/eui';
 import { RoleTemplate } from '../../../../../../../common/model';
 import { isInlineRoleTemplate, isStoredRoleTemplate } from '../../services/role_template_type';
@@ -12,11 +13,17 @@ import { isInlineRoleTemplate, isStoredRoleTemplate } from '../../services/role_
 const templateTypeOptions = [
   {
     id: 'inline',
-    label: 'Role template',
+    label: i18n.translate(
+      'xpack.security.management.editRoleMapping.roleTemplate.inlineTypeLabel',
+      { defaultMessage: 'Role template' }
+    ),
   },
   {
     id: 'stored',
-    label: 'Stored script',
+    label: i18n.translate(
+      'xpack.security.management.editRoleMapping.roleTemplate.storedTypeLabel',
+      { defaultMessage: 'Stored script' }
+    ),
   },
 ];
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, ChangeEvent } from 'react';
+import React, { Component, ChangeEvent, Fragment } from 'react';
 import {
   EuiPanel,
   EuiTitle,
@@ -53,7 +53,12 @@ export class MappingInfoPanel extends Component<Props, State> {
     return (
       <EuiPanel>
         <EuiTitle>
-          <h2>Role mapping</h2>
+          <h2>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.roleMappingTitle"
+              defaultMessage="Role mapping"
+            />
+          </h2>
         </EuiTitle>
         <EuiText size="s" color="subdued">
           <p>
@@ -140,7 +145,13 @@ export class MappingInfoPanel extends Component<Props, State> {
                   this.setState({ rolesMode: 'roles' });
                 }}
               >
-                Switch to roles <EuiIcon size="s" type="inputOutput" />
+                <Fragment>
+                  <FormattedMessage
+                    id="xpack.security.management.editRoleMapping.switchToRoles"
+                    defaultMessage="Switch to roles"
+                  />
+                  <EuiIcon size="s" type="inputOutput" />
+                </Fragment>
               </EuiLink>
             ) : (
               <EuiLink
@@ -148,7 +159,13 @@ export class MappingInfoPanel extends Component<Props, State> {
                   this.setState({ rolesMode: 'templates' });
                 }}
               >
-                Switch to role templates <EuiIcon size="s" type="inputOutput" />
+                <Fragment>
+                  <FormattedMessage
+                    id="xpack.security.management.editRoleMapping.switchToRoleTemplates"
+                    defaultMessage="Switch to role templates"
+                  />
+                  <EuiIcon size="s" type="inputOutput" />
+                </Fragment>
               </EuiLink>
             )}
           </EuiText>

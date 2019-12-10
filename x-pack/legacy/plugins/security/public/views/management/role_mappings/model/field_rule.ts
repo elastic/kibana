@@ -4,28 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { Rule } from './rule';
 
+/** The allowed types for field rule values */
 export type FieldRuleValue = string | number | null | Array<string | number | null>;
 
+/**
+ * Represents a single field rule.
+ * Ex: "username = 'foo'"
+ */
 export class FieldRule extends Rule {
   constructor(public readonly field: string, public readonly value: FieldRuleValue) {
     super();
   }
 
+  /** {@see Rule.getType} */
   public getType() {
     return `field`;
   }
 
+  /** {@see Rule.getDisplayTitle} */
   public getDisplayTitle() {
-    return `The following is true`;
+    return i18n.translate('xpack.security.management.editRoleMapping.fieldRule.displayTitle', {
+      defaultMessage: 'The following is true',
+    });
   }
 
+  /** {@see Rule.clone} */
   public clone() {
-    return new FieldRule(this.field, _.cloneDeep(this.value));
+    return new FieldRule(this.field, Array.isArray(this.value) ? [...this.value] : this.value);
   }
 
+  /** {@see Rule.toRaw} */
   public toRaw() {
     return {
       field: {

@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Rule, FieldRule, AllRule } from '../../../model';
 
 interface Props {
@@ -27,8 +28,18 @@ export const AddRuleButton = (props: Props) => {
         }
       }}
     >
-      Add
+      <FormattedMessage
+        id="xpack.security.management.editRoleMapping.addRuleButton"
+        defaultMessage="Add"
+      />
     </EuiButtonEmpty>
+  );
+
+  const addRuleText = (
+    <FormattedMessage
+      id="xpack.security.management.editRoleMapping.addRuleOption"
+      defaultMessage="Add rule"
+    />
   );
 
   const options = [
@@ -41,7 +52,10 @@ export const AddRuleButton = (props: Props) => {
         props.onClick(new FieldRule('username', '*'));
       }}
     >
-      Add Rule
+      <FormattedMessage
+        id="xpack.security.management.editRoleMapping.addRuleOption"
+        defaultMessage="Add rule"
+      />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
       key="ruleGroup"
@@ -52,7 +66,10 @@ export const AddRuleButton = (props: Props) => {
         props.onClick(new AllRule([new FieldRule('username', '*')]));
       }}
     >
-      Add rule group
+      <FormattedMessage
+        id="xpack.security.management.editRoleMapping.addRuleGroupOption"
+        defaultMessage="Add rule group"
+      />
     </EuiContextMenuItem>,
   ];
 

@@ -6,6 +6,8 @@
 
 import React, { Component, Fragment } from 'react';
 import { EuiEmptyPrompt, EuiCallOut, EuiSpacer, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 import { FieldRuleEditor } from './field_rule_editor';
 import { AddRuleButton } from './add_rule_button';
 import { RuleGroupEditor } from './rule_group_editor';
@@ -33,8 +35,22 @@ export class VisualRuleEditor extends Component<Props, {}> {
 
     return (
       <EuiEmptyPrompt
-        title={<h3>No rules defined</h3>}
-        body={<div>Add a rule to control which users should be assigned roles.</div>}
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.visualRuleEditor.noRulesDefinedTitle"
+              defaultMessage="No rules defined"
+            />
+          </h3>
+        }
+        body={
+          <div>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.visualRuleEditor.noRulesDefinedMessage"
+              defaultMessage="Add a rule to control which users should be assigned roles."
+            />
+          </div>
+        }
         data-test-subj="roleMappingsNoRulesDefined"
         actions={
           <AddRuleButton
@@ -58,16 +74,26 @@ export class VisualRuleEditor extends Component<Props, {}> {
       <Fragment>
         <EuiCallOut
           iconType="alert"
-          title="Switch to advanced editor"
+          title={
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToAdvancedEditorTitle"
+              defaultMessage="Switch to advanced editor"
+            />
+          }
           data-test-subj="roleMappingsRulesTooComplex"
         >
           <p>
-            Role mapping rules are too complex for the visual editor. Switch to the advanced editor
-            to continue editing this rule.
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToAdvancedEditorMessage"
+              defaultMessage="Role mapping rules are too complex for the visual editor. Switch to the advanced editor to continue editing this rule."
+            />
           </p>
 
           <EuiButton onClick={this.props.onSwitchEditorMode} size="s">
-            Use advanced editor
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.visualRuleEditor.switchToAdvancedEditorButton"
+              defaultMessage="Use advanced editor"
+            />
           </EuiButton>
         </EuiCallOut>
         <EuiSpacer size="s" />

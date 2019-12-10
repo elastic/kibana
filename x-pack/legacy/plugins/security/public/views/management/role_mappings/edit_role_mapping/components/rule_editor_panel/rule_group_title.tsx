@@ -14,6 +14,7 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   RuleGroup,
   AllRule,
@@ -90,7 +91,12 @@ export const RuleGroupTitle = (props: Props) => {
     <EuiOverlayMask>
       <EuiConfirmModal
         data-test-subj="confirmRuleChangeModal"
-        title={'Switch with invalid rules?'}
+        title={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmGroupChangePromptTitle"
+            defaultMessage="Switch with invalid rules?"
+          />
+        }
         onCancel={() => {
           setShowConfirmChangeModal(false);
           setPendingNewRule(null);
@@ -100,12 +106,24 @@ export const RuleGroupTitle = (props: Props) => {
           changeRuleDiscardingSubRules(pendingNewRule!);
           setPendingNewRule(null);
         }}
-        cancelButtonText={'Cancel'}
-        confirmButtonText={'Switch anyway'}
+        cancelButtonText={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmGroupChangeCancelButton"
+            defaultMessage="Cancel"
+          />
+        }
+        confirmButtonText={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.confirmGroupChangeConfirmButton"
+            defaultMessage="Switch anyway"
+          />
+        }
       >
         <p>
-          This group contains rules which are not compatible. If you switch, you will lose all rules
-          within this group.
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.switchWithIncompatibleRulesMessage"
+            defaultMessage="This group contains rules which are not compatible. If you switch, you will lose all rules within this group."
+          />
         </p>
       </EuiConfirmModal>
     </EuiOverlayMask>

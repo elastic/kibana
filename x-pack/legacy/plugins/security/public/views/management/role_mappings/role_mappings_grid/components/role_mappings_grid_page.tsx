@@ -326,14 +326,20 @@ export class RoleMappingsGridPage extends Component<any, State> {
           if (enabled) {
             return (
               <EuiBadge data-test-subj="roleMappingEnabled" color="secondary">
-                Enabled
+                <FormattedMessage
+                  id="xpack.security.management.roleMappings.table.enabledBadge"
+                  defaultMessage="Enabled"
+                />
               </EuiBadge>
             );
           }
 
           return (
             <EuiBadge color="hollow" data-test-subj="roleMappingEnabled">
-              Disabled
+              <FormattedMessage
+                id="xpack.security.management.roleMappings.table.disabledBadge"
+                defaultMessage="Disabled"
+              />
             </EuiBadge>
           );
         },

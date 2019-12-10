@@ -17,6 +17,8 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldRule, FieldRuleValue } from '../../../model';
 
 interface Props {
@@ -55,17 +57,25 @@ const comparisonOptions: Record<
 > = {
   text: {
     id: 'text',
-    label: 'matches text',
+    label: i18n.translate(
+      'xpack.security.management.editRoleMapping.fieldRuleEditor.matchesTextLabel',
+      { defaultMessage: 'matches text' }
+    ),
     defaultValue: '*',
   },
   number: {
     id: 'number',
-    label: 'equals number',
+    label: i18n.translate(
+      'xpack.security.management.editRoleMapping.fieldRuleEditor.equalsNumberLabel',
+      { defaultMessage: 'equals number' }
+    ),
     defaultValue: 0,
   },
   null: {
     id: 'null',
-    label: 'is null',
+    label: i18n.translate('xpack.security.management.editRoleMapping.fieldRuleEditor.isNullLabel', {
+      defaultMessage: 'is null',
+    }),
     defaultValue: null,
   },
 };
@@ -83,12 +93,8 @@ export class FieldRuleEditor extends Component<Props, State> {
     const { field, value } = this.props.rule;
 
     const content = Array.isArray(value)
-      ? value.map((v, index) =>
-          index === 0
-            ? this.renderPrimaryFieldRow(field, value)
-            : this.renderFieldRow(field, value, index)
-        )
-      : [this.renderPrimaryFieldRow(field, value)];
+      ? value.map((v, index) => this.renderFieldRow(field, value, index))
+      : [this.renderFieldRow(field, value, 0)];
 
     return (
       <EuiFlexGroup direction="column">
@@ -99,14 +105,16 @@ export class FieldRuleEditor extends Component<Props, State> {
     );
   }
 
-  private renderPrimaryFieldRow = (field: string, ruleValue: FieldRuleValue) => {
+  private renderFieldRow = (field: string, ruleValue: FieldRuleValue, valueIndex: number) => {
+    const isPrimaryRow = valueIndex === 0;
+
     let renderAddValueButton = true;
-    let renderDeleteButton = this.props.allowDelete;
+    let renderDeleteButton = !isPrimaryRow || this.props.allowDelete;
     let rowRuleValue: FieldRuleValue = ruleValue;
     if (Array.isArray(ruleValue)) {
       renderDeleteButton = ruleValue.length > 1 || this.props.allowDelete;
       renderAddValueButton = ruleValue.length === 1;
-      rowRuleValue = ruleValue[0];
+      rowRuleValue = ruleValue[valueIndex];
     }
 
     const valueComparison = this.getComparisonType(rowRuleValue);
@@ -116,22 +124,39 @@ export class FieldRuleEditor extends Component<Props, State> {
     return (
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={1}>
-          <EuiFormRow label="User field">
-            <EuiComboBox
-              isClearable={false}
-              selectedOptions={[{ label: field }]}
-              singleSelection={{ asPlainText: true }}
-              onChange={this.onFieldChange}
-              onCreateOption={this.onAddField}
-              options={fieldOptions}
-            />
-          </EuiFormRow>
+          {isPrimaryRow ? (
+            <EuiFormRow
+              label={i18n.translate(
+                'xpack.security.management.editRoleMapping.fieldRuleEditor.userFieldLabel',
+                { defaultMessage: 'User field' }
+              )}
+            >
+              <EuiComboBox
+                isClearable={false}
+                selectedOptions={[{ label: field }]}
+                singleSelection={{ asPlainText: true }}
+                onChange={this.onFieldChange}
+                onCreateOption={this.onAddField}
+                options={fieldOptions}
+              />
+            </EuiFormRow>
+          ) : (
+            <EuiFormRow hasEmptyLabelSpace={true}>
+              <EuiExpression
+                description={i18n.translate(
+                  'xpack.security.management.editRoleMapping.fieldRuleEditor.orLabel',
+                  { defaultMessage: 'or' }
+                )}
+                value={field}
+              />
+            </EuiFormRow>
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {this.renderFieldTypeInput(type, rowRuleValue, valueComparison.id, 0)}
+          {this.renderFieldTypeInput(valueComparison.id, valueIndex)}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          {this.renderFieldValueInput(type, rowRuleValue, valueComparison.id, 0)}
+          {this.renderFieldValueInput(type, rowRuleValue, valueIndex)}
         </EuiFlexItem>
         {renderDeleteButton && (
           <EuiFlexItem grow={false}>
@@ -139,7 +164,12 @@ export class FieldRuleEditor extends Component<Props, State> {
               <EuiButtonIcon
                 iconType="trash"
                 color="danger"
-                aria-label="Delete value"
+                aria-label={i18n.translate(
+                  'xpack.security.management.editRoleMapping.fieldRuleEditor.deleteValueLabel',
+                  {
+                    defaultMessage: 'Delete value',
+                  }
+                )}
                 onClick={() => this.onRemoveAlternateValue(0)}
               />
             </EuiFormRow>
@@ -154,7 +184,10 @@ export class FieldRuleEditor extends Component<Props, State> {
                 color="primary"
                 size="s"
               >
-                add alternate value
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.fieldRuleEditor.addAlternateValueButton"
+                  defaultMessage="add alternate value"
+                />
               </EuiButton>
             ) : (
               <EuiSpacer />
@@ -165,69 +198,17 @@ export class FieldRuleEditor extends Component<Props, State> {
     );
   };
 
-  private renderFieldRow = (field: string, ruleValue: FieldRuleValue, valueIndex: number) => {
-    let renderAddValueButton = true;
-    let rowRuleValue: FieldRuleValue = ruleValue;
-    if (Array.isArray(ruleValue)) {
-      renderAddValueButton = valueIndex === ruleValue.length - 1;
-      rowRuleValue = ruleValue[valueIndex];
-    }
-
-    const valueComparison = this.getComparisonType(rowRuleValue);
-
-    const type = valueComparison.id === 'number' ? 'number' : 'text';
-
+  private renderFieldTypeInput = (inputType: string, valueIndex: number) => {
     return (
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={1}>
-          <EuiFormRow hasEmptyLabelSpace={true}>
-            <EuiExpression description={`or`} value={field} />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {this.renderFieldTypeInput(type, rowRuleValue, valueComparison.id, valueIndex)}
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          {this.renderFieldValueInput(type, rowRuleValue, valueComparison.id, valueIndex)}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace={true}>
-            <EuiButtonIcon
-              iconType="trash"
-              color="danger"
-              aria-label="Delete value"
-              onClick={() => this.onRemoveAlternateValue(valueIndex)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiFormRow hasEmptyLabelSpace={true}>
-            {renderAddValueButton ? (
-              <EuiButton
-                onClick={this.onAddAlternateValue}
-                iconType="plusInCircle"
-                color="primary"
-                size="s"
-              >
-                add alternate value
-              </EuiButton>
-            ) : (
-              <EuiSpacer />
-            )}
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
-  private renderFieldTypeInput = (
-    fieldType: 'number' | 'text',
-    rowRuleValue: FieldRuleValue,
-    inputType: string,
-    valueIndex: number
-  ) => {
-    return (
-      <EuiFormRow label="Type" key={valueIndex}>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.security.management.editRoleMapping.fieldRuleEditor.typeFormRow',
+          {
+            defaultMessage: 'Type',
+          }
+        )}
+        key={valueIndex}
+      >
         <EuiSelect
           options={[
             { value: 'text', text: 'text' },
@@ -246,12 +227,19 @@ export class FieldRuleEditor extends Component<Props, State> {
   private renderFieldValueInput = (
     fieldType: 'number' | 'text',
     rowRuleValue: FieldRuleValue,
-    inputType: string,
     valueIndex: number
   ) => {
     const isNullValue = rowRuleValue === null;
     return (
-      <EuiFormRow label="Value" key={valueIndex}>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.security.management.editRoleMapping.fieldRuleEditor.valueFormRow',
+          {
+            defaultMessage: 'Value',
+          }
+        )}
+        key={valueIndex}
+      >
         <EuiFieldText
           value={isNullValue ? '-- null --' : (rowRuleValue as string)}
           onChange={

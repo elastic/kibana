@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiComboBox, EuiFormRow, EuiHorizontalRule } from '@elastic/eui';
 import { RoleMapping, Role } from '../../../../../../../common/model';
 import { RolesApi } from '../../../../../../lib/roles_api';
@@ -49,7 +50,10 @@ export class RoleSelector extends React.Component<Props, State> {
     return (
       <EuiComboBox
         data-test-subj="roleMappingFormRoleComboBox"
-        placeholder={'Select one or more roles'}
+        placeholder={i18n.translate(
+          'xpack.security.management.editRoleMapping.selectRolesPlaceholder',
+          { defaultMessage: 'Select one or more roles' }
+        )}
         isLoading={this.state.roles.length === 0}
         options={this.state.roles.map(r => ({ label: r.name }))}
         selectedOptions={roles!.map(r => ({ label: r }))}

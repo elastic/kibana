@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -45,7 +46,10 @@ export const RoleTemplateEditor = ({
       <EuiFlexItem grow={false}>
         <EuiFormRow>
           <EuiButtonEmpty color="danger" onClick={() => onDelete(roleTemplate)} size="s">
-            Delete role template
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.deleteRoleTemplateButton"
+              defaultMessage="Delete role template"
+            />
           </EuiButtonEmpty>
         </EuiFormRow>
       </EuiFlexItem>
@@ -53,11 +57,17 @@ export const RoleTemplateEditor = ({
   );
 
   function getTemplateFormatSwitch() {
+    const returnsJsonLabel = (
+      <FormattedMessage
+        id="xpack.security.management.editRoleMapping.roleTemplateReturnsJson"
+        defaultMessage="Returns JSON"
+      />
+    );
     return (
-      <EuiFormRow label="Returns JSON">
+      <EuiFormRow label={returnsJsonLabel}>
         <EuiSwitch
           checked={roleTemplate.format === 'json'}
-          label="returns JSON"
+          label={returnsJsonLabel}
           showLabel={false}
           onChange={e => {
             onChange({
@@ -73,7 +83,14 @@ export const RoleTemplateEditor = ({
   function getTemplateConfigurationFields() {
     const templateTypeComboBox = (
       <EuiFlexItem>
-        <EuiFormRow label="Template type">
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.roleTemplateType"
+              defaultMessage="Template type"
+            />
+          }
+        >
           <RoleTemplateTypeSelect
             roleTemplate={roleTemplate}
             canUseStoredScripts={canUseStoredScripts}
@@ -103,7 +120,10 @@ export const RoleTemplateEditor = ({
         extraProps.isInvalid = true;
         extraProps.error = (
           <EuiText size="xs" color="danger" data-test-subj="roleMappingInlineScriptsDisabled">
-            This template cannot be used because inline scripts are disabled in Elasticsearch.
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.roleTemplateInlineScriptsDisabled"
+              defaultMessage="This template cannot be used because inline scripts are disabled in Elasticsearch."
+            />
           </EuiText>
         );
       }
@@ -111,8 +131,18 @@ export const RoleTemplateEditor = ({
         <Fragment>
           <EuiFlexItem grow={1} style={{ maxWidth: '400px' }}>
             <EuiFormRow
-              label="Template"
-              helpText="You can use mustache templates here."
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.roleTemplateLabel"
+                  defaultMessage="Template"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.roleTemplateHelpText"
+                  defaultMessage="You can use mustache templates here"
+                />
+              }
               {...extraProps}
             >
               <EuiFieldText
@@ -138,7 +168,10 @@ export const RoleTemplateEditor = ({
         extraProps.isInvalid = true;
         extraProps.error = (
           <EuiText size="xs" color="danger" data-test-subj="roleMappingStoredScriptsDisabled">
-            This template cannot be used because stored scripts are disabled in Elasticsearch.
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.roleTemplateStoredScriptsDisabled"
+              defaultMessage="This template cannot be used because stored scripts are disabled in Elasticsearch."
+            />
           </EuiText>
         );
       }
@@ -146,8 +179,18 @@ export const RoleTemplateEditor = ({
         <Fragment>
           <EuiFlexItem grow={1} style={{ maxWidth: '400px' }}>
             <EuiFormRow
-              label="Stored script id"
-              helpText="Enter the id of a previously stored painless or mustache script."
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.storedScriptLabel"
+                  defaultMessage="Stored script id"
+                />
+              }
+              helpText={
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.storedScriptHelpText"
+                  defaultMessage="Enter the id of a previously stored painless or mustache script."
+                />
+              }
               {...extraProps}
             >
               <EuiFieldText
@@ -170,9 +213,19 @@ export const RoleTemplateEditor = ({
     if (isInvalidRoleTemplate(roleTemplate)) {
       return (
         <EuiFlexItem grow={1}>
-          <EuiCallOut color="warning" title="Invalid role template">
-            Role template is invalid, and cannot be edited here. Please delete and recreate, or fix
-            via the Role Mapping API
+          <EuiCallOut
+            color="warning"
+            title={
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.invalidRoleTemplateTitle"
+                defaultMessage="Invalid role template"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.invalidRoleTemplateMessage"
+              defaultMessage="Role template is invalid, and cannot be edited here. Please delete and recreate, or fix via the Role Mapping API."
+            />
           </EuiCallOut>
         </EuiFlexItem>
       );

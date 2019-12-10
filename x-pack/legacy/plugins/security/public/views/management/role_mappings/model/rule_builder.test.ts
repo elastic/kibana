@@ -63,7 +63,7 @@ describe('generateRulesFromRaw', () => {
           },
         ],
       });
-    }).toThrowError('Expected a single rule definition, but found 2');
+    }).toThrowError('Expected a single rule definition, but found 2.');
   });
 
   it('provides a rule trace describing the location of the error', () => {
@@ -88,7 +88,7 @@ describe('generateRulesFromRaw', () => {
       throw new Error(`Expected generateRulesFromRaw to throw error.`);
     } catch (e) {
       if (e instanceof RuleBuilderError) {
-        expect(e.message).toEqual(`'except' can only exist within an 'all' rule`);
+        expect(e.message).toEqual(`"except" rule can only exist within an "all" rule.`);
         expect(e.ruleTrace).toEqual(['all', '[1]', 'any', '[1]', 'except']);
       } else {
         throw e;
@@ -104,7 +104,7 @@ describe('generateRulesFromRaw', () => {
             username: '*',
           },
         });
-      }).toThrowError('Expected an array of rules, but found object');
+      }).toThrowError('Expected an array of rules, but found object.');
     });
   });
 
@@ -116,7 +116,7 @@ describe('generateRulesFromRaw', () => {
             username: '*',
           },
         });
-      }).toThrowError('Expected an array of rules, but found object');
+      }).toThrowError('Expected an array of rules, but found object.');
     });
   });
 
@@ -130,7 +130,7 @@ describe('generateRulesFromRaw', () => {
             },
           ],
         });
-      }).toThrowError('Expected an object, but found array');
+      }).toThrowError('Expected an object, but found array.');
     });
 
     it(`expects an single property in its object value`, () => {
@@ -141,7 +141,7 @@ describe('generateRulesFromRaw', () => {
             dn: '*',
           },
         });
-      }).toThrowError('Expected a single field, but found 2');
+      }).toThrowError('Expected a single field, but found 2.');
     });
 
     it('accepts an array of possible values', () => {
@@ -183,7 +183,7 @@ describe('generateRulesFromRaw', () => {
             },
           ],
         });
-      }).toThrowError(`'except' can only exist within an 'all' rule`);
+      }).toThrowError(`"except" rule can only exist within an "all" rule.`);
 
       expect(() => {
         generateRulesFromRaw({
@@ -193,7 +193,7 @@ describe('generateRulesFromRaw', () => {
             },
           },
         });
-      }).toThrowError(`'except' can only exist within an 'all' rule`);
+      }).toThrowError(`"except" rule can only exist within an "all" rule.`);
     });
   });
 });

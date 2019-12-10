@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiButtonEmpty,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { AddRuleButton } from './add_rule_button';
 import { RuleGroupTitle } from './rule_group_title';
 import { FieldRuleEditor } from './field_rule_editor';
@@ -51,7 +52,10 @@ export class RuleGroupEditor extends Component<Props, {}> {
                   size="s"
                   data-test-subj="deleteRuleGroupButton"
                 >
-                  Delete rule group
+                  <FormattedMessage
+                    id="xpack.security.management.editRoleMapping.deleteRuleGroupButton"
+                    defaultMessage="Delete rule group"
+                  />
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>

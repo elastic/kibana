@@ -62,7 +62,7 @@ describe('validateRoleMappingRules', () => {
     expect(validateRoleMappingRules(({ rules: { something: [] } } as unknown) as RoleMapping))
       .toMatchInlineSnapshot(`
       Object {
-        "error": "Unknown rule type: something",
+        "error": "Unknown rule type: something.",
         "isInvalid": true,
       }
     `);

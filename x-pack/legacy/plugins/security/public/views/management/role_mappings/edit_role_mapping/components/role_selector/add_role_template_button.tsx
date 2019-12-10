@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   canUseStoredScripts: boolean;
@@ -17,22 +18,33 @@ export const AddRoleTemplateButton = (props: Props) => {
   if (!props.canUseStoredScripts && !props.canUseInlineScripts) {
     return (
       <EuiCallOut iconType="alert" color="danger" title={'Role templates unavailable'}>
-        <p>Role templates cannot be used when scripts are disabled in Elasticsearch</p>
+        <p>
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.roleTemplatesUnavailable"
+            defaultMessage="Role templates cannot be used when scripts are disabled in Elasticsearch."
+          />
+        </p>
       </EuiCallOut>
     );
   }
 
+  const addRoleTemplate = (
+    <FormattedMessage
+      id="xpack.security.management.editRoleMapping.addRoleTemplate"
+      defaultMessage="Add role template"
+    />
+  );
   if (props.canUseInlineScripts) {
     return (
       <EuiButtonEmpty iconType="plusInCircle" onClick={() => props.onClick('inline')}>
-        Add role template
+        {addRoleTemplate}
       </EuiButtonEmpty>
     );
   }
 
   return (
     <EuiButtonEmpty iconType="plusInCircle" onClick={() => props.onClick('stored')}>
-      Add role template
+      {addRoleTemplate}
     </EuiButtonEmpty>
   );
 };
