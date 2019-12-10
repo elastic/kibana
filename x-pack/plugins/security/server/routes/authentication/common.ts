@@ -24,7 +24,7 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
         validate: { query: schema.object({}, { allowUnknowns: true }) },
         options: { authRequired: false },
       },
-      createLicensedRouteHandler(async (context, request, response) => {
+      async (context, request, response) => {
         const serverBasePath = basePath.serverBasePath;
         if (path === '/api/security/v1/logout') {
           logger.warn(
@@ -51,18 +51,28 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
         } catch (error) {
           return response.customError(wrapIntoCustomErrorResponse(error));
         }
-      })
+      }
     );
   }
 
-  router.get(
-    { path: '/internal/security/me', validate: false },
-    createLicensedRouteHandler(async (context, request, response) => {
-      try {
-        return response.ok({ body: (await authc.getCurrentUser(request)) as any });
-      } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
-      }
-    })
-  );
+  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
+  for (const path of ['/internal/security/me', '/api/security/v1/me']) {
+    router.get(
+      { path, validate: false },
+      createLicensedRouteHandler(async (context, request, response) => {
+        if (path === '/api/security/v1/me') {
+          logger.warn(
+            `The "${basePath.serverBasePath}${path}" endpoint is deprecated and will be removed in the next major version.`,
+            { tags: ['deprecation'] }
+          );
+        }
+
+        try {
+          return response.ok({ body: (await authc.getCurrentUser(request)) as any });
+        } catch (error) {
+          return response.customError(wrapIntoCustomErrorResponse(error));
+        }
+      })
+    );
+  }
 }

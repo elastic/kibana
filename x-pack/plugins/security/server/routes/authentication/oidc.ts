@@ -5,6 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { KibanaRequest, KibanaResponseFactory } from '../../../../../../src/core/server';
 import { OIDCAuthenticationFlow } from '../../authentication';
 import { createCustomResourceResponse } from '.';
@@ -95,7 +96,7 @@ export function defineOIDCRoutes({
         validate: {
           query: schema.object(
             {
-              authenticationResponseURI: schema.maybe(schema.string({ minLength: 1 })),
+              authenticationResponseURI: schema.maybe(schema.uri()),
               code: schema.maybe(schema.string()),
               error: schema.maybe(schema.string()),
               error_description: schema.maybe(schema.string()),
@@ -105,6 +106,9 @@ export function defineOIDCRoutes({
               target_link_uri: schema.maybe(schema.uri()),
               state: schema.maybe(schema.string()),
             },
+            // The client MUST ignore unrecognized response parameters according to
+            // https://openid.net/specs/openid-connect-core-1_0.html#AuthResponseValidation and
+            // https://tools.ietf.org/html/rfc6749#section-4.1.2.
             { allowUnknowns: true }
           ),
         },
@@ -178,6 +182,8 @@ export function defineOIDCRoutes({
               login_hint: schema.maybe(schema.string()),
               target_link_uri: schema.maybe(schema.uri()),
             },
+            // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
+            // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
             { allowUnknowns: true }
           ),
         },
@@ -215,6 +221,8 @@ export function defineOIDCRoutes({
             login_hint: schema.maybe(schema.string()),
             target_link_uri: schema.maybe(schema.uri()),
           },
+          // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
+          // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
           { allowUnknowns: true }
         ),
       },
@@ -235,7 +243,7 @@ export function defineOIDCRoutes({
     loginAttempt: ProviderLoginAttempt
   ) {
     try {
-      // We handle the fact that the user might get redirected to Kibana while already having an session
+      // We handle the fact that the user might get redirected to Kibana while already having a session
       // Return an error notifying the user they are already logged in.
       const authenticationResult = await authc.login(request, {
         provider: 'oidc',
@@ -244,9 +252,11 @@ export function defineOIDCRoutes({
 
       if (authenticationResult.succeeded()) {
         return response.forbidden({
-          body:
-            'Sorry, you already have an active Kibana session. ' +
-            'If you want to start a new one, please logout from the existing session first.',
+          body: i18n.translate('xpack.security.conflictingSessionError', {
+            defaultMessage:
+              'Sorry, you already have an active Kibana session. ' +
+              'If you want to start a new one, please logout from the existing session first.',
+          }),
         });
       }
 
