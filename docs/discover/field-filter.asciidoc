@@ -26,27 +26,16 @@ image::images/filter-field.png[height=317]
 show only documents that contain that value
 or image:images/NegativeFilter.jpg[Negative Filter] to exclude all documents with that value.
 +
-The applied filters appear below the search bar.  Negative filters are outlined in red.
-+
 If there is no data to display, you might need to set a <<set-time-filter, date time filter>>.  
 You can choose a time from the quick filter or choose your 
 own using absolute or relative times.
 
-[float]
-=== Filter for field present
+Additional filtering options:
 
-Use the documents table to filter for whether a field is present.
+* To filter for whether a field is present, expand the document in
+the document table, and click the filter for field present icon.
 
-. Expand the document in the documents table by clicking the Expand button 
-Expand Button to the left of the document’s table entry.
-
-. Hover over the filed name and click the ... filter for field present icon.
-
-[float]
-=== Filter by type
-
-The data type of a field is indicated by an icon in the field list.  
-To limit the field 
+*  To limit the field 
 list to a particular data type, click *Filter by type*.
 You can also filter for whether that type is
 aggregatable or searchable.  
@@ -99,7 +88,7 @@ turn off the suggestions by setting the advanced setting, `filterEditor:suggestV
 === Edit, disable, and delete filters
 
 Each filter is displayed as a tag, which you can 
-disable temporary or remove completely. Click the tag, and then click 
+temporarily disable or remove completely. Click the tag, and then click 
 one of the actions in the dropdown menu.  
 To apply a filter action to all of the applied filters,
 click the *Actions* icon and select the action.
@@ -112,7 +101,8 @@ searched do not contain the field in a pinned filter, it has no effect.
 
 * *Edit filter.* Edit the
 filter definition and label.
-Exclude results :: Switch from a positive
+
+* *Exclude results.* Switch from a positive
 filter to a negative filter and vice versa.
 
 * *Temporarily disable.* Disable the filter without

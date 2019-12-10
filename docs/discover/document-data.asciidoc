@@ -4,9 +4,7 @@
 When you submit a search query in *Discover*, the most recent documents that match the query
 are listed in the documents table. 
 By default, the table includes columns for 
-the time field and the document _source, or all fields and values in the document.
-Although the table contains all the details, it can be difficult to parse the default format.
-You can narrow the context of the table to reveal hidden insights and patterns.
+the time field and the document _source, which shows all fields and values in the document.
 
 [float]
 [[sorting]]
