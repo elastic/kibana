@@ -25,17 +25,11 @@ export async function policyExists(
   name: string,
   callCluster: CallESAsCurrentUser
 ): Promise<boolean> {
-  try {
-    // TODO: Figure out if there is a better way to check for an ILM policy to exist that
-    // does not throw an exception.
-    await callCluster('transport.request', {
-      method: 'GET',
-      path: '/_ilm/policy/' + name,
-    });
-    return true;
-  } catch (e) {
-    return false;
-  }
+  const response = await callCluster('transport.request', {
+    method: 'GET',
+    path: '/_ilm/policy/?filter_path=' + name,
+  });
 
-  return false;
+  // If the response contains a key, it means the policy exists
+  return Object.keys(response).length > 0;
 }
