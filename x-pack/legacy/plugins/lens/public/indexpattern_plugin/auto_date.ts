@@ -23,6 +23,7 @@ export function autoIntervalFromDateRange(dateRange?: DateRange, defaultValue: s
 
   const buckets = new TimeBuckets();
   buckets.setInterval('auto');
+  // For datemath expressions such as now/d, this gets the upper and lower bound
   buckets.setBounds({
     min: dateMath.parse(dateRange.fromDate),
     max: dateMath.parse(dateRange.toDate, { roundUp: true }),

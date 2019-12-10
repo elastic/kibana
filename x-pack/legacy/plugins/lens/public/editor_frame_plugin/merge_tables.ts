@@ -12,6 +12,7 @@ import { LensMultiTable } from '../types';
 interface MergeTables {
   layerIds: string[];
   tables: KibanaDatatable[];
+  _forceNowForTesting?: Date;
 }
 
 export const mergeTables: ExpressionFunction<
@@ -40,7 +41,7 @@ export const mergeTables: ExpressionFunction<
   context: {
     types: ['kibana_context', 'null'],
   },
-  fn(ctx, { layerIds, tables }: MergeTables) {
+  fn(ctx, { layerIds, tables, _forceNowForTesting }: MergeTables) {
     const resultTables: Record<string, KibanaDatatable> = {};
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
@@ -48,18 +49,19 @@ export const mergeTables: ExpressionFunction<
     return {
       type: 'lens_multitable',
       tables: resultTables,
-      dateRange: getDateRange(ctx),
+      dateRange: getDateRange(ctx, _forceNowForTesting),
     };
   },
 };
 
-function getDateRange(ctx?: KibanaContext | null) {
+function getDateRange(ctx?: KibanaContext | null, now?: Date) {
   if (!ctx || !ctx.timeRange) {
     return;
   }
 
-  const fromDate = dateMath.parse(ctx.timeRange.from);
-  const toDate = dateMath.parse(ctx.timeRange.to);
+  // For datemath expressions such as now/d, this gets the upper and lower bound
+  const fromDate = dateMath.parse(ctx.timeRange.from, now ? { forceNow: now } : undefined);
+  const toDate = dateMath.parse(ctx.timeRange.to, { roundUp: true, forceNow: now || undefined });
 
   if (!fromDate || !toDate) {
     return;

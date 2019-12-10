@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import moment from 'moment';
 import { mergeTables } from './merge_tables';
 import { KibanaDatatable } from 'src/plugins/expressions/public';
 
@@ -63,6 +64,35 @@ describe('lens_merge_tables', () => {
         "dateRange": Object {
           "fromDate": 2019-01-01T05:00:00.000Z,
           "toDate": 2020-01-01T05:00:00.000Z,
+        },
+        "tables": Object {},
+        "type": "lens_multitable",
+      }
+    `);
+  });
+
+  it('should handle date ranges with now and datemath', () => {
+    expect(
+      mergeTables.fn(
+        {
+          type: 'kibana_context',
+          timeRange: {
+            from: 'now/w',
+            to: 'now/w',
+          },
+        },
+        {
+          layerIds: ['first', 'second'],
+          tables: [],
+          _forceNowForTesting: moment('2019-01-01T05:00:00.000Z').toDate(),
+        },
+        {}
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "dateRange": Object {
+          "fromDate": 2018-12-30T05:00:00.000Z,
+          "toDate": 2019-01-06T04:59:59.999Z,
         },
         "tables": Object {},
         "type": "lens_multitable",
