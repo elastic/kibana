@@ -51,6 +51,14 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
     store: {
       get: () => {},
     },
+    data: {
+      query: {
+        savedQueries: {},
+      },
+      autocomplete: {
+        getProvider: () => undefined,
+      },
+    },
   };
 
   return (
@@ -62,8 +70,7 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
   );
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/52246
-describe.skip('search_bar', () => {
+describe('search_bar', () => {
   const defaultProps = {
     isLoading: false,
     onQuerySubmit: jest.fn(),
