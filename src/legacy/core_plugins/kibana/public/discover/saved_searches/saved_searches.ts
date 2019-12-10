@@ -24,7 +24,7 @@ import { SavedObjectLoader } from 'ui/saved_objects';
 // @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 import { createSavedSearchClass } from './_saved_search';
-import { IndexPatterns } from '../../../../data/public';
+import { IndexPatternsContract } from '../../../../../../plugins/data/public';
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
@@ -35,7 +35,7 @@ savedObjectManagementRegistry.register({
 
 export function createSavedSearchesService(
   savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatterns,
+  indexPatterns: IndexPatternsContract,
   chrome: ChromeStart
 ) {
   const SavedSearchClass = createSavedSearchClass(savedObjectsClient, indexPatterns);

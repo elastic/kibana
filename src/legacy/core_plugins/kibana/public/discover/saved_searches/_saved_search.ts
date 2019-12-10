@@ -18,11 +18,11 @@
  */
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { SavedObjectsClientContract } from 'kibana/public';
-import { IndexPatterns } from '../../../../data/public';
+import { IndexPatternsContract } from '../../../../../../plugins/data/public';
 
 export function createSavedSearchClass(
   savedObjectClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatterns
+  indexPatterns: IndexPatternsContract
 ) {
   const SavedObjectClass = createSavedObjectClass(savedObjectClient, indexPatterns);
 

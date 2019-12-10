@@ -35,6 +35,7 @@ import { createSavedSearchesService } from '../saved_searches/saved_searches';
 // @ts-ignore
 import { createSavedSearchFactory } from '../saved_searches/_saved_search';
 import { DiscoverStartPlugins } from '../plugin';
+import { DataStart } from '../../../../data/public';
 import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
 import { SavedSearch } from '../types';
 import { SharePluginStart } from '../../../../../../plugins/share/public';
@@ -44,6 +45,7 @@ export interface DiscoverServices {
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
+  data: DataStart;
   docLinks: DocLinksStart;
   docViewsRegistry: docViewsRegistry.DocViewsRegistry;
   eui_utils: EuiUtilsStart;
@@ -65,7 +67,6 @@ export async function buildGlobalAngularServices() {
   const injector = await chromeLegacy.dangerouslyGetActiveInjector();
   const Private = injector.get<IPrivate>('Private');
   const State = Private(StateProvider);
-
   return {
     State,
   };
