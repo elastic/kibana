@@ -31,7 +31,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.salesByCategoryTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.salesByCategoryTitle', {
         defaultMessage: '[eCommerce] Sales by Category',
       }),
       visState:
@@ -53,7 +53,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.salesByGenderTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.salesByGenderTitle', {
         defaultMessage: '[eCommerce] Sales by Gender',
       }),
       visState:
@@ -75,7 +75,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.markdownTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.markdownTitle', {
         defaultMessage: '[eCommerce] Markdown',
       }),
       visState:
@@ -96,7 +96,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.controlsTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.controlsTitle', {
         defaultMessage: '[eCommerce] Controls',
       }),
       visState:
@@ -117,7 +117,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '2',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.promotionTrackingTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.promotionTrackingTitle', {
         defaultMessage: '[eCommerce] Promotion Tracking',
       }),
       visState:
@@ -138,7 +138,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.totalRevenueTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.totalRevenueTitle', {
         defaultMessage: '[eCommerce] Total Revenue',
       }),
       visState:
@@ -160,7 +160,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.soldProductsPerDayTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.soldProductsPerDayTitle', {
         defaultMessage: '[eCommerce] Sold Products per Day',
       }),
       visState:
@@ -181,7 +181,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.averageSalesPriceTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.averageSalesPriceTitle', {
         defaultMessage: '[eCommerce] Average Sales Price',
       }),
       visState:
@@ -204,7 +204,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.averageSoldQuantityTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.averageSoldQuantityTitle', {
         defaultMessage: '[eCommerce] Average Sold Quantity',
       }),
       visState:
@@ -227,7 +227,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.ordersTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.ordersTitle', {
         defaultMessage: '[eCommerce] Orders',
       }),
       description: '',
@@ -249,7 +249,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.averageSalesPerRegionTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.averageSalesPerRegionTitle', {
         defaultMessage: '[eCommerce] Average Sales Per Region',
       }),
       visState:
@@ -271,7 +271,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.topSellingProductsTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.topSellingProductsTitle', {
         defaultMessage: '[eCommerce] Top Selling Products',
       }),
       visState:
@@ -372,11 +372,11 @@ export const getSavedObjects = (): SavedObject[] => [
       dashboard: '7.0.0',
     },
     attributes: {
-      title: i18n.translate('server.sampleData.ecommerceSpec.revenueDashboardTitle', {
+      title: i18n.translate('home.sampleData.ecommerceSpec.revenueDashboardTitle', {
         defaultMessage: '[eCommerce] Revenue Dashboard',
       }),
       hits: 0,
-      description: i18n.translate('server.sampleData.ecommerceSpec.revenueDashboardDescription', {
+      description: i18n.translate('home.sampleData.ecommerceSpec.revenueDashboardDescription', {
         defaultMessage: 'Analyze mock eCommerce orders and revenue',
       }),
       panelsJSON:

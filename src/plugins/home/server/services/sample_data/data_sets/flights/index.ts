@@ -23,10 +23,10 @@ import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
 
-const flightsName = i18n.translate('server.sampleData.flightsSpecTitle', {
+const flightsName = i18n.translate('home.sampleData.flightsSpecTitle', {
   defaultMessage: 'Sample flight data',
 });
-const flightsDescription = i18n.translate('server.sampleData.flightsSpecDescription', {
+const flightsDescription = i18n.translate('home.sampleData.flightsSpecDescription', {
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring flight routes.',
 });
 const initialAppLinks = [] as AppLinkSchema[];

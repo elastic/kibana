@@ -30,7 +30,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.uniqueVisitorsTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.uniqueVisitorsTitle', {
         defaultMessage: '[Logs] Unique Visitors vs. Average Bytes',
       }),
       visState:
@@ -52,7 +52,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.uniqueVisitorsByCountryTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.uniqueVisitorsByCountryTitle', {
         defaultMessage: '[Logs] Unique Visitors by Country',
       }),
       visState:
@@ -74,7 +74,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.heatmapTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.heatmapTitle', {
         defaultMessage: '[Logs] Heatmap',
       }),
       visState:
@@ -97,7 +97,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '2',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.hostVisitsBytesTableTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.hostVisitsBytesTableTitle', {
         defaultMessage: '[Logs] Host, Visits and Bytes Table',
       }),
       visState:
@@ -118,7 +118,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '2',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.goalsTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.goalsTitle', {
         defaultMessage: '[Logs] Goals',
       }),
       visState:
@@ -141,7 +141,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.fileTypeScatterPlotTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.fileTypeScatterPlotTitle', {
         defaultMessage: '[Logs] File Type Scatter Plot',
       }),
       visState:
@@ -162,7 +162,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.sourceAndDestinationSankeyChartTitle', {
         defaultMessage: '[Logs] Source and Destination Sankey Chart',
       }),
       visState:
@@ -183,7 +183,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.responseCodesOverTimeTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.responseCodesOverTimeTitle', {
         defaultMessage: '[Logs] Response Codes Over Time + Annotations',
       }),
       visState:
@@ -204,7 +204,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.inputControlsTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.inputControlsTitle', {
         defaultMessage: '[Logs] Input Controls',
       }),
       visState:
@@ -225,7 +225,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.visitorOSTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.visitorOSTitle', {
         defaultMessage: '[Logs] Visitors by OS',
       }),
       visState:
@@ -247,7 +247,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.markdownInstructionsTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.markdownInstructionsTitle', {
         defaultMessage: '[Logs] Markdown Instructions',
       }),
       visState:
@@ -342,11 +342,11 @@ export const getSavedObjects = (): SavedObject[] => [
       dashboard: '7.0.0',
     },
     attributes: {
-      title: i18n.translate('server.sampleData.logsSpec.webTrafficTitle', {
+      title: i18n.translate('home.sampleData.logsSpec.webTrafficTitle', {
         defaultMessage: '[Logs] Web Traffic',
       }),
       hits: 0,
-      description: i18n.translate('server.sampleData.logsSpec.webTrafficDescription', {
+      description: i18n.translate('home.sampleData.logsSpec.webTrafficDescription', {
         defaultMessage: "Analyze mock web traffic log data for Elastic's website",
       }),
       panelsJSON:

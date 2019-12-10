@@ -23,10 +23,10 @@ import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
 
-const logsName = i18n.translate('server.sampleData.logsSpecTitle', {
+const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
   defaultMessage: 'Sample web logs',
 });
-const logsDescription = i18n.translate('server.sampleData.logsSpecDescription', {
+const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
 });
 const initialAppLinks = [] as AppLinkSchema[];

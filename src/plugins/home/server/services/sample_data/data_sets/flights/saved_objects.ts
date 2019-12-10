@@ -31,7 +31,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.controlsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.controlsTitle', {
         defaultMessage: '[Flights] Controls',
       }),
       visState:
@@ -52,7 +52,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.flightCountAndAverageTicketPriceTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.flightCountAndAverageTicketPriceTitle', {
         defaultMessage: '[Flights] Flight Count and Average Ticket Price',
       }),
       visState:
@@ -75,7 +75,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.flightLogTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.flightLogTitle', {
         defaultMessage: '[Flights] Flight Log',
       }),
       description: '',
@@ -107,7 +107,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.airlineCarrierTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.airlineCarrierTitle', {
         defaultMessage: '[Flights] Airline Carrier',
       }),
       visState:
@@ -129,7 +129,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.delayTypeTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.delayTypeTitle', {
         defaultMessage: '[Flights] Delay Type',
       }),
       visState:
@@ -151,7 +151,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.delaysAndCancellationsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.delaysAndCancellationsTitle', {
         defaultMessage: '[Flights] Delays & Cancellations',
       }),
       visState:
@@ -172,7 +172,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.delayBucketsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.delayBucketsTitle', {
         defaultMessage: '[Flights] Delay Buckets',
       }),
       visState:
@@ -194,7 +194,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.flightDelaysTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.flightDelaysTitle', {
         defaultMessage: '[Flights] Flight Delays',
       }),
       visState:
@@ -216,7 +216,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.flightCancellationsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.flightCancellationsTitle', {
         defaultMessage: '[Flights] Flight Cancellations',
       }),
       visState:
@@ -238,7 +238,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.destinationWeatherTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.destinationWeatherTitle', {
         defaultMessage: '[Flights] Destination Weather',
       }),
       visState:
@@ -260,7 +260,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.markdownInstructionsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.markdownInstructionsTitle', {
         defaultMessage: '[Flights] Markdown Instructions',
       }),
       visState:
@@ -281,7 +281,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.originCountryTicketPricesTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.originCountryTicketPricesTitle', {
         defaultMessage: '[Flights] Origin Country Ticket Prices',
       }),
       visState:
@@ -303,7 +303,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.totalFlightDelaysTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.totalFlightDelaysTitle', {
         defaultMessage: '[Flights] Total Flight Delays',
       }),
       visState:
@@ -326,7 +326,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.totalFlightCancellationsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.totalFlightCancellationsTitle', {
         defaultMessage: '[Flights] Total Flight Cancellations',
       }),
       visState:
@@ -349,7 +349,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.originCountryTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.originCountryTitle', {
         defaultMessage: '[Flights] Origin Country vs. Destination Country',
       }),
       visState:
@@ -372,7 +372,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.totalFlightsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.totalFlightsTitle', {
         defaultMessage: '[Flights] Total Flights',
       }),
       visState:
@@ -394,7 +394,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '1',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.averageTicketPriceTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.averageTicketPriceTitle', {
         defaultMessage: '[Flights] Average Ticket Price',
       }),
       visState:
@@ -416,7 +416,7 @@ export const getSavedObjects = (): SavedObject[] => [
     version: '3',
     migrationVersion: {},
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.airportConnectionsTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.airportConnectionsTitle', {
         defaultMessage: '[Flights] Airport Connections (Hover Over Airport)',
       }),
       visState:
@@ -547,12 +547,12 @@ export const getSavedObjects = (): SavedObject[] => [
       dashboard: '7.0.0',
     },
     attributes: {
-      title: i18n.translate('server.sampleData.flightsSpec.globalFlightDashboardTitle', {
+      title: i18n.translate('home.sampleData.flightsSpec.globalFlightDashboardTitle', {
         defaultMessage: '[Flights] Global Flight Dashboard',
       }),
       hits: 0,
       description: i18n.translate(
-        'server.sampleData.flightsSpec.globalFlightDashboardDescription',
+        'home.sampleData.flightsSpec.globalFlightDashboardDescription',
         {
           defaultMessage:
             'Analyze mock flight data for ES-Air, Logstash Airways, Kibana Airlines and JetBeats',

@@ -17,23 +17,6 @@
  * under the License.
  */
 
-/*
-  Plugin to relace the sample_data methods in the legacy code:
-
-  During the setup phase of the sample_data_registry, the following methods are exposed:
-    getSampleDatasets DONE
-    registerSampleDataset DONE
-    addSavedObjectsToSampleDataset DONE
-    addAppLinksToSampleDataset DONE
-    replacePanelInSampleDatasetDashboard DONE
-  DONE
-    createListRoute
-    createInstallRoute
-  TODO:
-    createUninstallRoute
-  They go into the setup phase before the return methods.
-
-*/
 import Joi from 'joi';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { SavedObject } from 'src/core/public';

@@ -23,10 +23,10 @@ import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
 
-const ecommerceName = i18n.translate('server.sampleData.ecommerceSpecTitle', {
+const ecommerceName = i18n.translate('home.sampleData.ecommerceSpecTitle', {
   defaultMessage: 'Sample eCommerce orders',
 });
-const ecommerceDescription = i18n.translate('server.sampleData.ecommerceSpecDescription', {
+const ecommerceDescription = i18n.translate('home.sampleData.ecommerceSpecDescription', {
   defaultMessage: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
 });
 const initialAppLinks = [] as AppLinkSchema[];
