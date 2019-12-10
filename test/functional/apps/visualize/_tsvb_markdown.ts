@@ -71,7 +71,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should render html as plain text', async () => {
-        const html = '<h1>hello world</h1>';
+        const html = '<script>hello world</script>';
         await visualBuilder.enterMarkdown(html);
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(html);

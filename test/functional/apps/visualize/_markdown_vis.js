@@ -26,7 +26,8 @@ export default function ({ getPageObjects, getService }) {
   const markdown = `
 # Heading 1
 
-<h3>Inline HTML that should not be rendered as html</h3>
+<h3>Should be rendered as HTML</h3>
+<script>Should not be rendered as HTML</script>
   `;
 
   describe('visualize app', () => {
@@ -49,7 +50,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should not render html in markdown as html', async function () {
-        const expected = 'Heading 1\n<h3>Inline HTML that should not be rendered as html</h3>';
+        const expected = 'Heading 1\nShould be rendered as HTML\n<script>Should not be rendered as HTML</script>';
         const actual = await PageObjects.visualize.getMarkdownText();
         expect(actual).to.equal(expected);
       });
