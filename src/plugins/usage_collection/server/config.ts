@@ -17,12 +17,22 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
 
-export const ConfigSchema = schema.object({
+export const configSchema = schema.object({
   uiMetric: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     debug: schema.boolean({ defaultValue: true }),
   }),
   maximumWaitTimeForAllCollectorsInS: schema.number({ defaultValue: 60 }),
 });
+
+export type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  exposeToBrowser: {
+    uiMetric: true,
+  },
+};

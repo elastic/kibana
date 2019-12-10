@@ -19,7 +19,7 @@
 
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import { ConfigSchema } from './config';
+import { ConfigType } from './config';
 import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
@@ -37,7 +37,7 @@ export class UsageCollectionPlugin {
 
   public async setup(core: CoreSetup) {
     const config = await this.initializerContext.config
-      .create<TypeOf<typeof ConfigSchema>>()
+      .create<ConfigType>()
       .pipe(first())
       .toPromise();
 

@@ -21,7 +21,20 @@ import { Reporter, METRIC_TYPE } from '@kbn/analytics';
 // import { Storage } from 'ui/storage';
 import { Storage } from '../../kibana_utils/public';
 import { createReporter } from './services';
-import { PluginInitializerContext, Plugin, CoreSetup } from '../../../core/public';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  HttpServiceBase,
+} from '../../../core/public';
+
+interface PublicConfigType {
+  uiMetric: {
+    enabled: boolean;
+    debug: boolean;
+  };
+}
 
 export interface UsageCollectionSetup {
   allowTrackUserAgent: (allow: boolean) => void;
@@ -29,19 +42,23 @@ export interface UsageCollectionSetup {
   METRIC_TYPE: typeof METRIC_TYPE;
 }
 
-export function isUnauthenticated(path: string) {
-  // const path = (chrome as any).removeBasePath(window.location.pathname);
+export function isUnauthenticated(http: HttpServiceBase) {
+  const { basePath } = http;
+  const path = basePath.remove(window.location.pathname);
   return path === '/login' || path === '/logout' || path === '/logged_out' || path === '/status';
 }
 
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
   private trackUserAgent: boolean = true;
   private reporter?: Reporter;
-  constructor(initializerContext: PluginInitializerContext) {}
+  private config: ConfigType;
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<PublicConfigType>();
+  }
 
   public setup({ http }: CoreSetup): UsageCollectionSetup {
     const localStorage = new Storage(window.localStorage);
-    const debug = true;
+    const debug = this.config.uiMetric.enabled;
 
     this.reporter = createReporter({
       localStorage,
@@ -58,12 +75,12 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     };
   }
 
-  public start() {
+  public start({ http }: CoreStart) {
     if (!this.reporter) {
       return;
     }
-    const uiMetricEnabled = true;
-    if (uiMetricEnabled && !isUnauthenticated('')) {
+
+    if (this.config.uiMetric.enabled && !isUnauthenticated(http)) {
       this.reporter.start();
     }
 
