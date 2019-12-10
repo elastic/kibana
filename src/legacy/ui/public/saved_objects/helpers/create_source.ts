@@ -19,7 +19,7 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObject } from 'ui/saved_objects/types';
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/public';
+import { OverlayStart, SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/public';
 import { OVERWRITE_REJECTED } from 'ui/saved_objects/constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
@@ -32,6 +32,7 @@ import { confirmModalPromise } from './confirm_modal_promise';
  * @param savedObjectsClient - client to create a new saved object
  * @param esType - type of the saved object
  * @param options - options to pass to the saved object create method
+ * @param overlays - options to pass to the saved object create method
  * @returns {Promise} - A promise that is resolved with the objects id if the object is
  * successfully indexed. If the overwrite confirmation was rejected, an error is thrown with
  * a confirmRejected = true parameter so that case can be handled differently than
@@ -43,7 +44,8 @@ export async function createSource(
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClientContract,
   esType: string,
-  options = {}
+  options = {},
+  overlays: OverlayStart
 ) {
   try {
     return await savedObjectsClient.create(esType, source, options);
@@ -69,7 +71,7 @@ export async function createSource(
         }
       );
 
-      return confirmModalPromise(confirmMessage, title, confirmButtonText)
+      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
         .then(() =>
           savedObjectsClient.create(
             esType,

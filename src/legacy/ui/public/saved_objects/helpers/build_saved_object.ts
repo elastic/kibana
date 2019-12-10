@@ -18,7 +18,7 @@
  */
 import _ from 'lodash';
 import { SearchSource } from 'ui/courier';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { hydrateIndexPattern } from './hydrate_index_pattern';
 import { intializeSavedObject } from './initialize_saved_object';
 import { serializeSavedObject } from './serialize_saved_object';
@@ -32,7 +32,9 @@ export function buildSavedObject(
   savedObject: SavedObject,
   config: SavedObjectConfig = {},
   indexPatterns: IndexPatternsContract,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  chrome: ChromeStart,
+  overlays: OverlayStart
 ) {
   // type name for this object, used as the ES-type
   const esType = config.type || '';
@@ -100,7 +102,14 @@ export function buildSavedObject(
 
   savedObject.save = async (opts: SavedObjectSaveOpts) => {
     try {
-      const result = await saveSavedObject(savedObject, savedObjectsClient, config, opts);
+      const result = await saveSavedObject(
+        savedObject,
+        savedObjectsClient,
+        config,
+        opts,
+        chrome,
+        overlays
+      );
       return Promise.resolve(result);
     } catch (e) {
       return Promise.reject(e);

@@ -17,14 +17,21 @@
  * under the License.
  */
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { IndexPatternsContract } from '../../../../../../plugins/data/public';
 
 export function createSavedSearchClass(
   savedObjectClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsContract
+  indexPatterns: IndexPatternsContract,
+  chrome: ChromeStart,
+  overlays: OverlayStart
 ) {
-  const SavedObjectClass = createSavedObjectClass(savedObjectClient, indexPatterns);
+  const SavedObjectClass = createSavedObjectClass(
+    savedObjectClient,
+    indexPatterns,
+    chrome,
+    overlays
+  );
 
   class SavedSearch extends SavedObjectClass {
     public static type: string = 'search';

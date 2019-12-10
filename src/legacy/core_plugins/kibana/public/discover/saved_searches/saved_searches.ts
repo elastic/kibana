@@ -19,13 +19,12 @@
 import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { ChromeStart, SavedObjectsClientContract } from 'kibana/public';
+import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { SavedObjectLoader } from 'ui/saved_objects';
 // @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
 import { createSavedSearchClass } from './_saved_search';
 import { IndexPatternsContract } from '../../../../../../plugins/data/public';
-
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
 savedObjectManagementRegistry.register({
@@ -36,9 +35,15 @@ savedObjectManagementRegistry.register({
 export function createSavedSearchesService(
   savedObjectsClient: SavedObjectsClientContract,
   indexPatterns: IndexPatternsContract,
-  chrome: ChromeStart
+  chrome: ChromeStart,
+  overlays: OverlayStart
 ) {
-  const SavedSearchClass = createSavedSearchClass(savedObjectsClient, indexPatterns);
+  const SavedSearchClass = createSavedSearchClass(
+    savedObjectsClient,
+    indexPatterns,
+    chrome,
+    overlays
+  );
   const savedSearchLoader = new SavedObjectLoader(SavedSearchClass, savedObjectsClient, chrome);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
@@ -57,6 +62,7 @@ module.service('savedSearches', () =>
   createSavedSearchesService(
     npStart.core.savedObjects.client,
     npStart.plugins.data.indexPatterns,
-    npStart.core.chrome
+    npStart.core.chrome,
+    npStart.core.overlays
   )
 );

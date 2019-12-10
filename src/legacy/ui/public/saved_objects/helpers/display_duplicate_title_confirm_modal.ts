@@ -17,11 +17,15 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { SAVE_DUPLICATE_REJECTED } from 'ui/saved_objects/constants';
+import { OverlayStart } from 'kibana/public';
+import { SAVE_DUPLICATE_REJECTED } from '../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 import { SavedObject } from '../types';
 
-export function displayDuplicateTitleConfirmModal(savedObject: SavedObject): Promise<true> {
+export function displayDuplicateTitleConfirmModal(
+  savedObject: SavedObject,
+  overlays: OverlayStart
+): Promise<true> {
   const confirmMessage = i18n.translate(
     'common.ui.savedObjects.confirmModal.saveDuplicateConfirmationMessage',
     {
@@ -38,7 +42,7 @@ export function displayDuplicateTitleConfirmModal(savedObject: SavedObject): Pro
     }
   );
   try {
-    return confirmModalPromise(confirmMessage, '', confirmButtonText);
+    return confirmModalPromise(confirmMessage, '', confirmButtonText, overlays);
   } catch (_) {
     return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
   }

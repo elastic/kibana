@@ -27,7 +27,7 @@
  * This class seems to interface with ES primarily through the es Angular
  * service and the saved object api.
  */
-import { SavedObjectsClientContract } from 'kibana/public';
+import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { npStart } from 'ui/new_platform';
 import { SavedObjectConfig, SavedObjectSaveOpts } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
@@ -42,7 +42,9 @@ export interface SavedObject {
 
 export function createSavedObjectClass(
   savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsContract
+  indexPatterns: IndexPatternsContract,
+  chrome: ChromeStart,
+  overlays: OverlayStart
 ) {
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and
@@ -60,7 +62,9 @@ export function createSavedObjectClass(
         this,
         config,
         indexPatterns,
-        savedObjectsClient
+        savedObjectsClient,
+        chrome,
+        overlays
       );
     }
   }
@@ -71,6 +75,8 @@ export function createSavedObjectClass(
 export function SavedObjectProvider() {
   return createSavedObjectClass(
     npStart.core.savedObjects.client,
-    npStart.plugins.data.indexPatterns
+    npStart.plugins.data.indexPatterns,
+    npStart.core.chrome,
+    npStart.core.overlays
   );
 }

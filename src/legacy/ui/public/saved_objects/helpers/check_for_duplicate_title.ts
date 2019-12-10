@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SavedObjectsClientContract } from 'kibana/public';
+import { OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { SavedObject } from '../types';
 import { findObjectByTitle } from './find_object_by_title';
 import { SAVE_DUPLICATE_REJECTED } from '../constants';
@@ -30,12 +30,14 @@ import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_con
  * @param savedObjectsClient
  * @param isTitleDuplicateConfirmed
  * @param onTitleDuplicate
+ * @param overlays
  */
 export async function checkForDuplicateTitle(
   savedObject: SavedObject,
   savedObjectsClient: SavedObjectsClientContract,
   isTitleDuplicateConfirmed: boolean,
-  onTitleDuplicate: (() => void) | undefined
+  onTitleDuplicate: (() => void) | undefined,
+  overlays: OverlayStart
 ): Promise<true> {
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
@@ -65,5 +67,5 @@ export async function checkForDuplicateTitle(
 
   // TODO: make onTitleDuplicate a required prop and remove UI components from this class
   // Need to leave here until all users pass onTitleDuplicate.
-  return displayDuplicateTitleConfirmModal(savedObject);
+  return displayDuplicateTitleConfirmModal(savedObject, overlays);
 }

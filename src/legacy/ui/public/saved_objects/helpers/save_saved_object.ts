@@ -16,8 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npStart } from 'ui/new_platform';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { ChromeStart, OverlayStart, SavedObjectsClientContract } from 'kibana/public';
 import { SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from '../types';
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from '../constants';
 import { createSource } from './create_source';
@@ -45,6 +44,8 @@ function isErrorNonFatal(error: { message: string }) {
  * @property {boolean} [options.isTitleDuplicateConfirmed=false] - If true, save allowed with duplicate title
  * @property {func} [options.onTitleDuplicate] - function called if duplicate title exists.
  * When not provided, confirm modal will be displayed asking user to confirm or cancel save.
+ * @param {ChromeStart} [chrome]
+ * @param {OverlayStart} [overlays]
  * @return {Promise}
  * @resolved {String} - The id of the doc
  */
@@ -56,7 +57,9 @@ export async function saveSavedObject(
     confirmOverwrite = false,
     isTitleDuplicateConfirmed = false,
     onTitleDuplicate,
-  }: SavedObjectSaveOpts = {}
+  }: SavedObjectSaveOpts = {},
+  chrome: ChromeStart,
+  overlays: OverlayStart
 ): Promise<string> {
   const esType = config.type || '';
   const extractReferences = config.extractReferences;
@@ -84,7 +87,8 @@ export async function saveSavedObject(
       savedObject,
       savedObjectsClient,
       isTitleDuplicateConfirmed,
-      onTitleDuplicate
+      onTitleDuplicate,
+      overlays
     );
     savedObject.isSaving = true;
     const resp = confirmOverwrite
@@ -93,7 +97,8 @@ export async function saveSavedObject(
           savedObject,
           savedObjectsClient,
           esType,
-          savedObject.creationOpts({ references })
+          savedObject.creationOpts({ references }),
+          overlays
         )
       : await savedObjectsClient.create(
           esType,
@@ -103,7 +108,7 @@ export async function saveSavedObject(
 
     savedObject.id = resp.id;
     if (savedObject.showInRecentlyAccessed && savedObject.getFullPath) {
-      npStart.core.chrome.recentlyAccessed.add(
+      chrome.recentlyAccessed.add(
         savedObject.getFullPath(),
         savedObject.title,
         String(savedObject.id)
