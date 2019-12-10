@@ -51,7 +51,7 @@ This field will be used in the terms aggregation to group your documents into en
 . Set *Documents per entity* to configure the maximum number of documents accumulated per entity.
 
 [role="screenshot"]
-image::maps/images/top_hits.gif[]
+image::maps/images/top_hits.png[]
 
 [role="xpack"]
 [[point-to-point]]
