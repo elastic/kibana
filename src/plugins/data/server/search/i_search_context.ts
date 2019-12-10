@@ -18,8 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
-import { CoreSetup } from '../../../../core/server';
-import { SharedGlobalConfig } from '../../../../core/server/types';
+import { CoreSetup, SharedGlobalConfig } from '../../../../core/server';
 
 export interface ISearchContext {
   core: CoreSetup;

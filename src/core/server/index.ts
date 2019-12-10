@@ -139,6 +139,7 @@ export {
   PluginInitializerContext,
   PluginManifest,
   PluginName,
+  SharedGlobalConfig,
 } from './plugins';
 
 export {
