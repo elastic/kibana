@@ -1,3 +1,9 @@
+// Begin workaround for APM Server 7.x branch
+ifeval::["{branch}" == "7.x"]
+:branch: master
+endif::[]
+// End APM Server 7.x workaround
+
 [[troubleshooting]] 
 === Troubleshooting common problems
 
