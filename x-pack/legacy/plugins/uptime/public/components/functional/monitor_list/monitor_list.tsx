@@ -206,7 +206,7 @@ export const MonitorListComponent = (props: Props) => {
               field: 'monitor_id',
               name: '',
               sortable: true,
-              width: '40px',
+              width: '24px',
               isExpander: true,
               render: (id: string) => {
                 return (

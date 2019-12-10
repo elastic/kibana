@@ -6,7 +6,6 @@
 
 import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
@@ -96,7 +95,7 @@ export interface TimelinesTableProps {
  * Renders a table that displays metadata about timelines, (i.e. name,
  * description, etc.)
  */
-export const TimelinesTable = pure<TimelinesTableProps>(
+export const TimelinesTable = React.memo<TimelinesTableProps>(
   ({
     deleteTimelines,
     defaultPageSize,
