@@ -71,7 +71,7 @@ async function slackExecutor(
     result = await webhook.send(message);
   } catch (err) {
     if (err.original == null || err.original.response == null) {
-      return errorResult(actionId, err.message);
+      return serviceErrorResult(actionId, err.message);
     }
 
     const { status, statusText, headers } = err.original.response;
@@ -90,7 +90,17 @@ async function slackExecutor(
       );
     }
 
-    return errorResult(actionId, `${err.message} - ${statusText}`);
+    const errMessage = i18n.translate(
+      'xpack.actions.builtin.slack.unexpectedHttpResponseErrorMessage',
+      {
+        defaultMessage: 'unexpected http response from slack: {httpStatus} {httpStatusText}',
+        values: {
+          httpStatus: status,
+          httpStatusText: statusText,
+        },
+      }
+    );
+    return errorResult(actionId, errMessage);
   }
 
   if (result == null) {
@@ -104,55 +114,52 @@ async function slackExecutor(
   }
 
   if (result.text !== 'ok') {
-    const errMessage = i18n.translate(
-      'xpack.actions.builtin.slack.unexpectedTextResponseErrorMessage',
-      {
-        defaultMessage: 'unexpected text response from slack',
-      }
-    );
-    return errorResult(actionId, errMessage);
+    return serviceErrorResult(actionId, result.text);
   }
 
-  return successResult(result);
+  return successResult(actionId, result);
 }
 
-function successResult(data: any): ActionTypeExecutorResult {
-  return { status: 'ok', data };
+function successResult(actionId: string, data: any): ActionTypeExecutorResult {
+  return { status: 'ok', data, actionId };
 }
 
-function errorResult(id: string, message: string): ActionTypeExecutorResult {
+function errorResult(actionId: string, message: string): ActionTypeExecutorResult {
+  return {
+    status: 'error',
+    message,
+    actionId,
+  };
+}
+function serviceErrorResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate('xpack.actions.builtin.slack.errorPostingErrorMessage', {
-    defaultMessage: 'an error occurred in action "{id}" posting a slack message: {message}',
-    values: {
-      id,
-      message,
-    },
+    defaultMessage: 'error posting slack message',
   });
   return {
     status: 'error',
     message: errMessage,
+    actionId,
+    serviceMessage,
   };
 }
 
-function retryResult(id: string, message: string): ActionTypeExecutorResult {
+function retryResult(actionId: string, message: string): ActionTypeExecutorResult {
   const errMessage = i18n.translate(
     'xpack.actions.builtin.slack.errorPostingRetryLaterErrorMessage',
     {
-      defaultMessage: 'an error occurred in action "{id}" posting a slack message, retry later',
-      values: {
-        id,
-      },
+      defaultMessage: 'error posting a slack message, retry later',
     }
   );
   return {
     status: 'error',
     message: errMessage,
     retry: true,
+    actionId,
   };
 }
 
 function retryResultSeconds(
-  id: string,
+  actionId: string,
   message: string,
   retryAfter: number
 ): ActionTypeExecutorResult {
@@ -162,12 +169,9 @@ function retryResultSeconds(
   const errMessage = i18n.translate(
     'xpack.actions.builtin.slack.errorPostingRetryDateErrorMessage',
     {
-      defaultMessage:
-        'an error occurred in action "{id}" posting a slack message, retry at {retryString}: {message}',
+      defaultMessage: 'error posting a slack message, retry at {retryString}',
       values: {
-        id,
         retryString,
-        message,
       },
     }
   );
@@ -175,5 +179,7 @@ function retryResultSeconds(
     status: 'error',
     message: errMessage,
     retry,
+    actionId,
+    serviceMessage: message,
   };
 }
