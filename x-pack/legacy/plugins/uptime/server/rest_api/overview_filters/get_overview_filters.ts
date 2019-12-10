@@ -4,29 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Joi from 'joi';
+import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
+import { UMRestApiRouteCreator } from '../types';
 
-export const createGetOverviewFilters = (libs: UMServerLibs) => ({
+export const createGetOverviewFilters: UMRestApiRouteCreator = (libs: UMServerLibs) => ({
   method: 'GET',
   path: '/api/uptime/filters',
+  validate: {
+    query: schema.object({
+      dateRangeStart: schema.string(),
+      dateRangeEnd: schema.string(),
+      filters: schema.maybe(schema.string()),
+    }),
+  },
   options: {
-    validate: {
-      query: Joi.object({
-        filters: Joi.string(),
-        dateRangeStart: Joi.string().required(),
-        dateRangeEnd: Joi.string().required(),
-      }),
-    },
     tags: ['access:uptime'],
   },
-  handler: async (request: any): Promise<unknown> => {
+  handler: async (_context, request, response) => {
     const { dateRangeStart, dateRangeEnd, filters } = request.query;
-    console.log('filters', filters);
 
-    const c = await libs.monitors.getFilterBar(request, dateRangeStart, dateRangeEnd, filters);
-    return {
-      ...c,
-    };
+    const filtersResponse = await libs.monitors.getFilterBar(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      filters
+    );
+    return response.ok({ body: { ...filtersResponse } });
   },
 });
