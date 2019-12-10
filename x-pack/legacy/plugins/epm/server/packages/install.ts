@@ -6,11 +6,11 @@
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
-import { AssetReference, InstallationAttributes, KibanaAssetType } from '../../common/types';
+import { AssetReference, Installation, KibanaAssetType } from '../../common/types';
 import { installIndexPattern } from '../lib/kibana/index_pattern/install';
 import * as Registry from '../registry';
 import { getObject } from './get_objects';
-import { getInstallationObject } from './index';
+import { getInstallation } from './index';
 
 export async function installPackage(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -64,17 +64,17 @@ export async function saveInstallationReferences(options: {
   toSave: AssetReference[];
 }) {
   const { savedObjectsClient, pkgkey, toSave } = options;
-  const savedObject = await getInstallationObject({ savedObjectsClient, pkgkey });
-  const savedRefs = savedObject && savedObject.attributes.installed;
+  const installation = await getInstallation({ savedObjectsClient, pkgkey });
+  const savedRefs = installation?.installed || [];
   const mergeRefsReducer = (current: AssetReference[], pending: AssetReference) => {
     const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
     if (!hasRef) current.push(pending);
     return current;
   };
 
-  const toInstall = toSave.reduce(mergeRefsReducer, savedRefs || []);
+  const toInstall = toSave.reduce(mergeRefsReducer, savedRefs);
 
-  await savedObjectsClient.create<InstallationAttributes>(
+  await savedObjectsClient.create<Installation>(
     SAVED_OBJECT_TYPE_PACKAGES,
     { installed: toInstall },
     { id: pkgkey, overwrite: true }

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObject } from '../../../../../../src/core/server';
 import {
   AssetType,
   // ElasticsearchAssetType,
@@ -41,7 +42,10 @@ export class PackageNotInstalledError extends Error {
 // only Kibana Assets use Saved Objects at this point
 export const savedObjectTypes: AssetType[] = Object.values(KibanaAssetType);
 
-export function createInstallableFrom<T>(from: T, savedObject?: Installation): Installable<T> {
+export function createInstallableFrom<T>(
+  from: T,
+  savedObject?: SavedObject<Installation>
+): Installable<T> {
   return savedObject
     ? {
         ...from,
