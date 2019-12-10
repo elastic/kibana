@@ -16,7 +16,7 @@ import {
   EuiFormControlLayout,
 } from '@elastic/eui';
 import { isEmpty, kebabCase, camelCase } from 'lodash/fp';
-import React, { ChangeEvent, useCallback, useMemo, useState } from 'react';
+import React, { ChangeEvent, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';

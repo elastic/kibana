@@ -34,9 +34,12 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
         ...inputsRef.current.slice(0, index),
         ...inputsRef.current.slice(index + 1),
       ];
-      if (inputsRef.current[index] != null) {
-        inputsRef.current[index].value = 're-render';
-      }
+      inputsRef.current = inputsRef.current.map((ref, i) => {
+        if (i >= index && inputsRef.current[index] != null) {
+          ref.value = 're-render';
+        }
+        return ref;
+      });
     },
     [field]
   );
@@ -62,9 +65,12 @@ export const AddItem = ({ addText, dataTestSubj, field, idAria, isDisabled }: Ad
           ...inputsRef.current.slice(index + 1),
         ];
         setHaveBeenKeyboardDeleted(inputsRef.current.length - 1);
-        if (inputsRef.current[index] != null) {
-          inputsRef.current[index].value = 're-render';
-        }
+        inputsRef.current = inputsRef.current.map((ref, i) => {
+          if (i >= index && inputsRef.current[index] != null) {
+            ref.value = 're-render';
+          }
+          return ref;
+        });
       } else {
         field.setValue([...values.slice(0, index), value, ...values.slice(index + 1)]);
       }
