@@ -12,7 +12,9 @@ import { getExecuteDetails } from '../../test/fixtures';
 
 const { setup } = pageHelpers.watchCreateJson;
 
-describe.skip('<JsonWatchEdit /> create route', () => {
+const wrapBodyResponse = (obj: object) => JSON.stringify({ body: JSON.stringify(obj) });
+
+describe('<JsonWatchEdit /> create route', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchCreateJsonTestBed;
 
@@ -100,7 +102,7 @@ describe.skip('<JsonWatchEdit /> create route', () => {
             'There are {{ctx.payload.hits.total}} documents in your index. Threshold is 10.';
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               id: watch.id,
               name: watch.name,
               type: watch.type,
@@ -187,7 +189,7 @@ describe.skip('<JsonWatchEdit /> create route', () => {
           };
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 actionModes,
               }),
@@ -251,7 +253,7 @@ describe.skip('<JsonWatchEdit /> create route', () => {
           const scheduledTime = `now+${SCHEDULED_TIME}s`;
 
           expect(latestRequest.requestBody).toEqual(
-            JSON.stringify({
+            wrapBodyResponse({
               executeDetails: getExecuteDetails({
                 triggerData: {
                   triggeredTime,

@@ -6,7 +6,12 @@
 
 import React from 'react';
 import { ComponentType } from 'enzyme';
-
+import {
+  chromeServiceMock,
+  docLinksServiceMock,
+  uiSettingsServiceMock,
+  notificationServiceMock,
+} from '../../../../../../../src/core/public/mocks';
 import { AppContextProvider } from '../../../public/np_ready/application/app_context';
 
 export const withAppContext = (Component: ComponentType<any>) => (props: any) => {
@@ -14,16 +19,10 @@ export const withAppContext = (Component: ComponentType<any>) => (props: any) =>
     <AppContextProvider
       value={
         {
-          docLinks: {
-            DOC_LINK_VERSION: 'test',
-            ELASTIC_WEBSITE_URL: 'test',
-            links: {} as any,
-          },
-          chrome: {
-            setBreadcrumbs: () => {},
-          } as any,
+          docLinks: docLinksServiceMock.createStartContract(),
+          chrome: chromeServiceMock.createStartContract(),
           legacy: {
-            TimeBuckets: class MockTimeBuckets {
+            TimeBuckets: class MockTimeBuckes {
               setBounds(_domain: any) {
                 return {};
               }
@@ -38,10 +37,8 @@ export const withAppContext = (Component: ComponentType<any>) => (props: any) =>
               create: jest.fn(),
             } as any,
           },
-          uiSettings: {
-            get: () => {},
-            isDefault: () => true,
-          } as any,
+          uiSettings: uiSettingsServiceMock.createSetupContract(),
+          toasts: notificationServiceMock.createSetupContract().toasts,
         } as any
       }
     >

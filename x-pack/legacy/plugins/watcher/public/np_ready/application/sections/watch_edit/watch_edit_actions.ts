@@ -75,7 +75,7 @@ export async function saveWatch(watch: BaseWatch, toasts: ToastsSetup): Promise<
     );
     goToWatchList();
   } catch (error) {
-    return { error: error.body || error };
+    return { error: error?.response.data ?? (error.body || error) };
   }
 }
 
