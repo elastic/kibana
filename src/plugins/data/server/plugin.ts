@@ -21,18 +21,26 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../..
 import { IndexPatternsService } from './index_patterns';
 import { ISearchSetup } from './search';
 import { SearchService } from './search/search_service';
+import { ScriptsService } from './scripts';
+import { KqlTelemetryService } from './kql_telemetry';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
 }
 export class DataServerPlugin implements Plugin<DataPluginSetup> {
   private readonly searchService: SearchService;
+  private readonly scriptsService: ScriptsService;
+  private readonly kqlTelemetryService: KqlTelemetryService;
   private readonly indexPatterns = new IndexPatternsService();
   constructor(initializerContext: PluginInitializerContext) {
     this.searchService = new SearchService(initializerContext);
+    this.scriptsService = new ScriptsService();
+    this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
   }
   public setup(core: CoreSetup) {
     this.indexPatterns.setup(core);
+    this.scriptsService.setup(core);
+    this.kqlTelemetryService.setup(core);
     return {
       search: this.searchService.setup(core),
     };

@@ -17,8 +17,4 @@
  * under the License.
  */
 
-import { registerLanguages } from './register_languages';
-
-export function scriptsApi(server) {
-  registerLanguages(server);
-}
+export { KqlTelemetryService } from './kql_telemetry_service';
