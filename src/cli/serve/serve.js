@@ -22,8 +22,9 @@ import { statSync } from 'fs';
 import { resolve } from 'path';
 import url from 'url';
 
-import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
-import { getConfig } from '../../legacy/server/path';
+import { IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
+import { getConfigPath } from '../../core/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
 
@@ -171,7 +172,7 @@ export default function (program) {
       '-c, --config <path>',
       'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
-      [ getConfig() ]
+      [ getConfigPath() ]
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
     .option('-q, --quiet', 'Prevent all logging except errors')
