@@ -34,10 +34,10 @@ export const ConfigSchema = schema.object(
       schema.maybe(schema.string({ minLength: 32 })),
       schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
     ),
-    sessionTimeout: schema.maybe(schema.oneOf([schema.number(), schema.literal(null)])), // DEPRECATED
+    sessionTimeout: schema.maybe(schema.nullable(schema.number())), // DEPRECATED
     session: schema.object({
-      idleTimeout: schema.oneOf([schema.duration(), schema.literal(null)], { defaultValue: null }),
-      lifespan: schema.oneOf([schema.duration(), schema.literal(null)], { defaultValue: null }),
+      idleTimeout: schema.nullable(schema.duration()),
+      lifespan: schema.nullable(schema.duration()),
     }),
     secureCookies: schema.boolean({ defaultValue: false }),
     authc: schema.object({
