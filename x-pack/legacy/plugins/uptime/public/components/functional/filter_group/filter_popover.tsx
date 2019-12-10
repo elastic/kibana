@@ -50,7 +50,6 @@ export const FilterPopover = ({
   }, [searchQuery, items]);
 
   return (
-    // @ts-ignore zIndex prop is not described in the typing yet
     <EuiPopover
       button={
         <UptimeFilterButton
@@ -69,6 +68,7 @@ export const FilterPopover = ({
         setIsOpen(false);
         onFilterFieldChange(fieldName, tempSelectedItems);
       }}
+      data-test-subj={`filter-popover_${id}`}
       id={id}
       isOpen={isOpen}
       ownFocus={true}
@@ -97,6 +97,7 @@ export const FilterPopover = ({
         itemsToDisplay.map(item => (
           <EuiFilterSelectItem
             checked={isItemSelected(tempSelectedItems, item)}
+            data-test-subj={`filter-popover-item_${item}`}
             key={item}
             onClick={() => toggleSelectedItems(item, tempSelectedItems, setTempSelectedItems)}
           >
