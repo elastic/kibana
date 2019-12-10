@@ -25,9 +25,7 @@ const TextContainer = styled.div`
 `;
 
 export const MonitorSSLCertificate = (props: Props) => {
-  // this camel_case key should be refactored if possible
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  const certificateValidity = props?.tls?.certificate_not_valid_after || undefined;
+  const certificateValidity = props?.tls?.['certificate_not_valid_after'];
 
   const validExpiryDate = certificateValidity && !isNaN(new Date(certificateValidity).valueOf());
 

@@ -162,8 +162,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     };
 
     const result = await this.database.search(request, params);
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    const buckets: any[] = result?.aggregations?.by_id?.buckets || [];
+    const buckets: any[] = result?.aggregations?.['by_id']?.buckets ?? [];
 
     // @ts-ignore TODO fix destructuring implicit any
     return buckets.map(
@@ -249,10 +248,8 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets || [];
     const histogram = buckets.map(bucket => {
       const x: number = bucket?.key || 0;
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      const downCount: number = bucket?.down?.doc_count || 0;
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      const upCount: number = bucket?.up?.doc_count || 0;
+      const downCount: number = bucket?.down?.['doc_count'] ?? 0;
+      const upCount: number = bucket?.up?.['doc_count'] ?? 0;
       return {
         x,
         downCount: statusFilter && statusFilter !== 'down' ? 0 : downCount,

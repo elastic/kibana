@@ -249,9 +249,7 @@ export const enrichMonitorGroups: MonitorEnricher = async (
 
   const monitorIds: string[] = [];
   const summaries: MonitorSummary[] = monitorBuckets.map((monitor: any) => {
-    // replies from ElasticSearch are oftentimes in snake_case
-    // eslint-disable-next-line @typescript-eslint/camelcase
-    const monitorId = monitor?.key?.monitor_id;
+    const monitorId = monitor?.key?.['monitor_id'];
     monitorIds.push(monitorId);
     let state = monitor?.state?.value;
     state = {
@@ -349,9 +347,7 @@ const getHistogramForMonitors = async (
   };
   const result = await queryContext.database.search(queryContext.request, params);
 
-  // replies from ElasticSearch are oftentimes in snake_case
-  // eslint-disable-next-line @typescript-eslint/camelcase
-  const buckets: any[] = result?.aggregations?.by_id?.buckets || [];
+  const buckets: any[] = result?.aggregations?.['by_id']?.buckets ?? [];
   return buckets.reduce((map: { [key: string]: any }, item: any) => {
     const points = (item?.histogram?.buckets || []).map((histogram: any) => {
       const status = (histogram?.status?.buckets || []).reduce(

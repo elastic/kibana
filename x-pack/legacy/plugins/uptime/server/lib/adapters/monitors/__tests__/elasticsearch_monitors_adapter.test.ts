@@ -41,8 +41,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     // protect against possible rounding errors polluting the snapshot comparison
     const mockCall = searchMock.mock.calls[0][1];
     const fixedInterval = parseInt(
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      (mockCall?.body?.aggs?.timeseries?.date_histogram?.fixed_interval || '').split('ms')[0],
+      (mockCall?.body?.aggs?.timeseries?.date_histogram?.['fixed_interval'] ?? '').split('ms')[0],
       10
     );
     expect(fixedInterval).not.toBeNaN();
@@ -75,8 +74,7 @@ describe('ElasticsearchMonitorsAdapter', () => {
     // protect against possible rounding errors polluting the snapshot comparison
     const mockCall = searchMock.mock.calls[0][1];
     const fixedInterval = parseInt(
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      (mockCall?.body?.aggs?.timeseries?.date_histogram?.fixed_interval || '').split('ms')[0],
+      (mockCall?.body?.aggs?.timeseries?.date_histogram?.['fixed_interval'] ?? '').split('ms')[0],
       10
     );
     expect(fixedInterval).not.toBeNaN();

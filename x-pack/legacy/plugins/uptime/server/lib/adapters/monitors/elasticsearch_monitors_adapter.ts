@@ -133,8 +133,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     const linesByLocation: { [key: string]: LocationDurationLine } = {};
     dateHistogramBuckets.forEach((dateHistogramBucket: any) => {
       const x = dateHistogramBucket?.key;
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      const docCount = dateHistogramBucket?.doc_count || 0;
+      const docCount = dateHistogramBucket?.['doc_count'] ?? 0;
       // a set of all the locations for the current bucket
       const bucketLocations = new Set<string>();
 
@@ -291,8 +290,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         }
       });
 
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      searchAfter = queryResult?.aggregations?.ids?.after_key;
+      searchAfter = queryResult?.aggregations?.ids?.['after_key'];
     } while (searchAfter);
 
     let up: number = 0;
