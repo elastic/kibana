@@ -45,12 +45,11 @@ export const NodeContextMenu = injectUICapabilities(
     uiCapabilities,
     popoverPosition,
   }: Props) => {
+    const inventoryModel = findInventoryModel(nodeType);
     // Due to the changing nature of the fields between APM and this UI,
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
     // #26620 for the details for these fields.
     // TODO: This is tech debt, remove it after 7.0 & ECS migration.
-
-    const inventoryModel = findInventoryModel(nodeType);
     const apmField = nodeType === InfraNodeType.host ? 'host.hostname' : inventoryModel.fields.id;
 
     const nodeLogsMenuItem = {
@@ -80,8 +79,7 @@ export const NodeContextMenu = injectUICapabilities(
 
     const apmTracesMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewAPMTraces', {
-        defaultMessage: 'View {name} APM traces',
-        values: { name: inventoryModel.displayName },
+        defaultMessage: 'View APM traces',
       }),
       href: `../app/apm#/traces?_g=()&kuery=${apmField}:"${node.id}"`,
       'data-test-subj': 'viewApmTracesContextMenuItem',
@@ -89,29 +87,32 @@ export const NodeContextMenu = injectUICapabilities(
 
     const uptimeMenuItem = {
       name: i18n.translate('xpack.infra.nodeContextMenu.viewUptimeLink', {
-        defaultMessage: 'View {name} in Uptime',
-        values: { name: inventoryModel.displayName },
+        defaultMessage: 'View in Uptime',
       }),
       href: createUptimeLink(options, nodeType, node),
     };
 
-    const showLogsLink = node.id && uiCapabilities.logs.show;
-    const showAPMTraceLink = uiCapabilities.apm && uiCapabilities.apm.show;
+    const showDetail = inventoryModel.crosslinkSupport.details;
+    const showLogsLink =
+      inventoryModel.crosslinkSupport.logs && node.id && uiCapabilities.logs.show;
+    const showAPMTraceLink =
+      inventoryModel.crosslinkSupport.apm && uiCapabilities.apm && uiCapabilities.apm.show;
     const showUptimeLink =
-      [InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip;
+      inventoryModel.crosslinkSupport.uptime &&
+      ([InfraNodeType.pod, InfraNodeType.container].includes(nodeType) || node.ip);
 
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: '',
-        items: [
-          ...(showLogsLink ? [nodeLogsMenuItem] : []),
-          nodeDetailMenuItem,
-          ...(showAPMTraceLink ? [apmTracesMenuItem] : []),
-          ...(showUptimeLink ? [uptimeMenuItem] : []),
-        ],
-      },
+    const items = [
+      ...(showLogsLink ? [nodeLogsMenuItem] : []),
+      ...(showDetail ? [nodeDetailMenuItem] : []),
+      ...(showAPMTraceLink ? [apmTracesMenuItem] : []),
+      ...(showUptimeLink ? [uptimeMenuItem] : []),
     ];
+    const panels: EuiContextMenuPanelDescriptor[] = [{ id: 0, title: '', items }];
+
+    // If there is nothing to show then we need to return the child as is
+    if (items.length === 0) {
+      return <>{children}</>;
+    }
 
     return (
       <EuiPopover

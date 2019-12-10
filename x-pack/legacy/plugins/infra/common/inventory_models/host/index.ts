@@ -14,10 +14,16 @@ import {
 
 export const host: InventoryModel = {
   id: 'host',
-  displayName: i18n.translate('xpack.infra.inventoryModel.displayName.hosts', {
-    defaultMessage: 'host',
+  displayName: i18n.translate('xpack.infra.inventoryModel.host.displayName', {
+    defaultMessage: 'Hosts',
   }),
   requiredModules: ['system'],
+  crosslinkSupport: {
+    details: true,
+    logs: true,
+    apm: true,
+    uptime: true,
+  },
   fields: {
     id: 'host.name',
     name: 'host.name',

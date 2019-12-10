@@ -22,6 +22,7 @@ import {
   InfraSnapshotGroupbyInput,
 } from '../../graphql/types';
 import { findInventoryModel } from '../../../common/inventory_models';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface Props {
   nodeType: InfraNodeType;
@@ -29,6 +30,11 @@ interface Props {
   changeGroupBy: (groupBy: InfraSnapshotGroupbyInput[]) => void;
   changeMetric: (metric: InfraSnapshotMetricInput) => void;
 }
+
+const getDisplayNameForType = (type: InventoryItemType) => {
+  const inventoryModel = findInventoryModel(type);
+  return inventoryModel.displayName;
+};
 
 export const WaffleInventorySwitcher = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -60,19 +66,17 @@ export const WaffleInventorySwitcher = (props: Props) => {
           id: 'firstPanel',
           items: [
             {
-              name: i18n.translate('xpack.infra.waffle.nodeTypeSwitcher.hostsLabel', {
-                defaultMessage: 'Hosts',
-              }),
+              name: getDisplayNameForType('host'),
               icon: 'host',
               onClick: goToHost,
             },
             {
-              name: 'Kubernetes',
+              name: getDisplayNameForType('pod'),
               icon: 'kubernetes',
               onClick: goToK8,
             },
             {
-              name: 'Docker',
+              name: getDisplayNameForType('container'),
               icon: 'docker',
               onClick: goToDocker,
             },
@@ -88,19 +92,19 @@ export const WaffleInventorySwitcher = (props: Props) => {
           title: 'AWS',
           items: [
             {
-              name: 'EC2',
+              name: getDisplayNameForType('awsEC2'),
               onClick: goToAwsEC2,
             },
             {
-              name: 'S3',
+              name: getDisplayNameForType('awsS3'),
               onClick: goToAwsS3,
             },
             {
-              name: 'RDS',
+              name: getDisplayNameForType('awsRDS'),
               onClick: goToAwsRDS,
             },
             {
-              name: 'SQS',
+              name: getDisplayNameForType('awsSQS'),
               onClick: goToAwsSQS,
             },
           ],
@@ -108,25 +112,9 @@ export const WaffleInventorySwitcher = (props: Props) => {
       ] as EuiContextMenuPanelDescriptor[],
     []
   );
+
   const selectedText = useMemo(() => {
-    switch (props.nodeType) {
-      case InfraNodeType.host:
-        return i18n.translate('xpack.infra.waffle.nodeTypeSwitcher.hostsLabel', {
-          defaultMessage: 'Hosts',
-        });
-      case InfraNodeType.pod:
-        return 'Kubernetes';
-      case InfraNodeType.container:
-        return 'Docker';
-      case InfraNodeType.awsEC2:
-        return 'AWS EC2';
-      case InfraNodeType.awsS3:
-        return 'AWS S3';
-      case InfraNodeType.awsRDS:
-        return 'AWS RDS';
-      case InfraNodeType.awsSQS:
-        return 'AWS SQS';
-    }
+    return getDisplayNameForType(props.nodeType);
   }, [props.nodeType]);
 
   return (

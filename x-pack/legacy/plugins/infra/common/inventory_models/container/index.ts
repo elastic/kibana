@@ -10,10 +10,16 @@ import { InventoryModel } from '../types';
 
 export const container: InventoryModel = {
   id: 'container',
-  displayName: i18n.translate('xpack.infra.inventoryModel.displayName.docker', {
-    defaultMessage: 'container',
+  displayName: i18n.translate('xpack.infra.inventoryModel.container.displayName', {
+    defaultMessage: 'Docker Containers',
   }),
   requiredModules: ['docker'],
+  crosslinkSupport: {
+    details: true,
+    logs: true,
+    apm: true,
+    uptime: true,
+  },
   fields: {
     id: 'container.id',
     name: 'container.name',

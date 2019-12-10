@@ -4,13 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 
 export const awsS3: InventoryModel = {
   id: 'awsS3',
-  displayName: 'S3',
+  displayName: i18n.translate('xpack.infra.inventoryModels.awsS3.displayName', {
+    defaultMessage: 'S3 Buckets',
+  }),
   requiredModules: ['aws'],
+  crosslinkSupport: {
+    details: true,
+    logs: true,
+    apm: false,
+    uptime: false,
+  },
   metrics,
   fields: {
     id: 'aws.s3.bucket.name',

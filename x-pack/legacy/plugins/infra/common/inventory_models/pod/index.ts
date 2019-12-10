@@ -11,10 +11,16 @@ import { nginx as nginxRequiredMetrics } from '../shared/metrics/required_metric
 
 export const pod: InventoryModel = {
   id: 'pod',
-  displayName: i18n.translate('xpack.infra.inventoryModel.displayName.kubernetes', {
-    defaultMessage: 'pod',
+  displayName: i18n.translate('xpack.infra.inventoryModel.pod.displayName', {
+    defaultMessage: 'Kubernetes Pods',
   }),
   requiredModules: ['kubernetes'],
+  crosslinkSupport: {
+    details: true,
+    logs: true,
+    apm: true,
+    uptime: true,
+  },
   fields: {
     id: 'kubernetes.pod.uid',
     name: 'kubernetes.pod.name',

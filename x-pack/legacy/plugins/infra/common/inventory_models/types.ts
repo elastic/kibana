@@ -323,6 +323,12 @@ export interface InventoryModel {
     name: string;
     ip?: string;
   };
+  crosslinkSupport: {
+    details: boolean;
+    logs: boolean;
+    apm: boolean;
+    uptime: boolean;
+  };
   metrics: InventoryMetrics;
   requiredMetrics: InventoryMetric[];
 }
