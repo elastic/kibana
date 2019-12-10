@@ -17,7 +17,7 @@
  * under the License.
  */
 import { SavedObject, SavedObjectConfig } from '../types';
-import { IndexPatterns } from '../../../../core_plugins/data/public';
+import { IndexPatternsContract } from '../../../../../plugins/data/public';
 
 /**
  * After creation or fetching from ES, ensure that the searchSources index indexPattern
@@ -28,7 +28,7 @@ import { IndexPatterns } from '../../../../core_plugins/data/public';
 export async function hydrateIndexPattern(
   id: string,
   savedObject: SavedObject,
-  indexPatterns: IndexPatterns,
+  indexPatterns: IndexPatternsContract,
   config: SavedObjectConfig
 ) {
   const clearSavedIndexPattern = !!config.clearSavedIndexPattern;
@@ -51,4 +51,5 @@ export async function hydrateIndexPattern(
 
   const indexObj = await indexPatterns.get(index);
   savedObject.searchSource!.setField('index', indexObj);
+  return indexObj;
 }
