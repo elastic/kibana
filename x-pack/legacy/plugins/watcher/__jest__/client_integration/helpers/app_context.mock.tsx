@@ -19,7 +19,7 @@ export const mockContextValue = {
   docLinks: docLinksServiceMock.createStartContract(),
   chrome: chromeServiceMock.createStartContract(),
   legacy: {
-    TimeBuckets: class MockTimeBuckes {
+    TimeBuckets: class MockTimeBuckets {
       setBounds(_domain: any) {
         return {};
       }

@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { npSetup, npStart } from 'ui/new_platform';
 import routes from 'ui/routes';
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
-// @ts-ignore
 import { TimeBuckets } from 'ui/time_buckets';
 // @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
