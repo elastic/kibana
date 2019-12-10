@@ -8,30 +8,22 @@ import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
 
-import { useState, useEffect } from 'react';
-import { start as spacesPluginStart } from '../../../spaces/public/legacy';
-import { Space } from '../../../../../plugins/spaces/common/model/space';
+import { useKibanaInjectedVar } from './use_kibana_injected_var';
 
 export const useKibanaSpaceId = (): string => {
-  const [activeSpace, setActiveSpace] = useState<undefined | Space>();
-
-  useEffect(() => {
-    spacesPluginStart.then(({ spacesManager }) => {
-      if (spacesManager) {
-        spacesManager.getActiveSpace().then(space => setActiveSpace(space));
-      }
-    });
-  }, []);
+  const activeSpace = useKibanaInjectedVar('activeSpace');
 
   return pipe(
     activeSpaceRT.decode(activeSpace),
     fold(
       () => 'default',
-      decodedActiveSpace => decodedActiveSpace.id
+      decodedActiveSpace => decodedActiveSpace.space.id
     )
   );
 };
 
 const activeSpaceRT = rt.type({
-  id: rt.string,
+  space: rt.type({
+    id: rt.string,
+  }),
 });
