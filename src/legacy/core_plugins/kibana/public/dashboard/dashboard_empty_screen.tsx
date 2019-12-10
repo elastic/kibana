@@ -26,6 +26,7 @@ import {
   EuiPageBody,
   EuiPage,
   EuiText,
+  EuiButton,
 } from '@elastic/eui';
 import * as constants from './dashboard_empty_screen_constants';
 
@@ -38,23 +39,17 @@ export interface DashboardEmptyScreenProps {
 export function DashboardEmptyScreen({
   showLinkToVisualize,
   onLinkClick,
+  onVisualizeClick,
 }: DashboardEmptyScreenProps) {
   const linkToVisualizeParagraph = (
-    <EuiText data-test-subj="linkToVisualizeParagraph">
-      <p>
+    <p data-test-subj="linkToVisualizeParagraph">
+      <EuiButton iconSide="right" fill iconType="arrowDown" onClick={onVisualizeClick} data-test-subj="addVisualizationButton">
         <FormattedMessage
-          id="kbn.dashboard.addVisualizationDescription3"
-          defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
-          values={{
-            visualizeAppLink: (
-              <a className="euiLink" href="#/visualize">
-                {constants.visualizeAppLinkTest}
-              </a>
-            ),
-          }}
+          id="embeddableApi.addPanel.createNewDefaultOption"
+          defaultMessage="Create new"
         />
-      </p>
-    </EuiText>
+      </EuiButton>
+    </p>
   );
   const paragraph = (
     description1: string,
@@ -96,7 +91,7 @@ export function DashboardEmptyScreen({
   );
   return (
     <I18nProvider>
-      <EuiPage className="dshStartScreen" restrictWidth={'36em'}>
+      <EuiPage className="dshStartScreen" restrictWidth="36em">
         <EuiPageBody>
           <EuiPageContent verticalPosition="center" horizontalPosition="center">
             <EuiIcon type="dashboardApp" size="xxl" color="subdued" />

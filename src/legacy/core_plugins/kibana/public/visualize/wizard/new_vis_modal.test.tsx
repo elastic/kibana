@@ -31,6 +31,7 @@ jest.mock('../legacy_imports', () => ({
 import { NewVisModal } from './new_vis_modal';
 
 describe('NewVisModal', () => {
+  const { location } = window;
   const defaultVisTypeParams = {
     hidden: false,
     visualization: class Controller {
@@ -50,6 +51,12 @@ describe('NewVisModal', () => {
       stage: 'production',
       ...defaultVisTypeParams,
     },
+    {
+      name: 'visWithAliasUrl',
+      title: 'Vis with alias Url',
+      stage: 'production',
+      aliasUrl: '/aliasUrl',
+    },
   ];
   const visTypes: TypesStart = {
     get: (id: string) => {
@@ -66,6 +73,10 @@ describe('NewVisModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    window.location = location;
   });
 
   it('should render as expected', () => {
@@ -126,6 +137,25 @@ describe('NewVisModal', () => {
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
       visButton.simulate('click');
       expect(window.location.assign).toBeCalledWith('#/visualize/create?type=vis&foo=true&bar=42');
+    });
+
+    it('closes if visualization with aliasUrl and addToDashboard in editorParams', () => {
+      const onClose = jest.fn();
+      window.location.assign = jest.fn();
+      const wrapper = mountWithIntl(
+        <NewVisModal
+          isOpen={true}
+          onClose={onClose}
+          visTypesRegistry={visTypes}
+          editorParams={['foo=true', 'bar=42', 'addToDashboard']}
+          addBasePath={addBasePath}
+          uiSettings={uiSettings}
+        />
+      );
+      const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
+      visButton.simulate('click');
+      expect(window.location.assign).toBeCalledWith('testbasepath/aliasUrl');
+      expect(onClose).toHaveBeenCalled();
     });
   });
 
