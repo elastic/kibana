@@ -1226,10 +1226,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@17.0.0":
-  version "17.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-17.0.0.tgz#2b53500b9f4849fdf58f88ea89e10a0b58836acc"
-  integrity sha512-bWTVKbChPGh7AHLxW1o9yp7O3hL9lTVj69DVaaLBOz9K0JnDrWZ5VDvWL9AAguFWq9OEMY9oWjyBhQZr1ZeZbA==
+"@elastic/eui@17.1.0":
+  version "17.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-17.1.0.tgz#ad747d944f46fd131d184dbb3f7ae183a3f37859"
+  integrity sha512-5XBlxLfBrkQauFDE9N94PK21E/AP3UWxIs/ww0TbRb6PNRNxLGwKfdHPZb3tDA8It3Ksd6OfDz4d5+0ASQ5GIQ==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
