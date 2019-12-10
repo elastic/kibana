@@ -10,7 +10,7 @@ import { UptimeRefreshContext } from '../contexts';
 import { UptimeUrlParams, getSupportedUrlParams } from '../lib/helper';
 
 type GetUrlParams = () => UptimeUrlParams;
-type UpdateUrlParams = (updatedParams: { [key: string]: string | number | boolean }) => void;
+type UpdateUrlParams = (updatedParams: Record<string, any>) => void;
 
 export type UptimeUrlParamsHook = () => [GetUrlParams, UpdateUrlParams];
 
