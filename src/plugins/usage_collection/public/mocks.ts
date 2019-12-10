@@ -17,28 +17,20 @@
  * under the License.
  */
 
-import { MetricsSetupContract, MetricsStartContract, METRIC_TYPE } from '.';
+import { UsageCollectionSetup, METRIC_TYPE } from '.';
 
-export type Setup = jest.Mocked<MetricsSetupContract>;
-export type Start = jest.Mocked<MetricsStartContract>;
+export type Setup = jest.Mocked<UsageCollectionSetup>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
-    registerApp: jest.fn(),
-  };
-  return setupContract;
-};
-
-const createStartContract = (): Start => {
-  const startContract: Start = {
+    allowTrackUserAgent: jest.fn(),
     reportUiStats: jest.fn(),
     METRIC_TYPE,
   };
 
-  return startContract;
+  return setupContract;
 };
 
 export const metricsPluginMock = {
   createSetupContract,
-  createStartContract,
 };
