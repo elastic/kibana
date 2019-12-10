@@ -30,7 +30,7 @@ export const MonitorStatusBarComponent = ({ data, monitorId }: Props) => {
   if (data && data.monitorStatus && data.monitorStatus.length) {
     const { monitor, timestamp, tls } = data.monitorStatus[0];
     const duration = monitor?.duration?.us || undefined;
-    const status: 'up' | 'down' = monitor?.status === 'up' ? 'up' : 'down';
+    const status: string = monitor?.status === 'up' ? 'up' : 'down';
     const statuses = data?.monitorStatus || [];
     const full = statuses[0]?.url?.full || undefined;
 
