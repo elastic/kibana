@@ -20,7 +20,6 @@ import {
   getUpdateRequest,
   typicalPayload,
   getFindResultWithSingleHit,
-  typicalFilterPayload,
 } from './__mocks__/request_responses';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
@@ -114,20 +113,6 @@ describe('update_rules', () => {
         method: 'PUT',
         url: DETECTION_ENGINE_RULES_URL,
         payload: typicalPayload(),
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
-    });
-
-    test('returns 200 if type is filter', async () => {
-      alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.update.mockResolvedValue(updateActionResult());
-      alertsClient.update.mockResolvedValue(getResult());
-      const request: ServerInjectOptions = {
-        method: 'PUT',
-        url: DETECTION_ENGINE_RULES_URL,
-        payload: typicalFilterPayload(),
       };
       const { statusCode } = await server.inject(request);
       expect(statusCode).toBe(200);
