@@ -95,23 +95,21 @@ describe('search_bar', () => {
     );
   });
 
-  async function mountSearchBar() {
+  function mountSearchBar() {
     jest.clearAllMocks();
     const wrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
 
-    await act(async () => {
-      instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
-    });
+    instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
   }
 
-  it('should render search bar and fetch index pattern', async () => {
-    await mountSearchBar();
+  it('should render search bar and fetch index pattern', () => {
+    mountSearchBar();
 
     expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
   });
 
   it('should render search bar and submit queries', async () => {
-    await mountSearchBar();
+    mountSearchBar();
 
     await waitForIndexPatternFetch();
 
@@ -127,7 +125,7 @@ describe('search_bar', () => {
   });
 
   it('should translate kql query into JSON dsl', async () => {
-    await mountSearchBar();
+    mountSearchBar();
 
     await waitForIndexPatternFetch();
 
@@ -145,8 +143,8 @@ describe('search_bar', () => {
     });
   });
 
-  it('should open index pattern picker', async () => {
-    await mountSearchBar();
+  it('should open index pattern picker', () => {
+    mountSearchBar();
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme
