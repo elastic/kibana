@@ -10,6 +10,19 @@ The Pulse **service** performs *checks* across all of its channels when the clie
 
 ## Set up
 
+You must run Elasticsearch with security disabled, for example:
+
+```sh
+yarn es snapshot -E xpack.security.enabled=false
+```
+
+You must run Kibana on localhost and port 5601 (the defaults) and not be using
+the basepath proxy, like so:
+
+```sh
+yarn start --no-base-path
+```
+
 You must have the `pulse-poc-raw` index created for the APIs to work properly.
 Start up Kibana and run the following requests in the Kibana Dev Tools Console:
 
