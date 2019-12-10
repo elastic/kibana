@@ -21,9 +21,10 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
-import { uniq } from 'lodash';
+import { uniq, noop } from 'lodash';
 
 import { Subscription } from 'rxjs';
+import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
   subscribeWithScope,
@@ -40,8 +41,6 @@ import {
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
 import { Query, SavedQuery, IndexPatternsContract } from '../../../../../plugins/data/public';
-
-import './dashboard_empty_screen_directive';
 
 import {
   DashboardContainer,
@@ -143,6 +142,16 @@ export class DashboardAppController {
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
+    $scope.getShouldShowEditHelp = () =>
+      !dashboardStateManager.getPanels().length &&
+      dashboardStateManager.getIsEditMode() &&
+      !dashboardConfig.getHideWriteControls();
+
+    $scope.getShouldShowViewHelp = () =>
+      !dashboardStateManager.getPanels().length &&
+      dashboardStateManager.getIsViewMode() &&
+      !dashboardConfig.getHideWriteControls();
+
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
         return;
@@ -171,6 +180,17 @@ export class DashboardAppController {
       }
     };
 
+    const getEmptyScreenProps = (shouldShowEditHelp: boolean): DashboardEmptyScreenProps => {
+      const emptyScreenProps: DashboardEmptyScreenProps = {
+        onLinkClick: shouldShowEditHelp ? $scope.showAddPanel : $scope.enterEditMode,
+        showLinkToVisualize: shouldShowEditHelp,
+      };
+      if (shouldShowEditHelp) {
+        emptyScreenProps.onVisualizeClick = noop;
+      }
+      return emptyScreenProps;
+    };
+
     const getDashboardInput = (): DashboardContainerInput => {
       const embeddablesMap: {
         [key: string]: DashboardPanelState;
@@ -182,6 +202,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         expandedPanelId = dashboardContainer.getInput().expandedPanelId;
       }
+      const shouldShowEditHelp = $scope.getShouldShowEditHelp();
+      const shouldShowViewHelp = $scope.getShouldShowViewHelp();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -194,6 +216,7 @@ export class DashboardAppController {
         viewMode: dashboardStateManager.getViewMode(),
         panels: embeddablesMap,
         isFullScreenMode: dashboardStateManager.getFullScreenMode(),
+        isEmptyState: shouldShowEditHelp || shouldShowViewHelp,
         useMargins: dashboardStateManager.getUseMargins(),
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
@@ -233,6 +256,15 @@ export class DashboardAppController {
       .then((container: DashboardContainer | ErrorEmbeddable) => {
         if (!isErrorEmbeddable(container)) {
           dashboardContainer = container;
+
+          dashboardContainer.renderEmpty = () => {
+            const shouldShowEditHelp = $scope.getShouldShowEditHelp();
+            const shouldShowViewHelp = $scope.getShouldShowViewHelp();
+            const isEmptyState = shouldShowEditHelp || shouldShowViewHelp;
+            return isEmptyState ? (
+              <DashboardEmptyScreen {...getEmptyScreenProps(shouldShowEditHelp)} />
+            ) : null;
+          };
 
           updateIndexPatterns(dashboardContainer);
 
@@ -333,15 +365,6 @@ export class DashboardAppController {
 
     updateBreadcrumbs();
     dashboardStateManager.registerChangeListener(updateBreadcrumbs);
-
-    $scope.getShouldShowEditHelp = () =>
-      !dashboardStateManager.getPanels().length &&
-      dashboardStateManager.getIsEditMode() &&
-      !dashboardConfig.getHideWriteControls();
-    $scope.getShouldShowViewHelp = () =>
-      !dashboardStateManager.getPanels().length &&
-      dashboardStateManager.getIsViewMode() &&
-      !dashboardConfig.getHideWriteControls();
 
     const getChangesFromAppStateForContainerState = () => {
       const appStateDashboardInput = getDashboardInput();
@@ -728,6 +751,8 @@ export class DashboardAppController {
         });
       }
     };
+
+    navActions[TopNavIds.VISUALIZE] = async () => {};
 
     navActions[TopNavIds.OPTIONS] = anchorElement => {
       showOptionsPopover({
