@@ -50,6 +50,11 @@ interface IWaterfallItemBase {
   duration: number;
 
   /**
+   * Start in us
+   */
+  start?: number;
+
+  /**
    * start timestamp in us
    */
   timestamp: number;
@@ -89,6 +94,7 @@ function getTransactionItem(
     serviceName: transaction.service.name,
     name: transaction.transaction.name,
     duration: transaction.transaction.duration.us,
+    start: transaction.transaction.start?.us,
     timestamp: transaction.timestamp.us,
     offset: 0,
     skew: 0,
@@ -105,6 +111,7 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
     serviceName: span.service.name,
     name: span.span.name,
     duration: span.span.duration.us,
+    start: span.span.start?.us,
     timestamp: span.timestamp.us,
     offset: 0,
     skew: 0,
@@ -147,9 +154,6 @@ export function sortWaterfall(
   childrenByParentId: IWaterfallGroup,
   entryWaterfallTransaction: IWaterfallItem
 ) {
-  if (!entryWaterfallTransaction) {
-    return [];
-  }
   const visitedWaterfallItemSet = new Set();
   function getSortedChildren(
     item: IWaterfallItem,
@@ -229,21 +233,19 @@ const transformTraceItems = ({
 const findWaterfallTransactionById = (
   waterfallItems: Array<IWaterfallItemSpan | IWaterfallItemTransaction>,
   id?: IWaterfallItem['id']
-) =>
+): IWaterfallItemTransaction | undefined =>
   waterfallItems.find(
     waterfallItem =>
       waterfallItem.docType === 'transaction' && waterfallItem.id === id
   ) as IWaterfallItemTransaction;
 
-const sortLegacyWaterfall = (
-  waterfallItems: Array<IWaterfallItemSpan | IWaterfallItemTransaction>,
-  entryTransaction?: IWaterfallItemSpan | IWaterfallItemTransaction
+const sortWaterfallWithoutParent = (
+  waterfallItems: Array<IWaterfallItemSpan | IWaterfallItemTransaction>
 ) => {
-  const items = sortBy(waterfallItems, 'timestamp');
+  const items = sortBy(waterfallItems, 'start');
 
   items.forEach(item => {
-    const entryTimestamp = entryTransaction?.timestamp ?? 0;
-    item.offset = item.timestamp - entryTimestamp;
+    item.offset = item.start || 0;
   });
   return items;
 };
@@ -269,21 +271,23 @@ export function getWaterfall(
     entryTransactionId
   );
 
-  const isLegacyWaterfall = waterfallItems.every(waterfallItem =>
+  const isParentMissing = waterfallItems.every(waterfallItem =>
     isEmpty(waterfallItem.parentId)
   );
 
   let items;
   let traceRootTransaction;
 
-  if (isLegacyWaterfall) {
-    items = sortLegacyWaterfall(waterfallItems, entryWaterfallTransaction);
+  if (isParentMissing) {
+    items = sortWaterfallWithoutParent(waterfallItems);
   } else {
     const childrenByParentId = groupBy(waterfallItems, item =>
       item.parentId ? item.parentId : 'root'
     );
 
-    items = sortWaterfall(childrenByParentId, entryWaterfallTransaction);
+    items = entryWaterfallTransaction
+      ? sortWaterfall(childrenByParentId, entryWaterfallTransaction)
+      : [];
 
     traceRootTransaction = getTraceRootTransaction(childrenByParentId);
   }
@@ -294,7 +298,7 @@ export function getWaterfall(
   return {
     duration: getWaterfallDuration(items),
     serviceColors: getServiceColors(items),
-    entryTransaction: entryWaterfallTransaction.transaction,
+    entryTransaction: entryWaterfallTransaction?.transaction,
     rootTransaction: {
       item: traceRootTransaction,
       duration: traceRootTransaction?.transaction.duration.us

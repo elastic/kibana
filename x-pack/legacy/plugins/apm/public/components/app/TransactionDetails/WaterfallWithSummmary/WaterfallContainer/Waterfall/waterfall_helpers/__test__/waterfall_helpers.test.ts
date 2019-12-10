@@ -148,7 +148,7 @@ describe('waterfall_helpers', () => {
     });
   });
 
-  describe('getWaterfall - legacy', () => {
+  describe('When trace items dont have parent.id (pre-6.5 behaviour)', () => {
     const hits = [
       {
         processor: { event: 'transaction' },
@@ -157,7 +157,8 @@ describe('waterfall_helpers', () => {
         transaction: {
           duration: { us: 49660 },
           name: 'GET /api',
-          id: 'myTransactionId1'
+          id: 'myTransactionId1',
+          start: { us: 1000 }
         },
         timestamp: { us: 1549324795784006 }
       } as Transaction,
@@ -168,6 +169,7 @@ describe('waterfall_helpers', () => {
         transaction: { id: 'myTransactionId2' },
         timestamp: { us: 1549324795825633 },
         span: {
+          start: { us: 50000 },
           duration: { us: 481 },
           name: 'SELECT FROM products',
           id: 'mySpanIdB'
@@ -180,6 +182,7 @@ describe('waterfall_helpers', () => {
         transaction: { id: 'myTransactionId2' },
         span: {
           duration: { us: 6161 },
+          start: { us: 50500 },
           name: 'Api::ProductsController#index',
           id: 'mySpanIdA'
         },
@@ -192,6 +195,7 @@ describe('waterfall_helpers', () => {
         transaction: { id: 'myTransactionId2' },
         span: {
           duration: { us: 532 },
+          start: { us: 57000 },
           name: 'SELECT FROM product',
           id: 'mySpanIdC'
         },
@@ -204,6 +208,7 @@ describe('waterfall_helpers', () => {
         transaction: { id: 'myTransactionId1' },
         span: {
           duration: { us: 47557 },
+          start: { us: 58000 },
           name: 'GET opbeans-ruby:3000/api/products',
           id: 'mySpanIdD'
         },
@@ -215,13 +220,14 @@ describe('waterfall_helpers', () => {
         service: { name: 'opbeans-ruby' },
         transaction: {
           duration: { us: 8634 },
+          start: { us: 70000 },
           name: 'Api::ProductsController#index',
           id: 'myTransactionId2'
         },
         timestamp: { us: 1549324795823304 }
       } as Transaction
     ];
-    it('should return waterfall', () => {
+    it('should return waterfall sorted by start time', () => {
       const entryTransactionId = 'myTransactionId1';
       const errorsPerTransaction = {
         myTransactionId1: 2,

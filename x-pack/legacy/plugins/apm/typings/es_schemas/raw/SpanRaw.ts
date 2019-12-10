@@ -21,6 +21,7 @@ export interface SpanRaw extends APMBaseDoc {
   span: {
     action?: string;
     duration: { us: number };
+    start?: { us: number };
     id: string;
     name: string;
     stacktrace?: IStackframe[];

@@ -26,6 +26,7 @@ export interface TransactionRaw extends APMBaseDoc {
   trace: { id: string }; // trace is required
   transaction: {
     duration: { us: number };
+    start?: { us: number };
     id: string;
     marks?: {
       // "agent": not defined by APM Server - only sent by RUM agent
