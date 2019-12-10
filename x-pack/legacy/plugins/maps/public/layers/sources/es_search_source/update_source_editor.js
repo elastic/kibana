@@ -219,7 +219,7 @@ export class UpdateSourceEditor extends Component {
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage
-              id="xpack.maps.esSearch.tooltipsTitle"
+              id="xpack.maps.esSearch.sortTitle"
               defaultMessage="Sorting"
             />
           </h5>
