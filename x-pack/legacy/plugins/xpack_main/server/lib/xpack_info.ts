@@ -25,6 +25,10 @@ export interface XPackFeature {
   getLicenseCheckResults(): any;
 }
 
+interface Deps {
+  licensing: LicensingPluginSetup;
+}
+
 /**
  * A helper that provides a convenient way to access XPack Info returned by Elasticsearch.
  */
@@ -76,20 +80,12 @@ export class XPackInfo {
   /**
    * Constructs XPack info object.
    * @param {Hapi.Server} server HapiJS server instance.
-   * @param {Object} options
-   * @property {string} [options.clusterSource] Type of the cluster that should be used
-   * to fetch XPack info (data, monitoring etc.). If not provided, `data` is used.
-   * @property {number} options.pollFrequencyInMillis Polling interval used to automatically
-   * refresh XPack Info by the internal poller.
    */
-  constructor(
-    server: Legacy.Server,
-    { clusterSource = 'data', pollFrequencyInMillis }: XPackInfoOptions
-  ) {
-    this.licensingPlugin = server.newPlatform.setup.plugins.licensing as LicensingPluginSetup;
-    if (!this.licensingPlugin) {
+  constructor(server: Legacy.Server, deps: Deps) {
+    if (!deps.licensing) {
       throw new Error('XPackInfo requires enabled Licensing plugin');
     }
+    this.licensingPlugin = deps.licensing;
 
     this._cache = {};
 
