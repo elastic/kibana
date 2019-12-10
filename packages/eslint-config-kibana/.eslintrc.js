@@ -31,6 +31,10 @@ module.exports = {
           from: 'x-pack',
           toRelative: 'x-pack',
         },
+        {
+          from: 'react-router',
+          to: 'react-router-dom',
+        },
       ],
     ],
   }

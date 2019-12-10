@@ -21,7 +21,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { ColumnType, MlInMemoryTableBasic, SORT_DIRECTION } from '../../../../../shared_imports';
+import {
+  ColumnType,
+  mlInMemoryTableBasicFactory,
+  SORT_DIRECTION,
+} from '../../../../../shared_imports';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
@@ -38,7 +42,7 @@ import {
 } from '../../../../common';
 
 import { getPivotPreviewDevConsoleStatement } from './common';
-import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
+import { PreviewItem, PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
   return (a: string, b: string) => {
@@ -158,7 +162,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformPivotPreview error">
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewError', {
@@ -192,7 +196,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
       );
     }
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} data-test-subj="transformPivotPreview empty">
         <PreviewTitle previewRequest={previewRequest} />
         <EuiCallOut
           title={i18n.translate('xpack.transform.pivotPreview.PivotPreviewNoDataCalloutTitle', {
@@ -210,7 +214,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
   columnKeys.sort(sortColumns(groupByArr));
 
   const columns = columnKeys.map(k => {
-    const column: ColumnType = {
+    const column: ColumnType<PreviewItem> = {
       field: k,
       name: k,
       sortable: true,
@@ -256,8 +260,10 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
     },
   };
 
+  const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<PreviewItem>();
+
   return (
-    <EuiPanel>
+    <EuiPanel data-test-subj="transformPivotPreview loaded">
       <PreviewTitle previewRequest={previewRequest} />
       {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
@@ -273,6 +279,9 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
             initialPageSize: 5,
             pageSizeOptions: [5, 10, 25],
           }}
+          rowProps={() => ({
+            'data-test-subj': 'transformPivotPreviewRow',
+          })}
           sorting={sorting}
         />
       )}

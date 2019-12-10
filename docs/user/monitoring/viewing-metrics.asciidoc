@@ -41,7 +41,7 @@ default value, in the `kibana.yml` file. For more information, see
 must provide a user ID and password so {kib} can retrieve the data. 
 
 .. Create a user that has the `monitoring_user` 
-{stack-ov}/built-in-roles.html[built-in role] on the monitoring cluster.
+{ref}/built-in-roles.html[built-in role] on the monitoring cluster.
 
 .. Add the `xpack.monitoring.elasticsearch.username` and 
 `xpack.monitoring.elasticsearch.password` settings in the `kibana.yml` file.
@@ -64,7 +64,7 @@ remote monitoring cluster, you must use credentials that are valid on both the
 --
 
 .. Create users that have the `monitoring_user` and `kibana_user` 
-{stack-ov}/built-in-roles.html[built-in roles].
+{ref}/built-in-roles.html[built-in roles].
 
 . Open {kib} in your web browser. 
 +

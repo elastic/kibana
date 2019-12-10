@@ -20,9 +20,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import {
-  Link,
-} from 'react-router';
+import { Link } from 'react-router'; // eslint-disable-line
 
 import classNames from 'classnames';
 

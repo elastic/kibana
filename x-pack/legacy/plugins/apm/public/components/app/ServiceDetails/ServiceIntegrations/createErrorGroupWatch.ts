@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import url from 'url';
 import uuid from 'uuid';
+import { HttpServiceBase } from 'kibana/public';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -18,7 +19,6 @@ import {
   SERVICE_NAME
 } from '../../../../../common/elasticsearch_fieldnames';
 import { StringMap } from '../../../../../typings/common';
-// @ts-ignore
 import { createWatch } from '../../../../services/rest/watcher';
 
 function getSlackPathUrl(slackUrl?: string) {
@@ -36,6 +36,7 @@ export interface Schedule {
 }
 
 interface Arguments {
+  http: HttpServiceBase;
   emails: string[];
   schedule: Schedule;
   serviceName: string;
@@ -55,6 +56,7 @@ interface Actions {
 }
 
 export async function createErrorGroupWatch({
+  http,
   emails = [],
   schedule,
   serviceName,
@@ -251,6 +253,10 @@ export async function createErrorGroupWatch({
     };
   }
 
-  await createWatch(id, body);
+  await createWatch({
+    http,
+    id,
+    watch: body
+  });
   return id;
 }
