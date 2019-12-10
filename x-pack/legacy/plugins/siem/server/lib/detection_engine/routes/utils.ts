@@ -52,7 +52,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     meta: alert.params.meta,
     severity: alert.params.severity,
     updated_by: alert.updatedBy,
-    tags: alert.params.tags,
+    tags: alert.tags,
     to: alert.params.to,
     type: alert.params.type,
     threats: alert.params.threats,
@@ -96,8 +96,8 @@ export const getIndex = (request: RequestFacade, server: ServerFacade): string =
   return `${signalsIndex}-${spaceId}`;
 };
 
-export const callWithRequestFactory = (request: RequestFacade) => {
-  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+export const callWithRequestFactory = (request: RequestFacade, server: ServerFacade) => {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   return <T, U>(endpoint: string, params: T, options?: U) => {
     return callWithRequest(request, endpoint, params, options);
   };
