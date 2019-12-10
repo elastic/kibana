@@ -37,14 +37,14 @@ describe('HomeServerPlugin', () => {
     const initContext = coreMock.createPluginInitializerContext();
 
     test('wires up tutorials provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup);
+      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('registerTutorial');
       expect(setup.tutorials).toHaveProperty('addScopedTutorialContextFactory');
     });
 
     test('wires up sample data provider service and returns registerTutorial and addScopedTutorialContextFactory', () => {
-      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup);
+      const setup = new HomeServerPlugin(initContext).setup(mockCoreSetup, {});
       expect(setup).toHaveProperty('sampleData');
       expect(setup.sampleData).toHaveProperty('registerSampleDataset');
       expect(setup.sampleData).toHaveProperty('getSampleDatasets');
