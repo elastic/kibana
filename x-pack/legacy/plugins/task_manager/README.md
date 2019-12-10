@@ -271,19 +271,15 @@ Using `runNow` you can instruct TaskManger to run an existing task on-demand, wi
 ```js
 const taskManager = server.plugins.task_manager;
 
-
-if(taskRunResult.error){
-  try {
-    const taskRunResult = await taskManager.runNow('91760f10-1799-11ea-ba42-698eedde9799');
-    // if no error is thrown, the task has completed successfully.
-    // we don't expose internal state for security reasons, but rest assured the task has completed
-    // if no error is thrown and a `RunNowResult` ({ id: "91760f10-1799-11ea-ba42-698eedde9799" })
-  } catch(err: Error) {
-    // error happened, so err will have the folllowing messages
-    //  when the task doesnt exist: `Error: failed to run task "${id}" as it does not exist`
-    //  when the task is already running:`Error: failed to run task "${id}" as it is currently running`
-  }
-
+try {
+  const taskRunResult = await taskManager.runNow('91760f10-1799-11ea-ba42-698eedde9799');
+  // if no error is thrown, the task has completed successfully.
+  // we don't expose internal state for security reasons, but rest assured the task has completed
+  // if no error is thrown and a `RunNowResult` ({ id: "91760f10-1799-11ea-ba42-698eedde9799" })
+} catch(err: Error) {
+  // error happened, so err will have the folllowing messages
+  //  when the task doesnt exist: `Error: failed to run task "${id}" as it does not exist`
+  //  when the task is already running:`Error: failed to run task "${id}" as it is currently running`
 }
 ```
 
