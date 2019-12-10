@@ -21,7 +21,7 @@ import { last } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 
-import { parseRange, Range } from '../../../../../../utils/range';
+import { parseRange, Range } from './range';
 import { NumberRowModel } from './number_row';
 
 const EMPTY_STRING = '';

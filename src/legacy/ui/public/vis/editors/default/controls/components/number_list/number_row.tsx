@@ -21,7 +21,7 @@ import React, { useCallback } from 'react';
 
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Range } from '../../../../../../utils/range';
+import { Range } from './range';
 
 export interface NumberRowProps {
   autoFocus: boolean;

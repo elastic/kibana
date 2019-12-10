@@ -27,7 +27,7 @@ import {
   getNextModel,
   getRange,
 } from './utils';
-import { Range } from '../../../../../../utils/range';
+import { Range } from './range';
 import { NumberRowModel } from './number_row';
 
 describe('NumberList utils', () => {
