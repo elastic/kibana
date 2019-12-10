@@ -17,18 +17,26 @@
  * under the License.
  */
 
-import { TSearchStrategyProvider } from 'src/plugins/data/server';
-import { DEMO_SEARCH_STRATEGY } from '../common';
+import { Plugin, CoreSetup } from 'kibana/public';
+import { ISearchAppMountContext } from '../../../src/plugins/data/public';
 
-export const demoSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = () => {
-  return {
-    search: request => {
-      return Promise.resolve({
-        greeting:
-          request.mood === 'happy'
-            ? `Lovely to meet you, ${request.name}`
-            : `Hope you feel better, ${request.name}`,
-      });
-    },
-  };
-};
+declare module 'kibana/public' {
+  interface AppMountContext {
+    search?: ISearchAppMountContext;
+  }
+}
+export class SearchExplorerPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.application.register({
+      id: 'searchExplorer',
+      title: 'Search Explorer',
+      async mount(context, params) {
+        const { renderApp } = await import('./application');
+        return renderApp(context, params);
+      },
+    });
+  }
+
+  public start() {}
+  public stop() {}
+}
