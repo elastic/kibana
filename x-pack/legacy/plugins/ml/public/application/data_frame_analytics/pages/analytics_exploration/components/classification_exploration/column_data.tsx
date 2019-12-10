@@ -20,23 +20,43 @@ export function getColumnData(
       (pc: any) => pc.predicted_class !== classData.actual_class
     );
 
-    let accuracy = correctlyPredictedClass.count / classData.actual_class_doc_count;
-    // round to 2 decimal places without converting to string;
-    accuracy = Math.round(accuracy * 100) / 100;
+    let accuracy;
+    if (correctlyPredictedClass !== undefined) {
+      accuracy = correctlyPredictedClass.count / classData.actual_class_doc_count;
+      // round to 2 decimal places without converting to string;
+      accuracy = Math.round(accuracy * 100) / 100;
+    }
 
-    let error = incorrectlyPredictedClass.count / classData.actual_class_doc_count;
-    error = Math.round(error * 100) / 100;
+    let error;
+    if (incorrectlyPredictedClass !== undefined) {
+      error = incorrectlyPredictedClass.count / classData.actual_class_doc_count;
+      error = Math.round(error * 100) / 100;
+    }
 
-    colData.push({
-      [correctlyPredictedClass.predicted_class]: accuracy,
-      [incorrectlyPredictedClass.predicted_class]: error,
+    let col: any = {
       actual_class: classData.actual_class,
-      predicted_class: correctlyPredictedClass.predicted_class,
       actual_class_doc_count: classData.actual_class_doc_count,
-      count: correctlyPredictedClass.count,
-      error_count: incorrectlyPredictedClass.count,
-      accuracy,
-    });
+    };
+
+    if (correctlyPredictedClass !== undefined) {
+      col = {
+        ...col,
+        predicted_class: correctlyPredictedClass.predicted_class,
+        [correctlyPredictedClass.predicted_class]: accuracy,
+        count: correctlyPredictedClass.count,
+        accuracy,
+      };
+    }
+
+    if (incorrectlyPredictedClass !== undefined) {
+      col = {
+        ...col,
+        [incorrectlyPredictedClass.predicted_class]: error,
+        error_count: incorrectlyPredictedClass.count,
+      };
+    }
+
+    colData.push(col);
   });
 
   const columns: any = [
