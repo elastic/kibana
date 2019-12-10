@@ -4,23 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { savedObjectConditionalPrivilegeSchema } from './feature_schema';
-
-export interface SavedObjectPrivilegeCondition {
-  key: string;
-  value: string;
-}
-
-export interface SavedObjectConditionalPrivilege {
-  type: string;
-  condition: SavedObjectPrivilegeCondition | SavedObjectPrivilegeCondition[];
-}
-
-export function isSavedObjectConditionalPrivilege(
-  type: string | SavedObjectConditionalPrivilege
-): type is SavedObjectConditionalPrivilege {
-  return savedObjectConditionalPrivilegeSchema.validate(type).error == null;
-}
 /**
  * Feature privilege definition
  */
@@ -105,7 +88,7 @@ export interface FeatureKibanaPrivileges {
      *  }
      * ```
      */
-    all: Array<string | SavedObjectConditionalPrivilege>;
+    all: string[];
 
     /**
      * List of saved object types which users should have read-only access to when granted this privilege.
@@ -116,7 +99,7 @@ export interface FeatureKibanaPrivileges {
      *  }
      * ```
      */
-    read: Array<string | SavedObjectConditionalPrivilege>;
+    read: string[];
   };
   /**
    * A list of UI Capabilities that should be granted to users with this privilege.

@@ -5,10 +5,6 @@
  */
 
 import { isString } from 'lodash';
-import {
-  SavedObjectConditionalPrivilege,
-  isSavedObjectConditionalPrivilege,
-} from '../../../../features/server/feature_kibana_privileges';
 
 export class SavedObjectActions {
   private readonly prefix: string;
@@ -21,33 +17,15 @@ export class SavedObjectActions {
     return `${this.prefix}*`;
   }
 
-  public get(
-    typeOrSavedObjectConditionalPrivilege: string | SavedObjectConditionalPrivilege,
-    operation: string
-  ): string {
-    if (!typeOrSavedObjectConditionalPrivilege) {
-      throw new Error('typeOrSavedObjectPrivilege is required');
+  public get(type: string, operation: string): string {
+    if (!type || !isString(type)) {
+      throw new Error('type is required and must be a string');
     }
 
     if (!operation || !isString(operation)) {
-      throw new Error('operation is required and must be a string');
+      throw new Error('type is required and must be a string');
     }
 
-    if (isString(typeOrSavedObjectConditionalPrivilege)) {
-      return `${this.prefix}${typeOrSavedObjectConditionalPrivilege}/${operation}`;
-    }
-
-    if (isSavedObjectConditionalPrivilege(typeOrSavedObjectConditionalPrivilege)) {
-      const conditions = Array.isArray(typeOrSavedObjectConditionalPrivilege.condition)
-        ? typeOrSavedObjectConditionalPrivilege.condition
-        : [typeOrSavedObjectConditionalPrivilege.condition];
-      return `${this.prefix}${
-        typeOrSavedObjectConditionalPrivilege.type
-      }/${operation}(${conditions.map(({ key, value }) => `${key}=${value}`).join('&')})`;
-    }
-
-    throw new Error(
-      `typeOrSavedObjectPrivilege must be a string or SavedObjectConditionalPrivilege`
-    );
+    return `${this.prefix}${type}/${operation}`;
   }
 }

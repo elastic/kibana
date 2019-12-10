@@ -20,7 +20,6 @@ import { deepFreeze } from '../../../../src/core/utils';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { CapabilitiesModifier } from '../../../../src/legacy/server/capabilities';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
@@ -43,7 +42,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  */
 export interface LegacyAPI {
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
-  capabilities: { registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void };
   kibanaIndexName: string;
   cspRules: string;
   savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
@@ -156,6 +154,8 @@ export class Plugin {
       featuresService: features,
     });
 
+    core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
+
     defineRoutes({
       router: core.http.createRouter(),
       basePath: core.http.basePath,
@@ -194,12 +194,7 @@ export class Plugin {
             adminClusterClient: adminClient,
             authz,
             legacyAPI,
-            features,
           });
-
-          legacyAPI.capabilities.registerCapabilitiesModifier((request, capabilities) =>
-            authz.disableUnauthorizedCapabilities(KibanaRequest.from(request), capabilities)
-          );
         },
 
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),

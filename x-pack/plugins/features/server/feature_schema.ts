@@ -7,7 +7,7 @@
 import Joi from 'joi';
 
 import { difference } from 'lodash';
-import { Capabilities as UICapabilities } from '../../../../src/core/public';
+import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { FeatureWithAllOrReadPrivileges } from './feature';
 
 // Each feature gets its own property on the UICapabilities object,
@@ -24,19 +24,6 @@ const managementSchema = Joi.object().pattern(
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
 
-const savedObjectPrivilegeCondition = Joi.object({
-  key: Joi.string().required(),
-  value: Joi.string().required(),
-});
-
-export const savedObjectConditionalPrivilegeSchema = Joi.object({
-  type: Joi.string().required(),
-  condition: Joi.array()
-    .items(savedObjectPrivilegeCondition)
-    .single()
-    .required(),
-});
-
 const privilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
@@ -45,10 +32,10 @@ const privilegeSchema = Joi.object({
   app: Joi.array().items(Joi.string()),
   savedObject: Joi.object({
     all: Joi.array()
-      .items(Joi.string(), savedObjectConditionalPrivilegeSchema)
+      .items(Joi.string())
       .required(),
     read: Joi.array()
-      .items(Joi.string(), savedObjectConditionalPrivilegeSchema)
+      .items(Joi.string())
       .required(),
   }).required(),
   ui: Joi.array()
