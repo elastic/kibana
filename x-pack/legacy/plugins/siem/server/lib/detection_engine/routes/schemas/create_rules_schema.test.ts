@@ -5,7 +5,8 @@
  */
 
 import { createRulesSchema } from './create_rules_schema';
-import { RuleAlertParamsRest, UpdateRuleAlertParamsRest, ThreatParams } from '../../alerts/types';
+import { UpdateRuleAlertParamsRest } from '../../rules/types';
+import { ThreatParams, RuleAlertParamsRest } from '../../types';
 
 describe('create rules schema', () => {
   test('empty objects do not validate', () => {

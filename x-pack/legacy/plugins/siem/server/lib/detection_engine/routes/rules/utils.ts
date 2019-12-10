@@ -6,7 +6,8 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
-import { RuleAlertType, isAlertType, OutputRuleAlertRest, isAlertTypes } from '../../alerts/types';
+import { RuleAlertType, isAlertType, isAlertTypes } from '../../rules/types';
+import { OutputRuleAlertRest } from '../../types';
 
 export const getIdError = ({
   id,

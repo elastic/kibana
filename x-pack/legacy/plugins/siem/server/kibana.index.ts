@@ -6,8 +6,7 @@
 
 import { PluginInitializerContext } from 'src/core/server';
 
-import { rulesAlertType } from './lib/detection_engine/alerts/rules_alert_type';
-import { isAlertExecutor } from './lib/detection_engine/alerts/types';
+import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
 import { createRulesRoute } from './lib/detection_engine/routes/rules/create_rules_route';
 import { createIndexRoute } from './lib/detection_engine/routes/index/create_index_route';
 import { readIndexRoute } from './lib/detection_engine/routes/index/read_index_route';
@@ -18,6 +17,7 @@ import { updateRulesRoute } from './lib/detection_engine/routes/rules/update_rul
 import { setSignalsStatusRoute } from './lib/detection_engine/routes/signals/open_close_signals_route';
 import { ServerFacade } from './types';
 import { deleteIndexRoute } from './lib/detection_engine/routes/index/delete_index_route';
+import { isAlertExecutor } from './lib/detection_engine/signals/types';
 
 const APP_ID = 'siem';
 
@@ -26,7 +26,7 @@ export const initServerWithKibana = (context: PluginInitializerContext, __legacy
   const version = context.env.packageInfo.version;
 
   if (__legacy.plugins.alerting != null) {
-    const type = rulesAlertType({ logger, version });
+    const type = signalRulesAlertType({ logger, version });
     if (isAlertExecutor(type)) {
       __legacy.plugins.alerting.setup.registerType(type);
     }

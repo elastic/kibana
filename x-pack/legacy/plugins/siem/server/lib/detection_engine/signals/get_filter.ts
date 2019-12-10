@@ -5,7 +5,6 @@
  */
 
 import { AlertServices } from '../../../../../alerting/server/types';
-import { RuleAlertParams, PartialFilter } from './types';
 import { assertUnreachable } from '../../../utils/build_query';
 import {
   Query,
@@ -13,6 +12,7 @@ import {
   esFilters,
   IIndexPattern,
 } from '../../../../../../../../src/plugins/data/server';
+import { PartialFilter, RuleAlertParams } from '../types';
 
 export const getQueryFilter = (
   query: string,

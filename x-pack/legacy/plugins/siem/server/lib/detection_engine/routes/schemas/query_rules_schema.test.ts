@@ -5,7 +5,7 @@
  */
 
 import { queryRulesSchema } from './query_rules_schema';
-import { UpdateRuleAlertParamsRest } from '../../alerts/types';
+import { UpdateRuleAlertParamsRest } from '../../rules/types';
 
 describe('queryRulesSchema', () => {
   test('empty objects do not validate', () => {

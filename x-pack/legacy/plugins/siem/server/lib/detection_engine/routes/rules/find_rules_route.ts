@@ -7,8 +7,8 @@
 import Hapi from 'hapi';
 import { isFunction } from 'lodash/fp';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { findRules } from '../../alerts/find_rules';
-import { FindRulesRequest } from '../../alerts/types';
+import { findRules } from '../../rules/find_rules';
+import { FindRulesRequest } from '../../rules/types';
 import { findRulesSchema } from '../schemas/find_rules_schema';
 import { ServerFacade } from '../../../../types';
 import { transformFindAlertsOrError } from './utils';

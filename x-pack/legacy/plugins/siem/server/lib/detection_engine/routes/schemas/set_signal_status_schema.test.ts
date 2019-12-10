@@ -5,7 +5,7 @@
  */
 
 import { setSignalsStatusSchema } from './set_signal_status_schema';
-import { SignalsRestParams } from '../../alerts/types';
+import { SignalsRestParams } from '../../signals/types';
 
 describe('set signal status schema', () => {
   test('signal_ids and status is valid', () => {

@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  SignalSourceHit,
-  SignalSearchResponse,
-  RuleTypeParams,
-  OutputRuleAlertRest,
-} from '../types';
+import { SignalSourceHit, SignalSearchResponse } from '../types';
+import { Logger } from 'kibana/server';
+import { RuleTypeParams, OutputRuleAlertRest } from '../../types';
 
 export const sampleRuleAlertParams = (
   maxSignals?: number | undefined,
@@ -281,4 +278,14 @@ export const sampleRule = (): Partial<OutputRuleAlertRest> => {
     to: 'now',
     type: 'query',
   };
+};
+
+export const mockLogger: Logger = {
+  log: jest.fn(),
+  trace: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  fatal: jest.fn(),
 };

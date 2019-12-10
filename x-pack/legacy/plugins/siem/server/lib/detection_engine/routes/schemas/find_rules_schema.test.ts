@@ -5,7 +5,7 @@
  */
 
 import { findRulesSchema } from './find_rules_schema';
-import { FindParamsRest } from '../../alerts/types';
+import { FindParamsRest } from '../../rules/types';
 
 describe('find rules schema', () => {
   test('empty objects do validate', () => {

@@ -13,18 +13,18 @@ import {
 } from '../../../../common/constants';
 
 import { buildEventsSearchQuery } from './build_events_query';
-import { searchAfterAndBulkCreate } from './utils';
-import { RuleAlertTypeDefinition } from './types';
-import { getFilter } from './get_filter';
 import { getInputIndex } from './get_input_output_index';
+import { searchAfterAndBulkCreate } from './search_after_bulk_create';
+import { getFilter } from './get_filter';
+import { SignalRuleAlertTypeDefinition } from './types';
 
-export const rulesAlertType = ({
+export const signalRulesAlertType = ({
   logger,
   version,
 }: {
   logger: Logger;
   version: string;
-}): RuleAlertTypeDefinition => {
+}): SignalRuleAlertTypeDefinition => {
   return {
     id: SIGNALS_ID,
     name: 'SIEM Signals',

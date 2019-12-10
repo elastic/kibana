@@ -10,10 +10,10 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getIdError, transformOrError } from './utils';
 import { transformError } from '../utils';
 
-import { readRules } from '../../alerts/read_rules';
+import { readRules } from '../../rules/read_rules';
 import { ServerFacade } from '../../../../types';
 import { queryRulesSchema } from '../schemas/query_rules_schema';
-import { QueryRequest } from '../../alerts/types';
+import { QueryRequest } from './types';
 
 export const createReadRulesRoute: Hapi.ServerRoute = {
   method: 'GET',

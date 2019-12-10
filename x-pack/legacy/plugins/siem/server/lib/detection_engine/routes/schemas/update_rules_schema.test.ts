@@ -5,7 +5,8 @@
  */
 
 import { updateRulesSchema } from './update_rules_schema';
-import { UpdateRuleAlertParamsRest, ThreatParams } from '../../alerts/types';
+import { UpdateRuleAlertParamsRest } from '../../rules/types';
+import { ThreatParams } from '../../types';
 
 describe('update rules schema', () => {
   test('empty objects do not validate as they require at least id or rule_id', () => {
