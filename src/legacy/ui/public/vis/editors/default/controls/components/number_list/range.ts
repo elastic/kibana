@@ -46,7 +46,7 @@ const RANGE_RE = new RegExp(
   '^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$'
 );
 
-export class Range {
+export class NumberListRange {
   constructor(
     public minInclusive: boolean,
     public min: number,
@@ -62,7 +62,7 @@ export class Range {
   }
 }
 
-export function parseRange(input: string): Range {
+export function parseRange(input: string): NumberListRange {
   const match = String(input).match(RANGE_RE);
   if (!match) {
     throw new TypeError('expected input to be in interval notation e.g., (100, 200]');
@@ -76,5 +76,10 @@ export function parseRange(input: string): Range {
 
   const [minInclusive, min, max, maxInclusive] = args;
 
-  return new Range(minInclusive as boolean, min as number, max as number, maxInclusive as boolean);
+  return new NumberListRange(
+    minInclusive as boolean,
+    min as number,
+    max as number,
+    maxInclusive as boolean
+  );
 }
