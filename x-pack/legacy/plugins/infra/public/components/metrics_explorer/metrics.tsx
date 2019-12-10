@@ -34,10 +34,10 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
   const [shouldFocus, setShouldFocus] = useState(autoFocus);
 
   // the EuiCombobox forwards the ref to an input element
-  const handleInputRef = useCallback(
-    (ref: HTMLInputElement | null) => {
-      if (ref && shouldFocus) {
-        ref.focus();
+  const autoFocusInputElement = useCallback(
+    (inputElement: HTMLInputElement | null) => {
+      if (inputElement && shouldFocus) {
+        inputElement.focus();
         setShouldFocus(false);
       }
     },
@@ -81,7 +81,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
       selectedOptions={selectedOptions}
       onChange={handleChange}
       isClearable={true}
-      inputRef={handleInputRef}
+      inputRef={autoFocusInputElement}
     />
   );
 };
