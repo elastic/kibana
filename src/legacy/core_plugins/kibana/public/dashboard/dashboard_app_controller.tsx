@@ -37,6 +37,7 @@ import {
   SaveOptions,
   SavedObjectFinder,
   unhashUrl,
+  VISUALIZE_EMBEDDABLE_TYPE,
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
 import { Query, SavedQuery, IndexPatternsContract } from '../../../../../plugins/data/public';
@@ -68,7 +69,6 @@ import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize/embeddable';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
 

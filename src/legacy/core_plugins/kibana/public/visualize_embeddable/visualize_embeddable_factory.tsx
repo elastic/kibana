@@ -45,10 +45,10 @@ import {
   ErrorEmbeddable,
   Container,
   EmbeddableOutput,
-} from '../../../../../../plugins/embeddable/public';
-import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
-import { showNewVisModal } from '../wizard';
-import { SavedVisualizations } from '../types';
+} from '../../../../../plugins/embeddable/public';
+import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
+import { showNewVisModal } from '../visualize/wizard';
+import { SavedVisualizations } from '../visualize/types';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getIndexPattern } from './get_index_pattern';
 import {
@@ -58,7 +58,7 @@ import {
   VisSavedObject,
 } from './visualize_embeddable';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
-import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
+import { TypesStart } from '../../../visualizations/public/np_ready/public/types';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
   visState: string;

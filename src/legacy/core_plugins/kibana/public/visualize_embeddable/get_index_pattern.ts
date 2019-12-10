@@ -20,7 +20,7 @@
 import { npStart } from 'ui/new_platform';
 
 import { VisSavedObject } from './visualize_embeddable';
-import { indexPatterns, IIndexPattern } from '../../../../../../plugins/data/public';
+import { indexPatterns, IIndexPattern } from '../../../../../plugins/data/public';
 
 export async function getIndexPattern(
   savedVis: VisSavedObject

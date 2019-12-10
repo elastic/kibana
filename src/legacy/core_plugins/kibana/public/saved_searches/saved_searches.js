@@ -20,7 +20,7 @@
 import './_saved_search';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
-import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { savedObjectManagementRegistry } from '../management/saved_object_registry';
 
 
 // Register this service with the saved object registry so it can be

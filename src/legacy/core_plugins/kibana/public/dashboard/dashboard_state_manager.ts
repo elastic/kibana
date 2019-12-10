@@ -39,7 +39,7 @@ import {
 import { getAppStateDefaults, migrateAppState } from './lib';
 import { convertPanelStateToSavedDashboardPanel } from './lib/embeddable_saved_object_converters';
 import { FilterUtils } from './lib/filter_utils';
-import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
+import { SavedObjectDashboard } from '../saved_dashboard/saved_dashboard';
 
 import { SavedDashboardPanel, DashboardAppState, DashboardAppStateDefaults } from './types';
 

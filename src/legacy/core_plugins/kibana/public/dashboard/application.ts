@@ -19,7 +19,6 @@
 
 import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
-import { IPrivate } from 'ui/private';
 import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
@@ -43,6 +42,7 @@ import {
   RedirectWhenMissingProvider,
   confirmModalFactory,
   configureAppAngularModule,
+  IPrivate,
 } from './legacy_imports';
 
 // @ts-ignore

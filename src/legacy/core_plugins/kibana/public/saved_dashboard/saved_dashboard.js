@@ -19,7 +19,7 @@
 
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
-import { createDashboardEditUrl } from '../dashboard_constants';
+import { createDashboardEditUrl } from '../dashboard/dashboard_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import {

@@ -18,8 +18,7 @@
  */
 import React from 'react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
-// @ts-ignore
-import { formatMsg, formatStack } from 'ui/notify/lib/index';
+import { formatMsg, formatStack } from '../../kibana_services';
 
 interface Props {
   error: Error | string | null;

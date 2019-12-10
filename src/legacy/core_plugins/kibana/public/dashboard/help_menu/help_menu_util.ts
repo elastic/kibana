@@ -17,26 +17,22 @@
  * under the License.
  */
 
-import { SavedObject } from 'ui/saved_objects/saved_object';
-import { SearchSourceContract } from '../../../../../ui/public/courier';
-import { esFilters, Query, RefreshInterval } from '../../../../../../plugins/data/public';
+import { i18n } from '@kbn/i18n';
+import { CoreStart } from 'kibana/public';
 
-export interface SavedObjectDashboard extends SavedObject {
-  id?: string;
-  copyOnSave: boolean;
-  timeRestore: boolean;
-  timeTo?: string;
-  timeFrom?: string;
-  title: string;
-  description?: string;
-  panelsJSON: string;
-  optionsJSON?: string;
-  // TODO: write a migration to rid of this, it's only around for bwc.
-  uiStateJSON?: string;
-  lastSavedTitle: string;
-  searchSource: SearchSourceContract;
-  destroy: () => void;
-  refreshInterval?: RefreshInterval;
-  getQuery(): Query;
-  getFilters(): esFilters.Filter[];
+export function addHelpMenuToAppChrome(
+  chrome: CoreStart['chrome'],
+  docLinks: CoreStart['docLinks']
+) {
+  chrome.setHelpExtension({
+    appName: i18n.translate('kbn.dashboard.helpMenu.appName', {
+      defaultMessage: 'Dashboards',
+    }),
+    links: [
+      {
+        linkType: 'documentation',
+        href: `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/dashboard.html`,
+      },
+    ],
+  });
 }

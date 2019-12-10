@@ -116,6 +116,7 @@ export function initDashboardApp(app, deps) {
             },
           ]);
           addHelpMenuToAppChrome(deps.chrome, deps.core.docLinks);
+          $scope.core = deps.core;
         },
         resolve: {
           dash: function ($rootScope, $route, redirectWhenMissing, kbnUrl) {

@@ -73,4 +73,7 @@ export { defaultEditor } from 'ui/vis/editors/default/default';
 export { VisType } from 'ui/vis';
 export { wrapInI18nContext } from 'ui/i18n';
 
-export { VisSavedObject } from './embeddable/visualize_embeddable';
+export { VisSavedObject } from '../visualize_embeddable/visualize_embeddable';
+export { VisualizeEmbeddableFactory } from '../visualize_embeddable/visualize_embeddable_factory';
+export { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize_embeddable/constants';
+export { DashboardConstants } from '../dashboard/dashboard_constants';

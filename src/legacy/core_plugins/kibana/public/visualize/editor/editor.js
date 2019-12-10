@@ -21,12 +21,11 @@ import angular from 'angular';
 import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import '../saved_visualizations/saved_visualizations';
+import '../../saved_visualizations/saved_visualizations';
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { migrateAppState } from './lib';
-import { DashboardConstants } from '../../dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
@@ -38,13 +37,14 @@ import { initVisEditorDirective } from './visualization_editor';
 import { initVisualizationDirective } from './visualization';
 
 import {
+  subscribeWithScope,
   absoluteToParsedUrl,
   KibanaParsedUrl,
   migrateLegacyQuery,
   SavedObjectSaveModal,
   showSaveModal,
   stateMonitorFactory,
-  subscribeWithScope,
+  DashboardConstants,
 } from '../legacy_imports';
 
 import { getServices } from '../kibana_services';

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable, EmbeddableOutput } from '../../../../../../plugins/embeddable/public';
+import { Embeddable, EmbeddableOutput } from '../../../../../plugins/embeddable/public';
 
 import { DisabledLabVisualization } from './disabled_lab_visualization';
 import { VisualizeInput } from './visualize_embeddable';

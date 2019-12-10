@@ -66,3 +66,4 @@ export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 export { IInjector } from 'ui/chrome';
 export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
+export { VISUALIZE_EMBEDDABLE_TYPE } from '../visualize_embeddable';

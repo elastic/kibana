@@ -20,9 +20,9 @@
 import './_saved_vis';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
-import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-import { start as visualizations } from '../../../../visualizations/public/np_ready/public/legacy';
-import { createVisualizeEditUrl } from '../visualize_constants';
+import { savedObjectManagementRegistry } from '../management/saved_object_registry';
+import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
+import { createVisualizeEditUrl } from '../visualize/visualize_constants';
 import { findListItems } from './find_list_items';
 
 const app = uiModules.get('app/visualize');

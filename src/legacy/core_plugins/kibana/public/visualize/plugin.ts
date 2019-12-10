@@ -34,15 +34,18 @@ import { NavigationStart } from '../../../navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { VisualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable/constants';
 import { VisualizeConstants } from './visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
-import { defaultEditor, VisEditorTypesRegistryProvider } from './legacy_imports';
+import {
+  defaultEditor,
+  VisEditorTypesRegistryProvider,
+  VisualizeEmbeddableFactory,
+  VISUALIZE_EMBEDDABLE_TYPE,
+} from './legacy_imports';
 import { SavedVisualizations } from './types';
 
 export interface LegacyAngularInjectedDependencies {

@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { wrapInI18nContext } from 'ui/i18n';
 import { IUiSettingsClient } from 'kibana/public';
 import { TableHeader } from './table_header/table_header';
+import { wrapInI18nContext } from '../../../kibana_services';
 
 export function createTableHeaderDirective(reactDirective: any, config: IUiSettingsClient) {
   return reactDirective(

@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import './saved_dashboard';
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
-import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
+import { savedObjectManagementRegistry } from '../management/saved_object_registry';
 
 const module = uiModules.get('app/dashboard');
 

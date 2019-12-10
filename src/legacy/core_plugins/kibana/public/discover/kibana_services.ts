@@ -47,6 +47,10 @@ export function setServices(newServices: any) {
   services = newServices;
 }
 
+// import directives that
+import 'ui/directives/css_truncate';
+import 'ui/directives/field_name';
+
 // EXPORT legacy static dependencies, should be migrated when available in a new version;
 export { angular };
 export { wrapInI18nContext } from 'ui/i18n';
@@ -78,6 +82,8 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
 export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
+// @ts-ignore
+export { formatMsg, formatStack } from 'ui/notify/lib/index';
 
 // EXPORT types
 export { Vis } from 'ui/vis';
@@ -90,3 +96,4 @@ export {
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';
+export { DocView } from 'ui/registry/doc_views_types';
