@@ -118,6 +118,9 @@ export class TaskManager {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
 
+    // all task related events (task claimed, task marked as running, etc.) are emitted through events$
+    this.events$ = new Subject();
+
     this.store = new TaskStore({
       serializer: opts.serializer,
       savedObjectsRepository: opts.savedObjectsRepository,
@@ -127,17 +130,15 @@ export class TaskManager {
       definitions: this.definitions,
       taskManagerId: `kibana:${taskManagerId}`,
     });
+    // pipe store events into the TaskManager's event stream
+    this.store.events.subscribe(event => this.events$.next(event));
 
     this.pool = new TaskPool({
       logger: this.logger,
       maxWorkers: this.maxWorkers,
     });
 
-    this.events$ = new Subject();
     this.claimRequests$ = new Subject();
-    // if we end up with only one stream, remove merge
-    merge<TaskLifecycleEvent>(this.store.events).subscribe(event => this.events$.next(event));
-
     this.pollingSubscription = Subscription.EMPTY;
     this.poller$ = createTaskPoller<string, FillPoolResult>({
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
