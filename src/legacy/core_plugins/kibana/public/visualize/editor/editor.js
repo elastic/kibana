@@ -39,14 +39,13 @@ import {
   getServices,
   angular,
   absoluteToParsedUrl,
-  getUnhashableStatesProvider,
   KibanaParsedUrl,
   migrateLegacyQuery,
   SavedObjectSaveModal,
   showSaveModal,
   stateMonitorFactory,
   subscribeWithScope,
-  unhashUrl,
+  unhashUrl
 } from '../kibana_services';
 
 const {
@@ -54,19 +53,19 @@ const {
   capabilities,
   chrome,
   chromeLegacy,
-  data,
+  npData,
   docTitle,
   FilterBarQueryFilterProvider,
   getBasePath,
   toastNotifications,
-  timefilter,
   uiModules,
   uiRoutes,
   visualizations,
   share,
 } = getServices();
 
-const { savedQueryService } = data.search.services;
+const savedQueryService = npData.query.savedQueries;
+const { timefilter } = npData.query.timefilter;
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -86,7 +85,7 @@ uiRoutes
           );
         }
 
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
+        return ensureDefaultIndexPattern(core, npData, $rootScope, kbnUrl).then(() => savedVisualizations.get($route.current.params))
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
               return savedVis.vis.type.setup(savedVis)
@@ -105,7 +104,7 @@ uiRoutes
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
       savedVis: function (savedVisualizations, redirectWhenMissing, $route, $rootScope, kbnUrl) {
-        return ensureDefaultIndexPattern(core, data, $rootScope, kbnUrl)
+        return ensureDefaultIndexPattern(core, npData, $rootScope, kbnUrl)
           .then(() => savedVisualizations.get($route.current.params.id))
           .then((savedVis) => {
             chrome.recentlyAccessed.add(
@@ -165,7 +164,6 @@ function VisEditor(
   localStorage,
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
-  const getUnhashableStates = Private(getUnhashableStatesProvider);
 
   // Retrieve the resolved SavedVis instance.
   const savedVis = $route.current.locals.savedVis;
@@ -249,7 +247,7 @@ function VisEditor(
         anchorElement,
         allowEmbed: true,
         allowShortUrl: capabilities.visualize.createShortUrl,
-        shareableUrl: unhashUrl(window.location.href, getUnhashableStates()),
+        shareableUrl: unhashUrl(window.location.href),
         objectId: savedVis.id,
         objectType: 'visualization',
         sharingData: {

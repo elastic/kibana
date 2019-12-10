@@ -58,6 +58,7 @@ export {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsErrorHelpers,
+  SavedObjectsClientFactory,
   PropertyEqualsSavedObjectsPredicate,
   ISavedObjectsPredicate,
   AndSavedObjectsPredicates,

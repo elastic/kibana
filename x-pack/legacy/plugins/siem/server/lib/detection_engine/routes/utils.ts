@@ -6,7 +6,9 @@
 
 import Boom from 'boom';
 import { pickBy } from 'lodash/fp';
+import { APP_ID, SIGNALS_INDEX_KEY } from '../../../../common/constants';
 import { RuleAlertType, isAlertType, OutputRuleAlertRest, isAlertTypes } from '../alerts/types';
+import { ServerFacade, RequestFacade } from '../../../types';
 
 export const getIdError = ({
   id,
@@ -54,6 +56,7 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     tags: alert.params.tags,
     to: alert.params.to,
     type: alert.params.type,
+    threats: alert.params.threats,
   });
 };
 
@@ -72,4 +75,31 @@ export const transformOrError = (alert: unknown): Partial<OutputRuleAlertRest> |
   } else {
     return new Boom('Internal error transforming', { statusCode: 500 });
   }
+};
+
+export const transformError = (err: Error & { statusCode?: number }) => {
+  if (Boom.isBoom(err)) {
+    return err;
+  } else {
+    if (err.statusCode != null) {
+      return new Boom(err.message, { statusCode: err.statusCode });
+    } else {
+      // natively return the err and allow the regular framework
+      // to deal with the error when it is a non Boom
+      return err;
+    }
+  }
+};
+
+export const getIndex = (request: RequestFacade, server: ServerFacade): string => {
+  const spaceId = server.plugins.spaces.getSpaceId(request);
+  const signalsIndex = server.config().get(`xpack.${APP_ID}.${SIGNALS_INDEX_KEY}`);
+  return `${signalsIndex}-${spaceId}`;
+};
+
+export const callWithRequestFactory = (request: RequestFacade) => {
+  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+  return <T, U>(endpoint: string, params: T, options?: U) => {
+    return callWithRequest(request, endpoint, params, options);
+  };
 };

@@ -32,6 +32,7 @@ const risk_score = Joi.number()
   .greater(-1)
   .less(101);
 const severity = Joi.string();
+const status = Joi.string().valid('open', 'closed');
 const to = Joi.string();
 const type = Joi.string().valid('filter', 'query', 'saved_query');
 const queryFilter = Joi.string();
@@ -44,12 +45,40 @@ const per_page = Joi.number()
 const page = Joi.number()
   .min(1)
   .default(1);
+const signal_ids = Joi.array().items(Joi.string());
+const signal_status_query = Joi.object();
 const sort_field = Joi.string();
 const sort_order = Joi.string().valid('asc', 'desc');
 const tags = Joi.array().items(Joi.string());
 const fields = Joi.array()
   .items(Joi.string())
   .single();
+const threat_framework = Joi.string();
+const threat_tactic_id = Joi.string();
+const threat_tactic_name = Joi.string();
+const threat_tactic_reference = Joi.string();
+const threat_tactic = Joi.object({
+  id: threat_tactic_id.required(),
+  name: threat_tactic_name.required(),
+  reference: threat_tactic_reference.required(),
+});
+const threat_technique_id = Joi.string();
+const threat_technique_name = Joi.string();
+const threat_technique_reference = Joi.string();
+const threat_technique = Joi.object({
+  id: threat_technique_id.required(),
+  name: threat_technique_name.required(),
+  reference: threat_technique_reference.required(),
+});
+const threat_techniques = Joi.array().items(threat_technique.required());
+
+const threats = Joi.array().items(
+  Joi.object({
+    framework: threat_framework.required(),
+    tactic: threat_tactic.required(),
+    techniques: threat_techniques.required(),
+  })
+);
 /* eslint-enable @typescript-eslint/camelcase */
 
 export const createRulesSchema = Joi.object({
@@ -110,6 +139,7 @@ export const createRulesSchema = Joi.object({
   tags: tags.default([]),
   to: to.required(),
   type: type.required(),
+  threats: threats.default([]),
   references: references.default([]),
 });
 
@@ -165,6 +195,7 @@ export const updateRulesSchema = Joi.object({
   tags,
   to,
   type,
+  threats,
   references,
 }).xor('id', 'rule_id');
 
@@ -185,3 +216,9 @@ export const findRulesSchema = Joi.object({
   }),
   sort_order,
 });
+
+export const setSignalsStatusSchema = Joi.object({
+  signal_ids,
+  query: signal_status_query,
+  status: status.required(),
+}).xor('signal_ids', 'query');
