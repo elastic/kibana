@@ -37,7 +37,10 @@ export async function createTestUserService(
   const kibanaServer = getService('kibanaServer');
 
   const enabledPlugins = await kibanaServer.plugins.getEnabledIds();
-  if (enabledPlugins.includes('security')) {
+  const isEnabled = () => {
+    return enabledPlugins.includes('security') && !config.get('security.disableTestUser');
+  };
+  if (isEnabled()) {
     log.debug(
       '====================================================creating roles and users========================='
     );
@@ -82,7 +85,7 @@ export async function createTestUserService(
     }
 
     private assertIsEnabled() {
-      if (!enabledPlugins.includes('security')) {
+      if (!isEnabled()) {
         throw new Error('test user is not enabled because security is disabled in Kibana');
       }
     }

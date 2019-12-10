@@ -265,6 +265,7 @@ export const schema = Joi.object()
             then: Joi.array().min(1),
           })
           .default(['superuser']),
+        disableTestUser: Joi.boolean(),
       })
       .default(),
   })
