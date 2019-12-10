@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { MachineLearningCommonProvider } from './common';
 
-export function MachineLearningJobWizardAdvancedProvider({
-  getService,
-  getPageObjects,
-}: FtrProviderContext) {
+export function MachineLearningJobWizardAdvancedProvider(
+  { getService }: FtrProviderContext,
+  mlCommon: ProvidedType<typeof MachineLearningCommonProvider>
+) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -47,7 +49,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async setQueryDelay(queryDelay: string) {
-      await testSubjects.setValue('mlJobWizardInputQueryDelay', queryDelay, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputQueryDelay', queryDelay, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -64,7 +66,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async setFrequency(frequency: string) {
-      await testSubjects.setValue('mlJobWizardInputFrequency', frequency, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputFrequency', frequency, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -81,7 +83,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async setScrollSize(scrollSize: string) {
-      await testSubjects.setValue('mlJobWizardInputScrollSize', scrollSize, {
+      await mlCommon.setValueWithChecks('mlJobWizardInputScrollSize', scrollSize, {
         clearWithKeyboard: true,
         typeCharByChar: true,
       });
@@ -141,15 +143,14 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async openCreateDetectorModal() {
-      await testSubjects.click('mlAddDetectorButton');
-      await this.assertCreateDetectorModalExists();
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.click('mlAddDetectorButton');
+        await this.assertCreateDetectorModalExists();
+      });
     },
 
     async assertCreateDetectorModalExists() {
-      // this retry can be removed as soon as #48734 is merged
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlCreateDetectorModal');
-      });
+      await testSubjects.existOrFail('mlCreateDetectorModal', { timeout: 5000 });
     },
 
     async assertDetectorFunctionInputExists() {
@@ -261,7 +262,7 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async setDetectorDescription(description: string) {
-      await testSubjects.setValue('mlAdvancedDetectorDescriptionInput', description, {
+      await mlCommon.setValueWithChecks('mlAdvancedDetectorDescriptionInput', description, {
         clearWithKeyboard: true,
       });
       await this.assertDetectorDescriptionValue(description);
@@ -298,18 +299,17 @@ export function MachineLearningJobWizardAdvancedProvider({
     },
 
     async clickEditDetector(detectorIndex: number) {
-      await testSubjects.click(
-        `mlAdvancedDetector ${detectorIndex} > mlAdvancedDetectorEditButton`
-      );
-      await this.assertCreateDetectorModalExists();
+      await retry.tryForTime(20 * 1000, async () => {
+        await testSubjects.click(
+          `mlAdvancedDetector ${detectorIndex} > mlAdvancedDetectorEditButton`
+        );
+        await this.assertCreateDetectorModalExists();
+      });
     },
 
     async createJob() {
       await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
-      // this retry can be removed as soon as #48734 is merged
-      await retry.tryForTime(5000, async () => {
-        await testSubjects.existOrFail('mlStartDatafeedModal');
-      });
+      await testSubjects.existOrFail('mlStartDatafeedModal', { timeout: 10 * 1000 });
     },
   };
 }

@@ -22,6 +22,7 @@ import {
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useCallApmApi } from '../../../../hooks/useCallApmApi';
 import { APMClient } from '../../../../services/rest/createCallApmApi';
+import { clearCache } from '../../../../services/rest/callApi';
 import { useKibanaCore } from '../../../../../../observability/public';
 
 const APM_INDEX_LABELS = [
@@ -63,13 +64,6 @@ const APM_INDEX_LABELS = [
     label: i18n.translate('xpack.apm.settings.apmIndices.metricsIndicesLabel', {
       defaultMessage: 'Metrics Indices'
     })
-  },
-  {
-    configurationName: 'apm_oss.apmAgentConfigurationIndex',
-    label: i18n.translate(
-      'xpack.apm.settings.apmIndices.apmAgentConfigurationIndexLabel',
-      { defaultMessage: 'Agent Configuration Index' }
-    )
   }
 ];
 
@@ -87,6 +81,8 @@ async function saveApmIndices({
       body: apmIndices
     }
   });
+
+  clearCache();
 }
 
 export function ApmIndices() {

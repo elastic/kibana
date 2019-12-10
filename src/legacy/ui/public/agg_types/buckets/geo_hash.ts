@@ -26,7 +26,7 @@ import { IsFilteredByCollarParamEditor } from '../../vis/editors/default/control
 import { PrecisionParamEditor } from '../../vis/editors/default/controls/precision';
 import { geohashColumns } from '../../utils/decode_geo_hash';
 import { AggGroupNames } from '../../vis/editors/default/agg_groups';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { geoContains, scaleBounds } from '../../utils/geo_utils';

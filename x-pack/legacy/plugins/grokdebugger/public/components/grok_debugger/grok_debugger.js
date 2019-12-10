@@ -5,6 +5,9 @@
  */
 import React from 'react';
 import { isEmpty } from 'lodash';
+
+import './brace_imports';
+
 import {
   EuiForm,
   EuiButton,

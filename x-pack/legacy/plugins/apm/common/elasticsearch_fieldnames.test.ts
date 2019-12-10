@@ -33,6 +33,7 @@ describe('Transaction', () => {
     timestamp: { us: 1337 },
     trace: { id: 'trace id' },
     user: { id: '1337' },
+    user_agent: { name: 'Other', original: 'test original' },
     parent: {
       id: 'parentId'
     },

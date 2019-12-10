@@ -24,9 +24,24 @@ The following section is re-used in the Installation and Upgrade Guide
 === The default setting for `courier:batchSearches` is now `false`
 
 *Details:*
-Changing the default setting for `courier:batchSearches` to `false` means 
-that search requests will use the `_search` {es} endpoint rather than `_msearch`. 
+Changing the default setting for `courier:batchSearches` to `false` means
+that search requests will use the `_search` {es} endpoint rather than `_msearch`.
 
 *Impact:*
-Dashboard panels will load individually, and search requests will terminate 
+Dashboard panels will load individually, and search requests will terminate
 when users navigate away or update the query.
+
+[float]
+[[breaking_75_codeapp]]
+=== The experimental Code app has been removed
+
+*Details:*
+The experimental Code app that was previously disabled by default has been
+removed. Due to the existing implementation of code being untenable, we've
+decided not to pursue further development of the code app at this time.
+
+*Impact:*
+Any installs that previously enabled the Code app will now log a warning when
+Kibana starts up. It's safe to remove all configurations starting with
+`xpack.code.`. Starting in 8.0, these warnings will become errors that prevent
+Kibana from starting up.

@@ -20,12 +20,8 @@
 import Joi from 'joi';
 import os from 'os';
 
-import {
-  fromRoot
-} from '../../utils';
-import {
-  getData
-} from '../path';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import {
   DEFAULT_CSP_RULES,
   DEFAULT_CSP_STRICT,
@@ -109,6 +105,7 @@ export default () => Joi.object({
     maxPayloadBytes: HANDLED_IN_NEW_PLATFORM,
     socketTimeout: HANDLED_IN_NEW_PLATFORM,
     ssl: HANDLED_IN_NEW_PLATFORM,
+    compression: HANDLED_IN_NEW_PLATFORM,
   }).default(),
 
   uiSettings: HANDLED_IN_NEW_PLATFORM,
@@ -151,9 +148,7 @@ export default () => Joi.object({
     initialize: Joi.boolean().default(true)
   }).default(),
 
-  path: Joi.object({
-    data: Joi.string().default(getData())
-  }).default(),
+  path: HANDLED_IN_NEW_PLATFORM,
 
   stats: Joi.object({
     maximumWaitTimeForAllCollectorsInS: Joi.number().default(60)

@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const indexName = `metricbeat-6.7.0-2019.03.11`;
 

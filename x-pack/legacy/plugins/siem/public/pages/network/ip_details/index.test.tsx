@@ -38,9 +38,12 @@ mockUseKibanaCore.mockImplementation(() => ({
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work
-// For now let's forget about SiemSearchBar
+// For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../components/search_bar', () => ({
   SiemSearchBar: () => null,
+}));
+jest.mock('../../../components/query_bar', () => ({
+  QueryBar: () => null,
 }));
 
 let localSource: Array<{
@@ -108,13 +111,8 @@ jest.mock('ui/documentation_links', () => ({
   },
 }));
 
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-
 describe('Ip Details', () => {
   beforeAll(() => {
-    console.error = jest.fn();
     (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
@@ -126,7 +124,6 @@ describe('Ip Details', () => {
   });
 
   afterAll(() => {
-    console.error = originalError;
     delete (global as GlobalWithFetch).fetch;
   });
   const state: State = mockGlobalState;
@@ -163,7 +160,7 @@ describe('Ip Details', () => {
     wrapper.update();
     expect(
       wrapper
-        .find('[data-test-subj="ip-details-headline"] [data-test-subj="page_headline_title"]')
+        .find('[data-test-subj="ip-details-headline"] [data-test-subj="header-page-title"]')
         .text()
     ).toEqual('fe80::24ce:f7ff:fede:a571');
   });

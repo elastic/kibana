@@ -1,0 +1,121 @@
+[[release-highlights-7.5.0]]
+== 7.5.0 release highlights
+++++
+<titleabbrev>7.5.0</titleabbrev>
+++++
+
+Each release of {kib} brings new features and product improvements.
+Following are the most notable feature and user experience changes in 7.5.
+Play around with them locally, or on the
+https://www.elastic.co/products/elasticsearch/service[Elasticsearch Service],
+and reach out on the https://discuss.elastic.co/c/kibana[Kibana Discuss forum]
+if you have any questions or feedback.
+
+//NOTE: The notable-highlights tagged regions are re-used in the
+//Installation and Upgrade Guide
+
+// tag::notable-highlights[]
+
+For a complete list of highlights, 
+see the https://www.elastic.co/blog/kibana-7-5-0-released[Kibana 7.5 release blog].
+
+[float]
+[[lens-7.5]]
+=== Lens&mdash;a new way to create visualizations (beta)
+
+Lens is a simple, more intuitive way to visualize your data. Lens provides a
+drag-and-drop experience that helps you get from your data to insights
+in just a few clicks. If there is a better visualization for your data,
+Lens makes smart visualization suggestions for you, which allows you to
+quickly switch between visualization types. Want to use a different data set?
+With Lens, you can simply choose a different index pattern right from the UI.
+Check out our {kibana-ref}/lens.html[documentation] for full details. 
+
+[role="screenshot"]
+image::release-notes/images/7.5-lens.gif[Lens]
+
+[float]
+[[smart-query-cancellation-7.5]]
+=== Smart query cancellation
+
+Starting in 7.5, if you navigate to a different page or
+update a query before getting the results, {kib} applies a smart cancellation policy,
+canceling the
+{es} query.  Canceling unnecessary queries improves cluster performance
+by reducing noise caused by queries that you no longer need.
+
+[float]
+[[canvas-shareables-7.5]]
+=== Canvas workpads outside of Kibana
+
+Canvas introduces shareables, a new way to externally share information from
+{kib}.  Shareables enables our community to share static Canvas workpads
+using a code snippet. When the workpad is added to your website,
+you can customize the workpad behavior to autoplay the pages.
+
+[role="screenshot"]
+image::release-notes/images/7.5-canvas.gif[Canvas Shareables]
+
+[float]
+[[newsfeed-7.5]]
+=== A newsfeed to keep you informed
+
+Keep up with what’s going on at Elastic with our newsfeed in {kib}.
+You’ll learn about what’s new, what we’re blogging about, our latest webinars,
+and more.
+
+[role="screenshot"]
+image::release-notes/images/7.5-newsfeed.png[Newsfeed]
+
+[float]
+[[maps-7.5]]
+=== More Maps enhancements
+
+GeoJSON upload was released as Beta in 7.3,
+and now it's production ready in 7.5.
+GeoJSON upload makes it easier to add custom vector shapes to your map.
+Check out the {kibana-ref}/indexing-geojson-data-tutorial.html[Indexing GeoJSON data tutorial].
+
+In 7.5, Maps also introduces these new features:
+
+* Styling by date and time field, which is good for tracking time
+series data and for highlighting newer data over older records.
+* Document sorting to ensure that your most important data is on top of the map.
+* A new tooltip design with support for drag-drop field sorting and image embeds.
+
+[role="screenshot"]
+image::release-notes/images/7.5-maps.png[Maps]
+
+[float]
+[[api-keys-7.5]]
+=== A new UI for managing API Keys
+
+Our new API keys UI allows cluster administrators to view and invalidate
+all API keys, and users to view and invalidate their own keys.
+API keys are is especially useful when working with automated scripts,
+or workflow integration with other software. For example, you can use API
+keys to automate the ingestion of new data from remote sources,
+without live user interaction.  See {kibana-ref}/api-keys.html[the documentation] for more details.
+
+[role="screenshot"]
+image::release-notes/images/7.5-api-keys.png[API Keys UI]
+
+[float]
+[[snapshot-retention-7.5]]
+=== Automatic deletion of snapshots
+
+When creating a snapshot lifecycle policy with our
+*Snapshot and Restore* UI, you can now optionally configure a retention period.
+This feature enables you to automate the deletion of your snapshots,
+reducing the need for manual cleanup while allowing for retention of only the
+most relevant and recent snapshots. For example, you might define a
+policy that deletes snapshots older than thirty days, always keeps
+the latest five snapshots, and deletes the oldest snapshot if more than 50
+are present. See {ref}/slm-retention.html[Snapshot lifecycle management retention]
+for the full documentation.
+
+[role="screenshot"]
+image::release-notes/images/7.5-snapshot-retention.png[Snapshot Retention UI]
+
+
+// end::notable-highlights[]

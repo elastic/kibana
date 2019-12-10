@@ -24,6 +24,7 @@ A high level overview of our contributing guidelines.
   - [Internationalization](#internationalization)
   - [Testing and Building](#testing-and-building)
     - [Debugging server code](#debugging-server-code)
+    - [Instrumenting with Elastic APM](#instrumenting-with-elastic-apm)
   - [Debugging Unit Tests](#debugging-unit-tests)
   - [Unit Testing Plugins](#unit-testing-plugins)
   - [Cross-browser compatibility](#cross-browser-compatibility)
@@ -274,7 +275,7 @@ Note that for VSCode, to enable "live" linting of TypeScript (and other) file ty
   "eslint.autoFixOnSave": true,
 ```
 
-It is **not** recommended to use `prettier` plugin on Kibana project. Because settings are in `eslintrc.js` file and it is applied to too many files that shouldn't be prettier-ized. 
+:warning: It is **not** recommended to use the [`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the Kibana project. Formatting and styling roles are set in the multiple `.eslintrc.js` files across the project and some of them use the [NPM version of Prettier](https://www.npmjs.com/package/prettier). Using the IDE extension might cause conflicts, applying the formatting to too many files that shouldn't be prettier-ized and/or highlighting errors that are actually OK.
 
 ### Internationalization
 
@@ -323,6 +324,29 @@ macOS users on a machine with a discrete graphics card may see significant speed
 ### Debugging Server Code
 `yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
+### Instrumenting with Elastic APM
+Kibana ships with the [Elastic APM Node.js Agent](https://github.com/elastic/apm-agent-nodejs) built-in for debugging purposes.
+
+Its default configuration is meant to be used by core Kibana developers only, but it can easily be re-configured to your needs.
+In its default configuration it's disabled and will, once enabled, send APM data to a centrally managed Elasticsearch cluster accessible only to Elastic employees.
+
+To change the location where data is sent, use the [`serverUrl`](https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#server-url) APM config option.
+To activate the APM agent, use the [`active`](https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html#active) APM config option.
+
+All config options can be set either via environment variables, or by creating an appropriate config file under `config/apm.dev.js`.
+For more information about configuring the APM agent, please refer to [the documentation](https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuring-the-agent.html).
+
+Example `config/apm.dev.js` file:
+
+```js
+module.exports = {
+  active: true,
+};
+```
+
+Once the agent is active, it will trace all incoming HTTP requests to Kibana, monitor for errors, and collect process-level metrics.
+The collected data will be sent to the APM Server and is viewable in the APM UI in Kibana.
+
 ### Unit testing frameworks
 Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still
 exist in Mocha but all new unit tests should be written in Jest. Mocha tests
@@ -347,13 +371,19 @@ Test runner arguments:
  - `[test path]` is the relative path to the test file.
 
  Examples:
-  - Run the entire elasticsearch_service test suite with yarn:
-    `node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts`
-  - Run the jest test case whose description matches 'stops both admin and data clients':
-    `node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts`
+  - Run the entire elasticsearch_service test suite:
+    ```
+    node scripts/jest src/core/server/elasticsearch/elasticsearch_service.test.ts
+    ```
+  - Run the jest test case whose description matches `stops both admin and data clients`:
+    ```
+    node scripts/jest -t 'stops both admin and data clients' src/core/server/elasticsearch/elasticsearch_service.test.ts
+    ```
   - Run the api integration test case whose description matches the given string:
-    `node scripts/functional_tests_server --config test/api_integration/config.js`
-    `node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'`
+    ```
+    node scripts/functional_tests_server --config test/api_integration/config.js
+    node scripts/functional_test_runner --config test/api_integration/config.js --grep='should return 404 if id does not match any sample data sets'
+    ```
 
 ### Debugging Unit Tests
 

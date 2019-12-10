@@ -11,7 +11,7 @@ import { Legacy } from 'kibana';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { JsonObject } from '../../../../common/typed_json';
-import { InfraMetricModel } from '../metrics/adapter_types';
+import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
@@ -45,7 +45,12 @@ export interface InfraBackendFrameworkAdapter {
   ): Promise<boolean>;
   callWithRequest(
     req: InfraFrameworkRequest,
-    method: 'indices.getAlias' | 'indices.get',
+    method: 'indices.getAlias',
+    options?: object
+  ): Promise<InfraDatabaseGetIndicesAliasResponse>;
+  callWithRequest(
+    req: InfraFrameworkRequest,
+    method: 'indices.get',
     options?: object
   ): Promise<InfraDatabaseGetIndicesResponse>;
   callWithRequest(
@@ -63,7 +68,7 @@ export interface InfraBackendFrameworkAdapter {
   getSpaceId(request: InfraFrameworkRequest<any>): string;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
-    model: InfraMetricModel,
+    model: TSVBMetricModel,
     timerange: { min: number; max: number },
     filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
@@ -134,7 +139,16 @@ export interface InfraDatabaseMultiResponse<Hit, Aggregation> extends InfraDatab
 }
 
 export interface InfraDatabaseFieldCapsResponse extends InfraDatabaseResponse {
+  indices: string[];
   fields: InfraFieldsResponse;
+}
+
+export interface InfraDatabaseGetIndicesAliasResponse {
+  [indexName: string]: {
+    aliases: {
+      [aliasName: string]: any;
+    };
+  };
 }
 
 export interface InfraDatabaseGetIndicesResponse {
@@ -142,6 +156,15 @@ export interface InfraDatabaseGetIndicesResponse {
     aliases: {
       [aliasName: string]: any;
     };
+    mappings: {
+      _meta: object;
+      dynamic_templates: any[];
+      date_detection: boolean;
+      properties: {
+        [fieldName: string]: any;
+      };
+    };
+    settings: { index: object };
   };
 }
 

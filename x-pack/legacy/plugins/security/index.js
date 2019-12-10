@@ -30,9 +30,13 @@ export const security = (kibana) => new kibana.Plugin({
       enabled: Joi.boolean().default(true),
       cookieName: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       encryptionKey: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
-      sessionTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      session: Joi.object({
+        idleTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+        lifespan: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      }).default(),
       secureCookies: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
       public: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      loginAssistanceMessage: Joi.string().default(),
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
@@ -45,9 +49,10 @@ export const security = (kibana) => new kibana.Plugin({
     }).default();
   },
 
-  deprecations: function ({ unused, rename }) {
+  deprecations: function ({ rename, unused }) {
     return [
       unused('authorization.legacyFallback.enabled'),
+      rename('sessionTimeout', 'session.idleTimeout'),
       rename('authProviders', 'authc.providers'),
       (settings, log) => {
         const hasSAMLProvider = get(settings, 'authc.providers', []).includes('saml');
@@ -102,7 +107,11 @@ export const security = (kibana) => new kibana.Plugin({
 
       return {
         secureCookies: securityPlugin.__legacyCompat.config.secureCookies,
-        sessionTimeout: securityPlugin.__legacyCompat.config.sessionTimeout,
+        session: {
+          tenant: server.newPlatform.setup.core.http.basePath.serverBasePath,
+          idleTimeout: securityPlugin.__legacyCompat.config.session.idleTimeout,
+          lifespan: securityPlugin.__legacyCompat.config.session.lifespan,
+        },
         enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
       };
     },
@@ -115,7 +124,8 @@ export const security = (kibana) => new kibana.Plugin({
     }
 
     watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
-      if (securityPlugin.__legacyCompat.license.getFeatures().allowRbac) {
+      const xpackInfo = server.plugins.xpack_main.info;
+      if (xpackInfo.isAvailable() && xpackInfo.feature('security').isEnabled()) {
         await securityPlugin.__legacyCompat.registerPrivilegesWithCluster();
       }
     });
@@ -140,7 +150,6 @@ export const security = (kibana) => new kibana.Plugin({
       isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
         server.plugins.kibana.systemApi
       ),
-      capabilities: { registerCapabilitiesModifier: server.registerCapabilitiesModifier },
       cspRules: createCSPRuleString(config.get('csp.rules')),
       kibanaIndexName: config.get('kibana.index'),
     });
@@ -166,7 +175,9 @@ export const security = (kibana) => new kibana.Plugin({
 
     server.injectUiAppVars('login', () => {
       const { showLogin, allowLogin, layout = 'form' } = securityPlugin.__legacyCompat.license.getFeatures();
+      const { loginAssistanceMessage } = securityPlugin.__legacyCompat.config;
       return {
+        loginAssistanceMessage,
         loginState: {
           showLogin,
           allowLogin,

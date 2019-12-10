@@ -21,6 +21,7 @@ import { UptimeRefreshContext, UptimeSettingsContext, UMSettingsContextValues } 
 import { UptimeDatePicker } from './components/functional/uptime_date_picker';
 import { useUrlParams } from './hooks';
 import { store } from './state';
+import { setBasePath, triggerAppRefresh } from './state/actions';
 
 export interface UptimeAppColors {
   danger: string;
@@ -111,7 +112,9 @@ const Application = (props: UptimeAppProps) => {
   }, []);
 
   const refreshApp = () => {
-    setLastRefresh(Date.now());
+    const refreshTime = Date.now();
+    setLastRefresh(refreshTime);
+    store.dispatch(triggerAppRefresh(refreshTime));
   };
 
   const [getUrlParams] = useUrlParams();
@@ -141,6 +144,8 @@ const Application = (props: UptimeAppProps) => {
       setHeadingText,
     };
   };
+
+  store.dispatch(setBasePath(basePath));
 
   return (
     <i18nCore.Context>

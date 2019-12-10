@@ -537,7 +537,11 @@ describe('SAMLAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.samlPrepare',
-          { body: { acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml' } }
+          {
+            body: {
+              acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+            },
+          }
         );
 
         expect(mockOptions.logger.warn).not.toHaveBeenCalled();
@@ -572,7 +576,11 @@ describe('SAMLAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.samlPrepare',
-          { body: { acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml' } }
+          {
+            body: {
+              acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+            },
+          }
         );
 
         expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
@@ -610,7 +618,11 @@ describe('SAMLAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.samlPrepare',
-          { body: { acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml' } }
+          {
+            body: {
+              acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+            },
+          }
         );
 
         expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
@@ -686,7 +698,11 @@ describe('SAMLAuthenticationProvider', () => {
         sinon.assert.calledWithExactly(
           mockOptions.client.callAsInternalUser,
           'shield.samlPrepare',
-          { body: { acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml' } }
+          {
+            body: {
+              acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
+            },
+          }
         );
 
         expect(authenticationResult.failed()).toBe(true);
@@ -752,7 +768,9 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/base-path/api/security/v1/saml` },
+        body: {
+          acs: `test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml`,
+        },
       });
 
       expect(authenticationResult.redirected()).toBe(true);
@@ -773,7 +791,9 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, null);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/base-path/api/security/v1/saml` },
+        body: {
+          acs: `test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml`,
+        },
       });
 
       expect(authenticationResult.failed()).toBe(true);
@@ -983,7 +1003,9 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, state);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/base-path/api/security/v1/saml` },
+        body: {
+          acs: `test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml`,
+        },
       });
 
       expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
@@ -1053,7 +1075,9 @@ describe('SAMLAuthenticationProvider', () => {
       const authenticationResult = await provider.authenticate(request, state);
 
       sinon.assert.calledWithExactly(mockOptions.client.callAsInternalUser, 'shield.samlPrepare', {
-        body: { acs: `test-protocol://test-hostname:1234/base-path/api/security/v1/saml` },
+        body: {
+          acs: `test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml`,
+        },
       });
 
       expect(mockOptions.logger.warn).toHaveBeenCalledTimes(1);
@@ -1184,7 +1208,7 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         }
       );
@@ -1214,7 +1238,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML logout response is not defined.', async () => {
@@ -1238,7 +1262,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('relies on SAML logout if query string is not empty, but does not include SAMLRequest.', async () => {
@@ -1264,7 +1288,7 @@ describe('SAMLAuthenticationProvider', () => {
       });
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('relies on SAML invalidate call even if access token is presented.', async () => {
@@ -1287,13 +1311,13 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         }
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is null.', async () => {
@@ -1312,13 +1336,13 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         }
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('uses `realm` name instead of `acs` if it is specified for SAML invalidate request.', async () => {
@@ -1345,7 +1369,7 @@ describe('SAMLAuthenticationProvider', () => {
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects to /logged_out if `redirect` field in SAML invalidate response is not defined.', async () => {
@@ -1364,13 +1388,13 @@ describe('SAMLAuthenticationProvider', () => {
         {
           body: {
             queryString: 'SAMLRequest=xxx%20yyy',
-            acs: 'test-protocol://test-hostname:1234/base-path/api/security/v1/saml',
+            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/v1/saml',
           },
         }
       );
 
       expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe('/logged_out');
+      expect(authenticationResult.redirectURL).toBe('/mock-server-basepath/logged_out');
     });
 
     it('redirects user to the IdP if SLO is supported by IdP in case of SP initiated logout.', async () => {
