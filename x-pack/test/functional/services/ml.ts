@@ -36,8 +36,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
-  const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context);
-  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, common);
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, common);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
