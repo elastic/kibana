@@ -36,6 +36,6 @@ export const createReadPrivilegesRulesRoute = (server: ServerFacade): Hapi.Serve
   };
 };
 
-export const createReadPrivilegesRoute = (server: ServerFacade): void => {
+export const readPrivilegesRoute = (server: ServerFacade): void => {
   server.route(createReadPrivilegesRulesRoute(server));
 };
