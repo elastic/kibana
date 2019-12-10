@@ -18,7 +18,6 @@
  */
 
 import { first } from 'rxjs/operators';
-import { TypeOf } from '@kbn/config-schema';
 import { ConfigType } from './config';
 import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
