@@ -18,12 +18,14 @@
  */
 
 import _ from 'lodash';
-import { IndexPattern } from 'ui/index_patterns';
+
 import { PhraseFilter } from 'src/plugins/data/common/es_query/filters';
+import { IndexPattern } from '../../legacy_imports';
 import { FilterManager } from './filter_manager';
 import {
   FilterManager as QueryFilterManager,
   esFilters,
+  IFieldType,
 } from '../../../../../../plugins/data/public';
 
 export class PhraseFilterManager extends FilterManager {
@@ -38,18 +40,13 @@ export class PhraseFilterManager extends FilterManager {
 
   createFilter(phrases: any): PhraseFilter {
     let newFilter: PhraseFilter;
+    // TODO: Fix type to be required
+    const value = this.indexPattern.fields.getByName(this.fieldName) as IFieldType;
+
     if (phrases.length === 1) {
-      newFilter = esFilters.buildPhraseFilter(
-        this.indexPattern.fields.getByName(this.fieldName),
-        phrases[0],
-        this.indexPattern
-      );
+      newFilter = esFilters.buildPhraseFilter(value, phrases[0], this.indexPattern);
     } else {
-      newFilter = esFilters.buildPhrasesFilter(
-        this.indexPattern.fields.getByName(this.fieldName),
-        phrases,
-        this.indexPattern
-      );
+      newFilter = esFilters.buildPhrasesFilter(value, phrases, this.indexPattern);
     }
 
     newFilter.meta.key = this.fieldName;

@@ -16,9 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { timefilter } from 'ui/timefilter';
-import { IndexPattern } from 'ui/index_patterns';
 import { PhraseFilter } from 'src/plugins/data/common/es_query/filters';
+import { IndexPattern, timefilter } from '../legacy_imports';
 
 export function createSearchSource(
   SearchSource: any,

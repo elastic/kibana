@@ -19,10 +19,8 @@
 
 import React, { PureComponent, ChangeEvent } from 'react';
 import { InjectedIntlProps } from 'react-intl';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { VisOptionsProps } from 'ui/vis/editors/default';
-import { npStart } from 'ui/new_platform';
 
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -33,7 +31,6 @@ import {
   EuiSwitchEvent,
 } from '@elastic/eui';
 
-import { IndexPattern } from 'ui/index_patterns';
 import { ControlEditor } from './control_editor';
 import {
   addControl,
@@ -46,6 +43,7 @@ import {
   ControlParamsOptions,
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
+import { VisOptionsProps, IndexPattern, npStart } from '../../legacy_imports';
 
 interface ControlsTabUiState {
   type: CONTROL_TYPES;

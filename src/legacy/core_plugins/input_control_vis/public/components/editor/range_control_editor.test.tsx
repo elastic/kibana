@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 import { SinonSpy, spy, assert, match } from 'sinon';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('ui/new_platform', () => ({
+jest.mock('../../legacy_imports.ts', () => ({
   npStart: {
     plugins: {
       data: {

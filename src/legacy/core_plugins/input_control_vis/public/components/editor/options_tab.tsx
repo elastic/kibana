@@ -21,8 +21,9 @@ import React, { PureComponent } from 'react';
 
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { VisOptionsProps } from 'ui/vis/editors/default';
 import { EuiSwitchEvent } from '@elastic/eui';
+
+import { VisOptionsProps } from '../../legacy_imports';
 
 interface OptionsTabParams {
   updateFiltersOnChange: boolean;

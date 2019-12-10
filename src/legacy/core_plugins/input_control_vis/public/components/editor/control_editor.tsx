@@ -18,6 +18,8 @@
  */
 
 import React, { PureComponent, ChangeEvent } from 'react';
+import { InjectedIntlProps } from 'react-intl';
+
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiAccordion,
@@ -29,11 +31,11 @@ import {
   EuiSpacer,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { InjectedIntlProps } from 'react-intl';
-import { IndexPattern } from 'ui/index_patterns';
+
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
+import { IndexPattern } from '../../legacy_imports';
 
 interface ControlEditorUiProps {
   controlIndex: number;

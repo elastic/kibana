@@ -19,8 +19,8 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
-import { Field } from 'ui/index_patterns';
+
+import { npStart, Field } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';

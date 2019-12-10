@@ -25,7 +25,7 @@ jest.mock('../../../../../core_plugins/data/public/legacy', () => ({
   },
 }));
 
-jest.mock('ui/new_platform', () => ({
+jest.mock('../../legacy_imports.ts', () => ({
   npStart: {
     plugins: {
       data: {

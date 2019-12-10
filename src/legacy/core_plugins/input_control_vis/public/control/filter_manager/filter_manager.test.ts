@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { FilterManager } from './filter_manager';
 import { Filter } from 'src/plugins/data/common/es_query/filters';
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../legacy_imports';
 import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
 import { coreMock } from '../../../../../../core/public/mocks';
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPattern } from '../../../legacy_imports';
 
 /**
  * Returns forced **Partial** IndexPattern for use in tests

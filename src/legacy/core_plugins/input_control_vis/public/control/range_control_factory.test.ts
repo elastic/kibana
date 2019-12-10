@@ -29,11 +29,8 @@ class MockSearchSource {
   }
 }
 
-jest.mock('ui/timefilter', () => ({
+jest.mock('../legacy_imports.ts', () => ({
   createFilter: jest.fn(),
-}));
-
-jest.mock('ui/new_platform', () => ({
   npStart: {
     plugins: {
       data: {

@@ -22,7 +22,7 @@ import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { OptionsTab, OptionsTabProps } from './options_tab';
-import { Vis } from 'ui/vis';
+import { Vis } from '../../legacy_imports';
 
 describe('OptionsTab', () => {
   let props: OptionsTabProps;

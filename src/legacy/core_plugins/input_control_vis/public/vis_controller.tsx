@@ -20,14 +20,10 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { I18nContext } from 'ui/i18n';
-import { npStart } from 'ui/new_platform';
-
+import { npStart, I18nContext, Vis, VisParams, SearchSource } from './legacy_imports';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
 import { getLineageMap } from './lineage';
-import { SearchSource } from '../../../ui/public/courier/search_source/search_source';
-import { Vis, VisParams } from '../../visualizations/public';
 import { ControlParams } from './editor_utils';
 import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';

@@ -20,9 +20,9 @@
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
 import { EuiFormRow } from '@elastic/eui';
-
-import { npStart } from 'ui/new_platform';
 import { InjectedIntlProps } from 'react-intl';
+
+import { npStart } from '../../legacy_imports';
 
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
   onChange: (opt: any) => void;

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-jest.mock('ui/new_platform', () => ({
+jest.mock('../../legacy_imports.ts', () => ({
   npStart: {
     plugins: {
       data: {

@@ -19,9 +19,8 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
-import chrome from 'ui/chrome';
-import { Field, IndexPattern } from 'ui/index_patterns';
+
+import { npStart, chrome, Field, IndexPattern } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';

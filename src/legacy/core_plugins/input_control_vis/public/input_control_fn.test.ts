@@ -22,7 +22,7 @@ import { createInputControlVisFn } from './input_control_fn';
 // eslint-disable-next-line
 import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 
-jest.mock('ui/new_platform');
+jest.mock('./legacy_imports.ts');
 
 describe('interpreter/functions#input_control_vis', () => {
   const fn = functionWrapper(createInputControlVisFn);

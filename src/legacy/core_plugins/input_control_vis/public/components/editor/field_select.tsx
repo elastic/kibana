@@ -19,10 +19,12 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
+import { InjectedIntlProps } from 'react-intl';
+
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
-import { IndexPattern, Field } from 'ui/index_patterns';
-import { InjectedIntlProps } from 'react-intl';
+
+import { IndexPattern, Field } from '../../legacy_imports';
 
 interface FieldSelectUiState {
   isLoading: boolean;

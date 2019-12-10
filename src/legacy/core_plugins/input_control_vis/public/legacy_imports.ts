@@ -17,19 +17,15 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
-import { npSetup, npStart } from './legacy_imports';
-import { plugin } from '.';
+export { npSetup, npStart } from 'ui/new_platform';
 
-import { InputControlVisPluginSetupDependencies } from './plugin';
-import { setup as visualizationsSetup } from '../../visualizations/public/np_ready/public/legacy';
+import chrome from 'ui/chrome';
+export { chrome };
 
-const plugins: Readonly<InputControlVisPluginSetupDependencies> = {
-  expressions: npSetup.plugins.expressions,
-  visualizations: visualizationsSetup,
-};
-
-const pluginInstance = plugin({} as PluginInitializerContext);
-
-export const setup = pluginInstance.setup(npSetup.core, plugins);
-export const start = pluginInstance.start(npStart.core);
+export { I18nContext } from 'ui/i18n';
+export { Vis, VisParams } from 'ui/vis';
+export { IndexPattern, Field } from 'ui/index_patterns';
+export { VisOptionsProps } from 'ui/vis/editors/default';
+export { ValidatedDualRange } from 'ui/validated_range';
+export { SearchSource } from 'ui/courier';
+export { timefilter } from 'ui/timefilter';

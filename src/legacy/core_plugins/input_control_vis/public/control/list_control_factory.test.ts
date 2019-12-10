@@ -17,15 +17,21 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
 import { listControlFactory, ListControl } from './list_control_factory';
 import { ControlParams, CONTROL_TYPES } from '../editor_utils';
 
-jest.mock('ui/timefilter', () => ({
+jest.mock('./../legacy_imports.ts', () => ({
+  chrome: {
+    getInjected: jest.fn().mockImplementation(key => {
+      switch (key) {
+        case 'autocompleteTimeout':
+          return 1000;
+        case 'autocompleteTerminateAfter':
+          return 100000;
+      }
+    }),
+  },
   createFilter: jest.fn(),
-}));
-
-jest.mock('ui/new_platform', () => ({
   npStart: {
     plugins: {
       data: {
@@ -58,15 +64,6 @@ jest.mock('ui/new_platform', () => ({
     },
   },
 }));
-
-(chrome.getInjected as jest.Mock).mockImplementation(key => {
-  switch (key) {
-    case 'autocompleteTimeout':
-      return 1000;
-    case 'autocompleteTerminateAfter':
-      return 100000;
-  }
-});
 
 function MockSearchSource() {
   return {

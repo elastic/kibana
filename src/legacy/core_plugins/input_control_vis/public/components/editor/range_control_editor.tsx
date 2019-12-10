@@ -17,12 +17,14 @@
  * under the License.
  */
 import React, { Fragment, ChangeEvent } from 'react';
+
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern, Field } from 'ui/index_patterns';
+
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
+import { IndexPattern, Field } from '../../legacy_imports';
 
 interface RangeControlEditorProps {
   controlIndex: number;
