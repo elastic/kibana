@@ -7,7 +7,6 @@
 import { UMGqlRange } from '../../../common/domain_types';
 import { UMResolver } from '../../../common/graphql/resolver_types';
 import {
-  FilterBar,
   GetFilterBarQueryArgs,
   GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
@@ -65,7 +64,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     getSnapshotHistogram: UMGetSnapshotHistogram;
     getMonitorChartsData: UMGetMonitorChartsResolver;
     getLatestMonitors: UMLatestMonitorsResolver;
-    getFilterBar: UMGetFilterBarResolver;
     getMonitorPageTitle: UMGetMontiorPageTitleResolver;
   };
 } => ({
@@ -109,9 +107,6 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
         monitorId,
         location
       );
-    },
-    async getFilterBar(resolver, { dateRangeStart, dateRangeEnd }, { req }): Promise<FilterBar> {
-      return await libs.monitors.getFilterBar(req, dateRangeStart, dateRangeEnd);
     },
     async getMonitorPageTitle(
       resolver: any,
