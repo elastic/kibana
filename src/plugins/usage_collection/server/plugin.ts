@@ -24,9 +24,9 @@ import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/cor
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
-export interface UsageCollectionSetup extends CollectorSet {
+export type UsageCollectionSetup = CollectorSet & {
   registerLegacySavedObjects: (legcaySavedObjects: any) => void;
-}
+};
 
 export class UsageCollectionPlugin {
   logger: Logger;
@@ -35,7 +35,7 @@ export class UsageCollectionPlugin {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(core: CoreSetup): Promise<UsageCollectionSetup> {
+  public async setup(core: CoreSetup) {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof ConfigSchema>>()
       .pipe(first())
