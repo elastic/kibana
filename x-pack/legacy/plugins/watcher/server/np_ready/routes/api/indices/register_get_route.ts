@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
 import { reduce, size } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
@@ -82,7 +83,9 @@ export function registerGetRoute(deps: RouteDependencies, legacy: ServerShim) {
   deps.router.post(
     {
       path: '/api/watcher/indices',
-      validate: false,
+      validate: {
+        body: schema.object({}, { allowUnknowns: true }),
+      },
     },
     licensePreRoutingFactory(legacy, handler)
   );

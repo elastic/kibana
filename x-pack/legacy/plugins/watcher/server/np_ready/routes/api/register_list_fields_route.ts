@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { schema } from '@kbn/config-schema';
 import { RequestHandler } from 'src/core/server';
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsError } from '../../lib/is_es_error';
@@ -53,7 +54,11 @@ export function registerListFieldsRoute(deps: RouteDependencies, legacy: ServerS
   deps.router.post(
     {
       path: '/api/watcher/fields',
-      validate: false,
+      validate: {
+        body: schema.object({
+          indexes: schema.arrayOf(schema.string()),
+        }),
+      },
     },
     licensePreRoutingFactory(legacy, handler)
   );
