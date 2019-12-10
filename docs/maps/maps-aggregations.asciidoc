@@ -34,16 +34,16 @@ The point location is the weighted centroid for all geo-points in the gridded ce
 
 [role="xpack"]
 [[maps-top-hits-aggregation]]
-=== Most relevant entities
+=== Top hits per entity
 
-Use most relevent entities to display documents per entity.
-For example, you can use most relevent entities to show the most recent GPS tracks per flight callsign.
+Use top hits per entity to display the most relevent documents per entity.
+For example, you could display the most recent GPS tracks per flight.
 
-Most relevant entities uses {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by entity.
+Top hits per entity uses {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by entity.
 Then, {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metric aggregation] accumulates the most relevant documents for each entry.
 
-Most relevant entities is available for <<vector-layer, vector layers>> with *Documents* source.
-To enable most relevant entities:
+Top hits per entity is available for <<vector-layer, vector layers>> with *Documents* source.
+To enable top hits:
 
 . In *Sorting*, check the *Show documents per entity* checkbox.
 . Set *Entity* to the field that identifies entities in your documents.
