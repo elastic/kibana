@@ -100,8 +100,11 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       jobType: ANALYSIS_CONFIG_TYPE.REGRESSION,
     });
 
-    if (trainingErrorEval.success === true && trainingErrorEval.eval) {
-      // @ts-ignore
+    if (
+      trainingErrorEval.success === true &&
+      trainingErrorEval.eval &&
+      isRegressionEvaluateResponse(trainingErrorEval.eval)
+    ) {
       const { meanSquaredError, rSquared } = getValuesFromResponse(trainingErrorEval.eval);
       setTrainingEval({
         meanSquaredError,
@@ -222,10 +225,13 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <span>
-              {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
-                defaultMessage: 'Evaluation of regression job ID {jobId}',
-                values: { jobId: jobConfig.id },
-              })}
+              {i18n.translate(
+                'xpack.ml.dataframe.analytics.regressionExploration.evaluateJobIdTitle',
+                {
+                  defaultMessage: 'Evaluation of regression job ID {jobId}',
+                  values: { jobId: jobConfig.id },
+                }
+              )}
             </span>
           </EuiTitle>
         </EuiFlexItem>

@@ -187,7 +187,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
               <EuiTitle size="xs">
                 <span>
                   {i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.jobIdTitle',
+                    'xpack.ml.dataframe.analytics.classificationExploration.evaluateJobIdTitle',
                     {
                       defaultMessage: 'Evaluation of classification job ID {jobId}',
                       values: { jobId: jobConfig.id },

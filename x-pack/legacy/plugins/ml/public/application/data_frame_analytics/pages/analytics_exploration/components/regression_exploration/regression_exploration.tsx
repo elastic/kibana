@@ -23,7 +23,7 @@ interface GetDataFrameAnalyticsResponse {
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle', {
+      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
         defaultMessage: 'Destination index for regression job ID {jobId}',
         values: { jobId },
       })}

@@ -326,6 +326,11 @@ export function getEvalQueryBody({
   return query;
 }
 
+interface EvaluateMetrics {
+  classification: any;
+  regression: any;
+}
+
 export const loadEvalData = async ({
   isTraining,
   index,
@@ -356,7 +361,8 @@ export const loadEvalData = async ({
   }
 
   const query = getEvalQueryBody({ resultsField, isTraining, searchQuery, ignoreDefaultQuery });
-  const metrics = {
+
+  const metrics: EvaluateMetrics = {
     classification: {
       multiclass_confusion_matrix: {},
     },
@@ -373,8 +379,7 @@ export const loadEvalData = async ({
       [jobType]: {
         actual_field: dependentVariable,
         predicted_field: predictedField,
-        // @ts-ignore
-        metrics: metrics[jobType],
+        metrics: metrics[jobType as keyof EvaluateMetrics],
       },
     },
   };
