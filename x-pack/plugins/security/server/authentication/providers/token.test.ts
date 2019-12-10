@@ -300,36 +300,6 @@ describe('TokenAuthenticationProvider', () => {
       expect(authenticationResult.error).toEqual(refreshError);
     });
 
-    it('redirects non-AJAX requests to /login and clears session if token document is missing', async () => {
-      const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
-      const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
-
-      mockScopedClusterClient(
-        mockOptions.client,
-        sinon.match({ headers: { authorization: `Bearer ${tokenPair.accessToken}` } })
-      )
-        .callAsCurrentUser.withArgs('shield.authenticate')
-        .rejects({
-          statusCode: 500,
-          body: { error: { reason: 'token document is missing and must be present' } },
-        });
-
-      mockOptions.tokens.refresh.withArgs(tokenPair.refreshToken).resolves(null);
-
-      const authenticationResult = await provider.authenticate(request, tokenPair);
-
-      sinon.assert.calledOnce(mockOptions.tokens.refresh);
-
-      expect(request.headers).not.toHaveProperty('authorization');
-      expect(authenticationResult.redirected()).toBe(true);
-      expect(authenticationResult.redirectURL).toBe(
-        '/base-path/login?next=%2Fbase-path%2Fsome-path'
-      );
-      expect(authenticationResult.user).toBeUndefined();
-      expect(authenticationResult.state).toEqual(null);
-      expect(authenticationResult.error).toBeUndefined();
-    });
-
     it('redirects non-AJAX requests to /login and clears session if token cannot be refreshed', async () => {
       const request = httpServerMock.createKibanaRequest({ path: '/some-path' });
       const tokenPair = { accessToken: 'foo', refreshToken: 'bar' };
