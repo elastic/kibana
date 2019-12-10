@@ -25,11 +25,7 @@ import {
   IUiSettingsClient,
 } from 'kibana/public';
 import * as docViewsRegistry from 'ui/registry/doc_views';
-import chromeLegacy from 'ui/chrome';
-import { IPrivate } from 'ui/private';
 import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
-// @ts-ignore
-import { StateProvider } from 'ui/state_management/state';
 // @ts-ignore
 import { createSavedSearchesService } from '../saved_searches/saved_searches';
 // @ts-ignore
@@ -58,27 +54,9 @@ export interface DiscoverServices {
   // legacy
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  State: unknown;
   uiSettings: IUiSettingsClient;
 }
-
-export async function buildGlobalAngularServices() {
-  const injector = await chromeLegacy.dangerouslyGetActiveInjector();
-  const Private = injector.get<IPrivate>('Private');
-  const State = Private(StateProvider);
-  return {
-    State,
-  };
-}
-
-export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugins, test: false) {
-  const globalAngularServices = !test
-    ? await buildGlobalAngularServices()
-    : {
-        getSavedSearchById: async (id: string) => void id,
-        getSavedSearchUrlById: async (id: string) => void id,
-        State: null,
-      };
+export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugins) {
   const savedObjectService = createSavedSearchesService(
     core.savedObjects.client,
     plugins.data.indexPatterns,
@@ -86,7 +64,6 @@ export async function buildServices(core: CoreStart, plugins: DiscoverStartPlugi
     core.overlays
   );
   return {
-    ...globalAngularServices,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
