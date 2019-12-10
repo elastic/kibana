@@ -30,12 +30,17 @@ export const TypeParameter = ({ onTypeChange, isMultiField, docLink }: Props) =>
           label={typeField.label}
           error={error}
           isInvalid={isInvalid}
-          labelAppend={
+          helpText={
             docLink ? (
               <EuiText size="xs">
                 <EuiLink href={docLink} target="_blank">
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.typeField.documentationLinkLabel', {
-                    defaultMessage: 'Learn more',
+                    defaultMessage: '{typeName} documentation',
+                    values: {
+                      typeName: typeField.value
+                        ? (typeField.value as ComboBoxOption[])[0].label
+                        : '',
+                    },
                   })}
                 </EuiLink>
               </EuiText>

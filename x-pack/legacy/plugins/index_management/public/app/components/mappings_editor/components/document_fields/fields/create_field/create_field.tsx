@@ -178,13 +178,18 @@ export const CreateField = React.memo(function CreateFieldComponent({
                         label={subTypeField.label}
                         error={error}
                         isInvalid={isInvalid}
-                        labelAppend={
+                        helpText={
                           <EuiText size="xs">
                             <EuiLink href={docLink} target="_blank">
                               {i18n.translate(
                                 'xpack.idxMgmt.mappingsEditor.createField.documentationLinkLabel',
                                 {
-                                  defaultMessage: 'Learn more',
+                                  defaultMessage: '{typeName} documentation',
+                                  values: {
+                                    typeName: subTypeField.value
+                                      ? (subTypeField.value as ComboBoxOption[])[0].label
+                                      : '',
+                                  },
                                 }
                               )}
                             </EuiLink>
