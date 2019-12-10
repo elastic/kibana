@@ -17,15 +17,8 @@
  * under the License.
  */
 
-export {
-  addSearchStrategy,
-  hasSearchStategyForIndexPattern,
-  getSearchStrategyById,
-  getSearchStrategyForSearchRequest,
-} from './search_strategy_registry';
+import { addSearchStrategy, defaultSearchStrategy } from '../index';
 
-export { defaultSearchStrategy } from './default_search_strategy';
+addSearchStrategy(defaultSearchStrategy);
 
-export { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
-
-export { SearchError, getSearchErrorType } from './search_error';
+export { defaultSearchStrategy };

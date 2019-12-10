@@ -18,7 +18,6 @@
  */
 
 import { SearchStrategyProvider, SearchStrategySearchParams } from './types';
-import { addSearchStrategy } from './search_strategy_registry';
 import { isDefaultTypeIndexPattern } from './is_default_type_index_pattern';
 import {
   getSearchParams,
@@ -77,5 +76,3 @@ function search({ searchRequests, es, config, esShardTimeout }: SearchStrategySe
     abort: () => abortController.abort(),
   };
 }
-
-addSearchStrategy(defaultSearchStrategy);
