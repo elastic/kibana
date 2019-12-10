@@ -20,7 +20,7 @@ const { API_ROOT } = ROUTES;
 
 const { setup } = pageHelpers.watchList;
 
-describe.skip('<WatchList />', () => {
+describe('<WatchList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchListTestBed;
 
