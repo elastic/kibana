@@ -60,6 +60,7 @@ import { ExplorationTitle } from './classification_exploration';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
+const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
@@ -362,8 +363,6 @@ export const ResultsTable: FC<Props> = React.memo(
       status === INDEX_STATUS.ERROR && errorMessage.includes('parsing_exception')
         ? errorMessage
         : searchError;
-
-    const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
 
     return (
       <EuiPanel grow={false}>

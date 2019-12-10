@@ -5,19 +5,25 @@
  */
 
 import React from 'react';
-import { ClassificationEvaluateResponse } from '../../../../common/analytics';
+import { ConfusionMatrix, PredictedClass } from '../../../../common/analytics';
 
-export function getColumnData(
-  confusionMatrixData: ClassificationEvaluateResponse['classification']['multiclass_confusion_matrix']['confusion_matrix']
-) {
-  const colData: any = [];
+interface ColumnData {
+  actual_class: string;
+  actual_class_doc_count: number;
+  predicted_class?: string;
+  count?: number;
+  error_count?: number;
+}
+
+export function getColumnData(confusionMatrixData: ConfusionMatrix[]) {
+  const colData: Partial<ColumnData[]> = [];
 
   confusionMatrixData.forEach((classData: any) => {
     const correctlyPredictedClass = classData.predicted_classes.find(
-      (pc: any) => pc.predicted_class === classData.actual_class
+      (pc: PredictedClass) => pc.predicted_class === classData.actual_class
     );
     const incorrectlyPredictedClass = classData.predicted_classes.find(
-      (pc: any) => pc.predicted_class !== classData.actual_class
+      (pc: PredictedClass) => pc.predicted_class !== classData.actual_class
     );
 
     let accuracy;

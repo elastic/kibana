@@ -30,7 +30,7 @@ import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/
 import {
   isResultsSearchBoolQuery,
   isClassificationEvaluateResponse,
-  ClassificationEvaluateResponse,
+  ConfusionMatrix,
   ResultsSearchQuery,
   ANALYSIS_CONFIG_TYPE,
 } from '../../../../common/analytics';
@@ -45,9 +45,7 @@ interface Props {
 
 export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [confusionMatrixData, setConfusionMatrixData] = useState<
-    ClassificationEvaluateResponse['classification']['multiclass_confusion_matrix']['confusion_matrix']
-  >([]);
+  const [confusionMatrixData, setConfusionMatrixData] = useState<ConfusionMatrix[]>([]);
   const [columns, setColumns] = useState<any>([]);
   const [columnsData, setColumnsData] = useState<any>([]);
   const [popoverContents, setPopoverContents] = useState<any>([]);
@@ -133,9 +131,13 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
           const rowIndex = children?.props?.rowIndex;
           const colId = children?.props?.columnId;
           const gridItem = columnData[rowIndex];
-          const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
 
-          return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
+          if (gridItem !== undefined) {
+            const count = colId === gridItem.actual_class ? gridItem.count : gridItem.error_count;
+            return `${count} / ${gridItem.actual_class_doc_count} * 100 = ${cellContentsElement.textContent}`;
+          }
+
+          return cellContentsElement.textContent;
         },
       });
     }

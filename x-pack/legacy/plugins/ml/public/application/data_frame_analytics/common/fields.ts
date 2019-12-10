@@ -204,11 +204,10 @@ export const getDefaultClassificationFields = (
   docs: EsDoc[],
   jobConfig: DataFrameAnalyticsConfig
 ): EsFieldName[] => {
-  const resultsField = jobConfig.dest.results_field;
   if (docs.length === 0) {
     return [];
   }
-
+  const resultsField = jobConfig.dest.results_field;
   const newDocFields = getFlattenedFields(docs[0]._source, resultsField);
   return newDocFields
     .filter(k => {

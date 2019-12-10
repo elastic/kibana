@@ -54,6 +54,15 @@ export const ClassificationExploration: FC<Props> = ({ jobId, jobStatus }) => {
       ) {
         setJobConfig(analyticsConfigs.data_frame_analytics[0]);
         setIsLoadingJobConfig(false);
+      } else {
+        setJobConfigErrorMessage(
+          i18n.translate(
+            'xpack.ml.dataframe.analytics.classificationExploration.jobConfigurationNoResultsMessage',
+            {
+              defaultMessage: 'No results found.',
+            }
+          )
+        );
       }
     } catch (e) {
       if (e.message !== undefined) {

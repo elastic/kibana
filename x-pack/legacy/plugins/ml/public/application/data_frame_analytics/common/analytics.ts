@@ -75,15 +75,22 @@ export interface RegressionEvaluateResponse {
   };
 }
 
+export interface PredictedClass {
+  predicted_class: string;
+  count: number;
+}
+
+export interface ConfusionMatrix {
+  actual_class: string;
+  actual_class_doc_count: number;
+  predicted_classes: PredictedClass[];
+  other_predicted_class_doc_count: number;
+}
+
 export interface ClassificationEvaluateResponse {
   classification: {
     multiclass_confusion_matrix: {
-      confusion_matrix: Array<{
-        actual_class: string;
-        actual_class_doc_count: number;
-        predicted_classes: Array<{ predicted_class: string; count: number }>;
-        other_predicted_class_doc_count: number;
-      }>;
+      confusion_matrix: ConfusionMatrix[];
     };
   };
 }
@@ -327,8 +334,24 @@ export function getEvalQueryBody({
 }
 
 interface EvaluateMetrics {
-  classification: any;
-  regression: any;
+  classification: {
+    multiclass_confusion_matrix: object;
+  };
+  regression: {
+    r_squared: object;
+    mean_squared_error: object;
+  };
+}
+
+interface LoadEvalDataConfig {
+  isTraining: boolean;
+  index: string;
+  dependentVariable: string;
+  resultsField: string;
+  predictionFieldName?: string;
+  searchQuery?: ResultsSearchQuery;
+  ignoreDefaultQuery?: boolean;
+  jobType: ANALYSIS_CONFIG_TYPE;
 }
 
 export const loadEvalData = async ({
@@ -340,16 +363,7 @@ export const loadEvalData = async ({
   searchQuery,
   ignoreDefaultQuery,
   jobType,
-}: {
-  isTraining: boolean;
-  index: string;
-  dependentVariable: string;
-  resultsField: string;
-  predictionFieldName?: string;
-  searchQuery?: ResultsSearchQuery;
-  ignoreDefaultQuery?: boolean;
-  jobType: ANALYSIS_CONFIG_TYPE;
-}) => {
+}: LoadEvalDataConfig) => {
   const results: LoadEvaluateResult = { success: false, eval: null, error: null };
   const defaultPredictionField = `${dependentVariable}_prediction`;
   let predictedField = `${resultsField}.${
@@ -405,22 +419,26 @@ interface TrackTotalHitsSearchResponse {
   };
 }
 
+interface LoadDocsCountConfig {
+  ignoreDefaultQuery?: boolean;
+  isTraining: boolean;
+  searchQuery: SavedSearchQuery;
+  resultsField: string;
+  destIndex: string;
+}
+
+interface LoadDocsCountResponse {
+  docsCount: number | null;
+  success: boolean;
+}
+
 export const loadDocsCount = async ({
   ignoreDefaultQuery = true,
   isTraining,
   searchQuery,
   resultsField,
   destIndex,
-}: {
-  ignoreDefaultQuery?: boolean;
-  isTraining: boolean;
-  searchQuery: SavedSearchQuery;
-  resultsField: string;
-  destIndex: string;
-}): Promise<{
-  docsCount: number | null;
-  success: boolean;
-}> => {
+}: LoadDocsCountConfig): Promise<LoadDocsCountResponse> => {
   const query = getEvalQueryBody({ resultsField, isTraining, ignoreDefaultQuery, searchQuery });
 
   try {
@@ -436,7 +454,7 @@ export const loadDocsCount = async ({
     });
 
     const docsCount = resp.hits.total && resp.hits.total.value;
-    return { docsCount, success: true };
+    return { docsCount, success: docsCount !== undefined };
   } catch (e) {
     return {
       docsCount: null,
