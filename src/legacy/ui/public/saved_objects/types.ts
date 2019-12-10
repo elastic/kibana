@@ -32,7 +32,7 @@ export interface SavedObject {
   getDisplayName: () => string;
   getEsType: () => string;
   getFullPath: () => string;
-  hydrateIndexPattern?: (id?: string) => Promise<null | void>;
+  hydrateIndexPattern?: (id?: string) => Promise<null | IndexPattern>;
   id?: string | null;
   init?: () => Promise<SavedObject>;
   isSaving: boolean;

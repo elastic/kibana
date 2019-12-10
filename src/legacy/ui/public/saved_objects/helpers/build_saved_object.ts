@@ -26,12 +26,12 @@ import { serializeSavedObject } from './serialize_saved_object';
 import { EsResponse, SavedObject, SavedObjectConfig, SavedObjectSaveOpts } from '../types';
 import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
-import { IndexPatterns } from '../../../../core_plugins/data/public';
+import { IndexPatternsContract } from '../../../../../plugins/data/public';
 
 export function buildSavedObject(
   savedObject: SavedObject,
   config: SavedObjectConfig = {},
-  indexPatterns: IndexPatterns,
+  indexPatterns: IndexPatternsContract,
   savedObjectsClient: SavedObjectsClientContract
 ) {
   // type name for this object, used as the ES-type
