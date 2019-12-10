@@ -5,12 +5,14 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server/';
+import { Asset, Datasource, InputType } from '../../../ingest/server/libs/types';
+import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
+import { AssetReference, InstallationStatus, RegistryPackage } from '../../common/types';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
+import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
 import { installTemplates } from '../lib/elasticsearch/template/install';
-import { AssetReference } from '../../common/types';
-import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
-import { Datasource, Asset, InputType } from '../../../ingest/server/libs/types';
+import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
 
 export async function createDatasource(options: {
@@ -19,65 +21,93 @@ export async function createDatasource(options: {
   callCluster: CallESAsCurrentUser;
 }) {
   const { savedObjectsClient, pkgkey, callCluster } = options;
+  const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
+
+  if (packageInfo.status !== InstallationStatus.installed) {
+    throw new PackageNotInstalledError(pkgkey);
+  }
+
   const toSave = await installPipelines({ pkgkey, callCluster });
   // TODO: Clean up
   const info = await Registry.fetchInfo(pkgkey);
-  await installTemplates(info, callCluster);
 
-  await saveDatasourceReferences({
-    savedObjectsClient,
-    pkgkey,
-    toSave,
-  });
+  // TODO: This should be moved out of the initial data source creation in the end
+  await baseSetup(callCluster);
+  await installTemplates(info, callCluster);
+  const pkg = await Registry.fetchInfo(pkgkey);
+
+  await Promise.all([
+    installTemplates(pkg, callCluster),
+    saveDatasourceReferences({
+      savedObjectsClient,
+      pkg,
+      toSave,
+    }),
+  ]);
 
   return toSave;
 }
 
-export async function saveDatasourceReferences(options: {
+/**
+ * Makes the basic setup of the assets like global ILM policies. Creates them if they do
+ * not exist yet but will not overwrite existing once.
+ */
+async function baseSetup(callCluster: CallESAsCurrentUser) {
+  if (!(await policyExists('logs-default', callCluster))) {
+    await installILMPolicy('logs-default', callCluster);
+  }
+  if (!(await policyExists('metrics-default', callCluster))) {
+    await installILMPolicy('metrics-default', callCluster);
+  }
+}
+
+async function saveDatasourceReferences(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkg: RegistryPackage;
   toSave: AssetReference[];
 }) {
-  const { savedObjectsClient, pkgkey, toSave } = options;
-  const savedObject = await getDatasourceObject({ savedObjectsClient, pkgkey });
-  const savedRefs = savedObject?.attributes.package.assets;
-  const mergeRefsReducer = (current: Asset[] = [], pending: Asset) => {
-    const hasRef = current.find(c => c.id === pending.id && c.type === pending.type);
-    if (!hasRef) current.push(pending);
+  const { savedObjectsClient, pkg, toSave } = options;
+  const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
+  const savedAssets = savedDatasource?.package.assets;
+  const assetsReducer = (current: Asset[] = [], pending: Asset) => {
+    const hasAsset = current.find(c => c.id === pending.id && c.type === pending.type);
+    if (!hasAsset) current.push(pending);
     return current;
   };
 
-  const toInstall = (toSave as Asset[]).reduce(mergeRefsReducer, savedRefs);
-  const datasource: Datasource = createFakeDatasource(pkgkey, toInstall);
+  const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
+  const datasource: Datasource = createFakeDatasource(pkg, toInstall);
   await savedObjectsClient.create<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, datasource, {
-    id: pkgkey,
+    id: Registry.pkgToPkgKey(pkg),
     overwrite: true,
   });
 
   return toInstall;
 }
 
-export async function getDatasourceObject(options: {
+async function getDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
+  pkg: RegistryPackage;
 }) {
-  const { savedObjectsClient, pkgkey } = options;
-  return savedObjectsClient
-    .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, pkgkey)
+  const { savedObjectsClient, pkg } = options;
+  const datasource = await savedObjectsClient
+    .get<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, Registry.pkgToPkgKey(pkg))
     .catch(e => undefined);
+
+  return datasource?.attributes;
 }
 
-function createFakeDatasource(pkgkey: string, assets: Asset[] = []): Datasource {
+function createFakeDatasource(pkg: RegistryPackage, assets: Asset[] = []): Datasource {
   return {
-    id: pkgkey,
+    id: Registry.pkgToPkgKey(pkg),
     name: 'name',
     read_alias: 'read_alias',
     package: {
-      name: 'name',
-      version: '1.3.1',
-      description: 'description',
-      title: 'title',
-      assets: assets as Asset[],
+      name: pkg.name,
+      version: pkg.version,
+      description: pkg.description,
+      title: pkg.title,
+      assets,
     },
     streams: [
       {

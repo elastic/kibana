@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTitle, EuiIcon, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { entries } from '../../common/type_utils';
 import { RequirementsByServiceName } from '../../common/types';
+import { entries } from '../../common/type_utils';
 import { ServiceTitleMap } from '../constants';
 import { useCore } from '../hooks/use_core';
 import { Version } from './version';

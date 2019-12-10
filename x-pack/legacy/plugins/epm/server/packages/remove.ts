@@ -6,9 +6,9 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
-import { getInstallationObject, savedObjectTypes } from './index';
-import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { AssetReference, AssetType, ElasticsearchAssetType } from '../../common/types';
+import { CallESAsCurrentUser } from '../lib/cluster_access';
+import { getInstallation, savedObjectTypes } from './index';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -16,8 +16,8 @@ export async function removeInstallation(options: {
   callCluster: CallESAsCurrentUser;
 }): Promise<AssetReference[]> {
   const { savedObjectsClient, pkgkey, callCluster } = options;
-  const installation = await getInstallationObject({ savedObjectsClient, pkgkey });
-  const installedObjects = (installation && installation.attributes.installed) || [];
+  const installation = await getInstallation({ savedObjectsClient, pkgkey });
+  const installedObjects = installation?.installed || [];
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state

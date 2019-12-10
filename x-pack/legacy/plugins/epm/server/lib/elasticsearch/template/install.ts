@@ -5,12 +5,11 @@
  */
 
 import { safeLoad } from 'js-yaml';
-import { RegistryPackage, Dataset, AssetReference } from '../../../../common/types';
-import * as Registry from '../../../registry';
+import { AssetReference, Dataset, RegistryPackage } from '../../../../common/types';
 import { CallESAsCurrentUser } from '../../../../server/lib/cluster_access';
 import { getAssetsData } from '../../../packages/assets';
 import { Field } from '../../fields/field';
-import { generateMappings, getTemplate, generateTemplateName } from './template';
+import { generateMappings, generateTemplateName, getTemplate } from './template';
 
 const isFields = (path: string) => {
   return path.includes('/fields/');
@@ -22,32 +21,25 @@ const isFields = (path: string) => {
  * For each dataset, the fields.yml files are extracted. If there are multiple
  * in one datasets, they are merged together into 1 and then converted to a template
  * The template is currently loaded with the pkgey-package-dataset
- * @param callCluster
- * @param pkgkey
  */
-export async function installTemplates(p: RegistryPackage, callCluster: CallESAsCurrentUser) {
-  const pkgkey = p.name + '-' + p.version;
-  // TODO: Needs to be called to fill the cache but should not be required
-  await Registry.getArchiveInfo(pkgkey);
+export async function installTemplates(pkg: RegistryPackage, callCluster: CallESAsCurrentUser) {
+  if (!pkg.datasets) return;
 
-  const promises: Array<Promise<AssetReference>> = [];
-
-  for (const dataset of p.datasets) {
+  const promises = pkg.datasets.map(async dataset => {
     // Fetch all assset entries for this dataset
-    const assetEntries = getAssetsData(p, isFields, dataset.name);
+    const assetEntries = await getAssetsData(pkg, isFields, dataset.name);
 
     // Merge all the fields of a dataset together and create an Elasticsearch index template
-    let datasetFields: Field[] = [];
+    let fields: Field[] = [];
     for (const entry of assetEntries) {
       // Make sure it is defined as it is optional. Should never happen.
       if (entry.buffer) {
-        datasetFields = safeLoad(entry.buffer.toString());
+        fields = safeLoad(entry.buffer.toString());
       }
     }
 
-    const promise = installTemplate({ callCluster, fields: datasetFields, p, dataset });
-    promises.push(promise);
-  }
+    return installTemplate({ callCluster, fields, pkg, dataset });
+  });
 
   return Promise.all(promises);
 }
@@ -55,16 +47,16 @@ export async function installTemplates(p: RegistryPackage, callCluster: CallESAs
 async function installTemplate({
   callCluster,
   fields,
-  p,
+  pkg,
   dataset,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
-  p: RegistryPackage;
+  pkg: RegistryPackage;
   dataset: Dataset;
 }): Promise<AssetReference> {
   const mappings = generateMappings(fields);
-  const templateName = generateTemplateName(p.name, dataset.name, dataset.type);
+  const templateName = generateTemplateName(pkg.name, dataset.name, dataset.type);
   const template = getTemplate(templateName + '-*', mappings);
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {

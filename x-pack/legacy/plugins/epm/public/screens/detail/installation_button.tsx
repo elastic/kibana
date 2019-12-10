@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useCallback, useState, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
+import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { PackageInfo } from '../../../common/types';
+import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
 import { InstallStatus } from '../../types';
-import { ConfirmPackageInstall } from './confirm_package_install';
 import { ConfirmPackageDelete } from './confirm_package_delete';
-import { useDeletePackage, useInstallPackage, useGetPackageInstallStatus } from '../../hooks';
+import { ConfirmPackageInstall } from './confirm_package_install';
 
 interface InstallationButtonProps {
   package: PackageInfo;

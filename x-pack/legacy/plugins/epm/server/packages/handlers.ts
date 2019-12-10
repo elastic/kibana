@@ -6,19 +6,19 @@
 
 import { API_ROOT } from '../../common/routes';
 import { AssetType } from '../../common/types';
+import { getClusterAccessor } from '../lib/cluster_access';
+import { PluginContext } from '../plugin';
+import { getClient } from '../saved_objects';
+import { Request, ResponseToolkit } from '../types';
 import {
-  SearchParams,
   getCategories,
   getFile,
   getPackageInfo,
   getPackages,
   installPackage,
   removeInstallation,
+  SearchParams,
 } from './index';
-import { getClusterAccessor } from '../lib/cluster_access';
-import { PluginContext } from '../plugin';
-import { getClient } from '../saved_objects';
-import { Request, ResponseToolkit } from '../types';
 
 interface Extra extends ResponseToolkit {
   context: PluginContext;

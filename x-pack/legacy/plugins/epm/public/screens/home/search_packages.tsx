@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { Search as LocalSearch } from 'js-search';
+import React from 'react';
 import { PackageList, PackageListItem } from '../../../common/types';
 import { SearchResults } from './search_results';
 

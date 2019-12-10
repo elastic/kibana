@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
 import { EuiCard, EuiIcon, ICON_TYPES } from '@elastic/eui';
+import React from 'react';
 import styled from 'styled-components';
+import { PackageInfo, PackageListItem } from '../../common/types';
 import { useLinks } from '../hooks';
-import { PackageListItem, PackageInfo } from '../../common/types';
 
 export interface BadgeProps {
   showInstalledBadge?: boolean;
@@ -26,7 +26,6 @@ export function PackageCard({
   name,
   title,
   version,
-  icon: iconUrl,
   showInstalledBadge,
   status,
 }: PackageCardProps) {
@@ -34,23 +33,9 @@ export function PackageCard({
   const url = toDetailView({ name, version });
 
   // try to find a logo in EUI
+  // TODO: first try to find icon in `icons` property
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
-
-  let optionalIcon;
-  if (iconType) {
-    optionalIcon = <EuiIcon type={iconType} size="l" />;
-  } else if (iconUrl) {
-    // skipping b/c images from registry are Not Good
-    // https://github.com/elastic/package-registry/issues/45
-    // optionalIcon = (
-    //   <img
-    //     width="24"
-    //     height="24"
-    //     src={`http://package-registry.app.elstc.co${iconUrl}`}
-    //     alt={`${name} icon`}
-    //   />
-    // );
-  }
+  const optionalIcon = iconType ? <EuiIcon type={iconType} size="l" /> : undefined;
 
   return (
     <Card

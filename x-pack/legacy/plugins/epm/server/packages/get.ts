@@ -6,11 +6,11 @@
 
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { SAVED_OBJECT_TYPE_PACKAGES } from '../../common/constants';
-import { InstallationAttributes, Installed, Installation, NotInstalled } from '../../common/types';
+import { Installation, Installed, NotInstalled } from '../../common/types';
 import * as Registry from '../registry';
 import { createInstallableFrom } from './index';
 
-export { SearchParams, fetchFile as getFile } from '../registry';
+export { fetchFile as getFile, SearchParams } from '../registry';
 
 function nameAsTitle(name: string) {
   return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
@@ -35,7 +35,7 @@ export async function getPackages(
     type: SAVED_OBJECT_TYPE_PACKAGES,
     id: `${name}-${version}`,
   }));
-  const results = await savedObjectsClient.bulkGet<InstallationAttributes>(searchObjects);
+  const results = await savedObjectsClient.bulkGet<Installation>(searchObjects);
   const savedObjects = results.saved_objects.filter(o => !o.error); // ignore errors for now
   const packageList = registryItems
     .map(item =>
@@ -66,7 +66,7 @@ export async function getPackageInfo(options: {
   const updated = {
     ...item,
     title: item.title || nameAsTitle(item.name),
-    assets: Registry.groupPathsByService(item.assets),
+    assets: Registry.groupPathsByService(item?.assets || []),
   };
   return createInstallableFrom(updated, savedObject);
 }
@@ -74,11 +74,19 @@ export async function getPackageInfo(options: {
 export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
-}): Promise<Installation | undefined> {
+}) {
   const { savedObjectsClient, pkgkey } = options;
   return savedObjectsClient
-    .get<InstallationAttributes>(SAVED_OBJECT_TYPE_PACKAGES, pkgkey)
+    .get<Installation>(SAVED_OBJECT_TYPE_PACKAGES, pkgkey)
     .catch(e => undefined);
+}
+
+export async function getInstallation(options: {
+  savedObjectsClient: SavedObjectsClientContract;
+  pkgkey: string;
+}) {
+  const savedObject = await getInstallationObject(options);
+  return savedObject?.attributes;
 }
 
 function sortByName(a: { name: string }, b: { name: string }) {

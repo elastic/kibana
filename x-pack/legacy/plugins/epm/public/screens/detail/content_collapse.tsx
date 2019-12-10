@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useRef, useLayoutEffect, Fragment, useCallback } from 'react';
-import { EuiButtonEmpty, EuiSpacer, EuiButton, EuiHorizontalRule } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import React, { Fragment, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 const BottomFade = styled.div`

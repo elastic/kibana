@@ -6,13 +6,13 @@
 
 import { Observable } from 'rxjs';
 import { CoreSetup, CoreStart, IClusterClient, PluginInitializerContext } from 'src/core/server';
+import { PluginSetupContract } from '../../../../plugins/features/server';
 import { PLUGIN } from '../common/constants';
 import { Server } from '../server/types';
 import { EPMConfigSchema, epmConfigStore } from './config';
 import { feature } from './feature';
 import { fetchList } from './registry';
 import { routes } from './routes';
-import { PluginSetupContract } from '../../../../plugins/features/server';
 
 export { createSetupShim } from './shim';
 

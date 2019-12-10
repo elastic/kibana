@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import euiDark from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import chrome from 'ui/chrome';
 import { npSetup, npStart } from 'ui/new_platform';
 import { Plugin, PluginInitializerContext } from './plugin';

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useCallback, useState, Fragment } from 'react';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import createContainer from 'constate';
-import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import React, { Fragment, useCallback, useState } from 'react';
 import { NotificationsStart } from 'src/core/public';
+import { useLinks } from '.';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { PackageInfo } from '../../common/types';
-import { installPackage as fetchInstallPackage, installDatasource, removePackage } from '../data';
+import { installPackage as fetchInstallPackage, removePackage } from '../data';
 import { InstallStatus } from '../types';
 
 interface PackagesInstall {
@@ -23,6 +24,7 @@ interface PackageInstallItem {
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
+  const { toAddDataSourceView } = useLinks();
 
   const setPackageInstallStatus = useCallback(
     ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
@@ -38,18 +40,11 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
     async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
-      const handleRequestInstallDatasource = () => {
-        installDatasource(pkgkey).then(() => {
-          notifications.toasts.addSuccess({
-            title: `Installed Datasource`,
-            text: 'Successfully installed Datasource',
-          });
-        });
-      };
+
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
-
+        const packageDataSourceUrl = toAddDataSourceView({ name, version });
         const SuccessMsg = (
           <Fragment>
             <p>Next, create a data source to begin sending data to your Elasticsearch cluster.</p>
@@ -57,7 +52,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
               <EuiFlexItem grow={false}>
                 {/* Would like to add a loading indicator here but, afaict,
                  notifications are static. i.e. they won't re-render with new state */}
-                <EuiButton onClick={handleRequestInstallDatasource} size="s">
+                <EuiButton href={packageDataSourceUrl} size="s">
                   Add data source
                 </EuiButton>
               </EuiFlexItem>
@@ -79,7 +74,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus]
+    [notifications.toasts, setPackageInstallStatus, toAddDataSourceView]
   );
 
   const getPackageInstallStatus = useCallback(

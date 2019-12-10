@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
 import styled from 'styled-components';
 import { useCore, useLinks } from '../../hooks';
 

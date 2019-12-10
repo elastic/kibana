@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiErrorBoundary } from '@elastic/eui';
+import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter, Switch } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
-import { EuiErrorBoundary } from '@elastic/eui';
-import euiLight from '@elastic/eui/dist/eui_theme_light.json';
 import { ChromeStart, CoreSetup, HttpStart, I18nStart, NotificationsStart } from 'src/core/public';
+import { ThemeProvider } from 'styled-components';
 import { CoreProvider } from './contexts/core';
 import { setClient } from './data';
 import { PackageInstallProvider } from './hooks/';
