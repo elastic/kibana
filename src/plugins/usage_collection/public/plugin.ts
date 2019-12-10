@@ -91,13 +91,3 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
 
   public stop() {}
 }
-
-// export const createUiStatsReporter = (appName: string) => (
-//   type: UiStatsMetricType,
-//   eventNames: string | string[],
-//   count?: number
-// ): void => {
-//   if (telemetryReporter) {
-//     return telemetryReporter.reportUiStats(appName, type, eventNames, count);
-//   }
-// };
