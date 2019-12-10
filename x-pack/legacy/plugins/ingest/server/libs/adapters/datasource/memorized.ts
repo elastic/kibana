@@ -47,6 +47,21 @@ export class MemorizedDatasourceAdapter {
     );
   }
 
+  public async getByIDs(user: FrameworkUser, ids: string[]): Promise<StoredDatasource[] | null> {
+    return await memorize(
+      `get by IDs - ${JSON.stringify(ids)}`,
+      async () => {
+        if (!this.adapter) {
+          throw new Error('An adapter must be provided when running tests online');
+        }
+        return await this.adapter.getByIDs(user, ids);
+      },
+      {
+        pure: false,
+      }
+    );
+  }
+
   public async list(
     user: FrameworkUser,
     options: ListOptions = {}

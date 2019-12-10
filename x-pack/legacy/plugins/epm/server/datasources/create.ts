@@ -74,7 +74,7 @@ function createFakeDatasource(pkgkey: string, assets: Asset[] = []): Datasource 
     read_alias: 'read_alias',
     package: {
       name: 'name',
-      version: '1.0.1, 1.3.1',
+      version: '1.3.1',
       description: 'description',
       title: 'title',
       assets: assets as Asset[],

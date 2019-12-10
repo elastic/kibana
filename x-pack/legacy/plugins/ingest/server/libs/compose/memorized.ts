@@ -42,6 +42,7 @@ export function compose(servers?: {
       servers.kbnServer.savedObjects,
       servers.kbnServer.plugins.elasticsearch
     );
+    realDatasourceAdapter = new DatasourceAdapter(soAdapter);
     realPolicyAdapter = new PolicyAdapter(soAdapter);
     realFrameworkAdapter = new BackendFrameworkAdapter(
       camelCase(PLUGIN.ID),
