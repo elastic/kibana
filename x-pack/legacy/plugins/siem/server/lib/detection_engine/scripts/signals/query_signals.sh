@@ -9,12 +9,11 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./set_status_with_id.sh closed
-# Example: ./set_status_with_id.sh open
+# Example: ./signals/query_signals.sh
   curl -v -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/search \
-  -d '{"search_query": { "query": { "match_all": {} } } }'
-  #| jq .
+  -d '{"search_query": { "query": { "match_all": {} } } }' \
+  | jq .

@@ -6,13 +6,7 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { SignalsRestParams } from '../../signals/types';
-import {
-  RuleAlertParamsRest,
-  RuleAlertType,
-  SignalsStatusRestParams,
-  SignalsQueryRestParams,
-} from '../../alerts/types';
+import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
@@ -47,7 +41,7 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
   ],
 });
 
-export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams> => ({
+export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });

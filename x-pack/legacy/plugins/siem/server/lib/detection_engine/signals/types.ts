@@ -15,12 +15,30 @@ export interface SignalsParams {
   status: 'open' | 'closed';
 }
 
-export type SignalsRestParams = Omit<SignalsParams, 'signalIds'> & {
-  signal_ids: SignalsParams['signalIds'];
+export interface SignalsStatusParams {
+  signalIds: string[] | undefined | null;
+  query: object | undefined | null;
+  status: 'open' | 'closed';
+}
+
+export interface SignalQueryParams {
+  searchQuery: object;
+}
+
+export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
+  signal_ids: SignalsStatusParams['signalIds'];
 };
 
-export interface SignalsRequest extends RequestFacade {
-  payload: SignalsRestParams;
+export type SignalsQueryRestParams = Omit<SignalQueryParams, 'searchQuery'> & {
+  search_query: SignalQueryParams['searchQuery'];
+};
+
+export interface SignalsStatusRequest extends RequestFacade {
+  payload: SignalsStatusRestParams;
+}
+
+export interface SignalsQueryRequest extends RequestFacade {
+  payload: SignalsQueryRestParams;
 }
 
 export type SearchTypes =
