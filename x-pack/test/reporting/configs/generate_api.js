@@ -11,7 +11,7 @@ import { ReportingAPIProvider } from '../services';
 export default async function ({ readConfigFile }) {
   const apiConfig = await readConfigFile(require.resolve('../../api_integration/config.js'));
 
-  const config = {
+  return {
     servers: apiConfig.get('servers'),
     junit: { reportName: 'X-Pack Reporting Generate API Integration Tests' },
     testFiles: [require.resolve('../api/generate')],
@@ -39,7 +39,4 @@ export default async function ({ readConfigFile }) {
     esArchiver: apiConfig.get('esArchiver'),
     esTestCluster: apiConfig.get('esTestCluster'),
   };
-
-  console.log(JSON.stringify(config));
-  return config;
 }

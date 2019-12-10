@@ -9,7 +9,7 @@ import * as path from 'path';
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
-  const config = {
+  return {
     services: functionalConfig.get('services'),
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
@@ -35,7 +35,4 @@ export default async function ({ readConfigFile }) {
       ],
     },
   };
-
-  console.log(JSON.stringify(config));
-  return config;
 }

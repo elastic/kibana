@@ -11,7 +11,7 @@ export default async function ({ readConfigFile }) {
   const apiConfig = await readConfigFile(require.resolve('../../api_integration/config.js'));
   const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
-  const config = {
+  return {
     servers: apiConfig.get('servers'),
     junit: { reportName: 'X-Pack Chromium API Reporting Tests' },
     testFiles: [require.resolve('../api/chromium_tests')],
@@ -35,7 +35,4 @@ export default async function ({ readConfigFile }) {
     },
     esTestCluster: apiConfig.get('esTestCluster'),
   };
-
-  console.log(JSON.stringify(config));
-  return config;
 }
