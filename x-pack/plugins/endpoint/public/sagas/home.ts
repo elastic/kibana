@@ -21,13 +21,7 @@ async function resourceSaga({ actionsAndState, dispatch }: SagaContext, context:
     return hrefIsForPath(href, `${context.core.http.basePath.get()}/app/endpoint/`);
   }
 
-  for await (const {
-    action,
-    userIsOnPageAndLoggedIn,
-    href,
-    state,
-    shouldInitialize,
-  } of withPageNavigationStatus({
+  for await (const { userIsOnPageAndLoggedIn, shouldInitialize } of withPageNavigationStatus({
     actionsAndState,
     isOnPage,
   })) {
