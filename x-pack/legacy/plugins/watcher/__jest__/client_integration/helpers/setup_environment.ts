@@ -14,7 +14,9 @@ mockHttpClient.interceptors.response.use(
   res => {
     return res.data;
   },
-  rej => rej
+  rej => {
+    return Promise.reject(rej);
+  }
 );
 
 const mockSavedObjectsClient = () => {
