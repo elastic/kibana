@@ -24,7 +24,7 @@ export const setSignalsStatusRouteDef = (server: ServerFacade): Hapi.ServerRoute
         payload: setSignalsStatusSchema,
       },
     },
-    async handler(request: SignalsStatusRequest, _headers) {
+    async handler(request: SignalsStatusRequest) {
       const { signal_ids: signalIds, query, status } = request.payload;
       const index = getIndex(request, server);
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');

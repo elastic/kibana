@@ -24,7 +24,7 @@ export const querySignalsRouteDef = (server: ServerFacade): Hapi.ServerRoute => 
         payload: querySignalsSchema,
       },
     },
-    async handler(request: SignalsQueryRequest, _headers) {
+    async handler(request: SignalsQueryRequest) {
       const { query, aggs } = request.payload;
       const body = { query, aggs };
       const index = getIndex(request, server);

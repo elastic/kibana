@@ -9,7 +9,7 @@
 set -e
 ./check_env_variables.sh
 
-# Example: ./signals/query_signals.sh
+# Example: ./signals/aggs_signal.sh
   curl -s -k \
   -H 'Content-Type: application/json' \
   -H 'kbn-xsrf: 123' \
