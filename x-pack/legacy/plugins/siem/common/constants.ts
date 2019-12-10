@@ -51,3 +51,5 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
  * Default signals index key for kibana.dev.yml
  */
 export const SIGNALS_INDEX_KEY = 'signalsIndex';
+export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
+export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
