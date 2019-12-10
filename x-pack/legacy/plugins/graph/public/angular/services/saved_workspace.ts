@@ -19,12 +19,10 @@ export function createSavedWorkspaceClass(savedObjectClient, indexPatterns) {
         type: SavedWorkspace.type,
         mapping: SavedWorkspace.mapping,
         searchSource: SavedWorkspace.searchsource,
-        extractReferences: extractReferences,
-        injectReferences: injectReferences,
-
+        extractReferences,
+        injectReferences,
         // if this is null/undefined then the SavedObject will be assigned the defaults
-        id: id,
-
+        id,
         // default values that will get assigned if the doc is new
         defaults: {
           title: i18n.translate('xpack.graph.savedWorkspace.workspaceNameTitle', {
@@ -43,7 +41,7 @@ export function createSavedWorkspaceClass(savedObjectClient, indexPatterns) {
         return 'graph workspace';
       };
     }
-  } //End of class
+  }
 
   SavedWorkspace.type = 'graph-workspace';
 
