@@ -15,12 +15,7 @@ import {
 import { getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
-import {
-  Error,
-  MonitorDetails,
-  MonitorError,
-  OverviewFilters,
-} from '../../../../common/runtime_types';
+import { MonitorDetails, MonitorError, OverviewFilters } from '../../../../common/runtime_types';
 
 export const daw = (dateRangeStart: string, dateRangeEnd: string, filters: string | undefined) => {
   const range = {
@@ -225,9 +220,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     filters: string
   ): Promise<OverviewFilters> {
     const fields = {
-      ids: 'monitor.id',
       schemes: 'monitor.type',
-      urls: 'url.full',
       ports: 'url.port',
       locations: 'observer.geo.name',
       tags: 'tags',
@@ -246,29 +239,17 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         }, {}),
       },
     };
-    console.log(JSON.stringify(params, null, 2));
     const { aggregations } = await this.database.search(request, params);
 
-    // @ts-ignore the current code does not jive with TS's type inference
-    const c = Object.keys(fields).reduce(
-      (
-        acc: { [key: string]: any[] },
-        field: 'ids' | 'schemes' | 'urls' | 'ports' | 'locations' | 'tags'
-      ) => {
-        const bucketName:
-          | 'monitor.id'
-          | 'monitor.type'
-          | 'url.full'
-          | 'url.port'
-          | 'observer.geo.name'
-          | 'tags' = fields[field];
-        acc[field] = aggregations[bucketName].buckets.map((b: { key: string | number }) => b.key);
-        return acc;
-      },
-      {}
-    );
-    console.log(JSON.stringify(c, null, 2));
-    return c;
+    const getValues: (key: string) => string[] = (key: string) =>
+      (aggregations?.[key]?.buckets ?? []).map((bucket: any) => bucket?.key ?? '');
+
+    return {
+      locations: getValues(fields.locations),
+      ports: getValues(fields.ports).map(p => parseInt(p, 10)),
+      schemes: getValues(fields.schemes),
+      tags: getValues(fields.tags),
+    };
   }
 
   /**
