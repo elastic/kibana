@@ -7,6 +7,16 @@
 import { uniq } from 'lodash';
 import { SearchClient } from '../helpers/es_client';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
+import {
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  DESTINATION_ADDRESS,
+  TRACE_ID,
+  SPAN_DURATION,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  TIMESTAMP
+} from '../../../common/elasticsearch_fieldnames';
 
 export async function getNextTransactionSamples({
   apmIdxPattern,
@@ -26,32 +36,32 @@ export async function getNextTransactionSamples({
       query: {
         bool: {
           filter: [
-            { exists: { field: 'destination.address' } },
-            { exists: { field: 'trace.id' } },
-            { exists: { field: 'span.duration.us' } },
-            { range: { '@timestamp': { gt: startTimeInterval } } }
+            { exists: { field: DESTINATION_ADDRESS } },
+            { exists: { field: TRACE_ID } },
+            { exists: { field: SPAN_DURATION } },
+            { range: { [TIMESTAMP]: { gt: startTimeInterval } } }
           ]
         }
       },
       aggs: {
-        'ext-conns': {
+        externalConnections: {
           composite: {
             sources: [
-              { 'service.name': { terms: { field: 'service.name' } } },
-              { 'span.type': { terms: { field: 'span.type' } } },
+              { [SERVICE_NAME]: { terms: { field: SERVICE_NAME } } },
+              { [SPAN_TYPE]: { terms: { field: SPAN_TYPE } } },
               {
-                'span.subtype': {
-                  terms: { field: 'span.subtype', missing_bucket: true }
+                [SPAN_SUBTYPE]: {
+                  terms: { field: SPAN_SUBTYPE, missing_bucket: true }
                 }
               },
               {
-                'service.environment': {
-                  terms: { field: 'service.environment', missing_bucket: true }
+                [SERVICE_ENVIRONMENT]: {
+                  terms: { field: SERVICE_ENVIRONMENT, missing_bucket: true }
                 }
               },
               {
-                'destination.address': {
-                  terms: { field: 'destination.address' }
+                [DESTINATION_ADDRESS]: {
+                  terms: { field: DESTINATION_ADDRESS }
                 }
               }
             ],
@@ -65,14 +75,14 @@ export async function getNextTransactionSamples({
                 shard_size: 20,
                 script: {
                   lang: 'painless',
-                  source: "(int)doc['span.duration.us'].value/100000"
+                  source: `(int)doc['${SPAN_DURATION}'].value/100000`
                 }
               },
               aggs: {
                 tracesample: {
                   top_hits: {
                     size: 20,
-                    _source: ['trace.id', '@timestamp']
+                    _source: [TRACE_ID, TIMESTAMP]
                   }
                 }
               }
@@ -84,13 +94,14 @@ export async function getNextTransactionSamples({
   };
 
   const transactionsResponse = await searchClient(params);
-  const extConns = transactionsResponse.aggregations?.['ext-conns'];
-  const buckets = extConns?.buckets ?? [];
+  const externalConnections =
+    transactionsResponse.aggregations?.externalConnections;
+  const buckets = externalConnections?.buckets ?? [];
   const sampleTraces = buckets.flatMap(bucket => {
     return bucket.smpl.tracesample.hits.hits.map(hit => {
       const transactionDoc = hit._source as Transaction;
       const traceId = transactionDoc.trace.id;
-      const timestamp = Date.parse(transactionDoc['@timestamp']);
+      const timestamp = Date.parse(transactionDoc[TIMESTAMP]);
       return { traceId, timestamp };
     });
   });
@@ -99,7 +110,7 @@ export async function getNextTransactionSamples({
   );
   const traceIds = uniq(sampleTraces.map(({ traceId }) => traceId));
   return {
-    after_key: extConns?.after_key,
+    after_key: externalConnections?.after_key,
     latestTransactionTime,
     traceIds
   };

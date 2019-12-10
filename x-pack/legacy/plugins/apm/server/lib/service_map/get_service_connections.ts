@@ -10,6 +10,11 @@ import {
   combineServiceConnsScript,
   reduceServiceConnsScript
 } from './setup_required_scripts';
+import {
+  SPAN_ID,
+  TRACE_ID,
+  TRANSACTION_TYPE
+} from '../../../common/elasticsearch_fieldnames';
 
 export async function getServiceConnections({
   apmIdxPattern,
@@ -21,7 +26,7 @@ export async function getServiceConnections({
   searchClient: SearchClient;
 }) {
   const traceIdFilters = traceIds.map(traceId => ({
-    term: { 'trace.id': traceId }
+    term: { [TRACE_ID]: traceId }
   }));
   const params = {
     index: apmIdxPattern,
@@ -30,8 +35,8 @@ export async function getServiceConnections({
       query: {
         bool: {
           should: [
-            { exists: { field: 'span.id' } },
-            { exists: { field: 'transaction.type' } },
+            { exists: { field: SPAN_ID } },
+            { exists: { field: TRANSACTION_TYPE } },
             ...traceIdFilters
           ],
           minimum_should_match: 2
@@ -40,7 +45,7 @@ export async function getServiceConnections({
       aggs: {
         trace_id: {
           terms: {
-            field: 'trace.id',
+            field: TRACE_ID,
             order: { _key: 'asc' as const },
             size: traceIds.length
           },

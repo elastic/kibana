@@ -5,6 +5,7 @@
  */
 
 import { ServiceConnection } from './run_service_map_task';
+import { TIMESTAMP } from '../../../common/elasticsearch_fieldnames';
 
 export function mapServiceConnectionToBulkIndex({
   serviceConnsDestinationIndex,
@@ -26,7 +27,7 @@ export function mapServiceConnectionToBulkIndex({
     };
 
     const source = {
-      '@timestamp': serviceConnection.caller.timestamp,
+      [TIMESTAMP]: serviceConnection.caller.timestamp,
       observer: { version_major: 7 }, // TODO get stack version from NP api
       service: {
         name: serviceConnection.caller.service_name,

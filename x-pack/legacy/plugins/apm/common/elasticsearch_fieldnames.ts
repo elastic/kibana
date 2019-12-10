@@ -29,6 +29,7 @@ export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 
 export const TRACE_ID = 'trace.id';
 
+export const TIMESTAMP = '@timestamp';
 export const SPAN_DURATION = 'span.duration.us';
 export const SPAN_TYPE = 'span.type';
 export const SPAN_SUBTYPE = 'span.subtype';
