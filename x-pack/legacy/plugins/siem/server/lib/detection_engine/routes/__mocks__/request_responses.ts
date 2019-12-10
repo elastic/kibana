@@ -52,7 +52,11 @@ export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRes
 });
 
 export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
-  search_query: { query: { match_all: {} } },
+  query: { match_all: {} },
+});
+
+export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
 });
 
 export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
@@ -143,6 +147,12 @@ export const getSignalsQueryRequest = (): ServerInjectOptions => ({
   method: 'POST',
   url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
   payload: { ...typicalSignalsQuery() },
+});
+
+export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQueryAggs() },
 });
 
 export const createActionResult = (): ActionResult => ({

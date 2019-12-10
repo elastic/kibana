@@ -15,5 +15,5 @@ set -e
   -H 'kbn-xsrf: 123' \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
   -X POST ${KIBANA_URL}${SPACE_URL}/api/detection_engine/signals/search \
-  -d '{ "query": { "match_all": {} } } ' \
+  -d '{"aggs": {"statuses": {"terms": {"field": "signal.status", "size": 10 }}}}' \
   | jq .

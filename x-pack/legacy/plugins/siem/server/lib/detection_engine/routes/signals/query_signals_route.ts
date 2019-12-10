@@ -25,13 +25,14 @@ export const querySignalsRouteDef = (server: ServerFacade): Hapi.ServerRoute => 
       },
     },
     async handler(request: SignalsQueryRequest, _headers) {
-      const { search_query: searchQuery } = request.payload;
+      const { query, aggs } = request.payload;
+      const body = { query, aggs };
       const index = getIndex(request, server);
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       try {
         return callWithRequest(request, 'search', {
           index,
-          body: searchQuery,
+          body,
         });
       } catch (exc) {
         // error while getting or updating signal with id: id in signal index .siem-signals

@@ -22,16 +22,15 @@ export interface SignalsStatusParams {
 }
 
 export interface SignalQueryParams {
-  searchQuery: object;
+  query: object | undefined | null;
+  aggs: object | undefined | null;
 }
 
 export type SignalsStatusRestParams = Omit<SignalsStatusParams, 'signalIds'> & {
   signal_ids: SignalsStatusParams['signalIds'];
 };
 
-export type SignalsQueryRestParams = Omit<SignalQueryParams, 'searchQuery'> & {
-  search_query: SignalQueryParams['searchQuery'];
-};
+export type SignalsQueryRestParams = SignalQueryParams;
 
 export interface SignalsStatusRequest extends RequestFacade {
   payload: SignalsStatusRestParams;

@@ -7,5 +7,6 @@
 import Joi from 'joi';
 
 export const querySignalsSchema = Joi.object({
-  search_query: Joi.object().required(),
-});
+  query: Joi.object(),
+  aggs: Joi.object(),
+}).min(1);
