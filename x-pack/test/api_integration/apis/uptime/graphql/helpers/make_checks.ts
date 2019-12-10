@@ -160,3 +160,30 @@ export const makeChecks = async (
   }
   return checks;
 };
+
+export const makeChecksWithStatus = async (
+  es: any,
+  index: string,
+  monitorId: string,
+  numChecks: number,
+  numIps: number,
+  fields: { [key: string]: any } = {},
+  status: 'up' | 'down'
+) => {
+  const checks = [];
+  const oppositeStatus = status === 'up' ? 'down' : 'up';
+
+  for (let li = 0; li < numChecks; li++) {
+    checks.push(
+      await makeCheck(es, index, monitorId, numIps, fields, d => {
+        d.monitor.status = status;
+        if (d.summary) {
+          d.summary[status] += d.summary[oppositeStatus];
+          d.summary[oppositeStatus] = 0;
+        }
+        return d;
+      })
+    );
+  }
+  return checks;
+};

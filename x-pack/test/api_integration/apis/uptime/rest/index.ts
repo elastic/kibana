@@ -9,8 +9,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   describe('uptime REST endpoints', () => {
-    before('load heartbeat data', () => esArchiver.load('uptime/full_heartbeat'));
-    after('unload', () => esArchiver.unload('uptime/full_heartbeat'));
+    before('load heartbeat data', () => esArchiver.load('uptime/blank'));
+    after('unload', () => esArchiver.unload('uptime/blank'));
     loadTestFile(require.resolve('./snapshot'));
   });
 }
