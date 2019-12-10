@@ -4,36 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { StickyContainer } from 'react-sticky';
 
 import { FiltersGlobal } from '../../components/filters_global';
 import { HeaderPage } from '../../components/header_page';
-import { HeaderSection } from '../../components/header_section';
-import { HistogramSignals } from '../../components/page/detection_engine/histogram_signals';
 import { SiemSearchBar } from '../../components/search_bar';
-import { WrapperPage } from '../../components/wrapper_page';
+
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
+import { WrapperPage } from '../../components/wrapper_page';
 import { SpyRoute } from '../../utils/route/spy_routes';
+
+import { SignalsTable } from './components/signals';
+import { SignalsCharts } from './components/signals_chart';
 import { DetectionEngineEmptyPage } from './detection_engine_empty_page';
 import * as i18n from './translations';
-import { SignalsTable } from './signals';
 
 export const DetectionEngineComponent = React.memo(() => {
-  const sampleChartOptions = [
-    { text: 'Risk scores', value: 'risk_scores' },
-    { text: 'Severities', value: 'severities' },
-    { text: 'Top destination IPs', value: 'destination_ips' },
-    { text: 'Top event actions', value: 'event_actions' },
-    { text: 'Top event categories', value: 'event_categories' },
-    { text: 'Top host names', value: 'host_names' },
-    { text: 'Top rule types', value: 'rule_types' },
-    { text: 'Top rules', value: 'rules' },
-    { text: 'Top source IPs', value: 'source_ips' },
-    { text: 'Top users', value: 'users' },
-  ];
-
   return (
     <>
       <WithSource sourceId="default">
@@ -51,18 +39,7 @@ export const DetectionEngineComponent = React.memo(() => {
                   </EuiButton>
                 </HeaderPage>
 
-                <EuiPanel>
-                  <HeaderSection title="Signal detection frequency">
-                    <EuiSelect
-                      options={sampleChartOptions}
-                      onChange={() => {}}
-                      prepend="Stack by"
-                      value={sampleChartOptions[0].value}
-                    />
-                  </HeaderSection>
-
-                  <HistogramSignals />
-                </EuiPanel>
+                <SignalsCharts />
 
                 <EuiSpacer />
 
