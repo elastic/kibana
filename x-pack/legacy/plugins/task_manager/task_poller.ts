@@ -88,7 +88,7 @@ export function createTaskPoller<T, H>({
       return asOk(await work(...pullFromSet(set, getCapacity())));
     }),
     tap(openSleepPerf),
-    // catch
+    // catch errors during polling for work
     catchError((err: Error) => of(asPollingError<T>(err, PollingErrorType.WorkError)))
   );
 
