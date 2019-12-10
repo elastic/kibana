@@ -68,6 +68,7 @@ describe('utils', () => {
         updatedBy: 'elastic',
         interval: '5m',
         enabled: true,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       // Timestamp will potentially always be different so remove it for the test
       delete fakeSignalSourceHit['@timestamp'];
@@ -102,7 +103,7 @@ describe('utils', () => {
             query: 'user.name: root or user.name: admin',
             references: ['http://google.com'],
             severity: 'high',
-            tags: ['some fake tag'],
+            tags: ['some fake tag 1', 'some fake tag 2'],
             type: 'query',
             to: 'now',
             enabled: true,
@@ -131,6 +132,7 @@ describe('utils', () => {
         updatedBy: 'elastic',
         interval: '5m',
         enabled: true,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       // Timestamp will potentially always be different so remove it for the test
       delete fakeSignalSourceHit['@timestamp'];
@@ -174,7 +176,7 @@ describe('utils', () => {
             query: 'user.name: root or user.name: admin',
             references: ['http://google.com'],
             severity: 'high',
-            tags: ['some fake tag'],
+            tags: ['some fake tag 1', 'some fake tag 2'],
             type: 'query',
             to: 'now',
             enabled: true,
@@ -202,6 +204,7 @@ describe('utils', () => {
         updatedBy: 'elastic',
         interval: '5m',
         enabled: true,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       // Timestamp will potentially always be different so remove it for the test
       delete fakeSignalSourceHit['@timestamp'];
@@ -244,7 +247,7 @@ describe('utils', () => {
             query: 'user.name: root or user.name: admin',
             references: ['http://google.com'],
             severity: 'high',
-            tags: ['some fake tag'],
+            tags: ['some fake tag 1', 'some fake tag 2'],
             type: 'query',
             to: 'now',
             enabled: true,
@@ -270,6 +273,7 @@ describe('utils', () => {
         updatedBy: 'elastic',
         interval: '5m',
         enabled: true,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       // Timestamp will potentially always be different so remove it for the test
       delete fakeSignalSourceHit['@timestamp'];
@@ -307,7 +311,7 @@ describe('utils', () => {
             query: 'user.name: root or user.name: admin',
             references: ['http://google.com'],
             severity: 'high',
-            tags: ['some fake tag'],
+            tags: ['some fake tag 1', 'some fake tag 2'],
             type: 'query',
             to: 'now',
             enabled: true,
@@ -448,6 +452,7 @@ describe('utils', () => {
         updatedBy: 'elastic',
         interval: '5m',
         enabled: true,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(successfulsingleBulkCreate).toEqual(true);
     });
@@ -475,6 +480,7 @@ describe('utils', () => {
         updatedBy: 'elastic',
         interval: '5m',
         enabled: true,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(successfulsingleBulkCreate).toEqual(true);
     });
@@ -494,6 +500,7 @@ describe('utils', () => {
         updatedBy: 'elastic',
         interval: '5m',
         enabled: true,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(successfulsingleBulkCreate).toEqual(true);
     });
@@ -513,6 +520,7 @@ describe('utils', () => {
         updatedBy: 'elastic',
         interval: '5m',
         enabled: true,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(mockLogger.error).toHaveBeenCalled();
       expect(successfulsingleBulkCreate).toEqual(true);
@@ -530,6 +538,7 @@ describe('utils', () => {
           services: mockService,
           logger: mockLogger,
           pageSize: 1,
+          filter: undefined,
         })
       ).rejects.toThrow('Attempted to search after with empty sort id');
     });
@@ -543,6 +552,7 @@ describe('utils', () => {
         services: mockService,
         logger: mockLogger,
         pageSize: 1,
+        filter: undefined,
       });
       expect(searchAfterResult).toEqual(sampleDocSearchResultsWithSortId);
     });
@@ -559,6 +569,7 @@ describe('utils', () => {
           services: mockService,
           logger: mockLogger,
           pageSize: 1,
+          filter: undefined,
         })
       ).rejects.toThrow('Fake Error');
     });
@@ -579,6 +590,8 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(mockService.callCluster).toHaveBeenCalledTimes(0);
       expect(result).toEqual(true);
@@ -629,6 +642,8 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(mockService.callCluster).toHaveBeenCalledTimes(5);
       expect(result).toEqual(true);
@@ -650,6 +665,8 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
@@ -678,6 +695,8 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result).toEqual(false);
@@ -706,6 +725,8 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(result).toEqual(true);
     });
@@ -736,6 +757,8 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(result).toEqual(true);
     });
@@ -766,6 +789,8 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(result).toEqual(true);
     });
@@ -798,6 +823,8 @@ describe('utils', () => {
         interval: '5m',
         enabled: true,
         pageSize: 1,
+        filter: undefined,
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       expect(result).toEqual(false);
     });
@@ -873,7 +900,7 @@ describe('utils', () => {
           references: ['http://www.example.com', 'https://ww.example.com'],
           severity: 'high',
           updated_by: 'elastic',
-          tags: [],
+          tags: ['some fake tag 1', 'some fake tag 2'],
           to: 'now',
           type: 'query',
         },
@@ -926,7 +953,7 @@ describe('utils', () => {
           references: ['http://www.example.com', 'https://ww.example.com'],
           severity: 'high',
           updated_by: 'elastic',
-          tags: [],
+          tags: ['some fake tag 1', 'some fake tag 2'],
           to: 'now',
           type: 'query',
         },
@@ -957,6 +984,7 @@ describe('utils', () => {
         createdBy: 'elastic',
         updatedBy: 'elastic',
         interval: 'some interval',
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       const expected: Partial<OutputRuleAlertRest> = {
         created_by: 'elastic',
@@ -977,7 +1005,7 @@ describe('utils', () => {
         risk_score: 50,
         rule_id: 'rule-1',
         severity: 'high',
-        tags: ['some fake tag'],
+        tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
         updated_by: 'elastic',
@@ -1007,6 +1035,7 @@ describe('utils', () => {
         createdBy: 'elastic',
         updatedBy: 'elastic',
         interval: 'some interval',
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       const expected: Partial<OutputRuleAlertRest> = {
         created_by: 'elastic',
@@ -1027,7 +1056,7 @@ describe('utils', () => {
         risk_score: 50,
         rule_id: 'rule-1',
         severity: 'high',
-        tags: ['some fake tag'],
+        tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
         updated_by: 'elastic',
@@ -1046,6 +1075,7 @@ describe('utils', () => {
         createdBy: 'elastic',
         updatedBy: 'elastic',
         interval: 'some interval',
+        tags: ['some fake tag 1', 'some fake tag 2'],
       });
       const expected: Partial<OutputRuleAlertRest> = {
         created_by: 'elastic',
@@ -1066,7 +1096,7 @@ describe('utils', () => {
         risk_score: 50,
         rule_id: 'rule-1',
         severity: 'high',
-        tags: ['some fake tag'],
+        tags: ['some fake tag 1', 'some fake tag 2'],
         to: 'now',
         type: 'query',
         updated_by: 'elastic',
