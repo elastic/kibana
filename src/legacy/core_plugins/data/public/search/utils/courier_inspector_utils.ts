@@ -34,20 +34,20 @@ export function getRequestInspectorStats(searchSource: SearchSourceContract) {
 
   if (index) {
     stats.indexPattern = {
-      label: i18n.translate('common.ui.courier.indexPatternLabel', {
+      label: i18n.translate('data.search.searchSource.indexPatternLabel', {
         defaultMessage: 'Index pattern',
       }),
       value: index.title,
-      description: i18n.translate('common.ui.courier.indexPatternDescription', {
+      description: i18n.translate('data.search.searchSource.indexPatternDescription', {
         defaultMessage: 'The index pattern that connected to the Elasticsearch indices.',
       }),
     };
     stats.indexPatternId = {
-      label: i18n.translate('common.ui.courier.indexPatternIdLabel', {
+      label: i18n.translate('data.search.searchSource.indexPatternIdLabel', {
         defaultMessage: 'Index pattern ID',
       }),
       value: index.id!,
-      description: i18n.translate('common.ui.courier.indexPatternIdDescription', {
+      description: i18n.translate('data.search.searchSource.indexPatternIdDescription', {
         defaultMessage: 'The ID in the {kibanaIndexPattern} index.',
         values: { kibanaIndexPattern: '.kibana' },
       }),
@@ -66,14 +66,14 @@ export function getResponseInspectorStats(
 
   if (resp && resp.took) {
     stats.queryTime = {
-      label: i18n.translate('common.ui.courier.queryTimeLabel', {
+      label: i18n.translate('data.search.searchSource.queryTimeLabel', {
         defaultMessage: 'Query time',
       }),
-      value: i18n.translate('common.ui.courier.queryTimeValue', {
+      value: i18n.translate('data.search.searchSource.queryTimeValue', {
         defaultMessage: '{queryTime}ms',
         values: { queryTime: resp.took },
       }),
-      description: i18n.translate('common.ui.courier.queryTimeDescription', {
+      description: i18n.translate('data.search.searchSource.queryTimeDescription', {
         defaultMessage:
           'The time it took to process the query. ' +
           'Does not include the time to send the request or parse it in the browser.',
@@ -83,21 +83,21 @@ export function getResponseInspectorStats(
 
   if (resp && resp.hits) {
     stats.hitsTotal = {
-      label: i18n.translate('common.ui.courier.hitsTotalLabel', {
+      label: i18n.translate('data.search.searchSource.hitsTotalLabel', {
         defaultMessage: 'Hits (total)',
       }),
       value: `${resp.hits.total}`,
-      description: i18n.translate('common.ui.courier.hitsTotalDescription', {
+      description: i18n.translate('data.search.searchSource.hitsTotalDescription', {
         defaultMessage: 'The number of documents that match the query.',
       }),
     };
 
     stats.hits = {
-      label: i18n.translate('common.ui.courier.hitsLabel', {
+      label: i18n.translate('data.search.searchSource.hitsLabel', {
         defaultMessage: 'Hits',
       }),
       value: `${resp.hits.hits.length}`,
-      description: i18n.translate('common.ui.courier.hitsDescription', {
+      description: i18n.translate('data.search.searchSource.hitsDescription', {
         defaultMessage: 'The number of documents returned by the query.',
       }),
     };
@@ -105,14 +105,14 @@ export function getResponseInspectorStats(
 
   if (lastRequest && (lastRequest.ms === 0 || lastRequest.ms)) {
     stats.requestTime = {
-      label: i18n.translate('common.ui.courier.requestTimeLabel', {
+      label: i18n.translate('data.search.searchSource.requestTimeLabel', {
         defaultMessage: 'Request time',
       }),
-      value: i18n.translate('common.ui.courier.requestTimeValue', {
+      value: i18n.translate('data.search.searchSource.requestTimeValue', {
         defaultMessage: '{requestTime}ms',
         values: { requestTime: lastRequest.ms },
       }),
-      description: i18n.translate('common.ui.courier.requestTimeDescription', {
+      description: i18n.translate('data.search.searchSource.requestTimeDescription', {
         defaultMessage:
           'The time of the request from the browser to Elasticsearch and back. ' +
           'Does not include the time the requested waited in the queue.',

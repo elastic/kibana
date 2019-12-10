@@ -59,15 +59,18 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
   const tabs = [
     {
       id: 'table',
-      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tabHeaderShardFailures', {
-        defaultMessage: 'Shard failures',
-        description: 'Name of the tab displaying shard failures',
-      }),
+      name: i18n.translate(
+        'data.search.searchSource.fetch.shardsFailedModal.tabHeaderShardFailures',
+        {
+          defaultMessage: 'Shard failures',
+          description: 'Name of the tab displaying shard failures',
+        }
+      ),
       content: <ShardFailureTable failures={failures} />,
     },
     {
       id: 'json-request',
-      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tabHeaderRequest', {
+      name: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.tabHeaderRequest', {
         defaultMessage: 'Request',
         description: 'Name of the tab displaying the JSON request',
       }),
@@ -79,7 +82,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
     },
     {
       id: 'json-response',
-      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tabHeaderResponse', {
+      name: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.tabHeaderResponse', {
         defaultMessage: 'Response',
         description: 'Name of the tab displaying the JSON response',
       }),
@@ -104,7 +107,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
           {copy => (
             <EuiButtonEmpty onClick={copy}>
               <FormattedMessage
-                id="common.ui.courier.fetch.shardsFailedModal.copyToClipboard"
+                id="data.search.searchSource.fetch.shardsFailedModal.copyToClipboard"
                 defaultMessage="Copy response to clipboard"
               />
             </EuiButtonEmpty>
@@ -112,7 +115,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         </EuiCopy>
         <EuiButton onClick={() => onClose()} fill data-test-sub="closeShardFailureModal">
           <FormattedMessage
-            id="common.ui.courier.fetch.shardsFailedModal.close"
+            id="data.search.searchSource.fetch.shardsFailedModal.close"
             defaultMessage="Close"
             description="Closing the Modal"
           />

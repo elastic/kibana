@@ -35,7 +35,7 @@ export function getFailureSummaryText(failure: ShardFailure, failureDetails?: st
   const displayDetails =
     typeof failureDetails === 'string' ? failureDetails : getFailureSummaryDetailsText(failure);
 
-  return i18n.translate('common.ui.courier.fetch.shardsFailedModal.failureHeader', {
+  return i18n.translate('data.search.searchSource.fetch.shardsFailedModal.failureHeader', {
     defaultMessage: '{failureName} at {failureDetails}',
     values: { failureName, failureDetails: displayDetails },
     description: 'Summary of shard failures, e.g. "IllegalArgumentException at shard 0 node xyz"',

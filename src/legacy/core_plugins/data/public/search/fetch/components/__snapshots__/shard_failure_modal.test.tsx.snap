@@ -181,7 +181,7 @@ exports[`ShardFailureModal renders matching snapshot given valid properties 1`] 
       <FormattedMessage
         defaultMessage="Close"
         description="Closing the Modal"
-        id="common.ui.courier.fetch.shardsFailedModal.close"
+        id="data.search.searchSource.fetch.shardsFailedModal.close"
         values={Object {}}
       />
     </EuiButton>
