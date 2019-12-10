@@ -30,7 +30,7 @@ beforeAll(() => {
   mockedTaskInstance = {
     id: '',
     attempts: 0,
-    status: 'running' as TaskStatus,
+    status: TaskStatus.Running,
     version: '123',
     runAt: new Date(),
     scheduledAt: new Date(),
