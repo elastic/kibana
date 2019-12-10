@@ -28,13 +28,13 @@ import { ActionsConnectorsContext } from '../../context/actions_connectors_conte
 import { ActionConnector, IErrorObject } from '../../../types';
 
 interface ActionConnectorProps {
-  initialAction: any;
+  initialConnector: any;
   actionTypeName: string;
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ActionConnectorForm = ({
-  initialAction,
+  initialConnector,
   actionTypeName,
   setFlyoutVisibility,
 }: ActionConnectorProps) => {
@@ -48,10 +48,14 @@ export const ActionConnectorForm = ({
   const canSave = capabilities.get().actions.save;
 
   // hooks
-  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialAction });
+  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
 
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
+  };
+
+  const setConnector = (key: string, value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
   };
 
   const setActionConfigProperty = (key: string, value: any) => {
@@ -63,15 +67,16 @@ export const ActionConnectorForm = ({
   };
 
   useEffect(() => {
+    setConnector('connector', initialConnector);
     setServerError(null);
-  }, []);
+  }, [initialConnector]);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
 
-  const actionTypeRegisterd = actionTypeRegistry.get(initialAction.actionTypeId);
+  const actionTypeRegisterd = actionTypeRegistry.get(initialConnector.actionTypeId);
   if (actionTypeRegisterd === null) return null;
 
   function validateBaseProperties(actionObject: ActionConnector) {
@@ -191,7 +196,7 @@ export const ActionConnectorForm = ({
               editActionSecrets={setActionSecretsProperty}
               hasErrors={hasErrors}
             >
-              {initialAction.actionTypeId === null ? (
+              {initialConnector.actionTypeId === null ? (
                 <Fragment>
                   <EuiCallOut
                     title={i18n.translate(
