@@ -6,7 +6,6 @@
 
 import React, { useEffect } from 'react';
 import { EuiLink, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { get } from 'lodash';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { MonitorSummary } from '../../../../../common/graphql/types';
@@ -55,7 +54,7 @@ export function MonitorListDrawerComponent({
     loadMonitorDetails(summary.monitor_id);
   }, []);
 
-  const monitorUrl: string | undefined = get(summary.state.url, 'full', undefined);
+  const monitorUrl: string | undefined = summary.state.url?.full ?? undefined;
 
   return (
     <ContainerDiv>

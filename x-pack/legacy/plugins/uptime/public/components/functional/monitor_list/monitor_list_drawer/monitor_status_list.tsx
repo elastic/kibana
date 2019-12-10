@@ -5,7 +5,6 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Check } from '../../../../../common/graphql/types';
@@ -28,8 +27,7 @@ export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
   const downChecks: Set<string> = new Set();
 
   checks.forEach((check: Check) => {
-    // Doing this way because name is either string or null, get() default value only works on undefined value
-    const location = get<string | null>(check, 'observer.geo.name', null) || UNNAMED_LOCATION;
+    const location: string | null = check.observer?.geo?.name ?? UNNAMED_LOCATION;
 
     if (check.monitor.status === UP) {
       upChecks.add(location);
