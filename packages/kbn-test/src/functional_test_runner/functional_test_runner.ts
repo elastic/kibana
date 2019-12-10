@@ -18,10 +18,11 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Suite, Test } from './fake_mocha_types';
 
+import { Suite, Test } from './fake_mocha_types';
 import {
-  createLifecycle,
+  Lifecycle,
+  LifecyclePhase,
   readConfigFile,
   ProviderCollection,
   readProviderSpec,
@@ -31,7 +32,7 @@ import {
 } from './lib';
 
 export class FunctionalTestRunner {
-  public readonly lifecycle = createLifecycle();
+  public readonly lifecycle = new Lifecycle();
   private closed = false;
 
   constructor(
@@ -39,13 +40,12 @@ export class FunctionalTestRunner {
     private readonly configFile: string,
     private readonly configOverrides: any
   ) {
-    this.lifecycle.on('phaseStart', name => {
-      log.verbose('starting %j lifecycle phase', name);
-    });
-
-    this.lifecycle.on('phaseEnd', name => {
-      log.verbose('ending %j lifecycle phase', name);
-    });
+    for (const [key, value] of Object.entries(this.lifecycle)) {
+      if (value instanceof LifecyclePhase) {
+        value.before$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
+        value.after$.subscribe(() => log.verbose('starting %j lifecycle phase', key));
+      }
+    }
   }
 
   async run() {
@@ -59,7 +59,7 @@ export class FunctionalTestRunner {
       await providers.loadAll();
 
       const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
-      await this.lifecycle.trigger('beforeTests');
+      await this.lifecycle.beforeTests.trigger();
       this.log.info('Starting tests');
 
       return await runTests(this.lifecycle, mocha);
@@ -140,6 +140,6 @@ export class FunctionalTestRunner {
     if (this.closed) return;
 
     this.closed = true;
-    await this.lifecycle.trigger('cleanup');
+    await this.lifecycle.cleanup.trigger();
   }
 }
