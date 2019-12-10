@@ -80,7 +80,7 @@ export const WithLogFilterUrlState: React.FC<WithLogFilterUrlStateProps> = ({ in
   </WithLogFilter>
 );
 
-const mapToFilterQuery = (value: any): FilterQuery | null | undefined =>
+const mapToFilterQuery = (value: any): LogFilterUrlState | undefined =>
   value && value.kind === 'kuery' && typeof value.expression === 'string'
     ? {
         kind: value.kind,
