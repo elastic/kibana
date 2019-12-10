@@ -9,6 +9,7 @@ import { MainType, SubType, DataType, NormalizedFields } from '../../../../../ty
 
 import { AliasTypeRequiredParameters } from './alias_type';
 import { TokenCountTypeRequiredParameters } from './token_count_type';
+import { DenseVectorRequiredParameters } from './dense_vector_type';
 
 export interface ComponentProps {
   allFields: NormalizedFields['byId'];
@@ -17,6 +18,7 @@ export interface ComponentProps {
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasTypeRequiredParameters,
   token_count: TokenCountTypeRequiredParameters,
+  dense_vector: DenseVectorRequiredParameters,
 };
 
 export const getParametersFormForType = (

@@ -613,4 +613,29 @@ export const PARAMETERS_DEFINITION = {
       ],
     },
   },
+  dims: {
+    fieldConfig: {
+      defaultValue: '',
+      type: FIELD_TYPES.NUMBER,
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dimsFieldLabel', {
+        defaultMessage: 'Dims',
+      }),
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.dimsHelpTextDescription', {
+        defaultMessage: 'The number of dimensions in the vector.',
+      }),
+      formatters: [toInt],
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.dimsIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a dims value.',
+              }
+            )
+          ),
+        },
+      ],
+    },
+  },
 };
