@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { Server } from 'hapi';
-import { DEFAULT_CSP_RULES } from '../../../../../server/csp';
+import { DEFAULT_CSP_OPTIONS } from '../../../../../../core/server';
 import { createCspCollector } from './csp_collector';
 
 interface MockConfig {
@@ -85,7 +85,7 @@ test('does not arbitrarily fetch other csp configurations (e.g. whitelist only)'
 
 function setupCollector() {
   const mockConfig = { get: sinon.stub() };
-  mockConfig.get.withArgs('csp.rules').returns(DEFAULT_CSP_RULES);
+  mockConfig.get.withArgs('csp.rules').returns(DEFAULT_CSP_OPTIONS.rules);
   mockConfig.get.withArgs('csp.strict').returns(true);
   mockConfig.get.withArgs('csp.warnLegacyBrowsers').returns(true);
 

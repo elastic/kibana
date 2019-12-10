@@ -26,9 +26,9 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
+import { createCspDirectives } from '../../../core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
-import { createCSPRuleString } from '../../server/csp';
 
 export function uiRenderMixin(kbnServer, server, config) {
   function replaceInjectedVars(request, injectedVars) {
@@ -283,7 +283,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       },
     });
 
-    const csp = createCSPRuleString(config.get('csp.rules'));
+    const csp = createCspDirectives(config.get('csp.rules'));
     response.header('content-security-policy', csp);
 
     return response;

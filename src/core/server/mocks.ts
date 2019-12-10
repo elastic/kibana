@@ -19,6 +19,7 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart } from '.';
+import { DEFAULT_CSP_OPTIONS } from './csp';
 import { loggingServiceMock } from './logging/logging_service.mock';
 import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -48,6 +49,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       startupTimeout: duration('30s'),
     },
     path: { data: '/tmp' },
+    csp: DEFAULT_CSP_OPTIONS,
   };
 
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {

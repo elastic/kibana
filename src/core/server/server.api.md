@@ -574,6 +574,17 @@ export interface CoreStart {
     savedObjects: SavedObjectsServiceStart;
 }
 
+// @internal
+export function createCspDirectives(rules: string[]): string;
+
+// @public
+export interface CspOptions {
+    directives: string;
+    rules: string[];
+    strict: boolean;
+    warnLegacyBrowsers: boolean;
+}
+
 // @public
 export interface CustomHttpResponseOptions<T extends HttpResponsePayload | ResponseError> {
     body?: T;
@@ -581,6 +592,9 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     // (undocumented)
     statusCode: number;
 }
+
+// @public
+export const DEFAULT_CSP_OPTIONS: Readonly<CspOptions>;
 
 // @public (undocumented)
 export interface DeprecationAPIClientParams extends GenericParams {
@@ -1774,6 +1788,7 @@ export type SharedGlobalConfig = RecursiveReadonly_2<{
     kibana: Pick<KibanaConfigType_2, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+    csp: Pick<CspConfigType, typeof SharedGlobalConfigKeys.csp[number]>;
 }>;
 
 // @public
@@ -1813,9 +1828,10 @@ export const validBodyOutput: readonly ["data", "stream"];
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:221:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:222:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:223:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:223:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:223:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:224:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:225:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:226:3 - (ae-forgotten-export) The symbol "CspConfigType" needs to be exported by the entry point index.d.ts
 
 ```

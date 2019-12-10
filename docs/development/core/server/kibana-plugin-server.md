@@ -50,6 +50,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ContextSetup](./kibana-plugin-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CoreSetup](./kibana-plugin-server.coresetup.md) | Context passed to the plugins <code>setup</code> method. |
 |  [CoreStart](./kibana-plugin-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
+|  [CspOptions](./kibana-plugin-server.cspoptions.md) | The CSP options used for Kibana. |
 |  [CustomHttpResponseOptions](./kibana-plugin-server.customhttpresponseoptions.md) | HTTP response parameters for a response with adjustable status code. |
 |  [DeprecationAPIClientParams](./kibana-plugin-server.deprecationapiclientparams.md) |  |
 |  [DeprecationAPIResponse](./kibana-plugin-server.deprecationapiresponse.md) |  |
@@ -141,6 +142,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Variable | Description |
 |  --- | --- |
+|  [DEFAULT\_CSP\_OPTIONS](./kibana-plugin-server.default_csp_options.md) | The default set of CSP options used for Kibana. |
 |  [kibanaResponseFactory](./kibana-plugin-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-server.requesthandler.md) execution. |
 |  [validBodyOutput](./kibana-plugin-server.validbodyoutput.md) | The set of valid body.output |
 

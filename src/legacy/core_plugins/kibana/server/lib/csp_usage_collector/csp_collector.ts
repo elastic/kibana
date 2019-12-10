@@ -18,7 +18,7 @@
  */
 
 import { Server } from 'hapi';
-import { createCSPRuleString, DEFAULT_CSP_RULES } from '../../../../../server/csp';
+import { createCspDirectives, DEFAULT_CSP_OPTIONS } from '../../../../../../core/server';
 import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
 export function createCspCollector(server: Server) {
@@ -31,8 +31,8 @@ export function createCspCollector(server: Server) {
       // It's important that we do not send the value of csp.rules here as it
       // can be customized with values that can be identifiable to given
       // installs, such as URLs
-      const defaultRulesString = createCSPRuleString([...DEFAULT_CSP_RULES]);
-      const actualRulesString = createCSPRuleString(config.get('csp.rules'));
+      const defaultRulesString = createCspDirectives([...DEFAULT_CSP_OPTIONS.rules]);
+      const actualRulesString = createCspDirectives(config.get('csp.rules'));
 
       return {
         strict: config.get('csp.strict'),

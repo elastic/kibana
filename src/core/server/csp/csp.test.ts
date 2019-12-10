@@ -17,17 +17,12 @@
  * under the License.
  */
 
-import {
-  createCSPRuleString,
-  DEFAULT_CSP_RULES,
-  DEFAULT_CSP_STRICT,
-  DEFAULT_CSP_WARN_LEGACY_BROWSERS,
-} from './';
+import { createCspDirectives, DEFAULT_CSP_OPTIONS } from './csp';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
 // we test the default rules exactly so any change to those rules gets flagged
-// for manual review. In otherwords, this test is intentionally fragile to draw
+// for manual review. In other words, this test is intentionally fragile to draw
 // extra attention if defaults are modified in any way.
 //
 // A test failure here does not necessarily mean this change cannot be made,
@@ -37,25 +32,28 @@ import {
 // The tests use inline snapshots to make it as easy as possible to identify
 // the nature of a change in defaults during a PR review.
 test('default CSP rules', () => {
-  expect(DEFAULT_CSP_RULES).toMatchInlineSnapshot(`
-    Array [
-      "script-src 'unsafe-eval' 'self'",
-      "worker-src blob: 'self'",
-      "style-src 'unsafe-inline' 'self'",
-    ]
+  expect(DEFAULT_CSP_OPTIONS).toMatchInlineSnapshot(`
+    Object {
+      "directives": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+      "rules": Array [
+        "script-src 'unsafe-eval' 'self'",
+        "worker-src blob: 'self'",
+        "style-src 'unsafe-inline' 'self'",
+      ],
+      "strict": true,
+      "warnLegacyBrowsers": true,
+    }
   `);
 });
 
-test('CSP strict mode defaults to disabled', () => {
-  expect(DEFAULT_CSP_STRICT).toBe(true);
-});
+test('createCspDirectives() converts an array of rules into a CSP header string', () => {
+  const directives = createCspDirectives([
+    `string-src 'self'`,
+    'worker-src blob:',
+    'img-src data: blob:',
+  ]);
 
-test('CSP legacy browser warning defaults to enabled', () => {
-  expect(DEFAULT_CSP_WARN_LEGACY_BROWSERS).toBe(true);
-});
-
-test('createCSPRuleString() converts an array of rules into a CSP header string', () => {
-  const csp = createCSPRuleString([`string-src 'self'`, 'worker-src blob:', 'img-src data: blob:']);
-
-  expect(csp).toMatchInlineSnapshot(`"string-src 'self'; worker-src blob:; img-src data: blob:"`);
+  expect(directives).toMatchInlineSnapshot(
+    `"string-src 'self'; worker-src blob:; img-src data: blob:"`
+  );
 });
