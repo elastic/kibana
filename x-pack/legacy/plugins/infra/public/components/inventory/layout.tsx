@@ -18,6 +18,7 @@ import { NodesOverview } from '../nodes_overview';
 import { Toolbar } from './toolbars/toolbar';
 import { PageContent } from '../page';
 import { useSnapshot } from '../../containers/waffle/use_snaphot';
+import { useInventoryMeta } from '../../containers/inventory_metadata/use_inventory_meta';
 
 export interface LayoutProps {
   options: InfraWaffleMapOptions;
@@ -36,6 +37,7 @@ export interface LayoutProps {
 }
 
 export const Layout = (props: LayoutProps) => {
+  const { accounts, regions } = useInventoryMeta(props.sourceId);
   const { loading, nodes, reload } = useSnapshot(
     props.filterQuery,
     props.metric,
@@ -46,7 +48,7 @@ export const Layout = (props: LayoutProps) => {
   );
   return (
     <>
-      <Toolbar nodeType={props.nodeType} />
+      <Toolbar accounts={accounts} regions={regions} nodeType={props.nodeType} />
       <PageContent>
         <NodesOverview
           nodes={nodes}

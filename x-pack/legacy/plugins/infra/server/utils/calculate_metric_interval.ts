@@ -23,7 +23,7 @@ export const calculateMetricInterval = async (
   framework: InfraBackendFrameworkAdapter,
   request: InfraFrameworkRequest,
   options: Options,
-  modules: string[]
+  modules?: string[]
 ) => {
   const query = {
     allowNoIndices: true,
