@@ -24,7 +24,6 @@ import { Field } from 'ui/index_patterns';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
-import { start as data } from '../../../../core_plugins/data/public/legacy';
 import { ControlParams } from '../editor_utils';
 
 const minMaxAgg = (field?: Field) => {
@@ -118,7 +117,7 @@ export async function rangeControlFactory(
 ): Promise<RangeControl> {
   let indexPattern;
   try {
-    indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
+    indexPattern = await npStart.plugins.data.indexPatterns.get(controlParams.indexPattern);
   } catch (err) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }

@@ -21,6 +21,8 @@ import React, { PureComponent, ChangeEvent } from 'react';
 import { InjectedIntlProps } from 'react-intl';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { VisOptionsProps } from 'ui/vis/editors/default';
+import { npStart } from 'ui/new_platform';
+
 import {
   EuiButton,
   EuiFlexGroup,
@@ -44,7 +46,6 @@ import {
   ControlParamsOptions,
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
-import { start as data } from '../../../../../core_plugins/data/public/legacy';
 
 interface ControlsTabUiState {
   type: CONTROL_TYPES;
@@ -64,7 +65,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiInjectedProps, ControlsTa
   };
 
   getIndexPattern = async (indexPatternId: string): Promise<IndexPattern> => {
-    return await data.indexPatterns.indexPatterns.get(indexPatternId);
+    return await npStart.plugins.data.indexPatterns.get(indexPatternId);
   };
 
   onChange = (value: ControlParams[]) => this.props.setValue('controls', value);

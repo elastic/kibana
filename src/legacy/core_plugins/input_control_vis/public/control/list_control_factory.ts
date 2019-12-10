@@ -25,7 +25,6 @@ import { Field, IndexPattern } from 'ui/index_patterns';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 import { createSearchSource } from './create_search_source';
-import { start as data } from '../../../../core_plugins/data/public/legacy';
 import { ControlParams } from '../editor_utils';
 
 function getEscapedQuery(query = '') {
@@ -190,7 +189,7 @@ export async function listControlFactory(
 ) {
   let indexPattern: IndexPattern;
   try {
-    indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
+    indexPattern = await npStart.plugins.data.indexPatterns.get(controlParams.indexPattern);
 
     // dynamic options are only allowed on String fields but the setting defaults to true so it could
     // be enabled for non-string fields (since UI input is hidden for non-string fields).

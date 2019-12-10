@@ -44,23 +44,16 @@ jest.mock('ui/new_platform', () => ({
             getGlobalFilters: jest.fn().mockImplementation(() => []),
           },
         },
-      },
-    },
-  },
-}));
-
-jest.mock('../../../../core_plugins/data/public/legacy', () => ({
-  start: {
-    indexPatterns: {
-      indexPatterns: {
-        get: () => ({
-          fields: {
-            getByName: (name: any) => {
-              const fields: any = { myField: { name: 'myField' } };
-              return fields[name];
+        indexPatterns: {
+          get: () => ({
+            fields: {
+              getByName: (name: any) => {
+                const fields: any = { myField: { name: 'myField' } };
+                return fields[name];
+              },
             },
-          },
-        }),
+          }),
+        },
       },
     },
   },
