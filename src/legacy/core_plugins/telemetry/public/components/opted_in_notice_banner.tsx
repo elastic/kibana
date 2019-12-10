@@ -20,12 +20,15 @@
 /* eslint @elastic/eui/href-or-on-click:0 */
 
 import * as React from 'react';
+import chrome from 'ui/chrome';
 import { EuiButton, EuiLink, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   onSeenBanner: () => any;
 }
+
+const pathToSettings = chrome.addBasePath('kibana#/management/kibana/settings');
 
 /**
  * React component for displaying the Telemetry opt-in notice.
@@ -57,7 +60,7 @@ export class OptedInBanner extends React.PureComponent<Props> {
               </EuiLink>
             ),
             disableLink: (
-              <EuiLink href="#/management/kibana/settings" onClick={this.onLinkClick}>
+              <EuiLink href={pathToSettings} onClick={this.onLinkClick}>
                 <FormattedMessage
                   id="telemetry.telemetryOptedInDisableUsage"
                   defaultMessage="disable usage data here"
