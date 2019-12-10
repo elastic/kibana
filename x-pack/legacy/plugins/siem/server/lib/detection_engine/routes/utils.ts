@@ -18,9 +18,9 @@ export const getIdError = ({
   ruleId: string | undefined | null;
 }) => {
   if (id != null) {
-    return new Boom(`id of ${id} not found`, { statusCode: 404 });
+    return new Boom(`id: "${id}" not found`, { statusCode: 404 });
   } else if (ruleId != null) {
-    return new Boom(`rule_id of ${ruleId} not found`, { statusCode: 404 });
+    return new Boom(`rule_id: "${ruleId}" not found`, { statusCode: 404 });
   } else {
     return new Boom(`id or rule_id should have been defined`, { statusCode: 404 });
   }
@@ -34,7 +34,6 @@ export const transformAlertToRule = (alert: RuleAlertType): Partial<OutputRuleAl
     description: alert.params.description,
     enabled: alert.enabled,
     false_positives: alert.params.falsePositives,
-    filter: alert.params.filter,
     filters: alert.params.filters,
     from: alert.params.from,
     id: alert.id,
@@ -97,8 +96,8 @@ export const getIndex = (request: RequestFacade, server: ServerFacade): string =
   return `${signalsIndex}-${spaceId}`;
 };
 
-export const callWithRequestFactory = (request: RequestFacade) => {
-  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
+export const callWithRequestFactory = (request: RequestFacade, server: ServerFacade) => {
+  const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   return <T, U>(endpoint: string, params: T, options?: U) => {
     return callWithRequest(request, endpoint, params, options);
   };
