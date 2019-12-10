@@ -21,17 +21,14 @@ import React, { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  DataPublicPluginStart,
-  SearchBarOwnProps,
-  SearchBar,
-  esFilters,
-} from '../../../../../../../plugins/data/public';
+import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { DataPublicPluginStart, esFilters } from '../..';
+import { SearchBarOwnProps, SearchBar } from '.';
+import { QueryStart } from '../../query';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
-  data: DataPublicPluginStart;
+  data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
 }
 
@@ -39,14 +36,14 @@ export type StatetfulSearchBarProps = SearchBarOwnProps & {
   appName: string;
 };
 
-const defaultFiltersUpdated = (data: DataPublicPluginStart) => {
+const defaultFiltersUpdated = (query: QueryStart) => {
   return (filters: esFilters.Filter[]) => {
-    data.query.filterManager.setFilters(filters);
+    query.filterManager.setFilters(filters);
   };
 };
 
-const defaultOnRefreshChange = (data: DataPublicPluginStart) => {
-  const { timefilter } = data.query.timefilter;
+const defaultOnRefreshChange = (query: QueryStart) => {
+  const { timefilter } = query.timefilter;
   return (options: { isPaused: boolean; refreshInterval: number }) => {
     timefilter.setRefreshInterval({
       value: options.refreshInterval,
@@ -101,7 +98,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
         isSubscribed = false;
         subscriptions.unsubscribe();
       };
-    }, []);
+    }, [filterManager, timefilter.timefilter]);
 
     return (
       <KibanaContextProvider
@@ -119,8 +116,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           refreshInterval={refreshInterval}
           isRefreshPaused={refreshPaused}
           filters={filters}
-          onFiltersUpdated={defaultFiltersUpdated(data)}
-          onRefreshChange={defaultOnRefreshChange(data)}
+          onFiltersUpdated={defaultFiltersUpdated(data.query)}
+          onRefreshChange={defaultOnRefreshChange(data.query)}
           {...props}
         />
       </KibanaContextProvider>
