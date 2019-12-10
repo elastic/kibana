@@ -114,10 +114,6 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'topHitsSize', value: size });
   };
 
-  _onApplyGlobalQueryChange = applyGlobalQuery => {
-    this.props.onChange({ propName: 'applyGlobalQuery', value: applyGlobalQuery });
-  };
-
   renderTopHitsForm() {
     const topHitsSwitch = (
       <EuiFormRow

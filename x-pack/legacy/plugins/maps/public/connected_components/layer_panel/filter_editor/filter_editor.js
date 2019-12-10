@@ -202,7 +202,7 @@ export class FilterEditor extends Component {
           <h5>
             <FormattedMessage
               id="xpack.maps.layerPanel.filterEditor.title"
-              defaultMessage="Layer data"
+              defaultMessage="Filtering"
             />
           </h5>
         </EuiTitle>
@@ -213,11 +213,14 @@ export class FilterEditor extends Component {
 
         <EuiTextAlign textAlign="center">{this._renderQueryPopover()}</EuiTextAlign>
 
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
         {filterByBoundsSwitch}
 
         <GlobalFilterCheckbox
+          label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
+            defaultMessage: `Apply global filter to layer data`,
+          })}
           applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
         />
