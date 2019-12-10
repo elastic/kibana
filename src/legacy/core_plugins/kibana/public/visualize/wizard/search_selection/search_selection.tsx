@@ -21,23 +21,22 @@ import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
+import { IUiSettingsClient, SavedObjectsStart } from 'kibana/public';
 
-import { getServices } from '../../kibana_services';
 import { SavedObjectFinderUi } from '../../../../../../../plugins/kibana_react/public';
 import { VisType } from '../../legacy_imports';
 
 interface SearchSelectionProps {
   onSearchSelected: (searchId: string, searchType: string) => void;
   visType: VisType;
+  uiSettings: IUiSettingsClient;
+  savedObjects: SavedObjectsStart;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
   private fixedPageSize: number = 8;
 
   public render() {
-    const {
-      core: { uiSettings, savedObjects },
-    } = getServices();
     return (
       <React.Fragment>
         <EuiModalHeader>
@@ -88,8 +87,8 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
               },
             ]}
             fixedPageSize={this.fixedPageSize}
-            uiSettings={uiSettings}
-            savedObjects={savedObjects}
+            uiSettings={this.props.uiSettings}
+            savedObjects={this.props.savedObjects}
           />
         </EuiModalBody>
       </React.Fragment>
