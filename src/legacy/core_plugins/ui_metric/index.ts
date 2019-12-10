@@ -18,7 +18,6 @@
  */
 
 import { resolve } from 'path';
-import JoiNamespace from 'joi';
 import { Legacy } from '../../../../kibana';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,12 +26,6 @@ export default function(kibana: any) {
     id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],
     publicDir: resolve(__dirname, 'public'),
-    config(Joi: typeof JoiNamespace) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-        debug: Joi.boolean().default(Joi.ref('$dev')),
-      }).default();
-    },
     uiExports: {
       mappings: require('./mappings.json'),
     },

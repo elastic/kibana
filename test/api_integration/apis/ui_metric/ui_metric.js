@@ -49,7 +49,7 @@ export default function ({ getService }) {
         }
       };
       await supertest
-        .post('/api/telemetry/report')
+        .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send(report)
@@ -77,7 +77,7 @@ export default function ({ getService }) {
         }
       };
       await supertest
-        .post('/api/telemetry/report')
+        .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
         .send(report)
