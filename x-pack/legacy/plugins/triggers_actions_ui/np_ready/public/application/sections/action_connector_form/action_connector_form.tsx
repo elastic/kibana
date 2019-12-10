@@ -77,7 +77,7 @@ export const ActionConnectorForm = ({
   } | null>(null);
 
   const actionTypeRegisterd = actionTypeRegistry.get(initialConnector.actionTypeId);
-  if (actionTypeRegisterd === null) return null;
+  if (!actionTypeRegisterd) return null;
 
   function validateBaseProperties(actionObject: ActionConnector) {
     const validationResult = { errors: {} };
