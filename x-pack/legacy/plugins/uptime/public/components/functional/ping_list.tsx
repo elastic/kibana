@@ -6,12 +6,11 @@
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiComboBox,
-  EuiComboBoxOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiPanel,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -38,13 +37,13 @@ interface PingListQueryResult {
 }
 
 interface PingListProps {
-  onSelectedStatusChange: (status: string | null) => void;
-  onSelectedLocationChange: (location: EuiComboBoxOptionProps[]) => void;
+  onSelectedStatusChange: (status: string | undefined) => void;
+  onSelectedLocationChange: (location: any) => void;
   onPageCountChange: (itemCount: number) => void;
   onUpdateApp: () => void;
   pageSize: number;
   selectedOption: string;
-  selectedLocation: EuiComboBoxOptionProps[];
+  selectedLocation: string | undefined;
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
@@ -52,7 +51,7 @@ interface ExpandedRowMap {
   [key: string]: JSX.Element;
 }
 
-export const BaseLocationOptions = [{ label: 'All', value: 'All' }];
+export const AllLocationOption = { text: 'All', value: '' };
 
 export const toggleDetails = (
   ping: Ping,
@@ -84,32 +83,32 @@ export const PingListComponent = ({
 }: Props) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ExpandedRowMap>({});
 
-  const statusOptions: EuiComboBoxOptionProps[] = [
+  const statusOptions = [
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
         defaultMessage: 'All',
       }),
       value: '',
     },
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.upStatusOptionLabel', {
         defaultMessage: 'Up',
       }),
       value: 'up',
     },
     {
-      label: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
+      text: i18n.translate('xpack.uptime.pingList.statusOptions.downStatusOptionLabel', {
         defaultMessage: 'Down',
       }),
       value: 'down',
     },
   ];
   const locations = get<string[]>(data, 'allPings.locations');
-  const locationOptions: EuiComboBoxOptionProps[] = !locations
-    ? BaseLocationOptions
-    : BaseLocationOptions.concat(
+  const locationOptions = !locations
+    ? [AllLocationOption]
+    : [AllLocationOption].concat(
         locations.map(name => {
-          return { label: name, value: name };
+          return { text: name, value: name };
         })
       );
 
@@ -253,22 +252,18 @@ export const PingListComponent = ({
                         defaultMessage: 'Status',
                       })}
                     >
-                      <EuiComboBox
-                        isClearable={false}
-                        singleSelection={{ asPlainText: true }}
-                        selectedOptions={[
-                          statusOptions.find(({ value }) => value === selectedOption) ||
-                            statusOptions[2],
-                        ]}
+                      <EuiSelect
                         options={statusOptions}
                         aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
                           defaultMessage: 'Status',
                         })}
-                        onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
-                          if (typeof selectedOptions[0].value === 'string') {
+                        value={selectedOption}
+                        onChange={selected => {
+                          if (typeof selected.target.value === 'string') {
                             onSelectedStatusChange(
-                              // @ts-ignore it's definitely a string
-                              selectedOptions[0].value !== '' ? selectedOptions[0].value : null
+                              selected.target && selected.target.value !== ''
+                                ? selected.target.value
+                                : undefined
                             );
                           }
                         }}
@@ -282,16 +277,18 @@ export const PingListComponent = ({
                         defaultMessage: 'Location',
                       })}
                     >
-                      <EuiComboBox
-                        isClearable={false}
-                        singleSelection={{ asPlainText: true }}
-                        selectedOptions={selectedLocation}
+                      <EuiSelect
                         options={locationOptions}
+                        value={selectedLocation}
                         aria-label={i18n.translate('xpack.uptime.pingList.locationLabel', {
                           defaultMessage: 'Location',
                         })}
-                        onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
-                          onSelectedLocationChange(selectedOptions);
+                        onChange={selected => {
+                          onSelectedLocationChange(
+                            selected.target && selected.target.value !== ''
+                              ? selected.target.value
+                              : null
+                          );
                         }}
                       />
                     </EuiFormRow>
