@@ -98,7 +98,7 @@ function createRuleForType(
       if (entries.length !== 1) {
         throw new RuleBuilderError(
           i18n.translate(
-            'xpack.security.management.editRoleMapping.ruleBuilder.expectedObjectForFieldRule',
+            'xpack.security.management.editRoleMapping.ruleBuilder.expectedSingleFieldRule',
             {
               defaultMessage: `Expected a single field, but found {count}.`,
               values: { count: entries.length },

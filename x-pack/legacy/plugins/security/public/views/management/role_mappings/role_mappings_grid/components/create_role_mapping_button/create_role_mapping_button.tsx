@@ -17,7 +17,7 @@ export const CreateRoleMappingButton = () => {
       fill
     >
       <FormattedMessage
-        id="xpack.security.management.roleMappings.table.emptyPromptTitle"
+        id="xpack.security.management.roleMappings.createRoleMappingButton"
         defaultMessage="Create role mapping"
       />
     </EuiButton>

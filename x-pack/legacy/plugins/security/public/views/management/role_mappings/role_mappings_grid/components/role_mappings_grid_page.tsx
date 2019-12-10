@@ -86,7 +86,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
         <EuiPageContent>
           <SectionLoading>
             <FormattedMessage
-              id="xpack.security.management.roleMappings.table.loadingRoleMappingsDescription"
+              id="xpack.security.management.roleMappings.loadingRoleMappingsDescription"
               defaultMessage="Loading role mappings…"
             />
           </SectionLoading>
@@ -104,7 +104,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.security.management.roleMappings.table.loadingRoleMappingsErrorTitle"
+                id="xpack.security.management.roleMappings.loadingRoleMappingsErrorTitle"
                 defaultMessage="Error loading Role mappings"
               />
             }
@@ -132,7 +132,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
             <EuiTitle>
               <h2>
                 <FormattedMessage
-                  id="xpack.security.management.roleMappings.table.roleMappingTitle"
+                  id="xpack.security.management.roleMappings.roleMappingTitle"
                   defaultMessage="Role Mappings"
                 />
               </h2>
@@ -140,7 +140,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
             <EuiText color="subdued" size="s">
               <p>
                 <FormattedMessage
-                  id="xpack.security.management.roleMappings.table.roleMappingDescription"
+                  id="xpack.security.management.roleMappings.roleMappingDescription"
                   defaultMessage="View and manage your role mappings. A role mapping is a rule-based mechanism for assigning roles to users."
                 />
               </p>
@@ -149,7 +149,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
           <EuiPageContentHeaderSection>
             <EuiButton data-test-subj="createRoleMappingButton" href={getCreateRoleMappingHref()}>
               <FormattedMessage
-                id="xpack.security.management.roleMappings.table.createRoleMappingButtonLabel"
+                id="xpack.security.management.roleMappings.createRoleMappingButtonLabel"
                 defaultMessage="Create role mapping"
               />
             </EuiButton>
@@ -175,7 +175,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
 
     const message = isLoadingTable ? (
       <FormattedMessage
-        id="xpack.security.management.roleMappings.table.roleMappingTableLoadingMessage"
+        id="xpack.security.management.roleMappings.roleMappingTableLoadingMessage"
         defaultMessage="Loading role mappings…"
       />
     ) : (
@@ -213,7 +213,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
                 data-test-subj="bulkDeleteActionButton"
               >
                 <FormattedMessage
-                  id="xpack.security.management.roleMappings.table.deleteRoleMappingButton"
+                  id="xpack.security.management.roleMappings.deleteRoleMappingButton"
                   defaultMessage="Delete {count, plural, one {role mapping} other {role mappings}}"
                   values={{
                     count: selectedItems.length,
@@ -234,7 +234,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
           data-test-subj="reloadButton"
         >
           <FormattedMessage
-            id="xpack.security.management.roleMappings.table.reloadRoleMappingsButton"
+            id="xpack.security.management.roleMappings.reloadRoleMappingsButton"
             defaultMessage="Reload"
           />
         </EuiButton>
@@ -270,7 +270,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
     const config = [
       {
         field: 'name',
-        name: i18n.translate('xpack.security.management.roleMappings.table.nameColumnName', {
+        name: i18n.translate('xpack.security.management.roleMappings.nameColumnName', {
           defaultMessage: 'Name',
         }),
         sortable: true,
@@ -287,7 +287,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
       },
       {
         field: 'roles',
-        name: i18n.translate('xpack.security.management.roleMappings.table.rolesColumnName', {
+        name: i18n.translate('xpack.security.management.roleMappings.rolesColumnName', {
           defaultMessage: 'Roles',
         }),
         sortable: true,
@@ -296,7 +296,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
           if (roleTemplates.length > 0) {
             return (
               <span data-test-subj="roleMappingRoles">
-                {i18n.translate('xpack.security.management.roleMappings.table.roleTemplates', {
+                {i18n.translate('xpack.security.management.roleMappings.roleTemplates', {
                   defaultMessage:
                     '{templateCount, plural, one{# role template} other {# role templates}} defined',
                   values: {
@@ -319,7 +319,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
       },
       {
         field: 'enabled',
-        name: i18n.translate('xpack.security.management.roleMappings.table.enabledColumnName', {
+        name: i18n.translate('xpack.security.management.roleMappings.enabledColumnName', {
           defaultMessage: 'Enabled',
         }),
         render: (enabled: boolean) => {
@@ -327,7 +327,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
             return (
               <EuiBadge data-test-subj="roleMappingEnabled" color="secondary">
                 <FormattedMessage
-                  id="xpack.security.management.roleMappings.table.enabledBadge"
+                  id="xpack.security.management.roleMappings.enabledBadge"
                   defaultMessage="Enabled"
                 />
               </EuiBadge>
@@ -337,7 +337,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
           return (
             <EuiBadge color="hollow" data-test-subj="roleMappingEnabled">
               <FormattedMessage
-                id="xpack.security.management.roleMappings.table.disabledBadge"
+                id="xpack.security.management.roleMappings.disabledBadge"
                 defaultMessage="Disabled"
               />
             </EuiBadge>
@@ -345,7 +345,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
         },
       },
       {
-        name: i18n.translate('xpack.security.management.roleMappings.table.actionsColumnName', {
+        name: i18n.translate('xpack.security.management.roleMappings.actionsColumnName', {
           defaultMessage: 'Actions',
         }),
         actions: [
@@ -354,13 +354,13 @@ export class RoleMappingsGridPage extends Component<any, State> {
               return (
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.security.management.roleMappings.table.actionEditTooltip',
+                    'xpack.security.management.roleMappings.actionEditTooltip',
                     { defaultMessage: 'Edit' }
                   )}
                 >
                   <EuiButtonIcon
                     aria-label={i18n.translate(
-                      'xpack.security.management.roleMappings.table.actionDeleteAriaLabel',
+                      'xpack.security.management.roleMappings.actionEditAriaLabel',
                       {
                         defaultMessage: `Edit '{name}'`,
                         values: { name: record.name },
@@ -385,13 +385,13 @@ export class RoleMappingsGridPage extends Component<any, State> {
                         return (
                           <EuiToolTip
                             content={i18n.translate(
-                              'xpack.security.management.roleMappings.table.actionDeleteTooltip',
+                              'xpack.security.management.roleMappings.actionDeleteTooltip',
                               { defaultMessage: 'Delete' }
                             )}
                           >
                             <EuiButtonIcon
                               aria-label={i18n.translate(
-                                'xpack.security.management.roleMappings.table.actionDeleteAriaLabel',
+                                'xpack.security.management.roleMappings.actionDeleteAriaLabel',
                                 {
                                   defaultMessage: `Delete '{name}'`,
                                   values: { name },
@@ -445,13 +445,10 @@ export class RoleMappingsGridPage extends Component<any, State> {
       }
     } catch (e) {
       toastNotifications.addDanger(
-        i18n.translate(
-          'xpack.security.management.roleMappings.table.fetchingRoleMappingsErrorMessage',
-          {
-            defaultMessage: 'Error loading role mappings: {message}',
-            values: { message: _.get(e, 'body.message', '') },
-          }
-        )
+        i18n.translate('xpack.security.management.roleMappings.fetchingRoleMappingsErrorMessage', {
+          defaultMessage: 'Error loading role mappings: {message}',
+          values: { message: _.get(e, 'body.message', '') },
+        })
       );
     }
   }

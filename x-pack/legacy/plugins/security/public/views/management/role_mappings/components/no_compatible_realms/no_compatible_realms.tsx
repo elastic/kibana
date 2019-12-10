@@ -13,7 +13,7 @@ export const NoCompatibleRealms: React.FunctionComponent = () => (
   <EuiCallOut
     title={
       <FormattedMessage
-        id="xpack.security.management.roleMappings.table.noCompatibleRealmsErrorTitle"
+        id="xpack.security.management.roleMappings.noCompatibleRealmsErrorTitle"
         defaultMessage="No compatible realms are enabled in Elasticsearch"
       />
     }
@@ -21,13 +21,13 @@ export const NoCompatibleRealms: React.FunctionComponent = () => (
     iconType="alert"
   >
     <FormattedMessage
-      id="xpack.security.management.roleMappings.table.noCompatibleRealmsErrorDescription"
+      id="xpack.security.management.roleMappings.noCompatibleRealmsErrorDescription"
       defaultMessage="Role mappings will not be applied to any users. Contact your system administrator and refer to the {link} for more information."
       values={{
         link: (
           <EuiLink href={documentationLinks.getRoleMappingDocUrl()} target="_blank">
             <FormattedMessage
-              id="xpack.security.management.roleMappings.table.noCompatibleRealmsErrorLinkText"
+              id="xpack.security.management.roleMappings.noCompatibleRealmsErrorLinkText"
               defaultMessage="docs"
             />
           </EuiLink>
