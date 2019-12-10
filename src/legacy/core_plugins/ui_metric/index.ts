@@ -19,9 +19,7 @@
 
 import { resolve } from 'path';
 import JoiNamespace from 'joi';
-import { Server } from 'hapi';
 import { Legacy } from '../../../../kibana';
-import { registerUiMetricRoute } from './server/routes/api/ui_metric';
 
 // eslint-disable-next-line import/no-default-export
 export default function(kibana: any) {
@@ -36,18 +34,15 @@ export default function(kibana: any) {
       }).default();
     },
     uiExports: {
-      injectDefaultVars(server: Server) {
-        const config = server.config();
-        return {
-          uiMetricEnabled: config.get('ui_metric.enabled'),
-          debugUiMetric: config.get('ui_metric.debug'),
-        };
-      },
       mappings: require('./mappings.json'),
-      hacks: ['plugins/ui_metric/hacks/ui_metric_init'],
     },
     init(server: Legacy.Server) {
-      registerUiMetricRoute(server);
+      const { getSavedObjectsRepository } = server.savedObjects;
+      const { callWithInternalUser } = server.plugins.elasticsearch.getCluster('admin');
+      const internalRepository = getSavedObjectsRepository(callWithInternalUser);
+      const { usageCollection } = server.newPlatform.setup.plugins;
+
+      usageCollection.registerLegacySavedObjects(internalRepository);
     },
   });
 }

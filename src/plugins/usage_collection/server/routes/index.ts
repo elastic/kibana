@@ -18,9 +18,8 @@
  */
 
 import { IRouter } from '../../../../../src/core/server';
-import { LegacyApi } from '../plugin';
 import { registerUiMetricRoute } from './report_metrics';
 
-export function setupRoutes(router: IRouter, getLegacyApi: () => LegacyApi) {
-  registerUiMetricRoute(router, getLegacyApi);
+export function setupRoutes(router: IRouter, getLegacySavedObjects: any) {
+  registerUiMetricRoute(router, getLegacySavedObjects);
 }

@@ -20,25 +20,22 @@
 import { first } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
 import { ConfigSchema } from './config';
-import { PluginInitializerContext, Logger } from '../../../../src/core/server';
+import { PluginInitializerContext, Logger, CoreSetup } from '../../../../src/core/server';
 import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
 export interface UsageCollectionSetup extends CollectorSet {
-  registerLegacyAPI: (legacyAPI: LegacyApi) => void;
+  registerLegacySavedObjects: (legcaySavedObjects: any) => void;
 }
 
-export type LegacyApi = any;
-
-export class Plugin {
+export class UsageCollectionPlugin {
   logger: Logger;
-  private legacyAPI: LegacyApi;
-  private getLegacyAPI = (): LegacyApi => this.legacyAPI;
+  private legcaySavedObjects: any;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  public async setup(): Promise<UsageCollectionSetup> {
+  public async setup(core: CoreSetup): Promise<UsageCollectionSetup> {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof ConfigSchema>>()
       .pipe(first())
@@ -50,14 +47,14 @@ export class Plugin {
     });
 
     const router = core.http.createRouter();
-    setupRoutes(router, this.getLegacyAPI);
+    const getLegacySavedObjects = () => this.legcaySavedObjects;
+    setupRoutes(router, getLegacySavedObjects);
 
     return {
       ...collectorSet,
-      registerLegacyAPI: legacyAPI => (this.legacyAPI = legacyAPI),
-      // uiMetrics: {
-      //   enabled: config.ui_metrics.enabled,
-      // }
+      registerLegacySavedObjects: (legcaySavedObjects: any) => {
+        this.legcaySavedObjects = legcaySavedObjects;
+      },
     };
   }
 

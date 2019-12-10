@@ -17,76 +17,70 @@
  * under the License.
  */
 
-import { createReporter, UiStatsMetricType, METRIC_TYPE } from '@kbn/analytics';
-import { Storage } from 'ui/storage';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { Reporter, METRIC_TYPE } from '@kbn/analytics';
+// import { Storage } from 'ui/storage';
+import { Storage } from '../../kibana_utils/public';
+import { createReporter } from './services';
+import { PluginInitializerContext, Plugin, CoreSetup } from '../../../core/public';
 
 export interface UsageCollectionSetup {
-  registerApp: (appName: string) => void;
-}
-
-export interface UsageCollectionStart {
-  reportUiStats: (
-    appName: string,
-    type: UiStatsMetricType,
-    eventNames: string | string[],
-    count?: number
-  ) => void;
+  allowTrackUserAgent: (allow: boolean) => void;
+  reportUiStats: Reporter['reportUiStats'];
   METRIC_TYPE: typeof METRIC_TYPE;
 }
 
-export class MetricsPublicPlugin
-  implements Plugin<{}, {}, UsageCollectionSetup, UsageCollectionStart> {
-  private debugMode: boolean = false;
-  private apps: { [appName: string]: boolean } = {};
+export function isUnauthenticated(path: string) {
+  // const path = (chrome as any).removeBasePath(window.location.pathname);
+  return path === '/login' || path === '/logout' || path === '/logged_out' || path === '/status';
+}
 
+export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
+  private trackUserAgent: boolean = true;
+  private reporter?: Reporter;
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): UsageCollectionSetup {
-    this.debugMode = true;
-    return {
-      registerApp: (appName: string) => {
-        if (this.apps[appName]) {
-          throw Error(`${appName} already registered in Usage Collection plugin.`);
-        }
-        this.apps[appName] = true;
-      },
-    };
-  }
+  public setup({ http }: CoreSetup): UsageCollectionSetup {
+    const localStorage = new Storage(window.localStorage);
+    const debug = true;
 
-  public start(core: CoreStart): UsageCollectionStart {
-    const localStorage = new Storage(window.localStorage) as any;
-    const http = core.http;
-    const debug = this.debugMode;
-    // npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
-
-    const reporter = createReporter({
+    this.reporter = createReporter({
+      localStorage,
       debug,
-      storage: localStorage,
-      async http(report: object) {
-        const url = `/api/ui_metric/report`;
-        await http.post(url, {
-          body: JSON.stringify({ report }),
-        });
-      },
+      fetch: http,
     });
 
     return {
-      reportUiStats: (
-        appName: string,
-        type: UiStatsMetricType,
-        eventNames: string | string[],
-        count?: number
-      ) => {
-        if (this.apps[appName]) {
-          return reporter.reportUiStats(appName, type, eventNames, count);
-        }
-        if (this.debugMode) {
-          throw Error(`${appName} not registered in Usage Collection plugin.`);
-        }
+      allowTrackUserAgent: (allow: boolean) => {
+        this.trackUserAgent = allow;
       },
+      reportUiStats: this.reporter.reportUiStats,
       METRIC_TYPE,
     };
   }
+
+  public start() {
+    if (!this.reporter) {
+      return;
+    }
+    const uiMetricEnabled = true;
+    if (uiMetricEnabled && !isUnauthenticated('')) {
+      this.reporter.start();
+    }
+
+    if (this.trackUserAgent) {
+      this.reporter.reportUserAgent('kibana');
+    }
+  }
+
   public stop() {}
 }
+
+// export const createUiStatsReporter = (appName: string) => (
+//   type: UiStatsMetricType,
+//   eventNames: string | string[],
+//   count?: number
+// ): void => {
+//   if (telemetryReporter) {
+//     return telemetryReporter.reportUiStats(appName, type, eventNames, count);
+//   }
+// };

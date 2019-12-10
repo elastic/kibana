@@ -19,7 +19,7 @@
 
 import { Report } from '@kbn/analytics';
 
-export async function storeReport(internalRepository: any, report: Report) {
+export async function storeReport(internalRepository: any, report: Partial<Report>) {
   const uiStatsMetrics = report.uiStatsMetrics ? Object.entries(report.uiStatsMetrics) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
   return Promise.all([

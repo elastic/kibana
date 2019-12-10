@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { npStart, npSetup } from 'ui/new_platform';
+import { npStart } from 'ui/new_platform';
 
 import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import routes from 'ui/routes';
 import { docTitle } from 'ui/doc_title/doc_title';
 
 // @ts-ignore: allow traversal to fail on x-pack build
-import { UsageCollectionSetup, UsageCollectionStart } from 'src/plugins/usage_collection/public';
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
-
 import { SavedSearchLoader } from '../../../../../src/legacy/core_plugins/kibana/public/discover/types';
 
 export type npCore = typeof npStart.core;
@@ -37,7 +35,7 @@ export interface AppDependencies {
   plugins: AppPlugins;
 }
 
-export interface CoreStart extends npCore {
+export interface Core extends npCore {
   legacyHttp: {
     getClient(): any;
     setClient(client: any): void;
@@ -55,34 +53,19 @@ export interface CoreStart extends npCore {
   };
 }
 
-export interface PluginsStart extends AppPlugins {
+export interface Plugins extends AppPlugins {
   management: {
     sections: typeof management;
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
   };
-  usageCollection: UsageCollectionStart;
-}
-
-// @ts-ignore
-export interface CoreSetup {}
-
-export interface PluginsSetup {
-  usageCollection: UsageCollectionSetup;
-}
-
-export function createPublicSetupShim(): { core: CoreSetup; plugins: PluginsSetup } {
-  const { usageCollection } = npSetup.plugins;
-  return {
-    core: {},
-    plugins: {
-      usageCollection,
-    },
+  uiMetric: {
+    createUiStatsReporter: typeof createUiStatsReporter;
   };
 }
 
-export function createPublicStartShim(): { core: CoreStart; plugins: PluginsStart } {
+export function createPublicShim(): { core: Core; plugins: Plugins } {
   // This is an Angular service, which is why we use this provider pattern
   // to access it within our React app.
   let httpClient: ng.IHttpService;
@@ -91,7 +74,6 @@ export function createPublicStartShim(): { core: CoreStart; plugins: PluginsStar
   let savedSearches: SavedSearchLoader;
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = npStart.core.docLinks;
-  const { usageCollection } = npStart.plugins;
 
   return {
     core: {
@@ -129,7 +111,9 @@ export function createPublicStartShim(): { core: CoreStart; plugins: PluginsStar
         },
         getClient: (): any => savedSearches,
       },
-      usageCollection,
+      uiMetric: {
+        createUiStatsReporter,
+      },
     },
   };
 }

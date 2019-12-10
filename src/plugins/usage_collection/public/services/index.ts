@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const API_BASE_PATH = '/api/ui_metric';
+export { createReporter } from './create_reporter';
