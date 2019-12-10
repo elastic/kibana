@@ -5,7 +5,7 @@
 * <<csp-strict-mode>>
 * <<enabling-ssl>>
 * <<load-balancing>>
-* <<high-availability-kibana>>
+* <<high-availability>>
 
 How you deploy Kibana largely depends on your use case. If you are the only user,
 you can run Kibana on your local machine and configure it to point to whatever
