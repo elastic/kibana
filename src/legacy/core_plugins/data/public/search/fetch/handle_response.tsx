@@ -29,14 +29,14 @@ import { toMountPoint } from '../../../../../../plugins/kibana_react/public';
 export function handleResponse(request: SearchRequest, response: SearchResponse) {
   if (response.timed_out) {
     toastNotifications.addWarning({
-      title: i18n.translate('common.ui.courier.fetch.requestTimedOutNotificationMessage', {
+      title: i18n.translate('data.search.searchSource.fetch.requestTimedOutNotificationMessage', {
         defaultMessage: 'Data might be incomplete because your request timed out',
       }),
     });
   }
 
   if (response._shards && response._shards.failed) {
-    const title = i18n.translate('common.ui.courier.fetch.shardsFailedNotificationMessage', {
+    const title = i18n.translate('data.search.searchSource.fetch.shardsFailedNotificationMessage', {
       defaultMessage: '{shardsFailed} of {shardsTotal} shards failed',
       values: {
         shardsFailed: response._shards.failed,
@@ -44,7 +44,7 @@ export function handleResponse(request: SearchRequest, response: SearchResponse)
       },
     });
     const description = i18n.translate(
-      'common.ui.courier.fetch.shardsFailedNotificationDescription',
+      'data.search.searchSource.fetch.shardsFailedNotificationDescription',
       {
         defaultMessage: 'The data you are seeing might be incomplete or wrong.',
       }

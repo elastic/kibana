@@ -44,7 +44,7 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
       render: (item: ListItem) => {
         const failureSummeryText = getFailureSummaryText(item);
         const collapseLabel = i18n.translate(
-          'common.ui.courier.fetch.shardsFailedModal.tableRowCollapse',
+          'data.search.searchSource.fetch.shardsFailedModal.tableRowCollapse',
           {
             defaultMessage: 'Collapse {rowDescription}',
             description: 'Collapse a row of a table with failures',
@@ -53,7 +53,7 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
         );
 
         const expandLabel = i18n.translate(
-          'common.ui.courier.fetch.shardsFailedModal.tableRowExpand',
+          'data.search.searchSource.fetch.shardsFailedModal.tableRowExpand',
           {
             defaultMessage: 'Expand {rowDescription}',
             description: 'Expand a row of a table with failures',
@@ -81,7 +81,7 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
     },
     {
       field: 'shard',
-      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableColShard', {
+      name: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.tableColShard', {
         defaultMessage: 'Shard',
       }),
       sortable: true,
@@ -90,7 +90,7 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
     },
     {
       field: 'index',
-      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableColIndex', {
+      name: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.tableColIndex', {
         defaultMessage: 'Index',
       }),
       sortable: true,
@@ -98,7 +98,7 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
     },
     {
       field: 'node',
-      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableColNode', {
+      name: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.tableColNode', {
         defaultMessage: 'Node',
       }),
       sortable: true,
@@ -106,7 +106,7 @@ export function ShardFailureTable({ failures }: { failures: ShardFailure[] }) {
     },
     {
       field: 'reason.type',
-      name: i18n.translate('common.ui.courier.fetch.shardsFailedModal.tableColReason', {
+      name: i18n.translate('data.search.searchSource.fetch.shardsFailedModal.tableColReason', {
         defaultMessage: 'Reason',
       }),
       truncateText: true,

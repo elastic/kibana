@@ -57,7 +57,7 @@ export function ShardFailureOpenModalButton({ request, response, title }: Props)
         data-test-subj="openShardFailureModalBtn"
       >
         <FormattedMessage
-          id="common.ui.courier.fetch.shardsFailedModal.showDetails"
+          id="data.search.searchSource.fetch.shardsFailedModal.showDetails"
           defaultMessage="Show details"
           description="Open the modal to show details"
         />

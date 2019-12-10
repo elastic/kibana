@@ -27,11 +27,14 @@ export const noOpSearchStrategy: SearchStrategyProvider = {
   search: () => {
     const searchError = new SearchError({
       status: '418', // "I'm a teapot" error
-      title: i18n.translate('common.ui.courier.noSearchStrategyRegisteredErrorMessageTitle', {
-        defaultMessage: 'No search strategy registered',
-      }),
+      title: i18n.translate(
+        'data.search.searchSource.noSearchStrategyRegisteredErrorMessageTitle',
+        {
+          defaultMessage: 'No search strategy registered',
+        }
+      ),
       message: i18n.translate(
-        'common.ui.courier.noSearchStrategyRegisteredErrorMessageDescription',
+        'data.search.searchSource.noSearchStrategyRegisteredErrorMessageDescription',
         {
           defaultMessage: `Couldn't find a search strategy for the search request`,
         }
