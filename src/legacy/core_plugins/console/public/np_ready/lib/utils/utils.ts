@@ -86,9 +86,8 @@ export function expandLiteralStrings(data: string) {
       const firstDoubleQuoteIdx = string.indexOf('"');
       const colonAndAnySpacing = string.slice(0, firstDoubleQuoteIdx);
       const rawStringifiedValue = string.slice(firstDoubleQuoteIdx, string.length);
-      const jsonValue = JSON.parse(rawStringifiedValue)
-        .replace('^\s*\n', '') // prettier-ignore
-        .replace('\n\s*$', ''); // prettier-ignore
+      // Remove one level of JSON stringificaiton
+      const jsonValue = JSON.parse(rawStringifiedValue);
       return `${colonAndAnySpacing}"""${jsonValue}"""`;
     } else {
       return string;
