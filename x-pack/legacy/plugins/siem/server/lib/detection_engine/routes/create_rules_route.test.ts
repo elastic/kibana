@@ -22,11 +22,15 @@ import {
 import { DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 
 describe('create_rules', () => {
-  let { server, alertsClient, actionsClient } = createMockServer();
+  let { server, alertsClient, actionsClient, elasticsearch } = createMockServer();
 
   beforeEach(() => {
     jest.resetAllMocks();
-    ({ server, alertsClient, actionsClient } = createMockServer());
+    ({ server, alertsClient, actionsClient, elasticsearch } = createMockServer());
+    elasticsearch.getCluster = jest.fn().mockImplementation(() => ({
+      callWithRequest: jest.fn().mockImplementation(() => true),
+    }));
+
     createRulesRoute(server);
   });
 
@@ -93,27 +97,6 @@ describe('create_rules', () => {
         payload: {
           ...noType,
           type: 'query',
-        },
-      };
-      const { statusCode } = await server.inject(request);
-      expect(statusCode).toBe(200);
-    });
-
-    test('returns 200 if type is filter', async () => {
-      alertsClient.find.mockResolvedValue(getFindResult());
-      alertsClient.get.mockResolvedValue(getResult());
-      actionsClient.create.mockResolvedValue(createActionResult());
-      alertsClient.create.mockResolvedValue(getResult());
-      // Cannot type request with a ServerInjectOptions as the type system complains
-      // about the property filter involving Hapi types, so I left it off for now
-      const { language, query, type, ...noType } = typicalPayload();
-      const request = {
-        method: 'POST',
-        url: DETECTION_ENGINE_RULES_URL,
-        payload: {
-          ...noType,
-          type: 'filter',
-          filter: {},
         },
       };
       const { statusCode } = await server.inject(request);
