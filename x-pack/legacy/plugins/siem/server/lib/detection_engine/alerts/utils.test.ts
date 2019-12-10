@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { savedObjectsClientMock, loggingServiceMock } from 'src/core/server/mocks';
 
 import { Logger } from '../../../../../../../../src/core/server';
 import {
@@ -36,15 +36,7 @@ import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
 import { OutputRuleAlertRest } from './types';
 import { Signal } from '../../types';
 
-const mockLogger: Logger = {
-  log: jest.fn(),
-  trace: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  fatal: jest.fn(),
-};
+const mockLogger: Logger = loggingServiceMock.createLogger();
 
 const mockService = {
   callCluster: jest.fn(),
