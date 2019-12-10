@@ -38,7 +38,7 @@ export const getKibanaFrameworkAdapter = (
   );
   // TODO: fix the typing and remove this ignore comment
   // @ts-ignore this key has an additional typing that we weren't handling before
-  const canSave: boolean = capabilities?.uptime?.save || false;
+  const canSave: boolean = capabilities?.uptime?.save ?? false;
   const props: UptimeAppProps = {
     autocomplete,
     basePath: basePath.get(),

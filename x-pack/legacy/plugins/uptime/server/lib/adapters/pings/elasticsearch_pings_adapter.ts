@@ -80,7 +80,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
       aggregations: aggs,
     } = await this.database.search(request, params);
 
-    const locations = aggs?.locations || { buckets: [{ key: 'N/A', doc_count: 0 }] };
+    const locations = aggs?.locations ?? { buckets: [{ key: 'N/A', doc_count: 0 }] };
 
     const pings: Ping[] = hits.map(({ _id, _source }: any) => {
       const timestamp = _source['@timestamp'];
@@ -247,7 +247,7 @@ export class ElasticsearchPingsAdapter implements UMPingsAdapter {
     const result = await this.database.search(request, params);
     const buckets: HistogramQueryResult[] = result?.aggregations?.timeseries?.buckets || [];
     const histogram = buckets.map(bucket => {
-      const x: number = bucket?.key || 0;
+      const x: number = bucket?.key ?? 0;
       const downCount: number = bucket?.down?.['doc_count'] ?? 0;
       const upCount: number = bucket?.up?.['doc_count'] ?? 0;
       return {

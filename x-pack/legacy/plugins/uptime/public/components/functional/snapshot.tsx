@@ -65,8 +65,8 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
     <SnapshotHeading down={count.down || 0} total={count.total || 0} />
     <EuiSpacer size="xs" />
     <DonutChart
-      up={count.up || 0}
-      down={count.down || 0}
+      up={count.up}
+      down={count.down}
       height={SNAPSHOT_CHART_HEIGHT}
       width={SNAPSHOT_CHART_WIDTH}
     />

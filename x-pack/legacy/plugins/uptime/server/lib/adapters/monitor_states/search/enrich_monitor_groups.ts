@@ -349,8 +349,8 @@ const getHistogramForMonitors = async (
 
   const buckets: any[] = result?.aggregations?.['by_id']?.buckets ?? [];
   return buckets.reduce((map: { [key: string]: any }, item: any) => {
-    const points = (item?.histogram?.buckets || []).map((histogram: any) => {
-      const status = (histogram?.status?.buckets || []).reduce(
+    const points = (item?.histogram?.buckets ?? []).map((histogram: any) => {
+      const status = (histogram?.status?.buckets ?? []).reduce(
         (statuses: { up: number; down: number }, bucket: any) => {
           if (bucket.key === 'up') {
             statuses.up = bucket.doc_count;
@@ -380,4 +380,4 @@ const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
 };
 
 type SortChecks = (check: Check) => string[];
-const checksSortBy = (check: Check) => [check?.observer?.geo?.name || '', check?.monitor?.ip || ''];
+const checksSortBy = (check: Check) => [check?.observer?.geo?.name ?? '', check?.monitor?.ip ?? ''];

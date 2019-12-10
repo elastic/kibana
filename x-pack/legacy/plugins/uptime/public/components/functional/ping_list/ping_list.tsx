@@ -106,7 +106,7 @@ export const PingListComponent = ({
       value: 'down',
     },
   ];
-  const locations = data?.allPings?.locations || [];
+  const locations = data?.allPings?.locations ?? [];
   const locationOptions = !locations
     ? [AllLocationOption]
     : [AllLocationOption].concat(

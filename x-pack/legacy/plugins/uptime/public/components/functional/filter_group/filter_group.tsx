@@ -30,9 +30,9 @@ export const FilterGroupComponent = ({
   data,
   onFilterUpdate,
 }: Props) => {
-  const locations = data?.filterBar?.locations || [];
-  const ports = data?.filterBar?.ports || [];
-  const schemes = data?.filterBar?.schemes || [];
+  const locations = data?.filterBar?.locations ?? [];
+  const ports = data?.filterBar?.ports ?? [];
+  const schemes = data?.filterBar?.schemes ?? [];
 
   let filterKueries: Map<string, string[]>;
   try {

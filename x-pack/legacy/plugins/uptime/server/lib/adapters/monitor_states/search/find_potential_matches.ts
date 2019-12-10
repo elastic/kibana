@@ -29,7 +29,7 @@ export const findPotentialMatches = async (
 
   const checkGroups = new Set<string>();
   const monitorIds: string[] = [];
-  (queryResult?.aggregations?.monitors?.buckets || []).forEach((b: any) => {
+  (queryResult?.aggregations?.monitors?.buckets ?? []).forEach((b: any) => {
     const monitorId = b.key.monitor_id;
     monitorIds.push(monitorId);
 
