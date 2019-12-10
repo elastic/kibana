@@ -7,19 +7,17 @@
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import { ActionType } from '../../../../types';
 
-interface TypeFilterProps {
-  options: Array<{
-    value: string;
-    name: string;
-  }>;
-  onChange?: (selectedTags: string[]) => void;
+interface ActionTypeFilterProps {
+  actionTypes: ActionType[];
+  onChange?: (selectedActionTypeIds: string[]) => void;
 }
 
-export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
-  options,
+export const ActionTypeFilter: React.FunctionComponent<ActionTypeFilterProps> = ({
+  actionTypes,
   onChange,
-}: TypeFilterProps) => {
+}: ActionTypeFilterProps) => {
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -44,25 +42,25 @@ export const TypeFilter: React.FunctionComponent<TypeFilterProps> = ({
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertsList.typeFilterLabel"
-              defaultMessage="Type"
+              id="xpack.triggersActionsUI.sections.alertsList.actionTypeFilterLabel"
+              defaultMessage="Action Type"
             />
           </EuiFilterButton>
         }
       >
         <div className="euiFilterSelect__items">
-          {options.map((item, index) => (
+          {actionTypes.map(item => (
             <EuiFilterSelectItem
-              key={index}
+              key={item.id}
               onClick={() => {
-                const isPreviouslyChecked = selectedValues.includes(item.value);
+                const isPreviouslyChecked = selectedValues.includes(item.id);
                 if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter(val => val !== item.value));
+                  setSelectedValues(selectedValues.filter(val => val !== item.id));
                 } else {
-                  setSelectedValues(selectedValues.concat(item.value));
+                  setSelectedValues(selectedValues.concat(item.id));
                 }
               }}
-              checked={selectedValues.includes(item.value) ? 'on' : undefined}
+              checked={selectedValues.includes(item.id) ? 'on' : undefined}
             >
               {item.name}
             </EuiFilterSelectItem>

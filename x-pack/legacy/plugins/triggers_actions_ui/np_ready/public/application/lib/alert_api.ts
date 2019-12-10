@@ -17,11 +17,13 @@ export async function loadAlerts({
   page,
   searchText,
   typesFilter,
+  actionTypesFilter,
 }: {
   http: HttpServiceBase;
   page: { index: number; size: number };
   searchText?: string;
   typesFilter?: string[];
+  actionTypesFilter?: string[];
 }): Promise<{
   page: number;
   perPage: number;
@@ -31,6 +33,15 @@ export async function loadAlerts({
   const filters = [];
   if (typesFilter && typesFilter.length) {
     filters.push(`alert.attributes.alertTypeId:(${typesFilter.join(' or ')})`);
+  }
+  if (actionTypesFilter && actionTypesFilter.length) {
+    filters.push(
+      [
+        '(',
+        actionTypesFilter.map(id => `alert.attributes.actions:{ actionTypeId:${id} }`).join(' OR '),
+        ')',
+      ].join('')
+    );
   }
   return await http.get(`${BASE_ALERT_API_PATH}/_find`, {
     query: {

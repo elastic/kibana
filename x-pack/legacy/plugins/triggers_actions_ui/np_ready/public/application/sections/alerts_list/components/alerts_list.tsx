@@ -8,16 +8,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useEffect, useState } from 'react';
 // @ts-ignore: EuiSearchBar not exported in TypeScript
-import { EuiBasicTable, EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiButton, EuiFilterButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 
 import { AlertsContext } from '../../../context/alerts_context';
 import { useAppDependencies } from '../../../app_dependencies';
-import { Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
+import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_add';
 import { BulkActionPopover } from './bulk_action_popover';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { TypeFilter } from './type_filter';
+import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
+import { loadActionTypes } from '../../../lib/action_connector_api';
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
@@ -26,6 +28,7 @@ export const AlertsList: React.FunctionComponent = () => {
   } = useAppDependencies();
   const canDelete = capabilities.get().alerting.delete;
 
+  const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [data, setData] = useState<AlertTableItem[]>([]);
@@ -37,12 +40,13 @@ export const AlertsList: React.FunctionComponent = () => {
   const [page, setPage] = useState<Pagination>({ index: 0, size: 10 });
   const [searchText, setSearchText] = useState<string | undefined>(undefined);
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
+  const [actionTypesFilter, setActionTypesFilter] = useState<string[]>([]);
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
   useEffect(() => {
     loadAlertsData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, searchText, typesFilter]);
+  }, [page, searchText, typesFilter, actionTypesFilter]);
 
   useEffect(() => {
     (async () => {
@@ -69,6 +73,23 @@ export const AlertsList: React.FunctionComponent = () => {
   }, []);
 
   useEffect(() => {
+    (async () => {
+      try {
+        const result = await loadActionTypes({ http });
+        setActionTypes(result);
+      } catch (e) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.unableToLoadActionTypesMessage',
+            { defaultMessage: 'Unable to load action types' }
+          ),
+        });
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     // Avoid flickering before alert types load
     if (typeof alertTypesIndex === 'undefined') {
       return;
@@ -86,7 +107,13 @@ export const AlertsList: React.FunctionComponent = () => {
   async function loadAlertsData() {
     setIsLoadingAlerts(true);
     try {
-      const alertsResponse = await loadAlerts({ http, page, searchText, typesFilter });
+      const alertsResponse = await loadAlerts({
+        http,
+        page,
+        searchText,
+        typesFilter,
+        actionTypesFilter,
+      });
       setAlerts(alertsResponse.data);
       setTotalItemCount(alertsResponse.total);
     } catch (e) {
@@ -185,6 +212,10 @@ export const AlertsList: React.FunctionComponent = () => {
                     name: alertType.name,
                   }))
                   .sort((a, b) => a.name.localeCompare(b.name))}
+              />,
+              <ActionTypeFilter
+                actionTypes={actionTypes}
+                onChange={(ids: string[]) => setActionTypesFilter(ids)}
               />,
               <EuiButton
                 key="create-alert"

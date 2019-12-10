@@ -59,6 +59,7 @@ describe('loadAlerts', () => {
         "/api/alert/_find",
         Object {
           "query": Object {
+            "default_search_operator": "AND",
             "filter": undefined,
             "page": 1,
             "per_page": 10,
@@ -86,18 +87,19 @@ describe('loadAlerts', () => {
         "/api/alert/_find",
         Object {
           "query": Object {
+            "default_search_operator": "AND",
             "filter": undefined,
             "page": 1,
             "per_page": 10,
             "search": "apples",
-            "search_fields": "name",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
           },
         },
       ]
     `);
   });
 
-  test('should call find API with tagsFilter', async () => {
+  test('should call find API with actionTypesFilter', async () => {
     const resolvedValue = {
       page: 1,
       perPage: 10,
@@ -108,7 +110,7 @@ describe('loadAlerts', () => {
 
     const result = await loadAlerts({
       http,
-      tagsFilter: ['foo', 'bar'],
+      actionTypesFilter: ['foo', 'bar'],
       page: { index: 0, size: 10 },
     });
     expect(result).toEqual(resolvedValue);
@@ -117,7 +119,8 @@ describe('loadAlerts', () => {
         "/api/alert/_find",
         Object {
           "query": Object {
-            "filter": "alert.attributes.tags:(foo and bar)",
+            "default_search_operator": "AND",
+            "filter": "(alert.attributes.actions:{ actionTypeId:foo } OR alert.attributes.actions:{ actionTypeId:bar })",
             "page": 1,
             "per_page": 10,
             "search": undefined,
@@ -148,6 +151,7 @@ describe('loadAlerts', () => {
         "/api/alert/_find",
         Object {
           "query": Object {
+            "default_search_operator": "AND",
             "filter": "alert.attributes.alertTypeId:(foo or bar)",
             "page": 1,
             "per_page": 10,
@@ -159,7 +163,7 @@ describe('loadAlerts', () => {
     `);
   });
 
-  test('should call find API with tagsFilter and typesFilter', async () => {
+  test('should call find API with actionTypesFilter and typesFilter', async () => {
     const resolvedValue = {
       page: 1,
       perPage: 10,
@@ -170,7 +174,7 @@ describe('loadAlerts', () => {
 
     const result = await loadAlerts({
       http,
-      tagsFilter: ['foo', 'baz'],
+      actionTypesFilter: ['foo', 'baz'],
       typesFilter: ['foo', 'bar'],
       page: { index: 0, size: 10 },
     });
@@ -180,7 +184,8 @@ describe('loadAlerts', () => {
         "/api/alert/_find",
         Object {
           "query": Object {
-            "filter": "alert.attributes.tags:(foo and baz) and alert.attributes.alertTypeId:(foo or bar)",
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.alertTypeId:(foo or bar) and (alert.attributes.actions:{ actionTypeId:foo } OR alert.attributes.actions:{ actionTypeId:baz })",
             "page": 1,
             "per_page": 10,
             "search": undefined,
@@ -213,11 +218,12 @@ describe('loadAlerts', () => {
         "/api/alert/_find",
         Object {
           "query": Object {
-            "filter": "alert.attributes.tags:(foo and baz) and alert.attributes.alertTypeId:(foo or bar)",
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.alertTypeId:(foo or bar)",
             "page": 1,
             "per_page": 10,
             "search": "apples",
-            "search_fields": "name",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
           },
         },
       ]
