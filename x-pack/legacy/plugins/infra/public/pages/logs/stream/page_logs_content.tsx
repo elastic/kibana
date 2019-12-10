@@ -46,7 +46,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
   const derivedIndexPattern = createDerivedIndexPattern('logs');
   return (
     <>
-      <LogHighlightsBridge indexPattern={derivedIndexPattern} />
+      <LogHighlightsBridge />
       <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
       <WithLogPositionUrlState />
       <WithLogMinimapUrlState />
@@ -132,12 +132,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                 <WithSummary>
                   {({ buckets }) => (
                     <WithLogPosition>
-                      {({
-                        isAutoReloading,
-                        jumpToTargetPosition,
-                        visibleMidpointTime,
-                        visibleTimeInterval,
-                      }) => (
+                      {({ jumpToTargetPosition, visibleMidpointTime, visibleTimeInterval }) => (
                         <WithStreamItems>
                           {({ isReloading }) => (
                             <LogMinimap

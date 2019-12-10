@@ -56,7 +56,7 @@ export const WithLogFilter: React.FC<WithLogFilterProps> = ({ children, indexPat
 
 type LogFilterUrlState = LogFilterStateParams['filterQuery'];
 
-type WithLogFilterUrlStateProps = WithLogFilterProps;
+type WithLogFilterUrlStateProps = Omit<WithLogFilterProps, 'children'>;
 
 export const WithLogFilterUrlState: React.FC<WithLogFilterUrlStateProps> = ({ indexPattern }) => (
   <WithLogFilter indexPattern={indexPattern}>

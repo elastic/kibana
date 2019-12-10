@@ -26,7 +26,6 @@ export const WithSummary = connect((state: State) => ({
       start: number | null;
       end: number | null;
     }>;
-    filterQuery: string | null;
     visibleMidpointTime: number | null;
   }) => {
     const { intervalSize } = useContext(LogViewConfiguration.Context);
