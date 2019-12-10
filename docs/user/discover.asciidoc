@@ -13,9 +13,9 @@ image::images/Discover-Start.png[Discover]
 With *Discover*, you can:
 
 * Access every document in every index that matches the selected index pattern
-* Submit search queries and filter the search results
+* Search your data and filter the search results
 * Get field-level details about the documents that match your search
-* View what occurred just before and after an event
+* View what events occurred just before and after a document
 
 
 [float]
@@ -24,7 +24,7 @@ With *Discover*, you can:
 The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>
 to define the data to work with. The current index pattern and options for 
 changing it are in the upper left.
-If you haven't yet created an index pattern, try downloading a <<add-sample-data, sample data set>>, 
+If you haven't yet created an index pattern, you can download a <<add-sample-data, sample data set>>, 
 which has pre-built index patterns. 
 
 [float]
@@ -32,31 +32,33 @@ which has pre-built index patterns.
 
 By default, *Discover* shows data for the last 15 minutes.
 If you have a time-based index, and no data displays,
-you might need to increase the time range. Use the <<set-time-filter, time filter>> in the upper right
-to specify a common or recently-used time range, a relative time
+you might need to increase the time range. Using the <<set-time-filter, time filter>> in the upper right,
+you can specify a common or recently-used time range, a relative time
 from now, or an absolute time range.
 
 [float]
 === Search your data
 
-To search your data,
-enter your search criteria in the query bar.
-By default, you'll use the <<kuery-query, Kibana Query language>>,
-which offers a simplified query syntax and autocomplete. 
+You have your data, and now you start asking questions about it. 
+You can search for insights into your data using the <<kuery-query, Kibana Query language>>,
+which offers a simplified query syntax that allows boolean operators, wildcards, and field filtering. 
 For example, if 
 you search for `day_of_week : Friday`, you'll get a list of all documents 
-in which `day_of_week` is set to `Friday`. 
+in which `day_of_week` is set to `Friday`. If you prefer 
+Lucene query syntax, you can switch to it using the KQL menu. 
 
 To save a search, so you can use it in visualizations and dashboards,
-click *Save* in the menu bar. You can open the search at a later date by clicking *Open*.
+click *Save* in the menu bar. You can open a saved search at any time
+by clicking *Open*.
 
 [float]
 === Filter by field
 
-If you click on a name in the field list, you'll see 
+You can filter your search results to find exactly what you want.
+When you click on a name in the field list, you'll see 
 the top five values for the field, the number of documents that contain the field, 
 and the percentage of documents that contain each value. From this view, you can
-use the (+) magnifier icon to quickly filter for all 
+use the (+) magnifier icon to quickly find all 
 documents that have that value or (-) to exclude all 
 documents with that value. See <<field-filter, filtering by field>> for more filter options.
 
@@ -65,13 +67,12 @@ image::images/filter-field.png[height=317]
 
 
 [float]
-=== Modify the document table
+=== View field-level details
 
-Most likely, you're only interested in some of the fields of each document. 
-You can add fields add and remove fields from the document table
-by clicking *add* or *remove* next to the field 
-name in field list. 
-See <<document-data, Viewing document data>> for details.
+Want to view the field-level details? You can expand a document to 
+examine its contents either formatted or as JSON.
+From the table your, you can further refine your search with a single click.
+See <<document-data, Viewing document data>> for more options.
 
 [float]
 === View a document in context
@@ -80,6 +81,14 @@ Suppose you're troubleshooting your data, and you've narrowed down your results 
 Now you want to to see all the documents that occurred just before and after the 
 document that you are looking at. You can do that by expanding the document and 
 clicking <<document-context, View surrounding documents>>.
+
+[float]
+=== Share your search
+
+Finally, its time to share your data.  You can export your data as a CSV filterEditor
+or create direct link to share.  The *Share* action is in the menu bar..
+
+
 
 
 --

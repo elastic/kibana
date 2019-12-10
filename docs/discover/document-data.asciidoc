@@ -3,42 +3,42 @@
 
 When you submit a search query in *Discover*, the most recent documents that match the query
 are listed in the documents table. 
-From this table, you can dig into and understand your data 
-before you visualize it. This saves you time in creating your visualizations 
-and helps improve the quality of your dashboards.
+By default, the table includes columns for 
+the time field and the document _source, or all fields and values in the document.
+Although the table contains all the details, it can be difficult to parse the default format.
+You can narrow the context of the table to reveal hidden insights and patterns.
 
 [float]
 [[sorting]]
-=== Add, sort, and remove fields from the document table
+=== Add and remove fields from the document table
 
-By default, the document table includes columns for two fields: the 
-localized version of the time field for the selected index 
-pattern and the document _source. Use the following commands to 
-tailor the documents table to meet your needs.
+Use the following commands to 
+tailor the documents table to show specific events.
+
+Click the 
+arrow to expand the row to view the details in table or JSON format.
 
 [horizontal]
 Add a field column:: 
 Hover over the list of *Available fields* and then click *add* next to each field you want include in the table.
-The first column you add replaces the _source column. 
+The first column you add replaces the _source column.  
 Change sort order:: By default, columns are sorted by the values in the field.  
 If a time field is configured for the current index pattern, 
 the documents are sorted in reverse chronological order.  To change the sort order, hover over the column 
 and click image:images/sort-icon.png[] 
-Move a field column:: Hover over the column header and click the move left or move right icon image:images/move-icon.png[]. 
+Move a field column:: Hover over the column header and click the move left (<<) or move right icon (>>). 
 Remove&nbsp;a&nbsp;field&nbsp;column&nbsp;:: Hover over the list of *Specified fields* 
 and then click *remove* next to each. 
 Or, use the control in the column header.
 
 [float]
 === Drill down into field-level details
-To view the field data for a document, click the Expand icon.
-You can view field data in either Table or JSON format. 
-
+To view the document data in either Table for JSON format, click the expand icon (>).
 The expanded view provides these options for viewing your document:
 
 * For filtering options, hover over a row in the Table view.
 
-* View the events that surround your document, click <<document-context, Context view>>
+* To view the events that surround your document, click <<document-context, Context view>>
 For example, you might want to see the 10 documents that occurred 
 immediately before and after your event.  
 
@@ -52,8 +52,8 @@ image::images/Expanded-Document.png[]
 [float]
 === Configure the number of documents to show
 
-To configure the number of documents shown
-in the table, set the `discover:sampleSize` property in <<advanced-options,
+By default, the documents table includes the 500 most recent documents that 
+match the query. To change this number, set the `discover:sampleSize` property in <<advanced-options,
 Advanced Settings>>.
 
 

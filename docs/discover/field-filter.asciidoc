@@ -64,6 +64,7 @@ You'll see a list of fields from the
 index pattern that you are currently querying against.
 
 . Select a field. 
+
 ////
 +
 [role="screenshot"]
@@ -81,7 +82,7 @@ image::images/add_filter_field.png[]
 `is not between`:: The value for the field is not in the given range.
 `exists`:: Any value is present for the field.
 `does not exist`:: No value is present for the field.
-. Choose the values for your filter. 
+. Choose values for your filter. 
 +
 Values from your indices may be suggested
 as selections if you are filtering against an aggregatable field.
@@ -103,19 +104,21 @@ one of the actions in the dropdown menu.
 To apply a filter action to all of the applied filters,
 click the *Actions* icon and select the action.
 
-*Pin across all apps.* Persist filter
+* *Pin across all apps.* Persist filter
 when you switch contexts in Kibana. For example, you can pin a filter
 in *Discover* and it remains in place when you switch to *Visualize*.
 A filter is based on a particular index field--if the indices being
 searched do not contain the field in a pinned filter, it has no effect.
 
-*Edit filter.* Edit the
+* *Edit filter.* Edit the
 filter definition and label.
 Exclude results :: Switch from a positive
 filter to a negative filter and vice versa.
-Temporarily disable :: Disable the filter without
+
+* *Temporarily disable.* Disable the filter without
 removing it. Click again to reenable the filter.
-Delete:: Delete the filter.
+
+* *Delete.* Delete the filter.
 
 
 [float]
