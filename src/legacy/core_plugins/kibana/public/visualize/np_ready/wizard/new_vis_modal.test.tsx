@@ -29,6 +29,7 @@ jest.mock('../legacy_imports', () => ({
 }));
 
 import { NewVisModal } from './new_vis_modal';
+import { SavedObjectsStart } from 'kibana/public';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -76,6 +77,7 @@ describe('NewVisModal', () => {
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
         uiSettings={uiSettings}
+        savedObjects={{} as SavedObjectsStart}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -89,6 +91,7 @@ describe('NewVisModal', () => {
         visTypesRegistry={visTypes}
         addBasePath={addBasePath}
         uiSettings={uiSettings}
+        savedObjects={{} as SavedObjectsStart}
       />
     );
     expect(wrapper.find('[data-test-subj="visType-vis"]').exists()).toBe(true);
@@ -104,6 +107,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
@@ -121,6 +125,7 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-vis"]');
@@ -138,6 +143,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          savedObjects={{} as SavedObjectsStart}
         />
       );
       const searchBox = wrapper.find('input[data-test-subj="filterVisType"]');
@@ -156,6 +162,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          savedObjects={{} as SavedObjectsStart}
         />
       );
       expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(false);
@@ -170,6 +177,7 @@ describe('NewVisModal', () => {
           visTypesRegistry={visTypes}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          savedObjects={{} as SavedObjectsStart}
         />
       );
       expect(wrapper.find('[data-test-subj="visType-visExp"]').exists()).toBe(true);
