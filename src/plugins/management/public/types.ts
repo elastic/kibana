@@ -55,12 +55,14 @@ export type RegisterSection = (section: {
   icon?: string; // URL to image file; fallback if no `euiIconType`
 }) => ISection;
 
-type RegisterManagementApp = (managementApp: {
+export interface RegisterManagementAppArgs {
   id: string;
   title: string;
   mount: ManagementSectionMount;
   order?: number;
-}) => ManagementApp;
+}
+
+export type RegisterManagementApp = (managementApp: RegisterManagementAppArgs) => ManagementApp;
 
 type Unmount = () => Promise<void> | void;
 

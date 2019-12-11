@@ -25,7 +25,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 // export * from './plugin';
-export { ManagementSetup, ManagementStart } from './types';
-
-// remove after removal of angular management code
-export { ManagementSections } from './ManagementSections';
+export {
+  ManagementSetup,
+  ManagementStart,
+  ISection,
+  ManagementApp,
+  RegisterManagementApp,
+} from './types';

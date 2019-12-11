@@ -18,6 +18,7 @@
  */
 
 import { Section } from './Section';
+import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { Capabilities } from '../../../core/public';
 
 export class ManagementSections {
@@ -27,17 +28,18 @@ export class ManagementSections {
   }
 
   // todo verify input,
-  private register(section: {
-    id: string;
-    title: string;
-    order?: number;
-    euiIconType?: string; // takes precedence over `icon` property.
-    icon?: string; // URL to image file; fallback if no `euiIconType`
-  }) {
-    // console.log('about to register', this, this.sections);
-    const newSection = new Section(section);
-    this.sections.push(newSection);
-    return newSection;
+  private register(registerLegacyApp: KibanaLegacySetup['registerLegacyApp']) {
+    return (section: {
+      id: string;
+      title: string;
+      order?: number;
+      euiIconType?: string; // takes precedence over `icon` property.
+      icon?: string; // URL to image file; fallback if no `euiIconType`
+    }) => {
+      const newSection = new Section(section, registerLegacyApp);
+      this.sections.push(newSection);
+      return newSection;
+    };
   }
   private get(sectionId: Section['id']) {
     return this.sections.find(section => section.id === sectionId);
@@ -51,11 +53,11 @@ export class ManagementSections {
     };
   }
 
-  public setup = {
-    register: this.register.bind(this),
+  public setup = (kibanaLegacy: KibanaLegacySetup) => ({
+    register: this.register.bind(this)(kibanaLegacy.registerLegacyApp),
     get: this.get.bind(this),
     getAvailable: this.getAvailable.bind(this),
-  };
+  });
 
   public start = (capabilities: Capabilities) => ({
     getAvailable: this.getAvailable.bind(this)(capabilities),

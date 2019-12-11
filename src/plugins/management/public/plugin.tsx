@@ -19,7 +19,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { ManagementSetup, ManagementStart } from './types';
-import { ManagementSections } from './ManagementSections';
+import { ManagementSections } from './management_sections';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
@@ -27,10 +27,10 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
     // public setup(core: CoreSetup) {
-    console.log('ManagementPlugin setup');
+    // console.log('ManagementPlugin setup');
 
-    console.log('core', core);
-    console.log(kibana_legacy);
+    // console.log('core', core);
+    // console.log(kibana_legacy);
     /*
     kibana_legacy.registerLegacyApp({
       id: 'management/foo',
@@ -55,13 +55,13 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     */
 
     return {
-      sections: this.managementSections.setup,
+      sections: this.managementSections.setup(kibana_legacy),
     };
   }
 
   public start(core: CoreStart) {
-    console.log('ManagementPlugin start');
-    console.log('core', core);
+    // console.log('ManagementPlugin start');
+    // console.log('core', core);
     return {
       sections: this.managementSections.start(core.application.capabilities),
     };

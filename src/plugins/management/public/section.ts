@@ -17,55 +17,40 @@
  * under the License.
  */
 
-import { ManagementApp, ManagementSectionMount, CreateSection, ISection } from './types';
+import { ManagementApp, CreateSection, ISection, RegisterManagementAppArgs } from './types';
+import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
 export class Section implements ISection {
   public readonly id: string = '';
   public readonly title: string = '';
   public readonly apps: ManagementApp[] = [];
-  // registerApp: RegisterManagementApp;
   public readonly order?: number;
   public readonly euiIconType?: string;
   public readonly icon?: string;
+  private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
 
-  constructor(section: CreateSection) {
+  constructor(section: CreateSection, registerLegacyApp: KibanaLegacySetup['registerLegacyApp']) {
     this.id = section.id;
     this.title = section.title;
     this.order = section.order;
     this.euiIconType = section.euiIconType;
     this.icon = section.icon;
+    this.registerLegacyApp = registerLegacyApp;
   }
 
-  /*
-  registerApp({
-    id,
-    title,
-    order,
-    mount,
-  }: {
-    id: string;
-    title: string;
-    order?: number;
-    mount: ManagementSectionMount;
-  }): Section {
-    this.apps.push( new ManagementApp())
-  }
-  */
-  registerApp({
-    id,
-    title,
-    order,
-    mount,
-    url,
-  }: {
-    id: string;
-    title: string;
-    order?: number;
-    mount: ManagementSectionMount;
-    url?: string; // only for transitioning legacy management migration
-  }) {
+  // todo create class
+  registerApp({ id, title, order, mount }: RegisterManagementAppArgs): ManagementApp {
     // this.apps.push(new ManagementApp(app));
-    const app = { id, title, sectionId: this.id, order, basePath: 'basePath', mount, url };
+    this.registerLegacyApp({
+      id: `management/${this.id}/${id}`,
+      title,
+      mount: async (appMountContext, params) => {
+        console.log('abstract mount', appMountContext, params);
+        return await mount(appMountContext, { sectionBasePath: '', ...params });
+      },
+    });
+
+    const app = { id, title, sectionId: this.id, order, basePath: 'basePath', mount };
     this.apps.push(app);
     return app;
   }

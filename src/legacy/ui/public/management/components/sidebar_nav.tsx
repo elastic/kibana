@@ -21,60 +21,127 @@ import { EuiIcon, EuiSideNav, IconType, EuiScreenReaderOnly } from '@elastic/eui
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// import { IndexedArray } from 'ui/indexed_array';
+import {
+  ManagementApp,
+  ISection as ManagementSection,
+} from '../../../../../plugins/management/public';
 
-/*
-interface Subsection {
+interface LegacySection extends LegacyApp {
+  items: LegacyApp[];
+}
+
+interface LegacyApp {
   disabled: boolean;
   visible: boolean;
   id: string;
   display: string;
   url?: string;
-  icon?: IconType;
-}
-*/
-
-interface Subsection {
-  // disabled: boolean;
-  // visible: boolean;
-  id: string;
-  title: string;
-  url?: string;
   euiIconType?: IconType;
+  icon?: string;
 }
 
-interface Section extends Subsection {
-  apps: Subsection[];
+interface NavApp {
+  [key: string]: unknown;
 }
 
-// const sectionVisible = (section: Subsection) => !section.disabled && section.visible;
-const sectionToNav = (selectedId: string) => ({ title, id, url, euiIconType }: Subsection) => ({
-  id,
-  name: title,
-  icon: euiIconType ? <EuiIcon type={euiIconType} /> : null,
-  isSelected: selectedId === id,
-  href: url,
-  'data-test-subj': id,
-});
-
-export const sideNavItems = (sections: Section[], selectedId: string) =>
-  sections
-    // .filter(sectionVisible)
-    // .filter(section => section.items.filter(sectionVisible).length)
-    .map(section => ({
-      // items: section.items.filter(sectionVisible).map(sectionToNav(selectedId)),
-      items: section.apps.map(sectionToNav(selectedId)),
-      ...sectionToNav(selectedId)(section),
-    }));
+interface NavSection extends NavApp {
+  items: NavApp[];
+}
 
 interface SidebarNavProps {
-  sections: Section[];
+  sections: ManagementSection[];
+  legacySections: LegacySection[];
   selectedId: string;
 }
 
 interface SidebarNavState {
   isSideNavOpenOnMobile: boolean;
 }
+
+const managementSectionOrAppToNav = (appOrSection: ManagementApp | ManagementSection) => ({
+  id: appOrSection.id,
+  name: appOrSection.title,
+  'data-test-subj': appOrSection.id,
+});
+
+const managementSectionToNavSection = (section: ManagementSection) => ({
+  // todo support icon as url path
+  icon: section.euiIconType ? <EuiIcon type={section.euiIconType} /> : null,
+  ...managementSectionOrAppToNav(section),
+});
+
+const managementAppToNavItem = (selectedId?: string, parentId?: string) => (
+  app: ManagementApp
+) => ({
+  isSelected: selectedId === app.id,
+  href: `#/management/${parentId}/${app.id}`,
+  ...managementSectionOrAppToNav(app),
+});
+
+const legacySectionToNavSection = (section: LegacySection) => ({
+  name: section.display,
+  id: section.id,
+  icon: section.icon ? <EuiIcon type={section.icon} /> : null,
+  items: [],
+});
+
+const legacyAppToNavItem = (app: LegacyApp, selectedId: string) => ({
+  isSelected: selectedId === app.id,
+  name: app.display,
+  id: app.id,
+  href: app.url,
+});
+
+const sectionVisible = (section: LegacySection | LegacyApp) => !section.disabled && section.visible;
+
+export const sideNavItems = (sections: ManagementSection[], selectedId: string) =>
+  sections
+    // .filter(sectionVisible)
+    // .filter(section => section.items.filter(sectionVisible).length)
+    .map(section => ({
+      // items: section.items.filter(sectionVisible).map(sectionToNav(selectedId)),
+      items: section.apps.map(managementAppToNavItem(selectedId, section.id)),
+      ...managementSectionToNavSection(section),
+    }));
+
+const findOrAddSection = (navItems: NavSection[], legacySection: LegacySection): NavSection => {
+  const foundSection = navItems.find(sec => sec.id === legacySection.id);
+
+  if (foundSection) {
+    return foundSection;
+  } else {
+    const newSection = legacySectionToNavSection(legacySection);
+    navItems.push(newSection);
+    return newSection;
+  }
+};
+
+const mergeLegacyItems = (
+  navItems: NavSection[],
+  legacySections: LegacySection[],
+  selectedId: string
+) => {
+  // todo make sure filtering disabled apps
+  const filteredLegacySections = legacySections
+    .filter(sectionVisible)
+    .filter(section => section.items.filter(sectionVisible).length);
+
+  filteredLegacySections.forEach(legacySection => {
+    const section = findOrAddSection(navItems, legacySection);
+    legacySection.items.forEach(app => section.items.push(legacyAppToNavItem(app, selectedId)));
+  });
+
+  return navItems;
+};
+
+const sectionsToItems = (
+  sections: ManagementSection[],
+  legacySections: LegacySection[],
+  selectedId: string
+) => {
+  const navItems = sideNavItems(sections, selectedId);
+  return mergeLegacyItems(navItems, legacySections, selectedId);
+};
 
 export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState> {
   constructor(props: SidebarNavProps) {
@@ -101,7 +168,11 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
           mobileTitle={this.renderMobileTitle()}
           isOpenOnMobile={this.state.isSideNavOpenOnMobile}
           toggleOpenOnMobile={this.toggleOpenOnMobile}
-          items={sideNavItems(this.props.sections, this.props.selectedId)}
+          items={sectionsToItems(
+            this.props.sections,
+            this.props.legacySections,
+            this.props.selectedId
+          )}
           className="mgtSideBarNav"
         />
       </>

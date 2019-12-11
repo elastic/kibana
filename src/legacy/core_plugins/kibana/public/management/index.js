@@ -34,9 +34,6 @@ import { timefilter } from 'ui/timefilter';
 import { EuiPageContent, EuiTitle, EuiText, EuiSpacer, EuiIcon, EuiHorizontalRule } from '@elastic/eui';
 import { npStart } from 'ui/new_platform';
 
-import { ManagementSections } from '../../../../../plugins/management/public';
-import { Capabilities } from '../../../../../core/public';
-
 const SIDENAV_ID = 'management-sidenav';
 const LANDING_ID = 'management-landing';
 
@@ -100,41 +97,6 @@ export function updateLandingPage(version) {
   );
 }
 
-const sectionVisible = section => !section.disabled && section.visible;
-
-export function convertToNPFormat(managementItems) {
-  // filter out unused and disabled sections
-  const filteredItems = managementItems
-    .filter(sectionVisible)
-    .filter(section => section.items.filter(sectionVisible).length);
-
-  const managementSections = filteredItems.reduce((collector, legacySection) => {
-    const section = collector.setup.register({
-      id: legacySection.id,
-      title: legacySection.display,
-      order: legacySection.order,
-      euiIconType: legacySection.icon, // takes precedence over `icon` property.
-    });
-
-    // filter out disabled apps
-    legacySection.items.filter(sectionVisible).forEach((legacyApp) => {
-      section.registerApp({
-        id: legacyApp.id,
-        title: legacyApp.display,
-        order: legacyApp.order,
-        mount: () => {},
-        url: legacyApp.url
-      });
-    });
-
-    // TODO then sort
-    return collector;
-  }, new ManagementSections());
-
-  console.log('managementSections.start', managementSections.start);
-  return managementSections.start(Capabilities).getAvailable();
-}
-
 export function updateSidebar(
   items, id
 ) {
@@ -143,21 +105,25 @@ export function updateSidebar(
     return;
   }
 
-  console.log('ITEMS', items);
-  console.log('convertToNPFormat', convertToNPFormat(items));
-
-  console.log('subitems', items.items);
-  console.log('np items', npStart.plugins.management.sections.getAvailable());
-
   // ManagementSection
   // active, disabled, items, visible
 
+  const npSections = npStart.plugins.management.sections.getAvailable();
+
+  //todo merge
+  //todo iterate over new platform, then iterate over old interface
+  // verify highlighting item
+  // verify sidebar working within app sections
+  //verify rendering
+  // code cleanup
+  // typescript
+  // tests
 
   render(
     <I18nContext>
       <SidebarNav
-        // sections={items}
-        sections={convertToNPFormat(items)}
+        sections={npSections}
+        legacySections={items}
         selectedId={id}
         className="mgtSideNav"
       />
