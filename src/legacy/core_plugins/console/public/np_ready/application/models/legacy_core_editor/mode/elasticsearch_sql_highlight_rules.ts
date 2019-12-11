@@ -22,12 +22,14 @@ const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
 const oop = ace.acequire('ace/lib/oop');
 
 export const ElasticsearchSqlHighlightRules = function(this: any) {
+  // See https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-commands.html
   const keywords =
     'describe|between|in|like|not|and|or|desc|select|from|where|having|group|by|order' +
     'asc|desc|pivot|for|in|as|show|columns|include|frozen|tables|escape|limit|rlike|all|distinct';
 
   const builtinConstants = 'true|false';
 
+  // See https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-syntax-show-functions.html
   const builtinFunctions =
     'avg|count|first|first_value|last|last_value|max|min|sum|kurtosis|mad|percentile|percentile_rank|skewness|stddev_pop' +
     '|sum_of_squares|var_pop|histogram|case|coalesce|greatest|ifnull|iif|isnull|least|nullif|nvl|curdate|current_date' +
@@ -40,6 +42,7 @@ export const ElasticsearchSqlHighlightRules = function(this: any) {
     '|character_length|char_length|concat|insert|lcase|left|length|locate|ltrim|database|user|st_astext|st_aswkt|st_distance' +
     '|st_geometrytype|st_geomfromtext|st_wkttosql|st_x|st_y|st_z|score';
 
+  // See https://www.elastic.co/guide/en/elasticsearch/reference/current/sql-data-types.html
   const dataTypes =
     'null|boolean|byte|short|integer|long|double|float|half_float|scaled_float|keyword|text|binary|date|ip|object|nested|time' +
     '|interval_year|interval_month|interval_day|interval_hour|interval_minute|interval_second|interval_year_to_month' +
