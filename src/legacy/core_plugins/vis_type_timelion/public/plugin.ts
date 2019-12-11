@@ -39,7 +39,7 @@ import { getTimelionVisDefinition } from './timelion_vis_type';
 export interface TimelionVisualizationDependencies {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
-  timelionPanels: Map<string, Panel>;
+  timelionPanels: Map<string, any>;
   timefilter: TimefilterContract;
 }
 
@@ -62,26 +62,26 @@ export class TimelionVisPlugin implements Plugin<void, void> {
     core: CoreSetup,
     { expressions, visualizations, data }: TimelionPluginSetupDependencies
   ) {
-    const timelionPanels: Map<string, Panel> = new Map();
+    const timelionPanels: Map<string, any> = new Map();
 
-    setServices({ timelionPanels });
     const dependencies: TimelionVisualizationDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
       timelionPanels,
       timefilter: data.query.timefilter.timefilter,
     };
+    setServices(dependencies);
 
     this.registerPanels(dependencies);
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));
-    visualizations.types.createBaseVisualization(getTimelionVisDefinition(dependencies));
+    visualizations.types.createReactVisualization(getTimelionVisDefinition(dependencies));
   }
 
   private registerPanels(dependencies: TimelionVisualizationDependencies) {
-    const timeChartPanel: Panel = getTimeChart(dependencies);
+    const [name, timeChartPanel] = getTimeChart(dependencies);
 
-    dependencies.timelionPanels.set(timeChartPanel.name, timeChartPanel);
+    dependencies.timelionPanels.set(name as string, timeChartPanel);
   }
 
   public start(core: CoreStart) {

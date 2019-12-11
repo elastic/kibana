@@ -17,29 +17,18 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
+import { useEffect } from 'react';
 
-interface PanelConfig {
-  help?: string;
-  render?: Function;
-}
-
-export class Panel {
-  name: string;
-  help: string;
-  render: Function | undefined;
-
-  constructor(name: string, config: PanelConfig) {
-    this.name = name;
-    this.help = config.help || '';
-    this.render = config.render;
-
-    if (!config.render) {
-      throw new Error(
-        i18n.translate('timelion.panels.noRenderFunctionErrorMessage', {
-          defaultMessage: 'Panel must have a rendering function',
-        })
-      );
+export const useEventListener = (target: any, type: any, listener: any) => {
+  useEffect(() => {
+    const targetIsRef = target.hasOwnProperty('current');
+    const currentTarget = targetIsRef ? target.current : target;
+    if (currentTarget) {
+      currentTarget.addEventListener(type, listener);
     }
-  }
-}
+    return () => {
+      if (currentTarget) {
+        currentTarget.removeEventListener(type, listener);}
+    };
+  }, [target, type, listener]);
+};

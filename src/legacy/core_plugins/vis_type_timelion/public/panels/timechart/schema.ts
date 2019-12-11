@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import React from 'react';
 import './flot';
 import _ from 'lodash';
 import $ from 'jquery';

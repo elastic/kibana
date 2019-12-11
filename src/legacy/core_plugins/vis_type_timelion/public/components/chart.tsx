@@ -18,9 +18,44 @@
  */
 
 import React from 'react';
+import { EuiFormErrorText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-function ChartComponent(props: any) {
-  return <div>Charts</div>;
+import { getServices } from '../kibana_services';
+
+interface ChartComponentProp {
+  className?: string;
+  seriesList: any;
+  search?(): void;
+  interval: any;
+  rerenderTrigger: boolean;
+}
+
+function ChartComponent({ seriesList, interval, search }: ChartComponentProp) {
+  if (!seriesList) {
+    return null;
+  }
+
+  const panelScope = { seriesList, interval, search } as any;
+  panelScope.seriesList.render = seriesList.render || {
+    type: 'timechart',
+  };
+
+  const panelSchema = getServices().timelionPanels.get(panelScope.seriesList.render.type);
+
+  if (!panelSchema) {
+    return (
+      <EuiFormErrorText>
+        <FormattedMessage
+          id="timelion.chart.seriesList.noSchemaWarning"
+          defaultMessage="No such panel type: {renderType}"
+          values={{ renderType: panelScope.seriesList.render.type }}
+        />
+      </EuiFormErrorText>
+    );
+  }
+
+  return panelSchema(panelScope);
 }
 
 export { ChartComponent };

@@ -25,13 +25,13 @@ function TimelionVisComponent(props: any) {
   return (
     <div className="timVis">
       <ChartComponent
-        chart={props.esResponse.sheet[0]}
-        renderTrigger="renderComplete"
+        seriesList={props.visData.sheet[0]}
+        rerenderTrigger={props.renderComplete}
         className="timChart"
-        interval={props.visState.params.interval}
+        interval={props.vis.getState().params.interval}
       />
     </div>
-  )
+  );
 }
 
 export { TimelionVisComponent };
