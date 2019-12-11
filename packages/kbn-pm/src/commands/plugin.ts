@@ -67,10 +67,18 @@ export const PluginCommand: ICommand = {
     const pluginPath = join(rootPath, PLUGINS_BASE_PATH, pluginName);
     if (await pluginExists(pluginPath)) {
       log.write(chalk.red(`\nPlugin ${pluginName} already exists in ${rootPath}`));
+      return;
     }
 
     const hasUi = options.ui === true;
     const hasServer = options.server === true;
+
+    if (!hasUi && !hasServer) {
+      log.write(
+        chalk.red(`\nPlugins should have either a server or a ui component. Run yarn kbn for help.`)
+      );
+      return;
+    }
 
     log.write(
       chalk.bold(

@@ -45035,10 +45035,17 @@ const PluginCommand = {
 
     if (await pluginExists(pluginPath)) {
       _utils_log__WEBPACK_IMPORTED_MODULE_4__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.red(`\nPlugin ${pluginName} already exists in ${rootPath}`));
+      return;
     }
 
     const hasUi = options.ui === true;
     const hasServer = options.server === true;
+
+    if (!hasUi && !hasServer) {
+      _utils_log__WEBPACK_IMPORTED_MODULE_4__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.red(`\nPlugins should have either a server or a ui component. Run yarn kbn for help.`));
+      return;
+    }
+
     _utils_log__WEBPACK_IMPORTED_MODULE_4__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`\nInitializing plugin ${pluginName} (server ${hasServer ? 'enabled' : 'disabled'}, ui ${hasUi ? 'enabled' : 'disabled'})`));
 
     try {
