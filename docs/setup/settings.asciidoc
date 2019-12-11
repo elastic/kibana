@@ -7,7 +7,7 @@ if you installed {kib} from an archive distribution (`.tar.gz` or `.zip`), by
 default it is in `$KIBANA_HOME/config`. By default, with package distributions
 (Debian or RPM), it is in `/etc/kibana`.
 
-The default host and port settings configure {kib} to run on `localhost:5601`. To change that behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
+The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
 variety of other options. Finally, environment variables can be injected into
 configuration using `${MY_ENV_VAR}` syntax.
 
