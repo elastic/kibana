@@ -118,7 +118,7 @@ server.uuid
 server.name
 --------
 
-Settings unique across each host (e.g. running multiple installations on the same virtual machine):
+Settings unique across each host (for example, running multiple installations on the same virtual machine):
 --------
 logging.dest
 path.data
