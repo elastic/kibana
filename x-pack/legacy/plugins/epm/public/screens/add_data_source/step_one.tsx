@@ -3,19 +3,32 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import React, { Fragment } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiSpacer,
-  EuiSwitch,
+  EuiCheckboxGroup,
+  EuiCheckboxGroupOption,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import { FormState } from './add_data_source_form';
 
-export const StepOneTemplate = () => {
+interface AddDataSourceFormProps {
+  formState: FormState;
+  // EuiCheckboxGroup onChange prop type says parameter is an event, but it is a string of the input name
+  onCheckboxChange: (name: any) => void;
+  onTextChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
+  datasetCheckboxes: EuiCheckboxGroupOption[];
+}
+
+export const StepOne = ({
+  formState,
+  onCheckboxChange,
+  onTextChange,
+  datasetCheckboxes,
+}: AddDataSourceFormProps) => {
   return (
     <Fragment>
       <EuiForm>
@@ -30,7 +43,11 @@ export const StepOneTemplate = () => {
           }
         >
           <EuiFormRow label="Data source name" describedByIds={['data-source-name']}>
-            <EuiFieldText name="data-source-name" />
+            <EuiFieldText
+              name="datasourceName"
+              value={formState.datasourceName}
+              onChange={onTextChange}
+            />
           </EuiFormRow>
         </EuiDescribedFormGroup>
         <EuiHorizontalRule />
@@ -42,28 +59,11 @@ export const StepOneTemplate = () => {
           }
         >
           <EuiFormRow describedByIds={['select-inputs']}>
-            <Fragment>
-              <EuiSwitch
-                name="switch"
-                label="Collect access logs"
-                checked={true}
-                onChange={() => true}
-              />
-              <EuiSpacer size="s" />
-              <EuiSwitch
-                name="switch"
-                label="Collect error logs"
-                checked={true}
-                onChange={() => true}
-              />
-              <EuiSpacer size="s" />
-              <EuiSwitch
-                name="switch"
-                label="Collect metric logs"
-                checked={true}
-                onChange={() => true}
-              />
-            </Fragment>
+            <EuiCheckboxGroup
+              options={datasetCheckboxes}
+              idToSelectedMap={formState.datasets}
+              onChange={onCheckboxChange}
+            />
           </EuiFormRow>
         </EuiDescribedFormGroup>
       </EuiForm>

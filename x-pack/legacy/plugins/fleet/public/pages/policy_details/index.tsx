@@ -204,9 +204,8 @@ export const PolicyDetailsPage: React.FC<Props> = ({
                 </EuiTitle>
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
-                    {/* TODO: Make into real events count */}
                     <EuiTitle size="l">
-                      <span>{agentStatus.total * 13}</span>
+                      <span>{agentStatus.events}</span>
                     </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>

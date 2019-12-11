@@ -122,6 +122,7 @@ export interface Dataset {
   ingeset_pipeline: string;
   vars: object[];
   type: string;
+  // This is for convenience and not in the output from the registry. When creating a dataset, this info should be added.
   package: string;
 }
 
@@ -130,23 +131,6 @@ export interface Dataset {
 interface PackageAdditions {
   title: string;
   assets: AssetsGroupedByServiceByType;
-}
-export interface RegistryPackage {
-  name: string;
-  title?: string;
-  version: string;
-  readme?: string;
-  description: string;
-  categories: string[];
-  requirement: RequirementsByServiceName;
-  screenshots?: ScreenshotItem[];
-  icons?: string[];
-  assets?: string[];
-  internal?: boolean;
-  format_version: string;
-  datasets?: Dataset[];
-  download: string;
-  path: string;
 }
 
 // Managers public HTTP response types

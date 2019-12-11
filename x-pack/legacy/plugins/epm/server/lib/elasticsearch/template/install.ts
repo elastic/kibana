@@ -23,9 +23,10 @@ const isFields = (path: string) => {
  * The template is currently loaded with the pkgey-package-dataset
  */
 export async function installTemplates(pkg: RegistryPackage, callCluster: CallESAsCurrentUser) {
+  // If no datasets exist in this package, no templates have to be installed.
   if (!pkg.datasets) return;
 
-  const promises = pkg.datasets.map(async dataset => {
+  return pkg.datasets.map(async dataset => {
     // Fetch all assset entries for this dataset
     const assetEntries = await getAssetsData(pkg, isFields, dataset.name);
 
@@ -38,25 +39,21 @@ export async function installTemplates(pkg: RegistryPackage, callCluster: CallES
       }
     }
 
-    return installTemplate({ callCluster, fields, pkg, dataset });
+    return installTemplate({ callCluster, fields, dataset });
   });
-
-  return Promise.all(promises);
 }
 
 async function installTemplate({
   callCluster,
   fields,
-  pkg,
   dataset,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
-  pkg: RegistryPackage;
   dataset: Dataset;
 }): Promise<AssetReference> {
   const mappings = generateMappings(fields);
-  const templateName = generateTemplateName(pkg.name, dataset.name, dataset.type);
+  const templateName = generateTemplateName(dataset);
   const template = getTemplate(templateName + '-*', mappings);
   // TODO: Check return values for errors
   await callCluster('indices.putTemplate', {

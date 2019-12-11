@@ -34,6 +34,10 @@ export class AgentStatusHelper {
       return 'inactive';
     }
 
+    if (agent.current_error_events.length > 0) {
+      return 'error';
+    }
+
     switch (type) {
       case AGENT_TYPE_PERMANENT:
         if (intervalsSinceLastCheckIn >= 4) {

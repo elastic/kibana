@@ -10,7 +10,7 @@ import { PackageInfo } from '../../../common/types';
 import { NavButtonBack } from '../../components/nav_button_back';
 import { getPackageInfoByKey } from '../../data';
 import { useLinks } from '../../hooks';
-import { AddDataSourceSteps } from './add_data_source_steps';
+import { AddDataSourceForm } from './add_data_source_form';
 
 export interface AddDataSourceProps {
   pkgkey: string;
@@ -53,7 +53,7 @@ export function AddDataSource({ pkgkey }: AddDataSourceProps) {
   // don't have designs for loading/empty states
   if (!info) return null;
 
-  const { version, name, title } = info;
+  const { version, name, title, datasets } = info;
   const iconType = ICON_TYPES.find(key => key.toLowerCase() === `logo${name}`);
 
   return (
@@ -76,7 +76,14 @@ export function AddDataSource({ pkgkey }: AddDataSourceProps) {
               <h1>Add {title} data source</h1>
             </EuiTitle>
           </EuiPageHeader>
-          <AddDataSourceSteps pkgName={name} pkgVersion={version} pkgTitle={title} />
+          {datasets && (
+            <AddDataSourceForm
+              pkgName={name}
+              pkgVersion={version}
+              pkgTitle={title}
+              datasets={datasets}
+            />
+          )}
         </PageBody>
       </EuiFlexGroup>
     </PageContainer>

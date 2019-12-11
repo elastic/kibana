@@ -16,7 +16,12 @@ import { routes } from './routes';
 
 export { createSetupShim } from './shim';
 
-export type EPMPluginInitializerContext = Pick<PluginInitializerContext, 'config'>;
+export interface EPMPluginInitializerContext {
+  config: {
+    create: PluginInitializerContext['config']['create'];
+    createIfExists: PluginInitializerContext['config']['createIfExists'];
+  };
+}
 
 export interface EPMCoreSetup {
   elasticsearch: CoreSetup['elasticsearch'];
