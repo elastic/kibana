@@ -17,31 +17,22 @@
  * under the License.
  */
 
-import { ProjectGraph, ProjectMap } from '../utils/projects';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/server';
 
-export interface ICommandConfig {
-  extraArgs: string[];
-  options: { [key: string]: any };
-  rootPath: string;
+export interface [PLUGIN_CLASS_NAME]PluginSetup {};
+export interface [PLUGIN_CLASS_NAME]PluginStart {};
+
+export class [PLUGIN_CLASS_NAME]ServerPlugin implements Plugin<[PLUGIN_CLASS_NAME]PluginSetup, [PLUGIN_CLASS_NAME]PluginStart> {
+  constructor(initializerContext: PluginInitializerContext) {}
+
+  public setup(core: CoreSetup) {
+    return {};
+  }
+  public start(core: CoreStart) {
+    return {};
+  }
+
+  public stop() {}
 }
 
-export interface ICommand {
-  name: string;
-  description: string;
-
-  run: (projects: ProjectMap, projectGraph: ProjectGraph, config: ICommandConfig) => Promise<void>;
-}
-
-import { BootstrapCommand } from './bootstrap';
-import { CleanCommand } from './clean';
-import { RunCommand } from './run';
-import { WatchCommand } from './watch';
-import { PluginCommand } from './plugin';
-
-export const commands: { [key: string]: ICommand } = {
-  bootstrap: BootstrapCommand,
-  clean: CleanCommand,
-  run: RunCommand,
-  watch: WatchCommand,
-  plugin: PluginCommand,
-};
+export { [PLUGIN_CLASS_NAME]ServerPlugin as Plugin };

@@ -22,6 +22,7 @@ import fs from 'fs';
 import { ncp } from 'ncp';
 import { dirname, relative } from 'path';
 import { promisify } from 'util';
+import { join } from 'path';
 
 const lstat = promisify(fs.lstat);
 export const readFile = promisify(fs.readFile);
@@ -32,6 +33,7 @@ const mkdir = promisify(fs.mkdir);
 export const mkdirp = async (path: string) => await mkdir(path, { recursive: true });
 export const unlink = promisify(fs.unlink);
 export const copyDirectory = promisify(ncp);
+export const writeFile = promisify(fs.writeFile);
 
 async function statTest(path: string, block: (stats: fs.Stats) => boolean) {
   try {
@@ -103,4 +105,18 @@ async function forceCreate(src: string, dest: string, type: string) {
   }
 
   await symlink(src, dest, type);
+}
+
+export function deleteFolderRecursive(path: string) {
+  if (fs.existsSync(path)) {
+    fs.readdirSync(path).forEach(file => {
+      const curPath = join(path, file);
+      if (fs.lstatSync(curPath).isDirectory()) {
+        deleteFolderRecursive(curPath);
+      } else {
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
 }

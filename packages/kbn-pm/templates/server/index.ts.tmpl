@@ -17,31 +17,12 @@
  * under the License.
  */
 
-import { ProjectGraph, ProjectMap } from '../utils/projects';
+import { PluginInitializerContext } from '../../../core/server';
+import { [PLUGIN_CLASS_NAME]ServerPlugin } from './plugin';
 
-export interface ICommandConfig {
-  extraArgs: string[];
-  options: { [key: string]: any };
-  rootPath: string;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new [PLUGIN_CLASS_NAME]ServerPlugin(initializerContext);
 }
 
-export interface ICommand {
-  name: string;
-  description: string;
-
-  run: (projects: ProjectMap, projectGraph: ProjectGraph, config: ICommandConfig) => Promise<void>;
-}
-
-import { BootstrapCommand } from './bootstrap';
-import { CleanCommand } from './clean';
-import { RunCommand } from './run';
-import { WatchCommand } from './watch';
-import { PluginCommand } from './plugin';
-
-export const commands: { [key: string]: ICommand } = {
-  bootstrap: BootstrapCommand,
-  clean: CleanCommand,
-  run: RunCommand,
-  watch: WatchCommand,
-  plugin: PluginCommand,
-};
+export { [PLUGIN_CLASS_NAME]ServerPlugin as Plugin };
+export * from '../common';
