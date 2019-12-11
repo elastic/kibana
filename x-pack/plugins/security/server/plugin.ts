@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   IClusterClient,
@@ -94,7 +93,7 @@ export class Plugin {
   private readonly logger: Logger;
   private clusterClient?: IClusterClient;
   private spacesService?: SpacesService | symbol = Symbol('not accessed');
-  private licenseSubscription?: Subscription;
+  private securityLicenseService?: SecurityLicenseService;
 
   private legacyAPI?: LegacyAPI;
   private readonly getLegacyAPI = () => {
@@ -129,10 +128,10 @@ export class Plugin {
       plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
     });
 
-    const { license, update: updateLicense } = new SecurityLicenseService().setup();
-    this.licenseSubscription = licensing.license$.subscribe(rawLicense =>
-      updateLicense(rawLicense)
-    );
+    this.securityLicenseService = new SecurityLicenseService();
+    const { license } = this.securityLicenseService.setup({
+      license$: licensing.license$,
+    });
 
     const authc = await setupAuthentication({
       http: core.http,
@@ -229,9 +228,9 @@ export class Plugin {
       this.clusterClient = undefined;
     }
 
-    if (this.licenseSubscription) {
-      this.licenseSubscription.unsubscribe();
-      this.licenseSubscription = undefined;
+    if (this.securityLicenseService) {
+      this.securityLicenseService.stop();
+      this.securityLicenseService = undefined;
     }
   }
 

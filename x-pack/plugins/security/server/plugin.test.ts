@@ -63,6 +63,7 @@ describe('Security Plugin', () => {
                     },
                   },
                   "license": Object {
+                    "getChanges$": [Function],
                     "getFeatures": [Function],
                     "isEnabled": [Function],
                   },

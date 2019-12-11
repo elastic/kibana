@@ -4,18 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subscription, Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { LicensingPluginSetup, ILicense } from '../../../licensing/server';
-import { SecurityLicenseService } from '../../common/licensing';
+import { SecurityLicense } from '../../common/licensing';
 import { AuthenticatedUser } from '../../common/model';
 import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
-  securityLicenseService: ReturnType<SecurityLicenseService['setup']>;
-  licensing: LicensingPluginSetup;
+  securityLicense: SecurityLicense;
 }
 
 interface StartDeps {
@@ -23,24 +21,19 @@ interface StartDeps {
 }
 
 export class SecurityNavControlService {
-  private securityLicenseService!: ReturnType<SecurityLicenseService['setup']>;
-
-  private license$!: Observable<ILicense>;
+  private securityLicense!: SecurityLicense;
 
   private navControlRegistered!: boolean;
 
   private licenseSubscription?: Subscription;
 
-  public setup({ securityLicenseService, licensing }: SetupDeps) {
-    this.securityLicenseService = securityLicenseService;
-    this.license$ = licensing.license$;
-    this.navControlRegistered = false;
+  public setup({ securityLicense }: SetupDeps) {
+    this.securityLicense = securityLicense;
   }
 
   public start({ core }: StartDeps) {
-    this.licenseSubscription = this.license$.subscribe(rawLicense => {
-      this.securityLicenseService.update(rawLicense);
-      const showSecurityLinks = this.securityLicenseService.license.getFeatures().showLinks;
+    this.licenseSubscription = this.securityLicense.getChanges$().subscribe(() => {
+      const showSecurityLinks = this.securityLicense.getFeatures().showLinks;
 
       const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
 

@@ -6,8 +6,7 @@
 
 import { coreMock } from 'src/core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { ILicense, LicensingPluginSetup } from '../../../licensing/public';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { ILicense } from '../../../licensing/public';
 import { SecurityNavControlService } from '.';
 import { SecurityLicenseService } from '../../common/licensing';
 
@@ -25,13 +24,12 @@ const validLicense = {
 } as ILicense;
 
 describe('SecurityNavControlService', () => {
-  it('should register the nav control once the license supports it', async () => {
+  it('should register the nav control once the license supports it', () => {
     const license$ = new BehaviorSubject<ILicense>({} as ILicense);
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
-      securityLicenseService: new SecurityLicenseService().setup(),
-      licensing: ({ license$ } as unknown) as LicensingPluginSetup,
+      securityLicense: new SecurityLicenseService().setup({ license$ }).license,
     });
 
     const coreStart = coreMock.createStart();
@@ -41,18 +39,15 @@ describe('SecurityNavControlService', () => {
 
     license$.next(validLicense);
 
-    await nextTick();
-
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalled();
   });
 
-  it('should not register the nav control for anonymous paths', async () => {
+  it('should not register the nav control for anonymous paths', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
-      securityLicenseService: new SecurityLicenseService().setup(),
-      licensing: ({ license$ } as unknown) as LicensingPluginSetup,
+      securityLicense: new SecurityLicenseService().setup({ license$ }).license,
     });
 
     const coreStart = coreMock.createStart();
@@ -62,13 +57,12 @@ describe('SecurityNavControlService', () => {
     expect(coreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
   });
 
-  it('should only register the nav control once', async () => {
+  it('should only register the nav control once', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
-      securityLicenseService: new SecurityLicenseService().setup(),
-      licensing: ({ license$ } as unknown) as LicensingPluginSetup,
+      securityLicense: new SecurityLicenseService().setup({ license$ }).license,
     });
 
     const coreStart = coreMock.createStart();
@@ -78,20 +72,17 @@ describe('SecurityNavControlService', () => {
 
     // trigger license change
     license$.next({} as ILicense);
-    await nextTick();
     license$.next(validLicense);
-    await nextTick();
 
     expect(coreStart.chrome.navControls.registerRight).toHaveBeenCalledTimes(1);
   });
 
-  it('should allow for re-registration if the service is restarted', async () => {
+  it('should allow for re-registration if the service is restarted', () => {
     const license$ = new BehaviorSubject<ILicense>(validLicense);
 
     const navControlService = new SecurityNavControlService();
     navControlService.setup({
-      securityLicenseService: new SecurityLicenseService().setup(),
-      licensing: ({ license$ } as unknown) as LicensingPluginSetup,
+      securityLicense: new SecurityLicenseService().setup({ license$ }).license,
     });
 
     const coreStart = coreMock.createStart();

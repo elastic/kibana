@@ -24,6 +24,8 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
 
   private navControlService!: SecurityNavControlService;
 
+  private securityLicenseService!: SecurityLicenseService;
+
   public setup(core: CoreSetup, { licensing }: PluginSetupDependencies) {
     const { http, notifications, injectedMetadata } = core;
     const { basePath, anonymousPaths } = http;
@@ -38,9 +40,11 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
     http.intercept(new SessionTimeoutHttpInterceptor(this.sessionTimeout, anonymousPaths));
 
     this.navControlService = new SecurityNavControlService();
+    this.securityLicenseService = new SecurityLicenseService();
+    const { license } = this.securityLicenseService.setup({ license$: licensing.license$ });
+
     this.navControlService.setup({
-      securityLicenseService: new SecurityLicenseService().setup(),
-      licensing,
+      securityLicense: license,
     });
 
     return {
@@ -57,6 +61,7 @@ export class SecurityPlugin implements Plugin<SecurityPluginSetup, SecurityPlugi
   public stop() {
     this.sessionTimeout.stop();
     this.navControlService.stop();
+    this.securityLicenseService.stop();
   }
 }
 

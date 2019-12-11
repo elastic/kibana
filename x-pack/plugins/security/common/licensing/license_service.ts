@@ -4,25 +4,43 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observable, Subscription, BehaviorSubject } from 'rxjs';
 import { deepFreeze } from '../../../../../src/core/utils';
 import { ILicense } from '../../../licensing/common/types';
 import { SecurityLicenseFeatures } from './license_features';
 
 export interface SecurityLicense {
+  getChanges$(): Observable<void>;
   isEnabled(): boolean;
   getFeatures(): SecurityLicenseFeatures;
 }
 
+interface SetupDeps {
+  license$: Observable<ILicense>;
+}
+
 export class SecurityLicenseService {
-  public setup() {
+  private licenseSubscription?: Subscription;
+
+  public setup({ license$ }: SetupDeps) {
     let rawLicense: Readonly<ILicense> | undefined;
 
-    return {
-      update(newRawLicense: Readonly<ILicense>) {
-        rawLicense = newRawLicense;
-      },
+    const changesSubject$ = new BehaviorSubject<void>(undefined);
 
+    this.licenseSubscription = license$.subscribe(nextRawLicense => {
+      rawLicense = nextRawLicense;
+      changesSubject$.next();
+    });
+
+    return {
       license: deepFreeze({
+        /**
+         * Observable which notifies consumers when new license information is available.
+         */
+        getChanges$() {
+          return changesSubject$.asObservable();
+        },
+
         isEnabled() {
           if (!rawLicense) {
             return false;
@@ -82,5 +100,12 @@ export class SecurityLicenseService {
         },
       }),
     };
+  }
+
+  public stop() {
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+      this.licenseSubscription = undefined;
+    }
   }
 }
