@@ -21,10 +21,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { sharedFragments } from '../../../../legacy/plugins/infra/common/graphql/shared';
 import { InfraTimeKey } from '../../../../legacy/plugins/infra/public/graphql/types';
 import {
-  LOGS_SUMMARY_PATH,
-  logsSummaryRequestRT,
-  logsSummaryResponseRT,
-} from '../../../../legacy/plugins/infra/common/http_api/logs/summary';
+  LOG_ENTRIES_SUMMARY_PATH,
+  logEntriesSummaryRequestRT,
+  logEntriesSummaryResponseRT,
+} from '../../../../legacy/plugins/infra/common/http_api/log_entries';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
@@ -97,10 +97,10 @@ export default function({ getService }: FtrProviderContext) {
       const bucketSize = Math.ceil((endDate - startDate) / 10);
 
       const { body } = await supertest
-        .post(LOGS_SUMMARY_PATH)
+        .post(LOG_ENTRIES_SUMMARY_PATH)
         .set(COMMON_HEADERS)
         .send(
-          logsSummaryRequestRT.encode({
+          logEntriesSummaryRequestRT.encode({
             sourceId: 'default',
             startDate,
             endDate,
@@ -111,7 +111,7 @@ export default function({ getService }: FtrProviderContext) {
         .expect(200);
 
       const logSummaryResponse = pipe(
-        logsSummaryResponseRT.decode(body),
+        logEntriesSummaryResponseRT.decode(body),
         fold(throwErrors(createPlainError), identity)
       );
 

@@ -6,4 +6,4 @@
 
 export * from './log_analysis';
 export * from './metadata_api';
-export * from './logs';
+export * from './log_entries';

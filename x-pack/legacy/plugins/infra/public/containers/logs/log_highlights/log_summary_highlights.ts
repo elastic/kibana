@@ -9,7 +9,7 @@ import { debounce } from 'lodash';
 
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { fetchLogSummaryHighlights } from './api/fetch_log_summary_highlights';
-import { LogsSummaryHighlightsResponse } from '../../../../common/http_api';
+import { LogEntriesSummaryHighlightsResponse } from '../../../../common/http_api';
 
 export const useLogSummaryHighlights = (
   sourceId: string,
@@ -21,7 +21,7 @@ export const useLogSummaryHighlights = (
   highlightTerms: string[]
 ) => {
   const [logSummaryHighlights, setLogSummaryHighlights] = useState<
-    LogsSummaryHighlightsResponse['data']
+    LogEntriesSummaryHighlightsResponse['data']
   >([]);
 
   const [loadLogSummaryHighlightsRequest, loadLogSummaryHighlights] = useTrackedPromise(

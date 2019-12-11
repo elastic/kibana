@@ -15,13 +15,13 @@ import { throwErrors } from '../../../common/runtime_types';
 
 import { InfraBackendLibs } from '../../lib/infra_types';
 import {
-  LOGS_SUMMARY_PATH,
-  logsSummaryRequestRT,
-  logsSummaryResponseRT,
-  LOGS_SUMMARY_HIGHLIGHTS_PATH,
-  logsSummaryHighlightsRequestRT,
-  logsSummaryHighlightsResponseRT,
-} from '../../../common/http_api/logs';
+  LOG_ENTRIES_SUMMARY_PATH,
+  logEntriesSummaryRequestRT,
+  logEntriesSummaryResponseRT,
+  LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
+  logEntriesSummaryHighlightsRequestRT,
+  logEntriesSummaryHighlightsResponseRT,
+} from '../../../common/http_api/log_entries';
 import {
   compileFormattingRules,
   CompiledLogMessageFormattingRule,
@@ -53,13 +53,13 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
   framework.registerRoute(
     {
       method: 'post',
-      path: LOGS_SUMMARY_PATH,
+      path: LOG_ENTRIES_SUMMARY_PATH,
       validate: { body: escapeHatch },
     },
     async (requestContext, request, response) => {
       try {
         const payload = pipe(
-          logsSummaryRequestRT.decode(request.body),
+          logEntriesSummaryRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
         const { sourceId, startDate, endDate, bucketSize, query } = payload;
@@ -88,7 +88,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
         });
 
         return response.ok({
-          body: logsSummaryResponseRT.encode({
+          body: logEntriesSummaryResponseRT.encode({
             data: {
               start: startDate,
               end: endDate,
@@ -113,13 +113,13 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
   framework.registerRoute(
     {
       method: 'post',
-      path: LOGS_SUMMARY_HIGHLIGHTS_PATH,
+      path: LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
       validate: { body: escapeHatch },
     },
     async (requestContext, request, response) => {
       try {
         const payload = pipe(
-          logsSummaryHighlightsRequestRT.decode(request.body),
+          logEntriesSummaryHighlightsRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
         const { sourceId, startDate, endDate, bucketSize, query, highlightTerms } = payload;
@@ -176,7 +176,7 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
         );
 
         return response.ok({
-          body: logsSummaryHighlightsResponseRT.encode({ data: summaries }),
+          body: logEntriesSummaryHighlightsResponseRT.encode({ data: summaries }),
         });
       } catch (error) {
         return response.internalError({

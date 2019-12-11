@@ -11,21 +11,23 @@ import { kfetch } from 'ui/kfetch';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
 import {
-  LOGS_SUMMARY_HIGHLIGHTS_PATH,
-  LogsSummaryHighlightsRequest,
-  logsSummaryHighlightsRequestRT,
-  logsSummaryHighlightsResponseRT,
+  LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
+  LogEntriesSummaryHighlightsRequest,
+  logEntriesSummaryHighlightsRequestRT,
+  logEntriesSummaryHighlightsResponseRT,
 } from '../../../../../common/http_api';
 
-export const fetchLogSummaryHighlights = async (requestArgs: LogsSummaryHighlightsRequest) => {
+export const fetchLogSummaryHighlights = async (
+  requestArgs: LogEntriesSummaryHighlightsRequest
+) => {
   const response = await kfetch({
     method: 'POST',
-    pathname: LOGS_SUMMARY_HIGHLIGHTS_PATH,
-    body: JSON.stringify(logsSummaryHighlightsRequestRT.encode(requestArgs)),
+    pathname: LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
+    body: JSON.stringify(logEntriesSummaryHighlightsRequestRT.encode(requestArgs)),
   });
 
   return pipe(
-    logsSummaryHighlightsResponseRT.decode(response),
+    logEntriesSummaryHighlightsResponseRT.decode(response),
     fold(throwErrors(createPlainError), identity)
   );
 };

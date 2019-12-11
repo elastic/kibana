@@ -12,21 +12,21 @@ import { kfetch } from 'ui/kfetch';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 
 import {
-  LOGS_SUMMARY_PATH,
-  LogsSummaryRequest,
-  logsSummaryRequestRT,
-  logsSummaryResponseRT,
+  LOG_ENTRIES_SUMMARY_PATH,
+  LogEntriesSummaryRequest,
+  logEntriesSummaryRequestRT,
+  logEntriesSummaryResponseRT,
 } from '../../../../../common/http_api';
 
-export const fetchLogSummary = async (requestArgs: LogsSummaryRequest) => {
+export const fetchLogSummary = async (requestArgs: LogEntriesSummaryRequest) => {
   const response = await kfetch({
     method: 'POST',
-    pathname: LOGS_SUMMARY_PATH,
-    body: JSON.stringify(logsSummaryRequestRT.encode(requestArgs)),
+    pathname: LOG_ENTRIES_SUMMARY_PATH,
+    body: JSON.stringify(logEntriesSummaryRequestRT.encode(requestArgs)),
   });
 
   return pipe(
-    logsSummaryResponseRT.decode(response),
+    logEntriesSummaryResponseRT.decode(response),
     fold(throwErrors(createPlainError), identity)
   );
 };
