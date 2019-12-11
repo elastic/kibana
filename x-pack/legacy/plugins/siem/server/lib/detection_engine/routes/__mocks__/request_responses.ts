@@ -6,11 +6,13 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { RuleAlertParamsRest, RuleAlertType, SignalsRestParams } from '../../alerts/types';
+import { SignalsRestParams } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
+import { RuleAlertType } from '../../rules/types';
+import { RuleAlertParamsRest } from '../../types';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
