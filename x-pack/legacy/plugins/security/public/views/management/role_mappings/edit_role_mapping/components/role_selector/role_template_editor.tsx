@@ -129,6 +129,7 @@ export const RoleTemplateEditor = ({
           </EuiText>
         );
       }
+      const example = '{{username}}_role';
       return (
         <Fragment>
           <EuiFlexItem grow={1} style={{ maxWidth: '400px' }}>
@@ -142,7 +143,10 @@ export const RoleTemplateEditor = ({
               helpText={
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.roleTemplateHelpText"
-                  defaultMessage="You can use mustache templates here. Example: {{username}}_role"
+                  defaultMessage="You can use mustache templates here. Example: {example}"
+                  values={{
+                    example,
+                  }}
                 />
               }
               {...extraProps}
