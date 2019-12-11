@@ -41,6 +41,8 @@ export const RuntimeAgentEvent = t.intersection(
       payload: t.any,
       data: t.string,
       action_id: t.string,
+      policy_id: t.string,
+      stream_id: t.string,
     }),
   ],
   'AgentEvent'
@@ -72,6 +74,15 @@ export interface AgentEventsRepository {
     user: FrameworkUser,
     agentId: string,
     options?: {
+      search?: string;
+      page?: number;
+      perPage?: number;
+    }
+  ): Promise<{ items: AgentEvent[]; total: number }>;
+  list(
+    user: FrameworkUser,
+    options: {
+      agentId?: string;
       search?: string;
       page?: number;
       perPage?: number;

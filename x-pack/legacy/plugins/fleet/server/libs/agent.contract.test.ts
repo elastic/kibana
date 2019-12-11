@@ -238,37 +238,6 @@ describe('Agent lib', () => {
   });
 
   describe('checkin', () => {
-    it('should throw if the agens do not exists', async () => {
-      const { agents } = libs;
-
-      await expect(
-        agents.checkin(getUser('VALID_KEY'), [
-          {
-            timestamp: '2019-09-05T15:41:26+0000',
-            type: 'STATE',
-            subtype: 'STARTING',
-            message: 'State changed from PAUSE to STARTING',
-          },
-        ])
-      ).rejects.toThrowError(/Agent not found/);
-    });
-
-    it('should throw is the agent is not active', async () => {
-      const { agents } = libs;
-      await loadFixtures([
-        {
-          actions: [],
-          active: false,
-          policy_id: 'policy:1',
-          access_api_key_id: 'key1',
-        },
-      ]);
-
-      await expect(agents.checkin(getUser('VALID_KEY', 'key1'), [])).rejects.toThrowError(
-        /Agent inactive/
-      );
-    });
-
     it('should persist new events', async () => {
       const { agents } = libs;
       const [agentId] = await loadFixtures([
@@ -280,7 +249,8 @@ describe('Agent lib', () => {
         },
       ]);
 
-      await agents.checkin(getUser('VALID_KEY', 'key1'), [
+      const agent = await agents.getActiveByApiKeyId(getUser(), 'key1');
+      await agents.checkin(getUser(), agent, [
         {
           timestamp: '2019-09-05T15:41:26+0000',
           type: 'STATE',
@@ -316,7 +286,8 @@ describe('Agent lib', () => {
         },
       ]);
 
-      await agents.checkin(getUser('VALID_KEY', 'key1'), []);
+      const agent = await agents.getActiveByApiKeyId(getUser(), 'key1');
+      await agents.checkin(getUser(), agent, []);
 
       const refreshAgent = await getAgentById(agentId);
       expect(
@@ -339,7 +310,8 @@ describe('Agent lib', () => {
         },
       ]);
 
-      await agents.checkin(getUser('VALID_KEY', 'key1'), [], { key: 'local2' });
+      const agent = await agents.getActiveByApiKeyId(getUser(), 'key1');
+      await agents.checkin(getUser('VALID_KEY', 'key1'), agent, [], { key: 'local2' });
 
       const refreshAgent = await getAgentById(agentId);
       expect(
@@ -371,7 +343,9 @@ describe('Agent lib', () => {
           ],
         },
       ]);
-      const { actions } = await agents.checkin(getUser('VALID_KEY', 'key1'), []);
+
+      const agent = await agents.getActiveByApiKeyId(getUser(), 'key1');
+      const { actions } = await agents.checkin(getUser('VALID_KEY', 'key1'), agent, []);
 
       expect(actions).toHaveLength(1);
       expect(actions[0]).toMatchObject({
@@ -456,23 +430,23 @@ describe('Agent lib', () => {
   describe('getAgentsStatusForPolicy', () => {
     it('should return all agents', async () => {
       const { agents } = libs;
-      const policyId = 'policy:1';
+      const policyId = 'policy1';
       await loadFixtures([
         // Other policies
         {
           type: 'PERMANENT',
           active: true,
-          policy_id: 'policy:2',
+          policy_id: 'policy2',
         },
         {
           type: 'PERMANENT',
           active: true,
-          policy_id: 'policy:3',
+          policy_id: 'policy3',
         },
         {
           type: 'TEMPORARY',
           active: true,
-          policy_id: 'policy:3',
+          policy_id: 'policy3',
         },
         // PERMANENT
         // ERROR

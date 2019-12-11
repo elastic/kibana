@@ -11,6 +11,7 @@ import {
   AGENT_TYPE_TEMPORARY,
 } from '../../../common/constants';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
+import { RuntimeAgentEvent } from '../agent_events/types';
 
 export const RuntimeAgentType = t.union([
   t.literal(AGENT_TYPE_PERMANENT),
@@ -78,6 +79,7 @@ export const RuntimeAgent = t.intersection([
     ...newAgentProperties,
     id: t.string,
     actions: t.array(RuntimeAgentAction),
+    current_error_events: t.array(RuntimeAgentEvent),
   }),
   t.partial({
     last_updated: t.string,
@@ -95,6 +97,7 @@ export const RuntimeSavedObjectAgentAttributes = t.intersection([
     parent_id: t.string,
     version: t.string,
     enrolled_at: t.string,
+    current_error_events: t.string,
   }),
   t.interface({
     ...newAgentProperties,
