@@ -16,8 +16,8 @@ You must run Elasticsearch with security disabled, for example:
 yarn es snapshot -E xpack.security.enabled=false
 ```
 
-You must run Kibana on localhost and port 5601 (the defaults) and not be using
-the basepath proxy, like so:
+Only after Elasticsearch has finished starting up, you must start Kibana on
+localhost and port 5601 (the defaults) and not be using the basepath proxy:
 
 ```sh
 yarn start --no-base-path
