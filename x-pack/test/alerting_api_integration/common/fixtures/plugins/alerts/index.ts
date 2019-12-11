@@ -43,7 +43,7 @@ export default function(kibana: any) {
         id: 'test.noop',
         name: 'Test: Noop',
         async executor() {
-          return { status: 'ok' };
+          return { status: 'ok', actionId: '' };
         },
       };
       const indexRecordActionType: ActionType = {
@@ -125,6 +125,7 @@ export default function(kibana: any) {
           return {
             status: 'error',
             retry: new Date(params.retryAt),
+            actionId: '',
           };
         },
       };
@@ -186,6 +187,7 @@ export default function(kibana: any) {
           });
           return {
             status: 'ok',
+            actionId: '',
           };
         },
       };
