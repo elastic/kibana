@@ -166,7 +166,7 @@ export class TaskManager {
   };
 
   public get isStarted() {
-    return this.pollingSubscription && !this.pollingSubscription.closed;
+    return !this.pollingSubscription.closed;
   }
 
   private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {
