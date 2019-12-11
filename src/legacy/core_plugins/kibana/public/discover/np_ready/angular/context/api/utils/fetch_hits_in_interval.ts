@@ -19,8 +19,13 @@
 import {
   EsQuerySortValue,
   SortDirection,
+<<<<<<< HEAD:src/legacy/core_plugins/kibana/public/discover/np_ready/angular/context/api/utils/fetch_hits_in_interval.ts
   SearchSourceContract,
 } from '../../../../../kibana_services';
+=======
+  ISearchSource,
+} from '../../../../../../../../ui/public/courier';
+>>>>>>> Rename SearchSourceContract -> ISearchSource.:src/legacy/core_plugins/kibana/public/discover/angular/context/api/utils/fetch_hits_in_interval.ts
 import { convertTimeValueToIso } from './date_conversion';
 import { EsHitRecordList } from '../context';
 import { IntervalValue } from './generate_intervals';
@@ -40,7 +45,7 @@ interface RangeQuery {
  * and filters set.
  */
 export async function fetchHitsInInterval(
-  searchSource: SearchSourceContract,
+  searchSource: ISearchSource,
   timeField: string,
   sort: [EsQuerySortValue, EsQuerySortValue],
   sortDir: SortDirection,

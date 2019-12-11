@@ -18,7 +18,7 @@
  */
 
 export {
-  SearchSourceContract,
+  ISearchSource,
   EsQuerySortValue, // used externally by Discover
   FetchOptions, // used externally by AggTypes
   SortDirection, // used externally by Discover

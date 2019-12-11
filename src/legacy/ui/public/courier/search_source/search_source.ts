@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { SearchSource, SearchSourceContract } from '../index';
+export { SearchSource, ISearchSource } from '../index';
