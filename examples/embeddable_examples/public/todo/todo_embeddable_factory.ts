@@ -33,7 +33,7 @@ export class TodoEmbeddableFactory extends EmbeddableFactory {
   }
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.samples.helloworld.displayName', {
+    return i18n.translate('embeddableExamples.todo.displayName', {
       defaultMessage: 'Todo item',
     });
   }

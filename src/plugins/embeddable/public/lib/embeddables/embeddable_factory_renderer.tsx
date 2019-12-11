@@ -18,9 +18,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
 import { IEmbeddable, EmbeddableInput } from './i_embeddable';
 import { EmbeddableRoot } from './embeddable_root';
 import { GetEmbeddableFactory } from '../types';
@@ -53,7 +51,7 @@ export class EmbeddableFactoryRenderer extends React.Component<Props, State> {
     if (factory === undefined) {
       this.setState({
         loading: false,
-        error: i18n.translate('embeddable.errors.factoryDoesNotExist', {
+        error: i18n.translate('embeddableApi.errors.factoryDoesNotExist', {
           defaultMessage:
             'Embeddable factory of {type} does not exist. Ensure all neccessary plugins are installed and enabled.',
           values: {

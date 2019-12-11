@@ -42,7 +42,7 @@ export class HelloWorldEmbeddableFactory extends EmbeddableFactory {
   }
 
   public getDisplayName() {
-    return i18n.translate('embeddableApi.samples.helloworld.displayName', {
+    return i18n.translate('embeddableExamples.helloworld.displayName', {
       defaultMessage: 'hello world',
     });
   }
