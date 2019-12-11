@@ -55,7 +55,7 @@ export function AnnotationsPlot(props: Props) {
             content={
               <EuiFlexGroup>
                 <EuiFlexItem grow={true}>
-                  <EuiText color="subdued">
+                  <EuiText>
                     {i18n.translate('xpack.apm.version', {
                       defaultMessage: 'Version'
                     })}
