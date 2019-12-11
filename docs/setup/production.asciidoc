@@ -140,7 +140,7 @@ bin/kibana -c config/instance2.yml
 
 [float]
 [[high-availability]]
-=== High Availability Across Multiple Elasticsearch Nodes
+=== High availability across multiple Elasticsearch nodes
 Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
 Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
 
