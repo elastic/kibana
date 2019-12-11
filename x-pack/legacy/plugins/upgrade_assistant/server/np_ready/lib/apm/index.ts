@@ -434,8 +434,14 @@ export const apmReindexScript = `
         ctx._source.span.id = span_id.toString();
       }
       def parent = ctx._source.span.remove("parent");
-      if (parent != null && ctx._source.parent == null) {
-        ctx._source.parent = ["id": parent.toString()];
+      def tr_id = ctx._source.transaction.get("id");
+      if (ctx._source.parent == null) {
+        if (parent != null) {
+          ctx._source.parent = ["id": parent.toString()];
+        } else if (tr_id != null) {
+          // 7.x UI requires a value for parent.id - https://github.com/elastic/kibana/issues/52763
+          ctx._source.parent = ["id": tr_id];
+        }
       }
   }
 
