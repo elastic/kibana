@@ -53,8 +53,10 @@ function pathnameWithSlash(url: URL) {
  */
 function searchParamsAreEquivalent(first: URLSearchParams, second: URLSearchParams) {
   // A Set of keys from the second value which haven't yet been matched w/ an equivalent key from the first
+  // @ts-ignore
   const unmatchedKeysFromSecond = new Set(second.keys());
 
+  // @ts-ignore
   for (const key of first.keys()) {
     if (
       second.has(key) === false ||
