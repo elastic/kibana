@@ -307,6 +307,9 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: 1.0,
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorLabel', {
+        defaultMessage: 'Scaling factor',
+      }),
       validations: [
         {
           validator: ({ value }: ValidationFuncArg<any, number>) => {
@@ -315,7 +318,21 @@ export const PARAMETERS_DEFINITION = {
             }
           },
         },
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.scalingFactorIsRequiredErrorMessage',
+              {
+                defaultMessage: 'A scaling factor is required.',
+              }
+            )
+          ),
+        },
       ],
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorHelpText', {
+        defaultMessage:
+          'Values will be multiplied by this factor at index time and rounded to the closest long value.',
+      }),
     } as FieldConfig,
   },
   dynamic: {
