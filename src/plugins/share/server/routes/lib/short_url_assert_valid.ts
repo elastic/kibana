@@ -17,27 +17,25 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { parse } from 'url';
+import { trim } from 'lodash';
+import Boom from 'boom';
 
-export function shortUrlLookupProvider(server) {
-  async function updateMetadata(doc, req) {
-    try {
-      await req.getSavedObjectsClient().update('url', doc.id, {
-        accessDate: new Date(),
-        accessCount: get(doc, 'attributes.accessCount', 0) + 1
-      });
-    } catch (err) {
-      server.log('Warning: Error updating url metadata', err);
-      //swallow errors. It isn't critical if there is no update.
-    }
+export function shortUrlAssertValid(url: string) {
+  const { protocol, hostname, pathname } = parse(url);
+
+  if (protocol) {
+    throw Boom.notAcceptable(`Short url targets cannot have a protocol, found "${protocol}"`);
   }
 
-  return {
-    async getUrl(id, req) {
-      const doc = await req.getSavedObjectsClient().get('url', id);
-      updateMetadata(doc, req);
+  if (hostname) {
+    throw Boom.notAcceptable(`Short url targets cannot have a hostname, found "${hostname}"`);
+  }
 
-      return doc.attributes.url;
-    }
-  };
+  const pathnameParts = trim(pathname, '/').split('/');
+  if (pathnameParts.length !== 2) {
+    throw Boom.notAcceptable(
+      `Short url target path must be in the format "/app/{{appId}}", found "${pathname}"`
+    );
+  }
 }
