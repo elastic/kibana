@@ -17,7 +17,7 @@ import {
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { createDefaultSpace } from './lib/create_default_space';
 // @ts-ignore
 import { AuditLogger } from '../../../../server/lib/audit_logger';

@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { XPackMainPlugin } from '../../../xpack_main/server/xpack_main';
-
-export function isSecurityDisabled(xpackMainPlugin: XPackMainPlugin): boolean;
+export { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+export * from './feature';
