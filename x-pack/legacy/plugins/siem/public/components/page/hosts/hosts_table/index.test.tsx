@@ -17,17 +17,14 @@ import {
   TestProviders,
 } from '../../../../mock';
 import { useMountAppended } from '../../../../utils/use_mount_appended';
-import { mockUiSettings } from '../../../../mock/ui_settings';
-import { useKibanaCore } from '../../../../lib/compose/kibana_core';
+import { mockUseKibanaCore } from '../../../../mock/kibana_core';
 import { createStore, hostsModel, State } from '../../../../store';
 import { HostsTableType } from '../../../../store/hosts/model';
 import { HostsTable } from './index';
 import { mockData } from './mock';
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
+jest.mock('../../../../lib/compose/kibana_core', () => ({
+  useKibanaCore: () => mockUseKibanaCore(),
 }));
 
 // Test will fail because we will to need to mock some core services to make the test work

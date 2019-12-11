@@ -9,20 +9,16 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { flyoutHeaderHeight } from '../';
-import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { TestProviders } from '../../../mock';
-import { mockUiSettings } from '../../../mock/ui_settings';
+import { mockUseKibanaCore } from '../../../mock/kibana_core';
 import { Pane } from '.';
 
 const testFlyoutHeight = 980;
 const testWidth = 640;
 const usersViewing = ['elastic'];
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('ui/new_platform');
-jest.mock('../../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: mockUiSettings,
+jest.mock('../../../lib/compose/kibana_core', () => ({
+  useKibanaCore: () => mockUseKibanaCore(),
 }));
 
 jest.mock('ui/vis/lib/timezone', () => ({
