@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   EuiIcon,
   EuiLink,
@@ -50,10 +50,7 @@ export function DashboardEmptyScreen({
         onClick={onVisualizeClick}
         data-test-subj="addVisualizationButton"
       >
-        <FormattedMessage
-          id="embeddableApi.addPanel.createNewDefaultOption"
-          defaultMessage="Create new"
-        />
+        {constants.createNewVisualizationButton}
       </EuiButton>
     </p>
   );

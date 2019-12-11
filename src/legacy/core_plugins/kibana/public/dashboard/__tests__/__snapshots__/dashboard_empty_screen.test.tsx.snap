@@ -350,13 +350,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                               <span
                                 className="euiButton__text"
                               >
-                                <FormattedMessage
-                                  defaultMessage="Create new"
-                                  id="embeddableApi.addPanel.createNewDefaultOption"
-                                  values={Object {}}
-                                >
-                                  Create new
-                                </FormattedMessage>
+                                Create new
                               </span>
                             </span>
                           </button>
