@@ -37,6 +37,8 @@ import {
 import { LoadingPanel } from '../loading_panel';
 import { getColumnData } from './column_data';
 
+const defaultPanelWidth = 500;
+
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
@@ -51,6 +53,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   const [popoverContents, setPopoverContents] = useState<any>([]);
   const [docsCount, setDocsCount] = useState<null | number>(null);
   const [error, setError] = useState<null | string>(null);
+  const [panelWidth, setPanelWidth] = useState<number>(defaultPanelWidth);
 
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(() =>
@@ -112,6 +115,21 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
       setDocsCount(null);
     }
   };
+
+  const resizeHandler = () => {
+    const tablePanelWidth: number =
+      document.getElementById('mlDataFrameAnalyticsTableResultsPanel')?.clientWidth ||
+      defaultPanelWidth;
+    setPanelWidth(tablePanelWidth);
+  };
+
+  useEffect(() => {
+    window.addEventListener('resize', resizeHandler);
+    resizeHandler();
+    return () => {
+      window.removeEventListener('resize', resizeHandler);
+    };
+  }, []);
 
   useEffect(() => {
     if (confusionMatrixData.length > 0) {
@@ -183,7 +201,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
   }
 
   return (
-    <EuiPanel>
+    <EuiPanel style={{ width: `${panelWidth}px` }}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
