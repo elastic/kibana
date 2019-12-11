@@ -9,16 +9,20 @@ import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 class DocumentationLinksService {
   private esDocBasePath = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
 
-  public getRoleMappingDocUrl(): string {
+  public getRoleMappingDocUrl() {
     return `${this.esDocBasePath}/mapping-roles.html`;
   }
 
-  public getRoleMappingAPIDocUrl(): string {
+  public getRoleMappingAPIDocUrl() {
     return `${this.esDocBasePath}/security-api-put-role-mapping.html`;
   }
 
-  public getRoleMappingTemplateDocUrl(): string {
+  public getRoleMappingTemplateDocUrl() {
     return `${this.esDocBasePath}/security-api-put-role-mapping.html#_role_templates`;
+  }
+
+  public getRoleMappingFieldRulesDocUrl() {
+    return `${this.esDocBasePath}/role-mapping-resources.html#mapping-roles-rule-field`;
   }
 }
 

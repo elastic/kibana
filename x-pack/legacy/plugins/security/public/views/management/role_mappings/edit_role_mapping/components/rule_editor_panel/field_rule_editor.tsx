@@ -17,10 +17,13 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiFieldNumber,
+  EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FieldRule, FieldRuleValue } from '../../../model';
+import { documentationLinks } from '../../../services/documentation_links';
 
 interface Props {
   rule: FieldRule;
@@ -54,29 +57,22 @@ const fieldOptions = userFields.map(f => ({ label: f.name }));
 type ComparisonOption = 'text' | 'number' | 'null';
 const comparisonOptions: Record<
   ComparisonOption,
-  { id: string; label: string; defaultValue: FieldRuleValue }
+  { id: string; helpText?: string; defaultValue: FieldRuleValue }
 > = {
   text: {
     id: 'text',
-    label: i18n.translate(
-      'xpack.security.management.editRoleMapping.fieldRuleEditor.matchesTextLabel',
-      { defaultMessage: 'matches text' }
+    helpText: i18n.translate(
+      'xpack.security.management.editRoleMapping.fieldRuleEditor.textHelpText',
+      { defaultMessage: 'also supports wildcards and Lucene regular expressions' }
     ),
     defaultValue: '*',
   },
   number: {
     id: 'number',
-    label: i18n.translate(
-      'xpack.security.management.editRoleMapping.fieldRuleEditor.equalsNumberLabel',
-      { defaultMessage: 'equals number' }
-    ),
     defaultValue: 0,
   },
   null: {
     id: 'null',
-    label: i18n.translate('xpack.security.management.editRoleMapping.fieldRuleEditor.isNullLabel', {
-      defaultMessage: 'is null',
-    }),
     defaultValue: null,
   },
 };
@@ -118,9 +114,9 @@ export class FieldRuleEditor extends Component<Props, State> {
       rowRuleValue = ruleValue[valueIndex];
     }
 
-    const valueComparison = this.getComparisonType(rowRuleValue);
+    const comparisonType = this.getComparisonType(rowRuleValue);
 
-    const type = valueComparison.id === 'number' ? 'number' : 'text';
+    const type = comparisonType.id === 'number' ? 'number' : 'text';
 
     return (
       <EuiFlexGroup gutterSize="s">
@@ -154,7 +150,7 @@ export class FieldRuleEditor extends Component<Props, State> {
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {this.renderFieldTypeInput(valueComparison.id, valueIndex)}
+          {this.renderFieldTypeInput(comparisonType.id, valueIndex)}
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
           {this.renderFieldValueInput(type, rowRuleValue, valueIndex)}
@@ -253,6 +249,19 @@ export class FieldRuleEditor extends Component<Props, State> {
             defaultMessage: 'Value',
           }
         )}
+        labelAppend={
+          <EuiLink href={documentationLinks.getRoleMappingFieldRulesDocUrl()} target="_blank">
+            <EuiIconTip
+              type="questionInCircle"
+              content={
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.fieldRuleEditor.fieldValueHelp"
+                  defaultMessage="Learn more about supported field values"
+                />
+              }
+            />
+          </EuiLink>
+        }
         key={valueIndex}
       >
         {inputField}

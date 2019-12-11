@@ -142,7 +142,7 @@ export const RoleTemplateEditor = ({
               helpText={
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.roleTemplateHelpText"
-                  defaultMessage="You can use mustache templates here"
+                  defaultMessage="You can use mustache templates here. Example: {{username}}_role"
                 />
               }
               {...extraProps}
