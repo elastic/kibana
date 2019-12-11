@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { RequestHandlerContext } from 'kibana/server';
 import { InventoryAWSAccount } from '../../../../common/http_api/inventory_meta_api';
 import {
-  InfraFrameworkRequest,
-  InfraBackendFrameworkAdapter,
   InfraMetadataAggregationResponse,
   InfraMetadataAggregationBucket,
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 
 export interface AWSInventoryMetadata {
   accounts: InventoryAWSAccount[];
@@ -20,8 +20,8 @@ export interface AWSInventoryMetadata {
 }
 
 export const getAWSMetadata = async (
-  framework: InfraBackendFrameworkAdapter,
-  req: InfraFrameworkRequest,
+  framework: KibanaFramework,
+  req: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration
 ): Promise<AWSInventoryMetadata> => {
   const metricQuery = {
