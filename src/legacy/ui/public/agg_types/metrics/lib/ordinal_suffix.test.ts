@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
-import { ordinalSuffix } from '../ordinal_suffix';
-import expect from '@kbn/expect';
+import { forOwn } from 'lodash';
+import { ordinalSuffix } from './ordinal_suffix';
 
-describe('ordinal suffix util', function () {
+describe('ordinal suffix util', () => {
   const checks = {
     1: 'st',
     2: 'nd',
@@ -52,19 +51,19 @@ describe('ordinal suffix util', function () {
     27: 'th',
     28: 'th',
     29: 'th',
-    30: 'th'
+    30: 'th',
   };
 
-  _.forOwn(checks, function (expected, num) {
+  forOwn(checks, (expected, num: any) => {
     const int = parseInt(num, 10);
     const float = int + Math.random();
 
-    it('knowns ' + int, function () {
-      expect(ordinalSuffix(num)).to.be(num + '' + expected);
+    it('knowns ' + int, () => {
+      expect(ordinalSuffix(num)).toBe(num + '' + expected);
     });
 
-    it('knows ' + float, function () {
-      expect(ordinalSuffix(num)).to.be(num + '' + expected);
+    it('knows ' + float, () => {
+      expect(ordinalSuffix(num)).toBe(num + '' + expected);
     });
   });
 });
