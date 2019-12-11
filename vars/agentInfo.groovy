@@ -1,7 +1,7 @@
 def print() {
   try {
-    def startTime = sh(script: "date -d '-15 minutes' -Iseconds | sed s/+/%2B/", returnStdout: true).trim()
-    def endTime = sh(script: "date -d '+2 hours' -Iseconds | sed s/+/%2B/", returnStdout: true).trim()
+    def startTime = sh(script: "date -d '-3 minutes' -Iseconds | sed s/+/%2B/", returnStdout: true).trim()
+    def endTime = sh(script: "date -d '+1 hour 30 minutes' -Iseconds | sed s/+/%2B/", returnStdout: true).trim()
 
     def resourcesUrl =
       (
@@ -12,7 +12,7 @@ def print() {
       .replaceAll("'", '%27') // Need to escape ' because of the shell echo below, but can't really replace "'" with "\'" because of groovy sandbox
       .replaceAll(/\)$/, '%29') // This is just here because the URL parsing in the Jenkins console doesn't work right
 
-    def logsStartTime = sh(script: "date -d '-30 minutes' +%s", returnStdout: true).trim()
+    def logsStartTime = sh(script: "date -d '-3 minutes' +%s", returnStdout: true).trim()
     def logsUrl =
       (
         "https://infra-stats.elastic.co/app/infra#/logs" +
