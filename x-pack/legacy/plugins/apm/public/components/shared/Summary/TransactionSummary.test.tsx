@@ -16,7 +16,7 @@ describe('TransactionSummary', () => {
 
     const props = {
       errorCount: 0,
-      totalDuration: 0,
+      parentDuration: 0,
       transaction
     };
 

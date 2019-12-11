@@ -16,7 +16,7 @@ import { UserAgentSummaryItem } from './UserAgentSummaryItem';
 
 interface Props {
   transaction: Transaction;
-  totalDuration: number | undefined;
+  parentDuration: number | undefined;
   errorCount: number;
 }
 
@@ -43,14 +43,14 @@ const getTransactionResultSummaryItem = (transaction: Transaction) => {
 
 const TransactionSummary = ({
   transaction,
-  totalDuration,
+  parentDuration,
   errorCount
 }: Props) => {
   const items = [
     <TimestampTooltip time={transaction.timestamp.us / 1000} />,
     <DurationSummaryItem
       duration={transaction.transaction.duration.us}
-      totalDuration={totalDuration}
+      totalDuration={parentDuration}
       parentType="trace"
     />,
     getTransactionResultSummaryItem(transaction),

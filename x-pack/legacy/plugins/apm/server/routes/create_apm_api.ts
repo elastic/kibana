@@ -36,8 +36,11 @@ import {
 } from './settings/apm_indices';
 import { metricsChartsRoute } from './metrics';
 import { serviceNodesRoute } from './service_nodes';
-import { tracesRoute, tracesByIdRoute } from './traces';
-import { transactionByTraceIdRoute } from './transaction';
+import {
+  tracesRoute,
+  tracesByIdRoute,
+  rootTransactionByTraceIdRoute
+} from './traces';
 import {
   transactionGroupsBreakdownRoute,
   transactionGroupsChartsRoute,
@@ -119,7 +122,7 @@ const createApmApi = () => {
     .add(serviceMapRoute)
 
     // Transaction
-    .add(transactionByTraceIdRoute);
+    .add(rootTransactionByTraceIdRoute);
 
   return api;
 };
