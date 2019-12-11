@@ -126,17 +126,18 @@ describe('Policies Lib', () => {
         'foo',
         'bar',
       ]);
-      expect(firstAssign.datasources).toStrictEqual(['foo', 'bar']);
+      expect(firstAssign.datasources).toEqual(['foo', 'bar']);
+
       const secondAssign = await libs.policy.assignDatasource(TestUser, newPolicy.id as string, [
         'test',
       ]);
-      expect(secondAssign.datasources).toStrictEqual(['foo', 'bar', 'test']);
+      expect(secondAssign.datasources).toEqual(['foo', 'bar', 'test']);
 
       const unassigned = await libs.policy.unassignDatasource(TestUser, newPolicy.id as string, [
         'test',
         'foo',
       ]);
-      expect(unassigned.datasources).toStrictEqual(['bar']);
+      expect(unassigned.datasources).toEqual(['bar']);
     });
 
     describe.skip('finish update', () => {});
