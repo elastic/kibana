@@ -19,6 +19,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import moment from 'moment-timezone';
+import { unitOfTime } from 'moment';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
@@ -58,6 +59,48 @@ export interface DiscoverHistogramProps {
 
 interface DiscoverHistogramState {
   chartsTheme: EuiChartThemeType['theme'];
+}
+
+function findIntervalFromDuration(dateValue: number, esUnit: unitOfTime.Base, timeZone: string) {
+  const date = moment.tz(dateValue, timeZone);
+  const startOfDate = moment.tz(date, timeZone).startOf(esUnit);
+  const endOfDate = moment
+    .tz(date, timeZone)
+    .startOf(esUnit)
+    .add(1, esUnit);
+  return endOfDate.valueOf() - startOfDate.valueOf();
+}
+
+function getSingleUnitInterval(value: number, esUnit: unitOfTime.Base, timeZone: string) {
+  switch (esUnit) {
+    case 's':
+      return 1000;
+    case 'ms':
+      return 1;
+    default:
+      return findIntervalFromDuration(value, esUnit, timeZone);
+  }
+}
+
+export function findMinInterval(
+  xValues: number[],
+  esValue: number,
+  esUnit: string,
+  timeZone: string
+): number {
+  // if the interval is a single unit we need to find the minimum fixed interval in ms
+  // between the available dates
+  if (esValue === 1) {
+    return xValues.reduce((minInterval, currentXvalue) => {
+      return Math.min(
+        minInterval,
+        getSingleUnitInterval(currentXvalue, esUnit as unitOfTime.Base, timeZone)
+      );
+    }, Number.MAX_SAFE_INTEGER);
+  } else {
+    // if it's a multiple unit interval, than it's a fixed interval directly convertible to ms
+    return +moment.duration(esValue, esUnit as unitOfTime.Base);
+  }
 }
 
 export class DiscoverHistogram extends Component<DiscoverHistogramProps, DiscoverHistogramState> {
@@ -161,7 +204,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
      * see https://github.com/elastic/kibana/issues/27410
      * TODO: Once the Discover query has been update, we should change the below to use the new field
      */
-    const xInterval = chartData.ordered.interval;
+    const { intervalESValue, intervalESUnit, interval: xInterval } = chartData.ordered;
 
     const xValues = chartData.xAxisOrderedValues;
     const lastXValue = xValues[xValues.length - 1];
@@ -176,7 +219,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     const xDomain = {
       min: domainMin,
       max: domainMax,
-      minInterval: xInterval,
+      minInterval: findMinInterval(xValues, intervalESValue, intervalESUnit, timeZone),
     };
 
     // Domain end of 'now' will be milliseconds behind current time, so we extend time by 1 minute and check if
