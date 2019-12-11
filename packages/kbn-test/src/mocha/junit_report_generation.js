@@ -32,6 +32,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
     rootDirectory = dirname(require.resolve('../../../../package.json')),
+    getTestMetadata = () => ({}),
   } = options;
 
   const stats = {};
@@ -118,6 +119,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
         name: getFullTitle(node),
         classname: `${reportName}.${getPath(node).replace(/\./g, '·')}`,
         time: getDuration(node),
+        'metadata-json': JSON.stringify(getTestMetadata(node) || {}),
       });
     }
 
