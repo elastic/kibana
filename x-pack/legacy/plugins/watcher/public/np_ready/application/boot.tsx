@@ -11,6 +11,7 @@ import { SavedObjectsClientContract } from 'src/core/public';
 import { App, AppDeps } from './app';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
 import { LegacyDependencies } from '../types';
+import { setDefaultEmailTo } from './7_x_only';
 
 interface BootDeps extends AppDeps {
   element: HTMLElement;
@@ -22,6 +23,7 @@ interface BootDeps extends AppDeps {
 export const boot = (bootDeps: BootDeps) => {
   const { I18nContext, element, legacy, savedObjects, ...appDeps } = bootDeps;
 
+  setDefaultEmailTo(bootDeps.uiSettings.get('xPack:defaultAdminEmail'));
   setHttpClient(appDeps.http);
   setSavedObjectsClient(savedObjects);
 
