@@ -136,6 +136,9 @@
             "user_provided_metadata": {
               "type": "text"
             },
+            "current_error_events": {
+              "type": "text"
+            },
             "version": {
               "type": "keyword"
             }

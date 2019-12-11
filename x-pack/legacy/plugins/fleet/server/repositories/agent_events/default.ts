@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsBulkCreateObject } from 'src/core/server';
+import { SavedObjectsBulkCreateObject, SavedObjectsFindOptions } from 'src/core/server';
 import { SODatabaseAdapter } from '../../adapters/saved_objects_database/adapter_types';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 import {
@@ -37,6 +37,54 @@ export class AgentEventsRepository implements AgentEventsRepositoryType {
 
     await this.soAdapter.bulkCreate(user, objects);
   }
+
+  public async list(
+    user: FrameworkUser,
+    options: {
+      agentId?: string;
+      search?: string;
+      page?: number;
+      perPage?: number;
+    } = {
+      page: 1,
+      perPage: 20,
+    }
+  ) {
+    const { page, perPage, search } = options;
+
+    const findOptions: SavedObjectsFindOptions = {
+      type: SO_TYPE,
+      filter:
+        search && search !== ''
+          ? search.replace(/agent_events\./g, 'agent_events.attributes.')
+          : undefined,
+      perPage,
+      page,
+      sortField: 'timestamp',
+      sortOrder: 'DESC',
+      defaultSearchOperator: 'AND',
+    };
+
+    if (options.agentId) {
+      findOptions.search = options.agentId;
+      findOptions.searchFields = ['agent_id'];
+    }
+
+    const { total, saved_objects } = await this.soAdapter.find<AgentEventSOAttributes>(
+      user,
+      findOptions
+    );
+
+    const items: AgentEvent[] = saved_objects.map(so => {
+      return {
+        ...so.attributes,
+        payload: so.attributes.payload ? JSON.parse(so.attributes.payload) : undefined,
+      };
+    });
+
+    return { items, total };
+  }
+
   public async getEventsForAgent(
     user: FrameworkUser,
     agentId: string,
@@ -49,30 +97,10 @@ export class AgentEventsRepository implements AgentEventsRepositoryType {
       perPage: 20,
     }
   ) {
-    const { page, perPage, search } = options;
-    const { total, saved_objects } = await this.soAdapter.find<AgentEventSOAttributes>(user, {
-      type: SO_TYPE,
-      search: agentId,
-      searchFields: ['agent_id'],
-      filter:
-        search && search !== ''
-          ? search.replace(/agent_events\./g, 'agent_events.attributes.')
-          : undefined,
-      perPage,
-      page,
-      sortField: 'timestamp',
-      sortOrder: 'DESC',
-      defaultSearchOperator: 'AND',
+    return this.list(user, {
+      ...options,
+      agentId,
     });
-
-    const items: AgentEvent[] = saved_objects.map(so => {
-      return {
-        ...so.attributes,
-        payload: so.attributes.payload ? JSON.parse(so.attributes.payload) : undefined,
-      };
-    });
-
-    return { items, total };
   }
 
   public async deleteEventsForAgent(user: FrameworkUser, agentId: string): Promise<void> {

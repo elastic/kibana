@@ -178,6 +178,20 @@ export class AgentLib {
   }
 
   /**
+   * Get an active agent by api key id
+   */
+  public async getActiveByApiKeyId(user: FrameworkUser, accessApiKeyId: string) {
+    const agent = await this.agentsRepository.getByAccessApiKeyId(user, accessApiKeyId);
+    if (!agent) {
+      throw Boom.notFound('Agent not found or inactive');
+    }
+    if (!agent.active) {
+      throw Boom.forbidden('Agent inactive');
+    }
+    return agent;
+  }
+
+  /**
    * Agent checkin, update events, get new actions to perfomed.
    * @param agent
    * @param events
@@ -185,23 +199,11 @@ export class AgentLib {
    */
   public async checkin(
     user: FrameworkUser,
+    agent: Agent,
     events: AgentEvent[],
     localMetadata?: any
   ): Promise<{ actions: AgentAction[]; policy: AgentPolicy | null }> {
-    const res = await this.apiKeys.verifyAccessApiKey(user);
-    if (!res.valid) {
-      throw Boom.unauthorized('Invalid apiKey');
-    }
-
     const internalUser = this._getInternalUser();
-
-    const agent = await this.agentsRepository.getByAccessApiKeyId(internalUser, res.accessApiKeyId);
-    if (!agent) {
-      throw Boom.notFound('Agent not found or inactive');
-    }
-    if (!agent.active) {
-      throw Boom.forbidden('Agent inactive');
-    }
 
     const actions = this._filterActionsForCheckin(agent);
 
@@ -215,16 +217,20 @@ export class AgentLib {
       updateData.local_metadata = localMetadata;
     }
 
-    const { acknowledgedActionIds } = await this.agentEvents.processEventsForCheckin(
-      internalUser,
-      agent.id,
-      events
-    );
+    const {
+      acknowledgedActionIds,
+      updatedErrorEvents,
+    } = await this.agentEvents.processEventsForCheckin(internalUser, agent, events);
+
     if (acknowledgedActionIds.length > 0) {
       const updatedActions = actions.map(a => {
         return { ...a, sent_at: acknowledgedActionIds.indexOf(a.id) >= 0 ? now : undefined };
       });
       updateData.actions = updatedActions;
+    }
+
+    if (updatedErrorEvents) {
+      updateData.current_error_events = updatedErrorEvents;
     }
 
     await this.agentsRepository.update(internalUser, agent.id, updateData);
@@ -271,6 +277,7 @@ export class AgentLib {
     );
 
     return {
+      events: await this.agentEvents.getEventsCountForPolicyId(user, policyId),
       total: all.total,
       online: all.total - error.total - offline.total,
       error: error.total,

@@ -38,8 +38,19 @@ export const createCheckinAgentsRoute = (libs: FleetServerLib) => ({
   },
   handler: async (request: CheckinRequest): Promise<ReturnTypeCheckin> => {
     const { events } = await validateAndDecodePayload(request);
+    const res = await libs.apiKeys.verifyAccessApiKey(request.user);
+    if (!res.valid) {
+      throw Boom.unauthorized('Invalid apiKey');
+    }
+
+    const agent = await libs.agents.getActiveByApiKeyId(
+      libs.framework.getInternalUser(),
+      res.accessApiKeyId
+    );
+
     const { actions, policy } = await libs.agents.checkin(
       request.user,
+      agent,
       events,
       request.payload.local_metadata
     );

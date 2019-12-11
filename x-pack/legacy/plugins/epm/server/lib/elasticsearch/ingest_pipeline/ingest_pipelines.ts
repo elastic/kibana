@@ -55,10 +55,32 @@ async function installPipeline({
 }): Promise<AssetReference> {
   const buffer = Registry.getAsset(path);
   const parts = Registry.pathParts(path);
+  const extension = getExtension(path);
   const id = path.replace(/\W/g, '_'); // TODO: replace with "real" pipeline id
   const pipeline = buffer.toString('utf8');
 
-  await callCluster('ingest.putPipeline', { id, body: pipeline });
+  const callClusterParams: {
+    method: string;
+    path: string;
+    ignore: number[];
+    body: any;
+    headers?: any;
+  } = {
+    method: 'PUT',
+    path: `/_ingest/pipeline/${id}`,
+    ignore: [404],
+    body: pipeline,
+  };
+  if (extension === 'yml') {
+    callClusterParams.headers = { ['Content-Type']: 'application/yaml' };
+  }
+
+  // This uses the catch-all endpoint 'transport.request' because we have to explicitly
+  // set the Content-Type header above for sending yml data. Setting the headers is not
+  // exposed in the convenience endpoint 'ingest.putPipeline' of elasticsearch-js-legacy
+  // which we could otherwise use.
+  // See src/core/server/elasticsearch/api_types.ts for available endpoints.
+  await callCluster('transport.request', callClusterParams);
 
   return { id, type: parts.type };
 }
@@ -66,3 +88,8 @@ async function installPipeline({
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
 const isPipeline = ({ path }: Registry.ArchiveEntry) =>
   !isDirectory({ path }) && Registry.pathParts(path).type === ElasticsearchAssetType.ingestPipeline;
+
+const getExtension = (path: string): string => {
+  const splitPath = path.split('.');
+  return splitPath[splitPath.length - 1];
+};
