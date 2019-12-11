@@ -251,7 +251,6 @@ yarn es snapshot -E path.data=../data_prod1
 Start your remote cluster by running:
 ```bash
 yarn es snapshot -E transport.port=9500 -E http.port=9201 -E path.data=../data_prod2
-yarn es snapshot --license=trial -E cluster.name=prod2 -E transport.port=9500 -E http.port=9201 -E path.data=../data_prod2
 ```
 
 Once both clusters are running, start kibana. Kibana will connect to the primary cluster.
