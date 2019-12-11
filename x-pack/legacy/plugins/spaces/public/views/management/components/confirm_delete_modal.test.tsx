@@ -19,6 +19,7 @@ describe('ConfirmDeleteModal', () => {
     };
 
     const spacesManager = spacesManagerMock.create();
+    spacesManager.getActiveSpace.mockResolvedValue(space);
 
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
@@ -44,6 +45,7 @@ describe('ConfirmDeleteModal', () => {
     };
 
     const spacesManager = spacesManagerMock.create();
+    spacesManager.getActiveSpace.mockResolvedValue(space);
 
     const onCancel = jest.fn();
     const onConfirm = jest.fn();
