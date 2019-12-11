@@ -60,7 +60,7 @@ describe('<TemplateEdit />', () => {
 
   describe('without mappings', () => {
     const templateToEdit = fixtures.getTemplate({
-      name: 'index_template_without_Mappings',
+      name: 'index_template_without_mappings',
       indexPatterns: ['indexPattern1'],
     });
 

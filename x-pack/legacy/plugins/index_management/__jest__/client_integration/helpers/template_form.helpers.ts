@@ -124,7 +124,7 @@ export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
     component.update();
   };
 
-  const completeStepFour = async (aliases: string) => {
+  const completeStepFour = async (aliases?: string) => {
     const { find, component } = testBed;
 
     if (aliases) {
