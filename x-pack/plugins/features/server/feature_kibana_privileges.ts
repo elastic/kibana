@@ -4,6 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export interface FeatureKibanaAlertingPrivileges {
+  alertTypeId: string;
+  consumer: string;
+}
+
 /**
  * Feature privilege definition
  */
@@ -33,6 +38,11 @@ export interface FeatureKibanaPrivileges {
    * If this feature includes a catalogue entry, you can specify them here to control visibility based on user permissions.
    */
   catalogue?: string[];
+
+  alerting?: {
+    all: FeatureKibanaAlertingPrivileges[];
+    read: FeatureKibanaAlertingPrivileges[];
+  };
 
   /**
    * If your feature includes server-side APIs, you can tag those routes to secure access based on user permissions.

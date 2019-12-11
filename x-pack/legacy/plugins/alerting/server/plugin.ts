@@ -66,17 +66,25 @@ export class Plugin {
       app: ['alerting', 'kibana'],
       privileges: {
         all: {
+          alerting: {
+            all: [{ alertTypeId: '*', consumer: '*' }],
+            read: [],
+          },
           savedObject: {
-            all: ['alert'],
+            all: [],
             read: [],
           },
           ui: [],
           api: ['alerting-read', 'alerting-all'],
         },
         read: {
+          alerting: {
+            all: [],
+            read: [{ alertTypeId: '*', consumer: '*' }],
+          },
           savedObject: {
             all: [],
-            read: ['alert'],
+            read: [],
           },
           ui: [],
           api: ['alerting-read'],
@@ -161,7 +169,7 @@ export class Plugin {
     return {
       listTypes: this.alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest: (request: Hapi.Request) =>
-        alertsClientFactory!.create(KibanaRequest.from(request), request),
+        alertsClientFactory!.create(KibanaRequest.from(request), request, core.savedObjects),
     };
   }
 }

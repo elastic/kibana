@@ -63,6 +63,7 @@ export interface Alert {
   name: string;
   tags: string[];
   alertTypeId: string;
+  consumer: string;
   interval: string;
   actions: AlertAction[];
   params: Record<string, any>;

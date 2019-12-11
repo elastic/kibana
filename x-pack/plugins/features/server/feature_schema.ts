@@ -23,11 +23,22 @@ const managementSchema = Joi.object().pattern(
   Joi.array().items(Joi.string().regex(uiCapabilitiesRegex))
 );
 const catalogueSchema = Joi.array().items(Joi.string().regex(uiCapabilitiesRegex));
-
+const alertingSchema = Joi.object({
+  consumer: Joi.string().required(),
+  alertTypeId: Joi.string().required(),
+});
 const privilegeSchema = Joi.object({
   excludeFromBasePrivileges: Joi.boolean(),
   management: managementSchema,
   catalogue: catalogueSchema,
+  alerting: Joi.object({
+    all: Joi.array()
+      .items(alertingSchema)
+      .required(),
+    read: Joi.array()
+      .items(alertingSchema)
+      .required(),
+  }),
   api: Joi.array().items(Joi.string()),
   app: Joi.array().items(Joi.string()),
   savedObject: Joi.object({

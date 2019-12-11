@@ -9,7 +9,11 @@ import uuid from 'uuid';
 import { AlertTypeRegistry } from '../types';
 import { AlertsClient } from '../alerts_client';
 import { SecurityPluginStartContract, TaskManagerStartContract } from '../shim';
-import { KibanaRequest, Logger } from '../../../../../../src/core/server';
+import {
+  KibanaRequest,
+  Logger,
+  SavedObjectsLegacyService,
+} from '../../../../../../src/core/server';
 
 export interface ConstructorOpts {
   logger: Logger;
@@ -34,14 +38,22 @@ export class AlertsClientFactory {
     this.securityPluginSetup = options.securityPluginSetup;
   }
 
-  public create(request: KibanaRequest, legacyRequest: Hapi.Request): AlertsClient {
+  public create(
+    request: KibanaRequest,
+    legacyRequest: Hapi.Request,
+    savedObjectsLegacyService: SavedObjectsLegacyService
+  ): AlertsClient {
     const { securityPluginSetup } = this;
     return new AlertsClient({
       logger: this.logger,
       taskManager: this.taskManager,
       alertTypeRegistry: this.alertTypeRegistry,
-      savedObjectsClient: legacyRequest.getSavedObjectsClient(),
+      unsecuredSavedObjectsClient: savedObjectsLegacyService.getScopedSavedObjectsClient(
+        legacyRequest,
+        { excludedWrappers: ['security'] }
+      ),
       spaceId: this.getSpaceId(legacyRequest),
+      authorization: securityPluginSetup && securityPluginSetup.authz,
       async getUserName() {
         if (!securityPluginSetup) {
           return null;

@@ -7,9 +7,14 @@
 import Boom from 'boom';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Logger, SavedObjectsClientContract, SavedObjectReference } from 'src/core/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  SavedObjectReference,
+  KibanaRequest,
+} from '../../../../../src/core/server';
 import { Alert, RawAlert, AlertTypeRegistry, AlertAction, AlertType } from './types';
-import { TaskManagerStartContract } from './shim';
+import { TaskManagerStartContract, SecurityPluginStartContract } from './shim';
 import { validateAlertTypeParams } from './lib';
 import { CreateAPIKeyResult as SecurityPluginCreateAPIKeyResult } from '../../../../plugins/security/server';
 
@@ -25,9 +30,11 @@ export type CreateAPIKeyResult = FailedCreateAPIKeyResult | SuccessCreateAPIKeyR
 interface ConstructorOptions {
   logger: Logger;
   taskManager: TaskManagerStartContract;
-  savedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
   alertTypeRegistry: AlertTypeRegistry;
   spaceId?: string;
+  request: KibanaRequest;
+  authorization?: SecurityPluginStartContract['authz'];
   getUserName: () => Promise<string | null>;
   createAPIKey: () => Promise<CreateAPIKeyResult>;
 }
@@ -85,31 +92,37 @@ export class AlertsClient {
   private readonly logger: Logger;
   private readonly getUserName: () => Promise<string | null>;
   private readonly spaceId?: string;
+  private readonly request: KibanaRequest;
+  private readonly authorization?: SecurityPluginStartContract['authz'];
   private readonly taskManager: TaskManagerStartContract;
-  private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: () => Promise<CreateAPIKeyResult>;
 
   constructor({
     alertTypeRegistry,
-    savedObjectsClient,
+    unsecuredSavedObjectsClient,
     taskManager,
     logger,
     spaceId,
+    request,
+    authorization,
     getUserName,
     createAPIKey,
   }: ConstructorOptions) {
     this.logger = logger;
     this.getUserName = getUserName;
     this.spaceId = spaceId;
+    this.request = request;
+    this.authorization = authorization;
     this.taskManager = taskManager;
     this.alertTypeRegistry = alertTypeRegistry;
-    this.savedObjectsClient = savedObjectsClient;
+    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.createAPIKey = createAPIKey;
   }
 
   public async create({ data, options }: CreateOptions) {
-    // Throws an error if alert type isn't registered
+    await this.ensureAuthorized(data.alertTypeId, data.consumer, 'create');
     const alertType = this.alertTypeRegistry.get(data.alertTypeId);
     const validatedAlertTypeParams = validateAlertTypeParams(alertType, data.params);
     const apiKey = await this.createAPIKey();
@@ -129,7 +142,7 @@ export class AlertsClient {
       muteAll: false,
       mutedInstanceIds: [],
     });
-    const createdAlert = await this.savedObjectsClient.create('alert', rawAlert, {
+    const createdAlert = await this.unsecuredSavedObjectsClient.create('alert', rawAlert, {
       ...options,
       references,
     });
@@ -144,7 +157,7 @@ export class AlertsClient {
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
-          await this.savedObjectsClient.delete('alert', createdAlert.id);
+          await this.unsecuredSavedObjectsClient.delete('alert', createdAlert.id);
         } catch (err) {
           // Skip the cleanup error and throw the task manager error to avoid confusion
           this.logger.error(
@@ -153,7 +166,7 @@ export class AlertsClient {
         }
         throw e;
       }
-      await this.savedObjectsClient.update('alert', createdAlert.id, {
+      await this.unsecuredSavedObjectsClient.update('alert', createdAlert.id, {
         scheduledTaskId: scheduledTask.id,
       });
       createdAlert.attributes.scheduledTaskId = scheduledTask.id;
@@ -162,12 +175,14 @@ export class AlertsClient {
   }
 
   public async get({ id }: { id: string }) {
-    const result = await this.savedObjectsClient.get('alert', id);
+    const result = await this.unsecuredSavedObjectsClient.get('alert', id);
+    await this.ensureAuthorized(result.attributes.alertTypeId, result.attributes.consumer, 'get');
     return this.getAlertFromRaw(result.id, result.attributes, result.references);
   }
 
   public async find({ options = {} }: FindOptions = {}): Promise<FindResult> {
-    const results = await this.savedObjectsClient.find({
+    // find is harder to secure if you want to allow users to find all alerts that they have access to
+    const results = await this.unsecuredSavedObjectsClient.find({
       ...options,
       type: 'alert',
     });
@@ -185,8 +200,13 @@ export class AlertsClient {
   }
 
   public async delete({ id }: { id: string }) {
-    const alertSavedObject = await this.savedObjectsClient.get('alert', id);
-    const removeResult = await this.savedObjectsClient.delete('alert', id);
+    const alertSavedObject = await this.unsecuredSavedObjectsClient.get('alert', id);
+    await this.ensureAuthorized(
+      alertSavedObject.attributes.alertTypeId,
+      alertSavedObject.attributes.consumer,
+      'delete'
+    );
+    const removeResult = await this.unsecuredSavedObjectsClient.delete('alert', id);
     if (alertSavedObject.attributes.scheduledTaskId) {
       await this.taskManager.remove(alertSavedObject.attributes.scheduledTaskId);
     }
@@ -194,7 +214,8 @@ export class AlertsClient {
   }
 
   public async update({ id, data }: UpdateOptions) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get('alert', id);
+    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'update');
     const alertType = this.alertTypeRegistry.get(attributes.alertTypeId);
     const apiKey = await this.createAPIKey();
 
@@ -204,7 +225,7 @@ export class AlertsClient {
 
     const { actions, references } = this.extractReferences(data.actions);
     const username = await this.getUserName();
-    const updatedObject = await this.savedObjectsClient.update(
+    const updatedObject = await this.unsecuredSavedObjectsClient.update(
       'alert',
       id,
       {
@@ -227,11 +248,12 @@ export class AlertsClient {
   }
 
   public async updateApiKey({ id }: { id: string }) {
-    const { version, attributes } = await this.savedObjectsClient.get('alert', id);
+    const { version, attributes } = await this.unsecuredSavedObjectsClient.get('alert', id);
+    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'updateApiKey');
 
     const apiKey = await this.createAPIKey();
     const username = await this.getUserName();
-    await this.savedObjectsClient.update(
+    await this.unsecuredSavedObjectsClient.update(
       'alert',
       id,
       {
@@ -247,7 +269,8 @@ export class AlertsClient {
   }
 
   public async enable({ id }: { id: string }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get('alert', id);
+    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'enable');
     if (attributes.enabled === false) {
       const apiKey = await this.createAPIKey();
       const scheduledTask = await this.scheduleAlert(
@@ -256,7 +279,7 @@ export class AlertsClient {
         attributes.interval
       );
       const username = await this.getUserName();
-      await this.savedObjectsClient.update(
+      await this.unsecuredSavedObjectsClient.update(
         'alert',
         id,
         {
@@ -275,9 +298,10 @@ export class AlertsClient {
   }
 
   public async disable({ id }: { id: string }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', id);
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get('alert', id);
+    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'disable');
     if (attributes.enabled === true) {
-      await this.savedObjectsClient.update(
+      await this.unsecuredSavedObjectsClient.update(
         'alert',
         id,
         {
@@ -295,7 +319,9 @@ export class AlertsClient {
   }
 
   public async muteAll({ id }: { id: string }) {
-    await this.savedObjectsClient.update('alert', id, {
+    const { attributes } = await this.unsecuredSavedObjectsClient.get('alert', id);
+    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'muteAll');
+    await this.unsecuredSavedObjectsClient.update('alert', id, {
       muteAll: true,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
@@ -303,7 +329,9 @@ export class AlertsClient {
   }
 
   public async unmuteAll({ id }: { id: string }) {
-    await this.savedObjectsClient.update('alert', id, {
+    const { attributes } = await this.unsecuredSavedObjectsClient.get('alert', id);
+    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'unmuteAll');
+    await this.unsecuredSavedObjectsClient.update('alert', id, {
       muteAll: false,
       mutedInstanceIds: [],
       updatedBy: await this.getUserName(),
@@ -317,11 +345,12 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get('alert', alertId);
+    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'muteInstance');
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && !mutedInstanceIds.includes(alertInstanceId)) {
       mutedInstanceIds.push(alertInstanceId);
-      await this.savedObjectsClient.update(
+      await this.unsecuredSavedObjectsClient.update(
         'alert',
         alertId,
         {
@@ -340,10 +369,11 @@ export class AlertsClient {
     alertId: string;
     alertInstanceId: string;
   }) {
-    const { attributes, version } = await this.savedObjectsClient.get('alert', alertId);
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get('alert', alertId);
+    await this.ensureAuthorized(attributes.alertTypeId, attributes.consumer, 'unmuteInstance');
     const mutedInstanceIds = attributes.mutedInstanceIds || [];
     if (!attributes.muteAll && mutedInstanceIds.includes(alertInstanceId)) {
-      await this.savedObjectsClient.update(
+      await this.unsecuredSavedObjectsClient.update(
         'alert',
         alertId,
         {
@@ -452,6 +482,26 @@ export class AlertsClient {
             groups: invalidActionGroups.join(', '),
           },
         })
+      );
+    }
+  }
+
+  private async ensureAuthorized(
+    alertTypeId: string,
+    consumer: string | undefined,
+    operation: string
+  ) {
+    if (this.authorization == null) {
+      return;
+    }
+
+    const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(this.request);
+    const { hasAllRequested } = await checkPrivileges(
+      this.authorization.actions.alerting.get(alertTypeId, consumer, operation)
+    );
+    if (!hasAllRequested) {
+      throw Boom.forbidden(
+        `Unable to ${operation} ${consumer ? `${consumer}'s` : ''} ${alertTypeId}`
       );
     }
   }

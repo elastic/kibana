@@ -42,7 +42,7 @@ export interface Server extends Legacy.Server {
  */
 export type TaskManagerStartContract = Pick<TaskManager, 'schedule' | 'fetch' | 'remove'>;
 export type SecurityPluginSetupContract = Pick<SecurityPlugin, '__legacyCompat'>;
-export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc'>;
+export type SecurityPluginStartContract = Pick<SecurityPlugin, 'authc' | 'authz'>;
 export type XPackMainPluginSetupContract = Pick<XPackMainPlugin, 'registerFeature'>;
 export type TaskManagerSetupContract = Pick<
   TaskManager,

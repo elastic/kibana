@@ -55,7 +55,10 @@ export interface LegacyAPI {
  */
 export interface PluginSetupContract {
   authc: Authentication;
-  authz: Pick<Authorization, 'actions' | 'checkPrivilegesWithRequest' | 'mode'>;
+  authz: Pick<
+    Authorization,
+    'actions' | 'checkPrivilegesDynamicallyWithRequest' | 'checkPrivilegesWithRequest' | 'mode'
+  >;
 
   /**
    * If Spaces plugin is available it's supposed to register its SpacesService with Security plugin
@@ -174,6 +177,7 @@ export class Plugin {
       authz: {
         actions: authz.actions,
         checkPrivilegesWithRequest: authz.checkPrivilegesWithRequest,
+        checkPrivilegesDynamicallyWithRequest: authz.checkPrivilegesDynamicallyWithRequest,
         mode: authz.mode,
       },
 

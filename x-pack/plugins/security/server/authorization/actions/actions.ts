@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertingActions } from './alerting';
 import { ApiActions } from './api';
 import { AppActions } from './app';
 import { SavedObjectActions } from './saved_object';
@@ -21,6 +22,8 @@ export class Actions {
    * temporary hack until we remove this assumption in the role management UI
    */
   public readonly allHack = 'allHack:';
+
+  public readonly alerting = new AlertingActions(this.versionNumber);
 
   public readonly api = new ApiActions(this.versionNumber);
 
