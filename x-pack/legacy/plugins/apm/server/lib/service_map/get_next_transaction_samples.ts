@@ -65,8 +65,7 @@ export async function getNextTransactionSamples({
                 }
               }
             ],
-            // TODO: needs to be balanced with the 20 below
-            size: 200,
+            size: 20, // determines size of bulk index requests to apm-service-connections
             after: afterKey
           },
           aggs: {

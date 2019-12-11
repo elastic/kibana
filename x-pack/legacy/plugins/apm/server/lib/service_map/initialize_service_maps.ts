@@ -8,7 +8,6 @@ import { Server } from 'hapi';
 // @ts-ignore
 import { TaskManager, RunContext } from '../legacy/plugins/task_manager';
 import { runServiceMapTask } from './run_service_map_task';
-import { setupIngestPipeline } from './service-connection-es-scripts';
 import {
   SERVICE_MAP_TASK_TYPE,
   SERVICE_MAP_TASK_ID
@@ -16,21 +15,6 @@ import {
 import { createServiceConnectionsIndex } from './create_service_connections_index';
 
 export async function initializeServiceMaps(server: Server) {
-  // TODO remove setupIngestPipeline when agents set destination.address (elastic/apm#115)
-  setupIngestPipeline(server)
-    .then(() => {
-      server.log(
-        ['info', 'plugins', 'apm'],
-        `Created ingest pipeline to extract destination.address from span names.`
-      );
-    })
-    .catch(error => {
-      server.log(
-        ['error', 'plugins', 'apm'],
-        `Unable to setup the ingest pipeline to extract destination.address from span names.\n${error.stack}`
-      );
-    });
-
   await createServiceConnectionsIndex(server);
 
   const taskManager = server.plugins.task_manager;
