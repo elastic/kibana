@@ -34,7 +34,7 @@ import {
   ConcreteTaskInstance,
   RunContext,
   TaskInstanceWithId,
-  TaskInstance,
+  TaskInstanceWithDeprecatedFields,
   TaskLifecycle,
   TaskLifecycleResult,
   TaskStatus,
@@ -50,6 +50,7 @@ import {
   ClaimOwnershipResult,
 } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
+import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 
 const VERSION_CONFLICT_STATUS = 409;
 
@@ -268,11 +269,14 @@ export class TaskManager {
    * @param task - The task being scheduled.
    * @returns {Promise<ConcreteTaskInstance>}
    */
-  public async schedule(taskInstance: TaskInstance, options?: any): Promise<ConcreteTaskInstance> {
+  public async schedule(
+    taskInstance: TaskInstanceWithDeprecatedFields,
+    options?: any
+  ): Promise<ConcreteTaskInstance> {
     await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
-      taskInstance,
+      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance),
     });
     const result = await this.store.schedule(modifiedTask);
     this.attemptToRun();

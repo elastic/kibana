@@ -257,6 +257,18 @@ export interface TaskInstance {
 }
 
 /**
+ * Support for the depracated interval field, this should be removed in version 8.0.0
+ * and marked as a breaking change, ideally nutil then all usage of `interval` will be
+ * replaced with use of `recurringSchedule`
+ */
+export interface TaskInstanceWithDeprecatedFields extends TaskInstance {
+  /**
+   * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
+   * */
+  interval?: string;
+}
+
+/**
  * A task instance that has an id.
  */
 export type TaskInstanceWithId = Require<TaskInstance, 'id'>;

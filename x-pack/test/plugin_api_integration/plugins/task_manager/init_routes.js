@@ -35,6 +35,7 @@ export function initRoutes(server, taskTestingEvents) {
           task: Joi.object({
             taskType: Joi.string().required(),
             recurringSchedule: Joi.string().optional(),
+            interval: Joi.string().optional(),
             params: Joi.object().required(),
             state: Joi.object().optional(),
             id: Joi.string().optional()

@@ -230,6 +230,27 @@ export default function ({ getService }) {
       });
     });
 
+    it('should support the deprecated interval field', async () => {
+      const interval = _.random(5, 200);
+      const intervalMilliseconds = interval * 60000;
+
+      const originalTask = await scheduleTask({
+        taskType: 'sampleTask',
+        interval: `${interval}m`,
+        params: { },
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+
+        const [task] = (await currentTasks()).docs;
+        expect(task.attempts).to.eql(0);
+        expect(task.state.count).to.eql(1);
+
+        expectReschedule(Date.parse(originalTask.runAt), task, intervalMilliseconds);
+      });
+    });
+
     it('should return a task run result when asked to run a task now', async () => {
 
       const originalTask = await scheduleTask({
