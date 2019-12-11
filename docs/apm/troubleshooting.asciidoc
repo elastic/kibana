@@ -1,20 +1,11 @@
-// This is a workaround for links to the APM Server 7.x branch
-ifeval::["{branch}" == "7.x"]
-:apm-server-ref:       https://www.elastic.co/guide/en/apm/server/master
-endif::[]
-
 [[troubleshooting]] 
 === Troubleshooting common problems
 
+// This is a workaround for links to the APM Server 7.x branch
 ifeval::["{branch}" == "7.x"]
-branch = 1
-:apm-server-ref:       https://www.elastic.co/guide/en/apm/server/master
+// :apm-server-ref:       https://www.elastic.co/guide/en/apm/server/master
 endif::[]
-
-ifeval::[{branch} == "7.x"]
-branch = 2
-:apm-server-ref:       https://www.elastic.co/guide/en/apm/server/master
-endif::[]
+// End workaround
 
 If you have something to add to this section, please consider creating a pull request with
 your proposed changes in the https://github.com/elastic/kibana[Kibana repository].
