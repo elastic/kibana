@@ -90,6 +90,7 @@ const legacyAppToNavItem = (app: LegacyApp, selectedId: string) => ({
   name: app.display,
   id: app.id,
   href: app.url,
+  'data-test-subj': app.id,
 });
 
 const sectionVisible = (section: LegacySection | LegacyApp) => !section.disabled && section.visible;
