@@ -17,18 +17,18 @@
  * under the License.
  */
 
-import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '../../../../../src/plugins/data/public';
+import { TSearchStrategyProvider } from '../../../src/plugins/data/server';
+import { DEMO_SEARCH_STRATEGY } from '../common';
 
-export const DEMO_SEARCH_STRATEGY = 'DEMO_SEARCH_STRATEGY';
-
-export interface IDemoRequest extends IKibanaSearchRequest {
-  mood: string | 'sad' | 'happy';
-  name: string;
-}
-
-export interface IDemoResponse extends IKibanaSearchResponse {
-  greeting: string;
-}
+export const demoSearchStrategyProvider: TSearchStrategyProvider<typeof DEMO_SEARCH_STRATEGY> = () => {
+  return {
+    search: request => {
+      return Promise.resolve({
+        greeting:
+          request.mood === 'happy'
+            ? `Lovely to meet you, ${request.name}`
+            : `Hope you feel better, ${request.name}`,
+      });
+    },
+  };
+};

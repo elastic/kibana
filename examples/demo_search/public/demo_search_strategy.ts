@@ -22,8 +22,8 @@ import {
   ISearchContext,
   SYNC_SEARCH_STRATEGY,
   ISearchGeneric,
-} from '../../../../../src/plugins/data/public';
-import { TSearchStrategyProvider, ISearchStrategy } from '../../../../../src/plugins/data/public';
+} from '../../../src/plugins/data/public';
+import { TSearchStrategyProvider, ISearchStrategy } from '../../../src/plugins/data/public';
 
 import { DEMO_SEARCH_STRATEGY, IDemoResponse } from '../common';
 
