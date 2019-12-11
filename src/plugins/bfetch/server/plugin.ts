@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
+import {
+  CoreStart,
+  PluginInitializerContext,
+  CoreSetup,
+  Plugin,
+  RequestHandlerContext,
+} from 'src/core/server';
+import { schema } from '@kbn/config-schema';
 
 // eslint-disable-next-line
 export interface BfetchServerSetupDependencies {}
@@ -42,8 +49,39 @@ export class BfetchServerPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
-    // eslint-disable-next-line
-    console.log('server setup');
+    const router = core.http.createRouter();
+    router.post(
+      {
+        path: '/bfetch/batch',
+        options: {
+          authRequired: false,
+        },
+        validate: {
+          params: schema.object({}, { allowUnknowns: true }),
+          query: schema.object({}, { allowUnknowns: true }),
+          body: schema.object({}, { allowUnknowns: true }),
+        },
+      },
+      async (context, request, res) => {
+        return res.ok({ body: 'OK!' });
+      }
+    );
+    router.get(
+      {
+        path: '/bfetch/ping',
+        options: {
+          authRequired: false,
+        },
+        validate: {
+          params: schema.object({}, { allowUnknowns: true }),
+          query: schema.object({}, { allowUnknowns: true }),
+          body: schema.object({}, { allowUnknowns: true }),
+        },
+      },
+      async (context: RequestHandlerContext, request: any, response: any) => {
+        return response.ok({ body: 'pongs' });
+      }
+    );
     return {};
   }
 
