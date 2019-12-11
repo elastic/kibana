@@ -46,6 +46,7 @@ export const SIGNALS_ID = `${APP_ID}.signals`;
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
 export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules`;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
+export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags`;
 
 /**
  * Default signals index key for kibana.dev.yml
