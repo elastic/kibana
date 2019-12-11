@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpHandler } from 'src/core/public';
+import { HttpFetchOptions, HttpHandler } from 'src/core/public';
 import {
   getCategoriesPath,
   getFilePath,
@@ -23,7 +23,8 @@ import {
   PackagesGroupedByStatus,
 } from '../common/types';
 
-const defaultClient: HttpHandler = (path, options?) => fetch(path, options).then(res => res.json());
+const defaultClient: HttpHandler = (path: string, options?: HttpFetchOptions) =>
+  fetch(path, options).then(res => res.json());
 
 let _fetch: HttpHandler = defaultClient;
 
