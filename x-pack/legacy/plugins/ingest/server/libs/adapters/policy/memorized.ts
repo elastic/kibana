@@ -71,7 +71,11 @@ export class MemorizedPolicyAdapter {
     policy: StoredPolicy
   ): Promise<StoredPolicy> {
     return await memorize(
-      `update - ${JSON.stringify(policy)}`,
+      `update - ${JSON.stringify({
+        name: policy.name,
+        description: policy.description,
+        datasources: policy.datasources,
+      })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
