@@ -21,7 +21,6 @@ import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { SearchSourceContract } from 'ui/courier';
 import {
   esFilters,
   TimeRange,
@@ -51,6 +50,7 @@ import {
   getServices,
   IndexPattern,
   RequestAdapter,
+  SearchSourceContract,
 } from '../../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
 

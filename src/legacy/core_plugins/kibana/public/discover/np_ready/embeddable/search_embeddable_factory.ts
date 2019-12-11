@@ -18,8 +18,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { IInjector } from 'ui/chrome';
-import { getServices } from '../../kibana_services';
+import { getServices, IInjector } from '../../kibana_services';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,

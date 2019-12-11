@@ -20,16 +20,17 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 import angular from 'angular';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { registerFeature } from './np_ready/helpers/register_feature';
+import { registerFeature } from './np_ready/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
 import { NavigationStart } from '../../../navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
-import { buildServices } from './np_ready/helpers/build_services';
+import { buildServices } from './build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
+import { HomePublicPluginSetup } from '../../../../../plugins/home/public';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -42,6 +43,7 @@ export interface DiscoverSetupPlugins {
   uiActions: IUiActionsStart;
   embeddable: IEmbeddableSetup;
   kibana_legacy: KibanaLegacySetup;
+  home: HomePublicPluginSetup;
 }
 export interface DiscoverStartPlugins {
   uiActions: IUiActionsStart;
@@ -89,6 +91,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         return renderApp(innerAngularName, params.element);
       },
     });
+    registerFeature(plugins.home);
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
@@ -116,7 +119,6 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
     };
 
     this.registerEmbeddable(core, plugins);
-    registerFeature();
   }
 
   /**

@@ -29,13 +29,13 @@ import chromeLegacy from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
 // @ts-ignore
-import { createSavedSearchesService } from '../../saved_searches/saved_searches';
+import { createSavedSearchesService } from './saved_searches/saved_searches';
 // @ts-ignore
-import { createSavedSearchFactory } from '../../saved_searches/_saved_search';
-import { DiscoverStartPlugins } from '../../plugin';
-import { EuiUtilsStart } from '../../../../../../../plugins/eui_utils/public';
-import { SavedSearch } from '../types';
-import { SharePluginStart } from '../../../../../../../plugins/share/public';
+import { createSavedSearchFactory } from './saved_searches/_saved_search';
+import { DiscoverStartPlugins } from './plugin';
+import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
+import { SavedSearch } from './np_ready/types';
+import { SharePluginStart } from '../../../../../plugins/share/public';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;

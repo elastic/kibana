@@ -20,7 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OpenSearchPanel } from './open_search_panel';
-import { I18nContext } from 'ui/i18n';
+import { I18nProvider } from '@kbn/i18n/src/react';
 
 let isOpen = false;
 
@@ -39,12 +39,12 @@ export function showOpenSearchPanel({ makeUrl }) {
 
   document.body.appendChild(container);
   const element = (
-    <I18nContext>
+    <I18nProvider>
       <OpenSearchPanel
         onClose={onClose}
         makeUrl={makeUrl}
       />
-    </I18nContext>
+    </I18nProvider>
   );
   ReactDOM.render(element, container);
 }

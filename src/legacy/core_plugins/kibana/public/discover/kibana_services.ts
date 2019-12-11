@@ -17,7 +17,7 @@
  * under the License.
  */
 import angular from 'angular'; // just used in embeddables and discover controller
-import { DiscoverServices } from './np_ready/helpers/build_services';
+import { DiscoverServices } from './build_services';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
@@ -101,3 +101,4 @@ export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';
 export { DocView, DocViewInput } from 'ui/registry/doc_views_types';
 export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';
+export { IInjector } from 'ui/chrome';

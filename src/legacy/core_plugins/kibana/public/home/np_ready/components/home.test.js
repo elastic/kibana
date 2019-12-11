@@ -23,7 +23,8 @@ import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { Home } from './home';
-import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+
+import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/public';
 
 jest.mock('../kibana_services', () =>({
   getServices: () => ({

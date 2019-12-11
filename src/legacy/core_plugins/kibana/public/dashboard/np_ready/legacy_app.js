@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
-import { ensureDefaultIndexPattern } from '../legacy_imports';
+import { ensureDefaultIndexPattern, registerTimefilterWithGlobalStateFactory } from '../legacy_imports';
 import { initDashboardAppDirective } from './dashboard_app';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import {
@@ -31,7 +31,6 @@ import {
 } from '../../../../../../plugins/kibana_utils/public';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { addHelpMenuToAppChrome } from './help_menu/help_menu_util';
-import { registerTimefilterWithGlobalStateFactory } from '../../../../../ui/public/timefilter/setup_router';
 import { syncOnMount } from './global_state_sync';
 
 export function initDashboardApp(app, deps) {

@@ -18,24 +18,22 @@
  */
 import { i18n } from '@kbn/i18n';
 import {
-  FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,
-} from 'ui/registry/feature_catalogue';
+  HomePublicPluginSetup,
+} from '../../../../../../plugins/home/public';
 
-export function registerFeature() {
-  FeatureCatalogueRegistryProvider.register(() => {
-    return {
-      id: 'discover',
-      title: i18n.translate('kbn.discover.discoverTitle', {
-        defaultMessage: 'Discover',
-      }),
-      description: i18n.translate('kbn.discover.discoverDescription', {
-        defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
-      }),
-      icon: 'discoverApp',
-      path: '/app/kibana#/discover',
-      showOnHomePage: true,
-      category: FeatureCatalogueCategory.DATA,
-    };
+export function registerFeature(home: HomePublicPluginSetup) {
+  home.featureCatalogue.register({
+    id: 'discover',
+    title: i18n.translate('kbn.discover.discoverTitle', {
+      defaultMessage: 'Discover',
+    }),
+    description: i18n.translate('kbn.discover.discoverDescription', {
+      defaultMessage: 'Interactively explore your data by querying and filtering raw documents.',
+    }),
+    icon: 'discoverApp',
+    path: '/app/kibana#/discover',
+    showOnHomePage: true,
+    category: FeatureCatalogueCategory.DATA,
   });
 }

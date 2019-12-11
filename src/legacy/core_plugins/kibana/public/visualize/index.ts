@@ -34,6 +34,7 @@ import { start as navigation } from '../../../navigation/public/legacy';
 import { start as visualizations } from '../../../visualizations/public/np_ready/public/legacy';
 
 export * from './np_ready/visualize_constants';
+export { showNewVisModal } from './np_ready/wizard';
 
 /**
  * Get dependencies relying on the global angular context.

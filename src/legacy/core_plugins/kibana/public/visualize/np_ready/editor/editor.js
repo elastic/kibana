@@ -30,7 +30,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
 import { addHelpMenuToAppChrome } from '../help_menu/help_menu_util';
-import { FilterStateManager } from '../../../../../data/public/filter/filter_manager';
+import { FilterStateManager } from '../../../../../data/public';
 import { unhashUrl } from '../../../../../../../plugins/kibana_utils/public';
 
 import { initVisEditorDirective } from './visualization_editor';
