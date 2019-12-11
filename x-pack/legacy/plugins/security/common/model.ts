@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ApiKey } from './api_key';
 export {
+  ApiKey,
+  ApiKeyToInvalidate,
   AuthenticatedUser,
   BuiltinESPrivileges,
   EditUser,
@@ -19,4 +20,4 @@ export {
   User,
   canUserChangePassword,
   getUserDisplayName,
-} from '../../../../../plugins/security/common/model';
+} from '../../../../plugins/security/common/model';
