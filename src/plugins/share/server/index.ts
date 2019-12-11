@@ -17,27 +17,9 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { PluginInitializerContext } from '../../../core/server';
+import { SharePlugin } from './plugin';
 
-export function shortUrlLookupProvider(server) {
-  async function updateMetadata(doc, req) {
-    try {
-      await req.getSavedObjectsClient().update('url', doc.id, {
-        accessDate: new Date(),
-        accessCount: get(doc, 'attributes.accessCount', 0) + 1
-      });
-    } catch (err) {
-      server.log('Warning: Error updating url metadata', err);
-      //swallow errors. It isn't critical if there is no update.
-    }
-  }
-
-  return {
-    async getUrl(id, req) {
-      const doc = await req.getSavedObjectsClient().get('url', id);
-      updateMetadata(doc, req);
-
-      return doc.attributes.url;
-    }
-  };
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new SharePlugin(initializerContext);
 }
