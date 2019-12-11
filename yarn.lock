@@ -1251,6 +1251,31 @@
     tabbable "^3.0.0"
     uuid "^3.1.0"
 
+"@elastic/eui@17.1.0":
+  version "17.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-17.1.0.tgz#ad747d944f46fd131d184dbb3f7ae183a3f37859"
+  integrity sha512-5XBlxLfBrkQauFDE9N94PK21E/AP3UWxIs/ww0TbRb6PNRNxLGwKfdHPZb3tDA8It3Ksd6OfDz4d5+0ASQ5GIQ==
+  dependencies:
+    "@types/lodash" "^4.14.116"
+    "@types/numeral" "^0.0.25"
+    "@types/react-beautiful-dnd" "^10.1.0"
+    classnames "^2.2.5"
+    highlight.js "^9.12.0"
+    html "^1.0.0"
+    keymirror "^0.1.1"
+    lodash "^4.17.11"
+    numeral "^2.0.6"
+    prop-types "^15.6.0"
+    react-ace "^7.0.5"
+    react-beautiful-dnd "^10.1.0"
+    react-focus-lock "^1.17.7"
+    react-input-autosize "^2.2.2"
+    react-is "~16.3.0"
+    react-virtualized "^9.21.2"
+    resize-observer-polyfill "^1.5.0"
+    tabbable "^3.0.0"
+    uuid "^3.1.0"
+
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
