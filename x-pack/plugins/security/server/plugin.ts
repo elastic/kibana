@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   IClusterClient,
@@ -42,7 +42,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  */
 export interface LegacyAPI {
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
-  kibanaIndexName: string;
   cspRules: string;
   savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
   auditLogger: {
@@ -121,7 +120,10 @@ export class Plugin {
     core: CoreSetup,
     { features, licensing }: PluginSetupDependencies
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await createConfig$(this.initializerContext, core.http.isTlsEnabled)
+    const [config, legacyConfig] = await combineLatest([
+      createConfig$(this.initializerContext, core.http.isTlsEnabled),
+      this.initializerContext.config.legacy.globalConfig$,
+    ])
       .pipe(first())
       .toPromise();
 
@@ -148,7 +150,7 @@ export class Plugin {
       clusterClient: this.clusterClient,
       license,
       loggers: this.initializerContext.logger,
-      getLegacyAPI: this.getLegacyAPI,
+      kibanaIndexName: legacyConfig.kibana.index,
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: this.getSpacesService,
       featuresService: features,
