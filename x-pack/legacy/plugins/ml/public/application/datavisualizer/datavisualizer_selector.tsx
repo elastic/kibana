@@ -32,13 +32,13 @@ function startTrialDescription() {
     <span>
       <FormattedMessage
         id="xpack.ml.datavisualizer.startTrial.fullMLFeaturesDescription"
-        defaultMessage="To experience the full Machine Learning features that a {platinumSubscriptionLink} offers, start a 30-day trial."
+        defaultMessage="To experience the full Machine Learning features that a {subscriptionsLink} offers, start a 30-day trial."
         values={{
-          platinumSubscriptionLink: (
+          subscriptionsLink: (
             <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
               <FormattedMessage
-                id="xpack.ml.datavisualizer.startTrial.platinumSubscriptionTitle"
-                defaultMessage="Platinum subscription"
+                id="xpack.ml.datavisualizer.startTrial.subscriptionsLinkText"
+                defaultMessage="Platinum or Enterprise subscription"
               />
             </EuiLink>
           ),
