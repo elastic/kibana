@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObject } from 'ui/saved_objects/types';
+import { SavedObjectReference } from 'kibana/server';
+
 export function extractReferences({ attributes, references = [] }) {
   // For some reason, wsState comes in stringified 2x
   const state = JSON.parse(JSON.parse(attributes.wsState));
@@ -29,7 +32,7 @@ export function extractReferences({ attributes, references = [] }) {
   };
 }
 
-export function injectReferences(savedObject, references) {
+export function injectReferences(savedObject: SavedObject, references: SavedObjectReference[]) {
   // Skip if wsState is missing, at the time of development of this, there is no guarantee each
   // saved object has wsState.
   if (typeof savedObject.wsState !== 'string') {
