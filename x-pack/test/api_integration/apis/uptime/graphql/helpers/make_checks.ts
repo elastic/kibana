@@ -184,7 +184,8 @@ export const makeChecksWithStatus = async (
   numIps: number,
   every: number,
   fields: { [key: string]: any } = {},
-  status: 'up' | 'down'
+  status: 'up' | 'down',
+  mogrify: (doc: any) => any
 ) => {
   const checks = [];
   const oppositeStatus = status === 'up' ? 'down' : 'up';
@@ -195,10 +196,15 @@ export const makeChecksWithStatus = async (
       d.summary[status] += d.summary[oppositeStatus];
       d.summary[oppositeStatus] = 0;
     }
-    return d;
+    if (mogrify) {
+      return mogrify(d);
+    } else {
+      return d;
+    }
   });
 };
 
+// Helper for processing a list of checks to find the time picker bounds.
 export const getChecksDateRange = (checks: any[]) => {
   // Flatten 2d arrays
   const flattened = flattenDeep(checks);
