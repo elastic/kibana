@@ -5,7 +5,7 @@
  */
 
 import * as rt from 'io-ts';
-import { logEntriesSummaryRequestRT } from './summary';
+import { logEntriesSummaryRequestRT, logEntriesSummaryBucketRT } from './summary';
 
 export const LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH = '/api/log_entries/summary_highlights';
 
@@ -20,22 +20,26 @@ export type LogEntriesSummaryHighlightsRequest = rt.TypeOf<
   typeof logEntriesSummaryHighlightsRequestRT
 >;
 
+export const logEntriesSummaryHighlightsBucketRT = rt.intersection([
+  logEntriesSummaryBucketRT,
+  rt.type({
+    representativeKey: rt.type({
+      time: rt.number,
+      tiebreaker: rt.number,
+    }),
+  }),
+]);
+
+export type LogEntriesSummaryHighlightsBucket = rt.TypeOf<
+  typeof logEntriesSummaryHighlightsBucketRT
+>;
+
 export const logEntriesSummaryHighlightsResponseRT = rt.type({
   data: rt.array(
     rt.type({
       start: rt.number,
       end: rt.number,
-      buckets: rt.array(
-        rt.type({
-          start: rt.number,
-          end: rt.number,
-          entriesCount: rt.number,
-          representativeKey: rt.type({
-            time: rt.number,
-            tiebreaker: rt.number,
-          }),
-        })
-      ),
+      buckets: rt.array(logEntriesSummaryHighlightsBucketRT),
     })
   ),
 });

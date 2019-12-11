@@ -18,17 +18,19 @@ export const logEntriesSummaryRequestRT = rt.type({
 
 export type LogEntriesSummaryRequest = rt.TypeOf<typeof logEntriesSummaryRequestRT>;
 
+export const logEntriesSummaryBucketRT = rt.type({
+  start: rt.number,
+  end: rt.number,
+  entriesCount: rt.number,
+});
+
+export type LogEntriesSummaryBucket = rt.TypeOf<typeof logEntriesSummaryBucketRT>;
+
 export const logEntriesSummaryResponseRT = rt.type({
   data: rt.type({
     start: rt.number,
     end: rt.number,
-    buckets: rt.array(
-      rt.type({
-        start: rt.number,
-        end: rt.number,
-        entriesCount: rt.number,
-      })
-    ),
+    buckets: rt.array(logEntriesSummaryBucketRT),
   }),
 });
 
