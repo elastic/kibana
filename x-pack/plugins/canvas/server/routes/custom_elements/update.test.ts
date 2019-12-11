@@ -5,8 +5,9 @@
  */
 
 import sinon from 'sinon';
-import { CANVAS_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
+import { CustomElement } from '../../../../../legacy/plugins/canvas/types';
+import { CUSTOM_ELEMENT_TYPE } from '../../../../../legacy/plugins/canvas/common/lib/constants';
+import { initializeUpdateCustomElementRoute } from './update';
 import {
   IRouter,
   kibanaResponseFactory,
@@ -19,7 +20,6 @@ import {
   httpServerMock,
   loggingServiceMock,
 } from 'src/core/server/mocks';
-import { workpads } from '../../../../../legacy/plugins/canvas/__tests__/fixtures/workpads';
 import { okResponse } from '../ok_response';
 
 const mockRouteContext = ({
@@ -30,13 +30,27 @@ const mockRouteContext = ({
   },
 } as unknown) as RequestHandlerContext;
 
-const workpad = workpads[0];
 const now = new Date();
 const nowIso = now.toISOString();
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
 
-describe('PUT workpad', () => {
+type CustomElementPayload = CustomElement & {
+  '@timestamp': string;
+  '@created': string;
+};
+
+const customElement: CustomElementPayload = {
+  id: 'my-custom-element',
+  name: 'MyCustomElement',
+  displayName: 'My Wonderful Custom Element',
+  content: 'This is content',
+  tags: ['filter', 'graphic'],
+  '@created': '2019-02-08T18:35:23.029Z',
+  '@timestamp': '2019-02-08T18:35:23.029Z',
+};
+
+describe('PUT custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;
   let clock: sinon.SinonFakeTimers;
 
@@ -45,7 +59,7 @@ describe('PUT workpad', () => {
 
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-    initializeUpdateWorkpadRoute({
+    initializeUpdateCustomElementRoute({
       router,
       logger: loggingServiceMock.create().get(),
     });
@@ -58,24 +72,24 @@ describe('PUT workpad', () => {
     clock.restore();
   });
 
-  it(`returns 200 ok when the workpad is updated`, async () => {
-    const updatedWorkpad = { name: 'new name' };
-    const { id, ...workpadAttributes } = workpad;
+  it(`returns 200 ok when the custom element is updated`, async () => {
+    const updatedCustomElement = { name: 'new name' };
+    const { id, ...customElementAttributes } = customElement;
 
     const request = httpServerMock.createKibanaRequest({
       method: 'put',
-      path: `api/canvas/workpad/${id}`,
+      path: `api/canvas/custom-element/${id}`,
       params: {
         id,
       },
-      body: updatedWorkpad,
+      body: updatedCustomElement,
     });
 
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockResolvedValueOnce({
       id,
-      type: CANVAS_TYPE,
-      attributes: workpadAttributes as any,
+      type: CUSTOM_ELEMENT_TYPE,
+      attributes: customElementAttributes as any,
       references: [],
     });
 
@@ -86,12 +100,12 @@ describe('PUT workpad', () => {
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(okResponse);
     expect(mockRouteContext.core.savedObjects.client.create).toBeCalledWith(
-      CANVAS_TYPE,
+      CUSTOM_ELEMENT_TYPE,
       {
-        ...workpadAttributes,
-        ...updatedWorkpad,
+        ...customElementAttributes,
+        ...updatedCustomElement,
         '@timestamp': nowIso,
-        '@created': workpad['@created'],
+        '@created': customElement['@created'],
       },
       {
         overwrite: true,
@@ -100,10 +114,10 @@ describe('PUT workpad', () => {
     );
   });
 
-  it(`returns not found if existing workpad is not found`, async () => {
+  it(`returns not found if existing custom element is not found`, async () => {
     const request = httpServerMock.createKibanaRequest({
       method: 'put',
-      path: 'api/canvas/workpad/some-id',
+      path: 'api/canvas/custom-element/some-id',
       params: {
         id: 'not-found',
       },
@@ -117,14 +131,13 @@ describe('PUT workpad', () => {
     });
 
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-
     expect(response.status).toBe(404);
   });
 
   it(`returns bad request if the write fails`, async () => {
     const request = httpServerMock.createKibanaRequest({
       method: 'put',
-      path: 'api/canvas/workpad/some-id',
+      path: 'api/canvas/custom-element/some-id',
       params: {
         id: 'some-id',
       },
@@ -134,13 +147,12 @@ describe('PUT workpad', () => {
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.get.mockResolvedValueOnce({
       id: 'some-id',
-      type: CANVAS_TYPE,
+      type: CUSTOM_ELEMENT_TYPE,
       attributes: {},
       references: [],
     });
 
     mockRouteContext.core.savedObjects.client = savedObjectsClient;
-
     (mockRouteContext.core.savedObjects.client.create as jest.Mock).mockImplementationOnce(() => {
       throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
     });
@@ -148,76 +160,5 @@ describe('PUT workpad', () => {
     const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
 
     expect(response.status).toBe(400);
-  });
-});
-
-describe('update assets', () => {
-  let routeHandler: RequestHandler<any, any, any>;
-  let clock: sinon.SinonFakeTimers;
-
-  beforeEach(() => {
-    clock = sinon.useFakeTimers(now);
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter('') as jest.Mocked<IRouter>;
-    initializeUpdateWorkpadAssetsRoute({
-      router,
-      logger: loggingServiceMock.create().get(),
-    });
-
-    routeHandler = router.put.mock.calls[0][1];
-  });
-
-  afterEach(() => {
-    clock.restore();
-  });
-
-  it('updates assets', async () => {
-    const { id, ...attributes } = workpad;
-    const assets = {
-      'asset-1': {
-        '@created': new Date().toISOString(),
-        id: 'asset-1',
-        type: 'asset',
-        value: 'some-url-encoded-asset',
-      },
-      'asset-2': {
-        '@created': new Date().toISOString(),
-        id: 'asset-2',
-        type: 'asset',
-        value: 'some-other asset',
-      },
-    };
-
-    const request = httpServerMock.createKibanaRequest({
-      method: 'put',
-      path: 'api/canvas/workpad-assets/some-id',
-      params: {
-        id,
-      },
-      body: assets,
-    });
-
-    (mockRouteContext.core.savedObjects.client.get as jest.Mock).mockResolvedValueOnce({
-      id,
-      type: CANVAS_TYPE,
-      attributes: attributes as any,
-      references: [],
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
-    expect(response.status).toBe(200);
-
-    expect(mockRouteContext.core.savedObjects.client.create).toBeCalledWith(
-      CANVAS_TYPE,
-      {
-        ...attributes,
-        '@timestamp': nowIso,
-        assets,
-      },
-      {
-        id,
-        overwrite: true,
-      }
-    );
   });
 });
