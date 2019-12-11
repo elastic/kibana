@@ -57,13 +57,14 @@ export async function addMessagesToReport(options: {
     }
 
     log.info(`${classname} - ${name}:${messageList}`);
-    const append = `\n\nFailed Tests Reporter:${messageList}\n`;
+    const output = `Failed Tests Reporter:${messageList}\n\n`;
 
-    const [failure] = testCase.failure;
-    if (typeof failure === 'object') {
-      failure._ += append;
+    if (!testCase['system-out']) {
+      testCase['system-out'] = [output];
+    } else if (typeof testCase['system-out'][0] === 'string') {
+      testCase['system-out'][0] = output + String(testCase['system-out'][0]);
     } else {
-      testCase.failure[0] = String(failure) + append;
+      testCase['system-out'][0]._ = output + testCase['system-out'][0]._;
     }
   }
 

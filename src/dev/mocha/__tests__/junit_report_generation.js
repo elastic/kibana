@@ -98,6 +98,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE works',
         time: testPass.$.time,
+        'metadata-json': '{}',
       },
       'system-out': testPass['system-out'],
     });
@@ -109,6 +110,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE fails',
         time: testFail.$.time,
+        'metadata-json': '{}',
       },
       'system-out': testFail['system-out'],
       failure: [testFail.failure[0]],
@@ -124,6 +126,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE "before each" hook: fail hook for "never runs"',
         time: beforeEachFail.$.time,
+        'metadata-json': '{}',
       },
       'system-out': testFail['system-out'],
       failure: [beforeEachFail.failure[0]],
@@ -133,6 +136,7 @@ describe('dev/mocha/junit report generation', () => {
       $: {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE never runs',
+        'metadata-json': '{}',
       },
       'system-out': testFail['system-out'],
       skipped: [''],
