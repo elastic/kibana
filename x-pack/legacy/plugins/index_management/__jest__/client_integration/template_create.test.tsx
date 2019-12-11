@@ -318,7 +318,7 @@ describe('<TemplateCreate />', () => {
           await actions.completeStepThree(MAPPING_FIELDS);
 
           // Complete step 4 (aliases)
-          await nextTick();
+          await nextTick(100);
           await actions.completeStepFour(JSON.stringify(ALIASES));
         });
       });
