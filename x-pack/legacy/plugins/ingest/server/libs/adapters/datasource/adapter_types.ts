@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { AssetType, InputType, Datasource } from '../../types';
+import { AssetType, InputType } from '../../types';
 
 export const RuntimeStoredDatasource = t.intersection([
   t.type({
