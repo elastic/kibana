@@ -20,11 +20,7 @@
 import chrome from 'ui/chrome';
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  SearchSourceContract,
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../courier';
+import { ISearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
@@ -101,7 +97,7 @@ export const termsBucketAgg = new BucketAggType({
     resp: any,
     aggConfigs: AggConfigs,
     aggConfig: IBucketAggConfig,
-    searchSource: SearchSourceContract,
+    searchSource: ISearchSource,
     inspectorAdapters: Adapters,
     abortSignal?: AbortSignal
   ) => {

@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { SearchSourceContract } from '../../../../../ui/public/courier';
+import { ISearchSource } from '../../../../../ui/public/courier';
 import {
   esFilters,
   TimeRange,
@@ -89,7 +89,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
-  private filtersSearchSource?: SearchSourceContract;
+  private filtersSearchSource?: ISearchSource;
   private searchInstance?: JQLite;
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;

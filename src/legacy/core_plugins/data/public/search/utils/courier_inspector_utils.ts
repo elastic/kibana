@@ -26,9 +26,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { SearchResponse } from 'elasticsearch';
-import { SearchSourceContract, RequestInspectorStats } from '../types';
+import { ISearchSource, RequestInspectorStats } from '../types';
 
-export function getRequestInspectorStats(searchSource: SearchSourceContract) {
+export function getRequestInspectorStats(searchSource: ISearchSource) {
   const stats: RequestInspectorStats = {};
   const index = searchSource.getField('index');
 
@@ -58,7 +58,7 @@ export function getRequestInspectorStats(searchSource: SearchSourceContract) {
 }
 
 export function getResponseInspectorStats(
-  searchSource: SearchSourceContract,
+  searchSource: ISearchSource,
   resp: SearchResponse<unknown>
 ) {
   const lastRequest = searchSource.history && searchSource.history[searchSource.history.length - 1];

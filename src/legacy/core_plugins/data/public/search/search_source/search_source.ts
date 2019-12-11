@@ -84,14 +84,14 @@ import { FetchOptions, ApiCaller } from '../fetch/types';
 const esShardTimeout = npSetup.core.injectedMetadata.getInjectedVar('esShardTimeout') as number;
 const config = npSetup.core.uiSettings;
 
-export type SearchSourceContract = Pick<SearchSource, keyof SearchSource>;
+export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
 
 export class SearchSource {
   private id: string = _.uniqueId('data_source');
   private searchStrategyId?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: SearchSourceContract, options?: FetchOptions) => Promise<unknown>
+    (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
@@ -172,7 +172,7 @@ export class SearchSource {
    * @param  {SearchSourceOptions} options - the inherit options
    * @return {this} - chainable
    */
-  setParent(parent?: SearchSourceContract, options: SearchSourceOptions = {}) {
+  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}) {
     this.parent = parent as SearchSource;
     this.inheritOptions = options;
     return this;
@@ -222,7 +222,7 @@ export class SearchSource {
    *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: SearchSourceContract, options?: FetchOptions) => Promise<unknown>
+    handler: (searchSource: ISearchSource, options?: FetchOptions) => Promise<unknown>
   ) {
     this.requestStartHandlers.push(handler);
   }

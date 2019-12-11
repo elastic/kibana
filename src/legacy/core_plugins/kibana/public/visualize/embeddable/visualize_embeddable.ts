@@ -29,7 +29,7 @@ import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
 import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
-import { SearchSourceContract } from '../../../../../ui/public/courier';
+import { ISearchSource } from '../../../../../ui/public/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IIndexPattern,
@@ -53,7 +53,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 export interface VisSavedObject extends SavedObject {
   vis: Vis;
   description?: string;
-  searchSource: SearchSourceContract;
+  searchSource: ISearchSource;
   title: string;
   uiStateJSON?: string;
   destroy: () => void;

@@ -19,7 +19,7 @@
 import {
   EsQuerySortValue,
   SortDirection,
-  SearchSourceContract,
+  ISearchSource,
 } from '../../../../../../../../ui/public/courier';
 import { convertTimeValueToIso } from './date_conversion';
 import { EsHitRecordList } from '../context';
@@ -40,7 +40,7 @@ interface RangeQuery {
  * and filters set.
  */
 export async function fetchHitsInInterval(
-  searchSource: SearchSourceContract,
+  searchSource: ISearchSource,
   timeField: string,
   sort: [EsQuerySortValue, EsQuerySortValue],
   sortDir: SortDirection,

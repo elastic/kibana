@@ -52,7 +52,7 @@ export interface SearchSourceOptions {
   callParentStartHandlers?: boolean;
 }
 
-export { SearchSourceContract } from './search_source';
+export { ISearchSource } from './search_source';
 
 export interface SortOptions {
   mode?: 'min' | 'max' | 'sum' | 'avg' | 'median';
