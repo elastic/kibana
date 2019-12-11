@@ -14,7 +14,14 @@ import { rangeFilter } from '../helpers/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export interface ErrorsPerTransaction {
-  [transactionId: string]: number;
+  [transactionId: string]: {
+    doc_count: number;
+    error: {
+      timestamp: {
+        us: number;
+      };
+    };
+  };
 }
 
 const includedLogLevels = ['critical', 'error', 'fatal'];
@@ -46,6 +53,14 @@ export async function getTraceErrorsPerTransaction(
         transactions: {
           terms: {
             field: TRANSACTION_ID
+          },
+          aggs: {
+            error: {
+              top_hits: {
+                _source: ['timestamp'],
+                size: 1
+              }
+            }
           }
         }
       }
@@ -57,7 +72,10 @@ export async function getTraceErrorsPerTransaction(
   return (resp.aggregations?.transactions.buckets || []).reduce(
     (acc, bucket) => ({
       ...acc,
-      [bucket.key]: bucket.doc_count
+      [bucket.key]: {
+        doc_count: bucket.doc_count,
+        error: bucket.error.hits.hits[0]?._source
+      }
     }),
     {}
   );

@@ -73,6 +73,7 @@ export class Waterfall extends Component<Props> {
     const errorCount =
       item.docType === 'transaction'
         ? waterfall.errorCountByTransactionId[item.transaction.transaction.id]
+            ?.doc_count
         : 0;
 
     return (
