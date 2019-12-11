@@ -15,101 +15,22 @@ import { throwErrors } from '../../../common/runtime_types';
 
 import { InfraBackendLibs } from '../../lib/infra_types';
 import {
-  LOG_ENTRIES_SUMMARY_PATH,
-  logEntriesSummaryRequestRT,
-  logEntriesSummaryResponseRT,
   LOG_ENTRIES_SUMMARY_HIGHLIGHTS_PATH,
   logEntriesSummaryHighlightsRequestRT,
   logEntriesSummaryHighlightsResponseRT,
 } from '../../../common/http_api/log_entries';
-import {
-  compileFormattingRules,
-  CompiledLogMessageFormattingRule,
-} from '../../lib/domains/log_entries_domain/message';
+import { compileFormattingRules } from '../../lib/domains/log_entries_domain/message';
 import { getBuiltinRules } from '../../lib/domains/log_entries_domain/builtin_rules';
-import { SavedSourceConfigurationFieldColumnRuntimeType } from '../../lib/sources';
-import { InfraSourceConfiguration } from '../../../public/graphql/types';
-
-import { buildLogSummaryQueryBody } from './helpers';
+import {
+  buildLogSummaryQueryBody,
+  getRequiredFields,
+  createHighlightQueryDsl,
+  DateRangeAggregation,
+} from './helpers';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 
-// FIXME: move to a shared place, or to the elasticsearch-js repo
-interface DateRangeAggregation {
-  buckets: Array<{
-    key: number;
-    doc_count: number;
-    from: number;
-    from_as_strign: string;
-    to: number;
-    to_as_string: string;
-  }>;
-  start: number;
-  end: number;
-}
-
-export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) => {
-  // Summary
-  framework.registerRoute(
-    {
-      method: 'post',
-      path: LOG_ENTRIES_SUMMARY_PATH,
-      validate: { body: escapeHatch },
-    },
-    async (requestContext, request, response) => {
-      try {
-        const payload = pipe(
-          logEntriesSummaryRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-        const { sourceId, startDate, endDate, bucketSize, query } = payload;
-
-        const sourceConfiguration = (await sources.getSourceConfiguration(requestContext, sourceId))
-          .configuration;
-
-        const {
-          timestamp: timestampField,
-          tiebreaker: tiebreakerField,
-        } = sourceConfiguration.fields;
-
-        const esResults = await framework.callWithRequest<
-          {},
-          { log_summary: DateRangeAggregation }
-        >(requestContext, 'search', {
-          index: sourceConfiguration.logAlias,
-          body: buildLogSummaryQueryBody({
-            startDate,
-            endDate,
-            bucketSize,
-            timestampField,
-            tiebreakerField,
-            query,
-          }),
-        });
-
-        return response.ok({
-          body: logEntriesSummaryResponseRT.encode({
-            data: {
-              start: startDate,
-              end: endDate,
-              buckets:
-                esResults.aggregations?.log_summary.buckets.map(bucket => ({
-                  start: bucket.from,
-                  end: bucket.to,
-                  entriesCount: bucket.doc_count,
-                })) ?? [],
-            },
-          }),
-        });
-      } catch (error) {
-        return response.internalError({
-          body: error.message,
-        });
-      }
-    }
-  );
-
-  // Summary Highlights
+export const initLogEntriesSummaryHighlightsRoute = ({ framework, sources }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -186,30 +107,3 @@ export const initLogsSummaryRoute = ({ framework, sources }: InfraBackendLibs) =
     }
   );
 };
-
-const getRequiredFields = (
-  configuration: InfraSourceConfiguration,
-  messageFormattingRules: CompiledLogMessageFormattingRule
-): string[] => {
-  const fieldsFromCustomColumns = configuration.logColumns.reduce<string[]>(
-    (accumulatedFields, logColumn) => {
-      if (SavedSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
-        return [...accumulatedFields, logColumn.fieldColumn.field];
-      }
-      return accumulatedFields;
-    },
-    []
-  );
-  const fieldsFromFormattingRules = messageFormattingRules.requiredFields;
-
-  return Array.from(new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules]));
-};
-
-const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
-  multi_match: {
-    fields,
-    lenient: true,
-    query: phrase,
-    type: 'phrase',
-  },
-});

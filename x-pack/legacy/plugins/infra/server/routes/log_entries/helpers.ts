@@ -5,6 +5,25 @@
  */
 
 import { parseFilterQuery } from '../../utils/serialized_query';
+import {
+  InfraSourceConfiguration,
+  SavedSourceConfigurationFieldColumnRuntimeType,
+} from '../../lib/sources';
+import { CompiledLogMessageFormattingRule } from '../../lib/domains/log_entries_domain/message';
+
+// FIXME: move to a shared place, or to the elasticsearch-js repo
+export interface DateRangeAggregation {
+  buckets: Array<{
+    key: number;
+    doc_count: number;
+    from: number;
+    from_as_strign: string;
+    to: number;
+    to_as_string: string;
+  }>;
+  start: number;
+  end: number;
+}
 
 interface RangeBucket {
   from: number;
@@ -85,3 +104,30 @@ export const buildLogSummaryQueryBody = ({
     sort: [{ [timestampField]: 'asc', [tiebreakerField]: 'asc' }],
   };
 };
+
+export const getRequiredFields = (
+  configuration: InfraSourceConfiguration,
+  messageFormattingRules: CompiledLogMessageFormattingRule
+): string[] => {
+  const fieldsFromCustomColumns = configuration.logColumns.reduce<string[]>(
+    (accumulatedFields, logColumn) => {
+      if (SavedSourceConfigurationFieldColumnRuntimeType.is(logColumn)) {
+        return [...accumulatedFields, logColumn.fieldColumn.field];
+      }
+      return accumulatedFields;
+    },
+    []
+  );
+  const fieldsFromFormattingRules = messageFormattingRules.requiredFields;
+
+  return Array.from(new Set([...fieldsFromCustomColumns, ...fieldsFromFormattingRules]));
+};
+
+export const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
+  multi_match: {
+    fields,
+    lenient: true,
+    query: phrase,
+    type: 'phrase',
+  },
+});
