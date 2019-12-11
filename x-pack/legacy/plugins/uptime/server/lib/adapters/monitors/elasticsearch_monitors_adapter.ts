@@ -16,30 +16,7 @@ import { getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
 import { MonitorDetails, MonitorError, OverviewFilters } from '../../../../common/runtime_types';
-
-export const daw = (dateRangeStart: string, dateRangeEnd: string, filters: string | undefined) => {
-  const range = {
-    range: {
-      '@timestamp': {
-        gte: dateRangeStart,
-        lte: dateRangeEnd,
-      },
-    },
-  };
-  if (filters) {
-    const filtersObj = JSON.parse(filters);
-    const h = Array.isArray(filtersObj?.bool?.filter ?? {})
-      ? // i.e. {"bool":{"filter":{ ...some nested filter objects }}}
-        filtersObj.bool.filter
-      : // i.e. {"bool":{"filter":[ ...some listed filter objects ]}}
-        Object.keys(filtersObj?.bool?.filter ?? {}).map(key => ({
-          ...filtersObj?.bool?.filter?.[key],
-        }));
-    filtersObj.bool.filter = [...h, range];
-    return filtersObj;
-  }
-  return range;
-};
+import { combineRangeWithFilters } from './combine_range_with_filters';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -225,7 +202,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       locations: 'observer.geo.name',
       tags: 'tags',
     };
-    const filtersObj = daw(dateRangeStart, dateRangeEnd, filters);
+    const filtersObj = combineRangeWithFilters(dateRangeStart, dateRangeEnd, filters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
