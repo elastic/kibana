@@ -25,7 +25,9 @@ export type Setup = jest.Mocked<BfetchServerSetup>;
 export type Start = jest.Mocked<BfetchServerStart>;
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {};
+  const setupContract: Setup = {
+    addStreamingResponseRoute: jest.fn(),
+  };
   return setupContract;
 };
 

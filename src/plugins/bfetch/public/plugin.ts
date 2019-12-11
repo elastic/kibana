@@ -42,14 +42,10 @@ export class BfetchPublicPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchPublicSetupDependencies): BfetchPublicSetup {
-    // eslint-disable-next-line
-    console.log('public setup');
     return {};
   }
 
   public start(core: CoreStart, plugins: BfetchPublicStartDependencies): BfetchPublicStart {
-    // eslint-disable-next-line
-    console.log('public start');
     return {};
   }
 

@@ -17,23 +17,22 @@
  * under the License.
  */
 
-import {
-  CoreStart,
-  PluginInitializerContext,
-  CoreSetup,
-  Plugin,
-  RequestHandlerContext,
-} from 'src/core/server';
-import { schema } from '@kbn/config-schema';
+import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
+import { StreamingResponseHandler } from '../common/types';
+import { removeLeadingSlash } from './util';
+import { createStreamingResponseStream } from './streaming';
 
 // eslint-disable-next-line
-export interface BfetchServerSetupDependencies {}
+export interface BfetchServerSetupDependencies {
+  
+}
 
 // eslint-disable-next-line
 export interface BfetchServerStartDependencies {}
 
-// eslint-disable-next-line
-export interface BfetchServerSetup {}
+export interface BfetchServerSetup {
+  addStreamingResponseRoute: (path: string, handler: StreamingResponseHandler<any, any>) => void;
+}
 
 // eslint-disable-next-line
 export interface BfetchServerStart {}
@@ -49,47 +48,38 @@ export class BfetchServerPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
-    const router = core.http.createRouter();
-    router.post(
-      {
-        path: '/bfetch/batch',
-        options: {
-          authRequired: false,
-        },
-        validate: {
-          params: schema.object({}, { allowUnknowns: true }),
-          query: schema.object({}, { allowUnknowns: true }),
-          body: schema.object({}, { allowUnknowns: true }),
-        },
-      },
-      async (context, request, res) => {
-        return res.ok({ body: 'OK!' });
-      }
-    );
-    router.get(
-      {
-        path: '/bfetch/ping',
-        options: {
-          authRequired: false,
-        },
-        validate: {
-          params: schema.object({}, { allowUnknowns: true }),
-          query: schema.object({}, { allowUnknowns: true }),
-          body: schema.object({}, { allowUnknowns: true }),
-        },
-      },
-      async (context: RequestHandlerContext, request: any, response: any) => {
-        return response.ok({ body: 'pongs' });
-      }
-    );
-    return {};
+    return {
+      addStreamingResponseRoute: this.addStreamingResponseRoute(core),
+    };
   }
 
   public start(core: CoreStart, plugins: BfetchServerStartDependencies): BfetchServerStart {
-    // eslint-disable-next-line
-    console.log('server start');
     return {};
   }
 
   public stop() {}
+
+  private addStreamingResponseRoute = (
+    core: CoreSetup
+  ): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
+    const router = core.http.createRouter();
+    router.post(
+      {
+        path: `/bfetch/stream/${removeLeadingSlash(path)}`,
+        validate: {},
+      },
+      async (context, request, response) => {
+        const data = request.body;
+        return response.ok({
+          headers: {
+            'Content-Type': 'application/x-ndjson',
+            Connection: 'keep-alive',
+            'Transfer-Encoding': 'chunked',
+            'Cache-Control': 'no-cache',
+          },
+          body: createStreamingResponseStream(data, handler),
+        });
+      }
+    );
+  };
 }
