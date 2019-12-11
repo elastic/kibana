@@ -16,11 +16,21 @@ import {
   FrameworkRequest,
   FrameworkRouteHandler,
 } from '../../libs/adapters/framework/adapter_types';
+import { HapiFrameworkAdapter } from '../../libs/adapters/framework/hapi_framework_adapter';
 import { ServerLibs, Policy } from '../../libs/types';
 
-export const createGETPoliciyRoute = (libs: ServerLibs) => ({
+export const registerPolicyRoutes = (frameworkAdapter: HapiFrameworkAdapter, libs: ServerLibs) => {
+  frameworkAdapter.registerRoute(createGETPolicyRoute(libs));
+  frameworkAdapter.registerRoute(createGETPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createPOSTPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createPUTPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createAddPolicyDatasourceRoute(libs));
+  frameworkAdapter.registerRoute(createRemovePolicyDatasourceRoute(libs));
+};
+
+export const createGETPolicyRoute = (libs: ServerLibs) => ({
   method: 'GET',
-  path: '/api/ingest/policy/{policyId}',
+  path: '/api/ingest/policies/{policyId}',
   config: {},
   handler: (async (
     request: FrameworkRequest<{ params: { policyId: string } }>
@@ -92,7 +102,7 @@ export const createPOSTPoliciesRoute = (libs: ServerLibs) => ({
 
 export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
   method: 'PUT',
-  path: '/api/ingest/policy/{policyId}',
+  path: '/api/ingest/policies/{policyId}',
   config: {
     validate: {
       payload: {
@@ -114,6 +124,68 @@ export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
       name: request.payload.name,
       description: request.payload.description,
     });
+
+    return { item: policy, success: true, action: 'updated' };
+  }) as FrameworkRouteHandler,
+});
+
+export const createAddPolicyDatasourceRoute = (libs: ServerLibs) => ({
+  method: 'POST',
+  path: '/api/ingest/policies/{policyId}/addDatasources',
+  config: {
+    validate: {
+      payload: {
+        datasources: Joi.array()
+          .items(Joi.string())
+          .required(),
+      },
+    },
+  },
+  handler: (async (
+    request: FrameworkRequest<{
+      params: { policyId: string };
+      payload: { datasources: string[] };
+    }>
+  ): Promise<ReturnTypeUpdate<any>> => {
+    if (!request.user || request.user.kind !== 'authenticated') {
+      throw Boom.unauthorized('Only authenticated users can create a policy');
+    }
+    const policy = await libs.policy.assignDatasource(
+      request.user,
+      request.params.policyId,
+      request.payload.datasources
+    );
+
+    return { item: policy, success: true, action: 'updated' };
+  }) as FrameworkRouteHandler,
+});
+
+export const createRemovePolicyDatasourceRoute = (libs: ServerLibs) => ({
+  method: 'POST',
+  path: '/api/ingest/policies/{policyId}/removeDatasources',
+  config: {
+    validate: {
+      payload: {
+        datasources: Joi.array()
+          .items(Joi.string())
+          .required(),
+      },
+    },
+  },
+  handler: (async (
+    request: FrameworkRequest<{
+      params: { policyId: string };
+      payload: { datasources: string[] };
+    }>
+  ): Promise<ReturnTypeUpdate<any>> => {
+    if (!request.user || request.user.kind !== 'authenticated') {
+      throw Boom.unauthorized('Only authenticated users can create a policy');
+    }
+    const policy = await libs.policy.unassignDatasource(
+      request.user,
+      request.params.policyId,
+      request.payload.datasources
+    );
 
     return { item: policy, success: true, action: 'updated' };
   }) as FrameworkRouteHandler,

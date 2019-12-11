@@ -5,7 +5,7 @@
  */
 
 import { flatten, uniq } from 'lodash';
-import { Datasource, Policy } from '../../../ingest/server/libs/types';
+import { Datasource, Policy } from '../../common/types/domain_data';
 import { FrameworkUser } from '../adapters/framework/adapter_types';
 import { AgentPolicy, PoliciesRepository } from '../repositories/policies/types';
 

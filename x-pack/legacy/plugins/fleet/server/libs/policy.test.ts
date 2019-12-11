@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Status, Policy } from '../../common/types/domain_data';
 import { FrameworkUser, internalAuthData } from '../adapters/framework/adapter_types';
 import { AgentPolicy } from '../repositories/policies/types';
 import { PolicyLib } from './policy';
-import { Status, Policy } from '../../../ingest/server/libs/types';
 
 function getUser(apiKey?: string, apiKeyId?: string) {
   if (!apiKey) {
@@ -50,7 +50,7 @@ describe('Policies Lib', () => {
                 name: 'prod_west',
                 package: {
                   name: 'coredns',
-                  version: '1.0.1, 1.3.1',
+                  version: '1.3.1',
                   description:
                     'CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n',
                   title: 'CoreDNS',

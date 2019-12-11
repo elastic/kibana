@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment, useState } from 'react';
+import { Policy } from '../../../../common/types/domain_data';
 import { useLibs } from '../../../hooks/use_libs';
 import { EnrollmentApiKeysTable } from './enrollment_api_keys';
 import { useEnrollmentApiKey, useEnrollmentApiKeys } from './enrollment_api_keys/hooks';
@@ -31,7 +32,6 @@ import {
   ShellEnrollmentInstructions,
   ToolsEnrollmentInstructions,
 } from './enrollment_instructions';
-import { Policy } from '../../../../../ingest/server/libs/types';
 
 interface RouterProps {
   onClose: () => void;

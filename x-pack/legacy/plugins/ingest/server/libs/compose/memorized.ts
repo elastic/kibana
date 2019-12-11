@@ -14,6 +14,8 @@ import { BackendFrameworkAdapter } from '../adapters/framework/default';
 import { MemorizedBackendFrameworkAdapter } from '../adapters/framework/memorized';
 import { PolicyAdapter } from '../adapters/policy/default';
 import { MemorizedPolicyAdapter } from '../adapters/policy/memorized';
+import { DatasourceAdapter } from '../adapters/datasource/default';
+import { MemorizedDatasourceAdapter } from '../adapters/datasource/memorized';
 import { SODatabaseAdapter } from '../adapters/so_database/default';
 import { DatasourcesLib } from '../datasources';
 import { OutputsLib } from '../outputs';
@@ -26,6 +28,7 @@ export function compose(servers?: {
   kbnServer: KibanaLegacyServer;
   root: any;
 }): ServerLibs {
+  let realDatasourceAdapter: DatasourceAdapter;
   let realPolicyAdapter: PolicyAdapter;
   let realFrameworkAdapter: BackendFrameworkAdapter;
 
@@ -39,6 +42,7 @@ export function compose(servers?: {
       servers.kbnServer.savedObjects,
       servers.kbnServer.plugins.elasticsearch
     );
+    realDatasourceAdapter = new DatasourceAdapter(soAdapter);
     realPolicyAdapter = new PolicyAdapter(soAdapter);
     realFrameworkAdapter = new BackendFrameworkAdapter(
       camelCase(PLUGIN.ID),
@@ -54,7 +58,10 @@ export function compose(servers?: {
 
   const outputs = new OutputsLib({ framework });
 
-  const datasources = new DatasourcesLib();
+  const memorizedDatasourceAdapter = new MemorizedDatasourceAdapter(
+    realDatasourceAdapter!
+  ) as DatasourceAdapter;
+  const datasources = new DatasourcesLib(memorizedDatasourceAdapter, { framework });
 
   const memorizedPolicyAdapter = new MemorizedPolicyAdapter(realPolicyAdapter!) as PolicyAdapter;
   const policy = new PolicyLib(memorizedPolicyAdapter, { framework, outputs, datasources });

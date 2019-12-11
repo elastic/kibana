@@ -7,19 +7,13 @@
 import { Server } from 'hapi';
 import { HapiFrameworkAdapter } from '../libs/adapters/framework/hapi_framework_adapter';
 import { ServerLibs } from '../libs/types';
-import {
-  createGETPoliciesRoute,
-  createGETPoliciyRoute,
-  createPOSTPoliciesRoute,
-  createPUTPoliciesRoute,
-} from './policy';
+import { registerPolicyRoutes } from './policy';
+import { registerDatasourceRoutes } from './datasource';
 
 export function initRestApi(server: Server, libs: ServerLibs) {
   const frameworkAdapter = new HapiFrameworkAdapter(server);
 
-  // Policies route
-  frameworkAdapter.registerRoute(createGETPoliciyRoute(libs));
-  frameworkAdapter.registerRoute(createGETPoliciesRoute(libs));
-  frameworkAdapter.registerRoute(createPOSTPoliciesRoute(libs));
-  frameworkAdapter.registerRoute(createPUTPoliciesRoute(libs));
+  // Register routes
+  registerPolicyRoutes(frameworkAdapter, libs);
+  registerDatasourceRoutes(frameworkAdapter, libs);
 }

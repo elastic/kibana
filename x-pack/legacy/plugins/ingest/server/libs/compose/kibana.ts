@@ -12,6 +12,7 @@ import { ESDatabaseAdapter } from '../adapters/es_database/default';
 import { KibanaLegacyServer } from '../adapters/framework/adapter_types';
 import { BackendFrameworkAdapter } from '../adapters/framework/default';
 import { PolicyAdapter } from '../adapters/policy/default';
+import { DatasourceAdapter } from '../adapters/datasource/default';
 import { SODatabaseAdapter } from '../adapters/so_database/default';
 import { DatasourcesLib } from '../datasources';
 import { OutputsLib } from '../outputs';
@@ -28,7 +29,8 @@ export function compose(server: KibanaLegacyServer): ServerLibs {
 
   const outputs = new OutputsLib({ framework });
 
-  const datasources = new DatasourcesLib();
+  const datasourceAdapter = new DatasourceAdapter(soDatabase);
+  const datasources = new DatasourcesLib(datasourceAdapter, { framework });
 
   const policyAdapter = new PolicyAdapter(soDatabase);
   const policy = new PolicyLib(policyAdapter, { framework, outputs, datasources });

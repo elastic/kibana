@@ -22,7 +22,7 @@ export class RestPolicyAdapter extends PolicyAdapter {
 
   public async get(id: string): Promise<Policy | null> {
     try {
-      return (await this.REST.get<ReturnTypeGet<Policy>>(`/api/ingest/policy/${id}`)).item;
+      return (await this.REST.get<ReturnTypeGet<Policy>>(`/api/ingest/policies/${id}`)).item;
     } catch (e) {
       return null;
     }
@@ -51,7 +51,7 @@ export class RestPolicyAdapter extends PolicyAdapter {
   }
 
   public async update(id: string, policy: Partial<Policy>) {
-    return await this.REST.put<ReturnTypeUpdate<Policy>>(`/api/ingest/policy/${id}`, policy);
+    return await this.REST.put<ReturnTypeUpdate<Policy>>(`/api/ingest/policies/${id}`, policy);
   }
 
   public async getAgentStatus(policyId: string) {

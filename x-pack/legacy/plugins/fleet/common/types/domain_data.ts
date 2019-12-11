@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as t from 'io-ts';
-export { Policy, Datasource } from '../../../ingest/server/libs/types';
+export { Policy, Datasource, Status, Output } from '../../../ingest/server/libs/types';
 import { RuntimeAgent, RuntimeAgentAction } from '../../server/repositories/agents/types';
 import { RuntimeAgentEvent } from '../../server/repositories/agent_events/types';
 export { EnrollmentApiKey } from '../../server/repositories/enrollment_api_keys/types';

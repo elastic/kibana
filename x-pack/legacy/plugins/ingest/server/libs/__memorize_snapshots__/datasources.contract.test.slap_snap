@@ -1,0 +1,794 @@
+
+exports['Datasources Lib create should create a datasource - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1578621628829
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Datasources Lib create should create a datasource - create - {"name":"prod_west","package":"coredns"} (2)'] = {
+  "results": {
+    "id": "1c24eb30-1bba-11ea-bb43-a3136d820c76",
+    "name": "prod_west",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib create should create a datasource - get - "1c24eb30-1bba-11ea-bb43-a3136d820c76" (3)'] = {
+  "results": {
+    "id": "1c24eb30-1bba-11ea-bb43-a3136d820c76",
+    "name": "prod_west",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib list should list all datasources - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1578621628829
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Datasources Lib list should list all datasources - create - {"name":"test1","package":"coredns"} (2)'] = {
+  "results": {
+    "id": "1c76dbc0-1bba-11ea-bb43-a3136d820c76",
+    "name": "test1",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib list should list all datasources - get info (3)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1578621628829
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Datasources Lib list should list all datasources - create - {"name":"test2","package":"coredns"} (4)'] = {
+  "results": {
+    "id": "1d0f4b30-1bba-11ea-bb43-a3136d820c76",
+    "name": "test2",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib list should list all datasources - get info (5)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1578621628829
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Datasources Lib list should list all datasources - create - {"name":"test3","package":"coredns"} (6)'] = {
+  "results": {
+    "id": "1dac7590-1bba-11ea-bb43-a3136d820c76",
+    "name": "test3",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib list should list all datasources - list - {"username":"internal","options":{"page":1,"perPage":20}} (7)'] = {
+  "results": {
+    "items": [
+      {
+        "id": "1c76dbc0-1bba-11ea-bb43-a3136d820c76",
+        "name": "test1",
+        "package": {
+          "name": "coredns",
+          "version": "1.3.1",
+          "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+          "title": "CoreDNS",
+          "assets": [
+            {
+              "id": "string",
+              "type": "index-template"
+            }
+          ]
+        },
+        "streams": [
+          {
+            "id": "string",
+            "input": {
+              "type": "etc",
+              "config": {
+                "paths": "/var/log/*.log"
+              },
+              "ingest_pipelines": [
+                "string"
+              ],
+              "id": "string",
+              "index_template": "string",
+              "ilm_policy": "string",
+              "fields": [
+                {}
+              ]
+            },
+            "config": {
+              "metricsets": [
+                "container",
+                "cpu"
+              ]
+            },
+            "output_id": "default",
+            "processors": [
+              "string"
+            ]
+          }
+        ],
+        "read_alias": "string"
+      },
+      {
+        "id": "1d0f4b30-1bba-11ea-bb43-a3136d820c76",
+        "name": "test2",
+        "package": {
+          "name": "coredns",
+          "version": "1.3.1",
+          "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+          "title": "CoreDNS",
+          "assets": [
+            {
+              "id": "string",
+              "type": "index-template"
+            }
+          ]
+        },
+        "streams": [
+          {
+            "id": "string",
+            "input": {
+              "type": "etc",
+              "config": {
+                "paths": "/var/log/*.log"
+              },
+              "ingest_pipelines": [
+                "string"
+              ],
+              "id": "string",
+              "index_template": "string",
+              "ilm_policy": "string",
+              "fields": [
+                {}
+              ]
+            },
+            "config": {
+              "metricsets": [
+                "container",
+                "cpu"
+              ]
+            },
+            "output_id": "default",
+            "processors": [
+              "string"
+            ]
+          }
+        ],
+        "read_alias": "string"
+      },
+      {
+        "id": "1dac7590-1bba-11ea-bb43-a3136d820c76",
+        "name": "test3",
+        "package": {
+          "name": "coredns",
+          "version": "1.3.1",
+          "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+          "title": "CoreDNS",
+          "assets": [
+            {
+              "id": "string",
+              "type": "index-template"
+            }
+          ]
+        },
+        "streams": [
+          {
+            "id": "string",
+            "input": {
+              "type": "etc",
+              "config": {
+                "paths": "/var/log/*.log"
+              },
+              "ingest_pipelines": [
+                "string"
+              ],
+              "id": "string",
+              "index_template": "string",
+              "ilm_policy": "string",
+              "fields": [
+                {}
+              ]
+            },
+            "config": {
+              "metricsets": [
+                "container",
+                "cpu"
+              ]
+            },
+            "output_id": "default",
+            "processors": [
+              "string"
+            ]
+          }
+        ],
+        "read_alias": "string"
+      }
+    ],
+    "total": 3,
+    "page": 1,
+    "perPage": 20
+  }
+}
+
+exports['Datasources Lib update should update a datasource - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1578621628829
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Datasources Lib update should update a datasource - create - {"name":"prod_west","package":"coredns"} (2)'] = {
+  "results": {
+    "id": "1e4de5b0-1bba-11ea-bb43-a3136d820c76",
+    "name": "prod_west",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib update should update a datasource - get - "1e4de5b0-1bba-11ea-bb43-a3136d820c76" (3)'] = {
+  "results": {
+    "id": "1e4de5b0-1bba-11ea-bb43-a3136d820c76",
+    "name": "prod_west",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib update should update a datasource - update - {"name":"foo","package":"coredns"} (4)'] = {
+  "results": {
+    "id": "1e4de5b0-1bba-11ea-bb43-a3136d820c76",
+    "name": "foo",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib update should update a datasource - get - "1e4de5b0-1bba-11ea-bb43-a3136d820c76" (5)'] = {
+  "results": {
+    "id": "1e4de5b0-1bba-11ea-bb43-a3136d820c76",
+    "name": "foo",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "input": {
+          "index_template": "string",
+          "id": "string",
+          "type": "etc",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ],
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ]
+        },
+        "output_id": "default",
+        "id": "string",
+        "processors": [
+          "string"
+        ],
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        }
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib delete Should delete the by the ID - get info (1)'] = {
+  "results": {
+    "kibana": {
+      "version": "8.0.0"
+    },
+    "license": {
+      "type": "trial",
+      "expired": false,
+      "expiry_date_in_millis": 1578621628829
+    },
+    "security": {
+      "enabled": true,
+      "available": true
+    },
+    "watcher": {
+      "enabled": true,
+      "available": true
+    }
+  },
+  "thrownError": null
+}
+
+exports['Datasources Lib delete Should delete the by the ID - create - {"name":"prod_west","package":"coredns"} (2)'] = {
+  "results": {
+    "id": "1f861790-1bba-11ea-bb43-a3136d820c76",
+    "name": "prod_west",
+    "package": {
+      "name": "coredns",
+      "version": "1.3.1",
+      "description": "CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n",
+      "title": "CoreDNS",
+      "assets": [
+        {
+          "id": "string",
+          "type": "index-template"
+        }
+      ]
+    },
+    "streams": [
+      {
+        "id": "string",
+        "input": {
+          "type": "etc",
+          "config": {
+            "paths": "/var/log/*.log"
+          },
+          "ingest_pipelines": [
+            "string"
+          ],
+          "id": "string",
+          "index_template": "string",
+          "ilm_policy": "string",
+          "fields": [
+            {}
+          ]
+        },
+        "config": {
+          "metricsets": [
+            "container",
+            "cpu"
+          ]
+        },
+        "output_id": "default",
+        "processors": [
+          "string"
+        ]
+      }
+    ],
+    "read_alias": "string"
+  }
+}
+
+exports['Datasources Lib delete Should delete the by the ID - delete - 1f861790-1bba-11ea-bb43-a3136d820c76'] = {}
+
+exports['Datasources Lib delete Should delete the by the ID - list - {"username":"internal","options":{"page":1,"perPage":20}} (3)'] = {
+  "results": {
+    "items": [],
+    "total": 0,
+    "page": 1,
+    "perPage": 20
+  }
+}

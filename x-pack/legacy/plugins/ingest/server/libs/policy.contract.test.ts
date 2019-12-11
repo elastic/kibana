@@ -109,7 +109,7 @@ describe('Policies Lib', () => {
   });
 
   describe('update', () => {
-    it('should update a policy and invalidate the origional', async () => {
+    it('should update a policy and invalidate the original', async () => {
       const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
       const updated = await libs.policy.update(TestUser, newPolicy.id as string, {
         name: 'foo',
@@ -118,6 +118,26 @@ describe('Policies Lib', () => {
 
       const gottenPolicy = (await libs.policy.get(TestUser, newPolicy.id as string)) as Policy;
       expect(gottenPolicy.name).toBe('foo');
+    });
+
+    it('should assign and unassign data sources to policy', async () => {
+      const newPolicy = await libs.policy.create(TestUser, 'test', 'test description');
+      const firstAssign = await libs.policy.assignDatasource(TestUser, newPolicy.id as string, [
+        'foo',
+        'bar',
+      ]);
+      expect(firstAssign.datasources).toEqual(['foo', 'bar']);
+
+      const secondAssign = await libs.policy.assignDatasource(TestUser, newPolicy.id as string, [
+        'test',
+      ]);
+      expect(secondAssign.datasources).toEqual(['foo', 'bar', 'test']);
+
+      const unassigned = await libs.policy.unassignDatasource(TestUser, newPolicy.id as string, [
+        'test',
+        'foo',
+      ]);
+      expect(unassigned.datasources).toEqual(['bar']);
     });
 
     describe.skip('finish update', () => {});

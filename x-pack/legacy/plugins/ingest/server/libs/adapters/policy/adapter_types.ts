@@ -36,7 +36,7 @@ export const exampleStoredPolicy: Policy = {
       name: 'prod_west',
       package: {
         name: 'coredns',
-        version: '1.0.1, 1.3.1',
+        version: '1.3.1',
         description:
           'CoreDNS logs and metrics integration.\nThe CoreDNS integrations allows to gather logs and metrics from the CoreDNS DNS server to get better insights.\n',
         title: 'CoreDNS',

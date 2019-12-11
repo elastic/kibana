@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import { Output, Policy } from '../../../../ingest/server/libs/types';
+import { Output, Policy } from '../../../common/types/domain_data';
 import { FrameworkUser } from '../../adapters/framework/adapter_types';
 import { PolicyLib } from '../../../../ingest/server/libs/policy';
 import { OutputsLib } from '../../../../ingest/server/libs/outputs';

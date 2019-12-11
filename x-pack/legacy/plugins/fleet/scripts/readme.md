@@ -13,14 +13,6 @@ To generate a dummy config and an enrollment enrollmentApiKey you can use this s
 node scripts/dev_env_setup --kibanaUrl=http://localhost:5603/qed --kibanaUser=elastic --kibanaPassword=changeme
 ```
 
-### Ingest endpoints
-
-To spin up a mock server with ingest endpoints (policies, datasources, etc), run:
-
-```
-node scripts/mock_spec
-```
-
 #### Testing load
 
 `artillery run x-pack/legacy/plugins/fleet/dev/load_testing/artillery.yml`

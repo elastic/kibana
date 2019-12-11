@@ -5,26 +5,26 @@
  */
 
 import { memorize } from '@mattapperson/slapshot/lib/memorize';
-import { StoredPolicy } from './adapter_types';
-import { PolicyAdapter } from './default';
+import { StoredDatasource } from './adapter_types';
+import { DatasourceAdapter } from './default';
 import { FrameworkUser } from '../framework/adapter_types';
 import { ListOptions } from '../../../../../fleet/server/repositories/agents/types';
 
-export class MemorizedPolicyAdapter {
-  constructor(private readonly adapter?: PolicyAdapter) {}
+export class MemorizedDatasourceAdapter {
+  constructor(private readonly adapter?: DatasourceAdapter) {}
 
   public async create(
     user: FrameworkUser,
-    policy: StoredPolicy,
+    datasource: StoredDatasource,
     options?: { id?: string }
-  ): Promise<StoredPolicy> {
+  ): Promise<StoredDatasource> {
     return await memorize(
-      `create - ${JSON.stringify({ name: policy.name, description: policy.description })}`,
+      `create - ${JSON.stringify({ name: datasource.name, package: datasource.package.name })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.create(user, policy, options);
+        return await this.adapter.create(user, datasource, options);
       },
       {
         pure: false,
@@ -32,7 +32,7 @@ export class MemorizedPolicyAdapter {
     );
   }
 
-  public async get(user: FrameworkUser, id: string): Promise<StoredPolicy | null> {
+  public async get(user: FrameworkUser, id: string): Promise<StoredDatasource | null> {
     return await memorize(
       `get - ${JSON.stringify(id)}`,
       async () => {
@@ -47,10 +47,25 @@ export class MemorizedPolicyAdapter {
     );
   }
 
+  public async getByIDs(user: FrameworkUser, ids: string[]): Promise<StoredDatasource[] | null> {
+    return await memorize(
+      `get by IDs - ${JSON.stringify(ids)}`,
+      async () => {
+        if (!this.adapter) {
+          throw new Error('An adapter must be provided when running tests online');
+        }
+        return await this.adapter.getByIDs(user, ids);
+      },
+      {
+        pure: false,
+      }
+    );
+  }
+
   public async list(
     user: FrameworkUser,
     options: ListOptions = {}
-  ): Promise<{ items: StoredPolicy[]; total: number }> {
+  ): Promise<{ items: StoredDatasource[]; total: number }> {
     return await memorize(
       `list - ${JSON.stringify({ username: (user as any).username || user.kind, options })}`,
       async () => {
@@ -68,19 +83,15 @@ export class MemorizedPolicyAdapter {
   public async update(
     user: FrameworkUser,
     id: string,
-    policy: StoredPolicy
-  ): Promise<StoredPolicy> {
+    datasource: StoredDatasource
+  ): Promise<StoredDatasource> {
     return await memorize(
-      `update - ${JSON.stringify({
-        name: policy.name,
-        description: policy.description,
-        datasources: policy.datasources,
-      })}`,
+      `update - ${JSON.stringify({ name: datasource.name, package: datasource.package.name })}`,
       async () => {
         if (!this.adapter) {
           throw new Error('An adapter must be provided when running tests online');
         }
-        return await this.adapter.update(user, id, policy);
+        return await this.adapter.update(user, id, datasource);
       },
       {
         pure: false,
