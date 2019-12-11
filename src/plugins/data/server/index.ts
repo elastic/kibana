@@ -64,7 +64,6 @@ export {
   esFilters,
   esKuery,
   esQuery,
-  utils, // TODO only getDisplayValueFromFilter is used here
   // field formats
   BoolFormat,
   BytesFormat,
