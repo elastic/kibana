@@ -20,6 +20,11 @@
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
+
+// Node v5 querystring for browser.
+// @ts-ignore
+import * as qs from 'querystring-browser';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
@@ -81,10 +86,54 @@ function EditorUI() {
   useEffect(() => {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
 
-    const { content: text } = history.getSavedEditorState() || {
-      content: DEFAULT_INPUT_VALUE,
+    const getQueryParams = () => {
+      const [, queryString] = window.location.hash.split('?');
+      return qs.parse(queryString || '');
     };
-    editorInstanceRef.current.update(text);
+
+    const onHashChange = debounce(() => {
+      const qParams = getQueryParams();
+      if (!qParams || !qParams.load_from) {
+        return;
+      }
+      const sourceLocation: string = qParams.load_from;
+      if (/^https?:\/\//.test(sourceLocation)) {
+        const loadFrom: Record<string, any> = {
+          url: sourceLocation,
+          // Having dataType here is required as it doesn't allow jQuery to `eval` content
+          // coming from the external source thereby preventing XSS attack.
+          dataType: 'text',
+          kbnXsrfToken: false,
+        };
+
+        if (/https?:\/\/api\.github\.com/.test(sourceLocation)) {
+          loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
+        }
+
+        $.ajax(loadFrom).done(async data => {
+          await editorInstanceRef.current!.update(data);
+          editorInstanceRef.current!.moveToNextRequestEdge(false);
+          editorInstanceRef.current!.highlightCurrentRequestsAndUpdateActionBar();
+          editorInstanceRef
+            .current!.getCoreEditor()
+            .getContainer()
+            .focus();
+        });
+      }
+    }, 200);
+
+    window.addEventListener('hashchange', onHashChange);
+
+    const firstParamsCheck = getQueryParams();
+    if (firstParamsCheck && firstParamsCheck.load_from) {
+      // Process initial loading
+      onHashChange();
+    } else {
+      const { content: text } = history.getSavedEditorState() || {
+        content: DEFAULT_INPUT_VALUE,
+      };
+      editorInstanceRef.current.update(text);
+    }
 
     function setupAutosave() {
       let timer: number;
@@ -121,6 +170,7 @@ function EditorUI() {
     return () => {
       unsubscribeResizer();
       mappings.clearSubscriptions();
+      window.removeEventListener('hashchange', onHashChange);
     };
   }, [history, setInputEditor]);
 
