@@ -302,7 +302,7 @@ This setting may not be used when `server.compression.enabled` is set to `false`
   send on all responses to the client from the Kibana server.
 
 `server.host:`:: *Default: "localhost"* This setting specifies the host of the
-back end server. To allow remote users to connect, set the value to the ip address or DNS name of the {kib} server.
+back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server.
 
 `server.keepaliveTimeout:`:: *Default: "120000"* The number of milliseconds to wait for additional data before restarting
 the `server.socketTimeout` counter.
