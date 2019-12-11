@@ -17,8 +17,6 @@ import {
   EuiIcon,
   EuiComboBox,
   EuiFormRow,
-  EuiText,
-  EuiLink,
 } from '@elastic/eui';
 
 import { documentationService } from '../../../../../../services/documentation';
@@ -136,12 +134,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
   };
 
   const renderFormFields = useCallback(
-    ({ type, subType }) => {
+    ({ type }) => {
       const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
 
-      const docLink =
-        (documentationService.getTypeDocLink(subType) as string) ||
-        (documentationService.getTypeDocLink(type) as string);
+      const docLink = documentationService.getTypeDocLink(type) as string;
 
       return (
         <EuiFlexItem>
@@ -155,7 +151,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               <TypeParameter
                 isMultiField={isMultiField}
                 onTypeChange={onTypeChange}
-                docLink={subTypeOptions ? undefined : docLink} // if subType, the doc link will render under the subType select and not here
+                docLink={docLink}
               />
             </EuiFlexItem>
             {/* Field sub type (if any) */}
@@ -174,28 +170,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                     const isInvalid = error ? Boolean(error.length) : false;
 
                     return (
-                      <EuiFormRow
-                        label={subTypeField.label}
-                        error={error}
-                        isInvalid={isInvalid}
-                        helpText={
-                          <EuiText size="xs">
-                            <EuiLink href={docLink} target="_blank">
-                              {i18n.translate(
-                                'xpack.idxMgmt.mappingsEditor.createField.documentationLinkLabel',
-                                {
-                                  defaultMessage: '{typeName} documentation',
-                                  values: {
-                                    typeName: subTypeField.value
-                                      ? (subTypeField.value as ComboBoxOption[])[0].label
-                                      : '',
-                                  },
-                                }
-                              )}
-                            </EuiLink>
-                          </EuiText>
-                        }
-                      >
+                      <EuiFormRow label={subTypeField.label} error={error} isInvalid={isInvalid}>
                         <EuiComboBox
                           placeholder={i18n.translate(
                             'xpack.idxMgmt.mappingsEditor.createField.typePlaceholderLabel',

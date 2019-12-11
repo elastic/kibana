@@ -16,7 +16,7 @@ import { FIELD_TYPES_OPTIONS } from '../../../constants';
 interface Props {
   onTypeChange: (nextType: ComboBoxOption[]) => void;
   isMultiField?: boolean | null;
-  docLink?: string;
+  docLink?: string | undefined;
 }
 
 export const TypeParameter = ({ onTypeChange, isMultiField, docLink }: Props) => (
@@ -37,9 +37,10 @@ export const TypeParameter = ({ onTypeChange, isMultiField, docLink }: Props) =>
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.typeField.documentationLinkLabel', {
                     defaultMessage: '{typeName} documentation',
                     values: {
-                      typeName: typeField.value
-                        ? (typeField.value as ComboBoxOption[])[0].label
-                        : '',
+                      typeName:
+                        typeField.value && (typeField.value as ComboBoxOption[])[0]
+                          ? (typeField.value as ComboBoxOption[])[0].label
+                          : '',
                     },
                   })}
                 </EuiLink>
