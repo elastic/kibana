@@ -28,7 +28,7 @@ import {
   EuiSideNav,
 } from '@elastic/eui';
 
-import { AppMountContext, AppMountParameters } from '../../../../../src/core/public';
+import { AppMountContext, AppMountParameters } from '../../../src/core/public';
 import { EsSearchTest } from './es_strategy';
 import { Page } from './page';
 import { DemoStrategy } from './demo_strategy';

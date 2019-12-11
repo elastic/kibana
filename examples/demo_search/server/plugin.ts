@@ -17,26 +17,25 @@
  * under the License.
  */
 
-import { DataPublicPluginSetup } from '../../../../../src/plugins/data/public';
-import { Plugin, CoreSetup, PluginInitializerContext } from '../../../../../src/core/public';
-import { DEMO_SEARCH_STRATEGY } from '../common';
-import { demoClientSearchStrategyProvider } from './demo_search_strategy';
-import { IDemoRequest, IDemoResponse } from '../common';
+import { Plugin, CoreSetup, PluginInitializerContext } from 'kibana/server';
+import { DataPluginSetup } from 'src/plugins/data/server/plugin';
+import { demoSearchStrategyProvider } from './demo_search_strategy';
+import { DEMO_SEARCH_STRATEGY, IDemoRequest, IDemoResponse } from '../common';
 
-interface DemoDataSearchSetupDependencies {
-  data: DataPublicPluginSetup;
+interface IDemoSearchExplorerDeps {
+  data: DataPluginSetup;
 }
 
 /**
  * Add the typescript mappings for our search strategy to the request and
  * response types. This allows typescript to require the right shapes if
  * making the call:
- * const response = context.search.search(request, {}, DEMO_SEARCH_STRATEGY);
+ * const response = context.search.search(request, DEMO_SEARCH_STRATEGY);
  *
  * If the caller does not pass in the right `request` shape, typescript will
  * complain. The caller will also get a typed response.
  */
-declare module '../../../../../src/plugins/data/public' {
+declare module '../../../src/plugins/data/server' {
   export interface IRequestTypesMap {
     [DEMO_SEARCH_STRATEGY]: IDemoRequest;
   }
@@ -46,13 +45,14 @@ declare module '../../../../../src/plugins/data/public' {
   }
 }
 
-export class DemoDataPlugin implements Plugin {
+export class DemoDataPlugin implements Plugin<void, void, IDemoSearchExplorerDeps> {
   constructor(private initializerContext: PluginInitializerContext) {}
-  public setup(core: CoreSetup, deps: DemoDataSearchSetupDependencies) {
+
+  public setup(core: CoreSetup, deps: IDemoSearchExplorerDeps) {
     deps.data.search.registerSearchStrategyProvider(
       this.initializerContext.opaqueId,
       DEMO_SEARCH_STRATEGY,
-      demoClientSearchStrategyProvider
+      demoSearchStrategyProvider
     );
   }
 
