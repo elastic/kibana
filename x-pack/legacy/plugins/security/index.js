@@ -132,7 +132,6 @@ export const security = (kibana) => new kibana.Plugin({
         server.plugins.kibana.systemApi
       ),
       cspRules: createCSPRuleString(config.get('csp.rules')),
-      kibanaIndexName: config.get('kibana.index'),
     });
 
     // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
