@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { monitorStatesQueryString } from '../../../../../legacy/plugins/uptime/public/queries/monitor_states_query';
 import { expectFixtureEql } from './helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { makeChecks, makeChecksWithStatus } from './helpers/make_checks';
+import { makeChecksWithStatus } from './helpers/make_checks';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -108,7 +108,25 @@ export default function({ getService }: FtrProviderContext) {
 
           const es = getService('legacyEs');
           dateRangeStart = new Date().toISOString();
-          checks = await makeChecksWithStatus(es, index, testMonitorId, 1, 1, numIps, {}, 'down');
+          checks = await makeChecksWithStatus(
+            es,
+            index,
+            testMonitorId,
+            1,
+            numIps,
+            1,
+            {},
+            'up',
+            d => {
+              // turn an all up status into having at least one down
+              if (d.summary) {
+                d.monitor.status = 'down';
+                d.summary.up--;
+                d.summary.down++;
+              }
+              return d;
+            }
+          );
           dateRangeEnd = new Date().toISOString();
           nonSummaryIp = checks[0][0].monitor.ip;
         });

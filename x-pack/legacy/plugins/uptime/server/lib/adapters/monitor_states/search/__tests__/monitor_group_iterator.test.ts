@@ -11,8 +11,8 @@ import {
   MonitorGroupIterator,
 } from '../monitor_group_iterator';
 import { simpleQueryContext } from './test_helpers';
-import { QueryContext } from '../../elasticsearch_monitor_states_adapter';
 import { MonitorGroups } from '../fetch_page';
+import { QueryContext } from '../query_context';
 
 describe('iteration', () => {
   let iterator: MonitorGroupIterator | null = null;

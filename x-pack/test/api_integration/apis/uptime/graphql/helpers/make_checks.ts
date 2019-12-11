@@ -185,9 +185,8 @@ export const makeChecksWithStatus = async (
   every: number,
   fields: { [key: string]: any } = {},
   status: 'up' | 'down',
-  mogrify: (doc: any) => any
+  mogrify: (doc: any) => any = d => d
 ) => {
-  const checks = [];
   const oppositeStatus = status === 'up' ? 'down' : 'up';
 
   return await makeChecks(es, index, monitorId, numChecks, numIps, every, fields, d => {
@@ -196,11 +195,8 @@ export const makeChecksWithStatus = async (
       d.summary[status] += d.summary[oppositeStatus];
       d.summary[oppositeStatus] = 0;
     }
-    if (mogrify) {
-      return mogrify(d);
-    } else {
-      return d;
-    }
+
+    return mogrify(d);
   });
 };
 

@@ -11,7 +11,7 @@ import {
   MonitorGroupsFetcher,
   MonitorGroupsPage,
 } from '../fetch_page';
-import { QueryContext } from '../../elasticsearch_monitor_states_adapter';
+import { QueryContext } from '../query_context';
 import { MonitorSummary } from '../../../../../../common/graphql/types';
 import { nextPagination, prevPagination, simpleQueryContext } from './test_helpers';
 

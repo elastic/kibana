@@ -20,7 +20,7 @@ export class QueryContext {
   hasTimespanCache?: boolean;
 
   constructor(
-    database: many,
+    database: any,
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
