@@ -76,7 +76,7 @@ export default function({ getService }: FtrProviderContext) {
       const savedObjectResponse = await readPackageSavedObject();
       expect(savedObjectResponse.id).to.be('yamlpipeline-1.0.0');
     });
-    it('works with a package with only an ingest pipeline', async () => {
+    it('works with a package containing only yml format ingest pipelines', async () => {
       const createDataSource = async () => {
         const response = await supertest
           .get('/api/epm/datasource/install/yamlpipeline-1.0.0')
@@ -84,20 +84,22 @@ export default function({ getService }: FtrProviderContext) {
         return response.body;
       };
 
-      // const readDataSourceSavedObject = async () => {
-      //   const response = await supertest
-      //     .get('/api/saved_objects/epm-datasource/yamlpipeline-1.0.0')
-      //     .expect(200);
-      //   return response.body;
-      // };
+      const readDataSourceSavedObject = async () => {
+        const response = await supertest
+          .get('/api/saved_objects/epm-datasource/yamlpipeline-1.0.0')
+          .expect(200);
+        return response.body;
+      };
 
-      const createDataSourceResponse = await createDataSource();
-      console.log('createDataSourceResponse is ', createDataSourceResponse);
+      // comment for debugging
+      await createDataSource();
 
-      // const readDataSourceSavedObjectResponse = await readDataSourceSavedObject();
-      // console.log('readDataSourceSavedObjectResponse is ', readDataSourceSavedObjectResponse);
+      // uncomment for debugging
+      // const createDataSourceResponse = await createDataSource();
+      // console.log('createDataSourceResponse is ', createDataSourceResponse);
 
-      expect(false).to.be(true);
+      const readDataSourceSavedObjectResponse = await readDataSourceSavedObject();
+      expect(readDataSourceSavedObjectResponse.id).to.be('yamlpipeline-1.0.0');
     });
   });
 }
