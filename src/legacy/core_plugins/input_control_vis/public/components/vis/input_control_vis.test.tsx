@@ -28,6 +28,8 @@ import { InputControlVis } from './input_control_vis';
 import { ListControl } from '../../control/list_control_factory';
 import { RangeControl } from '../../control/range_control_factory';
 
+jest.mock('ui/new_platform');
+
 const mockListControl: ListControl = {
   id: 'mock-list-control',
   isEnabled: () => {

@@ -23,6 +23,8 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { RangeControl, ceilWithPrecision, floorWithPrecision } from './range_control';
 import { RangeControl as RangeControlClass } from '../../control/range_control_factory';
 
+jest.mock('ui/new_platform');
+
 const control: RangeControlClass = {
   id: 'mock-range-control',
   isEnabled: () => {

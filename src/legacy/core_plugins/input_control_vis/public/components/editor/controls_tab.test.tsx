@@ -134,6 +134,7 @@ describe('behavior', () => {
           fieldName: 'numberField',
           label: '',
           type: 'range',
+          parent: 'parent',
           options: {
             step: 1,
           },
@@ -156,6 +157,7 @@ describe('behavior', () => {
           fieldName: 'numberField',
           label: '',
           type: 'range',
+          parent: 'parent',
           options: {
             step: 1,
           },
@@ -166,6 +168,7 @@ describe('behavior', () => {
           fieldName: 'keywordField',
           label: 'custom label',
           type: 'list',
+          parent: 'parent',
           options: {
             type: 'terms',
             multiselect: true,
@@ -191,6 +194,7 @@ describe('behavior', () => {
           fieldName: 'numberField',
           label: '',
           type: 'range',
+          parent: 'parent',
           options: {
             step: 1,
           },
@@ -201,6 +205,7 @@ describe('behavior', () => {
           fieldName: 'keywordField',
           label: 'custom label',
           type: 'list',
+          parent: 'parent',
           options: {
             type: 'terms',
             multiselect: true,
