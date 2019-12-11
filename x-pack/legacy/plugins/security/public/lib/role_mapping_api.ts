@@ -5,7 +5,6 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { INTERNAL_API_BASE_PATH } from '../../common/constants';
 import { RoleMapping } from '../../common/model';
 
 interface CheckPrivilegesResponse {
@@ -21,7 +20,7 @@ type DeleteRoleMappingsResponse = Array<{
   error?: Error;
 }>;
 
-const roleMappingUrl = `${INTERNAL_API_BASE_PATH}/role_mapping`;
+const roleMappingUrl = `/internal/security/role_mapping`;
 
 export class RoleMappingApi {
   public static async getRoleMappingFeatures(): Promise<CheckPrivilegesResponse> {
