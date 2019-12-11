@@ -921,7 +921,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={goToWatchList}>
+                <EuiButtonEmpty onClick={() => goToWatchList()}>
                   {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
                     defaultMessage: 'Cancel',
                   })}

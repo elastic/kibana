@@ -220,7 +220,7 @@ export const JsonWatchEditForm = () => {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty data-test-subj="btnCancelWatch" onClick={goToWatchList}>
+              <EuiButtonEmpty data-test-subj="btnCancelWatch" onClick={() => goToWatchList()}>
                 {i18n.translate('xpack.watcher.sections.watchEdit.json.cancelButtonLabel', {
                   defaultMessage: 'Cancel',
                 })}
