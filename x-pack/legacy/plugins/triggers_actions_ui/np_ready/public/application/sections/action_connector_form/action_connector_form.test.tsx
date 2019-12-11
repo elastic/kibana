@@ -19,7 +19,7 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('action_connector_form', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const deps = {
       core: coreMock.createStart(),
       plugins: {

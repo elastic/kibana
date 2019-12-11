@@ -8,7 +8,7 @@ import { ActionConnector } from '../../../types';
 
 describe('connector reducer', () => {
   let initialConnector: ActionConnector;
-  beforeEach(() => {
+  beforeAll(() => {
     initialConnector = {
       secrets: {},
       id: 'test',

@@ -19,7 +19,7 @@ describe('connector_add_flyout', () => {
   let AppDependenciesProvider: React.ProviderExoticComponent<React.ProviderProps<AppDependencies>>;
   let deps: any;
 
-  beforeEach(() => {
+  beforeAll(() => {
     deps = {
       core: coreMock.createStart(),
       plugins: {

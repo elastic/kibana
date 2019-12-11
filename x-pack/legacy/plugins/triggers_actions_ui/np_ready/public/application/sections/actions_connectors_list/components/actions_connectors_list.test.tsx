@@ -22,7 +22,7 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('actions_connectors_list component empty', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
@@ -93,7 +93,7 @@ describe('actions_connectors_list component empty', () => {
 describe('actions_connectors_list component with items', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
@@ -182,7 +182,7 @@ describe('actions_connectors_list component with items', () => {
 describe('actions_connectors_list component empty with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );
@@ -246,7 +246,7 @@ describe('actions_connectors_list component empty with show only capability', ()
 describe('actions_connectors_list with show only capability', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const { loadAllActions, loadActionTypes } = jest.requireMock(
       '../../../lib/action_connector_api'
     );

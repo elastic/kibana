@@ -854,7 +854,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                         <EuiFieldNumber
                           value={termSize || 0}
                           onChange={e => {
-                            setAlertParams('termSize', e.target.value);
+                            const { value } = e.target;
+                            const termSizeVal = value !== '' ? parseFloat(value) : value;
+                            setAlertParams('termSize', termSizeVal);
                           }}
                           min={1}
                         />

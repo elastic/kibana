@@ -18,7 +18,7 @@ let AppDependenciesProvider: React.ProviderExoticComponent<React.ProviderProps<A
 let deps: any;
 
 describe('connector_edit_flyout', () => {
-  beforeEach(() => {
+  beforeAll(() => {
     deps = {
       core: coreMock.createStart(),
       plugins: {

@@ -19,7 +19,7 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 describe('connector_add_flyout', () => {
   let wrapper: ReactWrapper<any>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const deps = {
       core: coreMock.createStart(),
       plugins: {
