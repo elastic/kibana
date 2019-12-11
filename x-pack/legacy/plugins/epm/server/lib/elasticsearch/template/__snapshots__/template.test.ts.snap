@@ -41,15 +41,6 @@ exports[`tests loading fields.yml: base.yml 1`] = `
           },
           "match_mapping_type": "string"
         }
-      },
-      {
-        "labels": {
-          "path_match": "labels.*",
-          "mapping": {
-            "type": "keyword"
-          },
-          "match_mapping_type": "string"
-        }
       }
     ],
     "date_detection": false,
