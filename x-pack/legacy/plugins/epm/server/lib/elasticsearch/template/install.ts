@@ -23,7 +23,7 @@ const isFields = (path: string) => {
  * The template is currently loaded with the pkgey-package-dataset
  */
 export async function installTemplates(pkg: RegistryPackage, callCluster: CallESAsCurrentUser) {
-  // If not datasets exist in this package, not templates have to be installed.
+  // If no datasets exist in this package, no templates have to be installed.
   if (!pkg.datasets) return;
 
   return pkg.datasets.map(async dataset => {
