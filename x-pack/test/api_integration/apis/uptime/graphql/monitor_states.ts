@@ -104,29 +104,17 @@ export default function({ getService }: FtrProviderContext) {
         };
 
         before(async () => {
-          const index = 'heartbeat-8.0.0';
-
           const es = getService('legacyEs');
           dateRangeStart = new Date().toISOString();
-          checks = await makeChecksWithStatus(
-            es,
-            index,
-            testMonitorId,
-            1,
-            numIps,
-            1,
-            {},
-            'up',
-            d => {
-              // turn an all up status into having at least one down
-              if (d.summary) {
-                d.monitor.status = 'down';
-                d.summary.up--;
-                d.summary.down++;
-              }
-              return d;
+          checks = await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', d => {
+            // turn an all up status into having at least one down
+            if (d.summary) {
+              d.monitor.status = 'down';
+              d.summary.up--;
+              d.summary.down++;
             }
-          );
+            return d;
+          });
           dateRangeEnd = new Date().toISOString();
           nonSummaryIp = checks[0][0].monitor.ip;
         });

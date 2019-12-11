@@ -7,9 +7,10 @@
 import uuid from 'uuid';
 import { merge, flattenDeep } from 'lodash';
 
+const INDEX_NAME = 'heartbeat-8.0.0';
+
 export const makePing = async (
   es: any,
-  index: string,
   monitorId: string,
   fields: { [key: string]: any },
   mogrify: (doc: any) => any
@@ -101,7 +102,7 @@ export const makePing = async (
   const doc = mogrify(merge(baseDoc, fields));
 
   await es.index({
-    index,
+    index: INDEX_NAME,
     refresh: true,
     body: doc,
   });
@@ -111,7 +112,6 @@ export const makePing = async (
 
 export const makeCheck = async (
   es: any,
-  index: string,
   monitorId: string,
   numIps: number,
   fields: { [key: string]: any },
@@ -137,7 +137,7 @@ export const makeCheck = async (
     if (i === numIps - 1) {
       pingFields.summary = summary;
     }
-    const doc = await makePing(es, index, monitorId, pingFields, mogrify);
+    const doc = await makePing(es, monitorId, pingFields, mogrify);
     docs.push(doc);
     // @ts-ignore
     summary[doc.monitor.status]++;
@@ -147,7 +147,6 @@ export const makeCheck = async (
 
 export const makeChecks = async (
   es: any,
-  index: string,
   monitorId: string,
   numChecks: number,
   numIps: number,
@@ -170,7 +169,7 @@ export const makeChecks = async (
         },
       },
     });
-    checks.push(await makeCheck(es, index, monitorId, numIps, fields, mogrify));
+    checks.push(await makeCheck(es, monitorId, numIps, fields, mogrify));
   }
 
   return checks;
@@ -178,7 +177,6 @@ export const makeChecks = async (
 
 export const makeChecksWithStatus = async (
   es: any,
-  index: string,
   monitorId: string,
   numChecks: number,
   numIps: number,
@@ -189,7 +187,7 @@ export const makeChecksWithStatus = async (
 ) => {
   const oppositeStatus = status === 'up' ? 'down' : 'up';
 
-  return await makeChecks(es, index, monitorId, numChecks, numIps, every, fields, d => {
+  return await makeChecks(es, monitorId, numChecks, numIps, every, fields, d => {
     d.monitor.status = status;
     if (d.summary) {
       d.summary[status] += d.summary[oppositeStatus];

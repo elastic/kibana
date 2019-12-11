@@ -50,7 +50,6 @@ export default function({ getService }: FtrProviderContext) {
             const makeMonitorChecks = async (monitorId: string, status: 'up' | 'down') => {
               return makeChecksWithStatus(
                 getService('legacyEs'),
-                'heartbeat-8.0.0',
                 monitorId,
                 checksPerMonitor,
                 numIps,
