@@ -618,7 +618,7 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.NUMBER,
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dimsFieldLabel', {
-        defaultMessage: 'Dims',
+        defaultMessage: 'Dimensions',
       }),
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.dimsHelpTextDescription', {
         defaultMessage: 'The number of dimensions in the vector.',
@@ -630,7 +630,7 @@ export const PARAMETERS_DEFINITION = {
             i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.validations.dimsIsRequiredErrorMessage',
               {
-                defaultMessage: 'Specify a dims value.',
+                defaultMessage: 'Specify a dimension.',
               }
             )
           ),

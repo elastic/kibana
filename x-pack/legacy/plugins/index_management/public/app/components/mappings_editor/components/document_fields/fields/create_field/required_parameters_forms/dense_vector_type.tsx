@@ -19,7 +19,7 @@ export const DenseVectorRequiredParameters = () => {
       title={<h3>{label}</h3>}
       description={i18n.translate('xpack.idxMgmt.mappingsEditor.denseVector.dimsFieldDescription', {
         defaultMessage:
-          'Each document’s dense vector is encoded as a binary doc value. Its size in bytes is equal to 4 * dims + 4.',
+          'Each document’s dense vector is encoded as a binary doc value. Its size in bytes is equal to 4 * dimensions + 4.',
       })}
       idAria="mappingsEditorDimsParameter"
     >
