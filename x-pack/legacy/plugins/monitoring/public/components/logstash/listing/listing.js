@@ -6,7 +6,13 @@
 
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
-import { EuiPage, EuiLink, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPage,
+  EuiLink,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPanel,
+  EuiSpacer,
+  EuiScreenReaderOnly } from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
 import { ClusterStatus } from '..//cluster_status';
 import { EuiMonitoringTable } from '../../table';
@@ -165,6 +171,14 @@ export class Listing extends PureComponent {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.logstash.instances.heading"
+                defaultMessage="Logstash instances"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPanel>
             <ClusterStatus stats={stats} />
           </EuiPanel>
