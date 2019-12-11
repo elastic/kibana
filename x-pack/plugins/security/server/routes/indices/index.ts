@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INTERNAL_API_BASE_PATH = '/internal/security';
+import { defineGetFieldsRoutes } from './get_fields';
+import { RouteDefinitionParams } from '..';
+
+export function defineIndicesRoutes(params: RouteDefinitionParams) {
+  defineGetFieldsRoutes(params);
+}
