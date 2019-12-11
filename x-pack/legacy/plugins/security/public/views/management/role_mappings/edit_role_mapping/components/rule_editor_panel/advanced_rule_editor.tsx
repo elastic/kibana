@@ -8,10 +8,11 @@ import React, { useState, Fragment } from 'react';
 
 import 'brace/mode/json';
 import 'brace/theme/github';
-import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiCodeEditor, EuiFormRow, EuiButton, EuiSpacer, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { Rule, RuleBuilderError, generateRulesFromRaw } from '../../../model';
+import { documentationLinks } from '../../../services/documentation_links';
 
 interface Props {
   rules: Rule | null;
@@ -97,6 +98,29 @@ export const AdvancedRuleEditor = (props: Props) => {
             defaultMessage="Auto-format"
           />
         </EuiButton>
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.advancedEditorHelpText"
+              defaultMessage="Specify your rules in JSON format consistent with the {roleMappingAPI}"
+              values={{
+                roleMappingAPI: (
+                  <EuiLink
+                    href={documentationLinks.getRoleMappingAPIDocUrl()}
+                    external={true}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="xpack.security.management.editRoleMapping.advancedEditorEsApi"
+                      defaultMessage="Elasticsearch Role Mapping API"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+        </EuiText>
       </Fragment>
     </EuiFormRow>
   );

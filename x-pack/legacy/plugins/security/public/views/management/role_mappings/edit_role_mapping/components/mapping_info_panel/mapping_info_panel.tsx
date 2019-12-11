@@ -25,6 +25,7 @@ import {
   validateRoleMappingRoleTemplates,
 } from '../../services/role_mapping_validation';
 import { RoleSelector } from '../role_selector';
+import { documentationLinks } from '../../../services/documentation_links';
 
 interface Props {
   roleMapping: RoleMapping;
@@ -71,7 +72,7 @@ export class MappingInfoPanel extends Component<Props, State> {
         <EuiSpacer />
         {this.getRoleMappingName()}
         {this.getEnabledSwitch()}
-        {this.getRolesSelector()}
+        {this.getRolesOrRoleTemplatesSelector()}
       </EuiPanel>
     );
   }
@@ -110,15 +111,19 @@ export class MappingInfoPanel extends Component<Props, State> {
     );
   };
 
+  private getRolesOrRoleTemplatesSelector = () => {
+    if (this.state.rolesMode === 'roles') {
+      return this.getRolesSelector();
+    }
+    return this.getRoleTemplatesSelector();
+  };
+
   private getRolesSelector = () => {
     const validationFunction = () => {
       if (!this.props.validateForm) {
         return {};
       }
-      if (this.state.rolesMode === 'roles') {
-        return validateRoleMappingRoles(this.props.roleMapping);
-      }
-      return validateRoleMappingRoleTemplates(this.props.roleMapping);
+      return validateRoleMappingRoles(this.props.roleMapping);
     };
     return (
       <EuiDescribedFormGroup
@@ -139,35 +144,84 @@ export class MappingInfoPanel extends Component<Props, State> {
               />
             </span>
             <EuiSpacer size="xs" />
-            {this.state.rolesMode === 'templates' ? (
+            <EuiLink
+              onClick={() => {
+                this.setState({ rolesMode: 'templates' });
+              }}
+            >
+              <Fragment>
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.switchToRoleTemplates"
+                  defaultMessage="Switch to role templates"
+                />{' '}
+                <EuiIcon size="s" type="inputOutput" />
+              </Fragment>
+            </EuiLink>
+          </EuiText>
+        }
+      >
+        <EuiFormRow fullWidth={true} {...validationFunction()}>
+          <RoleSelector
+            roleMapping={this.props.roleMapping}
+            mode={this.state.rolesMode}
+            canUseInlineScripts={this.props.canUseInlineScripts}
+            canUseStoredScripts={this.props.canUseStoredScripts}
+            onChange={roleMapping => this.props.onChange(roleMapping)}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+    );
+  };
+
+  private getRoleTemplatesSelector = () => {
+    const validationFunction = () => {
+      if (!this.props.validateForm) {
+        return {};
+      }
+      return validateRoleMappingRoleTemplates(this.props.roleMapping);
+    };
+    return (
+      <EuiDescribedFormGroup
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.security.management.editRoleMapping.roleMappingRoleTemplatesFormRowTitle"
+              defaultMessage="Role Templates"
+            />
+          </h3>
+        }
+        description={
+          <EuiText size="s" color="subdued">
+            <span>
+              <FormattedMessage
+                id="xpack.security.management.editRoleMapping.roleMappingRoleTemplatesFormRowHelpText"
+                defaultMessage="Create templates which describe the roles to assign to your users."
+              />{' '}
               <EuiLink
-                onClick={() => {
-                  this.setState({ rolesMode: 'roles' });
-                }}
+                href={documentationLinks.getRoleMappingTemplateDocUrl()}
+                external={true}
+                target="_blank"
               >
-                <Fragment>
-                  <FormattedMessage
-                    id="xpack.security.management.editRoleMapping.switchToRoles"
-                    defaultMessage="Switch to roles"
-                  />{' '}
-                  <EuiIcon size="s" type="inputOutput" />
-                </Fragment>
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.roleMappingRoleTemplatesFormRowLearnMore"
+                  defaultMessage="Learn more about role templates"
+                />
               </EuiLink>
-            ) : (
-              <EuiLink
-                onClick={() => {
-                  this.setState({ rolesMode: 'templates' });
-                }}
-              >
-                <Fragment>
-                  <FormattedMessage
-                    id="xpack.security.management.editRoleMapping.switchToRoleTemplates"
-                    defaultMessage="Switch to role templates"
-                  />{' '}
-                  <EuiIcon size="s" type="inputOutput" />
-                </Fragment>
-              </EuiLink>
-            )}
+            </span>
+            <EuiSpacer size="xs" />
+            <EuiLink
+              onClick={() => {
+                this.setState({ rolesMode: 'roles' });
+              }}
+            >
+              <Fragment>
+                <FormattedMessage
+                  id="xpack.security.management.editRoleMapping.switchToRoles"
+                  defaultMessage="Switch to roles"
+                />{' '}
+                <EuiIcon size="s" type="inputOutput" />
+              </Fragment>
+            </EuiLink>
           </EuiText>
         }
       >

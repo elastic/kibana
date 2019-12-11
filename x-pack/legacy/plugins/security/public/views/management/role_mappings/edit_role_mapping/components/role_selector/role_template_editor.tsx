@@ -13,8 +13,8 @@ import {
   EuiFieldText,
   EuiCallOut,
   EuiText,
-  EuiButtonEmpty,
   EuiSwitch,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RoleTemplate } from '../../../../../../../common/model';
@@ -46,12 +46,12 @@ export const RoleTemplateEditor = ({
       {getEditorForTemplate()}
       <EuiFlexItem grow={false}>
         <EuiFormRow>
-          <EuiButtonEmpty color="danger" onClick={() => onDelete(roleTemplate)} size="s">
+          <EuiLink color="danger" onClick={() => onDelete(roleTemplate)}>
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.deleteRoleTemplateButton"
               defaultMessage="Delete role template"
             />
-          </EuiButtonEmpty>
+          </EuiLink>
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
