@@ -36,7 +36,6 @@ import { InvalidJSONProperty, SavedObjectNotFound, expandShorthand } from '../..
 
 import { SearchSource } from '../courier';
 import { findObjectByTitle } from './find_object_by_title';
-import { SavedObjectsClientProvider } from './saved_objects_client_provider';
 import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
 import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
@@ -66,8 +65,9 @@ function isErrorNonFatal(error) {
   return error.message === OVERWRITE_REJECTED || error.message === SAVE_DUPLICATE_REJECTED;
 }
 
-export function SavedObjectProvider(Promise, Private, confirmModalPromise, indexPatterns) {
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
+export function SavedObjectProvider(Promise, confirmModalPromise) {
+  const { indexPatterns } = npStart.plugins.data;
+  const { client: savedObjectsClient } = npStart.core.savedObjects;
 
   /**
    * The SavedObject class is a base class for saved objects loaded from the server and

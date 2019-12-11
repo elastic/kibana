@@ -19,7 +19,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
-import { initLegacyModule } from './shim/legacy_module';
+// import { initLegacyModule } from './shim/legacy_module';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setFieldFormats } from '../../../../plugins/data/public/services';
@@ -54,7 +54,6 @@ export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDe
   public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.
     setFieldFormats(data.fieldFormats);
-    initLegacyModule(data.indexPatterns);
     return {};
   }
 
