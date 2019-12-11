@@ -30,8 +30,6 @@ export interface Query {
   /** Fetch the most recent event data for a monitor ID, date range, location. */
   getLatestMonitors: Ping[];
 
-  getFilterBar?: FilterBar | null;
-
   getMonitorPageTitle?: MonitorPageTitle | null;
   /** Fetches the current state of Uptime monitors for the given parameters. */
   getMonitorStates?: MonitorSummaryResult | null;
@@ -469,21 +467,6 @@ export interface StatusData {
   down?: number | null;
   /** The total down counts for this point. */
   total?: number | null;
-}
-/** The data used to enrich the filter bar. */
-export interface FilterBar {
-  /** A series of monitor IDs in the heartbeat indices. */
-  ids?: string[] | null;
-  /** The location values users have configured for the agents. */
-  locations?: string[] | null;
-  /** The ports of the monitored endpoints. */
-  ports?: number[] | null;
-  /** The schemes used by the monitors. */
-  schemes?: string[] | null;
-  /** The possible status values contained in the indices. */
-  statuses?: string[] | null;
-  /** The list of URLs */
-  urls?: string[] | null;
 }
 
 export interface MonitorPageTitle {
