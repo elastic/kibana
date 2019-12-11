@@ -75,7 +75,7 @@ function runServerFunctions(server: any) {
 
       // Send the initial headers.
       res.writeHead(200, {
-        'Content-Type': 'text/plain',
+        'Content-Type': 'application/x-ndjson',
         Connection: 'keep-alive',
         'Transfer-Encoding': 'chunked',
         'Cache-Control': 'no-cache',
