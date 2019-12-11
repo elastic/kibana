@@ -51,10 +51,6 @@ type ContentPanelProps = PackageInfo & Pick<DetailProps, 'panel'>;
 export function ContentPanel(props: ContentPanelProps) {
   const { panel, name, version } = props;
   switch (panel) {
-    /*
-    case 'assets':
-      return <AssetAccordion assets={assets} />;
-      */
     case 'data-sources':
       return <DataSourcesPanel name={name} version={version} />;
     case 'overview':
