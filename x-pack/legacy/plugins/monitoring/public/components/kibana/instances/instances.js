@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiCallOut,
+  EuiScreenReaderOnly
 } from '@elastic/eui';
 import { capitalize, get } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
@@ -247,6 +248,14 @@ export class KibanaInstances extends PureComponent {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.kibana.instances.heading"
+                defaultMessage="Kibana instances"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPanel>
             <ClusterStatus stats={clusterStatus} />
           </EuiPanel>
