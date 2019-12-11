@@ -7,8 +7,7 @@
 import React, { Component } from 'react';
 import moment from 'moment';
 import { partialRight } from 'lodash';
-import {
-  EuiPage,
+import { EuiPage,
   EuiLink,
   EuiPageBody,
   EuiPageContent,
@@ -16,12 +15,13 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-} from '@elastic/eui';
+  EuiScreenReaderOnly } from '@elastic/eui';
 import { formatMetric } from '../../../lib/format_number';
 import { ClusterStatus } from '../cluster_status';
 import { Sparkline } from 'plugins/monitoring/components/sparkline';
 import { EuiMonitoringSSPTable } from '../../table';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage   } from '@kbn/i18n/react';
 
 export class PipelineListing extends Component {
   tooltipXValueFormatter(xValue, dateFormat) {
@@ -148,7 +148,17 @@ export class PipelineListing extends Component {
     return (
       <EuiPage>
         <EuiPageBody>
-          <EuiPanel>{this.renderStats()}</EuiPanel>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.logstash.pipline_listing.heading"
+                defaultMessage="Logstash pipelines"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
+          <EuiPanel>
+            {this.renderStats()}
+          </EuiPanel>
           <EuiSpacer size="m" />
           <EuiPageContent>
             <EuiMonitoringSSPTable
