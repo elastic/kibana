@@ -171,13 +171,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/infra/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/lens/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -207,13 +200,6 @@ module.exports = {
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/watcher/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'off',
-        'react-hooks/exhaustive-deps': 'off',
       },
     },
 
