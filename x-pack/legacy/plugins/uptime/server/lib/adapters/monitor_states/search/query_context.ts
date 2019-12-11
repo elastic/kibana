@@ -68,7 +68,7 @@ export class QueryContext {
 
     // @ts-ignore
     const tsStart = DateMath.parse(this.dateRangeEnd).subtract(10, 'seconds');
-    const tsEnd = DateMath.parse(this.dateRangeEnd);
+    const tsEnd = DateMath.parse(this.dateRangeEnd)!;
 
     return {
       bool: {
