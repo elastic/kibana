@@ -92,7 +92,7 @@ export const FlattenedType = React.memo(({ field }: Props) => {
               'xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldDescription',
               {
                 defaultMessage:
-                  'Prevent leaf values from being indexed if they are longer than this limit.',
+                  'Prevent leaf values from being indexed if they are beyond a certain length. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
               }
             )}
             toggleDefaultValue={getDefaultValueToggle('ignore_above', field.source)}
