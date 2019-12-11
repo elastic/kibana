@@ -21,5 +21,6 @@ export const awsS3NumberOfObjects = createTSVBModel(
       ],
     },
   ],
-  '>=86400s'
+  '>=86400s',
+  false
 );

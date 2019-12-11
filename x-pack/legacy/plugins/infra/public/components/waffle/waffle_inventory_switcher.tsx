@@ -71,22 +71,18 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
           items: [
             {
               name: getDisplayNameForType('host'),
-              icon: 'host',
               onClick: goToHost,
             },
             {
               name: getDisplayNameForType('pod'),
-              icon: 'kubernetes',
               onClick: goToK8,
             },
             {
               name: getDisplayNameForType('container'),
-              icon: 'docker',
               onClick: goToDocker,
             },
             {
               name: 'AWS',
-              icon: 'aws',
               panel: 'awsPanel',
             },
           ],

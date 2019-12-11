@@ -10,10 +10,12 @@ export const createTSVBModel = (
   id: InventoryMetric,
   requires: string[],
   series: TSVBSeries[],
-  interval = '>=300s'
+  interval = '>=300s',
+  dropLastBucket = true
 ): TSVBMetricModelCreator => (timeField, indexPattern): TSVBMetricModel => ({
   id,
   requires,
+  drop_last_bucket: dropLastBucket,
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
