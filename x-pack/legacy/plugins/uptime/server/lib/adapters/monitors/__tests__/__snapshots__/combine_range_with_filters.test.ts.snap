@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`combineRangeWithFilters combines filters that have no filter clause 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-15m",
+            "lte": "now",
+          },
+        },
+      },
+    ],
+    "minimum_should_match": 1,
+    "should": Array [
+      Object {
+        "match": Object {
+          "url.port": 80,
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`combineRangeWithFilters combines query with filter list 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "field": "monitor.id",
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-15m",
+            "lte": "now",
+          },
+        },
+      },
+    ],
+    "minimum_should_match": 1,
+    "should": Array [
+      Object {
+        "match": Object {
+          "url.port": 80,
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`combineRangeWithFilters combines query with filter object 1`] = `
+Object {
+  "bool": Object {
+    "filter": Array [
+      Object {
+        "field": "monitor.id",
+      },
+      Object {
+        "range": Object {
+          "@timestamp": Object {
+            "gte": "now-15m",
+            "lte": "now",
+          },
+        },
+      },
+    ],
+    "minimum_should_match": 1,
+    "should": Array [
+      Object {
+        "match": Object {
+          "url.port": 80,
+        },
+      },
+    ],
+  },
+}
+`;
