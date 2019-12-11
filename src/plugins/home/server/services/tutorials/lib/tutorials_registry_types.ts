@@ -108,3 +108,4 @@ export type TutorialContextFactory = (
   >
 ) => { [key: string]: unknown };
 export type ScopedTutorialContextFactory = (...args: any[]) => any;
+export type TutorialFilter = (tutorial: TutorialSchema) => boolean;

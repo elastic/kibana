@@ -19,7 +19,12 @@
 
 import { TutorialsRegistry } from './tutorials_registry';
 import { coreMock } from '../../../../../core/server/mocks';
-import { CoreSetup } from '../../../../../core/server';
+import {
+  CoreSetup,
+  IRouter,
+  RequestHandler,
+  RequestHandlerContext,
+} from '../../../../../core/server';
 import { httpServerMock } from '../../../../../core/server/mocks';
 
 import {
@@ -86,7 +91,69 @@ describe('TutorialsRegistry', () => {
 
     test('has a router that retrieves registered tutorials', () => {
       const mockResponse = httpServerMock.createResponseFactory();
-      expect(mockResponse.ok.mock.calls).toMatchInlineSnapshot(`Array []`);
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockGetRoute = jest.fn();
+      mockCoreSetup.http.createRouter.mockReturnValue(({
+        get: mockGetRoute,
+      } as unknown) as IRouter);
+      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      setup.registerTutorial(
+        () =>
+          ({
+            id: 'test-tutorial',
+          } as TutorialSchema)
+      );
+      expect(mockGetRoute).toHaveBeenCalled();
+      (mockGetRoute.mock.calls[0][1] as RequestHandler<any, any, any>)(
+        {} as RequestHandlerContext,
+        mockRequest,
+        mockResponse
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: [{ id: 'test-tutorial' }],
+        })
+      );
+    });
+
+    test('filters down tutorials according to registered filters', () => {
+      const mockResponse = httpServerMock.createResponseFactory();
+      const mockRequest = httpServerMock.createKibanaRequest();
+      const mockGetRoute = jest.fn();
+      mockCoreSetup.http.createRouter.mockReturnValue(({
+        get: mockGetRoute,
+      } as unknown) as IRouter);
+      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      setup.registerTutorialFilter(({ id }) => id !== 'tutorial1');
+      setup.registerTutorialFilter(({ id }) => id !== 'tutorial2');
+      setup.registerTutorial(
+        () =>
+          ({
+            id: 'tutorial1',
+          } as TutorialSchema)
+      );
+      setup.registerTutorial(
+        () =>
+          ({
+            id: 'tutorial2',
+          } as TutorialSchema)
+      );
+      setup.registerTutorial(
+        () =>
+          ({
+            id: 'tutorial3',
+          } as TutorialSchema)
+      );
+      (mockGetRoute.mock.calls[0][1] as RequestHandler<any, any, any>)(
+        {} as RequestHandlerContext,
+        mockRequest,
+        mockResponse
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: [{ id: 'tutorial3' }],
+        })
+      );
     });
   });
 

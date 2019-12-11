@@ -23,12 +23,14 @@ import {
   TutorialProvider,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
+  TutorialFilter,
 } from './lib/tutorials_registry_types';
 import { tutorialSchema } from './lib/tutorial_schema';
 
 export class TutorialsRegistry {
-  private readonly tutorialProviders: TutorialProvider[] = []; // pre-register all the tutorials we know we want in here
+  private readonly tutorialProviders: TutorialProvider[] = [];
   private readonly scopedTutorialContextFactories: TutorialContextFactory[] = [];
+  private readonly tutorialFilters: TutorialFilter[] = [];
 
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();
@@ -44,9 +46,11 @@ export class TutorialsRegistry {
         );
 
         return res.ok({
-          body: this.tutorialProviders.map(tutorialProvider => {
-            return tutorialProvider(scopedContext); // All the tutorialProviders need to be refactored so that they don't need the server.
-          }),
+          body: this.tutorialProviders
+            .map(tutorialProvider => {
+              return tutorialProvider(scopedContext);
+            })
+            .filter(tutorial => this.tutorialFilters.every(filter => filter(tutorial))),
         });
       }
     );
@@ -61,7 +65,9 @@ export class TutorialsRegistry {
 
         this.tutorialProviders.push(specProvider);
       },
-
+      registerTutorialFilter: (filter: TutorialFilter) => {
+        this.tutorialFilters.push(filter);
+      },
       addScopedTutorialContextFactory: (
         scopedTutorialContextFactory: ScopedTutorialContextFactory
       ) => {
