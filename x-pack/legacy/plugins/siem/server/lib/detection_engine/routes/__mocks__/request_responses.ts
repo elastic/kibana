@@ -6,11 +6,13 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { RuleAlertParamsRest, RuleAlertType, SignalsRestParams } from '../../alerts/types';
+import { SignalsRestParams } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
 } from '../../../../../common/constants';
+import { RuleAlertType } from '../../rules/types';
+import { RuleAlertParamsRest } from '../../types';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
@@ -36,20 +38,6 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
       techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
     },
   ],
-});
-
-export const typicalFilterPayload = (): Partial<RuleAlertParamsRest> => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  risk_score: 50,
-  type: 'filter',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  filter: {},
 });
 
 export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams> => ({

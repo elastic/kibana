@@ -110,7 +110,8 @@ export const security = (kibana) => new kibana.Plugin({
     }
 
     watchStatusAndLicenseToInitialize(server.plugins.xpack_main, this, async () => {
-      if (securityPlugin.__legacyCompat.license.getFeatures().allowRbac) {
+      const xpackInfo = server.plugins.xpack_main.info;
+      if (xpackInfo.isAvailable() && xpackInfo.feature('security').isEnabled()) {
         await securityPlugin.__legacyCompat.registerPrivilegesWithCluster();
       }
     });
@@ -131,7 +132,6 @@ export const security = (kibana) => new kibana.Plugin({
         server.plugins.kibana.systemApi
       ),
       cspRules: createCSPRuleString(config.get('csp.rules')),
-      kibanaIndexName: config.get('kibana.index'),
     });
 
     // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
