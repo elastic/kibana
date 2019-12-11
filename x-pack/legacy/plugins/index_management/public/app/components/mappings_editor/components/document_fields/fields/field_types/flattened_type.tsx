@@ -79,7 +79,7 @@ export const FlattenedType = React.memo(({ field }: Props) => {
             title={
               <h3>
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldTitle', {
-                  defaultMessage: 'Set leaf value length limit',
+                  defaultMessage: 'Set length limit',
                 })}
               </h3>
             }
@@ -97,9 +97,7 @@ export const FlattenedType = React.memo(({ field }: Props) => {
               component={Field}
             />
           </EditFieldFormRow>
-        </EditFieldSection>
 
-        <EditFieldSection>
           {/* split_queries_on_whitespace */}
           <EditFieldFormRow
             title={
