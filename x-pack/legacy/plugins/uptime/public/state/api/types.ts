@@ -10,4 +10,5 @@ export interface BaseParams {
   dateEnd: string;
   filters?: string;
   statusFilter?: string;
+  location?: string;
 }

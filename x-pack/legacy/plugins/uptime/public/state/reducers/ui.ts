@@ -4,49 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { handleActions, Action } from 'redux-actions';
 import {
-  UiActionTypes,
   PopoverState,
-  SET_INTEGRATION_POPOVER_STATE,
-  SET_BASE_PATH,
-  REFRESH_APP,
+  toggleIntegrationsPopover,
+  setBasePath,
+  triggerAppRefresh,
+  setFilters,
 } from '../actions/ui';
 
 export interface UiState {
   integrationsPopoverOpen: PopoverState | null;
   basePath: string;
   lastRefresh: number;
+  filters: Map<string, string[]>;
 }
 
 const initialState: UiState = {
   integrationsPopoverOpen: null,
   basePath: '',
   lastRefresh: Date.now(),
+  filters: new Map(),
 };
 
-export function uiReducer(state = initialState, action: UiActionTypes): UiState {
-  switch (action.type) {
-    case REFRESH_APP:
-      return {
-        ...state,
-        lastRefresh: action.payload,
-      };
-    case SET_INTEGRATION_POPOVER_STATE:
-      const popoverState = action.payload;
-      return {
-        ...state,
-        integrationsPopoverOpen: {
-          id: popoverState.id,
-          open: popoverState.open,
-        },
-      };
-    case SET_BASE_PATH:
-      const basePath = action.payload;
-      return {
-        ...state,
-        basePath,
-      };
-    default:
-      return state;
-  }
-}
+type UiPayload = PopoverState & string & boolean & number & Map<string, string[]>;
+
+export const uiReducer = handleActions<UiState, UiPayload>(
+  {
+    [String(toggleIntegrationsPopover)]: (state, action: Action<PopoverState>) => ({
+      ...state,
+      integrationsPopoverOpen: action.payload as PopoverState,
+    }),
+
+    [String(setBasePath)]: (state, action: Action<string>) => ({
+      ...state,
+      basePath: action.payload as string,
+    }),
+
+    [String(triggerAppRefresh)]: (state, action: Action<number>) => ({
+      ...state,
+      lastRefresh: action.payload as number,
+    }),
+
+    [String(setFilters)]: (state, action: Action<Map<string, string[]>>) => ({
+      ...state,
+      filters: new Map([...state.filters, ...(action.payload as Map<string, string[]>)]),
+    }),
+  },
+  initialState
+);

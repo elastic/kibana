@@ -21,6 +21,7 @@ interface FilterBarQueryResult {
 interface FilterBarDropdownsProps {
   currentFilter: string;
   onFilterUpdate: (kuery: string) => void;
+  setFilters: Function;
 }
 
 type Props = UptimeGraphQLQueryProps<FilterBarQueryResult> & FilterBarDropdownsProps;
@@ -30,6 +31,7 @@ export const FilterGroupComponent = ({
   currentFilter,
   data,
   onFilterUpdate,
+  setFilters,
 }: Props) => {
   const locations = get<string[]>(data, 'filterBar.locations', []);
   const ports = get<string[]>(data, 'filterBar.ports', []);
@@ -61,9 +63,12 @@ export const FilterGroupComponent = ({
     // store the new set of filters
     const persistedFilters = Array.from(updatedFilterMap);
     onFilterUpdate(persistedFilters.length === 0 ? '' : JSON.stringify(persistedFilters));
+    setFilters(new Map([[fieldName, values]]));
   };
 
   const getSelectedItems = (fieldName: string) => filterKueries.get(fieldName) || [];
+
+  setFilters(filterKueries);
 
   const filterPopoverProps: FilterPopoverProps[] = [
     {

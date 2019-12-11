@@ -13,7 +13,7 @@ import { MonitorSummary } from '../../../../../common/graphql/types';
 import { AppState } from '../../../../state';
 import { fetchMonitorDetails } from '../../../../state/actions/monitor';
 import { MostRecentError } from './most_recent_error';
-import { getMonitorDetails } from '../../../../state/selectors';
+import { getMonitorDetails, getFilters } from '../../../../state/selectors';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails } from '../../../../../common/runtime_types';
 import { useUrlParams } from '../../../../hooks';
@@ -39,6 +39,11 @@ interface MonitorListDrawerProps {
    * Redux action to trigger , loading monitor details
    */
   loadMonitorDetails: typeof fetchMonitorDetails;
+
+  /**
+   * Filters from filter bar
+   */
+  filters: Map<string, string[]>;
 }
 
 /**
@@ -49,20 +54,22 @@ export function MonitorListDrawerComponent({
   summary,
   loadMonitorDetails,
   monitorDetails,
+  filters,
 }: MonitorListDrawerProps) {
   if (!summary || !summary.state.checks) {
     return null;
   }
   const { monitor_id: monitorId } = summary;
   const [getUrlParams] = useUrlParams();
-  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd, filters } = getUrlParams();
+  const { dateRangeStart: dateStart, dateRangeEnd: dateEnd } = getUrlParams();
 
   useEffect(() => {
+    const location = filters?.get('observer.geo.name') ?? [];
     loadMonitorDetails({
       dateStart,
       dateEnd,
-      filters,
       monitorId,
+      location: location.join(),
     });
   }, [dateStart, dateEnd, filters]);
 
@@ -93,6 +100,7 @@ export function MonitorListDrawerComponent({
 
 const mapStateToProps = (state: AppState, { summary }: any) => ({
   monitorDetails: getMonitorDetails(state, summary),
+  filters: getFilters(state),
 });
 
 const mapDispatchToProps = (dispatch: any) => ({

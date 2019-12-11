@@ -16,18 +16,24 @@ export const createGetMonitorDetailsRoute: UMRestApiRouteCreator = (libs: UMServ
       monitorId: schema.string(),
       dateStart: schema.maybe(schema.string()),
       dateEnd: schema.maybe(schema.string()),
-      filters: schema.maybe(schema.string()),
+      location: schema.maybe(schema.string()),
     }),
   },
   options: {
     tags: ['access:uptime'],
   },
   handler: async (_context, request, response): Promise<any> => {
-    const { monitorId, dateStart, dateEnd, filters } = request.query;
+    const { monitorId, dateStart, dateEnd, location } = request.query;
 
     return response.ok({
       body: {
-        ...(await libs.monitors.getMonitorDetails(request, monitorId, dateStart, dateEnd, filters)),
+        ...(await libs.monitors.getMonitorDetails(
+          request,
+          monitorId,
+          dateStart,
+          dateEnd,
+          location
+        )),
       },
     });
   },

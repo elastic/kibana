@@ -8,5 +8,5 @@ export interface MonitorDetailsActionPayload {
   monitorId: string;
   dateStart: string;
   dateEnd: string;
-  filters?: string;
+  location?: string;
 }
