@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Section } from './Section';
+import { Section } from './section';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 import { Capabilities } from '../../../core/public';
 
