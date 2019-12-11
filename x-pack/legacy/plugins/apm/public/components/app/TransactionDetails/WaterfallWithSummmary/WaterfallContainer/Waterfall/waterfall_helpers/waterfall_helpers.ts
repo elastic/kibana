@@ -47,13 +47,6 @@ interface IWaterfallItemBase {
   duration: number;
 
   /**
-   * Start in us.
-   * This will only be used by legacy data.
-   * When the parent.id is missing on all waterfall
-   */
-  start?: number;
-
-  /**
    * start timestamp in us
    */
   timestamp: number;
@@ -93,13 +86,15 @@ function getTransactionItem(
     serviceName: transaction.service.name,
     name: transaction.transaction.name,
     duration: transaction.transaction.duration.us,
-    start: transaction.transaction.start?.us || 0,
     timestamp: transaction.timestamp.us,
     offset: 0,
     skew: 0,
     docType: 'transaction',
     transaction,
-    errorCount: errorsPerTransaction[transaction.transaction.id] || 0
+    errorCount:
+      errorsPerTransaction[transaction.transaction.id]?.doc_count || 0,
+    errorTimestamp:
+      errorsPerTransaction[transaction.transaction.id]?.error.timestamp.us
   };
 }
 
@@ -110,7 +105,6 @@ function getSpanItem(span: Span): IWaterfallItemSpan {
     serviceName: span.service.name,
     name: span.span.name,
     duration: span.span.duration.us,
-    start: span.span.start?.us || 0,
     timestamp: span.timestamp.us,
     offset: 0,
     skew: 0,
@@ -242,14 +236,6 @@ const findWaterfallTransactionById = (
       waterfallItem.docType === 'transaction' && waterfallItem.id === id
   ) as IWaterfallItemTransaction;
 
-const sortWaterfallByStartTime = (
-  waterfallItems: Array<IWaterfallItemSpan | IWaterfallItemTransaction>
-) => {
-  const items = sortBy(waterfallItems, 'start');
-
-  return items.map(item => ({ ...item, offset: item.start || 0 }));
-};
-
 export function getWaterfall(
   { trace, errorsPerTransaction }: TraceAPIResponse,
   entryTransactionId?: Transaction['transaction']['id']
@@ -271,22 +257,25 @@ export function getWaterfall(
     entryTransactionId
   );
 
-  const isParentMissing = waterfallItems.every(waterfallItem =>
-    isEmpty(waterfallItem.parentId)
-  );
-
   const childrenByParentId = groupBy(waterfallItems, item =>
     item.parentId ? item.parentId : 'root'
   );
 
   const rootTransaction = getRootTransaction(childrenByParentId);
 
-  const items = isParentMissing
-    ? sortWaterfallByStartTime(waterfallItems)
-    : sortWaterfallByParentId(childrenByParentId, entryWaterfallTransaction);
+  const items = sortWaterfallByParentId(
+    childrenByParentId,
+    entryWaterfallTransaction
+  );
 
   const getTransactionById = (id?: IWaterfallItem['id']) =>
     findWaterfallTransactionById(waterfallItems, id)?.transaction;
+
+  const errorsTimeline = Object.values(errorsPerTransaction)
+    .map(e => {
+      return e.error.timestamp.us;
+    })
+    .sort();
 
   return {
     duration: getWaterfallDuration(items),
@@ -295,6 +284,7 @@ export function getWaterfall(
     rootTransaction,
     errorsPerTransaction,
     items,
-    getTransactionById
+    getTransactionById,
+    errorsTimeline
   };
 }
