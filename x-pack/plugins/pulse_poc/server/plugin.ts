@@ -51,13 +51,13 @@ export class PulsePocPlugin {
       {
         path: '/api/pulse_poc/instructions/{deploymentId}',
         validate: {
-          query: schema.object({
+          params: schema.object({
             deploymentId: schema.string(),
           }),
         },
       },
       async (context, request, response) => {
-        const { deploymentId } = request.query;
+        const { deploymentId } = request.params;
         const es = context.core.elasticsearch.adminClient;
 
         const allChannelCheckResults = this.channels.map(async channel => {
