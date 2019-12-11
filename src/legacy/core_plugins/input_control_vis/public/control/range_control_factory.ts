@@ -124,7 +124,14 @@ export async function rangeControlFactory(
   const { filterManager } = npStart.plugins.data.query;
   return new RangeControl(
     controlParams,
-    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, filterManager),
+    new RangeFilterManager(
+      controlParams.id,
+      controlParams.fieldName,
+      // TODO: Fix error handling to create indexPattern in a more cononical way
+      // @ts-ignore
+      indexPattern,
+      filterManager
+    ),
     useTimeFilter,
     SearchSource
   );
