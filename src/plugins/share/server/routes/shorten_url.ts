@@ -17,19 +17,32 @@
  * under the License.
  */
 
-import { handleShortUrlError } from './lib/short_url_error';
-import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+import { IRouter } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 
-export const createShortenUrlRoute = ({ shortUrlLookup }) => ({
-  method: 'POST',
-  path: '/api/shorten_url',
-  handler: async function (request) {
-    try {
-      shortUrlAssertValid(request.payload.url);
-      const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
-      return { urlId };
-    } catch (err) {
-      throw handleShortUrlError(err);
-    }
-  }
-});
+import { shortUrlAssertValid } from './lib/short_url_assert_valid';
+import { ShortUrlLookupService } from './lib/short_url_lookup';
+
+export const createShortenUrlRoute = ({
+  shortUrlLookup,
+  router,
+}: {
+  shortUrlLookup: ShortUrlLookupService;
+  router: IRouter;
+}) => {
+  router.post(
+    {
+      path: '/api/shorten_url',
+      validate: {
+        body: schema.object({ url: schema.string() }),
+      },
+    },
+    router.handleLegacyErrors(async function(context, request, response) {
+      shortUrlAssertValid(request.body.url);
+      const urlId = await shortUrlLookup.generateUrlId(request.body.url, {
+        savedObjects: context.core.savedObjects.client,
+      });
+      return response.ok({ body: { urlId } });
+    })
+  );
+};
