@@ -52,7 +52,7 @@ export default function ({ getService }) {
         .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
-        .send(report)
+        .send({ report })
         .expect(200);
 
       const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });
@@ -80,7 +80,7 @@ export default function ({ getService }) {
         .post('/api/ui_metric/report')
         .set('kbn-xsrf', 'kibana')
         .set('content-type', 'application/json')
-        .send(report)
+        .send({ report })
         .expect(200);
 
       const response = await es.search({ index: '.kibana', q: 'type:ui-metric' });

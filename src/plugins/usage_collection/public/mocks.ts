@@ -31,6 +31,6 @@ const createSetupContract = (): Setup => {
   return setupContract;
 };
 
-export const metricsPluginMock = {
+export const usageCollectionPluginMock = {
   createSetupContract,
 };

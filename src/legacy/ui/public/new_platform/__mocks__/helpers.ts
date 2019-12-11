@@ -24,7 +24,7 @@ import { embeddablePluginMock } from '../../../../../plugins/embeddable/public/m
 import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { inspectorPluginMock } from '../../../../../plugins/inspector/public/mocks';
 import { uiActionsPluginMock } from '../../../../../plugins/ui_actions/public/mocks';
-import { metricsPluginMock } from '../../../../../plugins/usage_collection/public/mocks';
+import { usageCollectionPluginMock } from '../../../../../plugins/usage_collection/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
@@ -34,7 +34,7 @@ export const pluginsMock = {
     inspector: inspectorPluginMock.createSetupContract(),
     expressions: expressionsPluginMock.createSetupContract(),
     uiActions: uiActionsPluginMock.createSetupContract(),
-    usageCollection: metricsPluginMock.createSetupContract(),
+    usageCollection: usageCollectionPluginMock.createSetupContract(),
   }),
   createStart: () => ({
     data: dataPluginMock.createStartContract(),

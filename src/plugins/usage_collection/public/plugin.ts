@@ -18,7 +18,6 @@
  */
 
 import { Reporter, METRIC_TYPE } from '@kbn/analytics';
-// import { Storage } from 'ui/storage';
 import { Storage } from '../../kibana_utils/public';
 import { createReporter } from './services';
 import {
@@ -43,9 +42,8 @@ export interface UsageCollectionSetup {
 }
 
 export function isUnauthenticated(http: HttpServiceBase) {
-  const { basePath } = http;
-  const path = basePath.remove(window.location.pathname);
-  return path === '/login' || path === '/logout' || path === '/logged_out' || path === '/status';
+  const { anonymousPaths } = http;
+  return anonymousPaths.isAnonymous(window.location.pathname);
 }
 
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
