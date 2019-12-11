@@ -54,7 +54,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
           </div>
         );
       }),
-    [indices]
+    [handleCheckboxChange, indices]
   );
 
   return (
