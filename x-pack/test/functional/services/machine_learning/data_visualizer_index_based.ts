@@ -50,7 +50,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         const filteredCards = await testSubjects.findAll(
           `mlDataVisualizerFieldsPanel ${panelFieldTypes} > ~mlFieldDataCard`
         );
-        expect(filteredCards).to.have.length(expectedCardCount);
+        expect(filteredCards).to.have.length(
+          expectedCardCount,
+          `Card count for field types '${panelFieldTypes}' should be '${expectedCardCount}' (got '${filteredCards.length}')`
+        );
       });
     },
 
@@ -100,7 +103,7 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
       expectedCardCount: number
     ) {
       await retry.tryForTime(10 * 1000, async () => {
-        await testSubjects.selectValue('mlDataVisualizerFieldTypesSelect', filterFieldType, false);
+        await testSubjects.selectValue('mlDataVisualizerFieldTypesSelect', filterFieldType);
         await this.assertFieldsPanelTypeInputValue(filterFieldType);
         await this.assertFieldsPanelCardCount(panelFieldTypes, expectedCardCount);
       });

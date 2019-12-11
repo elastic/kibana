@@ -114,22 +114,12 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async selectValue(
-      selector: string,
-      value: string,
-      selectWithKeyboard: boolean = true
-    ): Promise<void> {
+    public async selectValue(selector: string, value: string): Promise<void> {
       log.debug(`Find.selectValue('${selector}', option[value="${value}"]')`);
       const combobox = await this.byCssSelector(selector);
-      if (selectWithKeyboard) {
-        const $ = await combobox.parseDomContent();
-        const text = $(`option[value="${value}"]`).text();
-        await combobox.type(text);
-      } else {
-        await combobox.click();
-        const opt = await combobox.findByCssSelector(`option[value='${value}']`);
-        await opt.click();
-      }
+      const $ = await combobox.parseDomContent();
+      const text = $(`option[value="${value}"]`).text();
+      await combobox.type(text);
     }
 
     public async filterElementIsDisplayed(elements: WebElementWrapper[]) {
