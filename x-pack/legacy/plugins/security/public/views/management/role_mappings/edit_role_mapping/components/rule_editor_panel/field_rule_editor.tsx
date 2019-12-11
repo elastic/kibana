@@ -167,7 +167,7 @@ export class FieldRuleEditor extends Component<Props, State> {
                     defaultMessage: 'Delete value',
                   }
                 )}
-                onClick={() => this.onRemoveAlternateValue(0)}
+                onClick={() => this.onRemoveAlternateValue(valueIndex)}
               />
             </EuiFormRow>
           </EuiFlexItem>
