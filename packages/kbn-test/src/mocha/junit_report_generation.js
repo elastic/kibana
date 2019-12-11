@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { resolve, dirname, relative } from 'path';
+import { dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
 
 import xmlBuilder from 'xmlbuilder';
+import { makeJunitReportPath } from '@kbn/test';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../';
@@ -137,13 +138,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       }
     });
 
-    const reportPath = resolve(
-      rootDirectory,
-      'target/junit',
-      process.env.JOB || '.',
-      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
-    );
-
+    const reportPath = makeJunitReportPath(rootDirectory, reportName);
     const reportXML = builder.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');
