@@ -29,6 +29,7 @@ import {
   ExpressionFunction,
   KibanaDatatableColumn,
 } from 'src/plugins/expressions/public';
+import { npStart } from 'ui/new_platform';
 import {
   SearchSource,
   SearchSourceContract,
@@ -42,11 +43,10 @@ import {
 } from '../../../../../ui/public/filter_manager/query_filter';
 
 import { buildTabularInspectorData } from '../../../../../ui/public/inspector/build_tabular_inspector_data';
-import { calculateObjectHash } from '../../../../../ui/public/vis/lib/calculate_object_hash';
+import { calculateObjectHash } from '../../../../visualizations/public';
 import { getTime } from '../../../../../ui/public/timefilter';
 // @ts-ignore
 import { tabifyAggResponse } from '../../../../../ui/public/agg_response/tabify/tabify';
-import { start as data } from '../../../../data/public/legacy';
 import { PersistedState } from '../../../../../ui/public/persisted_state';
 import { Adapters } from '../../../../../../plugins/inspector/public';
 
@@ -261,7 +261,7 @@ export const esaggs = (): ExpressionFunction<typeof name, Context, Arguments, Re
   async fn(context, args, { inspectorAdapters, abortSignal }) {
     const $injector = await chrome.dangerouslyGetActiveInjector();
     const Private: Function = $injector.get('Private');
-    const { indexPatterns } = data.indexPatterns;
+    const { indexPatterns } = npStart.plugins.data;
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     const aggConfigsState = JSON.parse(args.aggConfigs);

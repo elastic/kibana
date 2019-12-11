@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subscription } from 'rxjs';
+import { Subscription, combineLatest } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
   IClusterClient,
@@ -20,7 +20,6 @@ import { deepFreeze } from '../../../../src/core/utils';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesSetupContract } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { CapabilitiesModifier } from '../../../../src/legacy/server/capabilities';
 
 import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
@@ -29,6 +28,7 @@ import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from './licensing';
 import { setupSavedObjects } from './saved_objects';
 import { SecurityAuditLogger } from './audit';
+import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -43,8 +43,6 @@ export type FeaturesService = Pick<FeaturesSetupContract, 'getFeatures'>;
  */
 export interface LegacyAPI {
   isSystemAPIRequest: (request: KibanaRequest) => boolean;
-  capabilities: { registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void };
-  kibanaIndexName: string;
   cspRules: string;
   savedObjects: SavedObjectsLegacyService<KibanaRequest | LegacyRequest>;
   auditLogger: {
@@ -79,7 +77,8 @@ export interface PluginSetupContract {
         lifespan: number | null;
       };
       secureCookies: boolean;
-      authc: { providers: string[] };
+      cookieName: string;
+      loginAssistanceMessage: string;
     }>;
   };
 }
@@ -123,12 +122,15 @@ export class Plugin {
     core: CoreSetup,
     { features, licensing }: PluginSetupDependencies
   ): Promise<RecursiveReadonly<PluginSetupContract>> {
-    const config = await createConfig$(this.initializerContext, core.http.isTlsEnabled)
+    const [config, legacyConfig] = await combineLatest([
+      createConfig$(this.initializerContext, core.http.isTlsEnabled),
+      this.initializerContext.config.legacy.globalConfig$,
+    ])
       .pipe(first())
       .toPromise();
 
     this.clusterClient = core.elasticsearch.createClient('security', {
-      plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
+      plugins: [elasticsearchClientPlugin],
     });
 
     const { license, update: updateLicense } = new SecurityLicenseService().setup();
@@ -150,11 +152,13 @@ export class Plugin {
       clusterClient: this.clusterClient,
       license,
       loggers: this.initializerContext.logger,
-      getLegacyAPI: this.getLegacyAPI,
+      kibanaIndexName: legacyConfig.kibana.index,
       packageVersion: this.initializerContext.env.packageInfo.version,
       getSpacesService: this.getSpacesService,
       featuresService: features,
     });
+
+    core.capabilities.registerSwitcher(authz.disableUnauthorizedCapabilities);
 
     defineRoutes({
       router: core.http.createRouter(),
@@ -195,10 +199,6 @@ export class Plugin {
             authz,
             legacyAPI,
           });
-
-          legacyAPI.capabilities.registerCapabilitiesModifier((request, capabilities) =>
-            authz.disableUnauthorizedCapabilities(KibanaRequest.from(request), capabilities)
-          );
         },
 
         registerPrivilegesWithCluster: async () => await authz.registerPrivilegesWithCluster(),
@@ -215,7 +215,6 @@ export class Plugin {
           },
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
-          authc: { providers: config.authc.providers },
         },
       },
     });
