@@ -20,12 +20,10 @@ export interface OverviewFiltersState {
 
 const initialState: OverviewFiltersState = {
   filters: {
-    ids: [],
     locations: [],
     ports: [],
     schemes: [],
     tags: [],
-    urls: [],
   },
   errors: [],
   loading: false,
