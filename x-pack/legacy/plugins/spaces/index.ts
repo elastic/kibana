@@ -76,6 +76,7 @@ export const spaces = (kibana: Record<string, any>) =>
       injectDefaultVars(server: Server) {
         return {
           serverBasePath: server.config().get('server.basePath'),
+          activeSpace: null,
         };
       },
       async replaceInjectedVars(
