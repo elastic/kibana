@@ -6,16 +6,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHOWING = i18n.translate('xpack.siem.alertsViewer.showingLabel', {
-  defaultMessage: 'Showing',
-});
-
-export const ALERTS = i18n.translate('xpack.siem.alertsViewer.eventsLabel', {
+export const ALERTS_DOCUMENT_TYPE = i18n.translate('xpack.siem.hosts.alertsDocumentType', {
   defaultMessage: 'Alerts',
 });
 
-export const UNIT = (totalCount: number) =>
-  i18n.translate('xpack.siem.alertsViewer.unit', {
-    values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {alert} other {alerts}}`,
-  });
+export const TOTAL_COUNT_OF_ALERTS = i18n.translate('xpack.siem.hosts.totalCountOfAlerts', {
+  defaultMessage: 'alerts match the search criteria',
+});
+
+export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.hosts.alertsDocumentType', {
+  defaultMessage: 'Alerts',
+});
+

@@ -6,7 +6,7 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { NarrowDateRange } from '../../../components/ml/types';
-import { hostsModel } from '../../../store';
+import { hostsModel, networkModel } from '../../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 
@@ -37,8 +37,8 @@ export type SetQuery = ({
   refetch: Refetch;
 }) => void;
 
-interface QueryTabBodyProps {
-  type: hostsModel.HostsType;
+export interface QueryTabBodyProps {
+  type: hostsModel.HostsType | networkModel.NetworkType;
   startDate: number;
   endDate: number;
   filterQuery?: string | ESTermQuery;
@@ -49,25 +49,6 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
   indexPattern: IIndexPattern;
   skip: boolean;
   setQuery: SetQuery;
-  updateDateRange?: UpdateDateRange;
-  narrowDateRange?: NarrowDateRange;
-};
-
-export type AlertsComponentsQueryProps = QueryTabBodyProps & {
-  deleteQuery?: ({ id }: { id: string }) => void;
-  indexPattern: StaticIndexPattern;
-  skip: boolean;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: InspectQuery | null;
-    loading: boolean;
-    refetch: Refetch;
-  }) => void;
   updateDateRange?: UpdateDateRange;
   narrowDateRange?: NarrowDateRange;
 };

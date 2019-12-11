@@ -8,7 +8,7 @@ import React from 'react';
 import { AlertsComponentsQueryProps } from '../../../components/alerts_viewer/types';
 import { AlertsView } from '../../../components/alerts_viewer';
 
-export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentsQueryProps) => (
+export const NetworkAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentsQueryProps) => (
   <AlertsView
     {...alertsProps}
     pageFilters={[
@@ -17,7 +17,19 @@ export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentsQ
           should: [
             {
               exists: {
-                field: 'host.name',
+                field: 'source.ip',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      },
+      {
+        bool: {
+          should: [
+            {
+              exists: {
+                field: 'destination.ip',
               },
             },
           ],
@@ -28,4 +40,4 @@ export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentsQ
   />
 ));
 
-HostAlertsQueryTabBody.displayName = 'HostAlertsQueryTabBody';
+NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

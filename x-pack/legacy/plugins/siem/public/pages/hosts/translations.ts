@@ -63,14 +63,3 @@ export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.hosts.emptyActi
   defaultMessage: 'Go to documentation',
 });
 
-export const ALERTS_DOCUMENT_TYPE = i18n.translate('xpack.siem.hosts.alertsDocumentType', {
-  defaultMessage: 'Alerts',
-});
-
-export const TOTAL_COUNT_OF_ALERTS = i18n.translate('xpack.siem.hosts.totalCountOfAlerts', {
-  defaultMessage: 'alerts match the search criteria',
-});
-
-export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.hosts.alertsDocumentType', {
-  defaultMessage: 'Alerts',
-});

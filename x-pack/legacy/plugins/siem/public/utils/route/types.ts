@@ -9,11 +9,12 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HostsTableType } from '../../store/hosts/model';
+import { NetworkRouteType } from '../../pages/network/navigation/types';
 
 export interface RouteSpyState {
   pageName: string;
   detailName: string | undefined;
-  tabName: HostsTableType | undefined;
+  tabName: HostsTableType | NetworkRouteType | undefined;
   search: string;
   pathName: string;
   history?: H.History;

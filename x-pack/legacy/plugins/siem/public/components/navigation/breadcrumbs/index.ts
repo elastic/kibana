@@ -54,12 +54,18 @@ export const getBreadcrumbsForRoute = (
   }
   if (object != null && object.navTabs && object.pageName === SiemPageName.network) {
     const tempNav: SearchNavTab = { urlKey: 'network', isDetailPage: false };
-    const urlStateKeys = [getOr(tempNav, object.pageName, object.navTabs)];
+    let urlStateKeys = [getOr(tempNav, object.pageName, object.navTabs)];
+    if (object.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, object.tabName, object.navTabs)];
+    }
     return [
       ...siemRootBreadcrumb,
       ...getIPDetailsBreadcrumbs(
-        object.detailName,
-        urlStateKeys.reduce((acc: string[], item) => [...acc, getSearch(item, object)], [])
+        object,
+        urlStateKeys.reduce(
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
+          []
+        )
       ),
     ];
   }

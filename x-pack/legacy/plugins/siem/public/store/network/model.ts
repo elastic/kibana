@@ -19,6 +19,8 @@ export enum NetworkType {
 }
 
 export enum NetworkTableType {
+  alerts = 'alerts',
+  anomalies = 'anomalies',
   dns = 'dns',
   http = 'http',
   topCountriesDestination = 'topCountriesDestination',
@@ -103,6 +105,7 @@ export interface NetworkQueries {
   [NetworkTableType.topNFlowDestination]: TopNFlowQuery;
   [NetworkTableType.topNFlowSource]: TopNFlowQuery;
   [NetworkTableType.tls]: TlsQuery;
+  [NetworkTableType.alerts]: BasicQueryPaginated;
 }
 
 export interface NetworkPageModel {

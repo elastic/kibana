@@ -5,76 +5,54 @@
  */
 
 import React from 'react';
-import { connect } from 'react-redux';
-import { inputsModel, inputsSelectors, State, timelineSelectors } from '../../store';
-import { timelineActions, inputsActions } from '../../store/actions';
-import { TimelineModel } from '../../store/timeline/model';
-import { DEFAULT_SIGNALS_INDEX } from '../../../common/constants';
 
-import { StatefulEventsViewer } from '../events_viewer';
-import * as i18n from './translations';
-import { alertsDefaultModel } from './default_headers';
+import { EuiSpacer } from '@elastic/eui';
+import { manageQuery } from '../page/manage_query';
+import { AlertsOverTimeHistogram } from '../page/hosts/alerts_over_time';
+import { AlertsComponentsQueryProps } from './types';
+import { AlertsOverTimeQuery } from '../../containers/alerts/alerts_over_time';
+import { hostsModel } from '../../store/model';
+import { AlertsTable } from './alerts_table';
 
-export interface OwnProps {
-  end: number;
-  id: string;
-  start: number;
-}
+const AlertsOverTimeManage = manageQuery(AlertsOverTimeHistogram);
+export const AlertsView = ({
+  deleteQuery,
+  endDate,
+  filterQuery,
+  indexPattern,
+  pageFilters,
+  skip,
+  setQuery,
+  startDate,
+  type,
+  updateDateRange = () => {},
+}: AlertsComponentsQueryProps) => (
+  <>
+    <AlertsOverTimeQuery
+      endDate={endDate}
+      filterQuery={filterQuery}
+      sourceId="default"
+      startDate={startDate}
+      type={hostsModel.HostsType.page}
+    >
+      {({ alertsOverTime, loading, id, inspect, refetch, totalCount }) => (
+        <AlertsOverTimeManage
+          data={alertsOverTime!}
+          endDate={endDate}
+          id={id}
+          inspect={inspect}
+          loading={loading}
+          refetch={refetch}
+          setQuery={setQuery}
+          startDate={startDate}
+          totalCount={totalCount}
+          updateDateRange={updateDateRange}
+        />
+      )}
+    </AlertsOverTimeQuery>
+    <EuiSpacer size="l" />
+    <AlertsTable endDate={endDate} startDate={startDate} pageFilters={pageFilters} />
+  </>
+);
 
-const ALERTS_TABLE_ID = 'timeline-alerts-table';
-
-const StatefulAlertsViewerComponent = React.memo(({ end, start }) => {
-  return (
-    <StatefulEventsViewer
-      defaultIndices={[DEFAULT_SIGNALS_INDEX]}
-      defaultModel={alertsDefaultModel}
-      end={end}
-      id={ALERTS_TABLE_ID}
-      start={start}
-      timelineTypeContext={{
-        documentType: i18n.ALERTS,
-        footerText: i18n.ALERTS,
-        showCheckboxes: false,
-        showRowRenderers: false,
-        title: i18n.ALERTS,
-      }}
-    />
-  );
-});
-
-StatefulAlertsViewerComponent.displayName = 'StatefulAlertsViewerComponent';
-
-const makeMapStateToProps = () => {
-  const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getAlerts = timelineSelectors.getAlertsByIdSelector();
-  const mapStateToProps = (state: State, { id }: OwnProps) => {
-    const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const alerts: TimelineModel = getAlerts(state, id);
-    const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = alerts;
-
-    return {
-      columns,
-      dataProviders,
-      filters: getGlobalFiltersQuerySelector(state),
-      id,
-      isLive: input.policy.kind === 'interval',
-      itemsPerPage,
-      itemsPerPageOptions,
-      kqlMode,
-      query: getGlobalQuerySelector(state),
-      sort,
-    };
-  };
-  return mapStateToProps;
-};
-
-export const StatefulAlertsViewer = connect(makeMapStateToProps, {
-  createTimeline: timelineActions.createTimeline,
-  deleteEventQuery: inputsActions.deleteOneQuery,
-  updateItemsPerPage: timelineActions.updateItemsPerPage,
-  updateSort: timelineActions.updateSort,
-  removeColumn: timelineActions.removeColumn,
-  upsertColumn: timelineActions.upsertColumn,
-})(StatefulAlertsViewerComponent);
+AlertsView.displayName = 'AlertsView';

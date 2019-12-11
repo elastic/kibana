@@ -21,7 +21,7 @@ import {
   AuthenticationsQueryTabBody,
   UncommonProcessQueryTabBody,
   EventsQueryTabBody,
-  AlertsQueryTabBody,
+  HostAlertsQueryTabBody,
 } from '../navigation';
 
 const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
@@ -96,7 +96,7 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         />
         <Route
           path={`${hostDetailsPagePath}/:tabName(${HostsTableType.alerts})`}
-          render={() => <AlertsQueryTabBody {...tabProps} />}
+          render={() => <HostAlertsQueryTabBody {...tabProps} />}
         />
       </Switch>
     );

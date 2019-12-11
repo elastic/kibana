@@ -32,6 +32,7 @@ export interface OwnProps {
   id: string;
   start: number;
   headerFilterGroup?: React.ReactNode;
+  pageFilters?: esFilters.Filter[];
   timelineTypeContext?: TimelineTypeContextProps;
   utilityBar?: (totalCount: number) => React.ReactNode;
 }
@@ -83,7 +84,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
-    defaultFilters = [],
+    pageFilters = [],
     defaultModel,
     defaultIndices,
     deleteEventQuery,
@@ -159,7 +160,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
           id={id}
           dataProviders={dataProviders!}
           end={end}
-          filters={[...filters, ...defaultFilters]}
+          filters={[...filters, ...pageFilters]}
           headerFilterGroup={headerFilterGroup}
           indexPattern={indexPatterns ?? { fields: [], title: '' }}
           isLive={isLive}
@@ -230,4 +231,5 @@ export const StatefulEventsViewer = connect(makeMapStateToProps, {
   updateSort: timelineActions.updateSort,
   removeColumn: timelineActions.removeColumn,
   upsertColumn: timelineActions.upsertColumn,
+  setSearchBarFilter: inputsActions.setSearchBarFilter,
 })(StatefulEventsViewerComponent);
