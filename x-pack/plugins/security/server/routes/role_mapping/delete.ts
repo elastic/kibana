@@ -5,6 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { wrapError } from '../../errors';
 import { RouteDefinitionParams } from '..';
 
 export function defineRoleMappingDeleteRoutes(params: RouteDefinitionParams) {
@@ -20,12 +21,20 @@ export function defineRoleMappingDeleteRoutes(params: RouteDefinitionParams) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const deleteResponse = await clusterClient
-        .asScoped(request)
-        .callAsCurrentUser('shield.deleteRoleMapping', {
-          name: request.params.name,
+      try {
+        const deleteResponse = await clusterClient
+          .asScoped(request)
+          .callAsCurrentUser('shield.deleteRoleMapping', {
+            name: request.params.name,
+          });
+        return response.ok({ body: deleteResponse });
+      } catch (error) {
+        const wrappedError = wrapError(error);
+        return response.customError({
+          body: wrappedError,
+          statusCode: wrappedError.output.statusCode,
         });
-      return response.ok({ body: deleteResponse });
+      }
     })
   );
 }

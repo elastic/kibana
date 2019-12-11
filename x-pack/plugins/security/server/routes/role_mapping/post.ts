@@ -5,6 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { wrapError } from '../../errors';
 import { RouteDefinitionParams } from '..';
 
 export function defineRoleMappingPostRoutes(params: RouteDefinitionParams) {
@@ -41,13 +42,21 @@ export function defineRoleMappingPostRoutes(params: RouteDefinitionParams) {
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {
-      const saveResponse = await clusterClient
-        .asScoped(request)
-        .callAsCurrentUser('shield.saveRoleMapping', {
-          name: request.params.name,
-          body: request.body,
+      try {
+        const saveResponse = await clusterClient
+          .asScoped(request)
+          .callAsCurrentUser('shield.saveRoleMapping', {
+            name: request.params.name,
+            body: request.body,
+          });
+        return response.ok({ body: saveResponse });
+      } catch (error) {
+        const wrappedError = wrapError(error);
+        return response.customError({
+          body: wrappedError,
+          statusCode: wrappedError.output.statusCode,
         });
-      return response.ok({ body: saveResponse });
+      }
     })
   );
 }

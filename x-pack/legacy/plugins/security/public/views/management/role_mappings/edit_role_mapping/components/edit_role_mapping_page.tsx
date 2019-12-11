@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import _ from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { RoleMapping } from '../../../../../../common/model';
 import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
@@ -255,6 +254,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
           title: i18n.translate('xpack.security.management.editRoleMapping.saveError', {
             defaultMessage: `Error saving role mapping`,
           }),
+          toastMessage: e?.body?.message,
         });
 
         this.setState({
@@ -302,7 +302,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
           'xpack.security.management.editRoleMapping.table.fetchingRoleMappingsErrorMessage',
           {
             defaultMessage: 'Error loading role mapping editor: {message}',
-            values: { message: _.get(e, 'body.message', '') },
+            values: { message: e?.body?.message ?? '' },
           }
         )
       );
