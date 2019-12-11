@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import classNames from 'classnames';
 
 import { i18n } from '@kbn/i18n';
@@ -51,6 +51,8 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const { form } = useForm<Field>({ serializer: fieldSerializer });
 
+  const [isSelectingType, setIsSelectingType] = useState<boolean>(false);
+
   useEffect(() => {
     const subscription = form.subscribe(updatedFieldForm => {
       dispatch({ type: 'fieldForm.update', value: updatedFieldForm });
@@ -66,6 +68,12 @@ export const CreateField = React.memo(function CreateFieldComponent({
   const submitForm = async (e?: React.FormEvent, exitAfter: boolean = false) => {
     if (e) {
       e.preventDefault();
+    }
+
+    // Prevent form submission if user selects a type using with the "Enter" key
+    if (isSelectingType) {
+      setIsSelectingType(false); // reset back to false
+      return;
     }
 
     const { isValid, data } = await form.submit();
@@ -126,6 +134,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   const onTypeChange = (nextType: ComboBoxOption[]) => {
     form.setFieldValue('type', nextType);
+    setIsSelectingType(true);
 
     if (nextType.length) {
       const { subTypeOptions } = getSubTypeMeta(nextType[0].value as MainType);
@@ -146,6 +155,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
             <EuiFlexItem>
               <NameParameter />
             </EuiFlexItem>
+
             {/* Field type */}
             <EuiFlexItem>
               <TypeParameter
@@ -154,6 +164,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 docLink={docLink}
               />
             </EuiFlexItem>
+
             {/* Field sub type (if any) */}
             {subTypeOptions && (
               <EuiFlexItem>
@@ -181,7 +192,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
                           singleSelection={{ asPlainText: true }}
                           options={subTypeOptions}
                           selectedOptions={subTypeField.value as ComboBoxOption[]}
-                          onChange={newSubType => subTypeField.setValue(newSubType)}
+                          onChange={newSubType => {
+                            subTypeField.setValue(newSubType);
+                            setIsSelectingType(true);
+                          }}
                           isClearable={false}
                         />
                       </EuiFormRow>
