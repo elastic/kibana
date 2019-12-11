@@ -24,8 +24,8 @@ to report on and the {es} indices.
 ==== If you are using the `native` realm
 
 You can assign roles through the
-*Management* app in Kibana or with the `user` API. 
-This example shows to use *Management* to create a user who has a custom role and the 
+*Management* app in Kibana or with the {ref}/security-api-put-user.html[user API]. 
+This example shows how to use *Management* to create a user who has a custom role and the 
 `reporting_user` role.
 
 . Go to *Management > Roles*, and click *Create role*.
@@ -69,9 +69,10 @@ POST /_security/user/reporter
 }
 ---------------------------------------------------------------
 
-==== If you are using an LDAP or Active Directory realm
+==== If you are using an external identity provider
 
-You can either assign
+If you are using an external identity provider, such as 
+LDAP or Active Directory, you can either assign
 roles on a per user basis, or assign roles to groups of users. By default, role
 mappings are configured in
 {ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
