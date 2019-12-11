@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineItem } from '../../../../graphql/types';
@@ -18,6 +19,11 @@ import { ColumnRenderer } from '../renderers/column_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
 import { StatefulEvent } from './stateful_event';
 import { eventIsPinned } from '../helpers';
+
+const listCache = new CellMeasurerCache({
+  fixedWidth: true,
+  defaultHeight: 32,
+});
 
 interface Props {
   actionsColumnWidth: number;
@@ -64,32 +70,55 @@ export const Events = React.memo<Props>(
     toggleColumn,
     updateNote,
   }) => (
-    <EventsTbody data-test-subj="events">
-      {data.map((event, i) => (
-        <StatefulEvent
-          actionsColumnWidth={actionsColumnWidth}
-          addNoteToEvent={addNoteToEvent}
-          browserFields={browserFields}
-          columnHeaders={columnHeaders}
-          columnRenderers={columnRenderers}
-          event={event}
-          eventIdToNoteIds={eventIdToNoteIds}
-          getNotesByIds={getNotesByIds}
-          isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
-          isEventViewer={isEventViewer}
-          key={event._id}
-          maxDelay={maxDelay(i)}
-          onColumnResized={onColumnResized}
-          onPinEvent={onPinEvent}
-          onUnPinEvent={onUnPinEvent}
-          onUpdateColumns={onUpdateColumns}
-          rowRenderers={rowRenderers}
-          timelineId={id}
-          toggleColumn={toggleColumn}
-          updateNote={updateNote}
+    <AutoSizer>
+      {({ height, width }) => (
+        <List
+          height={height}
+          width={width}
+          rowHeight={listCache.rowHeight}
+          rowCount={data.length}
+          deferredMeasurementCache={listCache}
+          overscanRowCount={0}
+          rowRenderer={({ index, key, style, parent }) => {
+            const event = data[index];
+            return (
+              <CellMeasurer
+                key={key}
+                cache={listCache}
+                parent={parent}
+                columnIndex={0}
+                rowIndex={index}
+              >
+                <div style={style}>
+                  <StatefulEvent
+                    actionsColumnWidth={actionsColumnWidth}
+                    addNoteToEvent={addNoteToEvent}
+                    browserFields={browserFields}
+                    columnHeaders={columnHeaders}
+                    columnRenderers={columnRenderers}
+                    event={event}
+                    eventIdToNoteIds={eventIdToNoteIds}
+                    getNotesByIds={getNotesByIds}
+                    isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
+                    isEventViewer={isEventViewer}
+                    key={event._id}
+                    maxDelay={maxDelay(index)}
+                    onColumnResized={onColumnResized}
+                    onPinEvent={onPinEvent}
+                    onUnPinEvent={onUnPinEvent}
+                    onUpdateColumns={onUpdateColumns}
+                    rowRenderers={rowRenderers}
+                    timelineId={id}
+                    toggleColumn={toggleColumn}
+                    updateNote={updateNote}
+                  />
+                </div>
+              </CellMeasurer>
+            );
+          }}
         />
-      ))}
-    </EventsTbody>
+      )}
+    </AutoSizer>
   )
 );
 Events.displayName = 'Events';

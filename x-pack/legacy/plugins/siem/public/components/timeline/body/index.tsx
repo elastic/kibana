@@ -115,29 +115,28 @@ export const Body = React.memo<BodyProps>(
               toggleColumn={toggleColumn}
             />
 
-            <Events
-              actionsColumnWidth={getActionsColumnWidth(
-                isEventViewer,
-                timelineTypeContext.showCheckboxes
-              )}
-              addNoteToEvent={addNoteToEvent}
-              browserFields={browserFields}
-              columnHeaders={columnHeaders}
-              columnRenderers={columnRenderers}
-              data={data}
-              eventIdToNoteIds={eventIdToNoteIds}
-              getNotesByIds={getNotesByIds}
-              id={id}
-              isEventViewer={isEventViewer}
-              onColumnResized={onColumnResized}
-              onPinEvent={onPinEvent}
-              onUpdateColumns={onUpdateColumns}
-              onUnPinEvent={onUnPinEvent}
-              pinnedEventIds={pinnedEventIds}
-              rowRenderers={rowRenderers}
-              toggleColumn={toggleColumn}
-              updateNote={updateNote}
-            />
+            <div style={{ flex: '1 1 auto' }}>
+              <Events
+                actionsColumnWidth={getActionsColumnWidth(isEventViewer)}
+                addNoteToEvent={addNoteToEvent}
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                columnRenderers={columnRenderers}
+                data={data}
+                eventIdToNoteIds={eventIdToNoteIds}
+                getNotesByIds={getNotesByIds}
+                id={id}
+                isEventViewer={isEventViewer}
+                onColumnResized={onColumnResized}
+                onPinEvent={onPinEvent}
+                onUpdateColumns={onUpdateColumns}
+                onUnPinEvent={onUnPinEvent}
+                pinnedEventIds={pinnedEventIds}
+                rowRenderers={rowRenderers}
+                toggleColumn={toggleColumn}
+                updateNote={updateNote}
+              />
+            </div>
           </EventsTable>
         </TimelineBody>
         <TimelineBodyGlobalStyle />

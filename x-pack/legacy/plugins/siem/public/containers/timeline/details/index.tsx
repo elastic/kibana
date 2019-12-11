@@ -47,7 +47,7 @@ export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
         notifyOnNetworkStatusChange
         variables={variables}
       >
-        {({ data, loading, refetch }) => {
+        {({ data, loading }) => {
           return children!({
             loading,
             detailsData: getDetailsEvent(
@@ -62,3 +62,5 @@ export const TimelineDetailsComponentQuery = React.memo<TimelineDetailsProps>(
     );
   }
 );
+
+TimelineDetailsComponentQuery.displayName = 'TimelineDetailsComponentQuery';

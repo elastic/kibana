@@ -16,7 +16,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
@@ -227,12 +227,28 @@ export const PaginatedTable = memo<SiemTables>(
       ));
     const PaginationWrapper = showMorePagesIndicator ? PaginationEuiFlexItem : EuiFlexItem;
 
+    const basicTableSorting = useMemo(
+      () =>
+        sorting
+          ? {
+              sort: {
+                field: sorting.field,
+                direction: sorting.direction,
+              },
+            }
+          : null,
+      [sorting]
+    );
+
+    const onMouseEnter = useCallback(() => setShowInspect(true), [setShowInspect]);
+    const onMouseLeave = useCallback(() => setShowInspect(false), [setShowInspect]);
+
     return (
       <Panel
         data-test-subj={`${dataTestSubj}-loading-${loading}`}
         loading={loading}
-        onMouseEnter={() => setShowInspect(true)}
-        onMouseLeave={() => setShowInspect(false)}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         <HeaderSection
           id={id}
@@ -256,16 +272,7 @@ export const PaginatedTable = memo<SiemTables>(
               compressed
               items={pageOfItems}
               onChange={onChange}
-              sorting={
-                sorting
-                  ? {
-                      sort: {
-                        field: sorting.field,
-                        direction: sorting.direction,
-                      },
-                    }
-                  : null
-              }
+              sorting={basicTableSorting}
             />
             <FooterAction>
               <EuiFlexItem>
@@ -304,7 +311,7 @@ export const PaginatedTable = memo<SiemTables>(
 
 PaginatedTable.displayName = 'PaginatedTable';
 
-const BasicTable = styled(EuiBasicTable)`
+const BasicTableComponent = styled(EuiBasicTable)`
   tbody {
     th,
     td {
@@ -316,6 +323,10 @@ const BasicTable = styled(EuiBasicTable)`
     }
   }
 `;
+
+BasicTableComponent.displayName = 'BasicTableComponent';
+
+const BasicTable = React.memo(BasicTableComponent);
 
 BasicTable.displayName = 'BasicTable';
 

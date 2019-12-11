@@ -26,12 +26,6 @@ const mockSort: Sort = {
   sortDirection: Direction.desc,
 };
 
-jest.mock(
-  'react-visibility-sensor',
-  () => ({ children }: { children: (args: { isVisible: boolean }) => React.ReactNode }) =>
-    children({ isVisible: true })
-);
-
 jest.mock('../../../lib/helpers/scheduler', () => ({
   requestIdleCallbackViaScheduler: (callback: () => void, opts?: unknown) => {
     callback();

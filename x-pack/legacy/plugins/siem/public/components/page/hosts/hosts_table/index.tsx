@@ -140,6 +140,26 @@ const HostsTableComponent = React.memo<HostsTableProps>(
       direction,
     ]);
 
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateTableLimit({
+          hostsType: type,
+          limit: newLimit,
+          tableType,
+        }),
+      [updateTableLimit, type, tableType]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
+        }),
+      [updateTableActivePage, type, tableType]
+    );
+
     return (
       <PaginatedTable
         activePage={activePage}
@@ -153,26 +173,14 @@ const HostsTableComponent = React.memo<HostsTableProps>(
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
         sorting={sorting}
         totalCount={fakeTotalCount}
-        updateLimitPagination={newLimit =>
-          updateTableLimit({
-            hostsType: type,
-            limit: newLimit,
-            tableType,
-          })
-        }
-        updateActivePage={newPage =>
-          updateTableActivePage({
-            activePage: newPage,
-            hostsType: type,
-            tableType,
-          })
-        }
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
       />
     );
   }

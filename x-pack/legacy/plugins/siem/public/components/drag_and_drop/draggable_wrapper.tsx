@@ -31,7 +31,7 @@ DragEffects.displayName = 'DragEffects';
 export const DraggablePortalContext = createContext<boolean>(false);
 export const useDraggablePortalContext = () => useContext(DraggablePortalContext);
 
-const Wrapper = styled.div`
+const WrapperComponent = styled.div`
   display: inline-block;
   max-width: 100%;
 
@@ -39,6 +39,10 @@ const Wrapper = styled.div`
     display: none !important;
   }
 `;
+
+WrapperComponent.displayName = 'WrapperComponent';
+
+const Wrapper = React.memo(WrapperComponent);
 
 Wrapper.displayName = 'Wrapper';
 

@@ -6,7 +6,6 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import uuid from 'uuid';
-import VisibilitySensor from 'react-visibility-sensor';
 
 import { BrowserFields } from '../../../../containers/source';
 import { TimelineDetailsComponentQuery } from '../../../../containers/timeline/details';
@@ -51,31 +50,6 @@ interface Props {
 export const getNewNoteId = (): string => uuid.v4();
 
 const emptyDetails: DetailItem[] = [];
-
-/**
- * This is the default row height whenever it is a plain row renderer and not a custom row height.
- * We use this value when we do not know the height of a particular row.
- */
-const DEFAULT_ROW_HEIGHT = '32px';
-
-/**
- * This is the top offset in pixels of the top part of the timeline. The UI area where you do your
- * drag and drop and filtering.  It is a positive number in pixels of _PART_ of the header but not
- * the entire header. We leave room for some rows to render behind the drag and drop so they might be
- * visible by the time the user scrolls upwards. All other DOM elements are replaced with their "blank"
- * rows.
- */
-const TOP_OFFSET = 50;
-
-/**
- * This is the bottom offset in pixels of the bottom part of the timeline. The UI area right below the
- * timeline which is the footer.  Since the footer is so incredibly small we don't have enough room to
- * render around 5 rows below the timeline to get the user the best chance of always scrolling without seeing
- * "blank rows". The negative number is to give the bottom of the browser window a bit of invisible space to
- * keep around 5 rows rendering below it. All other DOM elements are replaced with their "blank"
- * rows.
- */
-const BOTTOM_OFFSET = -500;
 
 interface AttributesProps {
   children: React.ReactNode;
@@ -177,96 +151,73 @@ export const StatefulEvent = React.memo<Props>(
     // If we are not ready to render yet, just return null
     // see useEffect() for when it schedules the first
     // time this stateful component should be rendered.
-    if (!initialRender) {
-      return <SkeletonRow cellCount={columnCount} />;
-    }
+    // if (!initialRender) {
+    //   return <SkeletonRow cellCount={columnCount} />;
+    // }
 
     return (
-      <VisibilitySensor
-        partialVisibility={true}
-        scrollCheck={true}
-        offset={{ top: TOP_OFFSET, bottom: BOTTOM_OFFSET }}
+      <TimelineDetailsComponentQuery
+        sourceId="default"
+        indexName={event._index!}
+        eventId={event._id}
+        executeQuery={!!expanded[event._id]}
       >
-        {({ isVisible }) => {
-          if (isVisible) {
-            return (
-              <TimelineDetailsComponentQuery
-                sourceId="default"
-                indexName={event._index!}
-                eventId={event._id}
-                executeQuery={!!expanded[event._id]}
-              >
-                {({ detailsData, loading }) => (
-                  <EventsTrGroup
-                    className={STATEFUL_EVENT_CSS_CLASS_NAME}
-                    data-test-subj="event"
-                    ref={c => {
-                      if (c != null) {
-                        divElement.current = c;
-                      }
-                    }}
-                  >
-                    {getRowRenderer(event.ecs, rowRenderers).renderRow({
-                      browserFields,
-                      data: event.ecs,
-                      children: (
-                        <StatefulEventChild
-                          actionsColumnWidth={actionsColumnWidth}
-                          addNoteToEvent={addNoteToEvent}
-                          associateNote={associateNote}
-                          columnHeaders={columnHeaders}
-                          columnRenderers={columnRenderers}
-                          data={event.data}
-                          eventIdToNoteIds={eventIdToNoteIds}
-                          expanded={!!expanded[event._id]}
-                          getNotesByIds={getNotesByIds}
-                          id={event._id}
-                          isEventPinned={isEventPinned}
-                          isEventViewer={isEventViewer}
-                          loading={loading}
-                          onColumnResized={onColumnResized}
-                          onPinEvent={onPinEvent}
-                          onToggleExpanded={onToggleExpanded}
-                          onToggleShowNotes={onToggleShowNotes}
-                          onUnPinEvent={onUnPinEvent}
-                          showNotes={!!showNotes[event._id]}
-                          timelineId={timelineId}
-                          updateNote={updateNote}
-                        />
-                      ),
-                      timelineId,
-                    })}
+        {({ detailsData, loading }) => (
+          <EventsTrGroup
+            className={STATEFUL_EVENT_CSS_CLASS_NAME}
+            data-test-subj="event"
+            ref={c => {
+              if (c != null) {
+                divElement.current = c;
+              }
+            }}
+          >
+            {getRowRenderer(event.ecs, rowRenderers).renderRow({
+              browserFields,
+              data: event.ecs,
+              children: (
+                <StatefulEventChild
+                  actionsColumnWidth={actionsColumnWidth}
+                  addNoteToEvent={addNoteToEvent}
+                  associateNote={associateNote}
+                  columnHeaders={columnHeaders}
+                  columnRenderers={columnRenderers}
+                  data={event.data}
+                  eventIdToNoteIds={eventIdToNoteIds}
+                  expanded={!!expanded[event._id]}
+                  getNotesByIds={getNotesByIds}
+                  id={event._id}
+                  isEventPinned={isEventPinned}
+                  isEventViewer={isEventViewer}
+                  loading={loading}
+                  onColumnResized={onColumnResized}
+                  onPinEvent={onPinEvent}
+                  onToggleExpanded={onToggleExpanded}
+                  onToggleShowNotes={onToggleShowNotes}
+                  onUnPinEvent={onUnPinEvent}
+                  showNotes={!!showNotes[event._id]}
+                  timelineId={timelineId}
+                  updateNote={updateNote}
+                />
+              ),
+              timelineId,
+            })}
 
-                    <Attributes>
-                      <ExpandableEvent
-                        browserFields={browserFields}
-                        columnHeaders={columnHeaders}
-                        event={detailsData || emptyDetails}
-                        forceExpand={!!expanded[event._id] && !loading}
-                        id={event._id}
-                        onUpdateColumns={onUpdateColumns}
-                        timelineId={timelineId}
-                        toggleColumn={toggleColumn}
-                      />
-                    </Attributes>
-                  </EventsTrGroup>
-                )}
-              </TimelineDetailsComponentQuery>
-            );
-          } else {
-            // Height place holder for visibility detection as well as re-rendering sections.
-            const height =
-              divElement.current != null
-                ? `${divElement.current.clientHeight}px`
-                : DEFAULT_ROW_HEIGHT;
-
-            // height is being inlined directly in here because of performance with StyledComponents
-            // involving quick and constant changes to the DOM.
-            // https://github.com/styled-components/styled-components/issues/134#issuecomment-312415291
-            return <SkeletonRow cellCount={columnCount} style={{ height }} />;
-          }
-        }}
-      </VisibilitySensor>
+            <Attributes>
+              <ExpandableEvent
+                browserFields={browserFields}
+                columnHeaders={columnHeaders}
+                event={detailsData || emptyDetails}
+                forceExpand={!!expanded[event._id] && !loading}
+                id={event._id}
+                onUpdateColumns={onUpdateColumns}
+                timelineId={timelineId}
+                toggleColumn={toggleColumn}
+              />
+            </Attributes>
+          </EventsTrGroup>
+        )}
+      </TimelineDetailsComponentQuery>
     );
   }
 );
