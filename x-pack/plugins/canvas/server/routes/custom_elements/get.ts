@@ -7,17 +7,17 @@
 import { schema } from '@kbn/config-schema';
 import { RouteInitializerDeps } from '../';
 import {
-  CANVAS_TYPE,
-  API_ROUTE_WORKPAD,
+  CUSTOM_ELEMENT_TYPE,
+  API_ROUTE_CUSTOM_ELEMENT,
 } from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { okResponse } from '../ok_response';
+import { CustomElementAttributes } from './custom_element_attributes';
 import { catchErrorHandler } from '../catch_error_handler';
 
-export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {
+export function initializeGetCustomElementRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
-  router.delete(
+  router.get(
     {
-      path: `${API_ROUTE_WORKPAD}/{id}`,
+      path: `${API_ROUTE_CUSTOM_ELEMENT}/{id}`,
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -25,8 +25,17 @@ export function initializeDeleteWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      context.core.savedObjects.client.delete(CANVAS_TYPE, request.params.id);
-      return response.ok({ body: okResponse });
+      const customElement = await context.core.savedObjects.client.get<CustomElementAttributes>(
+        CUSTOM_ELEMENT_TYPE,
+        request.params.id
+      );
+
+      return response.ok({
+        body: {
+          id: customElement.id,
+          ...customElement.attributes,
+        },
+      });
     })
   );
 }
