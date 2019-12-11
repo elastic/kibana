@@ -7,17 +7,17 @@
 import React from 'react';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { formatMetric } from '../../../lib/format_number';
-import {
-  EuiFlexItem,
+import { EuiFlexItem,
   EuiPage,
   EuiPageBody,
   EuiFlexGrid,
   EuiSpacer,
   EuiPageContent,
   EuiPanel,
-} from '@elastic/eui';
+  EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SummaryStatus } from '../../summary_status';
+import { FormattedMessage  } from '@kbn/i18n/react';
 
 export function Beat({ summary, metrics, ...props }) {
   const metricsToShow = [
@@ -137,6 +137,14 @@ export function Beat({ summary, metrics, ...props }) {
         </EuiPanel>
         <EuiSpacer size="m" />
         <EuiPageContent>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.monitoring.beats.beat.heading"
+                defaultMessage="Beat"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
