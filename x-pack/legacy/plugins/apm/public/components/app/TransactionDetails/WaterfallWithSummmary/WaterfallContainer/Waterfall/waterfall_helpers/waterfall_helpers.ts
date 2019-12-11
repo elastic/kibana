@@ -32,11 +32,11 @@ export interface IWaterfall {
   rootTransaction?: Transaction;
   errorsPerTransaction: TraceAPIResponse['errorsPerTransaction'];
   items: IWaterfallItem[];
-  getTransactionById: (id?: IWaterfallItem['id']) => Transaction | undefined;
 }
 
 interface IWaterfallItemBase {
-  id: string | number;
+  parent?: IWaterfallItem;
+  id: string;
   parentId?: string;
   serviceName: string;
   name: string;
@@ -60,7 +60,6 @@ interface IWaterfallItemBase {
    * skew from timestamp in us
    */
   skew: number;
-  childIds?: Array<IWaterfallItemBase['id']>;
 }
 
 interface IWaterfallItemTransaction extends IWaterfallItemBase {
@@ -161,8 +160,8 @@ export function sortWaterfallByParentId(
     visitedWaterfallItemSet.add(item);
     const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
 
-    item.childIds = children.map(child => child.id);
     const entryTransactionTimestamp = entryWaterfallTransaction?.timestamp || 0;
+    item.parent = parentItem;
     item.offset = item.timestamp - entryTransactionTimestamp;
     item.skew = getClockSkew(item, parentItem);
 
@@ -245,8 +244,7 @@ export function getWaterfall(
       serviceColors: {},
       duration: 0,
       errorsPerTransaction,
-      items: [],
-      getTransactionById: () => undefined
+      items: []
     };
   }
 
@@ -268,9 +266,6 @@ export function getWaterfall(
     entryWaterfallTransaction
   );
 
-  const getTransactionById = (id?: IWaterfallItem['id']) =>
-    findWaterfallTransactionById(waterfallItems, id)?.transaction;
-
   const errorsTimeline = Object.values(errorsPerTransaction)
     .map(e => {
       return e.error.timestamp.us;
@@ -284,7 +279,6 @@ export function getWaterfall(
     rootTransaction,
     errorsPerTransaction,
     items,
-    getTransactionById,
     errorsTimeline
   };
 }

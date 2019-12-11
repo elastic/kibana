@@ -101,6 +101,7 @@ const createApmApi = () => {
     // Traces
     .add(tracesRoute)
     .add(tracesByIdRoute)
+    .add(rootTransactionByTraceIdRoute)
 
     // Transaction groups
     .add(transactionGroupsBreakdownRoute)
@@ -119,10 +120,7 @@ const createApmApi = () => {
     .add(transactionsLocalFiltersRoute)
     .add(serviceNodesLocalFiltersRoute)
     .add(uiFiltersEnvironmentsRoute)
-    .add(serviceMapRoute)
-
-    // Transaction
-    .add(rootTransactionByTraceIdRoute);
+    .add(serviceMapRoute);
 
   return api;
 };

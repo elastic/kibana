@@ -129,23 +129,6 @@ describe('waterfall_helpers', () => {
       expect(waterfall.items[0].id).toBe('myTransactionId2');
       expect(waterfall).toMatchSnapshot();
     });
-
-    it('getTransactionById', () => {
-      const entryTransactionId = 'myTransactionId1';
-      const errorsPerTransaction = {
-        myTransactionId1: 2,
-        myTransactionId2: 3
-      };
-      const waterfall = getWaterfall(
-        {
-          trace: { items: hits, exceedsMax: false },
-          errorsPerTransaction
-        },
-        entryTransactionId
-      );
-      const transaction = waterfall.getTransactionById('myTransactionId2');
-      expect(transaction!.transaction.id).toBe('myTransactionId2');
-    });
   });
 
   describe('When trace items dont have parent.id (pre-6.5 behaviour)', () => {
