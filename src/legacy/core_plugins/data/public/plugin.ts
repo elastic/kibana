@@ -19,7 +19,6 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
-// import { initLegacyModule } from './shim/legacy_module';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setFieldFormats } from '../../../../plugins/data/public/services';
