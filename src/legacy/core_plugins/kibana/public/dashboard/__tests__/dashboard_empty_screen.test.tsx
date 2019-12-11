@@ -18,7 +18,7 @@
  */
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { DashboardEmptyScreen, Props } from '../dashboard_empty_screen';
+import { DashboardEmptyScreen, Props } from '../np_ready/dashboard_empty_screen';
 
 describe('DashboardEmptyScreen', () => {
   const defaultProps = {

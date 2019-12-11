@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 import { IndexPattern } from 'ui/index_patterns';
 import { JobCreator } from './job_creator';
 import {

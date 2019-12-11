@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 // eslint-disable-next-line max-len
-import { VisualizeConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
+import { VisualizeConstants } from '../../../../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {

@@ -8,19 +8,19 @@
 //   monChart__legend--small
 //   monChart__legend-isLoading
 
-@import 'components/fetch_error/index';
-@import 'components/field_chooser/index';
-@import 'angular/directives/index';
-@import 'angular/doc_table/index';
+@import 'np_ready/components/fetch_error/index';
+@import 'np_ready/components/field_chooser/index';
+@import 'np_ready/angular/directives/index';
+@import 'np_ready/angular/doc_table/index';
 
 @import 'hacks';
 
 @import 'discover';
 
-@import 'embeddable/index';
+@import 'np_ready/embeddable/index';
 
 // Doc Viewer
-@import 'components/doc_viewer/index';
+@import 'np_ready/components/doc_viewer/index';
 
 // Context styles
-@import 'angular/context/index';
+@import 'np_ready/angular/context/index';

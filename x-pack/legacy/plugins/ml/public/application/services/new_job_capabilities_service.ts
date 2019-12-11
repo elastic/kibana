@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 
 import {
   Field,

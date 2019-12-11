@@ -17,7 +17,7 @@
  * under the License.
  */
 import angular from 'angular'; // just used in embeddables and discover controller
-import { DiscoverServices } from './helpers/build_services';
+import { DiscoverServices } from './np_ready/helpers/build_services';
 
 let angularModule: any = null;
 let services: DiscoverServices | null = null;
@@ -63,6 +63,9 @@ export {
   hasSearchStategyForIndexPattern,
   isDefaultTypeIndexPattern,
   SearchSource,
+  EsQuerySortValue,
+  SortDirection,
+  SearchSourceContract,
 } from '../../../../ui/public/courier';
 // @ts-ignore
 export { intervalOptions } from 'ui/agg_types/buckets/_interval_options';
@@ -96,4 +99,5 @@ export {
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';
-export { DocView } from 'ui/registry/doc_views_types';
+export { DocView, DocViewInput } from 'ui/registry/doc_views_types';
+export { registerTimefilterWithGlobalStateFactory } from 'ui/timefilter/setup_router';

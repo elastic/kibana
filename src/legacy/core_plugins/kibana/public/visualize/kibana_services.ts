@@ -31,7 +31,7 @@ import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { DataPublicPluginStart, IndexPatternsContract } from '../../../../../plugins/data/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { SavedVisualizations } from './types';
+import { SavedVisualizations } from './np_ready/types';
 
 export interface VisualizeKibanaServices {
   addBasePath: (url: string) => string;

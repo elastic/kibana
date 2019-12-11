@@ -7,7 +7,7 @@
 import { FC } from 'react';
 
 import { IndexPattern } from 'ui/index_patterns';
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 
 declare const DataRecognizer: FC<{
   indexPattern: IndexPattern;

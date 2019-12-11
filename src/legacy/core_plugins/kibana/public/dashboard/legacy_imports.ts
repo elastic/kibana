@@ -57,7 +57,7 @@ export { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 // @ts-ignore
 export { PromiseServiceCreator } from 'ui/promises/promises';
 // @ts-ignore
-export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url';
+export { KbnUrlProvider, RedirectWhenMissingProvider } from 'ui/url/index';
 // @ts-ignore
 export { confirmModalFactory } from 'ui/modals/confirm_modal';
 export { configureAppAngularModule } from 'ui/legacy_compat';

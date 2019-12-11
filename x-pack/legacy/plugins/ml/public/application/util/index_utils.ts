@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import chrome from 'ui/chrome';
 import { npStart } from 'ui/new_platform';
-import { SavedSearchLoader } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearchLoader } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 
 type IndexPatternSavedObject = SimpleSavedObject<SavedObjectAttributes>;

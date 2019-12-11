@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME, LINE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
   VisualizeConstants
-} from '../../../../src/legacy/core_plugins/kibana/public/visualize/visualize_constants';
+} from '../../../../src/legacy/core_plugins/kibana/public/visualize/np_ready/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');

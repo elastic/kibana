@@ -34,7 +34,7 @@ import { NavigationStart } from '../../../navigation/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { VisualizationsStart } from '../../../visualizations/public';
-import { VisualizeConstants } from './visualize_constants';
+import { VisualizeConstants } from './np_ready/visualize_constants';
 import { setServices, VisualizeKibanaServices } from './kibana_services';
 import {
   FeatureCatalogueCategory,
@@ -46,7 +46,7 @@ import {
   VisualizeEmbeddableFactory,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from './legacy_imports';
-import { SavedVisualizations } from './types';
+import { SavedVisualizations } from './np_ready/types';
 
 export interface LegacyAngularInjectedDependencies {
   legacyChrome: any;
@@ -124,7 +124,7 @@ export class VisualizePlugin implements Plugin {
         };
         setServices(deps);
 
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./np_ready/application');
         return renderApp(params.element, params.appBasePath, deps);
       },
     });

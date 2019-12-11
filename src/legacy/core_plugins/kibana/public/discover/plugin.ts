@@ -20,14 +20,14 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/p
 import angular from 'angular';
 import { IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { registerFeature } from './helpers/register_feature';
+import { registerFeature } from './np_ready/helpers/register_feature';
 import './kibana_services';
 import { IEmbeddableStart, IEmbeddableSetup } from '../../../../../plugins/embeddable/public';
 import { getInnerAngularModule, getInnerAngularModuleEmbeddable } from './get_inner_angular';
 import { setAngularModule, setServices } from './kibana_services';
 import { NavigationStart } from '../../../navigation/public';
 import { EuiUtilsStart } from '../../../../../plugins/eui_utils/public';
-import { buildServices } from './helpers/build_services';
+import { buildServices } from './np_ready/helpers/build_services';
 import { SharePluginStart } from '../../../../../plugins/share/public';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
@@ -85,7 +85,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
         }
         await this.initializeServices();
         await this.initializeInnerAngular();
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./np_ready/application');
         return renderApp(innerAngularName, params.element);
       },
     });
@@ -123,7 +123,7 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
    * register embeddable with a slimmer embeddable version of inner angular
    */
   private async registerEmbeddable(core: CoreStart, plugins: DiscoverStartPlugins) {
-    const { SearchEmbeddableFactory } = await import('./embeddable');
+    const { SearchEmbeddableFactory } = await import('./np_ready/embeddable');
     const getInjector = async () => {
       if (!this.initializeServices) {
         throw Error('Discover plugin registerEmbeddable:  initializeServices is undefined');

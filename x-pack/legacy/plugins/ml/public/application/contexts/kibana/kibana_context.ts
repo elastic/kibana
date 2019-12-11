@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { KibanaConfig } from 'src/legacy/server/kbn_server';
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
+import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/types';
 
 import {
   IndexPattern,

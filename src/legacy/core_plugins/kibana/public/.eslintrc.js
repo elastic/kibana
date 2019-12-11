@@ -17,20 +17,26 @@
  * under the License.
  */
 
-const path = require('path')
+const path = require('path');
 
+/**
+ * Builds custom restricted paths configuration for the shimmed plugins within the kibana plugin.
+ * These custom rules extend the default checks in the top level `eslintrc.js` by also checking two other things:
+ * * Making sure nothing within np_ready imports from the `ui` directory
+ * * Making sure no other code is importing things deep from within the shimmed plugins
+ * @param shimmedPlugins List of plugin names within the kibana plugin that are partially np ready
+ * @returns zones configuration for the no-restricted-paths linter
+ */
 function buildRestrictedPaths(shimmedPlugins) {
-  return shimmedPlugins.flatMap(shimmedPlugin => ([{
+  return shimmedPlugins.map(shimmedPlugin => ([{
     target: [
-      `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
-      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/kibana_services.ts`,
-      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/legacy_imports.ts`,
-      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/__tests__/**/*`,
-      `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/index.ts`,
+      `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/np_ready/**/*`,
     ],
     from: [
       'ui/**/*',
       'src/legacy/core_plugins/kibana/public/**/*',
+      'src/legacy/core_plugins/data/public/**/*',
+      '!src/legacy/core_plugins/data/public/index.ts',
       `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
     ],
     allowSameFolder: false,
@@ -39,15 +45,15 @@ function buildRestrictedPaths(shimmedPlugins) {
     target: [
       'src/**/*',
       `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
-      'x-pack/**/*'
+      'x-pack/**/*',
     ],
     from: [
       `src/legacy/core_plugins/kibana/public/${shimmedPlugin}/**/*`,
       `!src/legacy/core_plugins/kibana/public/${shimmedPlugin}/index.ts`,
     ],
     allowSameFolder: false,
-    errorMessage: `kibana/public/${shimmedPlugin} is behaving like a NP plugin and does not allow deep imports. If you need something from within ${shimmedPlugin}, consider re-exporting it from the top level index module`
-}]));
+    errorMessage: `kibana/public/${shimmedPlugin} is behaving like a NP plugin and does not allow deep imports. If you need something from within ${shimmedPlugin} in another plugin, consider re-exporting it from the top level index module`,
+  }])).reduce((acc, part) => [...acc, ...part], []);
 }
 
 module.exports = {
