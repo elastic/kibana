@@ -4,25 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable no-console */
 import {
   SearchParams,
   IndexDocumentParams,
   IndicesDeleteParams,
-  IndicesCreateParams
+  IndicesCreateParams,
+  BulkIndexDocumentsParams
 } from 'elasticsearch';
 import { merge } from 'lodash';
 import { cloneDeep, isString } from 'lodash';
-import { KibanaRequest } from 'src/core/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+import { IUiSettingsClient, IScopedClusterClient } from 'src/core/server';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
 import {
   ESSearchResponse,
   ESSearchRequest
 } from '../../../typings/elasticsearch';
-import { APMRequestHandlerContext } from '../../routes/typings';
 import { pickKeys } from '../../../public/utils/pickKeys';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
@@ -73,23 +71,17 @@ function addFilterForLegacyData(
 
 // add additional params for search (aka: read) requests
 async function getParamsForSearchRequest(
-  context: APMRequestHandlerContext,
+  apmIndices: ApmIndicesConfig,
+  uiSettingsClient: IUiSettingsClient,
   params: ESSearchRequest,
   apmOptions?: APMOptions
 ) {
-  const { uiSettings } = context.core;
-  const [indices, includeFrozen] = await Promise.all([
-    getApmIndices({
-      savedObjectsClient: context.core.savedObjects.client,
-      config: context.config
-    }),
-    uiSettings.client.get('search:includeFrozen')
-  ]);
+  const includeFrozen = await uiSettingsClient.get('search:includeFrozen');
 
   // Get indices for legacy data filter (only those which apply)
-  const apmIndices = Object.values(
+  const legacyApmIndices = Object.values(
     pickKeys(
-      indices,
+      apmIndices,
       'apm_oss.sourcemapIndices',
       'apm_oss.errorIndices',
       'apm_oss.onboardingIndices',
@@ -99,7 +91,7 @@ async function getParamsForSearchRequest(
     )
   );
   return {
-    ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
+    ...addFilterForLegacyData(legacyApmIndices, params, apmOptions), // filter out pre-7.0 data
     ignore_throttled: !includeFrozen // whether to query frozen indices or not
   };
 }
@@ -108,26 +100,16 @@ interface APMOptions {
   includeLegacyData: boolean;
 }
 
-interface ClientCreateOptions {
-  clientAsInternalUser?: boolean;
-}
-
 export type ESClient = ReturnType<typeof getESClient>;
 
 export function getESClient(
-  context: APMRequestHandlerContext,
-  request: KibanaRequest,
-  { clientAsInternalUser = false }: ClientCreateOptions = {}
+  apmIndices: ApmIndicesConfig,
+  uiSettingsClient: IUiSettingsClient,
+  esClient:
+    | IScopedClusterClient['callAsCurrentUser']
+    | IScopedClusterClient['callAsInternalUser'],
+  onRequest: (endpoint: string, params: Record<any, any>) => void = () => {}
 ) {
-  const {
-    callAsCurrentUser,
-    callAsInternalUser
-  } = context.core.elasticsearch.dataClient;
-
-  const callMethod = clientAsInternalUser
-    ? callAsInternalUser
-    : callAsCurrentUser;
-
   return {
     search: async <
       TDocument = unknown,
@@ -137,47 +119,33 @@ export function getESClient(
       apmOptions?: APMOptions
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       const nextParams = await getParamsForSearchRequest(
-        context,
+        apmIndices,
+        uiSettingsClient,
         params,
         apmOptions
       );
 
-      if (context.params.query._debug) {
-        console.log(`--DEBUG ES QUERY--`);
-        console.log(
-          `${request.url.pathname} ${JSON.stringify(context.params.query)}`
-        );
-        console.log(`GET ${nextParams.index}/_search`);
-        console.log(JSON.stringify(nextParams.body, null, 2));
-      }
+      onRequest('search', nextParams);
 
-      return (callMethod('search', nextParams) as unknown) as Promise<
+      return (esClient('search', nextParams) as unknown) as Promise<
         ESSearchResponse<TDocument, TSearchRequest>
       >;
     },
     index: <Body>(params: APMIndexDocumentParams<Body>) => {
-      return callMethod('index', params);
+      onRequest('index', params);
+      return esClient('index', params);
     },
     delete: (params: IndicesDeleteParams) => {
-      return callMethod('delete', params);
+      onRequest('delete', params);
+      return esClient('delete', params);
     },
     indicesCreate: (params: IndicesCreateParams) => {
-      return callMethod('indices.create', params);
+      onRequest('indices.create', params);
+      return esClient('indices.create', params);
+    },
+    bulk: (params: BulkIndexDocumentsParams) => {
+      onRequest('bulk', params);
+      return esClient('bulk', params);
     }
   };
-}
-
-export type SearchClient = ReturnType<typeof getSearchClient>;
-export function getSearchClient(callCluster: CallCluster) {
-  async function search<
-    TDocument = unknown,
-    TSearchRequest extends ESSearchRequest = {}
-  >(
-    params: TSearchRequest
-  ): Promise<ESSearchResponse<TDocument, TSearchRequest>> {
-    return (callCluster('search', params) as unknown) as Promise<
-      ESSearchResponse<TDocument, TSearchRequest>
-    >;
-  }
-  return search;
 }

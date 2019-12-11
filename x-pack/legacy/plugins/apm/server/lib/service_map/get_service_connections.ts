@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchClient } from '../helpers/es_client';
+import { ESClient } from '../helpers/es_client';
 import {
   mapServiceConnsScript,
   combineServiceConnsScript,
@@ -19,11 +19,11 @@ import {
 export async function getServiceConnections({
   targetApmIndices,
   traceIds,
-  searchClient
+  esClient
 }: {
   targetApmIndices: string[];
   traceIds: string[];
-  searchClient: SearchClient;
+  esClient: ESClient;
 }) {
   const traceIdFilters = traceIds.map(traceId => ({
     term: { [TRACE_ID]: traceId }
@@ -63,7 +63,7 @@ export async function getServiceConnections({
       }
     }
   };
-  const serviceConnectionsResponse = await searchClient(params);
+  const serviceConnectionsResponse = await esClient.search(params);
   const traceConnectionsBuckets =
     serviceConnectionsResponse.aggregations?.traces.buckets ?? [];
   return traceConnectionsBuckets;

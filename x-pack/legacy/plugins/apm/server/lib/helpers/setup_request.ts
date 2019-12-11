@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-console */
 import moment from 'moment';
 import { KibanaRequest } from 'src/core/server';
 import { IIndexPattern } from 'src/plugins/data/common';
@@ -86,12 +87,36 @@ export async function setupRequest<TParams extends SetupRequestParams>(
 
   const uiFiltersES = decodeUiFilters(dynamicIndexPattern, query.uiFilters);
 
+  const {
+    callAsCurrentUser,
+    callAsInternalUser
+  } = context.core.elasticsearch.dataClient;
+
+  const onRequest = (endpoint: string, params: Record<any, any>) => {
+    if (endpoint === 'search' && query._debug) {
+      console.log(`--DEBUG ES QUERY--`);
+      console.log(
+        `${request.url.pathname} ${JSON.stringify(context.params.query)}`
+      );
+      console.log(`GET ${params.index}/_search`);
+      console.log(JSON.stringify(params.body, null, 2));
+    }
+  };
+
   const coreSetupRequest = {
     indices,
-    client: getESClient(context, request, { clientAsInternalUser: false }),
-    internalClient: getESClient(context, request, {
-      clientAsInternalUser: true
-    }),
+    client: getESClient(
+      indices,
+      context.core.uiSettings.client,
+      callAsCurrentUser,
+      onRequest
+    ),
+    internalClient: getESClient(
+      indices,
+      context.core.uiSettings.client,
+      callAsInternalUser,
+      onRequest
+    ),
     config,
     dynamicIndexPattern
   };

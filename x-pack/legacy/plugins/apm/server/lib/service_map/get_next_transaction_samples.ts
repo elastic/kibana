@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { SearchClient } from '../helpers/es_client';
+import { ESClient } from '../helpers/es_client';
 import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import {
   SERVICE_NAME,
@@ -22,12 +22,12 @@ export async function getNextTransactionSamples({
   targetApmIndices,
   startTimeInterval,
   afterKey,
-  searchClient
+  esClient
 }: {
   targetApmIndices: string[];
   startTimeInterval: string | number;
   afterKey?: object;
-  searchClient: SearchClient;
+  esClient: ESClient;
 }) {
   const params = {
     index: targetApmIndices,
@@ -94,7 +94,7 @@ export async function getNextTransactionSamples({
     }
   };
 
-  const transactionsResponse = await searchClient(params);
+  const transactionsResponse = await esClient.search(params);
   const externalConnections =
     transactionsResponse.aggregations?.externalConnections;
   const buckets = externalConnections?.buckets ?? [];
