@@ -5,57 +5,33 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { get } from 'lodash';
-import { connect } from 'react-redux';
 import { Snapshot as SnapshotType } from '../../../common/runtime_types';
 import { DonutChart } from './charts';
-import { fetchSnapshotCount } from '../../state/actions';
 import { ChartWrapper } from './charts/chart_wrapper';
 import { SnapshotHeading } from './snapshot_heading';
-import { AppState } from '../../state';
+import { useUrlParams } from '../../hooks';
+import { UptimeSettingsContext, UptimeRefreshContext } from '../../contexts';
+import { fetchSnapshotCount, SnapshotApiRequest } from '../../state/api';
 
 const SNAPSHOT_CHART_WIDTH = 144;
 const SNAPSHOT_CHART_HEIGHT = 144;
 
-/**
- * Props expected from parent components.
- */
-interface OwnProps {
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  filters?: string;
-  /**
-   * Height is needed, since by default charts takes height of 100%
-   */
-  height?: string;
-  statusFilter?: string;
-}
-
-/**
- * Props given by the Redux store based on action input.
- */
-interface StoreProps {
+export interface SnapshotState {
   count: SnapshotType;
-  lastRefresh: number;
+  errors: any[];
   loading: boolean;
 }
 
-/**
- * Contains functions that will dispatch actions used
- * for this component's lifecyclel
- */
-interface DispatchProps {
-  loadSnapshotCount: typeof fetchSnapshotCount;
+interface Props {
+  height: string;
 }
 
-/**
- * Props used to render the Snapshot component.
- */
-type Props = OwnProps & StoreProps & DispatchProps;
-
-type PresentationalComponentProps = Pick<StoreProps, 'count' | 'loading'> &
-  Pick<OwnProps, 'height'>;
+type PresentationalComponentProps = Props & {
+  count: SnapshotType;
+  loading: boolean;
+};
 
 export const PresentationalComponent: React.FC<PresentationalComponentProps> = ({
   count,
@@ -74,58 +50,50 @@ export const PresentationalComponent: React.FC<PresentationalComponentProps> = (
   </ChartWrapper>
 );
 
+const initialState: SnapshotState = {
+  count: {
+    down: 0,
+    mixed: 0,
+    total: 0,
+    up: 0,
+  },
+  errors: [],
+  loading: false,
+};
+
 /**
  * This component visualizes a KPI and histogram chart to help users quickly
  * glean the status of their uptime environment.
  * @param props the props required by the component
  */
-export const Container: React.FC<Props> = ({
-  count,
-  dateRangeStart,
-  dateRangeEnd,
-  filters,
-  height,
-  statusFilter,
-  lastRefresh,
-  loading,
-  loadSnapshotCount,
-}: Props) => {
+export const Snapshot: React.FC<Props> = ({ height }: Props) => {
+  const [state, setState] = useState<SnapshotState>(initialState);
+  const { basePath } = useContext(UptimeSettingsContext);
+  const { lastRefresh } = useContext(UptimeRefreshContext);
+  const [getUrlParams] = useUrlParams();
+  const { dateRangeStart, dateRangeEnd, filters, statusFilter } = getUrlParams();
   useEffect(() => {
-    loadSnapshotCount(dateRangeStart, dateRangeEnd, filters, statusFilter);
+    async function f(props: SnapshotApiRequest) {
+      setState({
+        ...state,
+        count: {
+          ...(await fetchSnapshotCount({ ...props })),
+        },
+        loading: false,
+      });
+    }
+    try {
+      f({
+        basePath,
+        dateRangeStart,
+        dateRangeEnd,
+        filters,
+        statusFilter,
+      });
+    } catch (e) {
+      setState({ ...state, errors: [...state.errors, e] });
+    }
+    setState({ ...state, loading: true });
   }, [dateRangeStart, dateRangeEnd, filters, lastRefresh, statusFilter]);
-  return <PresentationalComponent count={count} height={height} loading={loading} />;
+  return <PresentationalComponent count={state.count} height={height} loading={state.loading} />;
 };
-
-/**
- * Provides state to connected component.
- * @param state the root app state
- */
-const mapStateToProps = ({
-  snapshot: { count, loading },
-  ui: { lastRefresh },
-}: AppState): StoreProps => ({
-  count,
-  lastRefresh,
-  loading,
-});
-
-/**
- * Used for fetching snapshot counts.
- * @param dispatch redux-provided action dispatcher
- */
-const mapDispatchToProps = (dispatch: any) => ({
-  loadSnapshotCount: (
-    dateRangeStart: string,
-    dateRangeEnd: string,
-    filters?: string,
-    statusFilter?: string
-  ): DispatchProps => {
-    return dispatch(fetchSnapshotCount(dateRangeStart, dateRangeEnd, filters, statusFilter));
-  },
-});
-
-export const Snapshot = connect<StoreProps, DispatchProps, OwnProps>(
-  // @ts-ignore connect is expecting null | undefined for some reason
-  mapStateToProps,
-  mapDispatchToProps
-)(Container);
