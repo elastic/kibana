@@ -117,7 +117,7 @@ export class DashboardAppController {
         timefilter: { timefilter },
       },
     },
-    core: { notifications, overlays, chrome, injectedMetadata, uiSettings },
+    core: { notifications, overlays, chrome, injectedMetadata, uiSettings, savedObjects },
   }: DashboardAppControllerDependencies) {
     new FilterStateManager(globalState, getAppState, filterManager);
     const queryFilter = filterManager;
