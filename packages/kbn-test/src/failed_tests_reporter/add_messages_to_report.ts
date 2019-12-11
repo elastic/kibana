@@ -61,11 +61,16 @@ export async function addMessagesToReport(options: {
 
     if (!testCase['system-out']) {
       testCase['system-out'] = [output];
-    } else if (typeof testCase['system-out'][0] === 'string') {
-      testCase['system-out'][0] = output + String(testCase['system-out'][0]);
-    } else {
-      testCase['system-out'][0]._ = output + testCase['system-out'][0]._;
+      continue;
     }
+
+    if (typeof testCase['system-out'][0] === 'string') {
+      testCase['system-out'][0] = output + String(testCase['system-out'][0]);
+      continue;
+    }
+
+    const [current] = testCase['system-out'];
+    current._ = output + current._;
   }
 
   const builder = new xml2js.Builder({
