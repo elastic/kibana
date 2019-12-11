@@ -22,6 +22,10 @@ interface PackageInstallItem {
   status: InstallStatus;
 }
 
+type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
+  successCallback?: () => void;
+};
+
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
   const { toAddDataSourceView } = useLinks();
@@ -37,13 +41,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const installPackage = useCallback(
-    async ({ name, version, title }: Pick<PackageInfo, 'name' | 'version' | 'title'>) => {
+    async ({ name, version, title, successCallback }: InstallPackageProps) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
 
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
+        if (successCallback) successCallback();
         const packageDataSourceUrl = toAddDataSourceView({ name, version });
         const SuccessMsg = (
           <Fragment>
@@ -59,7 +64,6 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
             </EuiFlexGroup>
           </Fragment>
         );
-
         notifications.toasts.addSuccess({
           title: `Installed ${title} package`,
           text: toMountPoint(SuccessMsg),
