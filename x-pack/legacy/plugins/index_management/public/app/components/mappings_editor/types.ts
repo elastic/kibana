@@ -18,6 +18,12 @@ export interface DataTypeDefinition {
   subTypes?: { label: string; types: SubType[] };
 }
 
+export type ConfigType =
+  | 'dynamic'
+  | 'date_detection'
+  | 'numeric_detection'
+  | 'dynamic_date_formats';
+
 export type MainType =
   | 'text'
   | 'keyword'
