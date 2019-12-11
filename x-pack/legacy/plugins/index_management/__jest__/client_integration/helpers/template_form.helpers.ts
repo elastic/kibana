@@ -8,16 +8,26 @@ import { TestBed, SetupFunc } from '../../../../../../test_utils';
 import { Template } from '../../../common/types';
 import { nextTick } from './index';
 
+interface MappingField {
+  name: string;
+  type: string;
+}
+
 export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
   actions: {
     clickNextButton: () => void;
     clickBackButton: () => void;
     clickSubmitButton: () => void;
+    clickEditButtonAtField: (index: number) => void;
+    clickEditFieldUpdateButton: () => void;
+    clickRemoveButtonAtField: (index: number) => void;
+    clickCancelCreateFieldButton: () => void;
     completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
     completeStepTwo: (settings: string) => void;
-    completeStepThree: () => void;
+    completeStepThree: (mappingFields?: MappingField[]) => void;
     completeStepFour: (aliases: string) => void;
     selectSummaryTab: (tab: 'summary' | 'request') => void;
+    addMappingField: (name: string, type: string) => void;
   };
 }
 
@@ -37,6 +47,28 @@ export const formSetup = async (
 
   const clickSubmitButton = () => {
     testBed.find('submitButton').simulate('click');
+  };
+
+  const clickEditButtonAtField = (index: number) => {
+    testBed
+      .find('editFieldButton')
+      .at(index)
+      .simulate('click');
+  };
+
+  const clickEditFieldUpdateButton = () => {
+    testBed.find('editFieldUpdateButton').simulate('click');
+  };
+
+  const clickRemoveButtonAtField = (index: number) => {
+    testBed
+      .find('removeFieldButton')
+      .at(index)
+      .simulate('click');
+  };
+
+  const clickCancelCreateFieldButton = () => {
+    testBed.find('createFieldWrapper.cancelButton').simulate('click');
   };
 
   const completeStepOne = async ({ name, indexPatterns, order, version }: Partial<Template>) => {
@@ -85,10 +117,18 @@ export const formSetup = async (
     component.update();
   };
 
-  const completeStepThree = async () => {
+  const completeStepThree = async (mappingFields?: MappingField[]) => {
     const { component } = testBed;
 
-    await nextTick();
+    if (mappingFields) {
+      for (const field of mappingFields) {
+        const { name, type } = field;
+        await addMappingField(name, type);
+      }
+    } else {
+      await nextTick();
+    }
+
     clickNextButton();
     await nextTick(50); // hooks updates cycles are tricky, adding some latency is needed
     component.update();
@@ -120,17 +160,37 @@ export const formSetup = async (
       .simulate('click');
   };
 
+  const addMappingField = async (name: string, type: string) => {
+    const { find, form, component } = testBed;
+
+    form.setInputValue('nameParameterInput', name);
+    form.setInputValue('fieldTypeSelect', type);
+
+    await nextTick();
+    component.update();
+
+    find('createFieldWrapper.addButton').simulate('click');
+
+    await nextTick();
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
       clickNextButton,
       clickBackButton,
       clickSubmitButton,
+      clickEditButtonAtField,
+      clickEditFieldUpdateButton,
+      clickRemoveButtonAtField,
+      clickCancelCreateFieldButton,
       completeStepOne,
       completeStepTwo,
       completeStepThree,
       completeStepFour,
       selectSummaryTab,
+      addMappingField,
     },
   };
 };
@@ -140,17 +200,29 @@ export type TemplateFormTestSubjects = TestSubjects;
 export type TestSubjects =
   | 'backButton'
   | 'codeEditorContainer'
+  | 'createFieldWrapper.addChildButton'
+  | 'createFieldWrapper.addButton'
+  | 'createFieldWrapper.addFieldButton'
+  | 'createFieldWrapper.addMultiFieldButton'
+  | 'createFieldWrapper.cancelButton'
+  | 'editFieldButton'
+  | 'editFieldUpdateButton'
+  | 'fieldsListItem'
+  | 'fieldTypeSelect'
   | 'indexPatternsField'
   | 'indexPatternsWarning'
   | 'indexPatternsWarningDescription'
+  | 'mappingsEditorFieldEdit'
   | 'mockCodeEditor'
   | 'mockComboBox'
   | 'nameField'
   | 'nameField.input'
+  | 'nameParameterInput'
   | 'nextButton'
   | 'orderField'
   | 'orderField.input'
   | 'pageTitle'
+  | 'removeFieldButton'
   | 'requestTab'
   | 'saveTemplateError'
   | 'settingsEditor'

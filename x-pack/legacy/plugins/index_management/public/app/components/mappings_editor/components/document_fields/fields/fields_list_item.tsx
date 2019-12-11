@@ -111,7 +111,11 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
       <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd">
         {canHaveChildFields && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={addField} disabled={isAddFieldBtnDisabled}>
+            <EuiButtonEmpty
+              onClick={addField}
+              disabled={isAddFieldBtnDisabled}
+              data-test-subj="addChildButton"
+            >
               {i18n.translate('xpack.idxMgmt.mappingsEditor.addChildButtonLabel', {
                 defaultMessage: 'Add child',
               })}
@@ -119,7 +123,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={editField}>
+          <EuiButtonEmpty onClick={editField} data-test-subj="editFieldButton">
             {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldButtonLabel', {
               defaultMessage: 'Edit',
             })}
@@ -128,7 +132,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
         <EuiFlexItem grow={false}>
           <DeleteFieldProvider>
             {deleteField => (
-              <EuiButtonEmpty onClick={() => deleteField(field)}>
+              <EuiButtonEmpty onClick={() => deleteField(field)} data-test-subj="removeFieldButton">
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.removeFieldButtonLabel', {
                   defaultMessage: 'Remove',
                 })}
@@ -145,6 +149,7 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
       className={classNames('mappingsEditor__fieldsListItem', {
         'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
       })}
+      data-test-subj="fieldsListItem"
     >
       <div
         style={{ paddingLeft: `${indent}px` }}
@@ -205,7 +210,11 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
                     grow={false}
                     className="mappingsEditor__fieldsListItem__multiFieldButton"
                   >
-                    <EuiButtonEmpty onClick={addField} iconType="plusInCircleFilled">
+                    <EuiButtonEmpty
+                      onClick={addField}
+                      iconType="plusInCircleFilled"
+                      data-test-subj="addMultiFieldButton"
+                    >
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.addMultiFieldButtonLabel', {
                         defaultMessage: 'Add multi-field',
                       })}
