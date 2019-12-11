@@ -6,10 +6,11 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { SignalsRestParams } from '../../signals/types';
+import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '../../../../../common/constants';
 import { RuleAlertType } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
@@ -40,17 +41,25 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
   ],
 });
 
-export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams> => ({
+export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsRestParams> => ({
+export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
   query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
   status: 'closed',
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsRestParams> => ({
+export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+  query: { match_all: {} },
+});
+
+export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+});
+
+export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
   status: 'closed',
 });
 
@@ -132,6 +141,18 @@ export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
   payload: {
     ...typicalSetStatusSignalByQueryPayload(),
   },
+});
+
+export const getSignalsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQuery() },
+});
+
+export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQueryAggs() },
 });
 
 export const createActionResult = (): ActionResult => ({
