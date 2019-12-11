@@ -6,16 +6,16 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { BrowserLineChart } from './BrowserLineChart';
-import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
+import { ServiceNodeMetrics } from '.';
+import { MockApmPluginContextWrapper } from '../../../utils/testHelpers';
 
-describe('BrowserLineChart', () => {
+describe('ServiceNodeMetrics', () => {
   describe('render', () => {
     it('renders', () => {
       expect(() =>
         shallow(
           <MockApmPluginContextWrapper>
-            <BrowserLineChart />
+            <ServiceNodeMetrics />
           </MockApmPluginContextWrapper>
         )
       ).not.toThrowError();

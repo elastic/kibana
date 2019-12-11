@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { metadata } from 'ui/metadata';
+import { useContext } from 'react';
+import { ApmPluginContext } from '../context/ApmPluginContext';
 
-export const stackVersionFromLegacyMetadata = metadata.branch;
+export function useApmPluginContext() {
+  return useContext(ApmPluginContext);
+}
