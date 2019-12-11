@@ -5,7 +5,7 @@
  */
 
 import uuid from 'uuid';
-import { merge } from 'lodash';
+import { merge, flattenDeep } from 'lodash';
 
 export const makePing = async (
   es: any,
@@ -151,13 +151,28 @@ export const makeChecks = async (
   monitorId: string,
   numChecks: number,
   numIps: number,
+  every: number, // number of millis between checks
   fields: { [key: string]: any } = {},
   mogrify: (doc: any) => any = d => d
 ) => {
   const checks = [];
+  const oldestTime = new Date().getTime() - numChecks * every;
+  let newestTime = oldestTime;
   for (let li = 0; li < numChecks; li++) {
+    const checkDate = new Date(newestTime + every);
+    newestTime = checkDate.getTime() + every;
+    fields = merge(fields, {
+      '@timestamp': checkDate.toISOString(),
+      monitor: {
+        timespan: {
+          gte: checkDate.toISOString(),
+          lt: new Date(newestTime).toISOString(),
+        },
+      },
+    });
     checks.push(await makeCheck(es, index, monitorId, numIps, fields, mogrify));
   }
+
   return checks;
 };
 
@@ -167,23 +182,43 @@ export const makeChecksWithStatus = async (
   monitorId: string,
   numChecks: number,
   numIps: number,
+  every: number,
   fields: { [key: string]: any } = {},
   status: 'up' | 'down'
 ) => {
   const checks = [];
   const oppositeStatus = status === 'up' ? 'down' : 'up';
 
-  for (let li = 0; li < numChecks; li++) {
-    checks.push(
-      await makeCheck(es, index, monitorId, numIps, fields, d => {
-        d.monitor.status = status;
-        if (d.summary) {
-          d.summary[status] += d.summary[oppositeStatus];
-          d.summary[oppositeStatus] = 0;
-        }
-        return d;
-      })
-    );
-  }
-  return checks;
+  return await makeChecks(es, index, monitorId, numChecks, numIps, every, fields, d => {
+    d.monitor.status = status;
+    if (d.summary) {
+      d.summary[status] += d.summary[oppositeStatus];
+      d.summary[oppositeStatus] = 0;
+    }
+    return d;
+  });
+};
+
+export const getChecksDateRange = (checks: any[]) => {
+  // Flatten 2d arrays
+  const flattened = flattenDeep(checks);
+
+  let startTime = 1 / 0;
+  let endTime = -1 / 0;
+  flattened.forEach(c => {
+    const ts = Date.parse(c['@timestamp']);
+
+    if (ts < startTime) {
+      startTime = ts;
+    }
+
+    if (ts > endTime) {
+      endTime = ts;
+    }
+  });
+
+  return {
+    start: new Date(startTime).toISOString(),
+    end: new Date(endTime).toISOString(),
+  };
 };

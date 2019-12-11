@@ -108,7 +108,7 @@ export default function({ getService }: FtrProviderContext) {
 
           const es = getService('legacyEs');
           dateRangeStart = new Date().toISOString();
-          checks = await makeChecksWithStatus(es, index, testMonitorId, 1, numIps, {}, 'down');
+          checks = await makeChecksWithStatus(es, index, testMonitorId, 1, 1, numIps, {}, 'down');
           dateRangeEnd = new Date().toISOString();
           nonSummaryIp = checks[0][0].monitor.ip;
         });

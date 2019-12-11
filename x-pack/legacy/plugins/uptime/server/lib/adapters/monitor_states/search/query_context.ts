@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import DateMath from '@elastic/datemath';
 import { CursorPagination } from '../adapter_types';
 import { INDEX_NAMES } from '../../../../../common/constants';
 
@@ -19,7 +20,7 @@ export class QueryContext {
   hasTimespanCache?: boolean;
 
   constructor(
-    database: any,
+    database: many,
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
@@ -65,6 +66,10 @@ export class QueryContext {
       return timestampClause;
     }
 
+    // @ts-ignore
+    const tsStart = DateMath.parse(this.dateRangeEnd).subtract(10, 'seconds');
+    const tsEnd = DateMath.parse(this.dateRangeEnd);
+
     return {
       bool: {
         filter: [
@@ -75,8 +80,8 @@ export class QueryContext {
                 {
                   range: {
                     'monitor.timespan': {
-                      gte: `${this.dateRangeEnd}-10s`,
-                      lte: this.dateRangeEnd,
+                      gte: tsStart.toISOString(),
+                      lte: tsEnd.toISOString(),
                     },
                   },
                 },

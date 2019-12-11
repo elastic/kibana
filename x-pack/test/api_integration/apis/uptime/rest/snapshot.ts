@@ -6,14 +6,18 @@
 
 import { expectFixtureEql } from '../graphql/helpers/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { makeChecks, makeChecksWithStatus } from '../graphql/helpers/make_checks';
+import {
+  makeChecks,
+  makeChecksWithStatus,
+  getChecksDateRange,
+} from '../graphql/helpers/make_checks';
 
 export default function({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('snapshot count', () => {
-    let dateRangeStart = new Date().toISOString();
-    let dateRangeEnd = new Date().toISOString();
+    const dateRangeStart = new Date().toISOString();
+    const dateRangeEnd = new Date().toISOString();
 
     describe('when no data is present', async () => {
       it('returns a null snapshot', async () => {
@@ -30,18 +34,20 @@ export default function({ getService }: FtrProviderContext) {
       const numDownMonitors = 7;
       const numIps = 2;
       const checksPerMonitor = 5;
+      const scheduleEvery = 10000; // fake monitor checks every 10s
+      let dateRange: { start: string; end: string };
 
       before(async () => {
-        dateRangeStart = new Date().toISOString();
-
         const promises: Array<Promise<any>> = [];
-        const makeMonitorChecks = async (monitorName: string, status: 'up' | 'down') => {
+
+        const makeMonitorChecks = async (monitorId: string, status: 'up' | 'down') => {
           return makeChecksWithStatus(
             getService('legacyEs'),
             'heartbeat-8.0.0',
-            monitorName,
+            monitorId,
             checksPerMonitor,
             numIps,
+            scheduleEvery,
             {},
             status
           );
@@ -54,14 +60,14 @@ export default function({ getService }: FtrProviderContext) {
           promises.push(makeMonitorChecks(`down-${i}`, 'down'));
         }
 
-        await Promise.all(promises);
-        dateRangeEnd = new Date().toISOString();
-        return null;
+        const generated = [];
+        const allResults = await Promise.all(promises);
+        dateRange = getChecksDateRange(allResults);
       });
 
       it('will count all statuses correctly', async () => {
         const apiResponse = await supertest.get(
-          `/api/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}`
+          `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}`
         );
 
         expectFixtureEql(apiResponse.body, 'snapshot');
@@ -71,8 +77,9 @@ export default function({ getService }: FtrProviderContext) {
         const filters = `{"bool":{"must":[{"match":{"monitor.status":{"query":"down","operator":"and"}}}]}}`;
         const statusFilter = 'down';
         const apiResponse = await supertest.get(
-          `/api/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}&filters=${filters}&statusFilter=${statusFilter}`
+          `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&filters=${filters}&statusFilter=${statusFilter}`
         );
+
         expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_down');
       });
 
@@ -80,7 +87,7 @@ export default function({ getService }: FtrProviderContext) {
         const filters = `{"bool":{"must":[{"match":{"monitor.status":{"query":"up","operator":"and"}}}]}}`;
         const statusFilter = 'up';
         const apiResponse = await supertest.get(
-          `/api/uptime/snapshot/count?dateRangeStart=${dateRangeStart}&dateRangeEnd=${dateRangeEnd}&filters=${filters}&statusFilter=${statusFilter}`
+          `/api/uptime/snapshot/count?dateRangeStart=${dateRange.start}&dateRangeEnd=${dateRange.end}&filters=${filters}&statusFilter=${statusFilter}`
         );
         expectFixtureEql(apiResponse.body, 'snapshot_filtered_by_up');
       });
