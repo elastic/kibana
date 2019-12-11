@@ -22,7 +22,7 @@ table_vis.enabled: false
 tagcloud.enabled: false
 tile_map.enabled: false
 timelion.enabled: false
-ui_metric.enabled: false
+usageCollection.uiMetric.enabled: false
 vega.enabled: false
 xpack.actions.enabled: false
 xpack.alerting.enabled: false
