@@ -42,8 +42,8 @@ class AppComponent extends Component {
     }).isRequired,
   };
 
-  constructor(props) {
-    super(props);
+  constructor(...args) {
+    super(...args);
     this.registerRouter();
 
     this.state = {

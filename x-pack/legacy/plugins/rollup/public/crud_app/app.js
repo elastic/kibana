@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, useEffect } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { HashRouter, Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
@@ -13,25 +13,33 @@ import { CRUD_APP_BASE_PATH } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { JobList, JobCreate } from './sections';
 
-const ShareRouterComponent = React.memo(({ children, history }) => {
-  useEffect(() => {
+class ShareRouterComponent extends Component {
+  static propTypes = {
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+      createHref: PropTypes.func.isRequired,
+    }).isRequired,
+  };
+
+  constructor(...args) {
+    super(...args);
+    this.registerRouter();
+  }
+
+  registerRouter() {
+    // Share the router with the app without requiring React or context.
+    const { history } = this.props;
     registerRouter({ history });
-  }, [history]);
+  }
 
-  return children;
-});
-
-ShareRouterComponent.propTypes = {
-  history: PropTypes.shape({
-    push: PropTypes.func.isRequired,
-    createHref: PropTypes.func.isRequired,
-  }).isRequired,
-};
+  render() {
+    return this.props.children;
+  }
+}
 
 const ShareRouter = withRouter(ShareRouterComponent);
 
-export class App extends Component {
-  // eslint-disable-line react/no-multi-comp
+export class App extends Component { // eslint-disable-line react/no-multi-comp
   componentDidMount() {
     trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }
