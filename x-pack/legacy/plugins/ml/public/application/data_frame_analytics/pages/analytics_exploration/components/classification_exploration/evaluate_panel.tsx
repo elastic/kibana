@@ -121,7 +121,10 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
     const tablePanelWidth: number =
       document.getElementById('mlDataFrameAnalyticsTableResultsPanel')?.clientWidth ||
       defaultPanelWidth;
-    setPanelWidth(tablePanelWidth);
+    // Keep the evaluate panel width slightly smaller than the results table
+    // to ensure results table can resize correctly. Temporary workaround DataGrid issue with flex
+    const newWidth = tablePanelWidth - 8;
+    setPanelWidth(newWidth);
   };
 
   useEffect(() => {
@@ -272,7 +275,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
             )}
             {/* BEGIN TABLE ELEMENTS */}
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
+              <EuiFlexGroup gutterSize="s" style={{ paddingLeft: '10%', paddingRight: '10%' }}>
                 <EuiFlexItem grow={false}>
                   <EuiFormRow
                     className="mlDataFrameAnalyticsClassification__actualLabel"
@@ -312,7 +315,7 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
+                        <EuiFlexItem grow={false} style={{ width: '90%' }}>
                           <EuiDataGrid
                             aria-label="Data grid demo"
                             columns={columns}
