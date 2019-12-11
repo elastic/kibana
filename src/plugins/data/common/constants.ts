@@ -17,16 +17,4 @@
  * under the License.
  */
 
-import { fetchProvider } from './fetch';
-
-export function makeKQLUsageCollector(usageCollection, server) {
-  const index = server.config().get('kibana.index');
-  const fetch = fetchProvider(index);
-  const kqlUsageCollector = usageCollection.makeUsageCollector({
-    type: 'kql',
-    fetch,
-    isReady: () => true,
-  });
-
-  usageCollection.registerCollector(kqlUsageCollector);
-}
+export const DEFAULT_QUERY_LANGUAGE = 'kuery';

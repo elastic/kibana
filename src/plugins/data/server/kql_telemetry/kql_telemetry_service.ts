@@ -17,18 +17,31 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerKqlTelemetryRoute } from './route';
+import { UsageCollectionSetup } from '../../../usage_collection/server';
+import { makeKQLUsageCollector } from './usage_collector';
 
 export class KqlTelemetryService implements Plugin<void> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup({ http, savedObjects }: CoreSetup) {
+  public async setup(
+    { http, savedObjects }: CoreSetup,
+    { usageCollection }: { usageCollection?: UsageCollectionSetup }
+  ) {
     registerKqlTelemetryRoute(
       http.createRouter(),
       savedObjects,
       this.initializerContext.logger.get('data', 'kql-telemetry')
     );
+
+    if (usageCollection) {
+      const config = await this.initializerContext.config.legacy.globalConfig$
+        .pipe(first())
+        .toPromise();
+      makeKQLUsageCollector(usageCollection, config.kibana.index);
+    }
   }
 
   public start() {}

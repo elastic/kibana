@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { getUiSettingDefaults } from '../../../ui_setting_defaults';
 import { get } from 'lodash';
+import { APICaller } from 'kibana/server';
+import { DEFAULT_QUERY_LANGUAGE } from '../../../common';
 
-const uiSettingDefaults = getUiSettingDefaults();
-const defaultSearchQueryLanguageSetting = uiSettingDefaults['search:queryLanguage'].value;
+const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;
 
-export function fetchProvider(index) {
-  return async callCluster => {
+export function fetchProvider(index: string) {
+  return async (callCluster: APICaller) => {
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,
@@ -38,7 +38,10 @@ export function fetchProvider(index) {
       }),
     ]);
 
-    const queryLanguageConfigValue = get(config, 'hits.hits[0]._source.config.search:queryLanguage');
+    const queryLanguageConfigValue = get(
+      config,
+      'hits.hits[0]._source.config.search:queryLanguage'
+    );
 
     // search:queryLanguage can potentially be in four states in the .kibana index:
     // 1. undefined: this means the user has never touched this setting

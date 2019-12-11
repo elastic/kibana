@@ -33,7 +33,6 @@ import { registerTutorials } from './server/tutorials/register';
 import * as systemApi from './server/lib/system_api';
 import mappings from './mappings.json';
 import { getUiSettingDefaults } from './ui_setting_defaults';
-import { makeKQLUsageCollector } from './server/lib/kql_usage_collector';
 import { registerCspCollector } from './server/lib/csp_usage_collector';
 import { injectVars } from './inject_vars';
 import { i18n } from '@kbn/i18n';
@@ -332,7 +331,6 @@ export default function (kibana) {
       registerSuggestionsApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
-      makeKQLUsageCollector(usageCollection, server);
       registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
