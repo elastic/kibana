@@ -133,7 +133,7 @@ export interface TaskDefinition {
    * function can return `true`, `false` or a Date. True will tell task manager
    * to retry using default delay logic. False will tell task manager to stop retrying
    * this task. Date will suggest when to the task manager the task should retry.
-   * This function isn't used for interval type tasks, those retry at the next interval.
+   * This function isn't used for recurring tasks, those retry as per their configured recurring schedule.
    */
   getRetry?: (attempts: number, error: object) => boolean | Date;
 
@@ -220,9 +220,11 @@ export interface TaskInstance {
   runAt?: Date;
 
   /**
-   * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
+   * A TaskSchedule string, which specifies this as a recurring task.
+   *
+   * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
    */
-  interval?: string;
+  recurringSchedule?: string;
 
   /**
    * A task-specific set of parameters, used by the task's run function to tailor

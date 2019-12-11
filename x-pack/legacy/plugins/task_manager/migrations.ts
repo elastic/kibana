@@ -12,5 +12,16 @@ export const migrations = {
       ...doc,
       updated_at: new Date().toISOString(),
     }),
+    '7.6.0': renameAttribute('interval', 'recurringSchedule'),
   },
 };
+
+function renameAttribute(oldName: string, newName: string) {
+  return ({ attributes: { [oldName]: value, ...attributes }, ...doc }: SavedObject) => ({
+    ...doc,
+    attributes: {
+      ...attributes,
+      [newName]: value,
+    },
+  });
+}

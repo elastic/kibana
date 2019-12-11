@@ -47,7 +47,7 @@ import {
   updateFields,
   IdleTaskWithExpiredRunAt,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  RecuringTaskWithInterval,
+  TaskWithRecurringSchedule,
   taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
   taskWithIDsAndRunnableStatus,
@@ -246,9 +246,9 @@ export class TaskStore {
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-      // Either task has an interval or the attempts < the maximum configured
+      // Either task has a recurringSchedule or the attempts < the maximum configured
       shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
-        RecuringTaskWithInterval,
+        TaskWithRecurringSchedule,
         ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
           taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
         )

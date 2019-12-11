@@ -110,7 +110,7 @@ export default function ({ getService }) {
 
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: '30m',
+        recurringSchedule: '30m',
         params: { historyItem },
       });
       log.debug(`Task created: ${scheduledTask.id}`);
@@ -215,7 +215,7 @@ export default function ({ getService }) {
 
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `${interval}m`,
+        recurringSchedule: `${interval}m`,
         params: { },
       });
 
@@ -234,7 +234,7 @@ export default function ({ getService }) {
 
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `30m`,
+        recurringSchedule: `30m`,
         params: { },
       });
 
@@ -274,7 +274,7 @@ export default function ({ getService }) {
     it('should return a task run error result when running a task now fails', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `30m`,
+        recurringSchedule: `30m`,
         params: {  failWith: 'error on run now', failOn: 3 },
       });
 
@@ -333,7 +333,7 @@ export default function ({ getService }) {
     it('should return a task run error result when trying to run a task now which is already running', async () => {
       const longRunningTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: '30m',
+        recurringSchedule: '30m',
         params: {
           waitForParams: true
         },
@@ -428,13 +428,13 @@ export default function ({ getService }) {
        */
       const fastTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `1s`,
+        recurringSchedule: `1s`,
         params: { },
       });
 
       const longRunningTask = await scheduleTask({
         taskType: 'sampleTask',
-        interval: `1s`,
+        recurringSchedule: `1s`,
         params: {
           waitForEvent: 'rescheduleHasHappened'
         },

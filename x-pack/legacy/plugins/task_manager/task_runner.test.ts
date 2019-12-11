@@ -86,10 +86,10 @@ describe('TaskManagerRunner', () => {
     expect(instance.state).toEqual({ hey: 'there' });
   });
 
-  test('reschedules tasks that have an interval', async () => {
+  test('reschedules tasks that have an recurringSchedule', async () => {
     const { runner, store } = testOpts({
       instance: {
-        interval: '10m',
+        recurringSchedule: '10m',
         status: TaskStatus.Running,
         startedAt: new Date(),
       },
@@ -133,11 +133,11 @@ describe('TaskManagerRunner', () => {
     sinon.assert.calledWithMatch(store.update, { runAt });
   });
 
-  test('tasks that return runAt override interval', async () => {
+  test('tasks that return runAt override the recurringSchedule', async () => {
     const runAt = minutesFromNow(_.random(5));
     const { runner, store } = testOpts({
       instance: {
-        interval: '20m',
+        recurringSchedule: '20m',
       },
       definitions: {
         bar: {
@@ -161,7 +161,7 @@ describe('TaskManagerRunner', () => {
     const { runner, store } = testOpts({
       instance: {
         id,
-        interval: undefined,
+        recurringSchedule: undefined,
       },
       definitions: {
         bar: {
@@ -237,7 +237,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        recurringSchedule: undefined,
       },
       definitions: {
         bar: {
@@ -366,7 +366,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: '1m',
+        recurringSchedule: '1m',
         startedAt: new Date(),
       },
       definitions: {
@@ -402,7 +402,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        recurringSchedule: undefined,
       },
       definitions: {
         bar: {
@@ -436,7 +436,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        recurringSchedule: undefined,
       },
       definitions: {
         bar: {
@@ -468,7 +468,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        recurringSchedule: undefined,
       },
       definitions: {
         bar: {
@@ -503,7 +503,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        recurringSchedule: undefined,
       },
       definitions: {
         bar: {
@@ -538,7 +538,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        recurringSchedule: undefined,
       },
       definitions: {
         bar: {
@@ -570,7 +570,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: '1m',
+        recurringSchedule: '1m',
         startedAt: new Date(),
       },
       definitions: {
@@ -601,7 +601,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: undefined,
+        recurringSchedule: undefined,
       },
       definitions: {
         bar: {
@@ -633,7 +633,7 @@ describe('TaskManagerRunner', () => {
       instance: {
         id,
         attempts: initialAttempts,
-        interval: `${intervalSeconds}s`,
+        recurringSchedule: `${intervalSeconds}s`,
         startedAt: new Date(),
       },
       definitions: {
@@ -749,7 +749,7 @@ describe('TaskManagerRunner', () => {
         onTaskEvent,
         instance: {
           id,
-          interval: '1m',
+          recurringSchedule: '1m',
         },
         definitions: {
           bar: {
@@ -800,7 +800,7 @@ describe('TaskManagerRunner', () => {
         onTaskEvent,
         instance: {
           id,
-          interval: '1m',
+          recurringSchedule: '1m',
           startedAt: new Date(),
         },
         definitions: {

@@ -14,7 +14,9 @@ import {
   RangeBoolClause,
 } from './query_clauses';
 
-export const RecuringTaskWithInterval: ExistsBoolClause = { exists: { field: 'task.interval' } };
+export const TaskWithRecurringSchedule: ExistsBoolClause = {
+  exists: { field: 'task.recurringSchedule' },
+};
 export function taskWithLessThanMaxAttempts(
   type: string,
   maxAttempts: number
