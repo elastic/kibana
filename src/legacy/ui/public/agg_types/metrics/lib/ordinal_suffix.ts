@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import { IpRangeKey } from '../agg_types/buckets/ip_range';
+// adopted from http://stackoverflow.com/questions/3109978/php-display-number-with-ordinal-suffix
+export function ordinalSuffix(num: any): string {
+  return num + '' + suffix(num);
+}
 
-export const ipRange = {
-  toString(range: IpRangeKey, format: (val: any) => string) {
-    if (range.type === 'mask') {
-      return format(range.mask);
-    }
-    const from = range.from ? format(range.from) : '-Infinity';
-    const to = range.to ? format(range.to) : 'Infinity';
-    return `${from} to ${to}`;
-  },
-};
+function suffix(num: any): string {
+  const int = Math.floor(parseFloat(num));
+
+  const hunth = int % 100;
+  if (hunth >= 11 && hunth <= 13) return 'th';
+
+  const tenth = int % 10;
+  if (tenth === 1) return 'st';
+  if (tenth === 2) return 'nd';
+  if (tenth === 3) return 'rd';
+  return 'th';
+}

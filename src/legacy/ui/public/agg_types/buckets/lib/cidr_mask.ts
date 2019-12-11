@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { Ipv4Address } from '../../../../plugins/kibana_utils/public';
+import { Ipv4Address } from '../../../../../../plugins/kibana_utils/public';
+
 const NUM_BITS = 32;
 
 function throwError(mask: string) {
