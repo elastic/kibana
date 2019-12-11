@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { EuiForm, EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiForm, EuiFormRow, EuiPanel, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n/react';
 import { MultiColumnEditor } from '../multi_column_editor';
@@ -24,6 +24,8 @@ import chartTableSVG from '../assets/chart_datatable.svg';
 export interface LayerState {
   layerId: string;
   columns: string[];
+  // pivots: string[];
+  pivot: boolean;
 }
 
 export interface DatatableVisualizationState {
@@ -34,6 +36,7 @@ function newLayerState(layerId: string): LayerState {
   return {
     layerId,
     columns: [generateId()],
+    pivot: true,
   };
 }
 
@@ -44,6 +47,12 @@ function updateColumns(
 ) {
   const columns = fn(layer.columns);
   const updatedLayer = { ...layer, columns };
+  const layers = state.layers.map(l => (l.layerId === layer.layerId ? updatedLayer : l));
+  return { ...state, layers };
+}
+
+function togglePivot(state: DatatableVisualizationState, layer: LayerState) {
+  const updatedLayer = { ...layer, pivot: !layer.pivot };
   const layers = state.layers.map(l => (l.layerId === layer.layerId ? updatedLayer : l));
   return { ...state, layers };
 }
@@ -87,6 +96,18 @@ export function DataTableLayer({
           }
           testSubj="datatable_columns"
           data-test-subj="datatable_multicolumnEditor"
+        />
+      </EuiFormRow>
+
+      <EuiSpacer size="s" />
+      <EuiFormRow
+        className="lnsConfigPanel__axis"
+        label={i18n.translate('xpack.lens.datatable.pivot', { defaultMessage: 'Pivot' })}
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.lens.datatable.pivot', { defaultMessage: 'Pivot' })}
+          checked={layer.pivot}
+          onChange={() => setState(togglePivot(state, layer))}
         />
       </EuiFormRow>
     </EuiPanel>
@@ -177,6 +198,7 @@ export const datatableVisualization: Visualization<
             {
               layerId: table.layerId,
               columns: table.columns.map(col => col.columnId),
+              pivot: false,
             },
           ],
         },
@@ -222,11 +244,15 @@ export const datatableVisualization: Visualization<
                     function: 'lens_datatable_columns',
                     arguments: {
                       columnIds: operations.map(o => o.columnId),
+                      bucketColumns: operations
+                        .filter(o => o.operation.isBucketed)
+                        .map(o => o.columnId),
                     },
                   },
                 ],
               },
             ],
+            pivot: [layer.pivot],
           },
         },
       ],
