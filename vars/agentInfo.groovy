@@ -6,8 +6,8 @@ def print() {
     def resourcesUrl =
       (
         "https://infra-stats.elastic.co/app/kibana#/visualize/edit/8bd92360-1b92-11ea-b719-aba04518cc34" +
-        "?_g=(time:(from:'2019-12-11T20:08:26%2B0000',to:'2019-12-11T22:23:27%2B0000'))" +
-        "&_a=(query:'host.name:kibana-ci-immutable-centos-1576095771925965229')"
+        "?_g=(time:(from:'${startTime}',to:'${endTime}'))" +
+        "&_a=(query:'host.name:${env.NODE_NAME}')"
       )
       .replaceAll("'", '%27') // Need to escape ' because of the shell echo below, but can't really replace "'" with "\'" because of groovy sandbox
       .replaceAll(/\)$/, '%29') // This is just here because the URL parsing in the Jenkins console doesn't work right
