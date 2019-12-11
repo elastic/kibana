@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -193,7 +194,9 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         },
       });
     }, [rowIndex, columnId, setCellProps]);
-    return <span>{typeof cellValue === 'number' ? `${cellValue * 100}%` : cellValue}</span>;
+    return (
+      <span>{typeof cellValue === 'number' ? `${Math.round(cellValue * 100)}%` : cellValue}</span>
+    );
   };
 
   if (isLoading === true) {
@@ -231,17 +234,33 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
         {error === null && (
           <Fragment>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <span>
-                  {i18n.translate(
-                    'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixHelpText',
-                    {
-                      defaultMessage: 'Normalized confusion matrix',
-                    }
-                  )}
-                </span>
-              </EuiTitle>
-              {docsCount !== null && (
+              <EuiFlexGroup gutterSize="xs">
+                <EuiTitle size="xxs">
+                  <span>
+                    {i18n.translate(
+                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixHelpText',
+                      {
+                        defaultMessage: 'Normalized confusion matrix',
+                      }
+                    )}
+                  </span>
+                </EuiTitle>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    anchorClassName="mlDataFrameAnalyticsClassificationInfoTooltip"
+                    content={i18n.translate(
+                      'xpack.ml.dataframe.analytics.classificationExploration.confusionMatrixTooltip',
+                      {
+                        defaultMessage:
+                          'The multi-class confusion matrix contains the number of occurrences where the analysis classified data points correctly with their actual class as well as the number of occurrences where it misclassified them with another class',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {docsCount !== null && (
+              <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
                     id="xpack.ml.dataframe.analytics.classificationExploration.generalizationDocsCount"
@@ -249,8 +268,8 @@ export const EvaluatePanel: FC<Props> = ({ jobConfig, jobStatus, searchQuery }) 
                     values={{ docsCount }}
                   />
                 </EuiText>
-              )}
-            </EuiFlexItem>
+              </EuiFlexItem>
+            )}
             {/* BEGIN TABLE ELEMENTS */}
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
