@@ -17,7 +17,7 @@ def print() {
 
     def logsStartTime = sh(script: "date -d '-30 minutes' +%s", returnStdout: true).trim()
     def logsUrl =
-      "https://infra-stats.elastic.co/app/infra#/logs?_g=()&flyoutOptions=(flyoutId:!n,flyoutVisibility:hidden,surroundingLogsId:!n)&logFilter=(expression:'host.name:${env.NODE_NAME}',kind:kuery)&logPosition=(position:(tiebreaker:23385715,time:${logsStartTime}000),streamLive:!f)"
+      "https://infra-stats.elastic.co/app/infra#/logs?_g=()&flyoutOptions=(flyoutId:!n,flyoutVisibility:hidden,surroundingLogsId:!n)&logFilter=(expression:'host.name:${env.NODE_NAME}',kind:kuery)&logPosition=(position:(time:${logsStartTime}000),streamLive:!f)"
       .replaceAll("'", '%27')
       .replaceAll('\\)', '%29')
 
