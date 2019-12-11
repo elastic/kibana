@@ -174,6 +174,7 @@ export const getResult = (): RuleAlertType => ({
   name: 'Detect Root/Admin Users',
   tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`],
   alertTypeId: 'siem.signals',
+  consumer: 'siem',
   params: {
     description: 'Detecting root and admin users',
     ruleId: 'rule-1',

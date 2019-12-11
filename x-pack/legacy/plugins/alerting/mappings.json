@@ -13,6 +13,9 @@
       "alertTypeId": {
         "type": "keyword"
       },
+      "consumer": {
+        "type": "keyword"
+      },
       "interval": {
         "type": "keyword"
       },

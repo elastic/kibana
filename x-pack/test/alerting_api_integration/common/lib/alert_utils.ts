@@ -183,6 +183,7 @@ export class AlertUtils {
       throttle: '1m',
       tags: [],
       alertTypeId: 'test.always-firing',
+      consumer: 'bar',
       params: {
         index: ES_TEST_INDEX_NAME,
         reference,

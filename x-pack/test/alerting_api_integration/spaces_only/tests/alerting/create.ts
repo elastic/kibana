@@ -69,6 +69,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         ],
         enabled: true,
         alertTypeId: 'test.noop',
+        consumer: 'bar',
         params: {},
         createdBy: null,
         interval: '1m',

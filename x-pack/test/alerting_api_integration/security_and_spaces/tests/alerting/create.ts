@@ -87,6 +87,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 ],
                 enabled: true,
                 alertTypeId: 'test.noop',
+                consumer: 'bar',
                 params: {},
                 createdBy: user.username,
                 interval: '1m',
@@ -201,10 +202,10 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "interval" fails because ["interval" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
+                  'child "name" fails because ["name" is required]. child "alertTypeId" fails because ["alertTypeId" is required]. child "consumer" fails because ["consumer" is required]. child "interval" fails because ["interval" is required]. child "params" fails because ["params" is required]. child "actions" fails because ["actions" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['name', 'alertTypeId', 'interval', 'params', 'actions'],
+                  keys: ['name', 'alertTypeId', 'consumer', 'interval', 'params', 'actions'],
                 },
               });
               break;

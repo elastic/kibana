@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SIGNALS_ID } from '../../../../common/constants';
+import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { RuleParams } from './types';
 import { addRuleIdToTags } from './add_rule_id_to_tags';
 
@@ -40,6 +40,7 @@ export const createRules = async ({
       name,
       tags: addRuleIdToTags(tags, ruleId),
       alertTypeId: SIGNALS_ID,
+      consumer: APP_ID,
       params: {
         description,
         ruleId,
