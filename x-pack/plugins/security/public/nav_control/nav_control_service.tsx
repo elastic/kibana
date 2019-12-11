@@ -70,7 +70,7 @@ export class SecurityNavControlService {
 
         const props = {
           user,
-          editProfileUrl: core.http.basePath.prepend('/app/kibana/#account'),
+          editProfileUrl: core.http.basePath.prepend('/app/kibana#/account'),
           logoutUrl: core.http.basePath.prepend(`/logout`),
         };
         ReactDOM.render(
