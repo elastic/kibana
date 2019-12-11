@@ -18,6 +18,7 @@ import { history } from '../../../../utils/history';
 import { TransactionOverview } from '..';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import * as useServiceTransactionTypesHook from '../../../../hooks/useServiceTransactionTypes';
+import * as useFetcherHook from '../../../../hooks/useFetcher';
 import { fromQuery } from '../../../shared/Links/url_helpers';
 import { Router } from 'react-router-dom';
 import { UrlParamsProvider } from '../../../../context/UrlParamsContext';
@@ -51,6 +52,8 @@ function setup({
   jest
     .spyOn(useServiceTransactionTypesHook, 'useServiceTransactionTypes')
     .mockReturnValue(serviceTransactionTypes);
+
+  jest.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   return render(
     <KibanaCoreContext.Provider value={coreMock}>
