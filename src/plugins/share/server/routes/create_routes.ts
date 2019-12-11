@@ -17,27 +17,16 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { CoreSetup, Logger } from 'kibana/server';
 
-export function shortUrlLookupProvider(server) {
-  async function updateMetadata(doc, req) {
-    try {
-      await req.getSavedObjectsClient().update('url', doc.id, {
-        accessDate: new Date(),
-        accessCount: get(doc, 'attributes.accessCount', 0) + 1
-      });
-    } catch (err) {
-      server.log('Warning: Error updating url metadata', err);
-      //swallow errors. It isn't critical if there is no update.
-    }
-  }
+import { shortUrlLookupProvider } from './lib/short_url_lookup';
+import { createGotoRoute } from './goto';
+import { createShortenUrlRoute } from './shorten_url';
 
-  return {
-    async getUrl(id, req) {
-      const doc = await req.getSavedObjectsClient().get('url', id);
-      updateMetadata(doc, req);
+export function createRoutes({ http }: CoreSetup, logger: Logger) {
+  const shortUrlLookup = shortUrlLookupProvider({ logger });
+  const router = http.createRouter();
 
-      return doc.attributes.url;
-    }
-  };
+  createGotoRoute({ router, shortUrlLookup, http });
+  createShortenUrlRoute({ router, shortUrlLookup });
 }
