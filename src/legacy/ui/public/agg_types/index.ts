@@ -34,7 +34,7 @@ import { derivativeMetricAgg } from './metrics/derivative';
 import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
 import { movingAvgMetricAgg } from './metrics/moving_avg';
 import { serialDiffMetricAgg } from './metrics/serial_diff';
-import { dateHistogramBucketAgg, setBounds } from './buckets/date_histogram';
+import { dateHistogramBucketAgg } from './buckets/date_histogram';
 import { histogramBucketAgg } from './buckets/histogram';
 import { rangeBucketAgg } from './buckets/range';
 import { dateRangeBucketAgg } from './buckets/date_range';
@@ -49,8 +49,6 @@ import { bucketSumMetricAgg } from './metrics/bucket_sum';
 import { bucketAvgMetricAgg } from './metrics/bucket_avg';
 import { bucketMinMetricAgg } from './metrics/bucket_min';
 import { bucketMaxMetricAgg } from './metrics/bucket_max';
-
-export { AggType } from './agg_type';
 
 export const aggTypes = {
   metrics: [
@@ -91,9 +89,28 @@ export const aggTypes = {
   ],
 };
 
-export { AggParam } from './agg_params';
+export { AggType } from './agg_type';
 export { AggConfig } from './agg_config';
 export { AggConfigs } from './agg_configs';
 export { FieldParamType } from './param_types';
+export { aggTypeFieldFilters } from './param_types/filter';
+export { setBounds } from './buckets/date_histogram';
+export { parentPipelineAggHelper } from './metrics/lib/parent_pipeline_agg_helper';
 
-export { setBounds };
+// static code
+export { AggParamType } from './param_types/agg';
+export { intervalOptions } from './buckets/_interval_options'; // only used in Discover
+export { isDateHistogramBucketAggConfig } from './buckets/date_histogram';
+export { isType, isStringType } from './buckets/migrate_include_exclude_format';
+export { CidrMask } from './buckets/lib/cidr_mask';
+export { convertDateRangeToString } from './buckets/date_range';
+export { convertIPRangeToString } from './buckets/ip_range';
+export { aggTypeFilters, propFilter } from './filter';
+export { OptionedParamType } from './param_types/optioned';
+export { isValidJson, isValidInterval } from './utils';
+
+// types
+export { AggParam, AggParamOption } from './agg_params';
+export { DateRangeKey } from './buckets/date_range';
+export { IpRangeKey } from './buckets/ip_range';
+export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
