@@ -76,7 +76,7 @@ describe('<TemplateEdit />', () => {
     });
 
     it('allows you to add mappings', async () => {
-      const { actions, component, find, form } = testBed;
+      const { actions, find } = testBed;
 
       await act(async () => {
         // Complete step 1 (logistics)
