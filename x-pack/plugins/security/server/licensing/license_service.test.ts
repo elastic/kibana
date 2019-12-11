@@ -7,9 +7,10 @@
 import { ILicense } from '../../../licensing/server';
 import { SecurityLicenseService } from './license_service';
 
-function getMockRawLicense({ isAvailable = false } = {}) {
+function getMockRawLicense({ isAvailable = false, isNotBasic = false } = {}) {
   return ({
     isAvailable,
+    isNotBasic,
     isOneOf: jest.fn(),
     getFeature: jest.fn(),
   } as unknown) as jest.Mocked<ILicense>;
@@ -22,6 +23,7 @@ describe('license features', function() {
       showLogin: true,
       allowLogin: false,
       showLinks: false,
+      showRoleMappingsManagement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       layout: 'error-es-unavailable',
@@ -36,6 +38,7 @@ describe('license features', function() {
       showLogin: true,
       allowLogin: false,
       showLinks: false,
+      showRoleMappingsManagement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       layout: 'error-xpack-unavailable',
@@ -43,7 +46,7 @@ describe('license features', function() {
     });
   });
 
-  it('should show login page and other security elements, allow RBAC but forbid document level security if license is not platinum or trial.', () => {
+  it('should show login page and other security elements, allow RBAC but forbid document level security and role mappings if license is not platinum or trial.', () => {
     const mockRawLicense = getMockRawLicense({ isAvailable: true });
     mockRawLicense.isOneOf.mockImplementation(licenses =>
       Array.isArray(licenses) ? licenses.includes('basic') : licenses === 'basic'
@@ -56,6 +59,7 @@ describe('license features', function() {
       showLogin: true,
       allowLogin: true,
       showLinks: true,
+      showRoleMappingsManagement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: true,
@@ -75,6 +79,7 @@ describe('license features', function() {
       showLogin: false,
       allowLogin: false,
       showLinks: false,
+      showRoleMappingsManagement: false,
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
@@ -82,8 +87,8 @@ describe('license features', function() {
     });
   });
 
-  it('should allow to login, allow RBAC and document level security if license is platinum or trial.', () => {
-    const mockRawLicense = getMockRawLicense({ isAvailable: true });
+  it('should allow to login, allow RBAC, document level security, and role mappings if license is platinum or trial.', () => {
+    const mockRawLicense = getMockRawLicense({ isAvailable: true, isNotBasic: true });
     mockRawLicense.isOneOf.mockImplementation(licenses => {
       const licenseArray = [licenses].flat();
       return licenseArray.includes('trial') || licenseArray.includes('platinum');
@@ -96,6 +101,7 @@ describe('license features', function() {
       showLogin: true,
       allowLogin: true,
       showLinks: true,
+      showRoleMappingsManagement: true,
       allowRoleDocumentLevelSecurity: true,
       allowRoleFieldLevelSecurity: true,
       allowRbac: true,
