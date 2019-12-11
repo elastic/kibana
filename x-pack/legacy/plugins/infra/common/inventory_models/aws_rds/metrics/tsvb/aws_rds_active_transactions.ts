@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
+import { createTSVBModel } from '../../../create_tsvb_model';
 
-export const awsRDSActiveTransactions: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
-  id: 'awsRDSActiveTransactions',
-  requires: ['aws.rds'],
-  index_pattern: indexPattern,
-  interval: '>=300s',
-  time_field: timeField,
-  type: 'timeseries',
-  series: [
+export const awsRDSActiveTransactions = createTSVBModel(
+  'awsRDSActiveTransactions',
+  ['aws.rds'],
+  [
     {
       id: 'active',
       split_mode: 'everything',
@@ -39,5 +32,5 @@ export const awsRDSActiveTransactions: TSVBMetricModelCreator = (
         },
       ],
     },
-  ],
-});
+  ]
+);

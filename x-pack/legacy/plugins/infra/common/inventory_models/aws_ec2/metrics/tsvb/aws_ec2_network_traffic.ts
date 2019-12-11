@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
-
-export const awsEC2NetworkTraffic: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
-  id: 'awsEC2NetworkTraffic',
-  requires: ['aws.ec2'],
-  index_pattern: indexPattern,
-  interval: '>=300s',
-  time_field: timeField,
-  type: 'timeseries',
-  series: [
+import { createTSVBModel } from '../../../create_tsvb_model';
+export const awsEC2NetworkTraffic = createTSVBModel(
+  'awsEC2NetworkTraffic',
+  ['aws.ec2'],
+  [
     {
       id: 'tx',
       split_mode: 'everything',
@@ -45,5 +37,5 @@ export const awsEC2NetworkTraffic: TSVBMetricModelCreator = (
         },
       ],
     },
-  ],
-});
+  ]
+);

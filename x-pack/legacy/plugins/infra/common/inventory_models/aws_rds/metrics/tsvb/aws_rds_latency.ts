@@ -3,20 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { createTSVBModel } from '../../../create_tsvb_model';
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
-
-export const awsRDSLatency: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
-  id: 'awsRDSLatency',
-  requires: ['aws.rds'],
-  index_pattern: indexPattern,
-  interval: '>=300s',
-  time_field: timeField,
-  type: 'timeseries',
-  series: [
+export const awsRDSLatency = createTSVBModel(
+  'awsRDSLatency',
+  ['aws.rds'],
+  [
     {
       id: 'read',
       split_mode: 'everything',
@@ -72,5 +64,5 @@ export const awsRDSLatency: TSVBMetricModelCreator = (
         },
       ],
     },
-  ],
-});
+  ]
+);

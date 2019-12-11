@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
+import { createTSVBModel } from '../../../create_tsvb_model';
 
-export const awsEC2CpuUtilization: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
-  id: 'awsEC2CpuUtilization',
-  requires: ['aws.ec2'],
-  index_pattern: indexPattern,
-  interval: '>=300s',
-  time_field: timeField,
-  type: 'timeseries',
-  series: [
+export const awsEC2CpuUtilization = createTSVBModel(
+  'awsEC2CpuUtilization',
+  ['aws.ec2'],
+  [
     {
       id: 'total',
       split_mode: 'everything',
@@ -40,5 +33,5 @@ export const awsEC2CpuUtilization: TSVBMetricModelCreator = (
         },
       ],
     },
-  ],
-});
+  ]
+);

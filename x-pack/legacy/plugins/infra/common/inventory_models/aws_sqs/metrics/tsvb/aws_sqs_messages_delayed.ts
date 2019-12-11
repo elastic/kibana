@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
+import { createTSVBModel } from '../../../create_tsvb_model';
 
-export const awsSQSMessagesDelayed: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
-  id: 'awsSQSMessagesDelayed',
-  requires: ['aws.sqs'],
-  index_pattern: indexPattern,
-  interval: '>=300s',
-  time_field: timeField,
-  type: 'timeseries',
-  series: [
+export const awsSQSMessagesDelayed = createTSVBModel(
+  'awsSQSMessagesDelayed',
+  ['aws.sqs'],
+  [
     {
       id: 'delayed',
       split_mode: 'everything',
@@ -29,4 +22,5 @@ export const awsSQSMessagesDelayed: TSVBMetricModelCreator = (
       ],
     },
   ],
-});
+  '>=300s'
+);

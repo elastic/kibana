@@ -3,20 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { createTSVBModel } from '../../../create_tsvb_model';
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
-
-export const awsS3DownloadBytes: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
-  id: 'awsS3DownloadBytes',
-  requires: ['aws.s3_daily_storage'],
-  index_pattern: indexPattern,
-  interval: '>=86400s',
-  time_field: timeField,
-  type: 'timeseries',
-  series: [
+export const awsS3DownloadBytes = createTSVBModel(
+  'awsS3DownloadBytes',
+  ['aws.s3_request'],
+  [
     {
       id: 'bytes',
       split_mode: 'everything',
@@ -29,4 +21,5 @@ export const awsS3DownloadBytes: TSVBMetricModelCreator = (
       ],
     },
   ],
-});
+  '>=300s'
+);

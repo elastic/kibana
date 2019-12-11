@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
+import { createTSVBModel } from '../../../create_tsvb_model';
 
-export const awsRDSCpuTotal: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
-  id: 'awsRDSCpuTotal',
-  requires: ['aws.rds'],
-  index_pattern: indexPattern,
-  interval: '>=300s',
-  time_field: timeField,
-  type: 'timeseries',
-  series: [
+export const awsRDSCpuTotal = createTSVBModel(
+  'awsRDSCpuTotal',
+  ['aws.rds'],
+  [
     {
       id: 'cpu',
       split_mode: 'everything',
@@ -40,5 +33,5 @@ export const awsRDSCpuTotal: TSVBMetricModelCreator = (
         },
       ],
     },
-  ],
-});
+  ]
+);

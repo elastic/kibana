@@ -181,6 +181,8 @@ export const TSVBSeriesRT = rt.intersection([
   }),
 ]);
 
+export type TSVBSeries = rt.TypeOf<typeof TSVBSeriesRT>;
+
 export const TSVBMetricModelRT = rt.intersection([
   rt.type({
     id: InventoryMetricRT,

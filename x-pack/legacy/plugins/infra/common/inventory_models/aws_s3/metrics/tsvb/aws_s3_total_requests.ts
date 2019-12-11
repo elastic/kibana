@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
+import { createTSVBModel } from '../../../create_tsvb_model';
 
-export const awsS3TotalRequests: TSVBMetricModelCreator = (
-  timeField,
-  indexPattern
-): TSVBMetricModel => ({
-  id: 'awsS3TotalRequests',
-  requires: ['aws.s3_daily_storage'],
-  index_pattern: indexPattern,
-  interval: '>=86400s',
-  time_field: timeField,
-  type: 'timeseries',
-  series: [
+export const awsS3TotalRequests = createTSVBModel(
+  'awsS3TotalRequests',
+  ['aws.s3_request'],
+  [
     {
       id: 'total',
       split_mode: 'everything',
@@ -29,4 +22,5 @@ export const awsS3TotalRequests: TSVBMetricModelCreator = (
       ],
     },
   ],
-});
+  '>=300s'
+);
