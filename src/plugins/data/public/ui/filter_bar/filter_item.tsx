@@ -20,7 +20,7 @@
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
-import React, { Component, ClickEvent } from 'react';
+import React, { Component, MouseEvent } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
@@ -46,7 +46,7 @@ class FilterItemUI extends Component<Props, State> {
     isPopoverOpen: false,
   };
 
-  private handleBadgeClick = (e: ClickEvent<HTMLInputElement>) => {
+  private handleBadgeClick = (e: MouseEvent<HTMLInputElement>) => {
     if (e.shiftKey) {
       this.onToggleDisabled();
     } else {
