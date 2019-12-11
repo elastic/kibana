@@ -4,32 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiSteps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { useTrackPageview } from '../../../hooks/use_track_metric';
-import { LogEntryRateSetupSteps } from './setup';
 import {
+  createInitialConfigurationStep,
+  createProcessStep,
   LogAnalysisSetupPage,
-  LogAnalysisSetupPageHeader,
   LogAnalysisSetupPageContent,
+  LogAnalysisSetupPageHeader,
 } from '../../../components/logging/log_analysis_setup';
-import { useLogEntryRateModuleContext } from './use_log_entry_rate_module';
+import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useLogEntryRateSetup } from './use_log_entry_rate_setup';
 
 export const LogEntryRateSetupContent: React.FunctionComponent = () => {
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup' });
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup', delay: 15000 });
 
   const {
-    cleanUpAndSetUpModule,
+    cleanUpAndSetUp,
+    endTime,
+    isValidating,
     lastSetupErrorMessages,
-    moduleDescriptor,
-    sourceConfiguration,
-    setUpModule,
+    setEndTime,
+    setStartTime,
+    setValidatedIndices,
+    setUp,
     setupStatus,
+    startTime,
+    validatedIndices,
+    validationErrors,
     viewResults,
-  } = useLogEntryRateModuleContext();
+  } = useLogEntryRateSetup();
+
+  const steps = useMemo(
+    () => [
+      createInitialConfigurationStep({
+        setStartTime,
+        setEndTime,
+        startTime,
+        endTime,
+        isValidating,
+        validatedIndices,
+        setValidatedIndices,
+        validationErrors,
+      }),
+      createProcessStep({
+        cleanUpAndSetUp,
+        errorMessages: lastSetupErrorMessages,
+        isConfigurationValid: validationErrors.length <= 0,
+        setUp,
+        setupStatus,
+        viewResults,
+      }),
+    ],
+    [
+      cleanUpAndSetUp,
+      endTime,
+      isValidating,
+      lastSetupErrorMessages,
+      setEndTime,
+      setStartTime,
+      setUp,
+      setValidatedIndices,
+      setupStatus,
+      startTime,
+      validatedIndices,
+      validationErrors,
+      viewResults,
+    ]
+  );
 
   return (
     <LogAnalysisSetupPage data-test-subj="logEntryRateSetupPage">
@@ -47,15 +92,7 @@ export const LogEntryRateSetupContent: React.FunctionComponent = () => {
           />
         </EuiText>
         <EuiSpacer />
-        <LogEntryRateSetupSteps
-          cleanupAndSetup={cleanUpAndSetUpModule}
-          errorMessages={lastSetupErrorMessages}
-          setup={setUpModule}
-          setupStatus={setupStatus}
-          viewResults={viewResults}
-          moduleDescriptor={moduleDescriptor}
-          sourceConfiguration={sourceConfiguration}
-        />
+        <EuiSteps steps={steps} />
       </LogAnalysisSetupPageContent>
     </LogAnalysisSetupPage>
   );

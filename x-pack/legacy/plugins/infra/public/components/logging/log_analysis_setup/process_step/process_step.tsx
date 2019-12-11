@@ -24,10 +24,10 @@ import { CreateMLJobsButton } from './create_ml_jobs_button';
 import { RecreateMLJobsButton } from './recreate_ml_jobs_button';
 
 interface ProcessStepProps {
-  cleanupAndSetup: () => void;
+  cleanUpAndSetUp: () => void;
   errorMessages: string[];
   isConfigurationValid: boolean;
-  setup: () => void;
+  setUp: () => void;
   setupStatus: SetupStatus;
   viewResults: () => void;
 }
@@ -46,10 +46,10 @@ export const createProcessStep = (props: ProcessStepProps): EuiContainedStepProp
 });
 
 export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
-  cleanupAndSetup,
+  cleanUpAndSetUp,
   errorMessages,
   isConfigurationValid,
-  setup,
+  setUp,
   setupStatus,
   viewResults,
 }) => {
@@ -80,7 +80,7 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
             </EuiCallOut>
           ))}
           <EuiSpacer />
-          <EuiButton fill onClick={cleanupAndSetup}>
+          <EuiButton fill onClick={cleanUpAndSetUp}>
             <FormattedMessage
               id="xpack.infra.analysisSetup.steps.setupProcess.tryAgainButton"
               defaultMessage="Try again"
@@ -102,9 +102,9 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
           </EuiButton>
         </>
       ) : setupStatus === 'requiredForUpdate' || setupStatus === 'requiredForReconfiguration' ? (
-        <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanupAndSetup} />
+        <RecreateMLJobsButton isDisabled={!isConfigurationValid} onClick={cleanUpAndSetUp} />
       ) : (
-        <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setup} />
+        <CreateMLJobsButton isDisabled={!isConfigurationValid} onClick={setUp} />
       )}
     </EuiText>
   );
