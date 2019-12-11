@@ -112,8 +112,13 @@
       align-self: center;
     }
   }
+}
 
-  .index-pattern-selection:not(.euiComboBox) {
-    padding: $euiSizeS 0;
-  }
+.indexPattern__container {
+  display: flex;
+  align-items: center;
+}
+
+.indexPattern__triggerButton {
+  @include euiTitle('xs');
 }
