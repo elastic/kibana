@@ -10,7 +10,14 @@ import { DetailDrawer } from './detail_drawer';
 import { Queue } from './queue';
 import { StatementSection } from './statement_section';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiPage, EuiPageContent, EuiPageBody } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiPage,
+  EuiPageContent,
+  EuiPageBody,
+  EuiScreenReaderOnly,
+} from '@elastic/eui';
+import { FormattedMessage   } from '@kbn/i18n/react';
 
 export class PipelineViewer extends React.Component {
   constructor() {
@@ -42,6 +49,14 @@ export class PipelineViewer extends React.Component {
     return (
       <EuiPage>
         <EuiPageBody>
+          <EuiScreenReaderOnly>
+            <h1>
+              <FormattedMessage
+                id="xpack.logstash.pipeline_viewer.heading"
+                defaultMessage="Logstash pipelines"
+              />
+            </h1>
+          </EuiScreenReaderOnly>
           <EuiPageContent
             verticalPosition="center"
             horizontalPosition="center"
