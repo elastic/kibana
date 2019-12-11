@@ -54,6 +54,11 @@ export const FlattenedType = React.memo(({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
+          {/* null_value */}
+          <NullValueParameter
+            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+          />
+
           {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
 
@@ -86,7 +91,8 @@ export const FlattenedType = React.memo(({ field }: Props) => {
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldDescription',
               {
-                defaultMessage: 'Leaf values longer than this limit will not be indexed.',
+                defaultMessage:
+                  'Prevent leaf values from being indexed if they are longer than this limit.',
               }
             )}
             toggleDefaultValue={getDefaultValueToggle('ignore_above', field.source)}
@@ -119,11 +125,6 @@ export const FlattenedType = React.memo(({ field }: Props) => {
           {/* similarity */}
           <SimilarityParameter
             defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
-          />
-
-          {/* null_value */}
-          <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
           />
 
           {/* boost */}

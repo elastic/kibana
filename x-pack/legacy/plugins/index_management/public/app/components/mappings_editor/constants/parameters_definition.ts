@@ -588,10 +588,16 @@ export const PARAMETERS_DEFINITION = {
   },
   ignore_above: {
     fieldConfig: {
-      defaultValue: 2147483647,
+      // Protects against Lucene’s term byte-length limit of 32766. UTF-8 characters may occupy at
+      // most 4 bytes, so 32766 / 4 = 8191 characters.
+      defaultValue: 8191,
       type: FIELD_TYPES.NUMBER,
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldLabel', {
         defaultMessage: 'String length limit',
+      }),
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldHelpText', {
+        defaultMessage:
+          'This option is useful for protecting against Lucene’s term byte-length limit of 32,766. UTF-8 characters may occupy at most 4 bytes, so 32,766 bytes equals 8,191 characters.',
       }),
       formatters: [toInt],
       validations: [
