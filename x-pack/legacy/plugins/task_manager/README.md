@@ -265,6 +265,25 @@ The danger is that in such a situation, a Task with that same `id` might already
 
 To achieve this you should use the `ensureScheduling` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
 
+### runNow
+Using `runNow` you can instruct TaskManger to run an existing task on-demand, without waiting for its scheduled time to be reached.
+
+```js
+const taskManager = server.plugins.task_manager;
+
+try {
+  const taskRunResult = await taskManager.runNow('91760f10-1799-11ea-ba42-698eedde9799');
+  // if no error is thrown, the task has completed successfully.
+  // we don't expose internal state for security reasons, but rest assured the task has completed
+  // if no error is thrown and a `RunNowResult` ({ id: "91760f10-1799-11ea-ba42-698eedde9799" })
+} catch(err: Error) {
+  // error happened, so err will have the folllowing messages
+  //  when the task doesnt exist: `Error: failed to run task "${id}" as it does not exist`
+  //  when the task is already running:`Error: failed to run task "${id}" as it is currently running`
+}
+```
+
+
 ### more options
 
 More custom access to the tasks can be done directly via Elasticsearch, though that won't be officially supported, as we can change the document structure at any time.
@@ -303,6 +322,36 @@ server.plugins.task_manager.addMiddleware({
     };
   },
 });
+```
+
+## Task Poller: polling for work
+TaskManager used to work in a `pull` model, but it now needs to support both `push` and `pull`, so it has been remodeled internally to support a single `push` model.
+
+Task Manager's lifecycle is pushed by the following operations:
+
+1. A polling interval has been reached.
+2. A new Task is scheduled.
+3. A Task is run using `runNow`.
+
+The polling interval straight forward: TaskPoller is configured to emit an event at a fixed interval.
+We wish to ignore any polling interval that goes off when there are no workers available, so we'll throttle that on workerAvailability
+
+Every time a Task is scheduled we want to trigger an early polling in order to respond to the newly scheduled task asap, but this too we only wish to do if there are available workers, so we can throttle this too.
+
+When a runNow call is made we need to force a poll as the user will now be waiting on the result of the runNow call, but
+there is a complexity here- we don't want to force polling as there might not be any worker capacity, but we also can't throttle, as we can't afford to "drop" these requests (as we are bypassing normal scheduling), so we'll have to buffer these.
+
+We now want to respond to all three of these push events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity top handle.
+Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", unlike `Run Task Now` which also means "poll for these specific tasks", so our capacity only needs to be applied to `Run Task Now`.
+
+We achieve this model by maintaining a queue using a Set (which removes duplicated).
+TODO: We don't want an unbounded queue, sobest to add a configurable cap and return an error to the `runNow` call when this cap is reached.
+
+Our current model, then, is this:
+```
+  Polling Interval  --> filter(workerAvailability > 0) --   []   --\ 
+  Task Scheduled    --> filter(workerAvailability > 0) --   []   ---|==>  Set([] + [] + [`ID`]) ==> work([`ID`])
+  Run Task `ID` Now --> buffer(workerAvailability > 0) -- [`ID`] --/ 
 ```
 
 ## Limitations in v1.0

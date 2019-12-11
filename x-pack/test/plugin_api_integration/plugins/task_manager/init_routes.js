@@ -60,6 +60,28 @@ export function initRoutes(server, taskTestingEvents) {
   });
 
   server.route({
+    path: '/api/sample_tasks/run_now',
+    method: 'POST',
+    config: {
+      validate: {
+        payload: Joi.object({
+          task: Joi.object({
+            id: Joi.string().optional()
+          })
+        }),
+      },
+    },
+    async handler(request) {
+      const { task: { id } } = request.payload;
+      try {
+        return await (taskManager.runNow(id));
+      } catch (err) {
+        return { id, error: `${err}` };
+      }
+    },
+  });
+
+  server.route({
     path: '/api/sample_tasks/ensure_scheduled',
     method: 'POST',
     config: {
@@ -98,14 +120,15 @@ export function initRoutes(server, taskTestingEvents) {
     config: {
       validate: {
         payload: Joi.object({
-          event: Joi.string().required()
+          event: Joi.string().required(),
+          data: Joi.object().optional().default({})
         }),
       },
     },
     async handler(request) {
       try {
-        const { event } = request.payload;
-        taskTestingEvents.emit(event);
+        const { event, data } = request.payload;
+        taskTestingEvents.emit(event, data);
         return { event };
       } catch (err) {
         return err;
