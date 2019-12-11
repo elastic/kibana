@@ -18,10 +18,10 @@
  */
 import angular from 'angular';
 import { npStart } from 'ui/new_platform';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-import { SearchSourceContract } from 'ui/courier';
 import { SavedObject } from 'ui/saved_objects/types';
-import { createSavedObjectClass, SavedObjectProvider } from 'ui/saved_objects/saved_object';
+import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 import { createDashboardEditUrl } from '../dashboard_constants';
 
@@ -46,7 +46,7 @@ export interface SavedObjectDashboard extends SavedObject {
 const module = uiModules.get('app/dashboard');
 
 // Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedDashboard', function(Private) {
+module.factory('SavedDashboard', function() {
   const services = {
     savedObjectsClient: npStart.core.savedObjects.client,
     indexPatterns: npStart.plugins.data.indexPatterns,
@@ -121,11 +121,11 @@ module.factory('SavedDashboard', function(Private) {
     }
 
     getQuery() {
-      return this.searchSource.getOwnField('query') || { query: '', language: 'kuery' };
+      return this.searchSource!.getOwnField('query') || { query: '', language: 'kuery' };
     }
 
     getFilters() {
-      return this.searchSource.getOwnField('filter') || [];
+      return this.searchSource!.getOwnField('filter') || [];
     }
   }
 
