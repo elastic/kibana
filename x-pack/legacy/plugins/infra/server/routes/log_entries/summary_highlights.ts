@@ -19,18 +19,14 @@ import {
   logEntriesSummaryHighlightsRequestRT,
   logEntriesSummaryHighlightsResponseRT,
 } from '../../../common/http_api/log_entries';
-import { compileFormattingRules } from '../../lib/domains/log_entries_domain/message';
-import { getBuiltinRules } from '../../lib/domains/log_entries_domain/builtin_rules';
-import {
-  buildLogSummaryQueryBody,
-  getRequiredFields,
-  createHighlightQueryDsl,
-  DateRangeAggregation,
-} from './helpers';
+import { parseFilterQuery } from '../../utils/serialized_query';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 
-export const initLogEntriesSummaryHighlightsRoute = ({ framework, sources }: InfraBackendLibs) => {
+export const initLogEntriesSummaryHighlightsRoute = ({
+  framework,
+  logEntries,
+}: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -45,59 +41,24 @@ export const initLogEntriesSummaryHighlightsRoute = ({ framework, sources }: Inf
         );
         const { sourceId, startDate, endDate, bucketSize, query, highlightTerms } = payload;
 
-        const sourceConfiguration = (await sources.getSourceConfiguration(requestContext, sourceId))
-          .configuration;
-
-        const timestampField = sourceConfiguration.fields.timestamp;
-        const tiebreakerField = sourceConfiguration.fields.tiebreaker;
-
-        const messageFormattingRules = compileFormattingRules(
-          getBuiltinRules(sourceConfiguration.fields.message)
-        );
-        const requiredFields = getRequiredFields(sourceConfiguration, messageFormattingRules);
-
-        const summaries = await Promise.all(
-          highlightTerms.map(async highlight => {
-            const highlightQuery = createHighlightQueryDsl(highlight, requiredFields);
-
-            const esResults = await framework.callWithRequest<
-              {},
-              { log_summary: DateRangeAggregation }
-            >(requestContext, 'search', {
-              index: sourceConfiguration.logAlias,
-              body: buildLogSummaryQueryBody({
-                startDate,
-                endDate,
-                bucketSize,
-                timestampField,
-                tiebreakerField,
-                query,
-                highlightQuery,
-              }),
-            });
-
-            return {
-              start: startDate,
-              end: endDate,
-              buckets:
-                esResults.aggregations?.log_summary.buckets
-                  .map(bucket => ({
-                    start: bucket.from,
-                    end: bucket.to,
-                    entriesCount: bucket.doc_count,
-                    // @ts-ignore
-                    representativeKey: bucket.top_hits_by_key.hits.hits.map(h => ({
-                      tiebreaker: h.sort[1],
-                      time: h.sort[0],
-                    }))[0],
-                  }))
-                  .filter(bucket => bucket.entriesCount > 0) ?? [],
-            };
-          })
+        const bucketsPerHighlightTerm = await logEntries.getLogSummaryHighlightBucketsBetween(
+          requestContext,
+          sourceId,
+          startDate,
+          endDate,
+          bucketSize,
+          highlightTerms,
+          parseFilterQuery(query)
         );
 
         return response.ok({
-          body: logEntriesSummaryHighlightsResponseRT.encode({ data: summaries }),
+          body: logEntriesSummaryHighlightsResponseRT.encode({
+            data: bucketsPerHighlightTerm.map(buckets => ({
+              start: startDate,
+              end: endDate,
+              buckets,
+            })),
+          }),
         });
       } catch (error) {
         return response.internalError({

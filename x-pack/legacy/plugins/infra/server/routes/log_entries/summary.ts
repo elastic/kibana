@@ -19,12 +19,11 @@ import {
   logEntriesSummaryRequestRT,
   logEntriesSummaryResponseRT,
 } from '../../../common/http_api/log_entries';
-
-import { buildLogSummaryQueryBody, DateRangeAggregation } from './helpers';
+import { parseFilterQuery } from '../../utils/serialized_query';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 
-export const initLogEntriesSummaryRoute = ({ framework, sources }: InfraBackendLibs) => {
+export const initLogEntriesSummaryRoute = ({ framework, logEntries }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
@@ -39,40 +38,21 @@ export const initLogEntriesSummaryRoute = ({ framework, sources }: InfraBackendL
         );
         const { sourceId, startDate, endDate, bucketSize, query } = payload;
 
-        const sourceConfiguration = (await sources.getSourceConfiguration(requestContext, sourceId))
-          .configuration;
-
-        const {
-          timestamp: timestampField,
-          tiebreaker: tiebreakerField,
-        } = sourceConfiguration.fields;
-
-        const esResults = await framework.callWithRequest<
-          {},
-          { log_summary: DateRangeAggregation }
-        >(requestContext, 'search', {
-          index: sourceConfiguration.logAlias,
-          body: buildLogSummaryQueryBody({
-            startDate,
-            endDate,
-            bucketSize,
-            timestampField,
-            tiebreakerField,
-            query,
-          }),
-        });
+        const buckets = await logEntries.getLogSummaryBucketsBetween(
+          requestContext,
+          sourceId,
+          startDate,
+          endDate,
+          bucketSize,
+          parseFilterQuery(query)
+        );
 
         return response.ok({
           body: logEntriesSummaryResponseRT.encode({
             data: {
               start: startDate,
               end: endDate,
-              buckets:
-                esResults.aggregations?.log_summary.buckets.map(bucket => ({
-                  start: bucket.from,
-                  end: bucket.to,
-                  entriesCount: bucket.doc_count,
-                })) ?? [],
+              buckets,
             },
           }),
         });
