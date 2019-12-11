@@ -11,8 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { createSavedWorkspaceClass } from './saved_workspace';
 
 export function SavedWorkspacesProvider() {
+  const savedObjectsClient = npStart.core.savedObjects.client;
   const services = {
-    savedObjectsClient: npStart.core.savedObjects.client,
+    savedObjectsClient,
     indexPatterns: npStart.plugins.data.indexPatterns,
     chrome: npStart.core.chrome,
     overlays: npStart.core.overlays,
@@ -44,12 +45,15 @@ export function SavedWorkspacesProvider() {
     // Returns a single dashboard by ID, should be the name of the workspace
     get: (id: string) => {
       // Returns a promise that contains a workspace which is a subclass of docSource
+      // @ts-ignore
       return new SavedWorkspace(id).init();
     },
     urlFor,
     delete: (ids: string | string[]) => {
-      ids = Array.isArray(ids) ? [ids] : ids;
-      return Promise.all(ids.map((id: string) => new SavedWorkspace(id).delete()));
+      const idArr = Array.isArray(ids) ? ids : [ids];
+      return Promise.all(
+        idArr.map((id: string) => savedObjectsClient.delete(SavedWorkspace.type, id))
+      );
     },
     find: (searchString: string, size: number = 100) => {
       return savedObjectsClient
