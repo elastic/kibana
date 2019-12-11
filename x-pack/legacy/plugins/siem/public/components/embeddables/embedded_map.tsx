@@ -8,7 +8,6 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
-import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 
 import { EmbeddablePanel } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
@@ -188,7 +187,7 @@ export const EmbeddedMapComponent = ({
       <EmbeddableHeader title={i18n.EMBEDDABLE_HEADER_TITLE}>
         <EuiText size="xs">
           <EuiLink
-            href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/conf-map-ui.html`}
+            href={`${core.docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${core.docLinks.DOC_LINK_VERSION}/conf-map-ui.html`}
             target="_blank"
           >
             {i18n.EMBEDDABLE_HEADER_HELP}

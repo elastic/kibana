@@ -13,13 +13,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { Overview } from './index';
 
 import '../../mock/ui_settings';
+import { mockUseKibanaCore } from '../../mock/kibana_core';
 import { mocksSource } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 
-jest.mock('ui/documentation_links', () => ({
-  documentationLinks: {
-    kibana: 'http://www.example.com',
-  },
+jest.mock('../../lib/compose/kibana_core', () => ({
+  useKibanaCore: () => mockUseKibanaCore(),
 }));
 
 let localSource: Array<{

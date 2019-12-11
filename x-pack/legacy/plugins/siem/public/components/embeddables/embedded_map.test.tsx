@@ -7,10 +7,11 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+
+import { mockUseKibanaCore } from '../../mock/kibana_core';
+import { useIndexPatterns } from '../../hooks/use_index_patterns';
 import { EmbeddedMapComponent } from './embedded_map';
 import { SetQuery } from './types';
-import { useKibanaCore } from '../../lib/compose/kibana_core';
-import { useIndexPatterns } from '../../hooks/use_index_patterns';
 
 jest.mock('../search_bar', () => ({
   siemFilterManager: {
@@ -22,15 +23,8 @@ const mockUseIndexPatterns = useIndexPatterns as jest.Mock;
 jest.mock('../../hooks/use_index_patterns');
 mockUseIndexPatterns.mockImplementation(() => [true, []]);
 
-const mockUseKibanaCore = useKibanaCore as jest.Mock;
-jest.mock('../../lib/compose/kibana_core');
-mockUseKibanaCore.mockImplementation(() => ({
-  uiSettings: {
-    get$: () => 'world',
-  },
-  injectedMetadata: {
-    getKibanaVersion: () => '8.0.0',
-  },
+jest.mock('../../lib/compose/kibana_core', () => ({
+  useKibanaCore: () => mockUseKibanaCore(),
 }));
 
 jest.mock('../../lib/compose/kibana_plugins');

@@ -9,10 +9,10 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import moment from 'moment';
 import React, { useContext, useReducer, useState } from 'react';
 import styled from 'styled-components';
-import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 
 import { DEFAULT_KBN_VERSION } from '../../../common/constants';
 import { useKibanaUiSetting } from '../../lib/settings/use_kibana_ui_setting';
+import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { METRIC_TYPE, TELEMETRY_EVENT, trackUiAction as track } from '../../lib/track_usage';
 import { errorToToaster } from '../ml/api/error_to_toaster';
 import { hasMlAdminPermissions } from '../ml/permissions/has_ml_admin_permissions';
@@ -102,6 +102,7 @@ export const MlPopover = React.memo(() => {
   const [isLoadingSiemJobs, siemJobs] = useSiemJobs(refreshToggle);
   const [, dispatchToaster] = useStateToaster();
   const capabilities = useContext(MlCapabilitiesContext);
+  const { docLinks } = useKibanaCore();
 
   // Enable/Disable Job & Datafeed -- passed to JobsTable for use as callback on JobSwitch
   const enableDatafeed = async (job: SiemJob, latestTimestampMs: number, enable: boolean) => {
@@ -226,7 +227,7 @@ export const MlPopover = React.memo(() => {
                     values={{
                       mlDocs: (
                         <a
-                          href={`${ELASTIC_WEBSITE_URL}guide/en/siem/guide/${DOC_LINK_VERSION}/machine-learning.html`}
+                          href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/siem/guide/${docLinks.DOC_LINK_VERSION}/machine-learning.html`}
                           rel="noopener noreferrer"
                           target="_blank"
                         >
