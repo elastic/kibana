@@ -16,11 +16,21 @@ import {
   FrameworkRequest,
   FrameworkRouteHandler,
 } from '../../libs/adapters/framework/adapter_types';
+import { HapiFrameworkAdapter } from '../../libs/adapters/framework/hapi_framework_adapter';
 import { ServerLibs, Policy } from '../../libs/types';
+
+export const registerPolicyRoutes = (frameworkAdapter: HapiFrameworkAdapter, libs: ServerLibs) => {
+  frameworkAdapter.registerRoute(createGETPolicyRoute(libs));
+  frameworkAdapter.registerRoute(createGETPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createPOSTPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createPUTPoliciesRoute(libs));
+  frameworkAdapter.registerRoute(createAddPolicyDatasourceRoute(libs));
+  frameworkAdapter.registerRoute(createRemovePolicyDatasourceRoute(libs));
+};
 
 export const createGETPolicyRoute = (libs: ServerLibs) => ({
   method: 'GET',
-  path: '/api/ingest/policy/{policyId}',
+  path: '/api/ingest/policies/{policyId}',
   config: {},
   handler: (async (
     request: FrameworkRequest<{ params: { policyId: string } }>
@@ -92,7 +102,7 @@ export const createPOSTPoliciesRoute = (libs: ServerLibs) => ({
 
 export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
   method: 'PUT',
-  path: '/api/ingest/policy/{policyId}',
+  path: '/api/ingest/policies/{policyId}',
   config: {
     validate: {
       payload: {
@@ -121,7 +131,7 @@ export const createPUTPoliciesRoute = (libs: ServerLibs) => ({
 
 export const createAddPolicyDatasourceRoute = (libs: ServerLibs) => ({
   method: 'POST',
-  path: '/api/ingest/policy/{policyId}/addDatasources',
+  path: '/api/ingest/policies/{policyId}/addDatasources',
   config: {
     validate: {
       payload: {
@@ -152,7 +162,7 @@ export const createAddPolicyDatasourceRoute = (libs: ServerLibs) => ({
 
 export const createRemovePolicyDatasourceRoute = (libs: ServerLibs) => ({
   method: 'POST',
-  path: '/api/ingest/policy/{policyId}/removeDatasources',
+  path: '/api/ingest/policies/{policyId}/removeDatasources',
   config: {
     validate: {
       payload: {

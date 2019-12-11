@@ -16,11 +16,22 @@ import {
   FrameworkRequest,
   FrameworkRouteHandler,
 } from '../../libs/adapters/framework/adapter_types';
+import { HapiFrameworkAdapter } from '../../libs/adapters/framework/hapi_framework_adapter';
 import { ServerLibs, Datasource } from '../../libs/types';
+
+export const registerDatasourceRoutes = (
+  frameworkAdapter: HapiFrameworkAdapter,
+  libs: ServerLibs
+) => {
+  frameworkAdapter.registerRoute(createGETDatasourceRoute(libs));
+  frameworkAdapter.registerRoute(createGETDatasourcesRoute(libs));
+  frameworkAdapter.registerRoute(createPOSTDatasourcesRoute(libs));
+  frameworkAdapter.registerRoute(createPUTDatasourcesRoute(libs));
+};
 
 export const createGETDatasourceRoute = (libs: ServerLibs) => ({
   method: 'GET',
-  path: '/api/ingest/datasource/{datasourceId}',
+  path: '/api/ingest/datasources/{datasourceId}',
   config: {},
   handler: (async (
     request: FrameworkRequest<{ params: { datasourceId: string } }>
@@ -87,7 +98,7 @@ export const createPOSTDatasourcesRoute = (libs: ServerLibs) => ({
 
 export const createPUTDatasourcesRoute = (libs: ServerLibs) => ({
   method: 'PUT',
-  path: '/api/ingest/datasource/{datasourceId}',
+  path: '/api/ingest/datasources/{datasourceId}',
   config: {
     validate: {
       payload: {
