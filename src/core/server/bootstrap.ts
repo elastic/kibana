@@ -66,7 +66,20 @@ export async function bootstrap({
 
   const root = new Root(rawConfigService, env, onRootShutdown);
 
-  process.on('SIGHUP', () => {
+  process.on('SIGHUP', () => reloadLoggingConfig());
+
+  // This is only used by the LogRotator service
+  // in order to be able to reload the log configuration
+  // under the cluster mode
+  process.on('message', msg => {
+    if (!msg || msg.reloadLoggingConfig !== true) {
+      return;
+    }
+
+    reloadLoggingConfig();
+  });
+
+  function reloadLoggingConfig() {
     const cliLogger = root.logger.get('cli');
     cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
 
@@ -77,7 +90,7 @@ export async function bootstrap({
     }
 
     cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
-  });
+  }
 
   process.on('SIGINT', () => shutdown());
   process.on('SIGTERM', () => shutdown());
