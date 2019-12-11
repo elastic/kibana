@@ -254,7 +254,7 @@ export const schema = Joi.object()
       })
       .default(),
 
-    // settings for the security service
+    // settings for the security service if there is no defaultRole defined, then default to superuser role.
     security: Joi.object()
       .keys({
         roles: Joi.object().default(),

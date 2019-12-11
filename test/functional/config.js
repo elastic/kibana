@@ -114,8 +114,25 @@ export default async function ({ readConfigFile }) {
           elasticsearch: { cluster: [], indices: [{ names: ['logstash*'],
             privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
               except: [] } }], run_as: [] }, kibana: []
+        },
+        test_shakespeare_reader: {
+          elasticsearch: { cluster: [], indices: [{ names: ['shakes*'],
+            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
+              except: [] } }], run_as: [] }, kibana: []
+        },
+        test_testhuge_reader: {
+          elasticsearch: { cluster: [], indices: [{ names: ['testhuge*'],
+            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
+              except: [] } }], run_as: [] }, kibana: []
+        },
+        test_alias_reader: {
+          elasticsearch: { cluster: [], indices: [{ names: ['alias*'],
+            privileges: ['read', 'view_index_metadata'], field_security: { grant: ['*'],
+              except: [] } }], run_as: [] }, kibana: []
         }
+
       },
+      defaultRoles: ['test_logstash_reader', 'kibana_user', 'test_shakespeare_reader', 'test_testhuge_reader', 'test_alias_reader']
     }
   };
 }

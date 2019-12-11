@@ -45,7 +45,6 @@ export async function createTestUserService(
       '====================================================creating roles and users========================='
     );
     for (const [name, definition] of Object.entries(config.get('security.roles'))) {
-      log.debug(`creating log ${name}`);
       // create the defined roles (need to map array to create roles)
       await role.create(name, definition);
     }
@@ -57,6 +56,7 @@ export async function createTestUserService(
     }
 
     // create test_user with username and pwd
+    log.debug(`default roles = ${config.get('security.defaultRoles')}`);
     await user.create('test_user', {
       password: 'changeme',
       roles: config.get('security.defaultRoles'),
@@ -72,6 +72,7 @@ export async function createTestUserService(
 
     async setRoles(roles: string[]) {
       this.assertIsEnabled();
+      log.debug(`set roles = ${roles}`);
       await user.create('test_user', {
         password: 'changeme',
         roles,
