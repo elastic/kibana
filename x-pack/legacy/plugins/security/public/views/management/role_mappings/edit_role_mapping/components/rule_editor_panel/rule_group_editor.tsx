@@ -30,13 +30,10 @@ interface Props {
 export class RuleGroupEditor extends Component<Props, {}> {
   public render() {
     return (
-      <EuiPanel>
-        <EuiFlexGroup
-          direction="column"
-          className={`secRoleMapping__ruleEditorGroup secRoleMapping__ruleEditorGroup--${
-            this.props.ruleDepth % 2 ? 'odd' : 'even'
-          }`}
-        >
+      <EuiPanel
+        className={`secRoleMapping__ruleEditorGroup--${this.props.ruleDepth % 2 ? 'odd' : 'even'}`}
+      >
+        <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={true}>
