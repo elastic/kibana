@@ -12,7 +12,40 @@ import { createSagaMiddleware, SagaContext } from '../lib/saga';
 import { endpointsListSaga } from './endpoints_list';
 import { actions } from '../actions/endpoints_list';
 
-jest.mock('./common.ts');
+jest.mock('./common.ts', () => {
+  return {
+    withPageNavigationStatus: async function* withPageNavigationStatus({
+      actionsAndState,
+      isOnPage = function() {
+        return false;
+      },
+    }: {
+      actionsAndState: SagaContext['actionsAndState'];
+      isOnPage: (href: any) => boolean;
+    }) {
+      for await (const { action, state } of actionsAndState()) {
+        yield {
+          action,
+          state,
+          href: '',
+          previousHref: '',
+          hrefChanged: true,
+          authenticationStatusChanged: true,
+          userIsOnPageAndLoggedIn: isOnPage('http://localhost/mock/app/endpoint/endpoints'),
+          shouldInitialize: false,
+        };
+      }
+    },
+  };
+});
+
+jest.mock('../concerns/routing.ts', () => {
+  return {
+    hrefIsForPath() {
+      return true;
+    },
+  };
+});
 
 describe('endpoints_list saga', () => {
   const sleep = (ms = 100) => new Promise(wakeup => setTimeout(wakeup, ms));
@@ -58,7 +91,6 @@ describe('endpoints_list saga', () => {
     );
 
     await sleep();
-    expect(fakeAppMountContext.core.http.get).toHaveBeenCalled();
     expect(fakeAppMountContext.core.http.get).toHaveBeenLastCalledWith('/api/endpoint/endpoints', {
       query: {
         pageIndex: 2,
