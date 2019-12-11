@@ -3,13 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiButton, EuiHorizontalRule, EuiPanel, EuiSteps } from '@elastic/eui';
-import React, { Fragment, useCallback, useState } from 'react';
+import {
+  EuiButton,
+  EuiHorizontalRule,
+  EuiPanel,
+  EuiSteps,
+  EuiCheckboxGroupIdToSelectedMap,
+} from '@elastic/eui';
+import React, { Fragment, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import styled from 'styled-components';
 import { installDatasource } from '../../data';
 import { useCore, useLinks } from '../../hooks';
-import { StepOneTemplate } from './step_one';
+import { StepOne } from './step_one';
+import { Dataset } from '../../../common/types';
 
 const StyledSteps = styled.div`
   .euiStep__titleWrapper {
@@ -24,16 +31,24 @@ interface AddDataSourceStepsProps {
   pkgName: string;
   pkgTitle: string;
   pkgVersion: string;
+  datasets: Dataset[];
+}
+export interface FormState {
+  datasourceName: string;
+  datasets: EuiCheckboxGroupIdToSelectedMap;
 }
 const FormNav = styled.div`
   text-align: right;
 `;
-export const AddDataSourceSteps = (props: AddDataSourceStepsProps) => {
+
+export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
   const [addDataSourceSuccess, setAddDataSourceSuccess] = useState<boolean>(false);
+  const [formState, setFormState] = useState<FormState>({ datasourceName: '', datasets: {} });
   const { notifications } = useCore();
   const { toDetailView } = useLinks();
-  const { pkgName, pkgTitle, pkgVersion } = props;
-  const handleRequestInstallDatasource = useCallback(async () => {
+  const { pkgName, pkgTitle, pkgVersion, datasets } = props;
+
+  const handleRequestInstallDatasource = async () => {
     try {
       await installDatasource(`${pkgName}-${pkgVersion}`);
       setAddDataSourceSuccess(true);
@@ -47,11 +62,40 @@ export const AddDataSourceSteps = (props: AddDataSourceStepsProps) => {
         iconType: 'alert',
       });
     }
-  }, [notifications.toasts, pkgName, pkgTitle, pkgVersion]);
+  };
+
+  const onCheckboxChange = (name: string) => {
+    const newCheckboxStateMap = {
+      ...formState,
+      datasets: {
+        ...formState.datasets,
+        [name]: !formState.datasets[name],
+      },
+    };
+    setFormState(newCheckboxStateMap);
+  };
+
+  const onTextChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    setFormState({ ...formState, [evt.target.name]: evt.target.value });
+  };
+
+  // create checkbox items from datasets for EuiCheckboxGroup
+  const checkboxes = datasets.map(dataset => ({
+    id: dataset.name,
+    label: dataset.title,
+  }));
+
   const stepOne = [
     {
       title: 'Define your data source',
-      children: <StepOneTemplate />,
+      children: (
+        <StepOne
+          datasetCheckboxes={checkboxes}
+          onCheckboxChange={onCheckboxChange}
+          onTextChange={onTextChange}
+          formState={formState}
+        />
+      ),
     },
   ];
 
