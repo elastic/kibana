@@ -6056,7 +6056,6 @@
     "xpack.infra.waffle.metricOptions.outboundTrafficText": "送信トラフィック",
     "xpack.infra.waffle.noDataDescription": "期間またはフィルターを調整してみてください。",
     "xpack.infra.waffle.noDataTitle": "表示するデータがありません。",
-    "xpack.infra.waffle.nodeTypeSwitcher.hostsLabel": "すべてのホスト",
     "xpack.infra.waffle.selectTwoGroupingsTitle": "最大 2 つのグループ分けを選択してください",
     "xpack.infra.waffle.unableToSelectGroupErrorMessage": "{nodeType} のオプションでグループを選択できません",
     "xpack.infra.waffle.unableToSelectMetricErrorTitle": "メトリックのオプションまたは値を選択できません",
