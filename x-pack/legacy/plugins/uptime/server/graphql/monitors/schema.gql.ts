@@ -139,8 +139,6 @@ export const monitorsSchema = gql`
       location: String
     ): [Ping!]!
 
-    getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
-
     getMonitorPageTitle(monitorId: String!): MonitorPageTitle
   }
 `;
