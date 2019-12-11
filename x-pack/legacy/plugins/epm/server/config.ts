@@ -37,7 +37,7 @@ const DEFAULT_CONFIG = {
   // This is the staging url and should be later switched to https://epr.elastic.co for production
   // Both are behind a CDN with caching, so upgrading the registry will not immidiately invalidate
   // all the cached information.
-  registryUrl: 'https://epr.ea-web.elastic.dev',
+  registryUrl: 'https://epr-staging.elastic.co',
 };
 
 // As of 2019, this is a Singleton because of the way JavaScript modules are specified.
