@@ -126,7 +126,7 @@ pid.file
 server.port
 --------
 
-Settings that need to be the same:
+Settings that must be the same:
 --------
 xpack.security.encryptionKey //decrypting session cookies
 xpack.reporting.encryptionKey //decrypting reports stored in Elasticsearch
