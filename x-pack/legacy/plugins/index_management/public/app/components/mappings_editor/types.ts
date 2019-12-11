@@ -119,6 +119,7 @@ export type ParameterName =
   | 'orientation'
   | 'points_only'
   | 'path'
+  | 'dims'
   | 'depth_limit';
 
 export interface Parameter {
