@@ -7,7 +7,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedField, Field as FieldType, SuperSelectOption } from '../../../../types';
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
