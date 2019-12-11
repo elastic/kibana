@@ -6,19 +6,19 @@
 
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
-import { IndexPattern, IndexPatterns } from 'ui/index_patterns';
 import { SavedObjectAttributes, SimpleSavedObject } from 'kibana/public';
 import chrome from 'ui/chrome';
+import { npStart } from 'ui/new_platform';
 import { SavedSearchLoader } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/types';
-import { start as data } from '../../../../../../../src/legacy/core_plugins/data/public/legacy';
+import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 
 type IndexPatternSavedObject = SimpleSavedObject<SavedObjectAttributes>;
 
 let indexPatternCache: IndexPatternSavedObject[] = [];
-let fullIndexPatterns: IndexPatterns | null = null;
+let fullIndexPatterns: IndexPatternsContract | null = null;
 
 export function loadIndexPatterns() {
-  fullIndexPatterns = data.indexPatterns.indexPatterns;
+  fullIndexPatterns = npStart.plugins.data.indexPatterns;
   const savedObjectsClient = chrome.getSavedObjectsClient();
   return savedObjectsClient
     .find({
@@ -49,7 +49,10 @@ export function getIndexPatternIdFromName(name: string) {
   return null;
 }
 
-export function loadCurrentIndexPattern(indexPatterns: IndexPatterns, $route: Record<string, any>) {
+export function loadCurrentIndexPattern(
+  indexPatterns: IndexPatternsContract,
+  $route: Record<string, any>
+) {
   fullIndexPatterns = indexPatterns;
   return fullIndexPatterns.get($route.current.params.index);
 }
