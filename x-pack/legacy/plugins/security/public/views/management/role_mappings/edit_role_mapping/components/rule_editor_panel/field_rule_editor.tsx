@@ -114,7 +114,7 @@ export class FieldRuleEditor extends Component<Props, State> {
     let rowRuleValue: FieldRuleValue = ruleValue;
     if (Array.isArray(ruleValue)) {
       renderDeleteButton = ruleValue.length > 1 || this.props.allowDelete;
-      renderAddValueButton = ruleValue.length === 1;
+      renderAddValueButton = ruleValue.length - 1 === valueIndex;
       rowRuleValue = ruleValue[valueIndex];
     }
 
