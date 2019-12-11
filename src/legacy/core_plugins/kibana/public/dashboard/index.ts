@@ -31,6 +31,8 @@ import { start as navigation } from '../../../navigation/public/legacy';
 import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 
+export * from './np_ready/dashboard_constants';
+
 /**
  * Get dependencies relying on the global angular context.
  * They also have to get resolved together with the legacy imports above

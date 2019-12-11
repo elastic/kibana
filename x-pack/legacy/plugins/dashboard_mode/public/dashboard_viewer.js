@@ -30,7 +30,6 @@ import 'uiExports/shareContextMenuExtensions';
 import _ from 'lodash';
 import 'ui/autoload/all';
 import 'ui/kbn_top_nav';
-import 'plugins/kibana/dashboard';
 import 'ui/vislib';
 import 'ui/agg_response';
 import 'ui/agg_types';
@@ -40,7 +39,7 @@ import { localApplicationService } from 'plugins/kibana/local_application_servic
 
 
 import { showAppRedirectNotification } from 'ui/notify';
-import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
+import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard';
 
 uiModules.get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());

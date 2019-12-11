@@ -24,7 +24,7 @@ import { IUiSettingsClient } from 'kibana/public';
 import rison from 'rison-node';
 import '../../doc_viewer';
 // @ts-ignore
-import { noWhiteSpace } from '../../../../../common/utils/no_white_space';
+import { noWhiteSpace } from '../../../../../../common/utils/no_white_space';
 
 import openRowHtml from './table_row/open.html';
 import detailsHtml from './table_row/details.html';
