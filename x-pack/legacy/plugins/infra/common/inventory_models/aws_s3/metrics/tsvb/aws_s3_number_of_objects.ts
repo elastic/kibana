@@ -16,7 +16,7 @@ export const awsS3NumberOfObjects: TSVBMetricModelCreator = (
   interval: '>=86400s',
   time_field: timeField,
   type: 'timeseries',
-  drop_last_bucket: 0,
+  drop_last_bucket: false,
   series: [
     {
       id: 'objects',
