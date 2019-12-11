@@ -121,7 +121,7 @@ server.uuid
 server.name
 --------
 
-Settings unique across each host (e.g. running multiple installations on the same virtual machine):
+Settings unique across each host (for example, running multiple installations on the same virtual machine):
 --------
 logging.dest
 path.data
@@ -129,7 +129,7 @@ pid.file
 server.port
 --------
 
-Settings that need to be the same:
+Settings that must be the same:
 --------
 xpack.security.encryptionKey //decrypting session cookies
 xpack.reporting.encryptionKey //decrypting reports stored in Elasticsearch
@@ -143,7 +143,7 @@ bin/kibana -c config/instance2.yml
 
 [float]
 [[high-availability]]
-=== High Availability Across Multiple Elasticsearch Nodes
+=== High availability across multiple Elasticsearch nodes
 Kibana can be configured to connect to multiple Elasticsearch nodes in the same cluster.  In situations where a node becomes unavailable,
 Kibana will transparently connect to an available node and continue operating.  Requests to available hosts will be routed in a round robin fashion.
 
