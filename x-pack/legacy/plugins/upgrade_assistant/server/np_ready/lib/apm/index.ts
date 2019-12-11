@@ -66,6 +66,12 @@ export const apmReindexScript = `
   // add ecs version
   ctx._source.ecs = ['version': '1.1.0-dev'];
 
+  // set processor.event
+  if (ctx._source.processor == null) {
+      // onboarding docs had no processor pre-6.4 - https://github.com/elastic/kibana/issues/52655
+      ctx._source.processor = ["event": "onboarding"];
+  }
+
   // beat -> observer
   def beat = ctx._source.remove("beat");
   if (beat != null) {
