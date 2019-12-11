@@ -87,7 +87,7 @@ export class KbnClientRequester {
     const url = Url.resolve(this.pickUrl(), options.path);
     const description = options.description || `${options.method} ${url}`;
     let attempt = 0;
-    const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
+    const maxAttempts = options.retries === undefined ? DEFAULT_MAX_ATTEMPTS : undefined;
 
     while (true) {
       attempt += 1;
