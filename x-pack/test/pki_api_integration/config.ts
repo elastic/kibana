@@ -28,6 +28,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
   return {
     testFiles: [require.resolve('./apis')],
     servers,
+    security: { disableTestUser: true },
     services,
     junit: {
       reportName: 'X-Pack PKI API Integration Tests',
