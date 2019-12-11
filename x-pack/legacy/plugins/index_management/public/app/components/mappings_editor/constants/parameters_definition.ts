@@ -304,20 +304,13 @@ export const PARAMETERS_DEFINITION = {
   },
   scaling_factor: {
     fieldConfig: {
-      defaultValue: 1.0,
+      defaultValue: '',
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorLabel', {
         defaultMessage: 'Scaling factor',
       }),
       validations: [
-        {
-          validator: ({ value }: ValidationFuncArg<any, number>) => {
-            if (value < 0) {
-              return { message: commonErrorMessages.smallerThanZero };
-            }
-          },
-        },
         {
           validator: emptyField(
             i18n.translate(
@@ -327,6 +320,20 @@ export const PARAMETERS_DEFINITION = {
               }
             )
           ),
+        },
+        {
+          validator: ({ value }: ValidationFuncArg<any, number>) => {
+            if (value <= 0) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.validations.greaterThanZeroErrorMessage',
+                  {
+                    defaultMessage: 'The scaling factor must be greater than 0.',
+                  }
+                ),
+              };
+            }
+          },
         },
       ],
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorHelpText', {
