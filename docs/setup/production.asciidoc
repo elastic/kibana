@@ -18,7 +18,7 @@ While Kibana isn't terribly resource intensive, we still recommend running Kiban
 separate from  your Elasticsearch data or master nodes. To distribute Kibana
 traffic across the nodes in your Elasticsearch cluster, you can run Kibana
 and an Elasticsearch client node on the same machine. For more information, see
-<<load-balancing, Load Balancing Across Multiple Elasticsearch Nodes>>.
+<<load-balancing-es, Load Balancing Across Multiple Elasticsearch Nodes>>.
 
 [float]
 [[configuring-kibana-shield]]
