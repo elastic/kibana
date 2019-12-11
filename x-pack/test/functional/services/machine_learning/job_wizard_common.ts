@@ -8,10 +8,12 @@ import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { MachineLearningCommonProvider } from './common';
+import { MachineLearningCustomUrlsProvider } from './custom_urls';
 
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
-  mlCommon: ProvidedType<typeof MachineLearningCommonProvider>
+  mlCommon: ProvidedType<typeof MachineLearningCommonProvider>,
+  customUrls: ProvidedType<typeof MachineLearningCustomUrlsProvider>
 ) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -171,6 +173,23 @@ export function MachineLearningJobWizardCommonProvider(
     async addJobGroup(jobGroup: string) {
       await comboBox.setCustom('mlJobWizardComboBoxJobGroups > comboBoxInput', jobGroup);
       expect(await this.getSelectedJobGroups()).to.contain(jobGroup);
+    },
+
+    async getSelectedCalendars(): Promise<string[]> {
+      await this.ensureAdditionalSettingsSectionOpen();
+      return await comboBox.getComboBoxSelectedOptions(
+        'mlJobWizardComboBoxCalendars > comboBoxInput'
+      );
+    },
+
+    async assertCalendarsSelection(calendars: string[]) {
+      expect(await this.getSelectedCalendars()).to.eql(calendars);
+    },
+
+    async addCalendar(calendarId: string) {
+      await this.ensureAdditionalSettingsSectionOpen();
+      await comboBox.setCustom('mlJobWizardComboBoxCalendars > comboBoxInput', calendarId);
+      expect(await this.getSelectedCalendars()).to.contain(calendarId);
     },
 
     async assertModelPlotSwitchExists(
@@ -363,6 +382,40 @@ export function MachineLearningJobWizardCommonProvider(
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
       await testSubjects.clickWhenNotDisabled('mlButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
+    },
+
+    async ensureAdditionalSettingsSectionOpen() {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists('mlJobWizardAdditionalSettingsSection')) === false) {
+          await testSubjects.click('mlJobWizardToggleAdditionalSettingsSection');
+          await testSubjects.existOrFail('mlJobWizardAdditionalSettingsSection', { timeout: 1000 });
+        }
+      });
+    },
+
+    async ensureNewCustomUrlFormModalOpen() {
+      await retry.tryForTime(5000, async () => {
+        if ((await testSubjects.exists('mlJobNewCustomUrlFormModal')) === false) {
+          await testSubjects.click('mlJobOpenCustomUrlFormButton');
+          await testSubjects.existOrFail('mlJobNewCustomUrlFormModal', { timeout: 1000 });
+        }
+      });
+    },
+
+    async addCustomUrl(customUrl: { label: string }) {
+      await this.ensureAdditionalSettingsSectionOpen();
+
+      const existingCustomUrls = await testSubjects.findAll('mlJobEditCustomUrlsList > *');
+
+      await this.ensureNewCustomUrlFormModalOpen();
+      // Fill-in the form
+      await customUrls.setCustomUrlLabel(customUrl.label);
+      // Save custom URL
+      await customUrls.saveCustomUrl('mlJobNewCustomUrlFormModal');
+
+      const expectedIndex = existingCustomUrls.length;
+
+      await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
     },
 
     async ensureAdvancedSectionOpen() {

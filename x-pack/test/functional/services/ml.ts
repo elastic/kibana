@@ -10,6 +10,7 @@ import {
   MachineLearningAnomalyExplorerProvider,
   MachineLearningAPIProvider,
   MachineLearningCommonProvider,
+  MachineLearningCustomUrlsProvider,
   MachineLearningDataFrameAnalyticsProvider,
   MachineLearningDataFrameAnalyticsCreationProvider,
   MachineLearningDataFrameAnalyticsTableProvider,
@@ -33,6 +34,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
   const api = MachineLearningAPIProvider(context);
+  const customUrls = MachineLearningCustomUrlsProvider(context);
   const dataFrameAnalytics = MachineLearningDataFrameAnalyticsProvider(context, api);
   const dataFrameAnalyticsCreation = MachineLearningDataFrameAnalyticsCreationProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
@@ -43,7 +45,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const jobTable = MachineLearningJobTableProvider(context);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, common);
-  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, common);
+  const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, common, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
   const navigation = MachineLearningNavigationProvider(context);
@@ -53,6 +55,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   return {
     anomalyExplorer,
     api,
+    customUrls,
     dataFrameAnalytics,
     dataFrameAnalyticsCreation,
     dataFrameAnalyticsTable,
