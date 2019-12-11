@@ -17,24 +17,3 @@
   height: 100%;
   padding: 0 4px;
 }
-
-#ml-legend-svg {
-  rect {
-    fill: none;
-    stroke: #bbb;
-    shape-rendering: crispEdges;
-  }
-
-  font: 11px sans-serif;
-  
-  text {
-    fill: #69707D;
-  }
-
-  .axis path,
-  .axis line {
-    fill: none;
-    stroke: #bbb;
-    shape-rendering: crispEdges;
-  }
-}

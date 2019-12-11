@@ -1,0 +1,19 @@
+/* Overrides for d3/svg default styles */
+.mlColorRangeLegend {
+  font: 11px sans-serif;
+  
+  text {
+    fill: $euiColorDarkShade;
+  }
+
+  .axis path {
+    fill: none;
+    stroke: none;
+  }
+
+  .axis line {
+    fill: none;
+    stroke: $euiColorDarkShade;
+    shape-rendering: crispEdges;
+  }
+}
