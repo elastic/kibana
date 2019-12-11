@@ -17,21 +17,20 @@
  * under the License.
  */
 
-import { CoreSetup, Plugin } from 'kibana/public';
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
 
-declare global {
-  interface Window {
-    uiSettingsPlugin?: Record<string, any>;
-    uiSettingsPluginValue?: string;
-  }
-}
+// eslint-disable-next-line import/no-default-export
+export default function CoreProviderPlugin(kibana: any) {
+  const config: Legacy.PluginSpecOptions = {
+    id: 'core-provider',
+    require: [],
+    publicDir: resolve(__dirname, 'public'),
+    init: (server: Legacy.Server) => ({}),
+    uiExports: {
+      hacks: [resolve(__dirname, 'public/index')],
+    },
+  };
 
-export class UiSettingsPlugin implements Plugin {
-  public setup(core: CoreSetup) {
-    window.uiSettingsPlugin = core.uiSettings.getAll().ui_settings_plugin;
-    window.uiSettingsPluginValue = core.uiSettings.get('ui_settings_plugin');
-  }
-
-  public start() {}
-  public stop() {}
+  return new kibana.Plugin(config);
 }

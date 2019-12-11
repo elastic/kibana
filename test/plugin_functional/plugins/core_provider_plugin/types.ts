@@ -16,6 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiSettingsPlugin } from './plugin';
+import { LegacyCoreSetup, LegacyCoreStart } from 'kibana/public';
 
-export const plugin = () => new UiSettingsPlugin();
+declare global {
+  interface Window {
+    np: {
+      setup: {
+        core: LegacyCoreSetup;
+        plugins: Record<string, any>;
+      };
+      start: {
+        core: LegacyCoreStart;
+        plugins: Record<string, any>;
+      };
+    };
+  }
+}

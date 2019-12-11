@@ -19,6 +19,7 @@
 
 import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
+import '../../plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -31,23 +32,23 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         await PageObjects.common.navigateToApp('settings');
       });
 
-      it('should attach string to window.corePluginB', async () => {
-        const corePluginB = await browser.execute('return window.corePluginB');
-        expect(corePluginB).to.equal(`Plugin A said: Hello from Plugin A!`);
-      });
-    });
-    describe('have injectedMetadata service provided', function describeIndexTests() {
-      before(async () => {
-        await PageObjects.common.navigateToApp('bar');
+      it('should run the new platform plugins', async () => {
+        expect(
+          await browser.execute(() => {
+            return window.np.setup.plugins.core_plugin_b.sayHi();
+          })
+        ).to.be('Plugin A said: Hello from Plugin A!');
       });
 
       it('should attach string to window.corePluginB', async () => {
-        const hasAccessToInjectedMetadata = await browser.execute(
-          'return window.hasAccessToInjectedMetadata'
-        );
-        expect(hasAccessToInjectedMetadata).to.equal(true);
+        expect(
+          await browser.execute(() => {
+            return window.np.setup.core.injectedMetadata.getKibanaBuildNumber();
+          })
+        ).to.be.a('number');
       });
     });
+
     describe('have env data provided', function describeIndexTests() {
       before(async () => {
         await PageObjects.common.navigateToApp('bar');
