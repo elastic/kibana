@@ -17,9 +17,24 @@
  * under the License.
  */
 
-export { Lifecycle } from './lifecycle';
-export { LifecyclePhase } from './lifecycle_phase';
-export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Provider } from './providers';
-export { runTests, setupMocha } from './mocha';
-export { FailureMetadata } from './failure_metadata';
+import { IHttpResponse } from './types';
+
+export class HttpResponse<TResponseBody = any> implements IHttpResponse<TResponseBody> {
+  public readonly request: Request;
+  public readonly response?: Response;
+  public readonly body?: TResponseBody;
+
+  constructor({
+    request,
+    response,
+    body,
+  }: {
+    request: Request;
+    response?: Response;
+    body?: TResponseBody;
+  }) {
+    this.request = request;
+    this.response = response;
+    this.body = body;
+  }
+}
