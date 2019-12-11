@@ -29,7 +29,6 @@ export function createReporter(config: AnalyicsReporterConfig): Reporter {
   const { localStorage, debug, fetch } = config;
 
   return new Reporter({
-    checkInterval: 300,
     debug,
     storage: localStorage,
     async http(report) {
