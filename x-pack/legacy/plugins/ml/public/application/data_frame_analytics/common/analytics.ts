@@ -146,6 +146,11 @@ export const getPredictionFieldName = (analysis: AnalysisConfig) => {
   let predictionFieldName;
   if (isRegressionAnalysis(analysis) && analysis.regression.prediction_field_name !== undefined) {
     predictionFieldName = analysis.regression.prediction_field_name;
+  } else if (
+    isClassificationAnalysis(analysis) &&
+    analysis.classification.prediction_field_name !== undefined
+  ) {
+    predictionFieldName = analysis.classification.prediction_field_name;
   }
   return predictionFieldName;
 };
