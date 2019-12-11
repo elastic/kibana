@@ -71,7 +71,12 @@ export const formSetup = async (
     testBed.find('createFieldWrapper.cancelButton').simulate('click');
   };
 
-  const completeStepOne = async ({ name, indexPatterns, order, version }: Partial<Template>) => {
+  const completeStepOne = async ({
+    name,
+    indexPatterns,
+    order,
+    version,
+  }: Partial<Template> = {}) => {
     const { form, find, component } = testBed;
 
     if (name) {
