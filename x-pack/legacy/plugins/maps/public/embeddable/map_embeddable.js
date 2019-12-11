@@ -165,9 +165,9 @@ export class MapEmbeddable extends Embeddable {
     });
   }
 
-  setLayerList(layerList) {
+  async setLayerList(layerList) {
     this._layerList = layerList;
-    this._store.dispatch(replaceLayerList(this._layerList));
+    return await this._store.dispatch(replaceLayerList(this._layerList));
   }
 
   addFilters = filters => {
