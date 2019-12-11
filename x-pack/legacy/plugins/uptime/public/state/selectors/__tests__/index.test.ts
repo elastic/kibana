@@ -9,6 +9,16 @@ import { AppState } from '../../../state';
 
 describe('state selectors', () => {
   const state: AppState = {
+    overviewFilters: {
+      filters: {
+        locations: [],
+        ports: [],
+        schemes: [],
+        tags: [],
+      },
+      errors: [],
+      loading: false,
+    },
     monitor: {
       monitorDetailsList: [],
       loading: false,
