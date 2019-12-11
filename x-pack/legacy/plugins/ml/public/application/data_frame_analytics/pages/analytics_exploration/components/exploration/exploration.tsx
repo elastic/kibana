@@ -23,6 +23,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -66,6 +67,7 @@ import {
 } from '../../../analytics_management/components/analytics_list/common';
 import { getTaskStateBadge } from '../../../analytics_management/components/analytics_list/columns';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
+import { ColorRangeLegend } from './color_range_legend';
 
 const customColorScaleFactory = (n: number) => (t: number) => {
   if (t < 1 / n) {
@@ -102,6 +104,15 @@ interface Props {
   jobStatus: DATA_FRAME_TASK_STATE;
 }
 
+type ScaleType = 'linear' | 'custom';
+const scaleTypeOptions = [
+  { value: 'linear', text: 'White - Blue (Linear)' },
+  { value: 'custom', text: 'White - Blue (Custom Scale)' },
+  { value: 'red-green', text: 'Red - Green' },
+  { value: 'green-red', text: 'Green - Red' },
+  { value: 'yello-green-blue', text: 'Yellow - Green - Blue' },
+];
+
 export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
 
@@ -111,6 +122,8 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
   const [searchQuery, setSearchQuery] = useState<SavedSearchQuery>(defaultSearchQuery);
   const [searchError, setSearchError] = useState<any>(undefined);
   const [searchString, setSearchString] = useState<string | undefined>(undefined);
+
+  const [scaleType, setScaleType] = useState<ScaleType>('linear');
 
   useEffect(() => {
     (async function() {
@@ -169,6 +182,8 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
 
   const columns: Array<ColumnType<TableItem>> = [];
 
+  let cellBgColor: any;
+
   if (jobConfig !== undefined && selectedFields.length > 0 && tableItems.length > 0) {
     // table cell color coding takes into account:
     // - whether the theme is dark/light
@@ -184,7 +199,41 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       key.includes(`${jobConfig.dest.results_field}.${FEATURE_INFLUENCE}.`)
     ).length;
     const customScale = customColorScaleFactory(featureCount);
-    const cellBgColor = (n: number) => cellBgColorScale(customScale(n));
+    const cellBgColorCustom = (n: number) => cellBgColorScale(customScale(n));
+
+    const coloursYGB = [
+      '#FFFFDD',
+      '#AAF191',
+      '#80D385',
+      '#61B385',
+      '#3E9583',
+      '#217681',
+      '#285285',
+      '#1F2D86',
+      '#000086',
+    ];
+    const colourRangeYGB = d3.range(0, 1, 1.0 / (coloursYGB.length - 1));
+    colourRangeYGB.push(1);
+
+    const scaleTypes = {
+      linear: cellBgColorScale,
+      custom: cellBgColorCustom,
+      'red-green': d3.scale
+        .linear()
+        .domain([0, 1])
+        .range(['red', 'green']),
+      'green-red': d3.scale
+        .linear()
+        .domain([0, 1])
+        .range(['green', 'red']),
+      'yello-green-blue': d3.scale
+        .linear()
+        .domain(colourRangeYGB)
+        .range(coloursYGB)
+        .interpolate(d3.interpolateHcl),
+    };
+
+    cellBgColor = scaleTypes[scaleType];
 
     columns.push(
       ...selectedFields.sort(sortColumns(tableItems[0], jobConfig.dest.results_field)).map(k => {
@@ -518,6 +567,22 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
               <Fragment />
             </EuiFormRow>
           )}
+          <EuiSpacer />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiSelect
+                compressed={true}
+                id="mlSelectScaleType"
+                options={scaleTypeOptions}
+                value={scaleType}
+                onChange={e => setScaleType(e.target.value)}
+                aria-label="Select the type of scale for the color legend"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <ColorRangeLegend cellBgColor={cellBgColor} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer />
           <MlInMemoryTableBasic
             allowNeutralSort={false}
