@@ -6,12 +6,7 @@
 import { EuiButton } from '@elastic/eui';
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import { PackageInfo } from '../../../common/types';
-import {
-  useDeletePackage,
-  useGetPackageInstallStatus,
-  useInstallPackage,
-  useLinks,
-} from '../../hooks';
+import { useDeletePackage, useGetPackageInstallStatus, useInstallPackage } from '../../hooks';
 import { InstallStatus } from '../../types';
 import { ConfirmPackageDelete } from './confirm_package_delete';
 import { ConfirmPackageInstall } from './confirm_package_install';
@@ -23,7 +18,6 @@ interface InstallationButtonProps {
 export function InstallationButton(props: InstallationButtonProps) {
   const { assets, name, title, version } = props.package;
   const installPackage = useInstallPackage();
-  const { toDetailView } = useLinks();
   const deletePackage = useDeletePackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const installationStatus = getPackageInstallStatus(name);
@@ -36,20 +30,10 @@ export function InstallationButton(props: InstallationButtonProps) {
     setModalVisible(!isModalVisible);
   }, [isModalVisible]);
 
-  const onSuccessInstall = useCallback(() => {
-    const packageUrl = toDetailView({ name, version });
-    const dataSourcesUrl = toDetailView({
-      name,
-      version,
-      panel: 'data-sources',
-    });
-    if (window.location.href.includes(packageUrl)) window.location.href = dataSourcesUrl;
-  }, [name, toDetailView, version]);
-
   const handleClickInstall = useCallback(() => {
-    installPackage({ name, version, title, onSuccess: onSuccessInstall });
+    installPackage({ name, version, title });
     toggleModal();
-  }, [installPackage, onSuccessInstall, name, title, toggleModal, version]);
+  }, [installPackage, name, title, toggleModal, version]);
 
   const handleClickDelete = useCallback(() => {
     deletePackage({ name, version, title });

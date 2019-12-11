@@ -22,13 +22,11 @@ interface PackageInstallItem {
   status: InstallStatus;
 }
 
-type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
-  onSuccess?: () => void;
-};
+type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'>;
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
   const [packages, setPackage] = useState<PackagesInstall>({});
-  const { toAddDataSourceView } = useLinks();
+  const { toAddDataSourceView, toDetailView } = useLinks();
 
   const setPackageInstallStatus = useCallback(
     ({ name, status }: { name: PackageInfo['name']; status: InstallStatus }) => {
@@ -41,14 +39,13 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const installPackage = useCallback(
-    async ({ name, version, title, onSuccess }: InstallPackageProps) => {
+    async ({ name, version, title }: InstallPackageProps) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
 
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
-        if (onSuccess) onSuccess();
         const packageDataSourceUrl = toAddDataSourceView({ name, version });
         const SuccessMsg = (
           <Fragment>
@@ -68,6 +65,18 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           title: `Installed ${title} package`,
           text: toMountPoint(SuccessMsg),
         });
+
+        // TODO: this should probably live somewhere else and use <Redirect />,
+        // this hook could return the request state and a component could
+        // use that state. the component should be able to unsubscribe to prevent memory leaks
+        const packageUrl = toDetailView({ name, version });
+        const dataSourcesUrl = toDetailView({
+          name,
+          version,
+          panel: 'data-sources',
+          withAppRoot: false,
+        });
+        if (window.location.href.includes(packageUrl)) window.location.hash = dataSourcesUrl;
       } catch (err) {
         setPackageInstallStatus({ name, status: InstallStatus.notInstalled });
         notifications.toasts.addWarning({
@@ -78,7 +87,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus, toAddDataSourceView]
+    [notifications.toasts, setPackageInstallStatus, toAddDataSourceView, toDetailView]
   );
 
   const getPackageInstallStatus = useCallback(
@@ -103,6 +112,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
           title: `Deleted ${title} package`,
           text: toMountPoint(SuccessMsg),
         });
+
+        const packageUrl = toDetailView({ name, version });
+        const dataSourcesUrl = toDetailView({
+          name,
+          version,
+          panel: 'data-sources',
+        });
+        if (window.location.href.includes(packageUrl)) window.location.href = dataSourcesUrl;
       } catch (err) {
         setPackageInstallStatus({ name, status: InstallStatus.installed });
         notifications.toasts.addWarning({
@@ -112,7 +129,7 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
         });
       }
     },
-    [notifications.toasts, setPackageInstallStatus]
+    [notifications.toasts, setPackageInstallStatus, toDetailView]
   );
 
   return {
