@@ -36,7 +36,7 @@ export function InstallationButton(props: InstallationButtonProps) {
     setModalVisible(!isModalVisible);
   }, [isModalVisible]);
 
-  const installSuccessCallback = useCallback(() => {
+  const onSuccessInstall = useCallback(() => {
     const packageUrl = toDetailView({ name, version });
     const dataSourcesUrl = toDetailView({
       name,
@@ -47,9 +47,9 @@ export function InstallationButton(props: InstallationButtonProps) {
   }, [name, toDetailView, version]);
 
   const handleClickInstall = useCallback(() => {
-    installPackage({ name, version, title, successCallback: installSuccessCallback });
+    installPackage({ name, version, title, onSuccess: onSuccessInstall });
     toggleModal();
-  }, [installPackage, installSuccessCallback, name, title, toggleModal, version]);
+  }, [installPackage, onSuccessInstall, name, title, toggleModal, version]);
 
   const handleClickDelete = useCallback(() => {
     deletePackage({ name, version, title });

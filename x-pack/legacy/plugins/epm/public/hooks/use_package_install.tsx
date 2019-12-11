@@ -23,7 +23,7 @@ interface PackageInstallItem {
 }
 
 type InstallPackageProps = Pick<PackageInfo, 'name' | 'version' | 'title'> & {
-  successCallback?: () => void;
+  onSuccess?: () => void;
 };
 
 function usePackageInstall({ notifications }: { notifications: NotificationsStart }) {
@@ -41,14 +41,14 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
   );
 
   const installPackage = useCallback(
-    async ({ name, version, title, successCallback }: InstallPackageProps) => {
+    async ({ name, version, title, onSuccess }: InstallPackageProps) => {
       setPackageInstallStatus({ name, status: InstallStatus.installing });
       const pkgkey = `${name}-${version}`;
 
       try {
         await fetchInstallPackage(pkgkey);
         setPackageInstallStatus({ name, status: InstallStatus.installed });
-        if (successCallback) successCallback();
+        if (onSuccess) onSuccess();
         const packageDataSourceUrl = toAddDataSourceView({ name, version });
         const SuccessMsg = (
           <Fragment>
