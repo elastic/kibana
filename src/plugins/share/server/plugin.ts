@@ -17,27 +17,21 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { createRoutes } from './routes/create_routes';
 
-export function shortUrlLookupProvider(server) {
-  async function updateMetadata(doc, req) {
-    try {
-      await req.getSavedObjectsClient().update('url', doc.id, {
-        accessDate: new Date(),
-        accessCount: get(doc, 'attributes.accessCount', 0) + 1
-      });
-    } catch (err) {
-      server.log('Warning: Error updating url metadata', err);
-      //swallow errors. It isn't critical if there is no update.
-    }
+export class SharePlugin implements Plugin {
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  public async setup(core: CoreSetup) {
+    createRoutes(core, this.initializerContext.logger.get());
   }
 
-  return {
-    async getUrl(id, req) {
-      const doc = await req.getSavedObjectsClient().get('url', id);
-      updateMetadata(doc, req);
+  public start() {
+    this.initializerContext.logger.get().debug('Starting plugin');
+  }
 
-      return doc.attributes.url;
-    }
-  };
+  public stop() {
+    this.initializerContext.logger.get().debug('Stopping plugin');
+  }
 }
