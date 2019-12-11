@@ -5,3 +5,4 @@
  */
 
 export * from './initial_configuration_step';
+export * from './validation';

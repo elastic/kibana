@@ -8,11 +8,9 @@ import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiCheckbox, EuiToolTip } f
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useCallback, useMemo } from 'react';
-import {
-  ValidatedIndex,
-  ValidationIndicesUIError,
-} from '../../../../../containers/logs/log_analysis/log_analysis_setup_state';
-import { LoadingOverlayWrapper } from '../../../../../components/loading_overlay_wrapper';
+
+import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
+import { ValidatedIndex, ValidationIndicesUIError } from './validation';
 
 export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   indices: ValidatedIndex[];
@@ -61,12 +59,10 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
     <EuiDescribedFormGroup
       idAria="indices"
       title={
-        <h3>
-          <FormattedMessage
-            id="xpack.infra.analysisSetup.indicesSelectionTitle"
-            defaultMessage="Choose indices"
-          />
-        </h3>
+        <FormattedMessage
+          id="xpack.infra.analysisSetup.indicesSelectionTitle"
+          defaultMessage="Choose indices"
+        />
       }
       description={
         <FormattedMessage

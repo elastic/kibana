@@ -6,8 +6,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { ValidationIndicesError } from '../../../../common/http_api';
 import { isExampleDataIndex } from '../../../../common/log_analysis';
+import {
+  ValidatedIndex,
+  ValidationIndicesUIError,
+} from '../../../components/logging/log_analysis_setup/initial_configuration_step';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 
@@ -16,25 +19,6 @@ type SetupHandler = (
   startTime: number | undefined,
   endTime: number | undefined
 ) => void;
-
-export type ValidationIndicesUIError =
-  | ValidationIndicesError
-  | { error: 'NETWORK_ERROR' }
-  | { error: 'TOO_FEW_SELECTED_INDICES' };
-
-interface ValidIndex {
-  validity: 'valid';
-  name: string;
-  isSelected: boolean;
-}
-
-interface InvalidIndex {
-  validity: 'invalid';
-  name: string;
-  errors: ValidationIndicesError[];
-}
-
-export type ValidatedIndex = ValidIndex | InvalidIndex;
 
 interface AnalysisSetupStateArguments<JobType extends string> {
   cleanupAndSetupModule: SetupHandler;
