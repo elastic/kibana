@@ -57,7 +57,7 @@ export const DatavisualizerSelector: FC = () => {
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      <EuiPage restrictWidth={1000}>
+      <EuiPage restrictWidth={1000} data-test-subj="mlPageDataVisualizerSelector">
         <EuiPageBody>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={false}>
@@ -145,7 +145,7 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#datavisualizer_index_select"
+                    href="#/datavisualizer_index_select"
                     data-test-subj="mlDataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage
