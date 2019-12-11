@@ -155,6 +155,7 @@ describe('NewVisModal', () => {
           editorParams={['foo=true', 'bar=42', 'addToDashboard']}
           addBasePath={addBasePath}
           uiSettings={uiSettings}
+          savedObjects={{} as SavedObjectsStart}
         />
       );
       const visButton = wrapper.find('button[data-test-subj="visType-visWithAliasUrl"]');
