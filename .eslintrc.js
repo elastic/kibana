@@ -325,8 +325,23 @@ module.exports = {
                 errorMessage: 'Plugins may only import from top-level public and server modules.',
               },
               {
-                target: ['(src|x-pack)/plugins/**/*', '!(src|x-pack)/plugins/*/server/**/*'],
-                from: ['src/core/server', 'src/core/server/**/*', '(src|x-pack)/plugins/*/server/**/*'],
+                target: [
+                  '(src|x-pack)/plugins/**/*',
+                  '!(src|x-pack)/plugins/*/server/**/*',
+
+                  'src/legacy/core_plugins/**/*',
+                  '!src/legacy/core_plugins/*/server/**/*',
+                  '!src/legacy/core_plugins/*/index.{js,ts,tsx}',
+
+                  'x-pack/legacy/plugins/**/*',
+                  '!x-pack/legacy/plugins/*/server/**/*',
+                  '!x-pack/legacy/plugins/*/index.{js,ts,tsx}',
+                ],
+                from: [
+                  'src/core/server',
+                  'src/core/server/**/*',
+                  '(src|x-pack)/plugins/*/server/**/*',
+                ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',
               },
