@@ -3,17 +3,14 @@
 exports[`ui reducer adds integration popover status to state 1`] = `
 Object {
   "basePath": "",
-  "integrationsPopoverOpen": Object {
-    "id": "popover-2",
-    "open": true,
-  },
+  "integrationsPopoverOpen": null,
   "lastRefresh": 125,
 }
 `;
 
 exports[`ui reducer sets the application's base path 1`] = `
 Object {
-  "basePath": "yyz",
+  "basePath": "abc",
   "integrationsPopoverOpen": null,
   "lastRefresh": 125,
 }
@@ -22,7 +19,8 @@ Object {
 exports[`ui reducer updates the refresh value 1`] = `
 Object {
   "basePath": "",
+  "filters": Map {},
   "integrationsPopoverOpen": null,
-  "lastRefresh": 125,
+  "lastRefresh": 1576085567590,
 }
 `;
