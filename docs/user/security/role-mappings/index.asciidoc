@@ -1,0 +1,40 @@
+[role="xpack"]
+[[role-mappings]]
+=== Role Mappings
+
+
+Role mappings allow you to describe which roles to assign to your users
+using a set of rules. Role mappings are required when authenticating via
+an external identity provider, such as Active Directory, Kerberos, PKI, OIDC,
+or SAML.
+
+Role mappings have no effect for users inside the `native` or `file` realms.
+
+To manage your role mappings, use *Management > Security > Role Mappings*.
+
+NOTE: The role mapping UI will only be available if your license supports external
+identity providers which can benefit from role mappings.
+
+// [role="screenshot"]
+// image:user/security/role-mappings/images/role-mappings-grid.png["Role Mappings UI"]
+
+
+[float]
+[[role-mappings-security-privileges]]
+=== Security privileges
+
+You must have the `manage_security` cluster privilege to manage role mappings in {kib}.
+You can manage roles in *Management > Security > Roles*, or use the 
+<<role-management-api, {kib} Role Management API>>. 
+
+
+[float]
+[[create-role-mapping]]
+=== Create a Role Mapping
+You can create a role mapping from *Management > Security > Role Mappings*.
+
+// [role="screenshot"]
+// image:user/security/role-mappings/images/create-role-mapping.png["Create Role Mapping UI"]
+
+
+
