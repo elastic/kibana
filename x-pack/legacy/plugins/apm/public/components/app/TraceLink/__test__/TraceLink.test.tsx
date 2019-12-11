@@ -9,26 +9,29 @@ import { shallow } from 'enzyme';
 import * as urlParamsHooks from '../../../../hooks/useUrlParams';
 import * as hooks from '../../../../hooks/useFetcher';
 import { TraceLink } from '../';
+import { MockApmPluginContextWrapper } from '../../../../utils/testHelpers';
+import * as routeConfig from '../../Main/route_config';
+import { BreadcrumbRoute } from '../../Main/ProvideBreadcrumbs';
 
-jest.mock('../../Main/route_config/index.tsx', () => ({
-  routes: [
-    {
-      path: '/services/:serviceName/transactions/view',
-      name: 'transaction_name'
-    },
-    {
-      path: '/traces',
-      name: 'traces'
-    }
-  ]
-}));
+const renderOptions = { wrapper: MockApmPluginContextWrapper };
+
+jest.spyOn(routeConfig, 'getRoutes').mockReturnValue([
+  {
+    path: '/services/:serviceName/transactions/view',
+    name: 'transaction_name'
+  },
+  {
+    path: '/traces',
+    name: 'traces'
+  }
+] as BreadcrumbRoute[]);
 
 describe('TraceLink', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
   it('renders transition page', () => {
-    const component = render(<TraceLink />);
+    const component = render(<TraceLink />, renderOptions);
     expect(component.getByText('Fetching trace...')).toBeDefined();
   });
 
