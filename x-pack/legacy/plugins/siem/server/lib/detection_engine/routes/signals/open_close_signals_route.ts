@@ -6,8 +6,8 @@
 
 import Hapi from 'hapi';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '../../../../../common/constants';
-import { SignalsRequest } from '../../alerts/types';
-import { setSignalsStatusSchema } from '../schemas';
+import { SignalsRequest } from '../../signals/types';
+import { setSignalsStatusSchema } from '../schemas/set_signal_status_schema';
 import { ServerFacade } from '../../../../types';
 import { transformError, getIndex } from '../utils';
 
