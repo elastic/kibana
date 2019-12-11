@@ -18,7 +18,7 @@ export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {
 
 const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   overview: 'Overview',
-  assets: 'Assets',
+  // assets: 'Assets',
   'data-sources': 'Data Sources',
 };
 

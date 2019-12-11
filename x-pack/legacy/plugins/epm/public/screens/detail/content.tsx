@@ -10,7 +10,6 @@ import styled from 'styled-components';
 import { DEFAULT_PANEL, DetailProps } from '.';
 import { PackageInfo } from '../../../common/types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
-import { AssetAccordion } from '../../components/asset_accordion';
 import { Requirements } from '../../components/requirements';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
@@ -50,10 +49,12 @@ export function Content(props: ContentProps) {
 
 type ContentPanelProps = PackageInfo & Pick<DetailProps, 'panel'>;
 export function ContentPanel(props: ContentPanelProps) {
-  const { assets, panel, name, version } = props;
+  const { panel, name, version } = props;
   switch (panel) {
+    /*
     case 'assets':
       return <AssetAccordion assets={assets} />;
+      */
     case 'data-sources':
       return <DataSourcesPanel name={name} version={version} />;
     case 'overview':
