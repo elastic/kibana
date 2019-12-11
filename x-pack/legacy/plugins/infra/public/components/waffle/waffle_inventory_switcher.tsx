@@ -23,7 +23,7 @@ import {
 import { findInventoryModel } from '../../../common/inventory_models';
 import { InventoryItemType } from '../../../common/inventory_models/types';
 
-interface Props {
+interface WaffleInventorySwitcherProps {
   nodeType: InfraNodeType;
   changeNodeType: (nodeType: InfraNodeType) => void;
   changeGroupBy: (groupBy: InfraSnapshotGroupbyInput[]) => void;
@@ -35,21 +35,26 @@ const getDisplayNameForType = (type: InventoryItemType) => {
   return inventoryModel.displayName;
 };
 
-export const WaffleInventorySwitcher = (props: Props) => {
+export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = ({
+  changeNodeType,
+  changeGroupBy,
+  changeMetric,
+  nodeType,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
   const openPopover = useCallback(() => setIsOpen(true), []);
   const goToNodeType = useCallback(
-    (nodeType: InfraNodeType) => {
+    (targetNodeType: InfraNodeType) => {
       closePopover();
-      props.changeNodeType(nodeType);
-      props.changeGroupBy([]);
-      const inventoryModel = findInventoryModel(nodeType);
-      props.changeMetric({
+      changeNodeType(targetNodeType);
+      changeGroupBy([]);
+      const inventoryModel = findInventoryModel(targetNodeType);
+      changeMetric({
         type: inventoryModel.metrics.defaultSnapshot as InfraSnapshotMetricType,
       });
     },
-    [props.changeGroupBy, props.changeNodeType, props.changeMetric]
+    [closePopover, changeNodeType, changeGroupBy, changeMetric]
   );
   const goToHost = useCallback(() => goToNodeType('host' as InfraNodeType), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod' as InfraNodeType), [goToNodeType]);
@@ -109,12 +114,12 @@ export const WaffleInventorySwitcher = (props: Props) => {
           ],
         },
       ] as EuiContextMenuPanelDescriptor[],
-    []
+    [goToAwsEC2, goToAwsRDS, goToAwsS3, goToAwsSQS, goToDocker, goToHost, goToK8]
   );
 
   const selectedText = useMemo(() => {
-    return getDisplayNameForType(props.nodeType);
-  }, [props.nodeType]);
+    return getDisplayNameForType(nodeType);
+  }, [nodeType]);
 
   return (
     <EuiFilterGroup>
