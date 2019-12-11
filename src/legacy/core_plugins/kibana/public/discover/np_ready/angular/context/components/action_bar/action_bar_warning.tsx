@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCallOut } from '@elastic/eui';
 import { SurrDocType } from '../../api/context';
 

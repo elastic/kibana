@@ -26,7 +26,7 @@ import { Home } from './home';
 
 import { FeatureCatalogueCategory } from '../../../../../../../plugins/home/public';
 
-jest.mock('../kibana_services', () =>({
+jest.mock('../../kibana_services', () =>({
   getServices: () => ({
     getBasePath: () => 'path',
     getInjected: () => ''

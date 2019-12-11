@@ -22,7 +22,7 @@ import { renderWithIntl } from 'test_utils/enzyme_helpers';
 
 import { DiscoverNoResults } from './no_results';
 
-jest.mock('../../kibana_services', () => {
+jest.mock('../../../kibana_services', () => {
   return {
     getServices: () => ({
       docLinks: {

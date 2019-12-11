@@ -22,7 +22,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Introduction } from './introduction';
 
-jest.mock('../../../../../kibana_react/public', () => {
+jest.mock('../../../../../../kibana_react/public', () => {
   return {
     Markdown: () => <div className="markdown"/>,
   };

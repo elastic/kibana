@@ -19,7 +19,7 @@
 
 import angular, { IModule } from 'angular';
 import { EuiConfirmModal } from '@elastic/eui';
-import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/target/types/angular';
+import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 
 import { AppMountContext, LegacyCoreStart } from 'kibana/public';
 import {

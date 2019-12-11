@@ -19,7 +19,7 @@
 
 import { EuiConfirmModal, EuiIcon } from '@elastic/eui';
 import angular, { IModule } from 'angular';
-import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/target/types/angular';
+import { i18nDirective, i18nFilter, I18nProvider } from '@kbn/i18n/angular';
 import {
   AppMountContext,
   ChromeStart,

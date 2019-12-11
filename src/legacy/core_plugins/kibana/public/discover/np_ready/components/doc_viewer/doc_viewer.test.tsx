@@ -21,29 +21,37 @@ import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DocViewRenderProps, DocViewInput } from '../../../kibana_services';
-
-const docViews: DocViewInput[] = [];
-
-function addDocView(docView: DocViewInput) {
-  docViews.push(docView);
-}
-
-function emptyDocViews() {
-  docViews.length = 0;
-}
+import { DocViewRenderProps, DocViewInput, getServices } from '../../../kibana_services';
 
 jest.mock('../../../kibana_services', () => {
+  const docViews: DocViewInput[] = [];
+
+  function addDocView(docView: DocViewInput) {
+    docViews.push(docView);
+  }
+
   return {
     getServices: () => ({
       docViewsRegistry: {
         getDocViewsSorted: () => {
           return docViews;
         },
+        addDocView,
+        docViews,
       },
     }),
+    formatMsg: (x: any) => String(x),
+    formatStack: (x: any) => String(x),
   };
 });
+
+const {
+  docViewsRegistry: { docViews, addDocView },
+} = getServices();
+
+function emptyDocViews() {
+  docViews.length = 0;
+}
 
 beforeEach(() => {
   emptyDocViews();
@@ -51,8 +59,8 @@ beforeEach(() => {
 });
 
 test('Render <DocViewer/> with 3 different tabs', () => {
-  addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
   addDocView({ order: 10, title: 'Render function', render: jest.fn() });
+  addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
   addDocView({ order: 30, title: 'Invalid doc view' });
 
   const renderProps = { hit: {} } as DocViewRenderProps;

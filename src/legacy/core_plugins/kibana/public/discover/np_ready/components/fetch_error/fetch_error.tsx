@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 import { getAngularModule, wrapInI18nContext, getServices } from '../../../kibana_services';
 

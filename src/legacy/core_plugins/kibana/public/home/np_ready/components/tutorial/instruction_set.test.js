@@ -52,7 +52,7 @@ const instructionVariants = [
   }
 ];
 
-jest.mock('../../../../../kibana_react/public', () => {
+jest.mock('../../../../../../kibana_react/public', () => {
   return {
     Markdown: () => <div className="markdown"/>,
   };

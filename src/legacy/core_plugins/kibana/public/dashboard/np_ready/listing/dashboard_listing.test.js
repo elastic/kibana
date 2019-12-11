@@ -42,17 +42,6 @@ jest.mock(
   { virtual: true }
 );
 
-jest.mock('ui/new_platform', () => {
-  return {
-    npStart: {
-      core: {
-        notifications: { toasts: { } },
-        uiSettings: { get: jest.fn(() => 10) },
-      },
-    },
-  };
-});
-
 import React from 'react';
 import { shallow } from 'enzyme';
 
@@ -83,6 +72,7 @@ test('renders empty page in before initial fetch to avoid flickering', () => {
       getViewUrl={() => {}}
       listingLimit={1000}
       hideWriteControls={false}
+      core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
     />
   );
   expect(component).toMatchSnapshot();
@@ -100,6 +90,7 @@ describe('after fetch', () => {
         listingLimit={1000}
         hideWriteControls={false}
         initialFilter="my dashboard"
+        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
@@ -121,6 +112,7 @@ describe('after fetch', () => {
         getViewUrl={() => {}}
         listingLimit={1000}
         hideWriteControls={false}
+        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
@@ -142,6 +134,7 @@ describe('after fetch', () => {
         getViewUrl={() => {}}
         listingLimit={1}
         hideWriteControls={false}
+        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
@@ -163,6 +156,7 @@ describe('after fetch', () => {
         getViewUrl={() => {}}
         listingLimit={1}
         hideWriteControls={true}
+        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 
@@ -184,6 +178,7 @@ describe('after fetch', () => {
         getViewUrl={() => {}}
         listingLimit={1}
         hideWriteControls={false}
+        core={{ notifications: { toasts: {} }, uiSettings: { get: jest.fn(() => 10) } }}
       />
     );
 

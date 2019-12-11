@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-jest.mock('../../kibana_services', () => {
+jest.mock('../../../kibana_services', () => {
   return {
     getServices: () => ({
       core: { uiSettings: {}, savedObjects: {} },

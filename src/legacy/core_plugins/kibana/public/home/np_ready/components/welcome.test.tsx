@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { Welcome } from './welcome';
 
-jest.mock('../kibana_services', () => ({
+jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     addBasePath: (path: string) => `root${path}`,
     trackUiMetric: () => {},

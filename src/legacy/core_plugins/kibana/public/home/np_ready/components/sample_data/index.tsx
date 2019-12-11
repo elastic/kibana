@@ -31,7 +31,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/target/types/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 interface Props {
   urlBasePath: string;

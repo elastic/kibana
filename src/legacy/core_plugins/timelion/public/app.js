@@ -40,6 +40,7 @@ import 'ui/directives/saved_object_finder';
 import 'ui/directives/listen';
 import 'ui/kbn_top_nav';
 import 'ui/saved_objects/ui/saved_object_save_as_checkbox';
+import '../../data/public/legacy';
 
 import rootTemplate from 'plugins/timelion/index.html';
 
@@ -63,8 +64,6 @@ require('plugins/timelion/services/_saved_sheet');
 require('./vis');
 
 SavedObjectRegistryProvider.register(require('plugins/timelion/services/saved_sheet_register'));
-
-require('ui/routes').enable();
 
 require('ui/routes')
   .when('/:id?', {
@@ -493,3 +492,5 @@ app.controller('timelion', function (
 
   init();
 });
+
+require('ui/routes').enable();

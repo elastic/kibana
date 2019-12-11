@@ -19,7 +19,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/target/types/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
 import { OptionsMenu } from './options';

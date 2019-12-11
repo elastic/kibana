@@ -25,7 +25,7 @@ import {
 } from './tutorial';
 
 
-jest.mock('../../kibana_services', () =>({
+jest.mock('../../../kibana_services', () =>({
   getServices: () =>({
     getBasePath: jest.fn(() => 'path'),
     chrome: {
@@ -33,7 +33,7 @@ jest.mock('../../kibana_services', () =>({
     }
   })
 }));
-jest.mock('../../../../../kibana_react/public', () => {
+jest.mock('../../../../../../kibana_react/public', () => {
   return {
     Markdown: () => <div className="markdown"/>,
   };
