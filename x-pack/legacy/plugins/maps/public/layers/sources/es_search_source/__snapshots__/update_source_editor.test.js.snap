@@ -90,6 +90,9 @@ exports[`should enable sort order select when sort field provided 1`] = `
         value="DESC"
       />
     </EuiFormRow>
+    <EuiHorizontalRule
+      margin="xs"
+    />
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressed"
@@ -102,7 +105,7 @@ exports[`should enable sort order select when sort field provided 1`] = `
       <EuiSwitch
         checked={false}
         compressed={true}
-        label="Show documents per entity"
+        label="Show top hits per entity"
         onChange={[Function]}
       />
     </EuiFormRow>
@@ -202,6 +205,9 @@ exports[`should render top hits form when useTopHits is true 1`] = `
         value="DESC"
       />
     </EuiFormRow>
+    <EuiHorizontalRule
+      margin="xs"
+    />
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressed"
@@ -214,7 +220,7 @@ exports[`should render top hits form when useTopHits is true 1`] = `
       <EuiSwitch
         checked={true}
         compressed={true}
-        label="Show documents per entity"
+        label="Show top hits per entity"
         onChange={[Function]}
       />
     </EuiFormRow>
@@ -354,6 +360,9 @@ exports[`should render update source editor 1`] = `
         value="DESC"
       />
     </EuiFormRow>
+    <EuiHorizontalRule
+      margin="xs"
+    />
     <EuiFormRow
       describedByIds={Array []}
       display="columnCompressed"
@@ -366,7 +375,7 @@ exports[`should render update source editor 1`] = `
       <EuiSwitch
         checked={false}
         compressed={true}
-        label="Show documents per entity"
+        label="Show top hits per entity"
         onChange={[Function]}
       />
     </EuiFormRow>

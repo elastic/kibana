@@ -13,6 +13,7 @@ import {
   EuiTitle,
   EuiPanel,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
@@ -124,7 +125,7 @@ export class UpdateSourceEditor extends Component {
       >
         <EuiSwitch
           label={i18n.translate('xpack.maps.source.esSearch.useTopHitsLabel', {
-            defaultMessage: `Show documents per entity`,
+            defaultMessage: `Show top hits per entity`,
           })}
           checked={this.props.useTopHits}
           onChange={this.onUseTopHitsChange}
@@ -275,6 +276,7 @@ export class UpdateSourceEditor extends Component {
           />
         </EuiFormRow>
 
+        <EuiHorizontalRule margin="xs" />
         {this.renderTopHitsForm()}
       </EuiPanel>
     );

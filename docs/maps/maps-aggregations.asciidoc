@@ -36,16 +36,14 @@ The point location is the weighted centroid for all geo-points in the gridded ce
 [[maps-top-hits-aggregation]]
 === Top hits per entity
 
-Use top hits per entity to display the most relevent documents per entity.
-For example, you could display the most recent GPS tracks per flight.
-
-Top hits per entity uses {es} {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation] to group your documents by entity.
-Then, {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metric aggregation] accumulates the most relevant documents for each entry.
+You can display the most relevant documents per entity, for example, the most recent GPS tracks per flight.
+To get this data, {es} first groups your data using a {ref}/search-aggregations-bucket-terms-aggregation.html[terms aggregation],
+then accumulates the most relevant documents based on sort order for each entry using a {ref}/search-aggregations-metrics-top-hits-aggregation.html[top hits metric aggregation].
 
 Top hits per entity is available for <<vector-layer, vector layers>> with *Documents* source.
 To enable top hits:
 
-. In *Sorting*, check the *Show documents per entity* checkbox.
+. In *Sorting*, select the *Show documents per entity* checkbox.
 . Set *Entity* to the field that identifies entities in your documents.
 This field will be used in the terms aggregation to group your documents into entity buckets.
 . Set *Documents per entity* to configure the maximum number of documents accumulated per entity.

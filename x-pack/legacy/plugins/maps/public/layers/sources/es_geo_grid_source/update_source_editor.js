@@ -99,7 +99,7 @@ export class UpdateSourceEditor extends Component {
         <EuiPanel>
           <EuiTitle size="xs">
             <h6>
-              <FormattedMessage id="xpack.maps.source.esGrid.geoTileGridLabel" defaultMessage="Geo tile grid" />
+              <FormattedMessage id="xpack.maps.source.esGrid.geoTileGridLabel" defaultMessage="Grid parameters" />
             </h6>
           </EuiTitle>
           <EuiSpacer size="m" />
