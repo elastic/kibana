@@ -54,13 +54,12 @@ export function createSavedWorkspaceClass(services: SavedObjectKibanaServices) {
           version: 1,
         },
       });
-
-      // Overwrite the default getDisplayName function which uses type and which is not very
-      // user friendly for this object.
-      this.getDisplayName = () => {
-        return 'graph workspace';
-      };
     }
+    // Overwrite the default getDisplayName function which uses type and which is not very
+    // user friendly for this object.
+    getDisplayName = () => {
+      return 'graph workspace';
+    };
   }
   return SavedWorkspaceClass;
 }
