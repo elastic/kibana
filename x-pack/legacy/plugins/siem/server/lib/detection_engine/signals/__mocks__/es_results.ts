@@ -92,7 +92,6 @@ export const sampleBulkCreateDuplicateResult = {
     {
       create: {
         _index: 'test',
-        _type: '_doc',
         _id: '4',
         _version: 1,
         result: 'created',
@@ -109,7 +108,6 @@ export const sampleBulkCreateDuplicateResult = {
     {
       create: {
         _index: 'test',
-        _type: '_doc',
         _id: '4',
         status: 409,
         error: {
@@ -124,7 +122,6 @@ export const sampleBulkCreateDuplicateResult = {
     {
       create: {
         _index: 'test',
-        _type: '_doc',
         _id: '4',
         status: 409,
         error: {

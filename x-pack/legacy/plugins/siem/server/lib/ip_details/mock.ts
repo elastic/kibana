@@ -80,7 +80,6 @@ export const responseAggs: IpOverviewHit = {
             hits: [
               {
                 _index: 'filebeat-8.0.0-2019.03.21-000002',
-                _type: '_doc',
                 _id: 'dHQ6y2kBCQofM5eXi5OE',
                 _score: null,
                 _source: {
@@ -138,7 +137,6 @@ export const responseAggs: IpOverviewHit = {
           hits: [
             {
               _index: 'filebeat-8.0.0-2019.05.20-000004',
-              _type: '_doc',
               _id: 'NU9dD2sB9v5HJNSHMMRc',
               _score: null,
               _source: {

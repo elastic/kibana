@@ -208,7 +208,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -243,7 +242,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -291,7 +289,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -326,7 +323,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -374,7 +370,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -409,7 +404,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -460,7 +454,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -495,7 +488,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -543,7 +535,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -578,7 +569,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -626,7 +616,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -661,7 +650,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -711,7 +699,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -746,7 +733,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -796,7 +782,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -831,7 +816,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -879,7 +863,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -914,7 +897,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -962,7 +944,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -997,7 +978,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -1045,7 +1025,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -1080,7 +1059,6 @@ export const mockResponse = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -1557,7 +1535,6 @@ export const mockResponseIp = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {
@@ -1592,7 +1569,6 @@ export const mockResponseIp = {
                 hits: [
                   {
                     _index: 'filebeat-8.0.0-2019.06.19-000005',
-                    _type: '_doc',
                     _id: 'dd4fa2d4bd-692279846149410',
                     _score: 1,
                     _source: {

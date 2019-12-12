@@ -26,7 +26,6 @@ export const mockResponseSearchTimelineDetails = {
     hits: [
       {
         _index: 'auditbeat-8.0.0-2019.03.29-000003',
-        _type: '_doc',
         _id: 'TUfUymkBCQofM5eXGBYL',
         _score: 1,
         _source: {
@@ -3389,12 +3388,6 @@ export const mockTimelineDetailsResult = {
       field: '_index',
       values: 'auditbeat-8.0.0-2019.03.29-000003',
       originalValue: 'auditbeat-8.0.0-2019.03.29-000003',
-    },
-    {
-      category: '_type',
-      field: '_type',
-      values: '_doc',
-      originalValue: '_doc',
     },
     {
       category: '_id',

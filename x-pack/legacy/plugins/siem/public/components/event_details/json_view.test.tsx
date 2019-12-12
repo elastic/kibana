@@ -27,7 +27,6 @@ describe('JSON View', () => {
         _id: 'pEMaMmkBUV60JmNWmWVi',
         _index: 'filebeat-8.0.0-2019.02.19-000001',
         _score: 1,
-        _type: '_doc',
         agent: {
           ephemeral_id: '9d391ef2-a734-4787-8891-67031178c641',
           hostname: 'siem-kibana',

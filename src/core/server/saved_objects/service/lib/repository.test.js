@@ -1025,7 +1025,7 @@ describe('SavedObjectsRepository', () => {
 
     it(`doesn't prepend namespace to the id or add namespace property when providing namespace for namespace agnostic type`, async () => {
       callAdminCluster.mockReturnValue({
-        items: [{ create: { _type: '_doc', _id: 'globaltype:one', _primary_term: 1, _seq_no: 2 } }],
+        items: [{ create: { _id: 'globaltype:one', _primary_term: 1, _seq_no: 2 } }],
       });
       await savedObjectsRepository.bulkCreate(
         [{ type: 'globaltype', id: 'one', attributes: { title: 'Test One' } }],

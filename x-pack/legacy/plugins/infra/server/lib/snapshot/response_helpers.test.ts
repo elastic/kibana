@@ -30,7 +30,6 @@ describe('InfraOps ResponseHelpers', () => {
             hits: [
               {
                 _index: 'metricbeat-2019-01-01',
-                _type: '_doc',
                 _id: '29392939',
                 _score: null,
                 sort: [],
@@ -58,7 +57,6 @@ describe('InfraOps ResponseHelpers', () => {
             hits: [
               {
                 _index: 'metricbeat-2019-01-01',
-                _type: '_doc',
                 _id: '29392939',
                 _score: null,
                 sort: [],
