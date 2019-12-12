@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { ToolbarProps } from '../../../public/components/inventory/toolbars/toolbar';
-import { MetricsAndGroupByToolbarItems } from '../shared/compontents/basic_toolbar_items';
+import { MetricsAndGroupByToolbarItems } from '../shared/compontents/metrics_and_groupby_toolbar_items';
 import { InfraSnapshotMetricType } from '../../graphql/types';
 
 export const AwsEC2ToolbarItems = (props: ToolbarProps) => {

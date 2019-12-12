@@ -15,12 +15,12 @@ import {
   toMetricOpt,
 } from '../../../../public/components/inventory/toolbars/toolbar_wrapper';
 
-interface BasicToolbarItemProps extends ToolbarProps {
+interface Props extends ToolbarProps {
   metricTypes: InfraSnapshotMetricType[];
   groupByFields: string[];
 }
 
-export const MetricsAndGroupByToolbarItems = (props: BasicToolbarItemProps) => {
+export const MetricsAndGroupByToolbarItems = (props: Props) => {
   const metricOptions = useMemo(() => props.metricTypes.map(toMetricOpt), [props.metricTypes]);
 
   const groupByOptions = useMemo(() => props.groupByFields.map(toGroupByOpt), [
