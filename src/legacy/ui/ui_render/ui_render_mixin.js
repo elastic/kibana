@@ -284,7 +284,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       },
     });
 
-    response.header('content-security-policy', config.get('csp.directives'));
+    response.header('content-security-policy', config.get('csp.header'));
 
     return response;
   }
