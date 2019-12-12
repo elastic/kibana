@@ -13,6 +13,7 @@ const COLOR_RANGE_RESOLUTION = 10;
 
 interface ColorRangeLegendProps {
   colorRange: (d: number) => string;
+  justifyTicks?: boolean;
   title?: string;
   width?: number;
 }
@@ -21,9 +22,16 @@ interface ColorRangeLegendProps {
  * Component to render a legend for color ranges to be used for color coding
  * table cells and visualizations.
  *
+ * This current version supports normalized value ranges (0-1) only.
+ *
  * @param props ColorRangeLegendProps
  */
-export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({ colorRange, title, width = 250 }) => {
+export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
+  colorRange,
+  justifyTicks = false,
+  title,
+  width = 250,
+}) => {
   const d3Container = useRef<null | SVGSVGElement>(null);
 
   const scale = d3.range(COLOR_RANGE_RESOLUTION + 1).map(d => ({
@@ -39,7 +47,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({ colorRange, title,
     const wrapperHeight = 32;
     const wrapperWidth = width;
 
-    const margin = { top: 2, bottom: 20, left: 1, right: 1 };
+    const margin = { top: 2, bottom: 20, left: justifyTicks ? 1 : 4, right: 1 };
 
     const legendWidth = wrapperWidth - margin.left - margin.right;
     const legendHeight = wrapperHeight - margin.top - margin.bottom;
@@ -84,16 +92,18 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({ colorRange, title,
       .attr('height', legendHeight)
       .style('fill', 'url(#mlColorRangeGradient)');
 
-    // create a scale and axis for the legend
-    const legendScale = d3.scale
+    const axisScale = d3.scale
       .linear()
       .domain([0, 1])
       .range([0, legendWidth]);
 
+    // Using this formatter ensures we get e.g. `0` and not `0.0`, but still `0.1`, `0.2` etc.
+    const tickFormat = d3.format('');
     const legendAxis = d3.svg
       .axis()
-      .scale(legendScale)
+      .scale(axisScale)
       .orient('bottom')
+      .tickFormat(tickFormat)
       .tickSize(legendHeight + 4)
       .ticks(legendWidth / 40);
 
@@ -105,10 +115,12 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({ colorRange, title,
 
     // Adjust the alignment of the first and last tick text
     // so that the tick labels don't overflow the color range.
-    const text = wrapper.selectAll('text')[0];
-    if (text.length > 1) {
-      d3.select(text[0]).style('text-anchor', 'start');
-      d3.select(text[text.length - 1]).style('text-anchor', 'end');
+    if (justifyTicks) {
+      const text = wrapper.selectAll('text')[0];
+      if (text.length > 1) {
+        d3.select(text[0]).style('text-anchor', 'start');
+        d3.select(text[text.length - 1]).style('text-anchor', 'end');
+      }
     }
   }, [JSON.stringify(scale), d3Container.current]);
 
