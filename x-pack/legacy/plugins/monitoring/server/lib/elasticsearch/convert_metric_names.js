@@ -55,11 +55,14 @@ export function uncovertMetricNames(byDateBucketResponse) {
     unconverted[metricName] = {
       buckets: byDateBucketResponse.buckets.map(bucket => {
         const {
+          // eslint-disable-next-line camelcase
           key_as_string,
+          // eslint-disable-next-line camelcase
           key,
+          // eslint-disable-next-line camelcase
           doc_count,
           ...rest
-        } = bucket; /* eslint-disable-line camelcase */
+        } = bucket;
         const metrics = Object.entries(rest).reduce((accum, [key, value]) => {
           if (key.startsWith(`${CONVERTED_TOKEN}${metricName}`)) {
             const name = key.split('__')[1];
