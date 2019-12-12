@@ -72,15 +72,10 @@ export class Plugin {
       reserved: {
         privilege: {
           savedObject: {
-            all: [
-              'alert',
-              'action',
-              'action_task_params',
-            ],
+            all: [],
             read: []
           },
-          ui: ['showAlerts', 'showActions'],
-          api: ['actions-read', 'actions-all', 'alerting-read', 'alerting-all']
+          ui: [],
         },
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'
