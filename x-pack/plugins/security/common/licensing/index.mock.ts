@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { of } from 'rxjs';
 import { SecurityLicense } from '.';
 
 export const licenseMock = {
   create: (): jest.Mocked<SecurityLicense> => ({
-    getChanges$: jest.fn(),
     isEnabled: jest.fn().mockReturnValue(true),
     getFeatures: jest.fn(),
+    features$: of(),
   }),
 };

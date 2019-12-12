@@ -25,36 +25,36 @@ export class SecurityNavControlService {
 
   private navControlRegistered!: boolean;
 
-  private licenseSubscription?: Subscription;
+  private securityFeaturesSubscription?: Subscription;
 
   public setup({ securityLicense }: SetupDeps) {
     this.securityLicense = securityLicense;
   }
 
   public start({ core }: StartDeps) {
-    this.licenseSubscription = this.securityLicense.getChanges$().subscribe(() => {
-      const showSecurityLinks = this.securityLicense.getFeatures().showLinks;
+    this.securityFeaturesSubscription = this.securityLicense.features$.subscribe(
+      ({ showLinks }) => {
+        const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
 
-      const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
+        const shouldRegisterNavControl =
+          !isAnonymousPath && showLinks && !this.navControlRegistered;
 
-      const shouldRegisterNavControl =
-        !isAnonymousPath && showSecurityLinks && !this.navControlRegistered;
-
-      if (shouldRegisterNavControl) {
-        const user = core.http.get('/api/security/v1/me', {
-          headers: {
-            'kbn-system-api': true,
-          },
-        }) as Promise<AuthenticatedUser>;
-        this.registerSecurityNavControl(core, user);
+        if (shouldRegisterNavControl) {
+          const user = core.http.get('/api/security/v1/me', {
+            headers: {
+              'kbn-system-api': true,
+            },
+          }) as Promise<AuthenticatedUser>;
+          this.registerSecurityNavControl(core, user);
+        }
       }
-    });
+    );
   }
 
   public stop() {
-    if (this.licenseSubscription) {
-      this.licenseSubscription.unsubscribe();
-      this.licenseSubscription = undefined;
+    if (this.securityFeaturesSubscription) {
+      this.securityFeaturesSubscription.unsubscribe();
+      this.securityFeaturesSubscription = undefined;
     }
     this.navControlRegistered = false;
   }

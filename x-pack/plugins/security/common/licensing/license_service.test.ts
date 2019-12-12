@@ -47,14 +47,14 @@ describe('license features', function() {
     });
   });
 
-  it('should notify consumers of license changes', () => {
+  it('should notify consumers of licensed feature changes', () => {
     const rawLicense$ = new BehaviorSubject(getMockRawLicense({ isAvailable: false }));
     const serviceSetup = new SecurityLicenseService().setup({
       license$: rawLicense$,
     });
 
     const subscriptionHandler = jest.fn();
-    const subscription = serviceSetup.license.getChanges$().subscribe(subscriptionHandler);
+    const subscription = serviceSetup.license.features$.subscribe(subscriptionHandler);
     try {
       expect(subscriptionHandler).toHaveBeenCalledTimes(1);
       rawLicense$.next(getMockRawLicense({ isAvailable: false }));

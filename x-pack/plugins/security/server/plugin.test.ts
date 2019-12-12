@@ -63,7 +63,16 @@ describe('Security Plugin', () => {
                     },
                   },
                   "license": Object {
-                    "getChanges$": [Function],
+                    "features$": Observable {
+                      "_isScalar": false,
+                      "operator": SwitchMapOperator {
+                        "project": [Function],
+                      },
+                      "source": Observable {
+                        "_isScalar": false,
+                        "_subscribe": [Function],
+                      },
+                    },
                     "getFeatures": [Function],
                     "isEnabled": [Function],
                   },
