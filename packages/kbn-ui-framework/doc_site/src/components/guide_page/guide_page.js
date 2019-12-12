@@ -31,10 +31,11 @@ export class GuidePage extends Component {
 
   onClickLink(id) {
     // Scroll to element.
+    // eslint-disable-next-line no-undef
     $('html, body').animate(
       {
-        // eslint-disable-line no-undef
-        scrollTop: $(`#${id}`).offset().top - 100, // eslint-disable-line no-undef
+        // eslint-disable-next-line no-undef
+        scrollTop: $(`#${id}`).offset().top - 100,
       },
       250
     );

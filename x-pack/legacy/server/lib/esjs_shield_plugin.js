@@ -5,8 +5,8 @@
  */
 
 (function(root, factory) {
+  // eslint-disable-next-line no-undef
   if (typeof define === 'function' && define.amd) {
-    // eslint-disable-line no-undef
     define([], factory); // eslint-disable-line no-undef
   } else if (typeof exports === 'object') {
     module.exports = factory();

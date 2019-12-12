@@ -108,8 +108,8 @@ describe('xsrf request filter', () => {
   });
 
   for (const method of destructiveMethods) {
+    // eslint-disable-next-line no-loop-func
     describe(`destructiveMethod: ${method}`, function() {
-      // eslint-disable-line no-loop-func
       it('accepts requests with the xsrf header', async function() {
         await kbnTestServer.request[method.toLowerCase()](root, testPath)
           .set(xsrfHeader, 'anything')

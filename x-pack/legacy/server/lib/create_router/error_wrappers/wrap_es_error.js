@@ -13,8 +13,8 @@ function extractCausedByChain(causedBy = {}, accumulator = []) {
     accumulator.push(reason);
   }
 
+  // eslint-disable-next-line camelcase
   if (caused_by) {
-    // eslint-disable-line camelcase
     return extractCausedByChain(caused_by, accumulator);
   }
 
