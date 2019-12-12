@@ -80,7 +80,7 @@ export async function generateCsvSearch(
 
   let payloadQuery: QueryFilter | undefined;
   let payloadSort: any[] = [];
-  let docValueFields: any[] = [];
+  let docValueFields: any[] | undefined;
   if (jobParams.post && jobParams.post.state) {
     ({
       post: {
@@ -118,7 +118,11 @@ export async function generateCsvSearch(
     }, {});
 
   if (indexPatternTimeField) {
-    docValueFields = [indexPatternTimeField].concat(docValueFields);
+    if (docValueFields) {
+      docValueFields = [indexPatternTimeField].concat(docValueFields);
+    } else {
+      docValueFields = [indexPatternTimeField];
+    }
   }
 
   const searchRequest: SearchRequest = {
