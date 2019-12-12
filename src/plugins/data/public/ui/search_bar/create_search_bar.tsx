@@ -32,7 +32,7 @@ interface StatefulSearchBarDeps {
   storage: IStorageWrapper;
 }
 
-export type StatetfulSearchBarProps = SearchBarOwnProps & {
+export type StatefulSearchBarProps = SearchBarOwnProps & {
   appName: string;
 };
 
@@ -55,7 +55,7 @@ const defaultOnRefreshChange = (query: QueryStart) => {
 export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
-  return (props: StatetfulSearchBarProps) => {
+  return (props: StatefulSearchBarProps) => {
     const { filterManager, timefilter } = data.query;
     const tfRefreshInterval = timefilter.timefilter.getRefreshInterval();
     const fmFilters = filterManager.getFilters();
