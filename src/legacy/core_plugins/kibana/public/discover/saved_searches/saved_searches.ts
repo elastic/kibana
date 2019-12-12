@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import './_saved_search';
+import { npStart } from 'ui/new_platform';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
-import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
+import { SavedObjectLoader } from 'ui/saved_objects';
+import { SavedObjectKibanaServices } from 'ui/saved_objects/types';
+// @ts-ignore
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';
-
+import { createSavedSearchClass } from './_saved_search';
 
 // Register this service with the saved object registry so it can be
 // edited by the object editor.
@@ -30,9 +32,13 @@ savedObjectManagementRegistry.register({
   title: 'searches',
 });
 
-export function createSavedSearchesService(Private, SavedSearch, kbnUrl, chrome) {
-  const savedObjectClient = Private(SavedObjectsClientProvider);
-  const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnUrl, chrome, savedObjectClient);
+export function createSavedSearchesService(services: SavedObjectKibanaServices) {
+  const SavedSearchClass = createSavedSearchClass(services);
+  const savedSearchLoader = new SavedObjectLoader(
+    SavedSearchClass,
+    services.savedObjectsClient,
+    services.chrome
+  );
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .
   savedSearchLoader.loaderProperties = {
     name: 'searches',
@@ -40,11 +46,18 @@ export function createSavedSearchesService(Private, SavedSearch, kbnUrl, chrome)
     nouns: 'saved searches',
   };
 
-  savedSearchLoader.urlFor = (id) => {
-    return kbnUrl.eval('#/discover/{{id}}', { id: id });
-  };
+  savedSearchLoader.urlFor = (id: string) => `#/discover/${encodeURIComponent(id)}`;
 
   return savedSearchLoader;
 }
+// this is needed for saved object management
 const module = uiModules.get('discover/saved_searches');
-module.service('savedSearches', createSavedSearchesService);
+module.service('savedSearches', () => {
+  const services = {
+    savedObjectsClient: npStart.core.savedObjects.client,
+    indexPatterns: npStart.plugins.data.indexPatterns,
+    chrome: npStart.core.chrome,
+    overlays: npStart.core.overlays,
+  };
+  return createSavedSearchesService(services);
+});
