@@ -27,12 +27,12 @@ export interface BfetchPublicSetupDependencies {}
 // eslint-disable-next-line
 export interface BfetchPublicStartDependencies {}
 
-export interface BfetchPublicSetup {
+export interface BfetchPublicApi {
   fetchStreaming: (params: FetchStreamingParams) => ReturnType<typeof fetchStreamingStatic>;
 }
 
-// eslint-disable-next-line
-export interface BfetchPublicStart {}
+export type BfetchPublicSetup = BfetchPublicApi;
+export type BfetchPublicStart = BfetchPublicApi;
 
 export class BfetchPublicPlugin
   implements
@@ -42,6 +42,8 @@ export class BfetchPublicPlugin
       BfetchPublicSetupDependencies,
       BfetchPublicStartDependencies
     > {
+  private api!: BfetchPublicApi;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchPublicSetupDependencies): BfetchPublicSetup {
@@ -50,18 +52,15 @@ export class BfetchPublicPlugin
       core.http.basePath.get()
     );
 
-    return {
+    this.api = {
       fetchStreaming,
     };
+
+    return this.api;
   }
 
   public start(core: CoreStart, plugins: BfetchPublicStartDependencies): BfetchPublicStart {
-    // this.ajaxStream = ajaxStream(
-    // this.initializerContext.env.packageInfo.version,
-    // core.http.basePath.get()
-    // );
-
-    return {};
+    return this.api;
   }
 
   public stop() {}

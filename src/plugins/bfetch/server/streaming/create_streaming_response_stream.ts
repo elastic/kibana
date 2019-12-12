@@ -33,7 +33,7 @@ export const createStreamingResponseStream = <Payload, Response>(
     next: (message: Response) => {
       try {
         const line = JSON.stringify(message);
-        stream.write(`${line.length}${delimiter}${line}${delimiter}`);
+        stream.write(`${line}${delimiter}`);
       } catch (error) {
         // eslint-disable-next-line
         console.error('Could not serialize or stream a message.')

@@ -52,16 +52,6 @@ export class BfetchServerPlugin
     const router = core.http.createRouter();
     const addStreamingResponseRoute = this.addStreamingResponseRoute(router);
 
-    addStreamingResponseRoute('example', {
-      onRequest: payload => {
-        const subject = new ReplaySubject();
-        subject.next(payload);
-        setTimeout(() => subject.next('end'), 2000);
-        setTimeout(() => subject.complete(), 2001);
-        return subject;
-      },
-    });
-
     return {
       addStreamingResponseRoute,
     };
