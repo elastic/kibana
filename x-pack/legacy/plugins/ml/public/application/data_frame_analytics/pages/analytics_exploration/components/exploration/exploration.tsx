@@ -20,6 +20,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiProgress,
+  EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -486,6 +487,7 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
       )}
       {(columns.length > 0 || searchQuery !== defaultSearchQuery) && sortField !== '' && (
         <>
+          <EuiSpacer size="s" />
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               {tableItems.length === SEARCH_SIZE && (
@@ -506,10 +508,9 @@ export const Exploration: FC<Props> = React.memo(({ jobId, jobStatus }) => {
                 title={i18n.translate(
                   'xpack.ml.dataframe.analytics.exploration.colorRangeLegendTitle',
                   {
-                    defaultMessage: 'Cell color coding is based on feature influence score',
+                    defaultMessage: 'Feature influence score',
                   }
                 )}
-                titleAlign="right"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

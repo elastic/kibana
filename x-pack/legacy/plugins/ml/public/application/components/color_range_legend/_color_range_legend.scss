@@ -1,8 +1,7 @@
 /* Overrides for d3/svg default styles */
 .mlColorRangeLegend {
-  font: 11px sans-serif;
-  
   text {
+    @include fontSize($euiFontSizeXS - 2px);
     fill: $euiColorDarkShade;
   }
 

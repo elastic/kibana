@@ -7,14 +7,13 @@
 import React, { useEffect, useRef, FC } from 'react';
 import d3 from 'd3';
 
-import { EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 const COLOR_RANGE_RESOLUTION = 10;
 
 interface ColorRangeLegendProps {
   colorRange: (d: number) => string;
   title?: string;
-  titleAlign?: 'left' | 'right';
   width?: number;
 }
 
@@ -24,12 +23,7 @@ interface ColorRangeLegendProps {
  *
  * @param props ColorRangeLegendProps
  */
-export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
-  colorRange,
-  title,
-  titleAlign = 'left',
-  width = 300,
-}) => {
+export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({ colorRange, title, width = 250 }) => {
   const d3Container = useRef<null | SVGSVGElement>(null);
 
   const scale = d3.range(COLOR_RANGE_RESOLUTION + 1).map(d => ({
@@ -45,7 +39,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
     const wrapperHeight = 32;
     const wrapperWidth = width;
 
-    const margin = { top: 2, bottom: 20, left: 8, right: 8 };
+    const margin = { top: 2, bottom: 20, left: 1, right: 1 };
 
     const legendWidth = wrapperWidth - margin.left - margin.right;
     const legendHeight = wrapperHeight - margin.top - margin.bottom;
@@ -100,7 +94,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
       .axis()
       .scale(legendScale)
       .orient('bottom')
-      .tickSize(legendHeight + 6)
+      .tickSize(legendHeight + 4)
       .ticks(legendWidth / 40);
 
     wrapper
@@ -108,16 +102,30 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
       .attr('class', 'legend axis')
       .attr('transform', 'translate(0, 0)')
       .call(legendAxis);
+
+    // Adjust the alignment of the first and last tick text
+    // so that the tick labels don't overflow the color range.
+    const text = wrapper.selectAll('text')[0];
+    if (text.length > 1) {
+      d3.select(text[0]).style('text-anchor', 'start');
+      d3.select(text[text.length - 1]).style('text-anchor', 'end');
+    }
   }, [JSON.stringify(scale), d3Container.current]);
 
+  if (title === undefined) {
+    return <svg ref={d3Container} />;
+  }
+
   return (
-    <>
-      {title && (
-        <EuiText size="xs" color="subdued" textAlign={titleAlign}>
-          {title}
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem>
+        <EuiText size="xs">
+          <strong>{title}</strong>
         </EuiText>
-      )}
-      <svg ref={d3Container} />
-    </>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <svg ref={d3Container} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
