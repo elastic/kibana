@@ -23,8 +23,6 @@ export function createSavedSearchClass(services: SavedObjectKibanaServices) {
   const SavedObjectClass = createSavedObjectClass(services);
 
   class SavedSearch extends SavedObjectClass {
-    public static fieldOrder = ['title', 'description'];
-    public static searchSource = true;
     public static type: string = 'search';
     public static mapping = {
       title: 'text',
