@@ -28,7 +28,7 @@ import { getPercentileValue } from './percentiles_get_value';
 import { PercentilesEditor } from '../../vis/editors/default/controls/percentiles';
 
 // @ts-ignore
-import { ordinalSuffix } from '../../utils/ordinal_suffix';
+import { ordinalSuffix } from './lib/ordinal_suffix';
 
 export type IPercentileAggConfig = IResponseAggConfig;
 
