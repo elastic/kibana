@@ -9,5 +9,5 @@ The CSP rules used for Kibana.
 <b>Signature:</b>
 
 ```typescript
-rules: string[];
+readonly rules: string[];
 ```

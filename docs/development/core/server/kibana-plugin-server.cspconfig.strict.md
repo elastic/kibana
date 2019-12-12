@@ -9,5 +9,5 @@ Specify whether browsers that do not support CSP should be able to use Kibana. U
 <b>Signature:</b>
 
 ```typescript
-strict: boolean;
+readonly strict: boolean;
 ```

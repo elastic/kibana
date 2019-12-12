@@ -578,10 +578,10 @@ export interface CoreStart {
 export class CspConfig {
     // Warning: (ae-forgotten-export) The symbol "CspConfigType" needs to be exported by the entry point index.d.ts
     constructor(rawCspConfig?: Partial<CspConfigType>);
-    header: string;
-    rules: string[];
-    strict: boolean;
-    warnLegacyBrowsers: boolean;
+    readonly header: string;
+    readonly rules: string[];
+    readonly strict: boolean;
+    readonly warnLegacyBrowsers: boolean;
 }
 
 // @public

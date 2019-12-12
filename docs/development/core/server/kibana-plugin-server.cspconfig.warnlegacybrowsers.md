@@ -9,5 +9,5 @@ Specify whether users with legacy browsers should be warned about their lack of 
 <b>Signature:</b>
 
 ```typescript
-warnLegacyBrowsers: boolean;
+readonly warnLegacyBrowsers: boolean;
 ```

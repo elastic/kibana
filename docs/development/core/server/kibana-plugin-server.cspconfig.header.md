@@ -9,5 +9,5 @@ The CSP rules in a formatted directives string for use in a `Content-Security-Po
 <b>Signature:</b>
 
 ```typescript
-header: string;
+readonly header: string;
 ```
