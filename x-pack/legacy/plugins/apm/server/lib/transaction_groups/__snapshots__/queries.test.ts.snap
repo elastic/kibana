@@ -41,6 +41,7 @@ Object {
           },
         },
         "terms": Object {
+          "execution_hint": "map",
           "field": "transaction.name",
           "order": Object {
             "sum": "desc",
@@ -135,6 +136,7 @@ Object {
           },
         },
         "terms": Object {
+          "execution_hint": "map",
           "field": "transaction.name",
           "order": Object {
             "sum": "desc",
