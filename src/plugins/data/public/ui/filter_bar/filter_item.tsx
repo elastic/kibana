@@ -24,7 +24,7 @@ import React, { Component } from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { FilterEditor } from './filter_editor';
 import { FilterView } from './filter_view';
-import { esFilters, utils, IIndexPattern } from '../..';
+import { esFilters, IIndexPattern } from '../..';
 
 interface Props {
   id: string;
@@ -60,7 +60,7 @@ class FilterItemUI extends Component<Props, State> {
       this.props.className
     );
 
-    const valueLabel = utils.getDisplayValueFromFilter(filter, this.props.indexPatterns);
+    const valueLabel = esFilters.getDisplayValueFromFilter(filter, this.props.indexPatterns);
     const dataTestSubjKey = filter.meta.key ? `filter-key-${filter.meta.key}` : '';
     const dataTestSubjValue = filter.meta.value ? `filter-value-${valueLabel}` : '';
     const dataTestSubjDisabled = `filter-${
