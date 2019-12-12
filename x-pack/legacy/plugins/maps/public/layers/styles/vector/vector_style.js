@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { VectorStyleEditor } from './components/vector_style_editor';
-import { getDefaultProperties, VECTOR_STYLES } from './vector_style_defaults';
+import { getDefaultProperties, LINE_STYLES, POLYGON_STYLES, VECTOR_STYLES } from './vector_style_defaults';
 import { AbstractStyle } from '../abstract_style';
 import {
   GEO_JSON_TYPE,
@@ -21,7 +21,7 @@ import { VectorStyleLegend } from './components/legend/vector_style_legend';
 import { VECTOR_SHAPE_TYPES } from '../../sources/vector_feature_types';
 import { SYMBOLIZE_AS_CIRCLE, SYMBOLIZE_AS_ICON } from './vector_constants';
 import { getMakiSymbolAnchor } from './symbol_utils';
-import { getComputedFieldName, scaleValue } from './style_util';
+import { getComputedFieldName, isOnlySingleFeatureType, scaleValue } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -253,32 +253,23 @@ export class VectorStyle extends AbstractStyle {
     return styleProperties.filter(styleProperty => (styleProperty.isDynamic() && styleProperty.isComplete()));
   }
 
-  _checkIfOnlyFeatureType = async (featureType) => {
-    const supportedFeatures = await this._source.getSupportedShapeTypes();
-
-    if (supportedFeatures.length === 1) {
-      return supportedFeatures[0] === featureType;
-    }
-
-    if (!this._descriptor.__styleMeta || !this._descriptor.__styleMeta.hasFeatureType) {
-      return false;
-    }
-
-    const featureTypes = Object.keys(this._descriptor.__styleMeta.hasFeatureType);
-    return featureTypes.reduce((isOnlySingleFeatureType, featureTypeKey) => {
-      const hasFeature = this._descriptor.__styleMeta.hasFeatureType[featureTypeKey];
-      return featureTypeKey === featureType
-        ? isOnlySingleFeatureType && hasFeature
-        : isOnlySingleFeatureType && !hasFeature;
-    }, true);
+  _isOnlySingleFeatureType = async (featureType) => {
+    return isOnlySingleFeatureType(
+      featureType,
+      await this._source.getSupportedShapeTypes(),
+      this._getStyleMeta().hasFeatureType);
   }
 
   _getIsPointsOnly = async () => {
-    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POINT);
+    return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POINT);
   }
 
   _getIsLinesOnly = async () => {
-    return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.LINE);
+    return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.LINE);
+  }
+
+  _getIsPolygonsOnly = async () => {
+    return this._isOnlySingleFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
   }
 
   _getFieldMeta = (fieldName) => {
@@ -321,6 +312,10 @@ export class VectorStyle extends AbstractStyle {
 
   }
 
+  _getStyleMeta = () => {
+    return _.get(this._descriptor, '__styleMeta', {});
+  }
+
   getIcon = () => {
     const styles = this.getRawProperties();
     const symbolId = this.arePointsSymbolizedAsCircles()
@@ -337,21 +332,43 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  renderLegendDetails() {
-    const styles = this._getAllStyleProperties();
-    const styleProperties = styles.map((style) => {
-      return {
-        // eslint-disable-next-line max-len
-        range: (style.isDynamic() && style.isComplete() && style.getField().getName()) ? this._getFieldMeta(style.getField().getName()) : null,
-        style: style
-      };
-    });
+  async _getLegendDetailStyleProperties() {
+    const isLinesOnly = await this._getIsLinesOnly();
+    const isPolygonsOnly = await this._getIsPolygonsOnly();
 
-    return (
-      <VectorStyleLegend
-        styleProperties={styleProperties}
-      />
-    );
+    return this.getDynamicPropertiesArray().filter(styleProperty => {
+      if (isLinesOnly) {
+        return LINE_STYLES.includes(styleProperty.getStyleName());
+      }
+
+      if (isPolygonsOnly) {
+        return POLYGON_STYLES.includes(styleProperty.getStyleName());
+      }
+
+      return true;
+    });
+  }
+
+  async hasLegendDetails() {
+    const styles = await this._getLegendDetailStyleProperties();
+    return styles.length > 0;
+  }
+
+  renderLegendDetails() {
+    const loadRows = async () => {
+      const styles = await this._getLegendDetailStyleProperties();
+      const promises = styles.map(async (style) => {
+        return {
+          label: await style.getField().getLabel(),
+          fieldFormatter: await this._source.getFieldFormatter(style.getField().getName()),
+          range: this._getFieldMeta(style.getField().getName()),
+          style,
+        };
+      });
+      return await Promise.all(promises);
+    };
+
+    return <VectorStyleLegend loadRows={loadRows} />;
   }
 
   _getFeatureStyleParams() {

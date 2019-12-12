@@ -29,8 +29,6 @@ import chromeLegacy from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/plugins/data/public';
 // @ts-ignore
-import { StateProvider } from 'ui/state_management/state';
-// @ts-ignore
 import { createSavedSearchesService } from '../saved_searches/saved_searches';
 // @ts-ignore
 import { createSavedSearchFactory } from '../saved_searches/_saved_search';
@@ -57,7 +55,6 @@ export interface DiscoverServices {
   // legacy
   getSavedSearchById: (id: string) => Promise<SavedSearch>;
   getSavedSearchUrlById: (id: string) => Promise<string>;
-  State: unknown;
   uiSettings: IUiSettingsClient;
 }
 
@@ -65,13 +62,11 @@ export async function buildGlobalAngularServices() {
   const injector = await chromeLegacy.dangerouslyGetActiveInjector();
   const Private = injector.get<IPrivate>('Private');
   const kbnUrl = injector.get<IPrivate>('kbnUrl');
-  const State = Private(StateProvider);
   const SavedSearchFactory = createSavedSearchFactory(Private);
   const service = createSavedSearchesService(Private, SavedSearchFactory, kbnUrl, chromeLegacy);
   return {
     getSavedSearchById: async (id: string) => service.get(id),
     getSavedSearchUrlById: async (id: string) => service.urlFor(id),
-    State,
   };
 }
 

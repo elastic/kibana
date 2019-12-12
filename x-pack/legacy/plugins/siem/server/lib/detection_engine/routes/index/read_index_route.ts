@@ -27,7 +27,7 @@ export const createReadIndexRoute = (server: ServerFacade): Hapi.ServerRoute => 
     async handler(request: RequestFacade, headers) {
       try {
         const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request);
+        const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (indexExists) {
           // head request is used for if you want to get if the index exists

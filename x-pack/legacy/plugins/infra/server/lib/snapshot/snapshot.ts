@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { RequestHandlerContext } from 'src/core/server';
 import {
   InfraSnapshotGroupbyInput,
@@ -70,8 +69,9 @@ const bucketSelector = (
   response: InfraDatabaseSearchResponse<{}, InfraSnapshotAggregationResponse>
 ) => (response.aggregations && response.aggregations.nodes.buckets) || [];
 
-const handleAfterKey = createAfterKeyHandler('body.aggregations.nodes.composite.after', input =>
-  idx(input, _ => _.aggregations.nodes.after_key)
+const handleAfterKey = createAfterKeyHandler(
+  'body.aggregations.nodes.composite.after',
+  input => input?.aggregations?.nodes?.after_key
 );
 
 const requestGroupedNodes = async (

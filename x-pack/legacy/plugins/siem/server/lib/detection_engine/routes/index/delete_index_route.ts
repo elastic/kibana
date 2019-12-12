@@ -42,7 +42,7 @@ export const createDeleteIndexRoute = (server: ServerFacade): Hapi.ServerRoute =
     async handler(request: RequestFacade) {
       try {
         const index = getIndex(request, server);
-        const callWithRequest = callWithRequestFactory(request);
+        const callWithRequest = callWithRequestFactory(request, server);
         const indexExists = await getIndexExists(callWithRequest, index);
         if (!indexExists) {
           return new Boom(`index: "${index}" does not exist`, { statusCode: 404 });

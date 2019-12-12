@@ -6,7 +6,6 @@
 
 export * from './log_analysis_capabilities';
 export * from './log_analysis_cleanup';
-export * from './log_analysis_jobs';
-export * from './log_analysis_results';
-export * from './log_analysis_results_url_state';
-export * from './log_analysis_status_state';
+export * from './log_analysis_module';
+export * from './log_analysis_module_status';
+export * from './log_analysis_module_types';

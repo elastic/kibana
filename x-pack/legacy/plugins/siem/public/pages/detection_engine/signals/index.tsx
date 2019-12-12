@@ -64,7 +64,7 @@ export const SignalsTable = React.memo(() => {
       <GlobalTime>
         {({ to, from, setQuery, deleteQuery, isInitializing }) => (
           <StatefulEventsViewer
-            defaultIndices={[DEFAULT_SIGNALS_INDEX]}
+            defaultIndices={[`${DEFAULT_SIGNALS_INDEX}-default`]}
             defaultFilters={filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters}
             defaultModel={signalsDefaultModel}
             end={to}

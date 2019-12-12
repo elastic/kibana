@@ -145,8 +145,8 @@ export class VectorLayer extends AbstractLayer {
     return 'vector';
   }
 
-  hasLegendDetails() {
-    return this._style.getDynamicPropertiesArray().length > 0;
+  async hasLegendDetails() {
+    return this._style.hasLegendDetails();
   }
 
   renderLegendDetails() {

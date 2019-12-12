@@ -62,6 +62,7 @@ export default function (kibana) {
       hacks: [
         'plugins/kibana/discover',
         'plugins/kibana/dev_tools',
+        'plugins/kibana/visualize',
       ],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
