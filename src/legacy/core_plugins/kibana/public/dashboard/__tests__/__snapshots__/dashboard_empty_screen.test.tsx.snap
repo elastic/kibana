@@ -230,14 +230,18 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                         type="dashboardApp"
                       >
                         <EuiIconEmpty
+                          aria-hidden={true}
                           className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                           focusable="false"
+                          role="img"
                           style={null}
                         >
                           <svg
+                            aria-hidden={true}
                             className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
@@ -583,14 +587,18 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                         type="dashboardApp"
                       >
                         <EuiIconEmpty
+                          aria-hidden={true}
                           className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                           focusable="false"
+                          role="img"
                           style={null}
                         >
                           <svg
+                            aria-hidden={true}
                             className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app euiIcon-isLoading"
                             focusable="false"
                             height={16}
+                            role="img"
                             style={null}
                             viewBox="0 0 16 16"
                             width={16}
