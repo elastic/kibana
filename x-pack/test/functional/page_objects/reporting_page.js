@@ -7,6 +7,13 @@
 import { parse } from 'url';
 import http from 'http';
 
+/*
+ * NOTE: Reporting is a service, not an app. The page objects that are
+ * important for generating reports belong to the apps that integrate with the
+ * Reporting service. Eventually, this file should be dissolved across the
+ * apps that need it for testing their integration.
+ * Issue: https://github.com/elastic/kibana/issues/52927
+ */
 export function ReportingPageProvider({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
@@ -22,7 +29,7 @@ export function ReportingPageProvider({ getService, getPageObjects }) {
       log.debug('ReportingPage:initTests');
       await PageObjects.settings.navigateTo();
       await esArchiver.loadIfNeeded('../../functional/es_archives/logstash_functional');
-      await esArchiver.load('historic');
+      await esArchiver.load('reporting/historic');
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'logstash-*'
       });
