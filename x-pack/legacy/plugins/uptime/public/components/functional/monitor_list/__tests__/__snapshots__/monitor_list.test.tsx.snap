@@ -52,8 +52,6 @@ exports[`MonitorList component renders a no items message when no data is provid
           Object {
             "align": "right",
             "field": "state",
-            "hasActions": true,
-            "id": "actions",
             "mobileOptions": Object {
               "header": false,
             },
@@ -159,8 +157,6 @@ exports[`MonitorList component renders the monitor list 1`] = `
           Object {
             "align": "right",
             "field": "state",
-            "hasActions": true,
-            "id": "actions",
             "mobileOptions": Object {
               "header": false,
             },
