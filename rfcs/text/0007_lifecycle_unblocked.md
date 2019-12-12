@@ -2,6 +2,37 @@
 - RFC PR: (leave this empty)
 - Kibana Issue: (leave this empty)
 
+- [Summary](#summary)
+- [Motivation](#motivation)
+- [Detailed design](#detailed-design)
+    - [<ol>
+<li>Synchronous lifecycle methods</li>
+</ol>](#ollisynchronous-lifecycle-methodsliol)
+    - [<ol start="2">
+<li>Synchronous Context Provider functions</li>
+</ol>](#ol-start2lisynchronous-context-provider-functionsliol)
+    - [<ol start="3">
+<li>Core should not expose API's as observables</li>
+</ol>](#ol-start3licore-should-not-expose-apis-as-observablesliol)
+    - [<ol start="4">
+<li>Complete example code</li>
+</ol>](#ol-start4licomplete-example-codeliol)
+    - [<ol start="5">
+<li>Core should expose a status signal for Core services &amp; plugins</li>
+</ol>](#ol-start5licore-should-expose-a-status-signal-for-core-services-amp-pluginsliol)
+- [Drawbacks](#drawbacks)
+- [Alternatives](#alternatives)
+  - [<ol>
+<li>Introduce a lifecycle/context provider timeout</li>
+</ol>](#olliintroduce-a-lifecyclecontext-provider-timeoutliol)
+  - [<ol start="2">
+<li>Treat anything that blocks Kibana from starting up as a bug</li>
+</ol>](#ol-start2litreat-anything-that-blocks-kibana-from-starting-up-as-a-bugliol)
+- [Adoption strategy](#adoption-strategy)
+- [How we teach this](#how-we-teach-this)
+- [Unresolved questions](#unresolved-questions)
+- [Footnotes](#footnotes)
+
 # Summary
 
 Prevent plugin lifecycle methods from blocking Kibana startup by making the
@@ -303,59 +334,52 @@ Drawbacks:
    administrator. 
 
 # Adoption strategy
+Although the eventual goal is to have sync-only lifecycles / providers, we
+will start by deprecating async behaviour and implementing a 30s timeout as
+per alternative (1). This will immediately lower the impact of plugin bugs
+while at the same time enabling a more incremental rollout and the flexibility
+to discover use cases that would require adopting Core API's to support sync
+lifecycles / providers.
+
 Adoption and implementation should be handled as follows:
+ - Adopt Core API’s to make sync lifecycles easier (3)
+ - Update migration guide and other documentation examples.
+ - Deprecate async lifecycles / context providers with a warning. Add a
+   timeout of 30s after which a plugin and it's dependencies will be disabled.
+ - Refactor existing plugin lifecycles which are easily converted to sync
+ - Future: remove async timeout lifecycles / context providers
 
-1. Don't expose core API's as observables (3).
-   This should be implemented first to improve the ergonomics of working with
-   core API's from inside synchronous context providers and lifecycle functions.
-   
-   Plugins consuming observable-based API's generally follow a pattern like the
-   following which effectively ignores the observable and should be easy to
-   refactor:
-
-   ```diff
-   - const adminClient = await coreSetup.elasticsearch.adminClient$.pipe(take(1)).toPromise();
-   + const adminClient = coreSetup.elasticsearch.adminClient;
-   ```
-
-2. Making context provider functions synchronous (2)
-   Adoption of context provider functions is still fairly low, so the amount
-   of change required by plugin authors should be limited.
-
-3. Synchronous lifecycle methods (1) will have the biggest impact on plugins
-   since many NP plugins and shims have been built with async lifecycle
-   methods in mind.
-
-   The following New Platform plugins or shims currently rely on async lifecycle functions:
-   1. [region_map](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/region_map/public/plugin.ts#L68)
-   2. [tile_map](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/tile_map/public/plugin.ts#L62)
-   3. [vis_type_table](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/vis_type_table/public/plugin.ts#L61)
-   4. [vis_type_vega](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/vis_type_vega/public/plugin.ts#L59)
-   5. [timelion](https://github.com/elastic/kibana/blob/9d69b72a5f200e58220231035b19da852fc6b0a5/src/plugins/timelion/server/plugin.ts#L40)
-   6. [code](https://github.com/elastic/kibana/blob/5049b460b47d4ae3432e1d9219263bb4be441392/x-pack/legacy/plugins/code/server/plugin.ts#L129-L149)
-   7. [spaces](https://github.com/elastic/kibana/blob/096c7ee51136327f778845c636d7c4f1188e5db2/x-pack/legacy/plugins/spaces/server/new_platform/plugin.ts#L95)
-   8. [licensing](https://github.com/elastic/kibana/blob/4667c46caef26f8f47714504879197708debae32/x-pack/plugins/licensing/server/plugin.ts)
-   9. [security](https://github.com/elastic/kibana/blob/0f2324e44566ce2cf083d89082841e57d2db6ef6/x-pack/plugins/security/server/plugin.ts#L96)
-
-Once this RFC has been merged we should educate teams on the implications to
-allow existing New Platform plugins to remove any async lifecycle
-behaviour they're relying on before we change this in core.
+The following New Platform plugins or shims currently rely on async lifecycle
+functions and will be impacted:
+1. [region_map](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/region_map/public/plugin.ts#L68)
+2. [tile_map](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/tile_map/public/plugin.ts#L62)
+3. [vis_type_table](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/vis_type_table/public/plugin.ts#L61)
+4. [vis_type_vega](https://github.com/elastic/kibana/blob/6039709929caf0090a4130b8235f3a53bd04ed84/src/legacy/core_plugins/vis_type_vega/public/plugin.ts#L59)
+5. [timelion](https://github.com/elastic/kibana/blob/9d69b72a5f200e58220231035b19da852fc6b0a5/src/plugins/timelion/server/plugin.ts#L40)
+6. [code](https://github.com/elastic/kibana/blob/5049b460b47d4ae3432e1d9219263bb4be441392/x-pack/legacy/plugins/code/server/plugin.ts#L129-L149)
+7. [spaces](https://github.com/elastic/kibana/blob/096c7ee51136327f778845c636d7c4f1188e5db2/x-pack/legacy/plugins/spaces/server/new_platform/plugin.ts#L95)
+8. [licensing](https://github.com/elastic/kibana/blob/4667c46caef26f8f47714504879197708debae32/x-pack/plugins/licensing/server/plugin.ts)
+9. [security](https://github.com/elastic/kibana/blob/0f2324e44566ce2cf083d89082841e57d2db6ef6/x-pack/plugins/security/server/plugin.ts#L96)
 
 # How we teach this
 
-Plugin lifecycle methods in the New Platform are no longer async.
-Plugins should treat the setup lifecycle as a place in time to register
-functionality with core or other plugins' API's and not as a mechanism to kick
-off and wait for any initialization that's required for the plugin to be able
-to run.
+Async Plugin lifecycle methods and async context provider functions have been
+deprecated. In the future all lifecycle methods will by sync only. Plugins
+should treat the setup lifecycle as a place in time to register functionality
+with core or other plugins' API's and not as a mechanism to kick off and wait
+for any initialization that's required for the plugin to be able to run.
 
 # Unresolved questions
-1. Are the drawbacks worth the benefits or can we live with Kibana potentially
-being blocked for the sake of convenient async lifecycle stages?
+1. ~~Are the drawbacks worth the benefits or can we live with Kibana potentially
+being blocked for the sake of convenient async lifecycle stages?~~
 
 2. Should core provide conventions or patterns for plugins to construct a
    snapshot of state and reactively updating this state and the behaviour it
    drives as the state of the world changes?
+
+3. Do plugins ever need to read config values and pass these as parameters to
+   Core API’s? If so we would have to expose synchronous config values to
+   support sync lifecycles.
 
 # Footnotes
 [1] Synchronous lifecycles can still be blocked by e.g. an infine for loop,
