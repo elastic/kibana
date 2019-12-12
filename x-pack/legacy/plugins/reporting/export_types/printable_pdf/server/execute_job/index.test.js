@@ -67,7 +67,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from('')));
 
-  const executeJob = executeJobFactory(mockServer);
+  const executeJob = executeJobFactory(mockServer, { browserDriverFactory: {} });
   const browserTimezone = 'UTC';
   await executeJob('pdfJobId', { objects: [], browserTimezone, headers: encryptedHeaders }, cancellationToken);
 
@@ -84,7 +84,7 @@ test(`passes browserTimezone to generatePdf`, async () => {
 });
 
 test(`returns content_type of application/pdf`, async () => {
-  const executeJob = executeJobFactory(mockServer);
+  const executeJob = executeJobFactory(mockServer, { browserDriverFactory: {} });
   const encryptedHeaders = await encryptHeaders({});
 
   const generatePdfObservable = generatePdfObservableFactory();
@@ -104,7 +104,7 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const generatePdfObservable = generatePdfObservableFactory();
   generatePdfObservable.mockReturnValue(Rx.of(Buffer.from(testContent)));
 
-  const executeJob = executeJobFactory(mockServer);
+  const executeJob = executeJobFactory(mockServer, { browserDriverFactory: {} });
   const encryptedHeaders = await encryptHeaders({});
   const { content } = await executeJob('pdfJobId', { objects: [], timeRange: {}, headers: encryptedHeaders }, cancellationToken);
 

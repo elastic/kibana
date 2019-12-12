@@ -22,19 +22,12 @@ import { createSearchBar, StatetfulSearchBarProps } from './search';
 import { Storage, IStorageWrapper } from '../../../../../src/plugins/kibana_utils/public';
 import { DataPublicPluginStart } from '../../../../plugins/data/public';
 import { initLegacyModule } from './shim/legacy_module';
-import { IUiActionsSetup } from '../../../../plugins/ui_actions/public';
-import {
-  createFilterAction,
-  GLOBAL_APPLY_FILTER_ACTION,
-} from './filter/action/apply_filter_action';
-import { APPLY_FILTER_TRIGGER } from '../../../../plugins/embeddable/public';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { setFieldFormats } from '../../../../plugins/data/public/services';
 
 export interface DataPluginStartDependencies {
   data: DataPublicPluginStart;
-  uiActions: IUiActionsSetup;
 }
 
 /**
@@ -67,7 +60,7 @@ export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDe
     this.storage = new Storage(window.localStorage);
   }
 
-  public start(core: CoreStart, { data, uiActions }: DataPluginStartDependencies): DataStart {
+  public start(core: CoreStart, { data }: DataPluginStartDependencies): DataStart {
     // This is required for when Angular code uses Field and FieldList.
     setFieldFormats(data.fieldFormats);
     initLegacyModule(data.indexPatterns);
@@ -77,17 +70,6 @@ export class DataPlugin implements Plugin<void, DataStart, {}, DataPluginStartDe
       data,
       storage: this.storage,
     });
-
-    uiActions.registerAction(
-      createFilterAction(
-        core.overlays,
-        data.query.filterManager,
-        data.query.timefilter.timefilter,
-        data.indexPatterns
-      )
-    );
-
-    uiActions.attachAction(APPLY_FILTER_TRIGGER, GLOBAL_APPLY_FILTER_ACTION);
 
     return {
       ui: {

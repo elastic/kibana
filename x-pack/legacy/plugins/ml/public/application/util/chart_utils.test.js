@@ -58,7 +58,7 @@ timefilter.setTime({
 describe('getExploreSeriesLink', () => {
   test('get timeseriesexplorer link', () => {
     const link = getExploreSeriesLink(seriesConfig);
-    const expectedLink = `<basepath>/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(population-03)),` +
+    const expectedLink = `#/timeseriesexplorer?_g=(ml:(jobIds:!(population-03)),` +
       `refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2017-02-23T00:00:00.000Z',mode:absolute,` +
       `to:'2017-02-23T23:59:59.999Z'))&_a=(mlTimeSeriesExplorer%3A(detectorIndex%3A0%2Centities%3A` +
       `(nginx.access.remote_ip%3A'72.57.0.53')%2Czoom%3A(from%3A'2017-02-19T20%3A00%3A00.000Z'%2Cto%3A'2017-02-27T04%3A00%3A00.000Z'))` +

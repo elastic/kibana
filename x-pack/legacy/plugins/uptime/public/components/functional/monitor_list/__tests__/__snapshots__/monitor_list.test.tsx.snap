@@ -67,7 +67,7 @@ exports[`MonitorList component renders a no items message when no data is provid
             "name": "",
             "render": [Function],
             "sortable": true,
-            "width": "40px",
+            "width": "24px",
           },
         ]
       }
@@ -174,7 +174,7 @@ exports[`MonitorList component renders the monitor list 1`] = `
             "name": "",
             "render": [Function],
             "sortable": true,
-            "width": "40px",
+            "width": "24px",
           },
         ]
       }

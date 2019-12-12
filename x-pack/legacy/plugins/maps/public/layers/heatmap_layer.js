@@ -98,7 +98,7 @@ export class HeatmapLayer extends VectorLayer {
     return 'heatmap';
   }
 
-  hasLegendDetails() {
+  async hasLegendDetails() {
     return true;
   }
 

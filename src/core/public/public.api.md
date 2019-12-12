@@ -465,9 +465,6 @@ export type HandlerFunction<T extends object> = (context: T, ...args: any[]) => 
 export type HandlerParameters<T extends HandlerFunction<any>> = T extends (context: any, ...args: infer U) => any ? U : never;
 
 // @public (undocumented)
-export type HttpBody = BodyInit | null | any;
-
-// @public (undocumented)
 export interface HttpErrorRequest {
     // (undocumented)
     error: Error;
@@ -476,13 +473,14 @@ export interface HttpErrorRequest {
 }
 
 // @public (undocumented)
-export interface HttpErrorResponse extends HttpResponse {
+export interface HttpErrorResponse extends IHttpResponse {
     // (undocumented)
     error: Error | IHttpFetchError;
 }
 
 // @public
 export interface HttpFetchOptions extends HttpRequestInit {
+    asResponse?: boolean;
     headers?: HttpHeadersInit;
     prependBasePath?: boolean;
     query?: HttpFetchQuery;
@@ -495,7 +493,14 @@ export interface HttpFetchQuery {
 }
 
 // @public
-export type HttpHandler = (path: string, options?: HttpFetchOptions) => Promise<HttpBody>;
+export interface HttpHandler {
+    // (undocumented)
+    <TResponseBody = any>(path: string, options: HttpFetchOptions & {
+        asResponse: true;
+    }): Promise<IHttpResponse<TResponseBody>>;
+    // (undocumented)
+    <TResponseBody = any>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
+}
 
 // @public (undocumented)
 export interface HttpHeadersInit {
@@ -507,8 +512,8 @@ export interface HttpHeadersInit {
 export interface HttpInterceptor {
     request?(request: Request, controller: IHttpInterceptController): Promise<Request> | Request | void;
     requestError?(httpErrorRequest: HttpErrorRequest, controller: IHttpInterceptController): Promise<Request> | Request | void;
-    response?(httpResponse: HttpResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
-    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<InterceptedHttpResponse> | InterceptedHttpResponse | void;
+    response?(httpResponse: IHttpResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
+    responseError?(httpErrorResponse: HttpErrorResponse, controller: IHttpInterceptController): Promise<IHttpResponseInterceptorOverrides> | IHttpResponseInterceptorOverrides | void;
 }
 
 // @public
@@ -527,12 +532,6 @@ export interface HttpRequestInit {
     referrerPolicy?: ReferrerPolicy;
     signal?: AbortSignal | null;
     window?: null;
-}
-
-// @public (undocumented)
-export interface HttpResponse extends InterceptedHttpResponse {
-    // (undocumented)
-    request: Readonly<Request>;
 }
 
 // @public (undocumented)
@@ -613,11 +612,16 @@ export interface IHttpInterceptController {
 }
 
 // @public (undocumented)
-export interface InterceptedHttpResponse {
-    // (undocumented)
-    body?: HttpBody;
-    // (undocumented)
-    response?: Response;
+export interface IHttpResponse<TResponseBody = any> {
+    readonly body?: TResponseBody;
+    readonly request: Readonly<Request>;
+    readonly response?: Readonly<Response>;
+}
+
+// @public
+export interface IHttpResponseInterceptorOverrides<TResponseBody = any> {
+    readonly body?: TResponseBody;
+    readonly response?: Readonly<Response>;
 }
 
 // @public

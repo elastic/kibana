@@ -5,7 +5,7 @@
  */
 
 import { summarizeCopyResult } from './summarize_copy_result';
-import { ProcessedImportResponse } from 'ui/management/saved_objects_management';
+import { ProcessedImportResponse } from '../../../../../../../src/legacy/core_plugins/management/public';
 
 const createSavedObjectsManagementRecord = () => ({
   type: 'dashboard',

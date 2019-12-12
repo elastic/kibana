@@ -6,22 +6,24 @@
 import React from 'react';
 
 import { EuiLink } from '@elastic/eui';
-import { Link, withRouter } from 'react-router-dom';
+import { Link, withRouter, RouteComponentProps } from 'react-router-dom';
 
-export function ConnectedLinkComponent({
+interface ConnectedLinkComponent extends RouteComponentProps {
+  location: any;
+  path: string;
+  disabled: boolean;
+  query: any;
+  [key: string]: any;
+}
+
+export const ConnectedLinkComponent = ({
   location,
   path,
   query,
   disabled,
   children,
   ...props
-}: {
-  location: any;
-  path: string;
-  disabled: boolean;
-  query: any;
-  [key: string]: any;
-}) {
+}: ConnectedLinkComponent) => {
   if (disabled) {
     return <EuiLink aria-disabled="true" {...props} />;
   }
@@ -36,6 +38,6 @@ export function ConnectedLinkComponent({
       className={`euiLink euiLink--primary ${props.className || ''}`}
     />
   );
-}
+};
 
-export const ConnectedLink = withRouter<any>(ConnectedLinkComponent);
+export const ConnectedLink = withRouter(ConnectedLinkComponent);

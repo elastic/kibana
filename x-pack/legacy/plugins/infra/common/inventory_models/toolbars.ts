@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx/target';
 import { ReactNode, FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { InventoryItemType } from './types';
@@ -24,7 +23,7 @@ const toolbars: Toolbars = {
 };
 
 export const findToolbar = (type: InventoryItemType) => {
-  const Toolbar = idx(toolbars, _ => _[type]);
+  const Toolbar = toolbars?.[type];
   if (!Toolbar) {
     throw new Error(
       i18n.translate('xpack.infra.inventoryModels.findToolbar.error', {

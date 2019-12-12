@@ -11,11 +11,11 @@ import { APMError } from '../../../../../../typings/es_schemas/ui/APMError';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,
-  MockPluginContextWrapper
+  MockApmPluginContextWrapper
 } from '../../../../../utils/testHelpers';
 
 const renderOptions = {
-  wrapper: MockPluginContextWrapper
+  wrapper: MockApmPluginContextWrapper
 };
 
 function getError() {
