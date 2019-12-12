@@ -28,12 +28,9 @@ export async function createDatasource(options: {
   }
 
   const toSave = await installPipelines({ pkgkey, callCluster });
-  // TODO: Clean up
-  const info = await Registry.fetchInfo(pkgkey);
 
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
-  await installTemplates(info, callCluster);
   const pkg = await Registry.fetchInfo(pkgkey);
 
   await Promise.all([
