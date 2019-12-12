@@ -129,7 +129,7 @@ const NetworkTopNFlowTableComponent = React.memo<NetworkTopNFlowTableProps>(
           }
         }
       },
-      [sort, type, tableType]
+      [sort, type, tableType, updateNetworkTable]
     );
 
     const field =
