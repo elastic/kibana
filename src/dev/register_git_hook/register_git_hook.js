@@ -58,6 +58,15 @@ function getKbnPrecommitGitHookScript(rootPath, nodeHome, platform) {
 
   set -euo pipefail
 
+  # Make it possible to terminate pre commit hook
+  # using ctrl-c so nothing else would happen or be
+  # sent to the output.
+  #
+  # The correct exit code on that situation
+  # according the linux documentation project is 130
+  # https://www.tldp.org/LDP/abs/html/exitcodes.html
+  trap "exit 130" SIGINT
+
   has_node() {
     command -v node >/dev/null 2>&1
   }

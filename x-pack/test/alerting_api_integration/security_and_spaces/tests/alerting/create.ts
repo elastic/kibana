@@ -31,11 +31,32 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle create alert request appropriately', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/action`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              actionTypeId: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
-            .send(getTestAlertData());
+            .send(
+              getTestAlertData({
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+              })
+            );
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
@@ -56,7 +77,14 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                 id: response.body.id,
                 name: 'abc',
                 tags: ['foo'],
-                actions: [],
+                actions: [
+                  {
+                    id: createdAction.id,
+                    actionTypeId: createdAction.actionTypeId,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
                 enabled: true,
                 alertTypeId: 'test.noop',
                 params: {},

@@ -30,7 +30,7 @@ const actionTypeRegistryParams = {
 let actionsClient: ActionsClient;
 let actionTypeRegistry: ActionTypeRegistry;
 const executor: ExecutorType = async options => {
-  return { status: 'ok' };
+  return { status: 'ok', actionId: options.actionId };
 };
 
 beforeEach(() => {

@@ -17,13 +17,8 @@
  * under the License.
  */
 
-import { getServices } from '../kibana_services';
-
-const { embeddables, uiModules } = getServices();
-
-uiModules
-  .get('kibana/directive', ['ngSanitize'])
-  .directive('visualizationEmbedded', function (Private, $timeout, getAppState) {
+export function initVisualizationDirective(app, deps) {
+  app.directive('visualizationEmbedded', function ($timeout, getAppState) {
 
     return {
       restrict: 'E',
@@ -37,7 +32,7 @@ uiModules
       link: function ($scope, element) {
         $scope.renderFunction = async () => {
           if (!$scope._handler) {
-            $scope._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject($scope.savedObj, {
+            $scope._handler = await deps.embeddables.getEmbeddableFactory('visualization').createFromObject($scope.savedObj, {
               timeRange: $scope.timeRange,
               filters: $scope.filters || [],
               query: $scope.query,
@@ -66,3 +61,4 @@ uiModules
       }
     };
   });
+}

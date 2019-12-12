@@ -1,5 +1,3 @@
-@import 'node_modules/@elastic/eui/src/components/panel/mixins';
-
 discover-app {
   flex-grow: 1;
 
@@ -37,7 +35,7 @@ discover-app {
   z-index: 1;
 }
 
-@include euiPanel('dscWrapper__content');
+@include euiPanel('.dscWrapper__content');
 
 .dscWrapper__content {
   padding-top: $euiSizeXS;
@@ -213,7 +211,6 @@ discover-app {
 }
 
 .dscResults {
-
   h3 {
     margin: -20px 0 10px 0;
     text-align: center;

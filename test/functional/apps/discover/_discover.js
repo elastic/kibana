@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
@@ -171,20 +170,6 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-    });
-
-    describe('filter editor', function () {
-      it('should add a phrases filter', async function () {
-        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-      });
-
-      it('should show the phrases if you re-open a phrases filter', async function () {
-        await filterBar.clickEditFilter('extension.raw', 'jpg');
-        const phrases = await filterBar.getFilterEditorSelectedPhrases();
-        expect(phrases.length).to.be(1);
-        expect(phrases[0]).to.be('jpg');
-      });
     });
 
     describe('data-shared-item', function () {

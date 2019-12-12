@@ -375,6 +375,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.handler) {
       this.handler.update(this.expression, expressionParams);
     }
+
+    this.vis.emit('apply');
   }
 
   private handleVisUpdate = async () => {

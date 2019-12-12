@@ -17,28 +17,33 @@ import {
 } from '../../graphql/types';
 import { findInventoryModel } from '../../../common/inventory_models';
 
-interface Props {
+interface WaffleInventorySwitcherProps {
   nodeType: InfraNodeType;
   changeNodeType: (nodeType: InfraNodeType) => void;
   changeGroupBy: (groupBy: InfraSnapshotGroupbyInput[]) => void;
   changeMetric: (metric: InfraSnapshotMetricInput) => void;
 }
 
-export const WaffleInventorySwitcher = (props: Props) => {
+export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = ({
+  changeNodeType,
+  changeGroupBy,
+  changeMetric,
+  nodeType,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const closePopover = useCallback(() => setIsOpen(false), []);
   const openPopover = useCallback(() => setIsOpen(true), []);
   const goToNodeType = useCallback(
-    (nodeType: InfraNodeType) => {
+    (targetNodeType: InfraNodeType) => {
       closePopover();
-      props.changeNodeType(nodeType);
-      props.changeGroupBy([]);
-      const inventoryModel = findInventoryModel(nodeType);
-      props.changeMetric({
+      changeNodeType(targetNodeType);
+      changeGroupBy([]);
+      const inventoryModel = findInventoryModel(targetNodeType);
+      changeMetric({
         type: inventoryModel.metrics.defaultSnapshot as InfraSnapshotMetricType,
       });
     },
-    [props.changeGroupBy, props.changeNodeType, props.changeMetric]
+    [closePopover, changeNodeType, changeGroupBy, changeMetric]
   );
   const goToHost = useCallback(() => goToNodeType('host' as InfraNodeType), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod' as InfraNodeType), [goToNodeType]);
@@ -68,10 +73,10 @@ export const WaffleInventorySwitcher = (props: Props) => {
         ],
       },
     ],
-    []
+    [goToDocker, goToHost, goToK8]
   );
   const selectedText = useMemo(() => {
-    switch (props.nodeType) {
+    switch (nodeType) {
       case InfraNodeType.host:
         return i18n.translate('xpack.infra.waffle.nodeTypeSwitcher.hostsLabel', {
           defaultMessage: 'Hosts',
@@ -81,7 +86,7 @@ export const WaffleInventorySwitcher = (props: Props) => {
       case InfraNodeType.container:
         return 'Docker';
     }
-  }, [props.nodeType]);
+  }, [nodeType]);
 
   return (
     <EuiFilterGroup>

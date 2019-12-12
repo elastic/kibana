@@ -190,7 +190,7 @@ export const PingListComponent = ({
   if (hasStatus) {
     columns.push({
       field: 'http.response.status_code',
-      align: 'right',
+      align: 'center',
       name: i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
         defaultMessage: 'Response code',
       }),
@@ -200,7 +200,7 @@ export const PingListComponent = ({
 
   columns.push({
     align: 'right',
-    width: '40px',
+    width: '24px',
     isExpander: true,
     render: (item: Ping) => (
       <EuiButtonIcon
@@ -300,6 +300,8 @@ export const PingListComponent = ({
         <EuiBasicTable
           loading={loading}
           columns={columns}
+          isExpandable={true}
+          hasActions={true}
           items={pings}
           itemId="id"
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}

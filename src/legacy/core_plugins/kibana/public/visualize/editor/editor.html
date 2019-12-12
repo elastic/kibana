@@ -39,7 +39,7 @@
     show-search-bar="true"
     show-query-bar="true"
     show-query-input="showQueryInput()"
-    show-filter-bar="showFilterBar() && chrome.getVisible()"
+    show-filter-bar="showFilterBar() && isVisible"
     show-date-picker="showQueryBarTimePicker()"
     show-auto-refresh-only="!showQueryBarTimePicker()"
     query="state.query"
@@ -67,7 +67,7 @@
   -->
   <kbn-top-nav
     ng-if="showFilterBar() && !isVisible"
-    
+
     app-name="'visualize'"
     show-search-bar="true"
     show-filter-bar="true"
@@ -91,7 +91,7 @@
   </div>
 
   <visualization-embedded
-    ng-if="!chrome.getVisible()"
+    ng-if="!isVisible"
     class="visualize"
     saved-obj="savedVis"
     ui-state="uiState"
@@ -110,7 +110,7 @@
   >
   </h1>
   <visualization-editor
-    ng-if="chrome.getVisible()"
+    ng-if="isVisible"
     saved-obj="savedVis"
     ui-state="uiState"
     time-range="timeRange"

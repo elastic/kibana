@@ -20,7 +20,6 @@
 export { SuggestionsComponent } from './typeahead/suggestions_component';
 export { IndexPatternSelect } from './index_pattern_select';
 export { FilterBar } from './filter_bar';
-export { applyFiltersPopover } from './apply_filters';
 export { QueryStringInput } from './query_string_input/query_string_input';
 
 // temp export - will be removed as final components are migrated to NP

@@ -1,0 +1,7 @@
+{
+  "id": "console",
+  "version": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["home"]
+}
