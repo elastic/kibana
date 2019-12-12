@@ -23,6 +23,10 @@ jest.mock('fs', () => ({
   createWriteStream: jest.fn(() => ({ write: mockStreamWrite })),
 }));
 
+jest.mock('../../../legacy/server/logging/rotate', () => ({
+  setupLoggingRotate: jest.fn().mockImplementation(() => Promise.resolve({})),
+}));
+
 const timestamp = new Date(Date.UTC(2012, 1, 1));
 let mockConsoleLog: jest.SpyInstance;
 

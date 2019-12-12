@@ -29,6 +29,11 @@ module.exports = {
           disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`
         },
         {
+          from: '@kbn/elastic-idx',
+          to: false,
+          disallowedMessage: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`
+        },
+        {
           from: 'x-pack',
           toRelative: 'x-pack',
         },

@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { useCallApmApi } from '../../../../../hooks/useCallApmApi';
 import { Config } from '../index';
 import { getOptionLabel } from '../../../../../../common/agent_configuration_constants';
-import { useKibanaCore } from '../../../../../../../observability/public';
 import { APMClient } from '../../../../../services/rest/createCallApmApi';
+import { useApmPluginContext } from '../../../../../hooks/useApmPluginContext';
 
 interface Props {
   onDeleted: () => void;
@@ -21,10 +21,7 @@ interface Props {
 
 export function DeleteButton({ onDeleted, selectedConfig }: Props) {
   const [isDeleting, setIsDeleting] = useState(false);
-  const {
-    notifications: { toasts }
-  } = useKibanaCore();
-
+  const { toasts } = useApmPluginContext().core.notifications;
   const callApmApi = useCallApmApi();
 
   return (
