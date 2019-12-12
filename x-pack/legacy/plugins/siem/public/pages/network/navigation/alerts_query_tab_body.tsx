@@ -5,48 +5,39 @@
  */
 
 import React from 'react';
-import {
-  AlertsComponentsQueryProps,
-  AlertsComponentPageFilterDsl,
-} from '../../../components/alerts_viewer/types';
+import { AlertsComponentsQueryProps } from '../../../components/alerts_viewer/types';
 import { AlertsView } from '../../../components/alerts_viewer';
 
-export const NetworkAlertsQueryTabBody = React.memo(
-  (
-    alertsProps: AlertsComponentsQueryProps & {
-      pageFilters: AlertsComponentPageFilterDsl;
-    }
-  ) => (
-    <AlertsView
-      {...alertsProps}
-      pageFilters={[
-        {
-          bool: {
-            should: [
-              {
-                exists: {
-                  field: 'source.ip',
-                },
+export const NetworkAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentsQueryProps) => (
+  <AlertsView
+    {...alertsProps}
+    pageFilters={[
+      {
+        bool: {
+          should: [
+            {
+              exists: {
+                field: 'source.ip',
               },
-            ],
-            minimum_should_match: 1,
-          },
+            },
+          ],
+          minimum_should_match: 1,
         },
-        {
-          bool: {
-            should: [
-              {
-                exists: {
-                  field: 'destination.ip',
-                },
+      },
+      {
+        bool: {
+          should: [
+            {
+              exists: {
+                field: 'destination.ip',
               },
-            ],
-            minimum_should_match: 1,
-          },
+            },
+          ],
+          minimum_should_match: 1,
         },
-      ]}
-    />
-  )
-);
+      },
+    ]}
+  />
+));
 
 NetworkAlertsQueryTabBody.displayName = 'NetworkAlertsQueryTabBody';

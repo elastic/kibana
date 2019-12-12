@@ -8,14 +8,9 @@ import React, { memo, useReducer } from 'react';
 
 import { ManageRoutesSpyProps, RouteSpyState, RouteSpyAction } from './types';
 import { RouterSpyStateContext, initRouteSpy } from './helpers';
-import { HostsTableType } from '../../store/hosts/model';
-import { NetworkRouteType } from '../../pages/network/navigation/types';
 
 export const ManageRoutesSpy = memo(({ children }: ManageRoutesSpyProps) => {
-  const reducerSpyRoute = (
-    state: RouteSpyState<HostsTableType | NetworkRouteType>,
-    action: RouteSpyAction<HostsTableType | NetworkRouteType>
-  ) => {
+  const reducerSpyRoute = (state: RouteSpyState, action: RouteSpyAction) => {
     switch (action.type) {
       case 'updateRoute':
         return action.route;

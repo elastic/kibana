@@ -10,23 +10,20 @@ import { decodeIpv6 } from '../../../lib/helpers';
 import { getNetworkUrl, getIPDetailsUrl } from '../../../components/link_to/redirect_to_network';
 import { networkModel } from '../../../store/network';
 import * as i18n from '../translations';
-import { RouteSpyState } from '../../../utils/route/types';
 import { NetworkRouteType } from '../navigation/types';
+import { NetworkRouteSpyState } from '../../../utils/route/types';
 
 export const type = networkModel.NetworkType.details;
-const TabNameMappedToI18nKey = <T>() => ({
+const TabNameMappedToI18nKey: Record<NetworkRouteType, string> = {
   [NetworkRouteType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
   [NetworkRouteType.anomalies]: i18n.NAVIGATION_ANOMALIES_TITLE,
   [NetworkRouteType.flows]: i18n.NAVIGATION_FLOWS_TITLE,
   [NetworkRouteType.dns]: i18n.NAVIGATION_DNS_TITLE,
   [NetworkRouteType.http]: i18n.NAVIGATION_HTTP_TITLE,
   [NetworkRouteType.tls]: i18n.NAVIGATION_TLS_TITLE,
-});
+};
 
-export const getBreadcrumbs = (
-  params: RouteSpyState<NetworkRouteType>,
-  search: string[]
-): Breadcrumb[] => {
+export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): Breadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
@@ -47,7 +44,7 @@ export const getBreadcrumbs = (
     breadcrumb = [
       ...breadcrumb,
       {
-        text: TabNameMappedToI18nKey<NetworkRouteType>()[params.tabName],
+        text: TabNameMappedToI18nKey[params.tabName],
         href: '',
       },
     ];

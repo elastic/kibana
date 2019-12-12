@@ -8,10 +8,8 @@ import { noop } from 'lodash/fp';
 import { createContext, Dispatch } from 'react';
 
 import { RouteSpyState, RouteSpyAction } from './types';
-import { NetworkRouteType } from '../../pages/network/navigation/types';
-import { HostsTableType } from '../../store/hosts/model';
 
-export const initRouteSpy: RouteSpyState<HostsTableType | NetworkRouteType> = {
+export const initRouteSpy: RouteSpyState = {
   pageName: '',
   detailName: undefined,
   tabName: undefined,
@@ -19,9 +17,7 @@ export const initRouteSpy: RouteSpyState<HostsTableType | NetworkRouteType> = {
   pathName: '/',
 };
 
-export const RouterSpyStateContext = createContext<
-  [
-    RouteSpyState<HostsTableType | NetworkRouteType>,
-    Dispatch<RouteSpyAction<HostsTableType | NetworkRouteType>>
-  ]
->([initRouteSpy, () => noop]);
+export const RouterSpyStateContext = createContext<[RouteSpyState, Dispatch<RouteSpyAction>]>([
+  initRouteSpy,
+  () => noop,
+]);

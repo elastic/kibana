@@ -38,7 +38,7 @@ export const mockHistory = {
 };
 
 const dispatchMock = jest.fn();
-const mockRoutes: RouteSpyState<HostsTableType> = {
+const mockRoutes: RouteSpyState = {
   pageName: '',
   detailName: undefined,
   tabName: undefined,

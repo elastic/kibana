@@ -6,7 +6,6 @@
 
 import { IIndexPattern } from 'src/plugins/data/public';
 import { NarrowDateRange } from '../../../components/ml/types';
-import { hostsModel } from '../../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 
@@ -38,7 +37,7 @@ export type SetQuery = ({
 }) => void;
 
 export interface QueryTabBodyProps {
-  type: hostsModel.HostsType;
+  type: 'page' | 'details';
   startDate: number;
   endDate: number;
   filterQuery?: string | ESTermQuery;

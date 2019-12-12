@@ -6,12 +6,13 @@
 
 import { Breadcrumb } from 'ui/chrome';
 
+import { get } from 'lodash/fp';
 import { hostsModel } from '../../../store';
 import { HostsTableType } from '../../../store/hosts/model';
 import { getHostsUrl, getHostDetailsUrl } from '../../../components/link_to/redirect_to_hosts';
 
 import * as i18n from '../translations';
-import { RouteSpyState } from '../../../utils/route/types';
+import { HostRouteSpyState } from '../../../utils/route/types';
 
 export const type = hostsModel.HostsType.details;
 
@@ -24,10 +25,7 @@ const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
 };
 
-export const getBreadcrumbs = (
-  params: RouteSpyState<HostsTableType>,
-  search: string[]
-): Breadcrumb[] => {
+export const getBreadcrumbs = (params: HostRouteSpyState, search: string[]): Breadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,
@@ -44,10 +42,13 @@ export const getBreadcrumbs = (
     ];
   }
   if (params.tabName != null) {
+    const tabName = get('tabName', params);
+    if (!tabName) return breadcrumb;
+
     breadcrumb = [
       ...breadcrumb,
       {
-        text: TabNameMappedToI18nKey[params.tabName],
+        text: TabNameMappedToI18nKey[tabName],
         href: '',
       },
     ];

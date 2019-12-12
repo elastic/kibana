@@ -15,7 +15,7 @@ export interface AlertsResolversDeps {
 }
 
 type QueryAlertsHistogramResolver = ChildResolverOf<
-  AppResolverOf<SourceResolvers.AlertsHistogram>,
+  AppResolverOf<SourceResolvers.AlertsHistogramResolver>,
   QuerySourceResolver
 >;
 

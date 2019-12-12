@@ -103,6 +103,10 @@ export const mockGlobalState: State = {
           limit: 10,
           sort: { direction: Direction.desc },
         },
+        [networkModel.NetworkTableType.alerts]: {
+          activePage: 0,
+          limit: 10,
+        },
       },
     },
     details: {
