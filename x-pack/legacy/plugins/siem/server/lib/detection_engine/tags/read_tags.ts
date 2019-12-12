@@ -71,10 +71,8 @@ export const readRawTags = async ({
         return findRules({ alertsClient, fields: ['tags'], perPage, page: page + 2 });
       })
       .reduce<Promise<Set<string>>>(async (accum, nextTagPage) => {
-        const nextTags = await nextTagPage;
-        const accumValue = await accum;
-        const tagArray = convertToTags(nextTags.data);
-        return new Set([...accumValue, ...tagArray]);
+        const tagArray = convertToTags((await nextTagPage).data);
+        return new Set([...(await accum), ...tagArray]);
       }, Promise.resolve(firstSet));
 
     return Array.from(returnTags);
