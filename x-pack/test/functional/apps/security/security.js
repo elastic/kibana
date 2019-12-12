@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       after(async () => {
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       afterEach(async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('can login', async () => {
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('displays message acknowledging logout', async () => {
         await PageObjects.security.login();
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
 
         const logoutMessage = await testSubjects.getVisibleText('loginInfoMessage');
         expect(logoutMessage).to.eql('You have logged out of Kibana.');
