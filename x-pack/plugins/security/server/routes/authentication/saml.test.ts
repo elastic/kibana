@@ -5,7 +5,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import { Authentication, AuthenticationResult, SAMLLoginStep } from '../../authentication';
+import { Authentication, AuthenticationResult, SAMLLogin } from '../../authentication';
 import { defineSAMLRoutes } from './saml';
 import { IRouter, RequestHandler, RouteConfig } from '../../../../../../src/core/server';
 
@@ -86,7 +86,7 @@ describe('SAML authentication routes', () => {
       expect(authc.login).toHaveBeenCalledWith(request, {
         provider: 'saml',
         value: {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
         },
       });
@@ -165,7 +165,7 @@ describe('SAML authentication routes', () => {
       expect(authc.login).toHaveBeenCalledWith(request, {
         provider: 'saml',
         value: {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response',
         },
       });

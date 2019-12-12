@@ -32,34 +32,45 @@ interface ProviderState extends Partial<TokenPair> {
    * initiate SAML handshake and where we should redirect user after successful authentication.
    */
   redirectURL?: string;
+
+  /**
+   * The name of the SAML realm that was used to establish session.
+   */
+  realm: string;
 }
 
 /**
- * Describes possible SAML Login steps.
+ * Describes possible SAML Login flows.
  */
-export enum SAMLLoginStep {
+export enum SAMLLogin {
   /**
-   * The final login step when IdP responds with SAML Response payload.
+   * The login flow when user initiates SAML handshake (SP Initiated Login).
    */
-  SAMLResponseReceived = 'saml-response-received',
+  LoginInitiatedByUser = 'login-by-user',
   /**
-   * The login step when we've captured user URL fragment and ready to start SAML handshake.
+   * The login flow when IdP responds with SAML Response payload (last step of the SP Initiated
+   * Login or IdP initiated Login).
    */
-  RedirectURLFragmentCaptured = 'redirect-url-fragment-captured',
+  LoginWithSAMLResponse = 'login-saml-response',
+  /**
+   * The login flow when we've captured user URL fragment and ready to start SAML handshake.
+   */
+  LoginWithRedirectURLFragmentCaptured = 'login-redirect-url-fragment-captured',
 }
 
 /**
  * Describes the parameters that are required by the provider to process the initial login request.
  */
 type ProviderLoginAttempt =
-  | { step: SAMLLoginStep.RedirectURLFragmentCaptured; redirectURLFragment: string }
-  | { step: SAMLLoginStep.SAMLResponseReceived; samlResponse: string };
+  | { type: SAMLLogin.LoginInitiatedByUser; redirectURL?: string }
+  | { type: SAMLLogin.LoginWithRedirectURLFragmentCaptured; redirectURLFragment: string }
+  | { type: SAMLLogin.LoginWithSAMLResponse; samlResponse: string };
 
 /**
  * Checks whether request query includes SAML request from IdP.
  * @param query Parsed HTTP request query.
  */
-export function isSAMLRequestQuery(query: any): query is { SAMLRequest: string } {
+function isSAMLRequestQuery(query: any): query is { SAMLRequest: string } {
   return query && query.SAMLRequest;
 }
 
@@ -113,7 +124,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   ) {
     this.logger.debug('Trying to perform a login.');
 
-    if (attempt.step === SAMLLoginStep.RedirectURLFragmentCaptured) {
+    // It may happen that Kibana is re-configured to use different realm for the same provider name,
+    // we should clear such session an log user out.
+    if (state?.realm && state.realm !== this.realm) {
+      const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
+      this.logger.debug(message);
+      return AuthenticationResult.failed(Boom.unauthorized(message));
+    }
+
+    if (attempt.type === SAMLLogin.LoginWithRedirectURLFragmentCaptured) {
       if (!state || !state.redirectURL) {
         const message = 'State does not include URL path to redirect to.';
         this.logger.debug(message);
@@ -138,6 +157,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       }
 
       return this.authenticateViaHandshake(request, redirectURL);
+    }
+
+    if (attempt.type === SAMLLogin.LoginInitiatedByUser) {
+      return this.captureRedirectURL(request, attempt.redirectURL);
     }
 
     const { samlResponse } = attempt;
@@ -186,6 +209,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
+    // It may happen that Kibana is re-configured to use different realm for the same provider name,
+    // we should clear such session an log user out.
+    if (state?.realm && state.realm !== this.realm) {
+      const message = `State based on realm "${state.realm}", but provider with the name "${this.options.name}" is configured to use realm "${this.realm}".`;
+      this.logger.debug(message);
+      return AuthenticationResult.failed(Boom.unauthorized(message));
+    }
+
     let authenticationResult = AuthenticationResult.notHandled();
     if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
@@ -212,15 +243,23 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   public async logout(request: KibanaRequest, state?: ProviderState) {
     this.logger.debug(`Trying to log user out via ${request.url.path}.`);
 
-    if ((!state || !state.accessToken) && !isSAMLRequestQuery(request.query)) {
-      this.logger.debug('There is neither access token nor SAML session to invalidate.');
+    // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
+    // and user will eventually be redirected to the home page to log in. But when SAML is enabled
+    // there is a special case when logout is initiated by the IdP or another SP, then IdP will
+    // request _every_ SP associated with the current user session to do the logout. So if Kibana,
+    // without an active session, receives such request it shouldn't redirect user to the home page,
+    // but rather redirect back to IdP with correct logout response and only Elasticsearch knows how
+    // to do that.
+    const isIdPInitiatedSLO = isSAMLRequestQuery(request.query);
+    if (!state?.accessToken && !isIdPInitiatedSLO) {
+      this.logger.debug('There is no SAML session to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
     try {
-      const redirect = isSAMLRequestQuery(request.query)
+      const redirect = isIdPInitiatedSLO
         ? await this.performIdPInitiatedSingleLogout(request)
-        : await this.performUserInitiatedSingleLogout(state!.accessToken!, state!.refreshToken!);
+        : await this.performUserInitiatedSingleLogout(state?.accessToken!, state?.refreshToken!);
 
       // Having non-null `redirect` field within logout response means that IdP
       // supports SAML Single Logout and we should redirect user to the specified
@@ -283,8 +322,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     // When we don't have state and hence request id we assume that SAMLResponse came from the IdP initiated login.
+    const isIdPInitiatedLogin = !stateRequestId;
     this.logger.debug(
-      stateRequestId
+      !isIdPInitiatedLogin
         ? 'Login has been previously initiated by Kibana.'
         : 'Login has been initiated by Identity Provider.'
     );
@@ -298,7 +338,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         refresh_token: refreshToken,
       } = await this.options.client.callAsInternalUser('shield.samlAuthenticate', {
         body: {
-          ids: stateRequestId ? [stateRequestId] : [],
+          ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
           content: samlResponse,
           realm: this.realm,
         },
@@ -307,11 +347,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Login has been performed with SAML response.');
       return AuthenticationResult.redirectTo(
         stateRedirectURL || `${this.options.basePath.get(request)}/`,
-        { state: { username, accessToken, refreshToken } }
+        { state: { username, accessToken, refreshToken, realm: this.realm } }
       );
     } catch (err) {
       this.logger.debug(`Failed to log in with SAML response: ${err.message}`);
-      return AuthenticationResult.failed(err);
+
+      // Since we don't know upfront what realm is targeted by the Identity Provider initiated login
+      // there is a chance that it failed because of realm mismatch and hence we should return
+      // `notHandled` and give other SAML providers a chance to properly handle it instead.
+      return isIdPInitiatedLogin
+        ? AuthenticationResult.notHandled()
+        : AuthenticationResult.failed(err);
     }
   }
 
@@ -336,7 +382,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     // First let's try to authenticate via SAML Response payload.
     const payloadAuthenticationResult = await this.loginWithSAMLResponse(request, samlResponse);
-    if (payloadAuthenticationResult.failed()) {
+    if (payloadAuthenticationResult.failed() || payloadAuthenticationResult.notHandled()) {
       return payloadAuthenticationResult;
     }
 
@@ -451,7 +497,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Request has been authenticated via refreshed token.');
       return AuthenticationResult.succeeded(user, {
         authHeaders,
-        state: { username, ...refreshedTokenPair },
+        state: { username, realm: this.realm, ...refreshedTokenPair },
       });
     } catch (err) {
       this.logger.debug(
@@ -488,7 +534,9 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       this.logger.debug('Redirecting to Identity Provider with SAML request.');
 
       // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
-      return AuthenticationResult.redirectTo(redirect, { state: { requestId, redirectURL } });
+      return AuthenticationResult.redirectTo(redirect, {
+        state: { requestId, redirectURL, realm: this.realm },
+      });
     } catch (err) {
       this.logger.debug(`Failed to initiate SAML handshake: ${err.message}`);
       return AuthenticationResult.failed(err);
@@ -541,11 +589,13 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * Redirects user to the client-side page that will grab URL fragment and redirect user back to Kibana
    * to initiate SAML handshake.
    * @param request Request instance.
+   * @param [redirectURL] Optional URL user is supposed to be redirected to after successful login.
+   * If not provided the URL of the specified request is used.
    */
-  private captureRedirectURL(request: KibanaRequest) {
-    const basePath = this.options.basePath.get(request);
-    const redirectURL = `${basePath}${request.url.path}`;
-
+  private captureRedirectURL(
+    request: KibanaRequest,
+    redirectURL = `${this.options.basePath.get(request)}${request.url.path}`
+  ) {
     // If the size of the path already exceeds the maximum allowed size of the URL to store in the
     // session there is no reason to try to capture URL fragment and we start handshake immediately.
     // In this case user will be redirected to the Kibana home/root after successful login.
@@ -558,8 +608,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     return AuthenticationResult.redirectTo(
-      `${this.options.basePath.serverBasePath}/api/security/saml/capture-url-fragment`,
-      { state: { redirectURL } }
+      `${this.options.basePath.serverBasePath}/internal/security/saml/capture-url-fragment`,
+      { state: { redirectURL, realm: this.realm } }
     );
   }
 }

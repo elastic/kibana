@@ -29,7 +29,7 @@ describe('Basic authentication routes', () => {
     router = routeParamsMock.router;
 
     authc = routeParamsMock.authc;
-    authc.isProviderEnabled.mockImplementation(provider => provider === 'basic');
+    authc.isProviderTypeEnabled.mockImplementation(provider => provider === 'basic');
 
     mockContext = ({
       licensing: {
@@ -156,7 +156,7 @@ describe('Basic authentication routes', () => {
 
       it('prefers `token` authentication provider if it is enabled', async () => {
         authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
-        authc.isProviderEnabled.mockImplementation(
+        authc.isProviderTypeEnabled.mockImplementation(
           provider => provider === 'token' || provider === 'basic'
         );
 

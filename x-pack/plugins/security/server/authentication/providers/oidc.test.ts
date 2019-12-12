@@ -18,7 +18,7 @@ import {
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { OIDCAuthenticationProvider, OIDCAuthenticationFlow, ProviderLoginAttempt } from './oidc';
+import { OIDCAuthenticationProvider, OIDCLogin, ProviderLoginAttempt } from './oidc';
 
 function expectAuthenticateCall(
   mockClusterClient: jest.Mocked<IClusterClient>,
@@ -72,7 +72,7 @@ describe('OIDCAuthenticationProvider', () => {
 
       await expect(
         provider.login(request, {
-          flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+          type: OIDCLogin.LoginInitiatedBy3rdParty,
           iss: 'theissuer',
           loginHint: 'loginhint',
         })
@@ -215,7 +215,7 @@ describe('OIDCAuthenticationProvider', () => {
           path: '/api/security/oidc/callback?code=somecodehere&state=somestatehere',
         }),
         attempt: {
-          flow: OIDCAuthenticationFlow.AuthorizationCode,
+          type: OIDCLogin.LoginWithAuthorizationCodeFlow,
           authenticationResponseURI:
             '/api/security/oidc/callback?code=somecodehere&state=somestatehere',
         },
@@ -230,7 +230,7 @@ describe('OIDCAuthenticationProvider', () => {
             '/api/security/oidc/callback?authenticationResponseURI=http://kibana/api/security/oidc/implicit#id_token=sometoken',
         }),
         attempt: {
-          flow: OIDCAuthenticationFlow.Implicit,
+          type: OIDCLogin.LoginWithImplicitFlow,
           authenticationResponseURI: 'http://kibana/api/security/oidc/implicit#id_token=sometoken',
         },
         expectedRedirectURI: 'http://kibana/api/security/oidc/implicit#id_token=sometoken',

@@ -28,21 +28,22 @@ import {
   OIDCAuthenticationProvider,
   PKIAuthenticationProvider,
   HTTPAuthenticationProvider,
-  isSAMLRequestQuery,
 } from './providers';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Tokens } from './tokens';
 import { SessionInfo } from '../../public';
+import { canRedirectRequest } from './can_redirect_request';
+import { getHTTPAuthenticationScheme } from './get_http_authentication_scheme';
 
 /**
  * The shape of the session that is actually stored in the cookie.
  */
 export interface ProviderSession {
   /**
-   * Name/type of the provider this session belongs to.
+   * Name and type of the provider this session belongs to.
    */
-  provider: string;
+  provider: { type: string; name: string };
 
   /**
    * The Unix time in ms when the session should be considered expired. If `null`, session will stay
@@ -73,9 +74,9 @@ export interface ProviderSession {
  */
 export interface ProviderLoginAttempt {
   /**
-   * Name/type of the provider this login attempt is targeted for.
+   * Name or type of the provider this login attempt is targeted for.
    */
-  provider: string;
+  provider: { name: string } | { type: string };
 
   /**
    * Login attempt can have any form and defined by the specific provider.
@@ -115,9 +116,31 @@ function assertRequest(request: KibanaRequest) {
 }
 
 function assertLoginAttempt(attempt: ProviderLoginAttempt) {
-  if (!attempt || !attempt.provider || typeof attempt.provider !== 'string') {
-    throw new Error('Login attempt should be an object with non-empty "provider" property.');
+  if (!isLoginAttemptWithProviderType(attempt) && !isLoginAttemptWithProviderName(attempt)) {
+    throw new Error(
+      'Login attempt should be an object with non-empty "provider.type" or "provider.name" property.'
+    );
   }
+}
+
+function isLoginAttemptWithProviderName(
+  attempt: unknown
+): attempt is { value: unknown; provider: { name: string } } {
+  return (
+    typeof attempt === 'object' &&
+    (attempt as any)?.provider?.name &&
+    typeof (attempt as any)?.provider?.name === 'string'
+  );
+}
+
+function isLoginAttemptWithProviderType(
+  attempt: unknown
+): attempt is { value: unknown; provider: { type: string } } {
+  return (
+    typeof attempt === 'object' &&
+    (attempt as any)?.provider?.type &&
+    typeof (attempt as any)?.provider?.type === 'string'
+  );
 }
 
 /**
@@ -194,29 +217,22 @@ export class Authenticator {
       }),
     };
 
-    const authProviders = this.options.config.authc.providers;
-    if (authProviders.length === 0) {
-      throw new Error(
-        'No authentication provider is configured. Verify `xpack.security.authc.providers` config value.'
-      );
-    }
-
     this.providers = new Map(
-      authProviders.map(providerType => {
-        const providerSpecificOptions = this.options.config.authc.hasOwnProperty(providerType)
-          ? (this.options.config.authc as Record<string, any>)[providerType]
-          : undefined;
-
-        this.logger.debug(`Enabling "${providerType}" authentication provider.`);
+      this.options.config.authc.sortedProviders.map(({ type, name }) => {
+        this.logger.debug(`Enabling "${name}" (${type}) authentication provider.`);
 
         return [
-          providerType,
+          name,
           instantiateProvider(
-            providerType,
-            Object.freeze({ ...providerCommonOptions, logger: options.loggers.get(providerType) }),
-            providerSpecificOptions
+            type,
+            Object.freeze({
+              ...providerCommonOptions,
+              name,
+              logger: options.loggers.get(type, name),
+            }),
+            this.options.config.authc.providers[type]?.[name]
           ),
-        ] as [string, BaseAuthenticationProvider];
+        ];
       })
     );
 
@@ -225,8 +241,15 @@ export class Authenticator {
       this.setupHTTPAuthenticationProvider(
         Object.freeze({
           ...providerCommonOptions,
+          name: '__http__',
           logger: options.loggers.get(HTTPAuthenticationProvider.type),
         })
+      );
+    }
+
+    if (this.providers.size === 0) {
+      throw new Error(
+        'No authentication provider is configured. Verify `xpack.security.authc.*` config value.'
       );
     }
 
@@ -245,60 +268,58 @@ export class Authenticator {
     assertRequest(request);
     assertLoginAttempt(attempt);
 
-    // If there is an attempt to login with a provider that isn't enabled, we should fail.
-    const provider = this.providers.get(attempt.provider);
-    if (provider === undefined) {
+    const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
+    const existingSession = await this.getSessionValue(sessionStorage);
+
+    // Login attempt can target specific provider by its name (e.g. chosen at the Login Selector UI)
+    // or a group of providers with the specified type (e.g. in case of 3rd-party initiated login
+    // attempts we may not know what provider exactly can handle that attempt and we have to try
+    // every enabled provider of the specified type).
+    const providers: Array<[string, BaseAuthenticationProvider]> =
+      isLoginAttemptWithProviderName(attempt) && this.providers.has(attempt.provider.name)
+        ? [[attempt.provider.name, this.providers.get(attempt.provider.name)!]]
+        : isLoginAttemptWithProviderType(attempt)
+        ? [...this.providerIterator(existingSession)].filter(
+            ([, { type }]) => type === attempt.provider.type
+          )
+        : [];
+
+    if (providers.length === 0) {
       this.logger.debug(
-        `Login attempt for provider "${attempt.provider}" is detected, but it isn't enabled.`
+        `Login attempt for provider with ${
+          isLoginAttemptWithProviderName(attempt)
+            ? `name ${attempt.provider.name}`
+            : `type "${(attempt.provider as Record<string, string>).type}"`
+        } is detected, but it isn't enabled.`
       );
       return AuthenticationResult.notHandled();
     }
 
-    this.logger.debug(`Performing login using "${attempt.provider}" provider.`);
+    for (const [providerName, provider] of providers) {
+      // Check if current session has been set by this provider.
+      const ownsSession =
+        existingSession?.provider.name === providerName &&
+        existingSession?.provider.type === provider.type;
 
-    const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
-
-    // If we detect an existing session that belongs to a different provider than the one requested
-    // to perform a login we should clear such session.
-    let existingSession = await this.getSessionValue(sessionStorage);
-    if (existingSession && existingSession.provider !== attempt.provider) {
-      this.logger.debug(
-        `Clearing existing session of another ("${existingSession.provider}") provider.`
+      const authenticationResult = await provider.login(
+        request,
+        attempt.value,
+        ownsSession ? existingSession!.state : null
       );
-      sessionStorage.clear();
-      existingSession = null;
-    }
 
-    const authenticationResult = await provider.login(
-      request,
-      attempt.value,
-      existingSession && existingSession.state
-    );
-
-    // There are two possible cases when we'd want to clear existing state:
-    // 1. If provider owned the state (e.g. intermediate state used for multi step login), but failed
-    // to login, that likely means that state is not valid anymore and we should clear it.
-    // 2. Also provider can specifically ask to clear state by setting it to `null` even if
-    // authentication attempt didn't fail (e.g. custom realm could "pin" client/request identity to
-    // a server-side only session established during multi step login that relied on intermediate
-    // client-side state which isn't needed anymore).
-    const shouldClearSession =
-      authenticationResult.shouldClearState() ||
-      (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401);
-    if (existingSession && shouldClearSession) {
-      sessionStorage.clear();
-    } else if (authenticationResult.shouldUpdateState()) {
-      const { idleTimeoutExpiration, lifespanExpiration } = this.calculateExpiry(existingSession);
-      sessionStorage.set({
-        state: authenticationResult.state,
-        provider: attempt.provider,
-        idleTimeoutExpiration,
-        lifespanExpiration,
-        path: this.serverBasePath,
+      this.updateSessionValue(sessionStorage, {
+        provider: { type: provider.type, name: providerName },
+        isSystemRequest: request.isSystemRequest,
+        authenticationResult,
+        existingSession: ownsSession ? existingSession : null,
       });
+
+      if (!authenticationResult.notHandled()) {
+        return authenticationResult;
+      }
     }
 
-    return authenticationResult;
+    return AuthenticationResult.notHandled();
   }
 
   /**
@@ -311,33 +332,46 @@ export class Authenticator {
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
     const existingSession = await this.getSessionValue(sessionStorage);
 
-    let authenticationResult = AuthenticationResult.notHandled();
-    for (const [providerType, provider] of this.providerIterator(existingSession)) {
-      // Check if current session has been set by this provider.
-      const ownsSession = existingSession && existingSession.provider === providerType;
+    // If request doesn't have any session information, isn't attributed with HTTP Authorization
+    // header and Login Selector is enabled, we must redirect user to the login selector.
+    const useLoginSelector =
+      !existingSession &&
+      this.options.config.authc.selector.enabled &&
+      canRedirectRequest(request) &&
+      getHTTPAuthenticationScheme(request) == null;
+    if (useLoginSelector) {
+      this.logger.debug('Redirecting request to Login Selector.');
+      return AuthenticationResult.redirectTo(
+        `${this.serverBasePath}login?next=${encodeURIComponent(
+          `${this.options.basePath.get(request)}${request.url.path}`
+        )}`
+      );
+    }
 
-      authenticationResult = await provider.authenticate(
+    for (const [providerName, provider] of this.providerIterator(existingSession)) {
+      // Check if current session has been set by this provider.
+      const ownsSession =
+        existingSession?.provider.name === providerName &&
+        existingSession?.provider.type === provider.type;
+
+      const authenticationResult = await provider.authenticate(
         request,
         ownsSession ? existingSession!.state : null
       );
 
       this.updateSessionValue(sessionStorage, {
-        providerType,
+        provider: { type: provider.type, name: providerName },
         isSystemRequest: request.isSystemRequest,
         authenticationResult,
         existingSession: ownsSession ? existingSession : null,
       });
 
-      if (
-        authenticationResult.failed() ||
-        authenticationResult.succeeded() ||
-        authenticationResult.redirected()
-      ) {
+      if (!authenticationResult.notHandled()) {
         return authenticationResult;
       }
     }
 
-    return authenticationResult;
+    return AuthenticationResult.notHandled();
   }
 
   /**
@@ -349,28 +383,33 @@ export class Authenticator {
 
     const sessionStorage = this.options.sessionStorageFactory.asScoped(request);
     const sessionValue = await this.getSessionValue(sessionStorage);
-    const providerName = this.getProviderName(request.query);
     if (sessionValue) {
       sessionStorage.clear();
 
-      return this.providers.get(sessionValue.provider)!.logout(request, sessionValue.state);
-    } else if (providerName) {
+      return this.providers.get(sessionValue.provider.name)!.logout(request, sessionValue.state);
+    }
+
+    const providerName = this.getProviderName(request.query);
+    if (providerName) {
       // provider name is passed in a query param and sourced from the browser's local storage;
       // hence, we can't assume that this provider exists, so we have to check it
       const provider = this.providers.get(providerName);
       if (provider) {
         return provider.logout(request, null);
       }
-    }
-
-    // Normally when there is no active session in Kibana, `logout` method shouldn't do anything
-    // and user will eventually be redirected to the home page to log in. But if SAML is supported there
-    // is a special case when logout is initiated by the IdP or another SP, then IdP will request _every_
-    // SP associated with the current user session to do the logout. So if Kibana (without active session)
-    // receives such a request it shouldn't redirect user to the home page, but rather redirect back to IdP
-    // with correct logout response and only Elasticsearch knows how to do that.
-    if (isSAMLRequestQuery(request.query) && this.providers.has('saml')) {
-      return this.providers.get('saml')!.logout(request);
+    } else {
+      // In case logout is called and we cannot figure out what provider is supposed to handle it,
+      // we should iterate through all providers and let them decide if they can perform a logout.
+      // This can be necessary if some 3rd-party initiates logout. And even if user doesn't have an
+      // active session already some providers can still properly respond to the 3rd-party logout
+      // request. For example SAML provider can process logout request encoded in `SAMLRequest`
+      // query string parameter.
+      for (const [, provider] of this.providerIterator(null)) {
+        const deauthenticationResult = await provider.logout(request);
+        if (!deauthenticationResult.notHandled()) {
+          return deauthenticationResult;
+        }
+      }
     }
 
     return DeauthenticationResult.notHandled();
@@ -393,7 +432,7 @@ export class Authenticator {
         now: Date.now(),
         idleTimeoutExpiration: sessionValue.idleTimeoutExpiration,
         lifespanExpiration: sessionValue.lifespanExpiration,
-        provider: sessionValue.provider,
+        provider: sessionValue.provider.name,
       };
     }
     return null;
@@ -403,8 +442,8 @@ export class Authenticator {
    * Checks whether specified provider type is currently enabled.
    * @param providerType Type of the provider (`basic`, `saml`, `pki` etc.).
    */
-  isProviderEnabled(providerType: string) {
-    return this.providers.has(providerType);
+  isProviderTypeEnabled(providerType: string) {
+    return [...this.providers.values()].some(provider => provider.type === providerType);
   }
 
   /**
@@ -428,10 +467,11 @@ export class Authenticator {
       }
     }
 
-    this.providers.set(
-      HTTPAuthenticationProvider.type,
-      new HTTPAuthenticationProvider(options, { supportedSchemes })
-    );
+    if (this.providers.has(options.name)) {
+      throw new Error(`Provider name "${options.name}" is reserved.`);
+    }
+
+    this.providers.set(options.name, new HTTPAuthenticationProvider(options, { supportedSchemes }));
   }
 
   /**
@@ -447,11 +487,11 @@ export class Authenticator {
     if (!sessionValue) {
       yield* this.providers;
     } else {
-      yield [sessionValue.provider, this.providers.get(sessionValue.provider)!];
+      yield [sessionValue.provider.name, this.providers.get(sessionValue.provider.name)!];
 
-      for (const [providerType, provider] of this.providers) {
-        if (providerType !== sessionValue.provider) {
-          yield [providerType, provider];
+      for (const [providerName, provider] of this.providers) {
+        if (providerName !== sessionValue.provider.name) {
+          yield [providerName, provider];
         }
       }
     }
@@ -468,7 +508,11 @@ export class Authenticator {
     // If for some reason we have a session stored for the provider that is not available
     // (e.g. when user was logged in with one provider, but then configuration has changed
     // and that provider is no longer available), then we should clear session entirely.
-    if (sessionValue && !this.providers.has(sessionValue.provider)) {
+    const sessionProvider = sessionValue && this.providers.get(sessionValue.provider.name);
+    if (
+      sessionValue &&
+      (!sessionProvider || sessionProvider.type !== sessionValue?.provider.type)
+    ) {
       sessionStorage.clear();
       sessionValue = null;
     }
@@ -479,12 +523,12 @@ export class Authenticator {
   private updateSessionValue(
     sessionStorage: SessionStorage<ProviderSession>,
     {
-      providerType,
+      provider,
       authenticationResult,
       existingSession,
       isSystemRequest,
     }: {
-      providerType: string;
+      provider: { type: string; name: string };
       authenticationResult: AuthenticationResult;
       existingSession: ProviderSession | null;
       isSystemRequest: boolean;
@@ -515,7 +559,7 @@ export class Authenticator {
         state: authenticationResult.shouldUpdateState()
           ? authenticationResult.state
           : existingSession!.state,
-        provider: providerType,
+        provider,
         idleTimeoutExpiration,
         lifespanExpiration,
         path: this.serverBasePath,

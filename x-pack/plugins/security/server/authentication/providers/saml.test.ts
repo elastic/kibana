@@ -18,7 +18,7 @@ import {
 } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { SAMLAuthenticationProvider, SAMLLoginStep } from './saml';
+import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
 
 function expectAuthenticateCall(
   mockClusterClient: jest.Mocked<IClusterClient>,
@@ -86,7 +86,7 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
           { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path#some-app' }
         )
       ).resolves.toEqual(
@@ -111,7 +111,7 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
           {}
         )
       ).resolves.toEqual(
@@ -134,7 +134,7 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
           { requestId: 'some-request-id', redirectURL: '' }
         )
       ).resolves.toEqual(
@@ -162,7 +162,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(
         provider.login(request, {
-          step: SAMLLoginStep.SAMLResponseReceived,
+          type: SAMLLogin.LoginWithSAMLResponse,
           samlResponse: 'saml-response-xml',
         })
       ).resolves.toEqual(
@@ -189,7 +189,7 @@ describe('SAMLAuthenticationProvider', () => {
       await expect(
         provider.login(
           request,
-          { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+          { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
           { requestId: 'some-request-id', redirectURL: '/test-base-path/some-path' }
         )
       ).resolves.toEqual(AuthenticationResult.failed(failureReason));
@@ -216,7 +216,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             {
               username: 'user',
               accessToken: 'some-valid-token',
@@ -261,7 +261,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             state
           )
         ).resolves.toEqual(AuthenticationResult.failed(failureReason));
@@ -307,7 +307,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             state
           )
         ).resolves.toEqual(
@@ -361,7 +361,7 @@ describe('SAMLAuthenticationProvider', () => {
         await expect(
           provider.login(
             request,
-            { step: SAMLLoginStep.SAMLResponseReceived, samlResponse: 'saml-response-xml' },
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' },
             state
           )
         ).resolves.toEqual(
@@ -397,7 +397,7 @@ describe('SAMLAuthenticationProvider', () => {
 
         await expect(
           provider.login(request, {
-            step: SAMLLoginStep.RedirectURLFragmentCaptured,
+            type: SAMLLogin.LoginWithRedirectURLFragmentCaptured,
             redirectURLFragment: '#some-fragment',
           })
         ).resolves.toEqual(
@@ -416,7 +416,7 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginWithRedirectURLFragmentCaptured,
               redirectURLFragment: '#some-fragment',
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -438,7 +438,7 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginWithRedirectURLFragmentCaptured,
               redirectURLFragment: '#some-fragment',
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -474,7 +474,7 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginWithRedirectURLFragmentCaptured,
               redirectURLFragment: '../some-fragment',
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -513,7 +513,7 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginWithRedirectURLFragmentCaptured,
               redirectURLFragment: '#some-fragment'.repeat(10),
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -550,7 +550,7 @@ describe('SAMLAuthenticationProvider', () => {
           provider.login(
             request,
             {
-              step: SAMLLoginStep.RedirectURLFragmentCaptured,
+              type: SAMLLogin.LoginWithRedirectURLFragmentCaptured,
               redirectURLFragment: '#some-fragment',
             },
             { redirectURL: '/test-base-path/some-path' }
@@ -613,7 +613,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/api/security/saml/capture-url-fragment',
+          '/mock-server-basepath/internal/security/saml/capture-url-fragment',
           { state: { redirectURL: '/base-path/s/foo/some-path' } }
         )
       );
@@ -849,7 +849,7 @@ describe('SAMLAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/api/security/saml/capture-url-fragment',
+          '/mock-server-basepath/internal/security/saml/capture-url-fragment',
           { state: { redirectURL: '/base-path/s/foo/some-path' } }
         )
       );

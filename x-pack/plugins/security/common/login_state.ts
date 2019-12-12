@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LoginLayout } from '../../../common/licensing';
+import { LoginLayout } from './licensing';
+
+interface LoginSelector {
+  enabled: boolean;
+  providers: Array<{ type: string; name: string; options: { description: string; order: number } }>;
+}
 
 export interface LoginState {
   layout: LoginLayout;
   allowLogin: boolean;
+  showLoginForm: boolean;
+  requiresSecureConnection: boolean;
+  selector: LoginSelector;
 }

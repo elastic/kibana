@@ -21,7 +21,7 @@ export { canRedirectRequest } from './can_redirect_request';
 export { Authenticator, ProviderLoginAttempt } from './authenticator';
 export { AuthenticationResult } from './authentication_result';
 export { DeauthenticationResult } from './deauthentication_result';
-export { OIDCAuthenticationFlow, SAMLLoginStep } from './providers';
+export { OIDCLogin, SAMLLogin } from './providers';
 export {
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
@@ -165,7 +165,7 @@ export async function setupAuthentication({
     login: authenticator.login.bind(authenticator),
     logout: authenticator.logout.bind(authenticator),
     getSessionInfo: authenticator.getSessionInfo.bind(authenticator),
-    isProviderEnabled: authenticator.isProviderEnabled.bind(authenticator),
+    isProviderTypeEnabled: authenticator.isProviderTypeEnabled.bind(authenticator),
     getCurrentUser,
     createAPIKey: (request: KibanaRequest, params: CreateAPIKeyParams) =>
       apiKeys.create(request, params),

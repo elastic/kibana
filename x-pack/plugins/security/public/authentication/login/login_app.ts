@@ -33,9 +33,6 @@ export const loginApp = Object.freeze({
           http: coreStart.http,
           fatalErrors: coreStart.fatalErrors,
           loginAssistanceMessage: config.loginAssistanceMessage,
-          requiresSecureConnection: coreStart.injectedMetadata.getInjectedVar(
-            'secureCookies'
-          ) as boolean,
         });
       },
     });

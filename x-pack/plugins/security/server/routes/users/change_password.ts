@@ -73,7 +73,7 @@ export function defineChangeUserPasswordRoutes({
       if (isUserChangingOwnPassword && currentSession) {
         try {
           const authenticationResult = await authc.login(request, {
-            provider: currentUser!.authentication_provider,
+            provider: { name: currentUser!.authentication_provider },
             value: { username, password: newPassword },
           });
 

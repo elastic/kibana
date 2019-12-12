@@ -37,6 +37,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   static readonly type = 'kerberos';
 
   /**
+   * Performs initial login request.
+   * @param request Request instance.
+   */
+  public async login(request: KibanaRequest) {
+    this.logger.debug('Trying to perform a login.');
+    return await this.authenticateViaSPNEGO(request);
+  }
+
+  /**
    * Performs Kerberos request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.

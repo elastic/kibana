@@ -98,8 +98,8 @@ describe('Authenticator', () => {
 
       it('enabled by default', () => {
         const authenticator = new Authenticator(getMockOptions({ providers: ['basic'] }));
-        expect(authenticator.isProviderEnabled('basic')).toBe(true);
-        expect(authenticator.isProviderEnabled('http')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('http')).toBe(true);
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
@@ -112,9 +112,9 @@ describe('Authenticator', () => {
         const authenticator = new Authenticator(
           getMockOptions({ providers: ['basic', 'kerberos'] })
         );
-        expect(authenticator.isProviderEnabled('basic')).toBe(true);
-        expect(authenticator.isProviderEnabled('kerberos')).toBe(true);
-        expect(authenticator.isProviderEnabled('http')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('kerberos')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('http')).toBe(true);
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
@@ -127,9 +127,9 @@ describe('Authenticator', () => {
         const authenticator = new Authenticator(
           getMockOptions({ providers: ['basic', 'kerberos'], http: { autoSchemesEnabled: false } })
         );
-        expect(authenticator.isProviderEnabled('basic')).toBe(true);
-        expect(authenticator.isProviderEnabled('kerberos')).toBe(true);
-        expect(authenticator.isProviderEnabled('http')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('kerberos')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('http')).toBe(true);
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
@@ -140,8 +140,8 @@ describe('Authenticator', () => {
         const authenticator = new Authenticator(
           getMockOptions({ providers: ['basic'], http: { enabled: false } })
         );
-        expect(authenticator.isProviderEnabled('basic')).toBe(true);
-        expect(authenticator.isProviderEnabled('http')).toBe(false);
+        expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
+        expect(authenticator.isProviderTypeEnabled('http')).toBe(false);
 
         expect(
           jest.requireMock('./providers/http').HTTPAuthenticationProvider
@@ -918,12 +918,12 @@ describe('Authenticator', () => {
   describe('`isProviderEnabled` method', () => {
     it('returns `true` only if specified provider is enabled', () => {
       let authenticator = new Authenticator(getMockOptions({ providers: ['basic'] }));
-      expect(authenticator.isProviderEnabled('basic')).toBe(true);
-      expect(authenticator.isProviderEnabled('saml')).toBe(false);
+      expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
+      expect(authenticator.isProviderTypeEnabled('saml')).toBe(false);
 
       authenticator = new Authenticator(getMockOptions({ providers: ['basic', 'saml'] }));
-      expect(authenticator.isProviderEnabled('basic')).toBe(true);
-      expect(authenticator.isProviderEnabled('saml')).toBe(true);
+      expect(authenticator.isProviderTypeEnabled('basic')).toBe(true);
+      expect(authenticator.isProviderTypeEnabled('saml')).toBe(true);
     });
   });
 });

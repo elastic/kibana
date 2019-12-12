@@ -5,9 +5,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { canRedirectRequest } from '../../authentication';
+import { canRedirectRequest, OIDCLogin, SAMLLogin } from '../../authentication';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+import {
+  OIDCAuthenticationProvider,
+  SAMLAuthenticationProvider,
+} from '../../authentication/providers';
+import { parseNext } from '../../../common/parse_next';
 import { RouteDefinitionParams } from '..';
 
 /**
@@ -71,4 +76,53 @@ export function defineCommonRoutes({ router, authc, basePath, logger }: RouteDef
       })
     );
   }
+
+  function getLoginAttemptForProviderType(providerType: string, next: string) {
+    if (providerType === SAMLAuthenticationProvider.type) {
+      return { type: SAMLLogin.LoginInitiatedByUser, redirectURL: next };
+    }
+
+    if (providerType === OIDCAuthenticationProvider.type) {
+      return { type: OIDCLogin.LoginInitiatedByUser, redirectURL: next };
+    }
+
+    return undefined;
+  }
+
+  router.get(
+    {
+      path: '/internal/security/login/{providerType}/{providerName}',
+      validate: {
+        params: schema.object({
+          providerType: schema.string(),
+          providerName: schema.string(),
+        }),
+        query: schema.object({ next: schema.maybe(schema.string()) }),
+      },
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      const { providerType, providerName } = request.params;
+      logger.info(`Logging in in with provider "${providerName}" (${providerType})`);
+
+      try {
+        const authenticationResult = await authc.login(request, {
+          provider: { name: providerName },
+          value: getLoginAttemptForProviderType(
+            providerType,
+            parseNext(request.url?.href ?? '', basePath.serverBasePath)
+          ),
+        });
+
+        if (authenticationResult.redirected()) {
+          return response.redirected({ headers: { location: authenticationResult.redirectURL! } });
+        }
+
+        return response.unauthorized();
+      } catch (err) {
+        logger.error(err);
+        return response.internalError();
+      }
+    }
+  );
 }

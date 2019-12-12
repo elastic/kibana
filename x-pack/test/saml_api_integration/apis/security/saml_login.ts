@@ -108,11 +108,15 @@ export default function({ getService }: FtrProviderContext) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        expect(handshakeResponse.headers.location).to.be('/api/security/saml/capture-url-fragment');
+        expect(handshakeResponse.headers.location).to.be(
+          '/internal/security/saml/capture-url-fragment'
+        );
       });
 
       it('should return an HTML page that will extract URL fragment', async () => {
-        const response = await supertest.get('/api/security/saml/capture-url-fragment').expect(200);
+        const response = await supertest
+          .get('/internal/security/saml/capture-url-fragment')
+          .expect(200);
 
         const kibanaBaseURL = url.format({ ...config.get('servers.kibana'), auth: false });
         const dom = new JSDOM(response.text, {
@@ -127,7 +131,7 @@ export default function({ getService }: FtrProviderContext) {
               Object.defineProperty(window, 'location', {
                 value: {
                   hash: '#/workpad',
-                  href: `${kibanaBaseURL}/api/security/saml/capture-url-fragment#/workpad`,
+                  href: `${kibanaBaseURL}/internal/security/saml/capture-url-fragment#/workpad`,
                   replace(newLocation: string) {
                     this.href = newLocation;
                     resolve();
@@ -149,13 +153,13 @@ export default function({ getService }: FtrProviderContext) {
 
         // Check that script that forwards URL fragment worked correctly.
         expect(dom.window.location.href).to.be(
-          '/api/security/saml/start?redirectURLFragment=%23%2Fworkpad'
+          '/internal/security/saml/start?redirectURLFragment=%23%2Fworkpad'
         );
       });
     });
 
     describe('initiating handshake', () => {
-      const initiateHandshakeURL = `/api/security/saml/start?redirectURLFragment=%23%2Fworkpad`;
+      const initiateHandshakeURL = `/internal/security/saml/start?redirectURLFragment=%23%2Fworkpad`;
 
       let captureURLCookie: Cookie;
       beforeEach(async () => {
@@ -222,7 +226,7 @@ export default function({ getService }: FtrProviderContext) {
         const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
 
         const handshakeResponse = await supertest
-          .get(`/api/security/saml/start?redirectURLFragment=%23%2Fworkpad`)
+          .get(`/internal/security/saml/start?redirectURLFragment=%23%2Fworkpad`)
           .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
@@ -360,7 +364,9 @@ export default function({ getService }: FtrProviderContext) {
         const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
 
         const handshakeResponse = await supertest
-          .get(`/api/security/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`)
+          .get(
+            `/internal/security/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`
+          )
           .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
@@ -515,7 +521,9 @@ export default function({ getService }: FtrProviderContext) {
         const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
 
         const handshakeResponse = await supertest
-          .get(`/api/security/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`)
+          .get(
+            `/internal/security/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`
+          )
           .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
@@ -603,7 +611,9 @@ export default function({ getService }: FtrProviderContext) {
         const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
 
         const handshakeResponse = await supertest
-          .get(`/api/security/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`)
+          .get(
+            `/internal/security/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`
+          )
           .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
@@ -647,7 +657,9 @@ export default function({ getService }: FtrProviderContext) {
         expect(handshakeCookie.path).to.be('/');
         expect(handshakeCookie.httpOnly).to.be(true);
 
-        expect(handshakeResponse.headers.location).to.be('/api/security/saml/capture-url-fragment');
+        expect(handshakeResponse.headers.location).to.be(
+          '/internal/security/saml/capture-url-fragment'
+        );
       });
     });
 
@@ -662,7 +674,9 @@ export default function({ getService }: FtrProviderContext) {
         const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
 
         const handshakeResponse = await supertest
-          .get(`/api/security/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`)
+          .get(
+            `/internal/security/saml/start?redirectURLFragment=${encodeURIComponent('#workpad')}`
+          )
           .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 
@@ -798,12 +812,12 @@ export default function({ getService }: FtrProviderContext) {
         const captureURLCookie = request.cookie(captureURLResponse.headers['set-cookie'][0])!;
 
         expect(captureURLResponse.headers.location).to.be(
-          '/api/security/saml/capture-url-fragment'
+          '/internal/security/saml/capture-url-fragment'
         );
 
         // 2. Initiate SAML handshake.
         const handshakeResponse = await supertest
-          .get(`/api/security/saml/start?redirectURLFragment=%23%2F${'workpad'.repeat(10)}`)
+          .get(`/internal/security/saml/start?redirectURLFragment=%23%2F${'workpad'.repeat(10)}`)
           .set('Cookie', captureURLCookie.cookieString())
           .expect(302);
 

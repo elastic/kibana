@@ -100,8 +100,15 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Redirects user to the login page preserving query string parameters.
    * @param request Request instance.
+   * @param [state] Optional state object associated with the provider.
    */
-  public async logout(request: KibanaRequest) {
+  public async logout(request: KibanaRequest, state?: ProviderState | null) {
+    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+
+    if (!state) {
+      return DeauthenticationResult.notHandled();
+    }
+
     // Query string may contain the path where logout has been called or
     // logout reason that login page may need to know.
     const queryString = request.url.search || `?msg=LOGGED_OUT`;
@@ -128,7 +135,7 @@ export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Trying to authenticate via state.');
 
     if (!authorization) {
-      this.logger.debug('Access token is not found in state.');
+      this.logger.debug('Authorization header is not found in state.');
       return AuthenticationResult.notHandled();
     }
 

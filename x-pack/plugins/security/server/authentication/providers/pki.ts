@@ -38,6 +38,15 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
   static readonly type = 'pki';
 
   /**
+   * Performs initial login request.
+   * @param request Request instance.
+   */
+  public async login(request: KibanaRequest) {
+    this.logger.debug('Trying to perform a login.');
+    return await this.authenticateViaPeerCertificate(request);
+  }
+
+  /**
    * Performs PKI request authentication.
    * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
