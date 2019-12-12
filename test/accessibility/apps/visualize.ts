@@ -22,19 +22,12 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const a11y = getService('a11y');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+
 
   describe('Visualize', () => {
-    const vizName = 'Visualize Listing A11y';
+
     before(async () => {
-      // await esArchiver.loadIfNeeded('logstash_functional');
-      // await kibanaServer.uiSettings.update({
-      //   defaultIndex: 'logstash-*',
-      // });
-      // //await esArchiver.load('visualize');
-      // await PageObjects.visualize.gotoVisualizationLandingPage();
-      // await PageObjects.visualize.deleteAllVisualizations();
+
       await PageObjects.common.navigateToApp('visualize');
     });
 
@@ -47,9 +40,10 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    // it('create visualize button', async () => {
-    //     await PageObjects.visualize.clickNewVisualization();
-    //     await a11y.testAppSnapshot();
-    //   });
+    
+    it.skip('create visualize button', async () => {
+     await PageObjects.visualize.clickNewVisualization();
+     await a11y.testAppSnapshot();
+    });
   });
 }
