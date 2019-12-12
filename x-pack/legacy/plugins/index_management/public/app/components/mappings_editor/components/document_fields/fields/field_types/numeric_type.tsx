@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, FormDataProvider, NumericField, RangeField } from '../../../../shared_imports';
+import { UseField, FormDataProvider, NumericField, Field } from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,
@@ -21,6 +20,7 @@ import {
   CopyToParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { PARAMETERS_DEFINITION } from '../../../../constants';
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
@@ -50,33 +50,14 @@ export const NumericType = ({ field }: Props) => {
           formData.subType === 'scaled_float' ? (
             <EditFieldSection>
               <EditFieldFormRow
-                title={
-                  <h3>
-                    {i18n.translate('xpack.idxMgmt.mappingsEditor.scalingFactorFieldTitle', {
-                      defaultMessage: 'Scaling factor',
-                    })}
-                  </h3>
-                }
-                description={i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.scalingFactorFieldDescription',
-                  {
-                    defaultMessage: 'The scaling factor to use when encoding values.',
-                  }
-                )}
+                title={<h3>{PARAMETERS_DEFINITION.scaling_factor.title}</h3>}
+                description={PARAMETERS_DEFINITION.scaling_factor.description}
                 withToggle={false}
               >
                 <UseField
                   path="scaling_factor"
                   config={getFieldConfig('scaling_factor')}
-                  component={RangeField}
-                  componentProps={{
-                    euiFieldProps: {
-                      min: 1,
-                      max: 50,
-                      showInput: true,
-                      fullWidth: true,
-                    },
-                  }}
+                  component={Field}
                 />
               </EditFieldFormRow>
             </EditFieldSection>

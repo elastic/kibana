@@ -303,6 +303,16 @@ export const PARAMETERS_DEFINITION = {
     } as FieldConfig,
   },
   scaling_factor: {
+    title: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldTitle', {
+      defaultMessage: 'Scaling factor',
+    }),
+    description: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldDescription',
+      {
+        defaultMessage:
+          'Values will be multiplied by this factor at index time and rounded to the closest long value. High factor values improve accuracy, but also increase space requirements.',
+      }
+    ),
     fieldConfig: {
       defaultValue: '',
       type: FIELD_TYPES.NUMBER,
@@ -337,8 +347,7 @@ export const PARAMETERS_DEFINITION = {
         },
       ],
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorHelpText', {
-        defaultMessage:
-          'Values will be multiplied by this factor at index time and rounded to the closest long value.',
+        defaultMessage: 'Value must be greater than 0.',
       }),
     } as FieldConfig,
   },

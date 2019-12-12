@@ -6,43 +6,18 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
-
-import { FormRow, UseField, RangeField } from '../../../../../shared_imports';
+import { FormRow, UseField, Field } from '../../../../../shared_imports';
 import { getFieldConfig } from '../../../../../lib';
+import { PARAMETERS_DEFINITION } from '../../../../../constants';
 
 export const ScaledFloatTypeRequiredParameters = () => {
   return (
     <FormRow
-      title={
-        <h3>
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.scaledFloat.scalingFactorFieldTitle', {
-            defaultMessage: 'Scaling factor',
-          })}
-        </h3>
-      }
-      description={i18n.translate(
-        'xpack.idxMgmt.mappingsEditor.scaledFlorat.scalingFactorFieldDescription',
-        {
-          defaultMessage:
-            'The scaling factor to use when encoding values. High values improve accuracy, but also increase space requirements.',
-        }
-      )}
+      title={<h3>{PARAMETERS_DEFINITION.scaling_factor.title}</h3>}
+      description={PARAMETERS_DEFINITION.scaling_factor.description}
       idAria="mappingsEditorScalingFactorParameter"
     >
-      <UseField
-        path="scaling_factor"
-        config={getFieldConfig('scaling_factor')}
-        component={RangeField}
-        componentProps={{
-          euiFieldProps: {
-            min: 1,
-            max: 50,
-            showInput: true,
-            fullWidth: true,
-          },
-        }}
-      />
+      <UseField path="scaling_factor" config={getFieldConfig('scaling_factor')} component={Field} />
     </FormRow>
   );
 };
