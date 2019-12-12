@@ -12,7 +12,7 @@ import {
 import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { EMSClient } from '@elastic/ems-client';
-import { xpackInfo } from './kibana_services';
+import { license } from './kibana_services';
 import fetch from 'node-fetch';
 
 const GIS_API_RELATIVE = `../${GIS_API_PATH}`;
@@ -69,8 +69,7 @@ export function getEMSClient() {
       };
     }
   }
-  const xpackMapsFeature = xpackInfo.get('features.maps');
-  const licenseId = xpackMapsFeature && xpackMapsFeature.maps && xpackMapsFeature.uid ? xpackMapsFeature.uid :  '';
+  const licenseId = license.id;
   if (latestLicenseId !== licenseId) {
     latestLicenseId = licenseId;
     emsClient.addQueryParams({ license: licenseId });

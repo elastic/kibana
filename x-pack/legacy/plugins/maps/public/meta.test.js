@@ -36,13 +36,7 @@ jest.mock('ui/chrome',
 );
 
 jest.mock('./kibana_services', () => {
-  return {
-    xpackInfo: {
-      get() {
-        return 'foobarlicenseid';
-      }
-    }
-  };
+  return { license: { id: 'foobarlicenseid' } };
 });
 
 describe('default use without proxy', () => {

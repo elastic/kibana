@@ -5,13 +5,15 @@
  */
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../../../../src/legacy/ui/public/courier';
-export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { esFilters } from '../../../../../src/plugins/data/public';
 import { npStart } from 'ui/new_platform';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from '../../../../../src/legacy/ui/public/courier';
 export const indexPatternService = npStart.plugins.data.indexPatterns;
+
+export const license = {};
+export const setLicenseId = latestLicenseId => license.id = latestLicenseId;
 
 export async function fetchSearchSourceAndRecordWithInspector({
   searchSource,
