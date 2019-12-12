@@ -54,12 +54,12 @@ describe('generateRulesFromRaw', () => {
       generateRulesFromRaw({
         all: [
           {
-            username: '*',
+            field: { username: '*' },
           },
         ],
         any: [
           {
-            username: '*',
+            field: { username: '*' },
           },
         ],
       });
@@ -96,13 +96,67 @@ describe('generateRulesFromRaw', () => {
     }
   });
 
+  it('calculates the max depth of the rule tree', () => {
+    const rules = {
+      all: [
+        // depth = 1
+        {
+          // depth = 2
+          all: [
+            // depth = 3
+            {
+              any: [
+                // depth == 4
+                { field: { username: 'foo' } },
+              ],
+            },
+            { except: { field: { username: 'foo' } } },
+          ],
+        },
+        {
+          // depth = 2
+          any: [
+            {
+              // depth = 3
+              all: [
+                {
+                  // depth = 4
+                  any: [
+                    {
+                      // depth = 5
+                      all: [
+                        {
+                          // depth = 6
+                          all: [
+                            // depth = 7
+                            {
+                              except: {
+                                field: { username: 'foo' },
+                              },
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(generateRulesFromRaw(rules).maxDepth).toEqual(7);
+  });
+
   describe('"any"', () => {
     it('expects an array value', () => {
       expect(() => {
         generateRulesFromRaw({
           any: {
-            username: '*',
-          },
+            field: { username: '*' },
+          } as any,
         });
       }).toThrowError('Expected an array of rules, but found object.');
     });
@@ -113,8 +167,8 @@ describe('generateRulesFromRaw', () => {
       expect(() => {
         generateRulesFromRaw({
           all: {
-            username: '*',
-          },
+            field: { username: '*' },
+          } as any,
         });
       }).toThrowError('Expected an array of rules, but found object.');
     });
