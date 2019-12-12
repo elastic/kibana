@@ -16,6 +16,7 @@ import { getIntegratedAppAvailability } from './capabilities_adapter';
 import {
   INTEGRATED_SOLUTIONS,
   PLUGIN,
+  DEFAULT_DARK_MODE,
   DEFAULT_TIMEPICKER_QUICK_RANGES,
 } from '../../../../common/constants';
 import { getTelemetryMonitorPageLogger, getTelemetryOverviewPageLogger } from '../telemetry';
@@ -47,7 +48,7 @@ export const getKibanaFrameworkAdapter = (
     basePath: basePath.get(),
     canSave,
     client: createApolloClient(`${basePath.get()}/api/uptime/graphql`, 'true'),
-    darkMode: core.uiSettings.get('theme:darkMode'),
+    darkMode: core.uiSettings.get(DEFAULT_DARK_MODE),
     commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     i18n,
     isApmAvailable: apm,
