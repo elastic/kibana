@@ -41,6 +41,13 @@ export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const SIGNALS_ID = `${APP_ID}.signals`;
 
 /**
+ * Special internal structure for tags for signals. This is used
+ * to filter out tags that have internal structures within them.
+ */
+export const INTERNAL_IDENTIFIER = '__internal';
+export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id`;
+
+/**
  * Detection engine routes
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
