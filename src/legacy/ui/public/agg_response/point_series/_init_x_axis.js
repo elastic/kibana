@@ -29,9 +29,19 @@ export function initXAxis(chart, table) {
   chart.xAxisFormat = format;
   chart.xAxisLabel = title;
 
-  if (params.interval) {
-    chart.ordered = {
-      interval: params.date ? moment.duration(params.interval) : params.interval,
-    };
+  const { interval, date } = params;
+  if (interval) {
+    if(date) {
+      const { intervalESUnit, intervalESValue } = params;
+      chart.ordered = {
+        interval: moment.duration(interval),
+        intervalESUnit: intervalESUnit,
+        intervalESValue: intervalESValue,
+      };
+    } else {
+      chart.ordered = {
+        interval,
+      };
+    }
   }
 }
