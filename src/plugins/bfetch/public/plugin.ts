@@ -18,6 +18,8 @@
  */
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/public';
+import { fetchStreaming as fetchStreamingStatic, FetchStreamingParams } from './streaming';
+import { removeLeadingSlash } from '../common';
 
 // eslint-disable-next-line
 export interface BfetchPublicSetupDependencies {}
@@ -25,8 +27,9 @@ export interface BfetchPublicSetupDependencies {}
 // eslint-disable-next-line
 export interface BfetchPublicStartDependencies {}
 
-// eslint-disable-next-line
-export interface BfetchPublicSetup {}
+export interface BfetchPublicSetup {
+  fetchStreaming: (params: FetchStreamingParams) => ReturnType<typeof fetchStreamingStatic>;
+}
 
 // eslint-disable-next-line
 export interface BfetchPublicStart {}
@@ -39,15 +42,41 @@ export class BfetchPublicPlugin
       BfetchPublicSetupDependencies,
       BfetchPublicStartDependencies
     > {
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchPublicSetupDependencies): BfetchPublicSetup {
-    return {};
+    const fetchStreaming = this.fetchStreaming(
+      this.initializerContext.env.packageInfo.version,
+      core.http.basePath.get()
+    );
+
+    return {
+      fetchStreaming,
+    };
   }
 
   public start(core: CoreStart, plugins: BfetchPublicStartDependencies): BfetchPublicStart {
+    // this.ajaxStream = ajaxStream(
+    // this.initializerContext.env.packageInfo.version,
+    // core.http.basePath.get()
+    // );
+
     return {};
   }
 
   public stop() {}
+
+  private fetchStreaming = (
+    version: string,
+    basePath: string
+  ): BfetchPublicSetup['fetchStreaming'] => params =>
+    fetchStreamingStatic({
+      ...params,
+      url: `${basePath}/bfetch/stream/${removeLeadingSlash(params.url)}`,
+      headers: {
+        'Content-Type': 'application/json',
+        'kbn-version': version,
+        ...(params.headers || {}),
+      },
+    });
 }

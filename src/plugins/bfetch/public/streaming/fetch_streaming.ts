@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { defer } from 'src/plugins/kibana_utils/common';
+import { defer } from '../../../kibana_utils/common';
 import { fromStreamingXhr } from './from_streaming_xhr';
 
 export interface FetchStreamingParams {
@@ -31,7 +31,7 @@ export interface FetchStreamingParams {
  * Sends an AJAX request to the server, and processes the result as a
  * streaming HTTP/1 response. Streams data as text through observable.
  */
-export function fetchStreaming<T>({
+export function fetchStreaming({
   url,
   headers = {},
   method = 'POST',

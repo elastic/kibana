@@ -18,8 +18,9 @@
  */
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-import { StreamingResponseHandler } from '../common/types';
-import { removeLeadingSlash } from './util';
+import { ReplaySubject } from 'rxjs';
+import { schema } from '@kbn/config-schema';
+import { StreamingResponseHandler, removeLeadingSlash } from '../common';
 import { createStreamingResponseStream } from './streaming';
 
 // eslint-disable-next-line
@@ -48,8 +49,21 @@ export class BfetchServerPlugin
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
+    const router = core.http.createRouter();
+    const addStreamingResponseRoute = this.addStreamingResponseRoute(router);
+
+    addStreamingResponseRoute('example', {
+      onRequest: payload => {
+        const subject = new ReplaySubject();
+        subject.next(payload);
+        setTimeout(() => subject.next('end'), 2000);
+        setTimeout(() => subject.complete(), 2001);
+        return subject;
+      },
+    });
+
     return {
-      addStreamingResponseRoute: this.addStreamingResponseRoute(core),
+      addStreamingResponseRoute,
     };
   }
 
@@ -60,13 +74,14 @@ export class BfetchServerPlugin
   public stop() {}
 
   private addStreamingResponseRoute = (
-    core: CoreSetup
+    router: ReturnType<CoreSetup['http']['createRouter']>
   ): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
-    const router = core.http.createRouter();
     router.post(
       {
         path: `/bfetch/stream/${removeLeadingSlash(path)}`,
-        validate: {},
+        validate: {
+          body: schema.any(),
+        },
       },
       async (context, request, response) => {
         const data = request.body;
