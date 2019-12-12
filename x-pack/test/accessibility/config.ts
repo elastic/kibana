@@ -13,10 +13,7 @@ export default async function({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [
-      require.resolve('./apps/login_page'),
-      require.resolve('./apps/spaces_view'),
-    ],
+    testFiles: [require.resolve('./apps/login_page')],
     pageObjects,
     services,
 
