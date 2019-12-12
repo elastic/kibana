@@ -32,7 +32,6 @@ import { get, identity } from 'lodash';
 // @ts-ignore
 import { npSetup } from 'ui/new_platform';
 import { FUNCTIONS_URL } from './consts';
-import { ajaxStream } from './ajax_stream';
 import { batchedFetch } from './batched_fetch';
 
 export function getType(node: any) {
@@ -68,13 +67,7 @@ export const loadLegacyServerFunctionWrappers = async () => {
       const serverFunctionList = await npSetup.core.http.get(FUNCTIONS_URL);
       const types = npSetup.plugins.expressions.__LEGACY.types.toJS();
       const { serialize } = serializeProvider(types);
-      const batch = batchedFetch({
-        ajaxStream: ajaxStream(
-          npSetup.core.injectedMetadata.getKibanaVersion(),
-          npSetup.core.injectedMetadata.getBasePath()
-        ),
-        serialize,
-      });
+      const batch = batchedFetch({ serialize });
 
       // For every sever-side function, register a client-side
       // function that matches its definition, but which simply

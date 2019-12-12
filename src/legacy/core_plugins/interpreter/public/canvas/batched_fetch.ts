@@ -25,11 +25,7 @@ import { split } from '../../../../../plugins/bfetch/public/streaming';
 import { defer } from '../../../../../plugins/kibana_utils/public';
 import { FUNCTIONS_URL } from './consts';
 
-// TODO: Import this type from kibana_util.
-type AjaxStream = any;
-
 export interface Options {
-  ajaxStream: any;
   serialize: any;
   ms?: number;
 }
@@ -52,7 +48,7 @@ export interface Request {
  * Create a function which executes an Expression function on the
  * server as part of a larger batch of executions.
  */
-export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
+export function batchedFetch({ serialize, ms = 10 }: Options) {
   // Uniquely identifies each function call in a batch operation
   // so that the appropriate promise can be resolved / rejected later.
   let id = 0;
@@ -71,7 +67,7 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
   };
 
   const runBatch = () => {
-    processBatch(ajaxStream, batch);
+    processBatch(batch);
     reset();
   };
 
@@ -114,7 +110,7 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
  * Runs the specified batch of functions on the server, then resolves
  * the related promises.
  */
-async function processBatch(ajaxStream: AjaxStream, batch: Batch) {
+async function processBatch(batch: Batch) {
   const { stream, promise } = npStart.plugins.bfetch.fetchStreaming({
     url: FUNCTIONS_URL,
     body: JSON.stringify({
