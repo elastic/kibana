@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint max-len: 0 */
-
 import { extractReferences, injectReferences } from './references';
 import { ES_GEO_GRID, ES_SEARCH, ES_PEW_PEW } from '../constants';
 

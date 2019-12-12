@@ -118,7 +118,7 @@ describe('Create Remote cluster', () => {
 
         const expectInvalidChar = (char) => {
           form.setComboBoxValue('remoteClusterFormSeedsInput', `192.16${char}:3000`);
-          expect(form.getErrorsMessages()).toContain(`Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`); // eslint-disable-line max-len
+          expect(form.getErrorsMessages()).toContain(`Seed node must use host:port format. Example: 127.0.0.1:9400, localhost:9400. Hosts can only consist of letters, numbers, and dashes.`);
         };
 
         [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]

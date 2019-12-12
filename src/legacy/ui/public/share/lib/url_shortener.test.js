@@ -119,11 +119,11 @@ describe('Url shortener', () => {
     });
 
     it('should shorten urls with a query string in the hash', async () => {
-      const relativeUrl = "/app/kibana#/discover?_g=(refreshInterval:(pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"; //eslint-disable-line max-len, quotes
+      const relativeUrl = "/app/kibana#/discover?_g=(refreshInterval:(pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))";
       kfetchStub.withArgs({
         method: 'POST',
         pathname: `/api/shorten_url`,
-        body: '{"url":"/app/kibana#/discover?_g=(refreshInterval:(pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"}' //eslint-disable-line max-len, quotes
+        body: '{"url":"/app/kibana#/discover?_g=(refreshInterval:(pause:!f,value:0),time:(from:now-15m,mode:quick,to:now))&_a=(columns:!(_source),index:%27logstash-*%27,interval:auto,query:(query_string:(analyze_wildcard:!t,query:%27*%27)),sort:!(%27@timestamp%27,desc))"}'
       }).returns(Promise.resolve({ urlId: shareId }));
 
       const shortUrl = await shortenUrl(`http://localhost${basePath}${relativeUrl}`);

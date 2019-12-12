@@ -519,7 +519,6 @@ function discoverController(
 
   $scope.getBucketIntervalToolTipText = () => {
     return i18n.translate('kbn.discover.bucketIntervalTooltip', {
-      // eslint-disable-next-line max-len
       defaultMessage: 'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}',
       values: {
         bucketsDescription: $scope.bucketInterval.scale > 1

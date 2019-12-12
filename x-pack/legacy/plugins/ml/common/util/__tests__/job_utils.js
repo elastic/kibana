@@ -113,7 +113,7 @@ describe('ML - job utils', () => {
     const job = {
       analysis_config: {
         detectors: [
-          { 'function': 'sum', 'field_name': 'bytes', 'partition_field_name': 'clientip', 'detector_description': 'High bytes client IP' }, // eslint-disable-line max-len
+          { 'function': 'sum', 'field_name': 'bytes', 'partition_field_name': 'clientip', 'detector_description': 'High bytes client IP' },
           { 'function': 'freq_rare', 'by_field_name': 'uri', 'over_field_name': 'clientip', 'detector_description': 'Freq rare URI' },
           { 'function': 'count', 'by_field_name': 'mlcategory', 'detector_description': 'Count by category' },
           { 'function': 'count', 'by_field_name': 'hrd', 'detector_description': 'count by hrd' },

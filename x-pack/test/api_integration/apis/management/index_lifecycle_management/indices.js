@@ -94,7 +94,7 @@ export default function ({ getService }) {
         // As there is no easy way to set the index in the ERROR state to be able to retry
         // we validate that the error returned *is* coming from the ES "_ilm/retry" endpoint
         const { body } = await retryPolicyOnIndex(indexName);
-        const expected = `[illegal_argument_exception] cannot retry an action for an index [${indexName}] that has not encountered an error when running a Lifecycle Policy`; // eslint-disable-line max-len
+        const expected = `[illegal_argument_exception] cannot retry an action for an index [${indexName}] that has not encountered an error when running a Lifecycle Policy`;
         expect(body.message).to.be(expected);
       });
     });

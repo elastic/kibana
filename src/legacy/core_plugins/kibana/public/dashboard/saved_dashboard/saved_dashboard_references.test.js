@@ -40,7 +40,6 @@ describe('extractReferences', () => {
       },
     };
     const updatedDoc = extractReferences(doc);
-    /* eslint-disable max-len */
     expect(updatedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -61,7 +60,6 @@ Object {
   ],
 }
 `);
-    /* eslint-enable max-len */
   });
 
   test('fails when "type" attribute is missing from a panel', () => {
@@ -136,7 +134,6 @@ describe('injectReferences', () => {
       },
     ];
     injectReferences(context, references);
-    /* eslint-disable max-len */
     expect(context).toMatchInlineSnapshot(`
 Object {
   "foo": true,
@@ -144,7 +141,6 @@ Object {
   "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\",\\"type\\":\\"visualization\\"}]",
 }
 `);
-    /* eslint-enable max-len */
   });
 
   test('skips when panelsJSON is missing', () => {

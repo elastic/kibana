@@ -17,9 +17,6 @@
  * under the License.
  */
 
-/* eslint max-len: 0 */
-/* eslint quotes: 0 */
-
 export const fieldMappings = {
   timestamp: {
     type: 'date'

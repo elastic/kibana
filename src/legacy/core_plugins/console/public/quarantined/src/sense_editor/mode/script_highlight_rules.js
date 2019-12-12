@@ -63,7 +63,6 @@ export function ScriptHighlightRules() {
       },
       {
         token: 'script.keyword.operator',
-        // eslint-disable-next-line max-len
         regex: '\\?\\.|\\*\\.|=~|==~|!|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|->|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^=|\\b(?:in|instanceof|new|typeof|void)'
       },
       {

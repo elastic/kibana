@@ -90,7 +90,6 @@ describe('buildHierarchicalData convertTable', () => {
           { 'id': 'col-5-agg_1', 'name': 'Average bytes' }
         ],
         rows: [
-          /* eslint-disable max-len */
           { 'col-0-agg_2': 'png', 'col-2-agg_3': 'IT', 'col-4-agg_4': 'win', 'col-1-agg_1': 412032, 'col-3-agg_1': 9299, 'col-5-agg_1': 0 },
           { 'col-0-agg_2': 'png', 'col-2-agg_3': 'IT', 'col-4-agg_4': 'mac', 'col-1-agg_1': 412032, 'col-3-agg_1': 9299, 'col-5-agg_1': 9299 },
           { 'col-0-agg_2': 'png', 'col-2-agg_3': 'US', 'col-4-agg_4': 'linux', 'col-1-agg_1': 412032, 'col-3-agg_1': 8293, 'col-5-agg_1': 3992 },
@@ -103,7 +102,6 @@ describe('buildHierarchicalData convertTable', () => {
           { 'col-0-agg_2': 'html', 'col-2-agg_3': 'CN', 'col-4-agg_4': 'mac', 'col-1-agg_1': 412032, 'col-3-agg_1': 9299, 'col-5-agg_1': 5892 },
           { 'col-0-agg_2': 'html', 'col-2-agg_3': 'FR', 'col-4-agg_4': 'win', 'col-1-agg_1': 412032, 'col-3-agg_1': 8293, 'col-5-agg_1': 3992 },
           { 'col-0-agg_2': 'html', 'col-2-agg_3': 'FR', 'col-4-agg_4': 'mac', 'col-1-agg_1': 412032, 'col-3-agg_1': 8293, 'col-5-agg_1': 3029 }
-          /* eslint-enable max-len */
         ]
       };
       dimensions = {

@@ -45,7 +45,6 @@ export function getEMSClient() {
 
       const proxyElasticMapsServiceInMaps = chrome.getInjected('proxyElasticMapsServiceInMaps', false);
       const proxyPath = proxyElasticMapsServiceInMaps ? relativeToAbsolute('..') : '';
-      // eslint-disable-next-line max-len
       const manifestServiceUrl = proxyElasticMapsServiceInMaps ? relativeToAbsolute(`${GIS_API_RELATIVE}/${EMS_CATALOGUE_PATH}`) : chrome.getInjected('emsManifestServiceUrl');
 
       emsClient = new EMSClient({

@@ -161,7 +161,6 @@ describe('PUT role', () => {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          //eslint-disable-next-line max-len
           message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [\"!foo\" is not allowed]]]`,
           statusCode: 400,
           validation: {
@@ -187,7 +186,6 @@ describe('PUT role', () => {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          //eslint-disable-next-line max-len
           message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"feature\" fails because [child \"foo\" fails because [\"foo\" at position 0 fails because [\"0\" with value \"!foo\" fails to match the required pattern: /^[a-zA-Z0-9_-]+$/]]]]]`,
           statusCode: 400,
           validation: {
@@ -214,7 +212,6 @@ describe('PUT role', () => {
         statusCode: 400,
         result: {
           error: 'Bad Request',
-          //eslint-disable-next-line max-len
           message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"base\" conflict with forbidden peer \"feature\"]]`,
           statusCode: 400,
           validation: {
@@ -240,7 +237,6 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             error: 'Bad Request',
-            //eslint-disable-next-line max-len
             message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"base\" fails because [\"base\" at position 0 fails because [\"0\" must be one of [all, read]]]]]`,
             statusCode: 400,
             validation: {
@@ -265,7 +261,6 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             error: 'Bad Request',
-            //eslint-disable-next-line max-len
             message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"_reserved\" is not allowed]]`,
             statusCode: 400,
             validation: {
@@ -298,7 +293,6 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             error: 'Bad Request',
-            //eslint-disable-next-line max-len
             message: `child \"kibana\" fails because [\"kibana\" position 1 contains a duplicate value]`,
             statusCode: 400,
             validation: {
@@ -325,7 +319,6 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             error: 'Bad Request',
-            //eslint-disable-next-line max-len
             message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"spaces\" fails because [\"spaces\" at position 0 fails because [\"0\" must be one of [*]], \"spaces\" at position 0 fails because [\"0\" with value \"foo-*\" fails to match the required pattern: /^[a-z0-9_-]+$/]]]]`,
             statusCode: 400,
             validation: {
@@ -349,7 +342,6 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             error: 'Bad Request',
-            //eslint-disable-next-line max-len
             message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"spaces\" fails because [\"spaces\" at position 1 fails because [\"1\" must be one of [*]], \"spaces\" at position 0 fails because [\"0\" with value \"*\" fails to match the required pattern: /^[a-z0-9_-]+$/]]]]`,
             statusCode: 400,
             validation: {
@@ -374,7 +366,6 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             error: 'Bad Request',
-            //eslint-disable-next-line max-len
             message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [child \"base\" fails because [\"base\" at position 0 fails because [\"0\" must be one of [all, read]]]]]`,
             statusCode: 400,
             validation: {
@@ -407,7 +398,6 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             error: 'Bad Request',
-            //eslint-disable-next-line max-len
             message: `child \"kibana\" fails because [\"kibana\" position 1 contains a duplicate value]`,
             statusCode: 400,
             validation: {
@@ -432,7 +422,6 @@ describe('PUT role', () => {
           statusCode: 400,
           result: {
             error: 'Bad Request',
-            //eslint-disable-next-line max-len
             message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"_reserved\" is not allowed]]`,
             statusCode: 400,
             validation: {

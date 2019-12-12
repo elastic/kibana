@@ -540,7 +540,7 @@ export class IndexPattern implements StaticIndexPattern {
                 {
                   defaultMessage:
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-                } // eslint-disable-line max-len
+                }
               );
               this.notifications.toasts.addDanger(message);
               throw err;

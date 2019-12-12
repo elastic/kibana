@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable quotes */
-
 /*
  Really didn't want to do this, but testing the agg flatten logic
  in units isn't really possible since the functions depend on each other

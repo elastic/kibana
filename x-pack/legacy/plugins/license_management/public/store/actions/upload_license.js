@@ -46,7 +46,6 @@ const dispatchFromResponse = async (response, dispatch, currentLicenseType, newL
     const messages = Object.values(acknowledge).slice(1);
     // messages can be in nested arrays
     const first = i18n.translate('xpack.licenseMgmt.uploadLicense.problemWithUploadedLicenseDescription', {
-      // eslint-disable-next-line max-len
       defaultMessage: 'Some functionality will be lost if you replace your {currentLicenseType} license with a {newLicenseType} license. Review the list of features below.',
       values: {
         currentLicenseType: currentLicenseType.toUpperCase(),

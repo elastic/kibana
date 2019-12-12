@@ -16,7 +16,6 @@ export function getEmsUnavailableMessage() {
   }
 
   return i18n.translate('xpack.maps.source.ems.disabledDescription', {
-    // eslint-disable-next-line max-len
     defaultMessage: 'Access to Elastic Maps Service has been disabled. Ask your system administrator to set "map.includeElasticMapsService" in kibana.yml.'
   });
 }

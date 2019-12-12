@@ -53,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
 
       const indicesAll = await indicesList.getIndicesAll();
 
-      const tableData = [ /*eslint-disable max-len*/
+      const tableData = [
         { name: 'many-0006_gkuqbjonkjmg', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '4.08 /s', unassignedShards: '0', },
         { name: 'many-0008_amnscruqlsnu', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '4.08 /s', unassignedShards: '0', },
         { name: 'many-0010_dgnlpqtstfvi', status: 'Health: green', documentCount: '1', dataSize: '3.7 KB', indexRate: '0 /s', searchRate: '1.95 /s', unassignedShards: '0', },
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
         { name: 'many-0011_xtkcmlwmxcov', status: 'Health: red', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: '1', },
         { name: 'many-0013_smjuwdkhpduv', status: 'Health: red', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: '1', },
         { name: 'many-0015_vwmrucgzvohb', status: 'Health: red', documentCount: '1', dataSize: '3.6 KB', indexRate: '0 /s', searchRate: '0 /s', unassignedShards: '1', },
-      ]; /*eslint-enable*/
+      ];
 
       // check the all data in the table
       indicesAll.forEach((obj, index) => { // eslint-disable-line no-unused-vars

@@ -63,7 +63,6 @@ function getFieldValueCounts(params) {
     if (params.hits.length - missing === 0) {
       return {
         error: i18n.translate('kbn.discover.fieldChooser.fieldCalculator.fieldIsNotPresentInDocumentsErrorMessage', {
-          // eslint-disable-next-line max-len
           defaultMessage: 'This field is present in your Elasticsearch mapping but not in the {hitsLength} documents shown in the doc table. You may still be able to visualize or search on it.',
           values: {
             hitsLength: params.hits.length,

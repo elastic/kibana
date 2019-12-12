@@ -145,7 +145,6 @@ export class MBMapContainer extends React.Component {
       });
       mbMap.on('load', () => {
         emptyImage = new Image();
-        // eslint-disable-next-line max-len
         emptyImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
         emptyImage.crossOrigin = 'anonymous';
         resolve(mbMap);

@@ -18,7 +18,6 @@
  */
 
 /* eslint import/no-unresolved: 0 */
-/* eslint  max-len: 0 */
 const ace = require('brace');
 
 ace.define('ace/theme/sense-dark', ['require', 'exports', 'module'],

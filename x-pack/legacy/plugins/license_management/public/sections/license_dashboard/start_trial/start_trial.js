@@ -138,7 +138,6 @@ export class StartTrial extends React.PureComponent {
                             target="_blank"
                           >
                             <FormattedMessage
-                              // eslint-disable-next-line max-len
                               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityDocumentationLinkText"
                               defaultMessage="documentation"
                             />
@@ -158,7 +157,6 @@ export class StartTrial extends React.PureComponent {
                             target="_blank"
                           >
                             <FormattedMessage
-                              // eslint-disable-next-line max-len
                               id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsLinkText"
                               defaultMessage="terms and conditions"
                             />

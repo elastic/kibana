@@ -305,7 +305,6 @@ export function initRoutes(server, licenseUid) {
 
       const vectorStyle = await tmsService.getVectorStyleSheet();
       const sourceManifest = vectorStyle.sources[request.query.sourceId];
-      // eslint-disable-next-line max-len
       const newUrl = `${GIS_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}?id=${request.query.id}&sourceId=${request.query.sourceId}&x={x}&y={y}&z={z}`;
       return {
         ...sourceManifest,

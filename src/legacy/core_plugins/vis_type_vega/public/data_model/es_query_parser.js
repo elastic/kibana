@@ -93,7 +93,6 @@ export class EsQueryParser {
           }));
       } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
         throw new Error(i18n.translate('visTypeVega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
-          // eslint-disable-next-line max-len
           defaultMessage: 'Legacy {legacyContext} can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. {timestampParam}',
           values: { legacyContext: `"${LEGACY_CONTEXT}"`, trueValue: 'true', timestampParam: '"@timestamp"' },
         }));

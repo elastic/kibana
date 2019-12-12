@@ -441,7 +441,6 @@ Object {
         },
       };
       const migratedDoc = migrate(doc);
-      /* eslint-disable max-len */
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -467,7 +466,6 @@ Object {
   "type": "visualization",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     it('extracts index patterns from controls', () => {
@@ -493,7 +491,6 @@ Object {
         },
       };
       const migratedDoc = migrate(doc);
-      /* eslint-disable max-len */
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -511,7 +508,6 @@ Object {
   "type": "visualization",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     it('skips extracting savedSearchId when missing', () => {
@@ -1571,7 +1567,6 @@ Object {
         },
       };
       const migratedDoc = migration(doc);
-      /* eslint-disable max-len */
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -1601,7 +1596,6 @@ Object {
   "type": "dashboard",
 }
 `);
-      /* eslint-enable max-len */
     });
 
     test('skips error when panelsJSON is not a string', () => {
@@ -1919,7 +1913,6 @@ Object {
         },
       };
       const migratedDoc = migration(doc);
-      /* eslint-disable max-len */
       expect(migratedDoc).toMatchInlineSnapshot(`
 Object {
   "attributes": Object {
@@ -1939,7 +1932,6 @@ Object {
   "type": "search",
 }
 `);
-      /* eslint-enable max-len */
     });
   });
 

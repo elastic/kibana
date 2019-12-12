@@ -6,8 +6,6 @@
 
 // These all have the domain name portion stripped out. The api infrastructure assumes it when we post to it anyhow.
 
-/* eslint-disable max-len */
-
 // The URL below was captured from release 6.4 and then the layout section was removed to test structure before
 // preserve_layout was introduced. See https://github.com/elastic/kibana/issues/23414
 export const PDF_PRINT_DASHBOARD_PRE_6_2 = '/api/reporting/generate/printablePdf?jobParams=(browserTimezone:America%2FNew_York,objectType:dashboard,relativeUrls:!(%27%2Fapp%2Fkibana%23%2Fdashboard%2F2ae34a60-3dd4-11e8-b2b9-5d5dc1715159%3F_g%3D(refreshInterval:(pause:!!t,value:0),time:(from:!%27Mon%2BApr%2B09%2B2018%2B17:56:08%2BGMT-0400!%27,mode:absolute,to:!%27Wed%2BApr%2B11%2B2018%2B17:56:08%2BGMT-0400!%27))%26_a%3D(description:!%27!%27,filters:!!(),fullScreenMode:!!f,options:(hidePanelTitles:!!f,useMargins:!!t),panels:!!((embeddableConfig:(),gridData:(h:15,i:!%271!%27,w:24,x:0,y:0),id:!%27145ced90-3dcb-11e8-8660-4d65aa086b3c!%27,panelIndex:!%271!%27,type:visualization,version:!%276.3.0!%27),(embeddableConfig:(),gridData:(h:15,i:!%272!%27,w:24,x:24,y:0),id:e2023110-3dcb-11e8-8660-4d65aa086b3c,panelIndex:!%272!%27,type:visualization,version:!%276.3.0!%27)),query:(language:lucene,query:!%27!%27),timeRestore:!!f,title:!%27couple%2Bpanels!%27,viewMode:view)%27),title:%27couple%20panels%27)';
