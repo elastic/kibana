@@ -64,7 +64,7 @@ export const elasticsearchMonitorStatesAdapter: UMMonitorStatesAdapter = {
       pagination: CONTEXT_DEFAULTS.CURSOR_PAGINATION,
       filterClause: filters && filters !== '' ? JSON.parse(filters) : null,
       size: CONTEXT_DEFAULTS.MAX_MONITORS_FOR_SNAPSHOT_COUNT,
-      statusFilter: statusFilter || undefined,
+      statusFilter,
     };
     return getSnapshotCountHelper(new MonitorGroupIterator(context));
   },

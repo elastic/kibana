@@ -18,7 +18,14 @@ export interface MonitorStatesParams {
   dateRangeEnd: string;
   pagination?: CursorPagination;
   filters?: string | null;
-  statusFilter?: string | null;
+  statusFilter?: string;
+}
+
+export interface GetSnapshotCountParams {
+  dateRangeStart: string;
+  dateRangeEnd: string;
+  filters?: string | null;
+  statusFilter?: string;
 }
 
 export interface UMMonitorStatesAdapter {
@@ -37,13 +44,6 @@ export interface GetMonitorStatesResult {
   summaries: MonitorSummary[];
   nextPagePagination: string | null;
   prevPagePagination: string | null;
-}
-
-export interface GetSnapshotCountParams {
-  dateRangeStart: string;
-  dateRangeEnd: string;
-  filters?: string | null;
-  statusFilter?: string | null;
 }
 
 export interface LegacyMonitorStatesQueryResult {
