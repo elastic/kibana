@@ -35,15 +35,17 @@ interface Opts<T, H> {
  * @prop {number} pollInterval - How often, in milliseconds, we will an event be emnitted, assuming there's capacity to do so
  * @prop {() => number} getCapacity - A function specifying whether there is capacity to emit new events
  * @prop {Observable<Option<T>>} pollRequests$ - A stream of requests for polling which can provide an optional argument for the polling phase
+ * @prop {number} bufferCapacity - How many requests are do we allow our buffer to accumulate before rejecting requests?
+ * @prop {(...params: T[]) => Promise<H>} work - The work we wish to execute in order to `poll`, this is the operation we're actually executing on request
  *
  * @returns {Observable<Set<T>>} - An observable which emits an event whenever a polling event is due to take place, providing access to a singleton Set representing a queue
  *  of unique request argumets of type T. The queue holds all the buffered request arguments streamed in via pollRequests$
  */
 export function createTaskPoller<T, H>({
-  pollRequests$,
-  bufferCapacity,
   pollInterval,
   getCapacity,
+  pollRequests$,
+  bufferCapacity,
   work,
 }: Opts<T, H>): Observable<Result<H, PollingError<T>>> {
   const hasCapacity = () => getCapacity() > 0;
