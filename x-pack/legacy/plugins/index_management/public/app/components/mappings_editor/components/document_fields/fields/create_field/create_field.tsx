@@ -70,7 +70,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       e.preventDefault();
     }
 
-    // Prevent form submission if user selects a type using the "Enter" key
+    // Prevent form submission if user selects a type using with the "Enter" key
     if (isSelectingType) {
       setIsSelectingType(false); // reset back to false
       return;
