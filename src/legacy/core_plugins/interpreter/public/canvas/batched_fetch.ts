@@ -19,6 +19,9 @@
 
 import _ from 'lodash';
 import { npStart } from 'ui/new_platform';
+import { filter, map } from 'rxjs/operators';
+// eslint-disable-next-line
+import { split } from '../../../../../plugins/bfetch/public/streaming';
 import { FUNCTIONS_URL } from './consts';
 
 // TODO: Import this type from kibana_util.
@@ -130,37 +133,33 @@ function createFuture() {
  * the related promises.
  */
 async function processBatch(ajaxStream: AjaxStream, batch: Batch) {
-  try {
-    const { stream, promise } = npStart.plugins.bfetch.fetchStreaming({
-      url: FUNCTIONS_URL,
-      body: JSON.stringify({
-        functions: Object.values(batch).map(({ request }) => request),
-      }),
+  const { stream, promise } = npStart.plugins.bfetch.fetchStreaming({
+    url: FUNCTIONS_URL,
+    body: JSON.stringify({
+      functions: Object.values(batch).map(({ request }) => request),
+    }),
+  });
+
+  stream
+    .pipe(
+      split('\n'),
+      filter<string>(Boolean),
+      map<string, any>((json: string) => JSON.parse(json))
+    )
+    .subscribe((message: any) => {
+      const { id, statusCode, result } = message;
+      const { future } = batch[id];
+
+      if (statusCode >= 400) {
+        future.reject(result);
+      } else {
+        future.resolve(result);
+      }
     });
 
-    stream.subscribe((message: string) => {
-      // eslint-disable-next-line
-      console.log('message', message);
-    });
-
-    await ajaxStream({
-      url: FUNCTIONS_URL,
-      body: JSON.stringify({
-        functions: Object.values(batch).map(({ request }) => request),
-      }),
-      onResponse({ id, statusCode, result }: any) {
-        const { future } = batch[id];
-
-        if (statusCode >= 400) {
-          future.reject(result);
-        } else {
-          future.resolve(result);
-        }
-      },
-    });
-  } catch (err) {
+  promise.catch(error => {
     Object.values(batch).forEach(({ future }) => {
-      future.reject(err);
+      future.reject(error);
     });
-  }
+  });
 }
