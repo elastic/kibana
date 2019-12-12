@@ -16,8 +16,12 @@
       "retryAt": {
         "type": "date"
       },
-      "recurringSchedule": {
-        "type": "text"
+      "schedule": {
+        "properties": {
+          "interval": {
+            "type": "text"
+          }
+        }
       },
       "attempts": {
         "type": "integer"

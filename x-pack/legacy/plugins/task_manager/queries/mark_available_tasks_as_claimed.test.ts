@@ -50,7 +50,7 @@ describe('mark_available_tasks_as_claimed', () => {
           // Either a task with idle status and runAt <= now or
           // status running or claiming with a retryAt <= now.
           shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-          // Either task has an recurringSchedule or the attempts < the maximum configured
+          // Either task has an schedule or the attempts < the maximum configured
           shouldBeOneOf<ExistsBoolClause | TermBoolClause | RangeBoolClause>(
             TaskWithRecurringSchedule,
             ...Object.entries(definitions).map(([type, { maxAttempts }]) =>
@@ -104,7 +104,7 @@ describe('mark_available_tasks_as_claimed', () => {
             {
               bool: {
                 should: [
-                  { exists: { field: 'task.recurringSchedule' } },
+                  { exists: { field: 'task.schedule' } },
                   {
                     bool: {
                       must: [

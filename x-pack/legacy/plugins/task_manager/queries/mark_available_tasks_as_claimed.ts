@@ -15,7 +15,7 @@ import {
 } from './query_clauses';
 
 export const TaskWithRecurringSchedule: ExistsBoolClause = {
-  exists: { field: 'task.recurringSchedule' },
+  exists: { field: 'task.schedule' },
 };
 export function taskWithLessThanMaxAttempts(
   type: string,

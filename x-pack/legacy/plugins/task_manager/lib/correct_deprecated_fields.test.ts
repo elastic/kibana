@@ -22,19 +22,19 @@ describe('ensureDeprecatedFieldsAreCorrected', () => {
       state: {},
     });
   });
-  test('doesnt change tasks with the recurringSchedule field', async () => {
+  test('doesnt change tasks with the schedule field', async () => {
     expect(
       ensureDeprecatedFieldsAreCorrected({
         id: 'my-foo-id',
         taskType: 'foo',
-        recurringSchedule: '10m',
+        schedule: { interval: '10m' },
         params: {},
         state: {},
       })
     ).toEqual({
       id: 'my-foo-id',
       taskType: 'foo',
-      recurringSchedule: '10m',
+      schedule: { interval: '10m' },
       params: {},
       state: {},
     });
@@ -51,7 +51,7 @@ describe('ensureDeprecatedFieldsAreCorrected', () => {
     ).toEqual({
       id: 'my-foo-id',
       taskType: 'foo',
-      recurringSchedule: '10m',
+      schedule: { interval: '10m' },
       params: {},
       state: {},
     });

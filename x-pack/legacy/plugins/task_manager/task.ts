@@ -176,6 +176,13 @@ export enum TaskLifecycleResult {
 
 export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
 
+export interface IntervalSchedule {
+  /**
+   * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
+   * */
+  interval: string;
+}
+
 /*
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
@@ -224,7 +231,7 @@ export interface TaskInstance {
    *
    * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
    */
-  recurringSchedule?: string;
+  schedule?: IntervalSchedule;
 
   /**
    * A task-specific set of parameters, used by the task's run function to tailor
@@ -259,7 +266,7 @@ export interface TaskInstance {
 /**
  * Support for the depracated interval field, this should be removed in version 8.0.0
  * and marked as a breaking change, ideally nutil then all usage of `interval` will be
- * replaced with use of `recurringSchedule`
+ * replaced with use of `schedule`
  */
 export interface TaskInstanceWithDeprecatedFields extends TaskInstance {
   /**

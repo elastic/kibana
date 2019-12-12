@@ -98,7 +98,7 @@ describe('TaskStore', () => {
         'task',
         {
           attempts: 0,
-          recurringSchedule: undefined,
+          schedule: undefined,
           params: '{"hello":"world"}',
           retryAt: null,
           runAt: '2019-02-12T21:01:22.479Z',
@@ -119,7 +119,7 @@ describe('TaskStore', () => {
       expect(result).toEqual({
         id: 'testid',
         attempts: 0,
-        recurringSchedule: undefined,
+        schedule: undefined,
         params: { hello: 'world' },
         retryAt: null,
         runAt: mockedDate,
@@ -271,7 +271,7 @@ describe('TaskStore', () => {
             task: {
               runAt,
               taskType: 'foo',
-              recurringSchedule: undefined,
+              schedule: undefined,
               attempts: 0,
               status: 'idle',
               params: '{ "hello": "world" }',
@@ -289,7 +289,7 @@ describe('TaskStore', () => {
             task: {
               runAt,
               taskType: 'bar',
-              recurringSchedule: '5m',
+              schedule: { interval: '5m' },
               attempts: 2,
               status: 'running',
               params: '{ "shazm": 1 }',
@@ -307,7 +307,7 @@ describe('TaskStore', () => {
           {
             attempts: 0,
             id: 'aaa',
-            recurringSchedule: undefined,
+            schedule: undefined,
             params: { hello: 'world' },
             runAt,
             scheduledAt: mockedDate,
@@ -322,7 +322,7 @@ describe('TaskStore', () => {
           {
             attempts: 2,
             id: 'bbb',
-            recurringSchedule: '5m',
+            schedule: { interval: '5m' },
             params: { shazm: 1 },
             runAt,
             scheduledAt: mockedDate,
@@ -476,7 +476,7 @@ describe('TaskStore', () => {
                   {
                     bool: {
                       should: [
-                        { exists: { field: 'task.recurringSchedule' } },
+                        { exists: { field: 'task.schedule' } },
                         {
                           bool: {
                             must: [
@@ -594,7 +594,7 @@ describe('TaskStore', () => {
                         {
                           bool: {
                             should: [
-                              { exists: { field: 'task.recurringSchedule' } },
+                              { exists: { field: 'task.schedule' } },
                               {
                                 bool: {
                                   must: [
@@ -729,7 +729,7 @@ if (doc['task.runAt'].size()!=0) {
             task: {
               runAt,
               taskType: 'foo',
-              recurringSchedule: undefined,
+              schedule: undefined,
               attempts: 0,
               status: 'idle',
               params: '{ "hello": "world" }',
@@ -750,7 +750,7 @@ if (doc['task.runAt'].size()!=0) {
             task: {
               runAt,
               taskType: 'bar',
-              recurringSchedule: '5m',
+              schedule: { interval: '5m' },
               attempts: 2,
               status: 'running',
               params: '{ "shazm": 1 }',
@@ -800,7 +800,7 @@ if (doc['task.runAt'].size()!=0) {
         {
           attempts: 0,
           id: 'aaa',
-          recurringSchedule: undefined,
+          schedule: undefined,
           params: { hello: 'world' },
           runAt,
           scope: ['reporting'],
@@ -813,7 +813,7 @@ if (doc['task.runAt'].size()!=0) {
         {
           attempts: 2,
           id: 'bbb',
-          recurringSchedule: '5m',
+          schedule: { interval: '5m' },
           params: { shazm: 1 },
           runAt,
           scope: ['reporting', 'ceo'],
@@ -873,7 +873,7 @@ if (doc['task.runAt'].size()!=0) {
         task.id,
         {
           attempts: task.attempts,
-          recurringSchedule: undefined,
+          schedule: undefined,
           params: JSON.stringify(task.params),
           retryAt: null,
           runAt: task.runAt.toISOString(),
@@ -891,7 +891,7 @@ if (doc['task.runAt'].size()!=0) {
 
       expect(result).toEqual({
         ...task,
-        recurringSchedule: undefined,
+        schedule: undefined,
         retryAt: null,
         scope: undefined,
         startedAt: null,
@@ -1069,7 +1069,7 @@ if (doc['task.runAt'].size()!=0) {
             task: {
               runAt,
               taskType: 'foo',
-              recurringSchedule: undefined,
+              schedule: undefined,
               attempts: 0,
               status: 'idle',
               params: '{ "hello": "world" }',
@@ -1093,7 +1093,7 @@ if (doc['task.runAt'].size()!=0) {
             task: {
               runAt,
               taskType: 'bar',
-              recurringSchedule: '5m',
+              schedule: { interval: '5m' },
               attempts: 2,
               status: 'running',
               params: '{ "shazm": 1 }',
@@ -1146,7 +1146,7 @@ if (doc['task.runAt'].size()!=0) {
                   id: 'aaa',
                   runAt,
                   taskType: 'foo',
-                  recurringSchedule: undefined,
+                  schedule: undefined,
                   attempts: 0,
                   status: 'idle' as TaskStatus,
                   params: { hello: 'world' },
@@ -1203,7 +1203,7 @@ if (doc['task.runAt'].size()!=0) {
                   id: 'bbb',
                   runAt,
                   taskType: 'bar',
-                  recurringSchedule: '5m',
+                  schedule: { interval: '5m' },
                   attempts: 2,
                   status: 'running' as TaskStatus,
                   params: { shazm: 1 },

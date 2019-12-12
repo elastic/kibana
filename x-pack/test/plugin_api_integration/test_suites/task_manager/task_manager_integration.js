@@ -110,7 +110,7 @@ export default function ({ getService }) {
 
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
-        recurringSchedule: '30m',
+        schedule: { interval: '30m' },
         params: { historyItem },
       });
       log.debug(`Task created: ${scheduledTask.id}`);
@@ -215,7 +215,7 @@ export default function ({ getService }) {
 
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
-        recurringSchedule: `${interval}m`,
+        schedule: { interval: `${interval}m` },
         params: { },
       });
 
@@ -255,7 +255,7 @@ export default function ({ getService }) {
 
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
-        recurringSchedule: `30m`,
+        schedule: { interval: `30m` },
         params: { },
       });
 
@@ -295,7 +295,7 @@ export default function ({ getService }) {
     it('should return a task run error result when running a task now fails', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
-        recurringSchedule: `30m`,
+        schedule: { interval: `30m` },
         params: {  failWith: 'error on run now', failOn: 3 },
       });
 
@@ -354,7 +354,7 @@ export default function ({ getService }) {
     it('should return a task run error result when trying to run a task now which is already running', async () => {
       const longRunningTask = await scheduleTask({
         taskType: 'sampleTask',
-        recurringSchedule: '30m',
+        schedule: { interval: '30m' },
         params: {
           waitForParams: true
         },
@@ -449,13 +449,13 @@ export default function ({ getService }) {
        */
       const fastTask = await scheduleTask({
         taskType: 'sampleTask',
-        recurringSchedule: `1s`,
+        schedule: { interval: `1s` },
         params: { },
       });
 
       const longRunningTask = await scheduleTask({
         taskType: 'sampleTask',
-        recurringSchedule: `1s`,
+        schedule: { interval: `1s` },
         params: {
           waitForEvent: 'rescheduleHasHappened'
         },

@@ -8,11 +8,11 @@ import { TaskInstance, TaskInstanceWithDeprecatedFields } from '../task';
 
 export function ensureDeprecatedFieldsAreCorrected({
   interval,
-  recurringSchedule,
+  schedule,
   ...taskInstance
 }: TaskInstanceWithDeprecatedFields): TaskInstance {
   return {
     ...taskInstance,
-    recurringSchedule: recurringSchedule || interval,
+    schedule: schedule || (interval ? { interval } : undefined),
   };
 }
