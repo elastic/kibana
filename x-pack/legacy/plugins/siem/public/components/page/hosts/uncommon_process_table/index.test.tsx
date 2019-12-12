@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
@@ -12,6 +12,7 @@ import * as React from 'react';
 import { TestProviders } from '../../../../mock';
 import { hostsModel } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { getArgs, UncommonProcessTable, getUncommonColumnsCurated } from '.';
 import { mockData } from './mock';
@@ -20,18 +21,7 @@ import * as i18n from './translations';
 
 describe('Uncommon Process Table Component', () => {
   const loadPage = jest.fn();
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default Uncommon process table', () => {
@@ -76,8 +66,7 @@ describe('Uncommon Process Table Component', () => {
             totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(
         wrapper
@@ -107,8 +96,7 @@ describe('Uncommon Process Table Component', () => {
             totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -139,8 +127,7 @@ describe('Uncommon Process Table Component', () => {
             totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -171,8 +158,7 @@ describe('Uncommon Process Table Component', () => {
             totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -203,8 +189,7 @@ describe('Uncommon Process Table Component', () => {
             totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -235,8 +220,7 @@ describe('Uncommon Process Table Component', () => {
             totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(
         wrapper
@@ -266,8 +250,7 @@ describe('Uncommon Process Table Component', () => {
             totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(
         wrapper
@@ -297,8 +280,7 @@ describe('Uncommon Process Table Component', () => {
             totalCount={mockData.UncommonProcess.totalCount}
             type={hostsModel.HostsType.page}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(
         wrapper

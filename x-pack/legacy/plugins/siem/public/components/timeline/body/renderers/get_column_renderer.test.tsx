@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -18,22 +18,15 @@ import { defaultHeaders } from '../column_headers/default_headers';
 import { columnRenderers } from '.';
 import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('get_column_renderer', () => {
   let nonSuricata: TimelineNonEcsData[];
   const _id = mockTimelineData[0]._id;
-  let root: HTMLElement;
+  const mount = useMountAppended();
 
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     nonSuricata = cloneDeep(mockTimelineData[0].data);
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
   });
 
   test('renders correctly against snapshot', () => {
@@ -64,8 +57,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{column}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('3');
   });
@@ -85,8 +77,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{column}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });
@@ -104,8 +95,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{column}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(getEmptyValue());
   });

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { AnomalyScoreComponent } from './anomaly_score';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 import { Anomalies } from '../types';
 
 const endDate: number = new Date('3000-01-01T00:00:00.000Z').valueOf();
@@ -20,18 +21,10 @@ jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
 describe('anomaly_scores', () => {
   let anomalies: Anomalies = cloneDeep(mockAnomalies);
-  let root: HTMLElement;
+  const mount = useMountAppended();
 
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     anomalies = cloneDeep(mockAnomalies);
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
   });
 
   test('renders correctly against snapshot', () => {
@@ -59,8 +52,7 @@ describe('anomaly_scores', () => {
           interval="day"
           narrowDateRange={narrowDateRange}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="anomaly-description-list"]').exists()).toEqual(false);
   });
@@ -76,8 +68,7 @@ describe('anomaly_scores', () => {
           interval="day"
           narrowDateRange={narrowDateRange}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     wrapper
       .find('[data-test-subj="anomaly-score-popover"]')

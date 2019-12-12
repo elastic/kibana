@@ -4,27 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-
-import * as React from 'react';
+import React from 'react';
 
 import { mockTimelineData, TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { HostWorkingDir } from './host_working_dir';
 
 describe('HostWorkingDir', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
@@ -49,8 +38,7 @@ describe('HostWorkingDir', () => {
             workingDirectory={undefined}
           />
         </div>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(wrapper.text()).toEqual('[hostname-123]');
@@ -67,8 +55,7 @@ describe('HostWorkingDir', () => {
             workingDirectory={null}
           />
         </div>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(wrapper.text()).toEqual('[hostname-123]');
@@ -85,8 +72,7 @@ describe('HostWorkingDir', () => {
             workingDirectory="[working-directory-123]"
           />
         </div>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(wrapper.text()).toEqual('in[working-directory-123]');
@@ -103,8 +89,7 @@ describe('HostWorkingDir', () => {
             workingDirectory="[working-directory-123]"
           />
         </div>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(wrapper.text()).toEqual('in[working-directory-123]');

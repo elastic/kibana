@@ -5,26 +5,16 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../../mock';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('SessionUserHostWorkingDir', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default SessionUserHostWorkingDir', () => {
@@ -60,8 +50,7 @@ describe('SessionUserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </EuiFlexItem>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Session');
     });
@@ -81,8 +70,7 @@ describe('SessionUserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </EuiFlexItem>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsession-123');
     });
@@ -102,8 +90,7 @@ describe('SessionUserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </EuiFlexItem>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsession-123@hostname-123');
     });
@@ -123,8 +110,7 @@ describe('SessionUserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </EuiFlexItem>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsession-123username-123@hostname-123');
     });
@@ -144,8 +130,7 @@ describe('SessionUserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </EuiFlexItem>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsession-123primary-123@hostname-123');
     });
@@ -165,8 +150,7 @@ describe('SessionUserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </EuiFlexItem>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsession-123primary-123assecondary-123@hostname-123');
     });
@@ -186,8 +170,7 @@ describe('SessionUserHostWorkingDir', () => {
               workingDirectory="workingdirectory-123"
             />
           </EuiFlexItem>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-123primary-123assecondary-123@hostname-123inworkingdirectory-123'

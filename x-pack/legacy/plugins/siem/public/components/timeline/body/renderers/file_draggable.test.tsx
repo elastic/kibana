@@ -5,25 +5,14 @@
  */
 
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../mock';
 
 import { FileDraggable } from './file_draggable';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('FileDraggable', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it prefers fileName and filePath over endgameFileName and endgameFilePath when all of them are provided', () => {
     const wrapper = mount(
@@ -36,8 +25,7 @@ describe('FileDraggable', () => {
           fileName="[fileName]"
           filePath="[filePath]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[fileName]in[filePath]');
   });
@@ -53,8 +41,7 @@ describe('FileDraggable', () => {
           fileName={undefined}
           filePath={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
@@ -70,8 +57,7 @@ describe('FileDraggable', () => {
           fileName={undefined}
           filePath={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[endgameFileName]');
   });
@@ -87,8 +73,7 @@ describe('FileDraggable', () => {
           fileName={undefined}
           filePath={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('in[endgameFilePath]');
   });
@@ -104,8 +89,7 @@ describe('FileDraggable', () => {
           fileName="[fileName]"
           filePath={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[fileName]');
   });
@@ -121,8 +105,7 @@ describe('FileDraggable', () => {
           fileName={undefined}
           filePath="[filePath]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('in[filePath]');
   });

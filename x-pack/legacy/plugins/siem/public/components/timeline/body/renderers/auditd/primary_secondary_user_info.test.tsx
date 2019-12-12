@@ -4,26 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../../mock';
 import { PrimarySecondaryUserInfo, nilOrUnSet } from './primary_secondary_user_info';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('UserPrimarySecondary', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default PrimarySecondaryUserInfo', () => {
@@ -49,8 +39,7 @@ describe('UserPrimarySecondary', () => {
             primary={undefined}
             secondary={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('user-name-1');
     });
@@ -65,8 +54,7 @@ describe('UserPrimarySecondary', () => {
             primary="unset"
             secondary="unset"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('user-name-1');
     });
@@ -81,8 +69,7 @@ describe('UserPrimarySecondary', () => {
             userName={undefined}
             secondary={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('primary-1');
     });
@@ -97,8 +84,7 @@ describe('UserPrimarySecondary', () => {
             userName="unset"
             secondary="unset"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('primary-1');
     });
@@ -113,8 +99,7 @@ describe('UserPrimarySecondary', () => {
             primary={undefined}
             secondary="secondary-1"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('secondary-1');
     });
@@ -129,8 +114,7 @@ describe('UserPrimarySecondary', () => {
             primary="unset"
             userName="unset"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('secondary-1');
     });
@@ -145,8 +129,7 @@ describe('UserPrimarySecondary', () => {
             primary="username-1"
             secondary="username-1"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('username-1');
     });
@@ -161,8 +144,7 @@ describe('UserPrimarySecondary', () => {
             primary="[primary]"
             secondary="[secondary]"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[primary]as[secondary]');
     });

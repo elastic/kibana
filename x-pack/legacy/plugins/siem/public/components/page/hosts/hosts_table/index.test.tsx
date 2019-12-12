@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
@@ -16,6 +16,7 @@ import {
   mockGlobalState,
   TestProviders,
 } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { mockUiSettings } from '../../../../mock/ui_settings';
 import { useKibanaCore } from '../../../../lib/compose/kibana_core';
 import { createStore, hostsModel, State } from '../../../../store';
@@ -43,18 +44,10 @@ describe('Hosts Table', () => {
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
-  let root: HTMLElement;
+  const mount = useMountAppended();
 
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
   });
 
   describe('rendering', () => {
@@ -103,8 +96,7 @@ describe('Hosts Table', () => {
                 type={hostsModel.HostsType.page}
               />
             </TestProviders>
-          </MockedProvider>,
-          { attachTo: root }
+          </MockedProvider>
         );
       });
       test('Initial value of the store', () => {

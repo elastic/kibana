@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -14,22 +14,12 @@ import { TestProviders } from '../../mock/test_providers';
 import { EventDetails } from './event_details';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EventDetails', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('should match snapshot', () => {
@@ -66,8 +56,7 @@ describe('EventDetails', () => {
               timelineId="test"
               toggleColumn={jest.fn()}
             />
-          </TestProviders>,
-          { attachTo: root }
+          </TestProviders>
         );
 
         expect(
@@ -93,8 +82,7 @@ describe('EventDetails', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(

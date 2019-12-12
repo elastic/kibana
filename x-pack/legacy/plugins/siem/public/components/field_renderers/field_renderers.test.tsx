@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -24,22 +24,12 @@ import {
   MoreContainer,
 } from './field_renderers';
 import { mockData } from '../page/network/ip_overview/mock';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 type AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
 
 describe('Field Renderers', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('#locationRenderer', () => {
     test('it renders correctly against snapshot', () => {
@@ -52,8 +42,7 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when no fields provided', () => {
       const wrapper = mount(
-        <TestProviders>{locationRenderer([], mockData.complete)}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{locationRenderer([], mockData.complete)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -62,8 +51,7 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           {locationRenderer(['source.geo.my_house'], mockData.complete)}
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -77,9 +65,7 @@ describe('Field Renderers', () => {
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
-      const wrapper = mount(<TestProviders>{dateRenderer(null)}</TestProviders>, {
-        attachTo: root,
-      });
+      const wrapper = mount(<TestProviders>{dateRenderer(null)}</TestProviders>);
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
   });
@@ -98,16 +84,14 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when non-string field provided', () => {
       const wrapper = mount(
-        <TestProviders>{autonomousSystemRenderer(halfEmptyMock, FlowTarget.source)}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{autonomousSystemRenderer(halfEmptyMock, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
 
     test('it renders emptyTagValue when invalid field provided', () => {
       const wrapper = mount(
-        <TestProviders>{autonomousSystemRenderer(emptyMock, FlowTarget.source)}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{autonomousSystemRenderer(emptyMock, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -132,23 +116,20 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
 
     test('it renders emptyTagValue when no host.id is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -178,30 +159,26 @@ describe('Field Renderers', () => {
 
     test('it renders emptyTagValue when non-matching IP is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{hostNameRenderer(mockData.complete.host, '10.10.10.11')}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
 
     test('it renders emptyTagValue when no host.id is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{hostNameRenderer(emptyIdHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.ip is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{hostNameRenderer(emptyIpHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
     test('it renders emptyTagValue when no host.name is provided', () => {
       const wrapper = mount(
-        <TestProviders>{hostNameRenderer(emptyNameHost, FlowTarget.source)}</TestProviders>,
-        { attachTo: root }
+        <TestProviders>{hostNameRenderer(emptyNameHost, FlowTarget.source)}</TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -228,8 +205,7 @@ describe('Field Renderers', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultFieldRenderer rowItems={['item1']} attrName={'item1'} idPrefix={'prefix-1'} />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('item1 ');
     });
@@ -243,8 +219,7 @@ describe('Field Renderers', () => {
             attrName={'item1'}
             idPrefix={'prefix-1'}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('item1,item2 ');
     });
@@ -258,8 +233,7 @@ describe('Field Renderers', () => {
             attrName={'item1'}
             idPrefix={'prefix-1'}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('item1,item2,item3,item4,item5 ');
@@ -274,8 +248,7 @@ describe('Field Renderers', () => {
             attrName={'item1'}
             idPrefix={'prefix-1'}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('item1,item2,item3,item4,item5  ,+2 More');

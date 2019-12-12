@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
@@ -18,28 +18,22 @@ import {
   mockIndexPattern,
   TestProviders,
 } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { NetworkTopCountriesTable } from '.';
 import { mockData } from './mock';
+
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 describe('NetworkTopCountries Table Component', () => {
   const loadPage = jest.fn();
   const state: State = mockGlobalState;
+  const mount = useMountAppended();
 
   let store = createStore(state, apolloClientObservable);
-  let root: HTMLElement;
 
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
   });
 
   describe('rendering', () => {
@@ -118,8 +112,7 @@ describe('NetworkTopCountries Table Component', () => {
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
-        </MockedProvider>,
-        { attachTo: root }
+        </MockedProvider>
       );
       expect(store.getState().network.page.queries.topCountriesSource.sort).toEqual({
         direction: 'desc',

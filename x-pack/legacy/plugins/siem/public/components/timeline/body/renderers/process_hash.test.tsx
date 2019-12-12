@@ -4,26 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as React from 'react';
-import { mount } from 'enzyme';
+import React from 'react';
 
 import { TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { ProcessHash } from './process_hash';
 
 describe('ProcessHash', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('displays the processHashMd5, processHashSha1, and processHashSha256 when they are all provided', () => {
     const wrapper = mount(
@@ -35,8 +24,7 @@ describe('ProcessHash', () => {
           processHashSha1="[processHashSha1]"
           processHashSha256="[processHashSha256]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processHashSha256][processHashSha1][processHashMd5]');
   });
@@ -51,8 +39,7 @@ describe('ProcessHash', () => {
           processHashSha1={undefined}
           processHashSha256={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
@@ -67,8 +54,7 @@ describe('ProcessHash', () => {
           processHashSha1={undefined}
           processHashSha256={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processHashMd5]');
   });
@@ -83,8 +69,7 @@ describe('ProcessHash', () => {
           processHashSha1="[processHashSha1]"
           processHashSha256={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processHashSha1]');
   });
@@ -99,8 +84,7 @@ describe('ProcessHash', () => {
           processHashSha1={undefined}
           processHashSha256="[processHashSha256]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processHashSha256]');
   });

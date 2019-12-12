@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
@@ -18,6 +18,7 @@ import { mocksSource } from '../../../containers/source/mock';
 import { FlowTarget } from '../../../graphql/types';
 import { useKibanaCore } from '../../../lib/compose/kibana_core';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 import { mockUiSettings } from '../../../mock/ui_settings';
 import { createStore, State } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -112,7 +113,7 @@ jest.mock('ui/documentation_links', () => ({
 }));
 
 describe('Ip Details', () => {
-  let root: HTMLElement;
+  const mount = useMountAppended();
 
   beforeAll(() => {
     (global as GlobalWithFetch).fetch = jest.fn().mockImplementationOnce(() =>
@@ -132,17 +133,9 @@ describe('Ip Details', () => {
   const state: State = mockGlobalState;
   let store = createStore(state, apolloClientObservable);
 
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
     localSource = cloneDeep(mocksSource);
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
   });
 
   test('it renders', () => {
@@ -165,8 +158,7 @@ describe('Ip Details', () => {
             <IPDetails {...getMockProps(ip)} />
           </Router>
         </MockedProvider>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     // Why => https://github.com/apollographql/react-apollo/issues/1711
     await new Promise(resolve => setTimeout(resolve));

@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 
 import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import {
   ZeekSignature,
   extractStateValue,
@@ -26,19 +27,11 @@ import {
 } from './zeek_signature';
 
 describe('ZeekSignature', () => {
+  const mount = useMountAppended();
   let zeek: Ecs;
-  let root: HTMLElement;
 
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     zeek = cloneDeep(mockTimelineData[13].ecs);
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
   });
 
   describe('rendering', () => {
@@ -127,8 +120,7 @@ describe('ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableZeekElement id="id-123" field="zeek.notice" value={null} />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(
         wrapper
@@ -142,8 +134,7 @@ describe('ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableZeekElement id="id-123" field="zeek.notice" value={'mynote'} />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('mynote');
     });
@@ -157,8 +148,7 @@ describe('ZeekSignature', () => {
             value={'mynote'}
             stringRenderer={value => `->${value}<-`}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('->mynote<-');
     });
@@ -169,8 +159,7 @@ describe('ZeekSignature', () => {
         const wrapper = mount(
           <TestProviders>
             <DraggableZeekElement id="id-123" field={field} value={'the people you love'} />
-          </TestProviders>,
-          { attachTo: root }
+          </TestProviders>
         );
 
         expect(

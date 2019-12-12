@@ -10,25 +10,14 @@
  */
 
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../../mock';
 
 import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('EndgameSecurityEventDetailsLine', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it renders the expected text when all properties are provided and event action is admin_logon', () => {
     const wrapper = mount(
@@ -53,8 +42,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -84,8 +72,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -115,8 +102,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName](target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -146,8 +132,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -177,8 +162,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName][eventCode]'
@@ -208,8 +192,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -239,8 +222,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -270,8 +252,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactivevia[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -301,8 +282,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials\\[endgameTargetDomainName][hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -332,8 +312,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -363,8 +342,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[winlogEventId]'
@@ -394,8 +372,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -425,8 +402,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -456,8 +432,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processExecutable](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -487,8 +462,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'A login was attempted using explicit credentials[endgameTargetUserName]\\[endgameTargetDomainName]to[hostName]using logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName]as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -518,8 +492,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -549,8 +522,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName={undefined}
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,\\[userDomain][hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -580,8 +552,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])[eventCode]'
@@ -611,8 +582,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])'

@@ -5,29 +5,19 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
 import '../../mock/ui_settings';
 import { HeaderPage } from './index';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('HeaderPage', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it renders', () => {
     const wrapper = shallow(
@@ -49,8 +39,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -65,8 +54,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage backOptions={{ href: '#', text: 'Test link' }} title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -81,8 +69,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -97,8 +84,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage subtitle="Test subtitle" title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -113,8 +99,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -129,8 +114,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage subtitle2="Test subtitle 2" title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -145,8 +129,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -163,8 +146,7 @@ describe('HeaderPage', () => {
         <HeaderPage title="Test title">
           <p>{'Test supplement'}</p>
         </HeaderPage>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -179,8 +161,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -195,8 +176,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage border title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
 
@@ -208,8 +188,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     const siemHeaderPage = wrapper.find('.siemHeaderPage').first();
 
@@ -221,8 +200,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage draggableArguments={{ field: 'neat', value: 'cool' }} title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -237,8 +215,7 @@ describe('HeaderPage', () => {
     const wrapper = mount(
       <TestProviders>
         <HeaderPage title="Test title" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(

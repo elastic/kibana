@@ -5,7 +5,6 @@
  */
 
 import { omit } from 'lodash/fp';
-import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -17,6 +16,7 @@ import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../timeline/body/helpers';
 import { Category } from './category';
 import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;
@@ -37,18 +37,7 @@ const columnHeaders: ColumnHeader[] = [
 
 describe('field_items', () => {
   const timelineId = 'test';
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('getFieldItems', () => {
     Object.keys(selectedCategoryFields!).forEach(fieldId => {
@@ -73,8 +62,7 @@ describe('field_items', () => {
               onCategorySelected={jest.fn()}
               timelineId={timelineId}
             />
-          </TestProviders>,
-          { attachTo: root }
+          </TestProviders>
         );
 
         expect(
@@ -108,8 +96,7 @@ describe('field_items', () => {
               onCategorySelected={jest.fn()}
               timelineId={timelineId}
             />
-          </TestProviders>,
-          { attachTo: root }
+          </TestProviders>
         );
 
         expect(
@@ -142,8 +129,7 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -175,8 +161,7 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -210,8 +195,7 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       wrapper
@@ -250,8 +234,7 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -283,8 +266,7 @@ describe('field_items', () => {
             onCategorySelected={jest.fn()}
             timelineId={timelineId}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(

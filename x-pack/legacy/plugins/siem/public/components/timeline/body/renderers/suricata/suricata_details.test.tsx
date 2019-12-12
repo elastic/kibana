@@ -4,28 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData } from '../../../../../mock';
 import { TestProviders } from '../../../../../mock/test_providers';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { SuricataDetails } from './suricata_details';
 
 describe('SuricataDetails', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default SuricataDetails', () => {
@@ -47,8 +37,7 @@ describe('SuricataDetails', () => {
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'

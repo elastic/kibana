@@ -9,9 +9,9 @@ import { NetworkType } from '../../../store/network/model';
 import * as i18n from './translations';
 import { AnomaliesByNetwork, Anomaly } from '../types';
 import { Columns } from '../../paginated_table';
-import { mount } from 'enzyme';
 import React from 'react';
 import { TestProviders } from '../../../mock';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 const startDate = new Date(2001).valueOf();
 const endDate = new Date(3000).valueOf();
@@ -19,18 +19,7 @@ const interval = 'days';
 const narrowDateRange = jest.fn();
 
 describe('get_anomalies_network_table_columns', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('on network page, we expect to get all columns', () => {
     expect(
@@ -125,9 +114,7 @@ describe('get_anomalies_network_table_columns', () => {
       },
     };
     if (column != null && column.render != null) {
-      const wrapper = mount(<TestProviders>{column.render('', anomaly)}</TestProviders>, {
-        attachTo: root,
-      });
+      const wrapper = mount(<TestProviders>{column.render('', anomaly)}</TestProviders>);
       expect(
         wrapper
           .find(
@@ -188,9 +175,7 @@ describe('get_anomalies_network_table_columns', () => {
       },
     };
     if (column != null && column.render != null) {
-      const wrapper = mount(<TestProviders>{column.render(undefined, anomaly)}</TestProviders>, {
-        attachTo: root,
-      });
+      const wrapper = mount(<TestProviders>{column.render(undefined, anomaly)}</TestProviders>);
       expect(wrapper.text()).toEqual('');
     } else {
       expect(column).not.toBe(null);

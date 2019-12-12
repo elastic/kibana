@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash';
 import * as React from 'react';
@@ -13,6 +13,7 @@ import { mockBrowserFields } from '../../../../containers/source/mock';
 import { Ecs } from '../../../../graphql/types';
 import { mockTimelineData } from '../../../../mock';
 import { TestProviders } from '../../../../mock/test_providers';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { rowRenderers } from '.';
 import { getRowRenderer } from './get_row_renderer';
@@ -23,22 +24,14 @@ describe('get_column_renderer', () => {
   let zeek: Ecs;
   let system: Ecs;
   let auditd: Ecs;
-  let root: HTMLElement;
+  const mount = useMountAppended();
 
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
     nonSuricata = cloneDeep(mockTimelineData[0].ecs);
     suricata = cloneDeep(mockTimelineData[2].ecs);
     zeek = cloneDeep(mockTimelineData[13].ecs);
     system = cloneDeep(mockTimelineData[28].ecs);
     auditd = cloneDeep(mockTimelineData[19].ecs);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
   });
 
   test('renders correctly against snapshot', () => {
@@ -65,8 +58,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{row}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toContain('some child');
   });
@@ -82,8 +74,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{row}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toContain(
       'some child 4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
@@ -102,8 +93,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{row}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toContain(
       'some child 4ETEXPLOITNETGEARWNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)Source192.168.0.3:53Destination192.168.0.3:6343'
@@ -122,8 +112,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{row}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toContain(
       'some child C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
@@ -142,8 +131,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{row}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toContain(
       'some child Braden@zeek-londonattempted a login via(6278)with resultfailureSource128.199.212.120'
@@ -162,8 +150,7 @@ describe('get_column_renderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{row}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toContain(
       'some child Sessionalice@zeek-sanfranin/executedgpgconf(5402)gpgconf--list-dirsagent-socketgpgconf --list-dirs agent-socket'

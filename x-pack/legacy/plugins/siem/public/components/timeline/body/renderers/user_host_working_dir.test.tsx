@@ -4,26 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../mock';
 import { UserHostWorkingDir } from './user_host_working_dir';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('UserHostWorkingDir', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
@@ -81,8 +71,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('\\[user-domain-123]');
     });
@@ -100,8 +89,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[user-name-123]');
     });
@@ -119,8 +107,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[host-name-123]');
     });
@@ -138,8 +125,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('in[working-directory-123]');
     });
@@ -157,8 +143,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[user-name-123]in[working-directory-123]');
     });
@@ -176,8 +161,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[host-name-123]in[working-directory-123]');
     });
@@ -195,8 +179,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[user-name-123]\\[user-domain-123]@[host-name-123]');
     });
@@ -214,8 +197,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('[user-name-123]@[host-name-123]');
@@ -235,8 +217,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('[user-name-123]custom separator[host-name-123]');
@@ -255,8 +236,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="draggable-content-user.domain"]').exists()).toBe(true);
@@ -276,8 +256,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -298,8 +277,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="draggable-content-user.name"]').exists()).toBe(true);
@@ -319,8 +297,7 @@ describe('UserHostWorkingDir', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(

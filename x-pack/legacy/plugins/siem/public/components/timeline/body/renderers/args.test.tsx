@@ -4,26 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { TestProviders } from '../../../../mock';
 import { ArgsComponent } from './args';
 
 describe('Args', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
@@ -47,8 +37,7 @@ describe('Args', () => {
             args={undefined}
             processTitle={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('');
     });
@@ -62,8 +51,7 @@ describe('Args', () => {
             args={null}
             processTitle={null}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('');
     });
@@ -72,8 +60,7 @@ describe('Args', () => {
       const wrapper = mount(
         <TestProviders>
           <ArgsComponent contextId="context-123" eventId="event-123" args={[]} processTitle="" />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('');
     });
@@ -87,8 +74,7 @@ describe('Args', () => {
             args={['arg1', 'arg2', 'arg3']}
             processTitle={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('arg1arg2arg3');
     });
@@ -102,8 +88,7 @@ describe('Args', () => {
             args={null}
             processTitle="process-title-1"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('process-title-1');
     });
@@ -117,8 +102,7 @@ describe('Args', () => {
             args={['arg1', 'arg2', 'arg3']}
             processTitle="process-title-1"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('arg1arg2arg3process-title-1');
     });

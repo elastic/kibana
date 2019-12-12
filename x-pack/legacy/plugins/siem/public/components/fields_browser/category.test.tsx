@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
@@ -13,24 +12,14 @@ import { Category } from './category';
 import { getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { TestProviders } from '../../mock';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import * as i18n from './translations';
 
 describe('Category', () => {
   const timelineId = 'test';
   const selectedCategoryId = 'client';
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it renders the category id as the value of the title', () => {
     const wrapper = mount(
@@ -53,8 +42,7 @@ describe('Category', () => {
           onCategorySelected={jest.fn()}
           timelineId={timelineId}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -86,8 +74,7 @@ describe('Category', () => {
           onCategorySelected={jest.fn()}
           timelineId={timelineId}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -119,8 +106,7 @@ describe('Category', () => {
           onCategorySelected={jest.fn()}
           timelineId={timelineId}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(

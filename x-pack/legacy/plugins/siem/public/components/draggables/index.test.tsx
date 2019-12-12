@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock';
 import { getEmptyString } from '../empty_value';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import {
   DefaultDraggable,
@@ -19,18 +20,7 @@ import {
 } from '.';
 
 describe('draggables', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default DefaultDraggable', () => {
@@ -114,8 +104,7 @@ describe('draggables', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultDraggable id="draggable-id" field="some-field" value="some value" />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('some value');
     });
@@ -138,8 +127,7 @@ describe('draggables', () => {
       const wrapper = mount(
         <TestProviders>
           <DefaultDraggable id="draggable-id" field="source.bytes" value="a default draggable" />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -159,8 +147,7 @@ describe('draggables', () => {
             tooltipContent="default draggable string tooltip"
             value="a default draggable"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -180,8 +167,7 @@ describe('draggables', () => {
             tooltipContent={<span>{'default draggable tooltip'}</span>}
             value="a default draggable"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -201,8 +187,7 @@ describe('draggables', () => {
             tooltipContent={null}
             value="a default draggable"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -225,8 +210,7 @@ describe('draggables', () => {
             value="some value"
             iconType="number"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('some value');
     });
@@ -267,8 +251,7 @@ describe('draggables', () => {
             value=""
             iconType="document"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyString());
     });
@@ -283,8 +266,7 @@ describe('draggables', () => {
             value="some value"
             iconType="number"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -306,8 +288,7 @@ describe('draggables', () => {
             iconType="number"
             tooltipContent="draggable badge string tooltip"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -329,8 +310,7 @@ describe('draggables', () => {
             iconType="number"
             tooltipContent={<span>{'draggable badge tooltip'}</span>}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -352,8 +332,7 @@ describe('draggables', () => {
             iconType="number"
             tooltipContent={null}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(

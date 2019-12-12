@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
@@ -13,22 +12,12 @@ import { TestProviders } from '../../mock/test_providers';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EventFieldsBrowser', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('column headers', () => {
     ['Field', 'Value', 'Description'].forEach(header => {
@@ -44,8 +33,7 @@ describe('EventFieldsBrowser', () => {
               timelineId="test"
               toggleColumn={jest.fn()}
             />
-          </TestProviders>,
-          { attachTo: root }
+          </TestProviders>
         );
 
         expect(wrapper.find('thead').containsMatchingElement(<span>{header}</span>)).toBeTruthy();
@@ -66,8 +54,7 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.find('input[type="search"]').props().placeholder).toEqual(
@@ -93,8 +80,7 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -119,8 +105,7 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -146,8 +131,7 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={toggleColumn}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       wrapper
@@ -180,8 +164,7 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -208,8 +191,7 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(
         wrapper
@@ -233,8 +215,7 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(
         wrapper
@@ -258,8 +239,7 @@ describe('EventFieldsBrowser', () => {
             timelineId="test"
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(

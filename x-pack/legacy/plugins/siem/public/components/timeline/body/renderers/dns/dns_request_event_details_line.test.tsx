@@ -10,25 +10,14 @@
  */
 
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../../mock';
 
 import { DnsRequestEventDetailsLine } from './dns_request_event_details_line';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('DnsRequestEventDetailsLine', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it renders the expected text when all properties are provided', () => {
     const wrapper = mount(
@@ -49,8 +38,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -76,8 +64,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -103,8 +90,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -130,8 +116,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -157,8 +142,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp]via[processName](123)[eventCode]'
@@ -184,8 +168,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[winlogEventId]'
@@ -211,8 +194,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -238,8 +220,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -265,8 +246,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processExecutable](123)[eventCode]'
@@ -292,8 +272,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName][eventCode]'
@@ -319,8 +298,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -346,8 +324,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName={undefined}
           winlogEventId="[winlogEventId]"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '\\[userDomain][hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -373,8 +350,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)[eventCode]'
@@ -400,8 +376,7 @@ describe('DnsRequestEventDetailsLine', () => {
           userName="[userName]"
           winlogEventId={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual(
       '[userName]\\[userDomain]@[hostName]asked for[dnsQuestionName]with question type[dnsQuestionType], which resolved to[dnsResolvedIp](response code:[dnsResponseCode])via[processName](123)'

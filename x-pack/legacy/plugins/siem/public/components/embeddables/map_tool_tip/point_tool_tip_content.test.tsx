@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { FeatureProperty } from '../types';
@@ -12,6 +12,7 @@ import { getRenderedFieldValue, PointToolTipContentComponent } from './point_too
 import { TestProviders } from '../../../mock';
 import { getEmptyStringTag } from '../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../links';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 jest.mock('../../search_bar', () => ({
   siemFilterManager: {
@@ -20,18 +21,7 @@ jest.mock('../../search_bar', () => ({
 }));
 
 describe('PointToolTipContent', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   const mockFeatureProps: FeatureProperty[] = [
     {
@@ -72,8 +62,7 @@ describe('PointToolTipContent', () => {
           featureProps={mockFeaturePropsArrayValue}
           closeTooltip={closeTooltip}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="add-to-kql-host.name"]').prop('filter')).toEqual({
       meta: {

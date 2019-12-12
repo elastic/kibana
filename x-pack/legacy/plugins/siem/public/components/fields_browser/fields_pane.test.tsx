@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { FieldsPane } from './fields_pane';
@@ -16,18 +16,7 @@ import { FieldsPane } from './fields_pane';
 const timelineId = 'test';
 
 describe('FieldsPane', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it renders the selected category', () => {
     const selectedCategory = 'auditd';
@@ -46,8 +35,7 @@ describe('FieldsPane', () => {
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -75,8 +63,7 @@ describe('FieldsPane', () => {
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -104,8 +91,7 @@ describe('FieldsPane', () => {
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -133,8 +119,7 @@ describe('FieldsPane', () => {
           toggleColumn={jest.fn()}
           width={FIELDS_PANE_WIDTH}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(

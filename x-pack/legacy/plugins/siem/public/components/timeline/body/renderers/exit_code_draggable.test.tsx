@@ -5,32 +5,20 @@
  */
 
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { ExitCodeDraggable } from './exit_code_draggable';
 
 describe('ExitCodeDraggable', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it renders the expected text and exit code, when both text and an endgameExitCode are provided', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="0" eventId="1" text="with exit code" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('with exit code0');
   });
@@ -44,8 +32,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           text="with exit code"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
@@ -59,8 +46,7 @@ describe('ExitCodeDraggable', () => {
           eventId="1"
           text="with exit code"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
@@ -69,8 +55,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="" eventId="1" text="with exit code" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
@@ -79,8 +64,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text={undefined} />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('1');
   });
@@ -89,8 +73,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text={null} />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('1');
   });
@@ -99,8 +82,7 @@ describe('ExitCodeDraggable', () => {
     const wrapper = mount(
       <TestProviders>
         <ExitCodeDraggable contextId="test" endgameExitCode="1" eventId="1" text="" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('1');
   });

@@ -5,25 +5,14 @@
  */
 
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { TestProviders } from '../../../../mock';
 
 import { ParentProcessDraggable } from './parent_process_draggable';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('ParentProcessDraggable', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('displays the text, endgameParentProcessName, and processPpid when they are all provided', () => {
     const wrapper = mount(
@@ -35,8 +24,7 @@ describe('ParentProcessDraggable', () => {
           processPpid={456}
           text="via parent process"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('via parent process[endgameParentProcessName](456)');
   });
@@ -51,8 +39,7 @@ describe('ParentProcessDraggable', () => {
           processPpid={undefined}
           text="via parent process"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('');
   });
@@ -67,8 +54,7 @@ describe('ParentProcessDraggable', () => {
           processPpid={456}
           text="via parent process"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('via parent process(456)');
   });
@@ -83,8 +69,7 @@ describe('ParentProcessDraggable', () => {
           processPpid={456}
           text={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('(456)');
   });
@@ -99,8 +84,7 @@ describe('ParentProcessDraggable', () => {
           processPpid={undefined}
           text="via parent process"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('via parent process[endgameParentProcessName]');
   });
@@ -115,8 +99,7 @@ describe('ParentProcessDraggable', () => {
           processPpid={undefined}
           text={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[endgameParentProcessName]');
   });

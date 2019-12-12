@@ -4,26 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../mock';
 import { ProcessDraggable, ProcessDraggableWithNonExistentProcess } from './process_draggable';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('ProcessDraggable', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
@@ -83,8 +73,7 @@ describe('ProcessDraggable', () => {
             processName="[process-name]"
             processPid={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-name]');
     });
@@ -101,8 +90,7 @@ describe('ProcessDraggable', () => {
             processName={null}
             processPid={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-executable]');
     });
@@ -119,8 +107,7 @@ describe('ProcessDraggable', () => {
             processName={null}
             processPid={123}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('(123)');
     });
@@ -137,8 +124,7 @@ describe('ProcessDraggable', () => {
             processName="[process-name]"
             processPid={NaN}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-name]');
     });
@@ -155,8 +141,7 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={NaN}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-executable]');
     });
@@ -173,8 +158,7 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={NaN}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-executable]');
     });
@@ -191,8 +175,7 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={NaN}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[endgame-process_name]');
     });
@@ -209,8 +192,7 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[endgame-process_name](456)');
     });
@@ -227,8 +209,7 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={123}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('(123)');
     });
@@ -245,8 +226,7 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('(456)');
     });
@@ -263,8 +243,7 @@ describe('ProcessDraggable', () => {
             processName="[process-name]"
             processPid={123}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-name](123)');
     });
@@ -281,8 +260,7 @@ describe('ProcessDraggable', () => {
             processName={null}
             processPid={123}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-executable](123)');
     });
@@ -299,8 +277,7 @@ describe('ProcessDraggable', () => {
             processName={null}
             processPid={null}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-executable](456)');
     });
@@ -317,8 +294,7 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={123}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-executable](123)');
     });
@@ -335,8 +311,7 @@ describe('ProcessDraggable', () => {
             processName=""
             processPid={123}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-executable](123)');
     });
@@ -353,8 +328,7 @@ describe('ProcessDraggable', () => {
             processName="[process-name]"
             processPid={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-name]');
     });
@@ -371,8 +345,7 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[process-executable]');
     });
@@ -389,8 +362,7 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[endgame-process-name]');
     });
@@ -407,8 +379,7 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={123}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('(123)');
     });
@@ -425,8 +396,7 @@ describe('ProcessDraggable', () => {
             processName={undefined}
             processPid={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('(999)');
     });
@@ -434,18 +404,7 @@ describe('ProcessDraggable', () => {
 });
 
 describe('ProcessDraggableWithNonExistentProcess', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it renders the expected text when all fields are undefined', () => {
     const wrapper = mount(
@@ -459,8 +418,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('an unknown process');
   });
@@ -477,8 +435,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('(999)');
   });
@@ -495,8 +452,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[endgameProcessName]');
   });
@@ -513,8 +469,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processExecutable]');
   });
@@ -531,8 +486,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName="[processName]"
           processPid={undefined}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processName]');
   });
@@ -549,8 +503,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName={undefined}
           processPid={123}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('(123)');
   });
@@ -567,8 +520,7 @@ describe('ProcessDraggableWithNonExistentProcess', () => {
           processName="[processName]"
           processPid={123}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('[processName](123)');
   });

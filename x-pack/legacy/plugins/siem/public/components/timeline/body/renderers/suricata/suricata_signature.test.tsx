@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import {
   SuricataSignature,
   Tokens,
@@ -17,18 +18,7 @@ import {
 } from './suricata_signature';
 
 describe('SuricataSignature', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
@@ -74,8 +64,7 @@ describe('SuricataSignature', () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableSignatureId id="id-123" signatureId={123} />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('123');
     });
@@ -84,8 +73,7 @@ describe('SuricataSignature', () => {
       const wrapper = mount(
         <TestProviders>
           <DraggableSignatureId id="id-123" signatureId={123} />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(

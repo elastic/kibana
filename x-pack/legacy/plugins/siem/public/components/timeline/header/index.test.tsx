@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -14,6 +14,7 @@ import { mockIndexPattern } from '../../../mock';
 import { TestProviders } from '../../../mock/test_providers';
 import { mockUiSettings } from '../../../mock/ui_settings';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 import { TimelineHeaderComponent } from '.';
 
@@ -26,18 +27,7 @@ mockUseKibanaCore.mockImplementation(() => ({
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
@@ -85,8 +75,7 @@ describe('Header', () => {
               sortDirection: Direction.desc,
             }}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="dataProviders"]').exists()).toEqual(true);
@@ -113,8 +102,7 @@ describe('Header', () => {
               sortDirection: Direction.desc,
             }}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="timelineCallOutUnauthorized"]').exists()).toEqual(true);

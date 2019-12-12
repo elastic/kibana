@@ -4,27 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock';
 import { ONE_MILLISECOND_AS_NANOSECONDS } from '../formatted_duration/helpers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Duration } from '.';
 
 describe('Duration', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('it renders the expected formatted duration', () => {
     const wrapper = mount(
@@ -35,8 +24,7 @@ describe('Duration', () => {
           fieldName="event.duration"
           value={`${ONE_MILLISECOND_AS_NANOSECONDS}`}
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(
       wrapper

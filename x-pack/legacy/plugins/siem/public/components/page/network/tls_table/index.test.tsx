@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
@@ -12,6 +12,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../../mock';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { TlsTable } from '.';
@@ -24,18 +25,10 @@ describe('Tls Table Component', () => {
   const state: State = mockGlobalState;
 
   let store = createStore(state, apolloClientObservable);
-  let root: HTMLElement;
+  const mount = useMountAppended();
 
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
   beforeEach(() => {
     store = createStore(state, apolloClientObservable);
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
   });
 
   describe('Rendering', () => {
@@ -77,8 +70,7 @@ describe('Tls Table Component', () => {
               type={networkModel.NetworkType.details}
             />
           </TestProviders>
-        </MockedProvider>,
-        { attachTo: root }
+        </MockedProvider>
       );
       expect(store.getState().network.details.queries!.tls.sort).toEqual({
         direction: 'desc',

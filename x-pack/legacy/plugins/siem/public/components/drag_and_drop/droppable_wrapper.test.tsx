@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
@@ -14,20 +14,10 @@ import { TestProviders } from '../../mock';
 
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { DroppableWrapper } from './droppable_wrapper';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('DroppableWrapper', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
@@ -56,8 +46,7 @@ describe('DroppableWrapper', () => {
               <DroppableWrapper droppableId="testing">{message}</DroppableWrapper>
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(message);
@@ -75,8 +64,7 @@ describe('DroppableWrapper', () => {
               </DroppableWrapper>
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.find('[data-test-subj="this-should-not-render"]').exists()).toBe(false);
@@ -93,8 +81,7 @@ describe('DroppableWrapper', () => {
               />
             </DragDropContextWrapper>
           </MockedProvider>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('isDraggingOver is: false');

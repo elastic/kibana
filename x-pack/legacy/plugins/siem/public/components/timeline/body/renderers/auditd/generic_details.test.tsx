@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -12,20 +12,10 @@ import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { AuditdGenericDetails, AuditdGenericLine } from './generic_details';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('GenericDetails', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default AuditAcquiredCredsDetails', () => {
@@ -53,8 +43,7 @@ describe('GenericDetails', () => {
             data={mockTimelineData[19].ecs}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionalice@zeek-sanfranin/generic-text-123gpgconf(5402)gpgconf--list-dirsagent-socketgpgconf --list-dirs agent-socket'
@@ -96,8 +85,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -124,8 +112,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -152,8 +139,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -180,8 +166,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -208,8 +193,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1username-1@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -236,8 +220,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1[username-2]as[username-3]@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -264,8 +247,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1[username-1]as[username-2]@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -292,8 +274,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -320,8 +301,7 @@ describe('GenericDetails', () => {
             args={['arg1', 'arg2', 'arg3']}
             result="success"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Sessionsession-1[username-primary]@host-1inworking-directory-1generic-text-123process-name-1(123)arg1arg2arg3process-title-1with resultsuccess'
@@ -348,8 +328,7 @@ describe('GenericDetails', () => {
             args={undefined}
             result={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Session');
     });
@@ -374,8 +353,7 @@ describe('GenericDetails', () => {
             args={undefined}
             result={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Session@some-host-name');
     });
@@ -400,8 +378,7 @@ describe('GenericDetails', () => {
             args={undefined}
             result={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsome-user-name');
     });
@@ -426,8 +403,7 @@ describe('GenericDetails', () => {
             args={undefined}
             result={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessiongeneric-text-123some-process-name');
     });
@@ -452,8 +428,7 @@ describe('GenericDetails', () => {
             args={undefined}
             result={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionsome-user-namesome-process-title');
     });
@@ -478,8 +453,7 @@ describe('GenericDetails', () => {
             args={undefined}
             result={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessioninsome-working-directory');
     });
@@ -504,8 +478,7 @@ describe('GenericDetails', () => {
             workingDirectory={undefined}
             result={undefined}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Sessionarg1arg2arg 3');
     });

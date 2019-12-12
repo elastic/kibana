@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment-timezone';
@@ -13,6 +13,7 @@ import * as React from 'react';
 import { TimelineNonEcsData } from '../../../../graphql/types';
 import { defaultHeaders, mockFrameworks, mockTimelineData, TestProviders } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
@@ -22,18 +23,7 @@ jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 const mockFramework = mockFrameworks.default_UTC;
 
 describe('plain_column_renderer', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     let mockDatum: TimelineNonEcsData[];
@@ -78,8 +68,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Access');
     });
@@ -95,8 +84,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('192.168.0.3');
     });
@@ -112,8 +100,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('120.6KB');
     });
@@ -129,8 +116,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('Action');
     });
@@ -146,8 +132,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         moment
@@ -168,8 +153,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{emptyColumn}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -186,8 +170,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{emptyColumn}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(getEmptyValue());
     });
@@ -204,8 +187,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('I am a log file message');
     });
@@ -222,8 +204,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -245,8 +226,7 @@ describe('plain_column_renderer', () => {
       const wrapper = mount(
         <TestProviders>
           <span>{column}</span>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(

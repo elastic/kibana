@@ -7,7 +7,7 @@
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 
 import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
@@ -55,6 +55,7 @@ import {
   NETWORK_PROTOCOL_FIELD_NAME,
   NETWORK_TRANSPORT_FIELD_NAME,
 } from '../source_destination/field_names';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
@@ -120,18 +121,7 @@ const getNetflowInstance = () => (
 );
 
 describe('Netflow', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(getNetflowInstance());
@@ -139,9 +129,7 @@ describe('Netflow', () => {
   });
 
   test('it renders a destination label', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -152,9 +140,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.bytes', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -165,9 +151,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.continent_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -178,9 +162,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.country_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -191,9 +173,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.country_iso_code', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -204,9 +184,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.region_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -217,9 +195,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.geo.city_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -230,9 +206,7 @@ describe('Netflow', () => {
   });
 
   test('it renders the destination ip and port, separated with a colon', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -243,9 +217,7 @@ describe('Netflow', () => {
   });
 
   test('it renders destination.packets', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -256,9 +228,7 @@ describe('Netflow', () => {
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -272,9 +242,7 @@ describe('Netflow', () => {
   });
 
   test('it renders event.duration', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -285,9 +253,7 @@ describe('Netflow', () => {
   });
 
   test('it renders event.end', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -298,9 +264,7 @@ describe('Netflow', () => {
   });
 
   test('it renders event.start', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -311,9 +275,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.bytes', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -324,9 +286,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.community_id', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -337,9 +297,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.direction', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -350,9 +308,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.packets', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -363,9 +319,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.protocol', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -376,9 +330,7 @@ describe('Netflow', () => {
   });
 
   test('it renders process.name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -389,9 +341,7 @@ describe('Netflow', () => {
   });
 
   test('it renders a source label', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -402,9 +352,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.bytes', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -415,9 +363,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.continent_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -428,9 +374,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.country_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -441,9 +385,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.country_iso_code', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -454,9 +396,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.region_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -467,9 +407,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.geo.city_name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -480,9 +418,7 @@ describe('Netflow', () => {
   });
 
   test('it renders the source ip and port, separated with a colon', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -493,9 +429,7 @@ describe('Netflow', () => {
   });
 
   test('it renders source.packets', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -506,9 +440,7 @@ describe('Netflow', () => {
   });
 
   test('it hyperlinks tls.client_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -522,9 +454,7 @@ describe('Netflow', () => {
   });
 
   test('renders tls.client_certificate.fingerprint.sha1 text', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -536,9 +466,7 @@ describe('Netflow', () => {
   });
 
   test('it hyperlinks tls.fingerprints.ja3.hash site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -549,9 +477,7 @@ describe('Netflow', () => {
   });
 
   test('renders tls.fingerprints.ja3.hash text', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -562,9 +488,7 @@ describe('Netflow', () => {
   });
 
   test('it hyperlinks tls.server_certificate.fingerprint.sha1 site to compare the fingerprint against a known set of signatures', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -578,9 +502,7 @@ describe('Netflow', () => {
   });
 
   test('renders tls.server_certificate.fingerprint.sha1 text', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -592,9 +514,7 @@ describe('Netflow', () => {
   });
 
   test('it renders network.transport', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper
@@ -605,9 +525,7 @@ describe('Netflow', () => {
   });
 
   test('it renders user.name', () => {
-    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>, {
-      attachTo: root,
-    });
+    const wrapper = mount(<TestProviders>{getNetflowInstance()}</TestProviders>);
 
     expect(
       wrapper

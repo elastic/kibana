@@ -4,29 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../../mock/test_providers';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 import { DataProviders } from '.';
 import { DataProvider } from './data_provider';
 import { mockDataProviders } from './mock/mock_data_providers';
 
 describe('DataProviders', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     const dropMessage = ['Drop', 'query', 'build', 'here'];
@@ -66,8 +56,7 @@ describe('DataProviders', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
@@ -88,8 +77,7 @@ describe('DataProviders', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       dropMessage.forEach(word => expect(wrapper.text()).toContain(word));
@@ -110,8 +98,7 @@ describe('DataProviders', () => {
             onToggleDataProviderExcluded={jest.fn()}
             show={true}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       mockDataProviders.forEach(dataProvider =>

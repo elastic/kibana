@@ -4,26 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Ja3Fingerprint } from '.';
 
 describe('Ja3Fingerprint', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('renders the expected label', () => {
     const wrapper = mount(
@@ -34,8 +23,7 @@ describe('Ja3Fingerprint', () => {
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -55,8 +43,7 @@ describe('Ja3Fingerprint', () => {
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -76,8 +63,7 @@ describe('Ja3Fingerprint', () => {
           fieldName="tls.fingerprints.ja3.hash"
           value="fff799d91b7c01ae3fe6787cfc895552"
         />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(

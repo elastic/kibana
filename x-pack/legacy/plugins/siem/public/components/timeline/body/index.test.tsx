@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../../containers/source/mock';
@@ -16,6 +16,7 @@ import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { wait } from '../../../lib/helpers';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 jest.mock('../../../lib/settings/use_kibana_ui_setting');
 
@@ -40,18 +41,7 @@ jest.mock('../../../lib/helpers/scheduler', () => ({
 }));
 
 describe('Body', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the column headers', () => {
@@ -81,8 +71,7 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -120,8 +109,7 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -159,8 +147,7 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -200,8 +187,7 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       wrapper.update();
       await wait();
@@ -222,7 +208,10 @@ describe('Body', () => {
     const dispatchAddNoteToEvent = jest.fn();
     const dispatchOnPinEvent = jest.fn();
 
-    const addaNoteToEvent = (wrapper: ReactWrapper, note: string) => {
+    const addaNoteToEvent = (
+      wrapper: ReactWrapper<unknown, unknown, React.Component<{}, {}, any>>, // eslint-disable-line
+      note: string
+    ) => {
       wrapper
         .find('[data-test-subj="add-note"]')
         .first()
@@ -288,8 +277,7 @@ describe('Body', () => {
             toggleColumn={jest.fn()}
             updateNote={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       addaNoteToEvent(wrapper, 'hello world');
 
@@ -328,8 +316,7 @@ describe('Body', () => {
           sort={mockSort}
           toggleColumn={jest.fn()}
           updateNote={jest.fn()}
-        />,
-        { attachTo: root }
+        />
       );
       addaNoteToEvent(wrapper, 'hello world');
       dispatchAddNoteToEvent.mockClear();

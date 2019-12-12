@@ -6,25 +6,14 @@
 
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mount } from 'enzyme';
 
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 import { ZeekDetails } from './zeek_details';
 
 describe('ZeekDetails', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default ZeekDetails', () => {
@@ -48,8 +37,7 @@ describe('ZeekDetails', () => {
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'C8DRTq362Fios6hw16connectionREJSrConnection attempt rejectedtcpSource185.176.26.101:44059Destination207.154.238.205:11568'
@@ -64,8 +52,7 @@ describe('ZeekDetails', () => {
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'CyIrMA1L1JtLqdIuoldnsudpSource206.189.35.240:57475Destination67.207.67.3:53'
@@ -80,8 +67,7 @@ describe('ZeekDetails', () => {
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'CZLkpC22NquQJOpkwehttp302Source206.189.35.240:36220Destination192.241.164.26:80'
@@ -96,8 +82,7 @@ describe('ZeekDetails', () => {
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'noticeDropped:falseScan::Port_Scan8.42.77.171 scanned at least 15 unique ports of host 207.154.238.205 in 0m0sSource8.42.77.171'
@@ -112,8 +97,7 @@ describe('ZeekDetails', () => {
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'CmTxzt2OVXZLkGDaResslTLSv12TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256Source188.166.66.184:34514Destination91.189.95.15:443'
@@ -128,8 +112,7 @@ describe('ZeekDetails', () => {
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Cu0n232QMyvNtzb75jfilessha1: fa5195a...md5: f7653f1...fa5195a5dfacc9d1c68d43600f0e0262cad14dde'
@@ -144,8 +127,7 @@ describe('ZeekDetails', () => {
             browserFields={mockBrowserFields}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(
         wrapper

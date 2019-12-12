@@ -4,27 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock/test_providers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Ip } from '.';
 
 describe('Port', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
@@ -37,8 +27,7 @@ describe('Port', () => {
     const wrapper = mount(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(
@@ -53,8 +42,7 @@ describe('Port', () => {
     const wrapper = mount(
       <TestProviders>
         <Ip contextId="test" eventId="abcd" fieldName="destination.ip" value="10.1.2.3" />
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(

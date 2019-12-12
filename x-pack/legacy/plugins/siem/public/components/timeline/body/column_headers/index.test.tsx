@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -14,6 +14,7 @@ import { Direction } from '../../../../graphql/types';
 import { mockBrowserFields } from '../../../../../public/containers/source/mock';
 import { Sort } from '../sort';
 import { TestProviders } from '../../../../mock/test_providers';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 import { ColumnHeadersComponent } from '.';
 
@@ -26,18 +27,7 @@ jest.mock('../../../resize_handle/is_resizing', () => ({
 }));
 
 describe('ColumnHeaders', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     const sort: Sort = {
@@ -80,8 +70,7 @@ describe('ColumnHeaders', () => {
             timelineId={'test'}
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(
@@ -108,8 +97,7 @@ describe('ColumnHeaders', () => {
             timelineId={'test'}
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       defaultHeaders.forEach(h => {
@@ -138,8 +126,7 @@ describe('ColumnHeaders', () => {
             timelineId={'test'}
             toggleColumn={jest.fn()}
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       defaultHeaders.forEach(h => {

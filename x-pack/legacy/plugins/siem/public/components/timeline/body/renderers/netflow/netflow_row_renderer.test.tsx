@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -12,6 +12,7 @@ import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { getMockNetflowData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 import {
   eventActionMatches,
@@ -27,18 +28,7 @@ export const justIdAndTimestamp: Ecs = {
 jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
 
 describe('netflowRowRenderer', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   test('renders correctly against snapshot', () => {
     const browserFields: BrowserFields = {};
@@ -121,8 +111,7 @@ describe('netflowRowRenderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
     expect(wrapper.text()).toEqual('some children');
   });
@@ -137,8 +126,7 @@ describe('netflowRowRenderer', () => {
     const wrapper = mount(
       <TestProviders>
         <span>{children}</span>
-      </TestProviders>,
-      { attachTo: root }
+      </TestProviders>
     );
 
     expect(

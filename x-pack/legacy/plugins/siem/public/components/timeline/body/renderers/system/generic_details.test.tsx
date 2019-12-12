@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -12,20 +12,10 @@ import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { SystemGenericDetails, SystemGenericLine } from './generic_details';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('SystemGenericDetails', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default SystemGenericDetails', () => {
@@ -53,8 +43,7 @@ describe('SystemGenericDetails', () => {
             data={mockTimelineData[28].ecs}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Braden@zeek-london[generic-text-123](6278)with resultfailureSource128.199.212.120'
@@ -87,8 +76,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][generic-text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -119,8 +107,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('');
     });
@@ -149,8 +136,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[hostname-123]');
     });
@@ -179,8 +165,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[hostname-123][message-123]');
     });
@@ -209,8 +194,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[hostname-123]with result[outcome-123][message-123]');
     });
@@ -239,8 +223,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]with result[outcome-123][packageName-123][message-123]'
@@ -271,8 +254,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]with result[outcome-123][packageName-123][packageSummary-123][message-123]'
@@ -303,8 +285,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -335,8 +316,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processExecutable-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -367,8 +347,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processExecutable-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -399,8 +378,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -431,8 +409,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -463,8 +440,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -495,8 +471,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -527,8 +502,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -559,8 +533,7 @@ describe('SystemGenericDetails', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -12,20 +12,10 @@ import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { SystemGenericFileDetails, SystemGenericFileLine } from './generic_file_details';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('SystemGenericFileDetails', () => {
-  let root: HTMLElement;
-
-  // https://github.com/atlassian/react-beautiful-dnd/issues/1593
-  beforeEach(() => {
-    root = document.createElement('div');
-    root.id = 'root';
-    document.body.appendChild(root);
-  });
-
-  afterEach(() => {
-    document.body.removeChild(root);
-  });
+  const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders the default SystemGenericDetails', () => {
@@ -53,8 +43,7 @@ describe('SystemGenericFileDetails', () => {
             data={mockTimelineData[29].ecs}
             timelineId="test"
           />
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         'Evan@zeek-london[generic-text-123](6278)with resultfailureSource128.199.212.120'
@@ -103,8 +92,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory="[working-directory-123]"
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][generic-text-123][fileName-123]in[filePath-123][processName-123](123)[arg-1][arg-2][arg-3][some-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -151,8 +139,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('an unknown process');
     });
@@ -197,8 +184,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[hostname-123]an unknown process');
     });
@@ -243,8 +229,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[hostname-123]an unknown process[message-123]');
     });
@@ -289,8 +274,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][message-123]'
@@ -337,8 +321,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][message-123]'
@@ -385,8 +368,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][packageSummary-123][message-123]'
@@ -433,8 +415,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123]an unknown processwith result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -481,8 +462,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][message-123]'
@@ -529,8 +509,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashMd5-123][message-123]'
@@ -577,8 +556,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -625,8 +603,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][packageVersion-123]with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -673,8 +650,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processExecutable-123](123)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -721,8 +697,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)via parent process(456)with result[outcome-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -769,8 +744,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -817,8 +791,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -865,8 +838,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -913,8 +885,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '\\[userDomain-123][hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -961,8 +932,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -1009,8 +979,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -1057,8 +1026,7 @@ describe('SystemGenericFileDetails', () => {
               args={null}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[process-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -1105,8 +1073,7 @@ describe('SystemGenericFileDetails', () => {
               args={['[arg-1]', '[arg-2]', '[arg-3]']}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual(
         '[username-123]\\[userDomain-123]@[hostname-123]in[working-directory-123][text-123][processName-123](123)[arg-1][arg-2][arg-3][process-title-123]with exit code[endgameExitCode-123]via parent process[endgameParentProcessName-123](456)with result[outcome-123][sshSignature-123][sshMethod-123][packageName-123][packageVersion-123][packageSummary-123][processHashSha256-123][processHashSha1-123][processHashMd5-123][message-123]'
@@ -1153,8 +1120,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
       expect(wrapper.text()).toEqual('[endgameFileName]in[endgameFilePath]an unknown process');
     });
@@ -1199,8 +1165,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('[fileName]in[filePath]an unknown process');
@@ -1247,8 +1212,7 @@ describe('SystemGenericFileDetails', () => {
                 workingDirectory={undefined}
               />
             </div>
-          </TestProviders>,
-          { attachTo: root }
+          </TestProviders>
         );
 
         expect(wrapper.text().includes('via')).toBe(true);
@@ -1297,8 +1261,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text().includes('via')).toBe(false);
@@ -1346,8 +1309,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual(
@@ -1397,8 +1359,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('an unknown process');
@@ -1446,8 +1407,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('an unknown process');
@@ -1493,8 +1453,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('an unknown process[message]');
@@ -1540,8 +1499,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('an unknown process');
@@ -1587,8 +1545,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('[endgameProcessName](789)');
@@ -1634,8 +1591,7 @@ describe('SystemGenericFileDetails', () => {
               workingDirectory={undefined}
             />
           </div>
-        </TestProviders>,
-        { attachTo: root }
+        </TestProviders>
       );
 
       expect(wrapper.text()).toEqual('[processName](123)');
