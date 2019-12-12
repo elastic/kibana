@@ -22,6 +22,7 @@ import { npStart } from 'ui/new_platform';
 import { filter, map } from 'rxjs/operators';
 // eslint-disable-next-line
 import { split } from '../../../../../plugins/bfetch/public/streaming';
+import { defer } from '../../../../../plugins/kibana_utils/public';
 import { FUNCTIONS_URL } from './consts';
 
 // TODO: Import this type from kibana_util.
@@ -96,7 +97,7 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
     }
 
     // If not, create a new promise, id, and add it to the batched collection.
-    const future = createFuture();
+    const future = defer();
     const newId = nextId();
     request.id = newId;
 
@@ -106,25 +107,6 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
     };
 
     return future.promise;
-  };
-}
-
-/**
- * An externally resolvable / rejectable promise, used to make sure
- * individual batch responses go to the correct caller.
- */
-function createFuture() {
-  let resolve;
-  let reject;
-  const promise = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-
-  return {
-    resolve,
-    reject,
-    promise,
   };
 }
 
