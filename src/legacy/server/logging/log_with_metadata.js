@@ -18,10 +18,10 @@
  */
 import { isPlainObject } from 'lodash';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
   metadataSymbol,
   attachMetaData,
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../src/core/server/legacy/logging/legacy_logging_server';
 
 export const logWithMetadata = {
