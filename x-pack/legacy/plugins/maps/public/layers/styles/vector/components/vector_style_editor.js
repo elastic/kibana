@@ -22,7 +22,7 @@ import { SYMBOLIZE_AS_ICON } from '../vector_constants';
 import { i18n } from '@kbn/i18n';
 import { SYMBOL_OPTIONS } from '../symbol_utils';
 
-import { EuiSpacer, EuiButtonGroup } from '@elastic/eui';
+import { EuiSpacer, EuiButtonGroup, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 export class VectorStyleEditor extends Component {
   state = {
@@ -116,6 +116,14 @@ export class VectorStyleEditor extends Component {
   _getOrdinalFields() {
     return [...this.state.dateFields, ...this.state.numberFields];
   }
+
+  _handleSelectedFeatureChange = selectedFeature => {
+    this.setState({ selectedFeature });
+  };
+
+  _onIsTimeAwareChange = event => {
+    this.props.onIsTimeAwareChange(event.target.checked);
+  };
 
   _renderFillColor() {
     return (
@@ -235,11 +243,7 @@ export class VectorStyleEditor extends Component {
     );
   }
 
-  _handleSelectedFeatureChange = selectedFeature => {
-    this.setState({ selectedFeature });
-  };
-
-  render() {
+  _renderProperties() {
     const { supportedFeatures, selectedFeature } = this.state;
 
     if (!supportedFeatures) {
@@ -299,6 +303,36 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         {styleProperties}
+      </Fragment>
+    );
+  }
+
+  _renderIsTimeAwareSwitch() {
+    if (!this.props.showIsTimeAware) {
+      return null;
+    }
+
+    return (
+      <EuiFormRow
+        display="columnCompressedSwitch"
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.maps.vectorStyleEditor.isTimeAwareLabel', {
+            defaultMessage: 'Apply global time to style metadata requests',
+          })}
+          checked={this.props.isTimeAware}
+          onChange={this._onIsTimeAwareChange}
+          compressed
+        />
+      </EuiFormRow>
+    );
+  }
+
+  render() {
+    return (
+      <Fragment>
+        {this._renderProperties()}
+        {this._renderIsTimeAwareSwitch()}
       </Fragment>
     );
   }

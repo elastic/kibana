@@ -6,6 +6,7 @@
 
 import { shallowWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
+import moment from 'moment';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { MostRecentError } from '../most_recent_error';
 import { MonitorDetails, MonitorError } from '../../../../../../common/runtime_types';
@@ -13,6 +14,10 @@ import { MonitorDetails, MonitorError } from '../../../../../../common/runtime_t
 describe('MostRecentError component', () => {
   let monitorDetails: MonitorDetails;
   let monitorError: MonitorError;
+
+  beforeAll(() => {
+    moment.prototype.fromNow = jest.fn(() => '5 days ago');
+  });
 
   beforeEach(() => {
     monitorError = {
@@ -39,7 +44,7 @@ describe('MostRecentError component', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('renders properly with empty data', () => {
+  it('renders properly with mock data', () => {
     const component = renderWithIntl(
       <Router>
         <MostRecentError

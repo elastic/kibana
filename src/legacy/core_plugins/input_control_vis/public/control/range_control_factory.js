@@ -26,7 +26,6 @@ import {
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
-import { start as data } from '../../../../core_plugins/data/public/legacy';
 import { npStart } from 'ui/new_platform';
 
 const minMaxAgg = (field) => {
@@ -103,7 +102,7 @@ class RangeControl extends Control {
 export async function rangeControlFactory(controlParams, useTimeFilter, SearchSource) {
   let indexPattern;
   try {
-    indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
+    indexPattern = await npStart.plugins.data.indexPatterns.get(controlParams.indexPattern);
   } catch (err) {
     // ignore not found error and return control so it can be displayed in disabled state.
   }

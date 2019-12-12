@@ -6,10 +6,9 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-const SECOND = 1000;
 export const config = {
   schema: schema.object({
-    pollingFrequency: schema.number({ defaultValue: 30 * SECOND }),
+    pollingFrequency: schema.duration({ defaultValue: '30s' }),
   }),
 };
 

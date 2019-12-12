@@ -8,7 +8,7 @@
 import { DynamicStyleProperty } from './dynamic_style_property';
 import { getComputedFieldName } from '../style_util';
 import { HALF_LARGE_MAKI_ICON_SIZE, LARGE_MAKI_ICON_SIZE, SMALL_MAKI_ICON_SIZE } from '../symbol_utils';
-import { vectorStyles } from '../vector_style_defaults';
+import { VECTOR_STYLES } from '../vector_style_defaults';
 import _ from 'lodash';
 import { CircleIcon } from '../components/legend/circle_icon';
 import React, { Fragment } from 'react';
@@ -55,7 +55,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
 
       const halfIconPixels = iconPixels / 2;
-      const targetName = getComputedFieldName(vectorStyles.ICON_SIZE, this._options.field.name);
+      const targetName = getComputedFieldName(VECTOR_STYLES.ICON_SIZE, this._options.field.name);
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
@@ -112,9 +112,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty {
 
   renderHeader() {
     let icons;
-    if (this.getStyleName() === vectorStyles.LINE_WIDTH) {
+    if (this.getStyleName() === VECTOR_STYLES.LINE_WIDTH) {
       icons = getLineWidthIcons();
-    } else if (this.getStyleName() === vectorStyles.ICON_SIZE) {
+    } else if (this.getStyleName() === VECTOR_STYLES.ICON_SIZE) {
       icons = getSymbolSizeIcons();
     } else {
       return null;

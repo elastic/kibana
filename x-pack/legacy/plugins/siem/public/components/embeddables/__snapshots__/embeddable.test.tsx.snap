@@ -1,11 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Embeddable it renders 1`] = `
-<Component>
-  <Embeddable>
+<section
+  className="siemEmbeddable"
+>
+  <Panel
+    paddingSize="none"
+  >
     <p>
       Test content
     </p>
-  </Embeddable>
-</Component>
+  </Panel>
+</section>
 `;

@@ -7,4 +7,4 @@
 export const SYMBOLIZE_AS_CIRCLE = 'circle';
 export const SYMBOLIZE_AS_ICON = 'icon';
 
-export const DEFAULT_ICON_SIZE = 10;
+export const DEFAULT_ICON_SIZE = 6;

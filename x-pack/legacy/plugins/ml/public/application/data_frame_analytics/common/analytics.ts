@@ -8,7 +8,6 @@ import { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
-import { idx } from '@kbn/elastic-idx';
 import { cloneDeep } from 'lodash';
 import { ml } from '../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
@@ -164,7 +163,7 @@ export const isRegressionResultsSearchBoolQuery = (
 export interface DataFrameAnalyticsConfig {
   id: DataFrameAnalyticsId;
   // Description attribute is not supported yet
-  // description?: string;
+  description?: string;
   dest: {
     index: IndexName;
     results_field: string;
@@ -242,12 +241,13 @@ export const useRefreshAnalyticsList = (
 const DEFAULT_SIG_FIGS = 3;
 
 export function getValuesFromResponse(response: RegressionEvaluateResponse) {
-  let meanSquaredError = idx(response, _ => _.regression.mean_squared_error.error) as number;
+  let meanSquaredError = response?.regression?.mean_squared_error?.error;
+
   if (meanSquaredError) {
     meanSquaredError = Number(meanSquaredError.toPrecision(DEFAULT_SIG_FIGS));
   }
 
-  let rSquared = idx(response, _ => _.regression.r_squared.value) as number;
+  let rSquared = response?.regression?.r_squared?.value;
   if (rSquared) {
     rSquared = Number(rSquared.toPrecision(DEFAULT_SIG_FIGS));
   }

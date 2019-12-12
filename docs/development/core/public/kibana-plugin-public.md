@@ -52,10 +52,10 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HttpErrorResponse](./kibana-plugin-public.httperrorresponse.md) |  |
 |  [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) | All options that may be used with a [HttpHandler](./kibana-plugin-public.httphandler.md)<!-- -->. |
 |  [HttpFetchQuery](./kibana-plugin-public.httpfetchquery.md) |  |
+|  [HttpHandler](./kibana-plugin-public.httphandler.md) | A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) for options and [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) for the response. |
 |  [HttpHeadersInit](./kibana-plugin-public.httpheadersinit.md) |  |
 |  [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) | An object that may define global interceptor functions for different parts of the request and response lifecycle. See [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md)<!-- -->. |
 |  [HttpRequestInit](./kibana-plugin-public.httprequestinit.md) | Fetch API options available to [HttpHandler](./kibana-plugin-public.httphandler.md)<!-- -->s. |
-|  [HttpResponse](./kibana-plugin-public.httpresponse.md) |  |
 |  [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |  |
 |  [I18nStart](./kibana-plugin-public.i18nstart.md) | I18nStart.Context is required by any localizable React component from @<!-- -->kbn/i18n and @<!-- -->elastic/eui packages and is supposed to be used as the topmost component for any i18n-compatible React tree. |
 |  [IAnonymousPaths](./kibana-plugin-public.ianonymouspaths.md) | APIs for denoting paths as not requiring authentication |
@@ -63,7 +63,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IContextContainer](./kibana-plugin-public.icontextcontainer.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [IHttpFetchError](./kibana-plugin-public.ihttpfetcherror.md) |  |
 |  [IHttpInterceptController](./kibana-plugin-public.ihttpinterceptcontroller.md) | Used to halt a request Promise chain in a [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md)<!-- -->. |
-|  [InterceptedHttpResponse](./kibana-plugin-public.interceptedhttpresponse.md) |  |
+|  [IHttpResponse](./kibana-plugin-public.ihttpresponse.md) |  |
+|  [IHttpResponseInterceptorOverrides](./kibana-plugin-public.ihttpresponseinterceptoroverrides.md) | Properties that can be returned by HttpInterceptor.request to override the response. |
 |  [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) | Client-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. [IUiSettingsClient](./kibana-plugin-public.iuisettingsclient.md) |
 |  [LegacyCoreSetup](./kibana-plugin-public.legacycoresetup.md) | Setup interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
 |  [LegacyCoreStart](./kibana-plugin-public.legacycorestart.md) | Start interface exposed to the legacy platform via the <code>ui/new_platform</code> module. |
@@ -108,8 +109,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [HandlerContextType](./kibana-plugin-public.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-public.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-public.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-public.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-public.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-public.handlercontexttype.md)<!-- -->. |
-|  [HttpBody](./kibana-plugin-public.httpbody.md) |  |
-|  [HttpHandler](./kibana-plugin-public.httphandler.md) | A function for making an HTTP requests to Kibana's backend. See [HttpFetchOptions](./kibana-plugin-public.httpfetchoptions.md) for options and [HttpBody](./kibana-plugin-public.httpbody.md) for the response. |
 |  [HttpSetup](./kibana-plugin-public.httpsetup.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
 |  [HttpStart](./kibana-plugin-public.httpstart.md) | See [HttpServiceBase](./kibana-plugin-public.httpservicebase.md) |
 |  [IContextProvider](./kibana-plugin-public.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |

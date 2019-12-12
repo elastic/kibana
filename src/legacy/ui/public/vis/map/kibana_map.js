@@ -22,7 +22,7 @@ import { createZoomWarningMsg } from './map_messages';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
-import { zoomToPrecision } from '../../utils/zoom_to_precision';
+import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../../../../core_plugins/tile_map/common/origin';
 
@@ -564,6 +564,8 @@ export class KibanaMap extends EventEmitter {
 
     let baseLayer;
     if (settings.baseLayerType === 'wms') {
+      //This is user-input that is rendered with the Leaflet attribution control. Needs to be sanitized.
+      this._baseLayerSettings.options.attribution = _.escape(settings.options.attribution);
       baseLayer = this._getWMSBaseLayer(settings.options);
     } else if (settings.baseLayerType === 'tms') {
       baseLayer = this._getTMSBaseLayer((settings.options));

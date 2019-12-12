@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -16,14 +15,16 @@ import { ZeekDetails } from './zeek_details';
 describe('ZeekDetails', () => {
   describe('rendering', () => {
     test('it renders the default ZeekDetails', () => {
-      const wrapper = shallow(
-        <ZeekDetails
-          data={mockTimelineData[2].ecs}
-          browserFields={mockBrowserFields}
-          timelineId="test"
-        />
+      const wrapper = mountWithIntl(
+        <TestProviders>
+          <ZeekDetails
+            data={mockTimelineData[2].ecs}
+            browserFields={mockBrowserFields}
+            timelineId="test"
+          />
+        </TestProviders>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('ZeekDetails'))).toMatchSnapshot();
     });
 
     test('it returns zeek.connection if the data does contain zeek.connection data', () => {
@@ -126,7 +127,12 @@ describe('ZeekDetails', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      expect(
+        wrapper
+          .find('ZeekDetails')
+          .children()
+          .exists()
+      ).toBeFalsy();
     });
   });
 });

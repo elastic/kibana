@@ -108,19 +108,15 @@ describe('draggables', () => {
     });
 
     test('it returns null if value is undefined', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <DefaultDraggable id="draggable-id" field="some-field" value={undefined} />
-        </TestProviders>
+      const wrapper = shallow(
+        <DefaultDraggable id="draggable-id" field="some-field" value={undefined} />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if value is null', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <DefaultDraggable id="draggable-id" field="some-field" value={null} />
-        </TestProviders>
+      const wrapper = shallow(
+        <DefaultDraggable id="draggable-id" field="some-field" value={null} />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
@@ -218,31 +214,27 @@ describe('draggables', () => {
     });
 
     test('it returns null if value is undefined', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <DraggableBadge
-            contextId="context-id"
-            eventId="event-id"
-            field="some-field"
-            iconType="number"
-            value={undefined}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <DraggableBadge
+          contextId="context-id"
+          eventId="event-id"
+          field="some-field"
+          iconType="number"
+          value={undefined}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if value is null', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <DraggableBadge
-            contextId="context-id"
-            eventId="event-id"
-            field="some-field"
-            value={null}
-            iconType="number"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <DraggableBadge
+          contextId="context-id"
+          eventId="event-id"
+          field="some-field"
+          value={null}
+          iconType="number"
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });

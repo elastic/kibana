@@ -6,10 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { flatten, get } from 'lodash';
-
-import Boom from 'boom';
+import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
 import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
+import { KibanaFramework } from '../framework/kibana_framework_adapter';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
 import { metrics } from '../../../../common/inventory_models';
@@ -17,15 +16,16 @@ import { TSVBMetricModelCreator } from '../../../../common/inventory_models/type
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
-  private framework: InfraBackendFrameworkAdapter;
+  private framework: KibanaFramework;
 
-  constructor(framework: InfraBackendFrameworkAdapter) {
+  constructor(framework: KibanaFramework) {
     this.framework = framework;
   }
 
   public async getMetrics(
-    req: InfraFrameworkRequest,
-    options: InfraMetricsRequestOptions
+    requestContext: RequestHandlerContext,
+    options: InfraMetricsRequestOptions,
+    rawRequest: KibanaRequest // NP_TODO: Temporarily needed until metrics getVisData no longer needs full request
   ): Promise<InfraMetricData[]> {
     const fields = {
       [InfraNodeType.host]: options.sourceConfiguration.fields.host,
@@ -35,11 +35,11 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     const indexPattern = `${options.sourceConfiguration.metricAlias},${options.sourceConfiguration.logAlias}`;
     const nodeField = fields[options.nodeType];
     const search = <Aggregation>(searchOptions: object) =>
-      this.framework.callWithRequest<{}, Aggregation>(req, 'search', searchOptions);
+      this.framework.callWithRequest<{}, Aggregation>(requestContext, 'search', searchOptions);
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeIds.nodeId);
     if (!validNode) {
-      throw Boom.notFound(
+      throw new Error(
         i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {
@@ -50,7 +50,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     }
 
     const requests = options.metrics.map(metricId =>
-      this.makeTSVBRequest(metricId, options, req, nodeField)
+      this.makeTSVBRequest(metricId, options, rawRequest, nodeField, requestContext)
     );
 
     return Promise.all(requests)
@@ -92,12 +92,13 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   async makeTSVBRequest(
     metricId: InfraMetric,
     options: InfraMetricsRequestOptions,
-    req: InfraFrameworkRequest,
-    nodeField: string
+    req: KibanaRequest,
+    nodeField: string,
+    requestContext: RequestHandlerContext
   ) {
     const createTSVBModel = get(metrics, ['tsvb', metricId]) as TSVBMetricModelCreator | undefined;
     if (!createTSVBModel) {
-      throw Boom.badRequest(
+      throw new Error(
         i18n.translate('xpack.infra.metrics.missingTSVBModelError', {
           defaultMessage: 'The TSVB model for {metricId} does not exist for {nodeType}',
           values: {
@@ -121,7 +122,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     );
     const calculatedInterval = await calculateMetricInterval(
       this.framework,
-      req,
+      requestContext,
       {
         indexPattern: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
         timestampField: options.sourceConfiguration.fields.timestamp,
@@ -135,7 +136,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     }
 
     if (model.id_type === 'cloud' && !options.nodeIds.cloudId) {
-      throw Boom.badRequest(
+      throw new Error(
         i18n.translate('xpack.infra.kibanaMetrics.cloudIdMissingErrorMessage', {
           defaultMessage:
             'Model for {metricId} requires a cloudId, but none was given for {nodeId}.',
@@ -152,6 +153,6 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       ? [{ match: { [model.map_field_to]: id } }]
       : [{ match: { [nodeField]: id } }];
 
-    return this.framework.makeTSVBRequest(req, model, timerange, filters);
+    return this.framework.makeTSVBRequest(req, model, timerange, filters, requestContext);
   }
 }

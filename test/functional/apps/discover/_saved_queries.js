@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
+  const browser = getService('browser');
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -85,6 +86,17 @@ export default function ({ getService, getPageObjects }) {
         expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
         expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
       });
+
+      it('preserves the currently loaded query when the page is reloaded', async () => {
+        await browser.refresh();
+        const timePickerValues = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+        expect(timePickerValues.start).to.not.eql(PageObjects.timePicker.defaultStartTime);
+        expect(timePickerValues.end).to.not.eql(PageObjects.timePicker.defaultEndTime);
+        expect(await PageObjects.discover.getHitCount()).to.be('2,792');
+        expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
+      });
+
 
       it('allows saving changes to a currently loaded query via the saved query management component', async () => {
         await queryBar.setQuery('response:404');

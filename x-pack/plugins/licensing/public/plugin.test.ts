@@ -5,6 +5,7 @@
  */
 
 import { take } from 'rxjs/operators';
+import { mountExpiredBannerMock } from './plugin.test.mocks';
 
 import { LicenseType } from '../common/types';
 import { LicensingPlugin, licensingSessionStorageKey } from './plugin';
@@ -14,10 +15,13 @@ import { licenseMock } from '../common/license.mock';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpInterceptor } from 'src/core/public';
 
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 describe('licensing plugin', () => {
   let plugin: LicensingPlugin;
 
   afterEach(async () => {
+    jest.clearAllMocks();
     await plugin.stop();
   });
 
@@ -28,15 +32,30 @@ describe('licensing plugin', () => {
         plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
 
         const coreSetup = coreMock.createSetup();
-        const fetchedLicense = licenseMock.create({ license: { uid: 'fetched' } });
-        coreSetup.http.get.mockResolvedValue(fetchedLicense);
+        const firstLicense = licenseMock.create({ license: { uid: 'first', type: 'basic' } });
+        const secondLicense = licenseMock.create({ license: { uid: 'second', type: 'gold' } });
+        coreSetup.http.get
+          .mockImplementationOnce(async () => {
+            await delay(100);
+            return firstLicense;
+          })
+          .mockImplementationOnce(async () => {
+            await delay(100);
+            return secondLicense;
+          });
 
         const { license$, refresh } = await plugin.setup(coreSetup);
 
-        refresh();
-        const license = await license$.pipe(take(1)).toPromise();
+        let fromObservable;
+        license$.subscribe(license => (fromObservable = license));
 
-        expect(license.uid).toBe('fetched');
+        const licenseResult = await refresh();
+        expect(licenseResult.uid).toBe('first');
+        expect(licenseResult).toBe(fromObservable);
+
+        const secondResult = await refresh();
+        expect(secondResult.uid).toBe('second');
+        expect(secondResult).toBe(fromObservable);
       });
 
       it('data re-fetch call marked as a system api', async () => {
@@ -49,7 +68,7 @@ describe('licensing plugin', () => {
 
         const { refresh } = await plugin.setup(coreSetup);
 
-        refresh();
+        await refresh();
 
         expect(coreSetup.http.get.mock.calls[0][1]).toMatchObject({
           headers: {
@@ -119,7 +138,7 @@ describe('licensing plugin', () => {
 
         const { license$, refresh } = await plugin.setup(coreSetup);
 
-        refresh();
+        await refresh();
         const license = await license$.pipe(take(1)).toPromise();
 
         expect(license.uid).toBe('fresh');
@@ -143,7 +162,7 @@ describe('licensing plugin', () => {
         coreSetup.http.get.mockRejectedValue(new Error('reason'));
 
         const { license$, refresh } = await plugin.setup(coreSetup);
-        refresh();
+        await refresh();
 
         const license = await license$.pipe(take(1)).toPromise();
 
@@ -161,7 +180,7 @@ describe('licensing plugin', () => {
         const { license$, refresh } = await plugin.setup(coreSetup);
         expect(sessionStorage.removeItem).toHaveBeenCalledTimes(0);
 
-        refresh();
+        await refresh();
         await license$.pipe(take(1)).toPromise();
 
         expect(sessionStorage.removeItem).toHaveBeenCalledTimes(1);
@@ -169,6 +188,7 @@ describe('licensing plugin', () => {
       });
     });
   });
+
   describe('interceptor', () => {
     it('register http interceptor checking signature header', async () => {
       const sessionStorage = coreMock.createStorage();
@@ -201,7 +221,7 @@ describe('licensing plugin', () => {
         response: {
           headers: {
             get(name: string) {
-              if (name === 'kbn-xpack-sig') {
+              if (name === 'kbn-license-sig') {
                 return 'signature-1';
               }
               throw new Error('unexpected header');
@@ -224,6 +244,40 @@ describe('licensing plugin', () => {
       await registeredInterceptor!.response!(httpResponse as any, null as any);
 
       expect(coreSetup.http.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('http interceptor does not trigger license re-fetch for anonymous pages', async () => {
+      const sessionStorage = coreMock.createStorage();
+      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+      const coreSetup = coreMock.createSetup();
+      coreSetup.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+      let registeredInterceptor: HttpInterceptor;
+      coreSetup.http.intercept.mockImplementation((interceptor: HttpInterceptor) => {
+        registeredInterceptor = interceptor;
+        return () => undefined;
+      });
+
+      await plugin.setup(coreSetup);
+      const httpResponse = {
+        response: {
+          headers: {
+            get(name: string) {
+              if (name === 'kbn-license-sig') {
+                return 'signature-1';
+              }
+              throw new Error('unexpected header');
+            },
+          },
+        },
+        request: {
+          url: 'http://10.10.10.10:5601/api/hello',
+        },
+      };
+      await registeredInterceptor!.response!(httpResponse as any, null as any);
+
+      expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
     });
 
     it('http interceptor does not trigger re-fetch if requested x-pack/info endpoint', async () => {
@@ -249,7 +303,7 @@ describe('licensing plugin', () => {
         response: {
           headers: {
             get(name: string) {
-              if (name === 'kbn-xpack-sig') {
+              if (name === 'kbn-license-sig') {
                 return 'signature-1';
               }
               throw new Error('unexpected header');
@@ -269,6 +323,59 @@ describe('licensing plugin', () => {
       expect(updated).toBe(false);
     });
   });
+
+  describe('expired banner', () => {
+    it('does not show "license expired" banner if license is not expired.', async () => {
+      const sessionStorage = coreMock.createStorage();
+      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+      const coreSetup = coreMock.createSetup();
+      coreSetup.http.get.mockResolvedValueOnce(
+        licenseMock.create({ license: { status: 'active', type: 'gold' } })
+      );
+
+      const { refresh } = await plugin.setup(coreSetup);
+
+      const coreStart = coreMock.createStart();
+      await plugin.start(coreStart);
+
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(0);
+    });
+
+    it('shows "license expired" banner if license is expired only once.', async () => {
+      const sessionStorage = coreMock.createStorage();
+      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
+
+      const coreSetup = coreMock.createSetup();
+      const activeLicense = licenseMock.create({ license: { status: 'active', type: 'gold' } });
+      const expiredLicense = licenseMock.create({ license: { status: 'expired', type: 'gold' } });
+      coreSetup.http.get
+        .mockResolvedValueOnce(activeLicense)
+        .mockResolvedValueOnce(expiredLicense)
+        .mockResolvedValueOnce(activeLicense)
+        .mockResolvedValueOnce(expiredLicense);
+
+      const { refresh } = await plugin.setup(coreSetup);
+
+      const coreStart = coreMock.createStart();
+      await plugin.start(coreStart);
+
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(0);
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
+      await refresh();
+      expect(coreStart.overlays.banners.add).toHaveBeenCalledTimes(1);
+      expect(mountExpiredBannerMock).toHaveBeenCalledWith({
+        type: 'gold',
+        uploadUrl: '/app/kibana#/management/elasticsearch/license_management/upload_license',
+      });
+    });
+  });
+
   describe('#stop', () => {
     it('stops polling', async () => {
       const sessionStorage = coreMock.createStorage();
@@ -281,19 +388,6 @@ describe('licensing plugin', () => {
 
       await plugin.stop();
       expect(completed).toBe(true);
-    });
-
-    it('refresh does not trigger data re-fetch', async () => {
-      const sessionStorage = coreMock.createStorage();
-      plugin = new LicensingPlugin(coreMock.createPluginInitializerContext(), sessionStorage);
-      const coreSetup = coreMock.createSetup();
-      const { refresh } = await plugin.setup(coreSetup);
-
-      await plugin.stop();
-
-      refresh();
-
-      expect(coreSetup.http.get).toHaveBeenCalledTimes(0);
     });
 
     it('removes http interceptor', async () => {

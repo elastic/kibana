@@ -5,14 +5,13 @@
  */
 
 import expect from '@kbn/expect';
-import { SecurityService, SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const security: SecurityService = getService('security');
-  const spaces: SpacesService = getService('spaces');
+  const security = getService('security');
+  const spaces = getService('spaces');
   const log = getService('log');
 
   const start = encodeURIComponent(new Date(Date.now() - 10000).toISOString());

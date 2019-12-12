@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SpacesService } from '../../../common/services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { Spaces } from '../scenarios';
 
@@ -13,7 +12,7 @@ export default function alertingApiIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  const spacesService: SpacesService = getService('spaces');
+  const spacesService = getService('spaces');
   const esArchiver = getService('esArchiver');
 
   describe('alerting api integration spaces only', function() {

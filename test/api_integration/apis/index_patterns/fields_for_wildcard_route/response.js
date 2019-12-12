@@ -72,7 +72,7 @@ export default function ({ getService }) {
               readFromDocValues: true,
             },
             {
-              aggregatable: true,
+              aggregatable: false,
               esTypes: [
                 'keyword'
               ],
@@ -156,7 +156,7 @@ export default function ({ getService }) {
               readFromDocValues: true,
             },
             {
-              aggregatable: true,
+              aggregatable: false,
               esTypes: [
                 'keyword'
               ],

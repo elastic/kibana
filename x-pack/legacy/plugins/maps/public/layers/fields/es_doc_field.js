@@ -27,4 +27,31 @@ export class ESDocField extends AbstractField {
     return field.type;
   }
 
+  supportsFieldMeta() {
+    return true;
+  }
+
+  async getFieldMetaRequest(/* config */) {
+    const field = await this._getField();
+
+    if (field.type !== 'number' && field.type !== 'date') {
+      return null;
+    }
+
+    const extendedStats = {};
+    if (field.scripted) {
+      extendedStats.script = {
+        source: field.script,
+        lang: field.lang
+      };
+    } else {
+      extendedStats.field = this._fieldName;
+    }
+    return {
+      [this._fieldName]: {
+        extended_stats: extendedStats
+      }
+    };
+  }
+
 }

@@ -15,7 +15,7 @@ import { AggConfigs } from 'ui/agg_types';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
 import { convertToGeoJson } from './convert_to_geojson';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import { vectorStyles } from '../../styles/vector/vector_style_defaults';
+import { getDefaultDynamicProperties, VECTOR_STYLES } from '../../styles/vector/vector_style_defaults';
 import { RENDER_AS } from './render_as';
 import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource } from '../es_agg_source';
 import { DynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
+import { StaticStyleProperty } from '../../styles/vector/properties/static_style_property';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -84,7 +85,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
-        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -170,13 +170,15 @@ export class ESGeoGridSource extends AbstractESAggSource {
     const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const aggConfigs = new AggConfigs(indexPattern, this._makeAggConfigs(searchFilters.geogridPrecision), aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
-    const esResponse = await this._runEsQuery(
-      layerName,
+    const esResponse = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
       searchSource,
       registerCancelCallback,
-      i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
+      requestDescription: i18n.translate('xpack.maps.source.esGrid.inspectorDescription', {
         defaultMessage: 'Elasticsearch geo grid aggregation request'
-      }));
+      }),
+    });
 
     const tabifiedResp = tabifyAggResponse(aggConfigs, esResponse);
     const { featureCollection } = convertToGeoJson({
@@ -214,22 +216,26 @@ export class ESGeoGridSource extends AbstractESAggSource {
     ];
   }
 
-  _createDefaultLayerDescriptor(options) {
-    if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
-      return HeatmapLayer.createDescriptor({
-        sourceDescriptor: this._descriptor,
-        ...options
-      });
-    }
+  _createHeatmapLayerDescriptor(options) {
+    return HeatmapLayer.createDescriptor({
+      sourceDescriptor: this._descriptor,
+      ...options
+    });
+  }
 
+  _createVectorLayerDescriptor(options) {
     const descriptor = VectorLayer.createDescriptor({
       sourceDescriptor: this._descriptor,
       ...options
     });
+
+    const defaultDynamicProperties = getDefaultDynamicProperties();
+
     descriptor.style = VectorStyle.createDescriptor({
-      [vectorStyles.FILL_COLOR]: {
+      [VECTOR_STYLES.FILL_COLOR]: {
         type: DynamicStyleProperty.type,
         options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.FILL_COLOR].options,
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
@@ -238,16 +244,27 @@ export class ESGeoGridSource extends AbstractESAggSource {
           color: 'Blues'
         }
       },
-      [vectorStyles.ICON_SIZE]: {
+      [VECTOR_STYLES.LINE_COLOR]: {
+        type: StaticStyleProperty.type,
+        options: {
+          color: '#FFF'
+        }
+      },
+      [VECTOR_STYLES.LINE_WIDTH]: {
+        type: StaticStyleProperty.type,
+        options: {
+          size: 0
+        }
+      },
+      [VECTOR_STYLES.ICON_SIZE]: {
         type: DynamicStyleProperty.type,
         options: {
+          ...defaultDynamicProperties[VECTOR_STYLES.ICON_SIZE].options,
           field: {
             label: COUNT_PROP_LABEL,
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN
           },
-          minSize: 4,
-          maxSize: 32,
         }
       }
     });
@@ -257,15 +274,15 @@ export class ESGeoGridSource extends AbstractESAggSource {
   createDefaultLayer(options) {
     if (this._descriptor.requestType === RENDER_AS.HEATMAP) {
       return new HeatmapLayer({
-        layerDescriptor: this._createDefaultLayerDescriptor(options),
+        layerDescriptor: this._createHeatmapLayerDescriptor(options),
         source: this
       });
     }
 
-    const layerDescriptor = this._createDefaultLayerDescriptor(options);
+    const layerDescriptor = this._createVectorLayerDescriptor(options);
     const style = new VectorStyle(layerDescriptor.style, this);
     return new VectorLayer({
-      layerDescriptor: layerDescriptor,
+      layerDescriptor,
       source: this,
       style
     });

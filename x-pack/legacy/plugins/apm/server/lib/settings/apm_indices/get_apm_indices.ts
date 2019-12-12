@@ -54,15 +54,25 @@ export function getApmIndicesConfig(config: APMConfig): ApmIndicesConfig {
   };
 }
 
-export async function getApmIndices(context: APMRequestHandlerContext) {
+// export async function getApmIndices(context: APMRequestHandlerContext) {
+//   return _getApmIndices(context.core, context.config);
+// }
+
+export async function getApmIndices({
+  config,
+  savedObjectsClient
+}: {
+  config: APMConfig;
+  savedObjectsClient: SavedObjectsClientContract;
+}) {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(
-      context.core.savedObjects.client
+      savedObjectsClient
     );
-    const apmIndicesConfig = getApmIndicesConfig(context.config);
+    const apmIndicesConfig = getApmIndicesConfig(config);
     return merge({}, apmIndicesConfig, apmIndicesSavedObject);
   } catch (error) {
-    return getApmIndicesConfig(context.config);
+    return getApmIndicesConfig(config);
   }
 }
 

@@ -34,6 +34,8 @@ import { JobSelectorBadge } from '../../../components/job_selector/job_selector_
 import { toLocaleString } from '../../../util/string_utils';
 import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
 
+const MlInMemoryTable = mlInMemoryTableFactory<Group>();
+
 // Used to pass on attribute names to table columns
 export enum AnomalyDetectionListColumns {
   id = 'id',
@@ -194,8 +196,6 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, jobsList, statsBarData
       direction: sortDirection,
     },
   };
-
-  const MlInMemoryTable = mlInMemoryTableFactory<Group>();
 
   return (
     <Fragment>

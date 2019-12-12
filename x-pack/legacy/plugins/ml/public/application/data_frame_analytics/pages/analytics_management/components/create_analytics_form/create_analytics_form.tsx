@@ -36,6 +36,7 @@ import {
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { Messages } from './messages';
 import { JobType } from './job_type';
+import { JobDescriptionInput } from './job_description';
 import { mmlUnitInvalidErrorMessage } from '../../hooks/use_create_analytics_form/reducer';
 
 // based on code used by `ui/index_patterns` internally
@@ -70,6 +71,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
     dependentVariable,
     dependentVariableFetchFail,
     dependentVariableOptions,
+    description,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
@@ -322,6 +324,7 @@ export const CreateAnalyticsForm: FC<CreateAnalyticsFormProps> = ({ actions, sta
               data-test-subj="mlAnalyticsCreateJobFlyoutJobIdInput"
             />
           </EuiFormRow>
+          <JobDescriptionInput description={description} setFormState={setFormState} />
           <EuiFormRow
             label={i18n.translate('xpack.ml.dataframe.analytics.create.sourceIndexLabel', {
               defaultMessage: 'Source index',

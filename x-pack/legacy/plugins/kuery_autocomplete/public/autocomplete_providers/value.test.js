@@ -112,7 +112,7 @@ describe('Kuery value suggestions', function () {
       const spy = jest.spyOn(npStart.plugins.data, 'getSuggestions');
       await getSuggestions({ fieldName, prefix, suffix });
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toBeCalledWith(expect.any(String), expect.any(Object), prefix + suffix, undefined);
+      expect(spy).toBeCalledWith(expect.any(String), expect.any(Object), prefix + suffix, undefined, undefined);
     });
 
     test('should escape quotes in suggestions', async () => {

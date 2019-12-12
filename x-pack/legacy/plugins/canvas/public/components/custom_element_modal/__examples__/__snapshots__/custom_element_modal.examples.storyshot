@@ -93,6 +93,7 @@ Array [
               >
                 <div
                   className="euiFormRow euiFormRow--compressed"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -136,6 +137,7 @@ Array [
                 </div>
                 <div
                   className="euiFormRow"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -170,6 +172,7 @@ Array [
                 </div>
                 <div
                   className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -447,6 +450,7 @@ Array [
               >
                 <div
                   className="euiFormRow euiFormRow--compressed"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -490,6 +494,7 @@ Array [
                 </div>
                 <div
                   className="euiFormRow"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -524,6 +529,7 @@ Array [
                 </div>
                 <div
                   className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -798,6 +804,7 @@ Array [
               >
                 <div
                   className="euiFormRow euiFormRow--compressed"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -841,6 +848,7 @@ Array [
                 </div>
                 <div
                   className="euiFormRow"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -875,6 +883,7 @@ Array [
                 </div>
                 <div
                   className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -1151,6 +1160,7 @@ Array [
               >
                 <div
                   className="euiFormRow euiFormRow--compressed"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -1194,6 +1204,7 @@ Array [
                 </div>
                 <div
                   className="euiFormRow"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"
@@ -1228,6 +1239,7 @@ Array [
                 </div>
                 <div
                   className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                  id="generated-id-row"
                 >
                   <div
                     className="euiFormRow__labelWrapper"

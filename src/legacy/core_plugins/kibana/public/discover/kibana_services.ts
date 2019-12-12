@@ -67,7 +67,6 @@ export { migrateLegacyQuery } from 'ui/utils/migrate_legacy_query';
 // @ts-ignore
 export { RequestAdapter } from 'ui/inspector/adapters';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { FieldList } from 'ui/index_patterns';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 export { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';
@@ -78,11 +77,16 @@ export { tabifyAggResponse } from 'ui/agg_response/tabify';
 // @ts-ignore
 export { vislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 export { ensureDefaultIndexPattern } from 'ui/legacy_compat';
-export { unhashUrl } from 'ui/state_management/state_hashing';
+export { unhashUrl } from '../../../../../plugins/kibana_utils/public';
 
 // EXPORT types
 export { Vis } from 'ui/vis';
-export { IndexPatterns, IndexPattern, FieldType } from 'ui/index_patterns';
+export {
+  IndexPatternsContract,
+  IIndexPattern,
+  IndexPattern,
+  IFieldType,
+} from '../../../../../plugins/data/public';
 export { ElasticSearchHit } from 'ui/registry/doc_views_types';
 export { DocViewRenderProps, DocViewRenderFn } from 'ui/registry/doc_views';
 export { Adapters } from 'ui/inspector/types';

@@ -20,6 +20,7 @@
 import { createFilterTerms } from './terms';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
+import { IBucketAggConfig } from '../_bucket_agg_type';
 import { esFilters } from '../../../../../../plugins/data/public';
 
 jest.mock('ui/new_platform');
@@ -49,7 +50,11 @@ describe('AggConfig Filters', () => {
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
 
-      const filter = createFilterTerms(aggConfigs.aggs[0], 'apache', {}) as esFilters.Filter;
+      const filter = createFilterTerms(
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        'apache',
+        {}
+      ) as esFilters.Filter;
 
       expect(filter).toHaveProperty('query');
       expect(filter.query).toHaveProperty('match_phrase');
@@ -64,27 +69,35 @@ describe('AggConfig Filters', () => {
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
 
-      const filterFalse = createFilterTerms(aggConfigs.aggs[0], '', {}) as esFilters.Filter;
+      const filterFalse = createFilterTerms(
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        '',
+        {}
+      ) as esFilters.Filter;
 
       expect(filterFalse).toHaveProperty('query');
       expect(filterFalse.query).toHaveProperty('match_phrase');
       expect(filterFalse.query.match_phrase).toHaveProperty('field');
       expect(filterFalse.query.match_phrase.field).toBeFalsy();
 
-      const filterTrue = createFilterTerms(aggConfigs.aggs[0], '1', {}) as esFilters.Filter;
+      const filterTrue = createFilterTerms(
+        aggConfigs.aggs[0] as IBucketAggConfig,
+        '1',
+        {}
+      ) as esFilters.Filter;
 
       expect(filterTrue).toHaveProperty('query');
       expect(filterTrue.query).toHaveProperty('match_phrase');
       expect(filterTrue.query.match_phrase).toHaveProperty('field');
       expect(filterTrue.query.match_phrase.field).toBeTruthy();
     });
-    //
+
     it('should generate correct __missing__ filter', () => {
       const aggConfigs = getAggConfigs([
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
       const filter = createFilterTerms(
-        aggConfigs.aggs[0],
+        aggConfigs.aggs[0] as IBucketAggConfig,
         '__missing__',
         {}
       ) as esFilters.ExistsFilter;
@@ -95,13 +108,13 @@ describe('AggConfig Filters', () => {
       expect(filter.meta).toHaveProperty('index', '1234');
       expect(filter.meta).toHaveProperty('negate', true);
     });
-    //
+
     it('should generate correct __other__ filter', () => {
       const aggConfigs = getAggConfigs([
         { type: BUCKET_TYPES.TERMS, schema: 'segment', params: { field: 'field' } },
       ]);
 
-      const [filter] = createFilterTerms(aggConfigs.aggs[0], '__other__', {
+      const [filter] = createFilterTerms(aggConfigs.aggs[0] as IBucketAggConfig, '__other__', {
         terms: ['apache'],
       }) as esFilters.Filter[];
 
