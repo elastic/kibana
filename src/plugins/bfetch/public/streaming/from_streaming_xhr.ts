@@ -20,7 +20,7 @@
 import { Observable, Subject } from 'rxjs';
 
 /**
- * Creates observable from streaming XMLHttpRequest, where each message
+ * Creates observable from streaming XMLHttpRequest, where each event
  * corresponds to a streamed chunk.
  */
 export const fromStreamingXhr = (
