@@ -33,9 +33,8 @@ import { validateRoleMappingForSave } from '../services/role_mapping_validation'
 import { MappingInfoPanel } from './mapping_info_panel';
 
 interface State {
-  isLoadingApp: boolean;
+  loadState: 'loading' | 'permissionDenied' | 'finished';
   roleMapping: RoleMapping | null;
-  permissionDenied: boolean;
   hasCompatibleRealms: boolean;
   canUseStoredScripts: boolean;
   canUseInlineScripts: boolean;
@@ -57,9 +56,8 @@ export class EditRoleMappingPage extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      isLoadingApp: true,
+      loadState: 'loading',
       roleMapping: null,
-      permissionDenied: false,
       hasCompatibleRealms: true,
       canUseStoredScripts: true,
       canUseInlineScripts: true,
@@ -77,13 +75,13 @@ export class EditRoleMappingPage extends Component<Props, State> {
   }
 
   public render() {
-    const { permissionDenied, isLoadingApp } = this.state;
+    const { loadState } = this.state;
 
-    if (permissionDenied) {
+    if (loadState === 'permissionDenied') {
       return <PermissionDenied />;
     }
 
-    if (isLoadingApp) {
+    if (loadState === 'loading') {
       return (
         <EuiPageContent>
           <SectionLoading />
@@ -290,12 +288,13 @@ export class EditRoleMappingPage extends Component<Props, State> {
         hasCompatibleRealms,
       } = features;
 
+      const loadState: State['loadState'] = canManageRoleMappings ? 'finished' : 'permissionDenied';
+
       this.setState({
-        permissionDenied: !canManageRoleMappings,
+        loadState,
         hasCompatibleRealms,
         canUseStoredScripts,
         canUseInlineScripts,
-        isLoadingApp: false,
         roleMapping,
       });
     } catch (e) {

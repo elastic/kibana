@@ -41,11 +41,9 @@ interface Props {
 }
 
 interface State {
-  isLoadingApp: boolean;
-  isLoadingTable: boolean;
+  loadState: 'loadingApp' | 'loadingTable' | 'permissionDenied' | 'finished';
   roleMappings: null | RoleMapping[];
   selectedItems: RoleMapping[];
-  permissionDenied: boolean;
   hasCompatibleRealms: boolean;
   error: any;
 }
@@ -63,10 +61,8 @@ export class RoleMappingsGridPage extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
-      isLoadingApp: true,
-      isLoadingTable: false,
+      loadState: 'loadingApp',
       roleMappings: null,
-      permissionDenied: false,
       hasCompatibleRealms: true,
       selectedItems: [],
       error: undefined,
@@ -78,13 +74,13 @@ export class RoleMappingsGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const { permissionDenied, isLoadingApp, isLoadingTable, error, roleMappings } = this.state;
+    const { loadState, error, roleMappings } = this.state;
 
-    if (permissionDenied) {
+    if (loadState === 'permissionDenied') {
       return <PermissionDenied />;
     }
 
-    if (isLoadingApp) {
+    if (loadState === 'loadingApp') {
       return (
         <EuiPageContent>
           <SectionLoading>
@@ -120,7 +116,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       );
     }
 
-    if (!isLoadingTable && roleMappings && roleMappings.length === 0) {
+    if (loadState === 'finished' && roleMappings && roleMappings.length === 0) {
       return (
         <EuiPageContent>
           <EmptyPrompt />
@@ -174,16 +170,17 @@ export class RoleMappingsGridPage extends Component<Props, State> {
   }
 
   private renderTable = () => {
-    const { roleMappings, selectedItems, isLoadingTable } = this.state;
+    const { roleMappings, selectedItems, loadState } = this.state;
 
-    const message = isLoadingTable ? (
-      <FormattedMessage
-        id="xpack.security.management.roleMappings.roleMappingTableLoadingMessage"
-        defaultMessage="Loading role mappings…"
-      />
-    ) : (
-      undefined
-    );
+    const message =
+      loadState === 'loadingTable' ? (
+        <FormattedMessage
+          id="xpack.security.management.roleMappings.roleMappingTableLoadingMessage"
+          defaultMessage="Loading role mappings…"
+        />
+      ) : (
+        undefined
+      );
 
     const sorting = {
       sort: {
@@ -257,7 +254,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
         sorting={sorting}
         selection={selection}
         pagination={pagination}
-        loading={isLoadingTable}
+        loading={loadState === 'loadingTable'}
         message={message}
         isSelectable={true}
         rowProps={() => {
@@ -436,15 +433,12 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       } = await this.props.roleMappingsAPI.getRoleMappingFeatures();
 
       this.setState({
-        permissionDenied: !canManageRoleMappings,
+        loadState: canManageRoleMappings ? this.state.loadState : 'permissionDenied',
         hasCompatibleRealms,
       });
 
       if (canManageRoleMappings) {
         this.initiallyLoadRoleMappings();
-      } else {
-        // We're done loading and will just show the "Disabled" error.
-        this.setState({ isLoadingApp: false });
       }
     } catch (e) {
       toastNotifications.addDanger(
@@ -457,12 +451,12 @@ export class RoleMappingsGridPage extends Component<Props, State> {
   }
 
   private initiallyLoadRoleMappings = () => {
-    this.setState({ isLoadingApp: true, isLoadingTable: false });
+    this.setState({ loadState: 'loadingApp' });
     this.loadRoleMappings();
   };
 
   private reloadRoleMappings = () => {
-    this.setState({ roleMappings: [], isLoadingApp: false, isLoadingTable: true });
+    this.setState({ roleMappings: [], loadState: 'loadingTable' });
     this.loadRoleMappings();
   };
 
@@ -474,6 +468,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       this.setState({ error: e });
     }
 
-    this.setState({ isLoadingApp: false, isLoadingTable: false });
+    this.setState({ loadState: 'finished' });
   };
 }
