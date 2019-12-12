@@ -7,10 +7,10 @@
 /* eslint-disable no-console */
 /* tslint:disable */
 
-import { readFileSync } from 'fs';
-import path from 'path';
 import expect from '@kbn/expect';
+import { readFileSync } from 'fs';
 import ServerMock from 'mock-http-server';
+import path from 'path';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
@@ -86,6 +86,18 @@ export default function({ getService }: FtrProviderContext) {
 
       const readDataSourceSavedObject = async () => {
         const response = await supertest
+          // I tried changing this to
+          // /api/saved_objects/datasources/yamlpipeline-1.0.0
+          // b/c `datasources` is the name ingest uses but it 404'd
+          // /api/saved_objects/_find?type=datasources
+          // and
+          // /api/ingest/datasources
+          // both show the saved object
+          // I tried adding
+          // datasources: { isNamespaceAgnostic: true, }
+          // to https://github.com/elastic/kibana/blob/ef9bc478cba32eb8722c17d7911cb201941f2adc/x-pack/legacy/plugins/ingest/index.ts#L37
+          // thinking that's what registered it as a type but it didn't work
+          // I didn't do a full restart though, so maybe it does still work
           .get('/api/saved_objects/epm-datasource/yamlpipeline-1.0.0')
           .expect(200);
         return response.body;
