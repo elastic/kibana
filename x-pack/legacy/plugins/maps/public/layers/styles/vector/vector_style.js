@@ -30,6 +30,8 @@ import { StaticColorProperty } from './properties/static_color_property';
 import { DynamicColorProperty } from './properties/dynamic_color_property';
 import { StaticOrientationProperty } from './properties/static_orientation_property';
 import { DynamicOrientationProperty } from './properties/dynamic_orientation_property';
+import { StaticTextProperty } from './properties/static_text_property';
+import { DynamicTextProperty } from './properties/dynamic_text_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -66,6 +68,10 @@ export class VectorStyle extends AbstractStyle {
     this._iconSizeStyleProperty = this._makeSizeProperty(this._descriptor.properties[VECTOR_STYLES.ICON_SIZE], VECTOR_STYLES.ICON_SIZE);
     // eslint-disable-next-line max-len
     this._iconOrientationProperty = this._makeOrientationProperty(this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION], VECTOR_STYLES.ICON_ORIENTATION);
+    this._labelStyleProperty = this._makeLabelProperty(this._descriptor.properties[VECTOR_STYLES.LABEL]);
+    this._labelSizeStyleProperty = this._makeSizeProperty(this._descriptor.properties[VECTOR_STYLES.LABEL_SIZE], VECTOR_STYLES.LABEL_SIZE);
+    // eslint-disable-next-line max-len
+    this._labelColorStyleProperty = this._makeColorProperty(this._descriptor.properties[VECTOR_STYLES.LABEL_COLOR], VECTOR_STYLES.LABEL_COLOR);
   }
 
   _getAllStyleProperties() {
@@ -74,7 +80,10 @@ export class VectorStyle extends AbstractStyle {
       this._fillColorStyleProperty,
       this._lineWidthStyleProperty,
       this._iconSizeStyleProperty,
-      this._iconOrientationProperty
+      this._iconOrientationProperty,
+      this._labelStyleProperty,
+      this._labelSizeStyleProperty,
+      this._labelColorStyleProperty,
     ];
   }
 
@@ -95,16 +104,15 @@ export class VectorStyle extends AbstractStyle {
       return dynamicStyleProp.isFieldMetaEnabled();
     });
 
+    const styleProperties = {};
+    this._getAllStyleProperties().forEach(styleProperty => {
+      styleProperties[styleProperty.getStyleName()] = styleProperty;
+    });
+
     return (
       <VectorStyleEditor
         handlePropertyChange={handlePropertyChange}
-        styleProperties={{
-          lineColor: this._lineColorStyleProperty,
-          fillColor: this._fillColorStyleProperty,
-          lineWidth: this._lineWidthStyleProperty,
-          iconSize: this._iconSizeStyleProperty,
-          iconOrientation: this._iconOrientationProperty,
-        }}
+        styleProperties={styleProperties}
         symbolDescriptor={this._descriptor.properties[VECTOR_STYLES.SYMBOL]}
         layer={layer}
         loadIsPointsOnly={this._getIsPointsOnly}
@@ -597,6 +605,19 @@ export class VectorStyle extends AbstractStyle {
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
       return new DynamicOrientationProperty(descriptor.options, styleName, field);
+    } else {
+      throw new Error(`${descriptor} not implemented`);
+    }
+  }
+
+  _makeLabelProperty(descriptor) {
+    if (!descriptor || !descriptor.options) {
+      return new StaticTextProperty({ value: '' }, VECTOR_STYLES.LABEL);
+    } else if (descriptor.type === StaticStyleProperty.type) {
+      return new StaticTextProperty(descriptor.options, VECTOR_STYLES.LABEL);
+    } else if (descriptor.type === DynamicStyleProperty.type) {
+      const field = this._makeField(descriptor.options.field);
+      return new DynamicTextProperty(descriptor.options, VECTOR_STYLES.LABEL, field);
     } else {
       throw new Error(`${descriptor} not implemented`);
     }

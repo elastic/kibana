@@ -11,6 +11,7 @@ import chrome from 'ui/chrome';
 import { VectorStyleColorEditor } from './color/vector_style_color_editor';
 import { VectorStyleSizeEditor } from './size/vector_style_size_editor';
 import { VectorStyleSymbolEditor } from './vector_style_symbol_editor';
+import { VectorStyleLabelEditor } from './label/vector_style_label_editor';
 import { OrientationEditor } from './orientation/orientation_editor';
 import {
   getDefaultDynamicProperties,
@@ -175,20 +176,64 @@ export class VectorStyleEditor extends Component {
     );
   }
 
+  _renderLabelProperties() {
+    const labelEditor = (
+      <VectorStyleLabelEditor
+        handlePropertyChange={this.props.handlePropertyChange}
+        styleProperty={this.props.styleProperties.label}
+        ordinalFields={this._getOrdinalFields()}
+        defaultStaticStyleOptions={this.state.defaultStaticProperties.label.options}
+        defaultDynamicStyleOptions={this.state.defaultDynamicProperties.label.options}
+      />
+    );
+
+    if (!this.props.styleProperties.label.isComplete()) {
+      return (
+        <Fragment>
+          {labelEditor}
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
+    }
+
+    return (
+      <Fragment>
+        {labelEditor}
+        <EuiSpacer size="m" />
+
+        <VectorStyleColorEditor
+          swatches={DEFAULT_LINE_COLORS}
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.labelColor}
+          ordinalFields={this._getOrdinalFields()}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelColor.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelColor.options}
+        />
+        <EuiSpacer size="m" />
+
+        <VectorStyleSizeEditor
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.labelSize}
+          ordinalFields={this._getOrdinalFields()}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.labelSize.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelSize.options}
+        />
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
+  }
+
   _renderPointProperties() {
     let iconOrientation;
     if (this.props.symbolDescriptor.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
       iconOrientation = (
-        <Fragment>
-          <OrientationEditor
-            handlePropertyChange={this.props.handlePropertyChange}
-            styleProperty={this.props.styleProperties.iconOrientation}
-            ordinalFields={this.state.numberFields}
-            defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
-            defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconOrientation.options}
-          />
-          <EuiSpacer size="m" />
-        </Fragment>
+        <OrientationEditor
+          handlePropertyChange={this.props.handlePropertyChange}
+          styleProperty={this.props.styleProperties.iconOrientation}
+          ordinalFields={this.state.numberFields}
+          defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
+          defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconOrientation.options}
+        />
       );
     }
 
@@ -212,8 +257,12 @@ export class VectorStyleEditor extends Component {
         <EuiSpacer size="m" />
 
         {iconOrientation}
+        <EuiSpacer size="m" />
 
         {this._renderSymbolSize()}
+        <EuiSpacer size="m" />
+
+        {this._renderLabelProperties()}
       </Fragment>
     );
   }

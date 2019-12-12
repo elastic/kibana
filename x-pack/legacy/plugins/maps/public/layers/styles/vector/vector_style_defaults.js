@@ -11,6 +11,7 @@ import {
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS
 } from '../color_utils';
+import chrome from 'ui/chrome';
 
 const DEFAULT_ICON = 'airfield';
 
@@ -24,7 +25,10 @@ export const VECTOR_STYLES = {
   LINE_COLOR: 'lineColor',
   LINE_WIDTH: 'lineWidth',
   ICON_SIZE: 'iconSize',
-  ICON_ORIENTATION: 'iconOrientation'
+  ICON_ORIENTATION: 'iconOrientation',
+  LABEL: 'label',
+  LABEL_COLOR: 'labelColor',
+  LABEL_SIZE: 'labelSize',
 };
 
 export const LINE_STYLES = [VECTOR_STYLES.LINE_COLOR, VECTOR_STYLES.LINE_WIDTH];
@@ -50,6 +54,7 @@ export function getDefaultStaticProperties(mapColors = []) {
   const nextFillColor = DEFAULT_FILL_COLORS[nextColorIndex];
   const nextLineColor = DEFAULT_LINE_COLORS[nextColorIndex];
 
+  const isDarkMode = chrome.getUiSettingsClient().get('theme:darkMode', false);
 
   return {
     [VECTOR_STYLES.FILL_COLOR]: {
@@ -80,6 +85,24 @@ export function getDefaultStaticProperties(mapColors = []) {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
         orientation: 0
+      }
+    },
+    [VECTOR_STYLES.LABEL]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        value: ''
+      }
+    },
+    [VECTOR_STYLES.LABEL_COLOR]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        color: isDarkMode ? '#FFFFFF' : '#000000'
+      }
+    },
+    [VECTOR_STYLES.LABEL_SIZE]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        size: 8
       }
     },
   };
@@ -136,6 +159,35 @@ export function getDefaultDynamicProperties() {
     [VECTOR_STYLES.ICON_ORIENTATION]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
+        field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        }
+      }
+    },
+    [VECTOR_STYLES.LABEL]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        field: undefined,
+      }
+    },
+    [VECTOR_STYLES.LABEL_COLOR]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        color: COLOR_GRADIENTS[0].value,
+        field: undefined,
+        fieldMetaOptions: {
+          isEnabled: true,
+          sigma: DEFAULT_SIGMA,
+        }
+      }
+    },
+    [VECTOR_STYLES.LABEL_SIZE]: {
+      type: VectorStyle.STYLE_TYPE.STATIC,
+      options: {
+        minSize: 4,
+        maxSize: 32,
         field: undefined,
         fieldMetaOptions: {
           isEnabled: true,
