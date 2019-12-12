@@ -74,7 +74,7 @@ export class CapabilitiesService {
     const url = http.anonymousPaths.isAnonymous(window.location.pathname)
       ? '/api/core/capabilities/defaults'
       : '/api/core/capabilities';
-    const capabilities = await http.post(url, {
+    const capabilities = await http.post<Capabilities>(url, {
       body: payload,
     });
     return deepFreeze(capabilities);

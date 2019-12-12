@@ -22,10 +22,7 @@ import { NoLogRateResultsIndexError } from '../../../lib/log_analysis';
 
 const anyObject = schema.object({}, { allowUnknowns: true });
 
-export const initLogAnalysisGetLogEntryRateRoute = ({
-  framework,
-  logAnalysis,
-}: InfraBackendLibs) => {
+export const initGetLogEntryRateRoute = ({ framework, logAnalysis }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',

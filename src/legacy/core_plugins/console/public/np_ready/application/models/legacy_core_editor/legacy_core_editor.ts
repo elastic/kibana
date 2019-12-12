@@ -104,25 +104,12 @@ export class LegacyCoreEditor implements CoreEditor {
     return this.editor.getValue();
   }
 
-  setValue(text: string, forceRetokenize: boolean): Promise<void> {
+  async setValue(text: string, forceRetokenize: boolean): Promise<void> {
     const session = this.editor.getSession();
     session.setValue(text);
-    return new Promise(resolve => {
-      if (!forceRetokenize) {
-        // resolve immediately
-        resolve();
-        return;
-      }
-
-      // force update of tokens, but not on this thread to allow for ace rendering.
-      setTimeout(function() {
-        let i;
-        for (i = 0; i < session.getLength(); i++) {
-          session.getTokens(i);
-        }
-        resolve();
-      });
-    });
+    if (forceRetokenize) {
+      await this.forceRetokenize();
+    }
   }
 
   getLineValue(lineNumber: number): string {
@@ -239,6 +226,20 @@ export class LegacyCoreEditor implements CoreEditor {
   isCompleterActive() {
     // Secrets of the arcane here.
     return Boolean((this.editor as any).completer && (this.editor as any).completer.activated);
+  }
+
+  private forceRetokenize() {
+    const session = this.editor.getSession();
+    return new Promise(resolve => {
+      // force update of tokens, but not on this thread to allow for ace rendering.
+      setTimeout(function() {
+        let i;
+        for (i = 0; i < session.getLength(); i++) {
+          session.getTokens(i);
+        }
+        resolve();
+      });
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/camelcase
