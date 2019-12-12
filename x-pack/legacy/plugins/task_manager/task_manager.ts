@@ -276,7 +276,7 @@ export class TaskManager {
     await this.waitUntilStarted();
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
-      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance),
+      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
     const result = await this.store.schedule(modifiedTask);
     this.attemptToRun();
