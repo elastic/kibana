@@ -10,7 +10,7 @@ import { DataFrameAnalyticsConfig } from '../../../../common';
 
 import { ACTION } from './actions';
 import { reducer, validateAdvancedEditor } from './reducer';
-import { getInitialState } from './state';
+import { getInitialState, JOB_TYPES } from './state';
 
 jest.mock('ui/index_patterns', () => ({
   validateIndexPattern: () => true,
@@ -20,7 +20,7 @@ type SourceIndex = DataFrameAnalyticsConfig['source']['index'];
 
 const getMockState = ({
   index,
-  modelMemoryLimit,
+  modelMemoryLimit = '100mb',
 }: {
   index: SourceIndex;
   modelMemoryLimit?: string;
@@ -51,6 +51,7 @@ describe('useCreateAnalyticsForm', () => {
         destinationIndex: 'the-destination-index',
         jobId: 'the-analytics-job-id',
         sourceIndex: 'the-source-index',
+        jobType: JOB_TYPES.OUTLIER_DETECTION,
       },
     });
     expect(updatedState.isValid).toBe(true);

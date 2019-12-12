@@ -91,15 +91,19 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   private async refreshBadges() {
-    const badges = await this.props.getActions(PANEL_BADGE_TRIGGER, {
+    let badges: IAction[] = await this.props.getActions(PANEL_BADGE_TRIGGER, {
       embeddable: this.props.embeddable,
     });
+    if (!this.mounted) return;
 
-    if (this.mounted) {
-      this.setState({
-        badges,
-      });
+    const { disabledActions } = this.props.embeddable.getInput();
+    if (disabledActions) {
+      badges = badges.filter(badge => disabledActions.indexOf(badge.id) === -1);
     }
+
+    this.setState({
+      badges,
+    });
   }
 
   public UNSAFE_componentWillMount() {
@@ -200,9 +204,14 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   };
 
   private getActionContextMenuPanel = async () => {
-    const actions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
+    let actions = await this.props.getActions(CONTEXT_MENU_TRIGGER, {
       embeddable: this.props.embeddable,
     });
+
+    const { disabledActions } = this.props.embeddable.getInput();
+    if (disabledActions) {
+      actions = actions.filter(action => disabledActions.indexOf(action.id) === -1);
+    }
 
     const createGetUserData = (overlays: OverlayStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {

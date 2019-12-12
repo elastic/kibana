@@ -16,6 +16,7 @@ import { asDuration } from '../../../../../../utils/formatters';
 import { ErrorCountBadge } from '../../ErrorCountBadge';
 import { IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 import { ErrorOverviewLink } from '../../../../../shared/Links/apm/ErrorOverviewLink';
+import { TRACE_ID } from '../../../../../../../common/elasticsearch_fieldnames';
 
 type ItemType = 'transaction' | 'span';
 
@@ -212,7 +213,7 @@ export function WaterfallItem({
             serviceName={item.transaction.service.name}
             query={{
               kuery: encodeURIComponent(
-                `trace.id : "${item.transaction.trace.id}" and transaction.id : "${item.transaction.transaction.id}"`
+                `${TRACE_ID} : "${item.transaction.trace.id}" and transaction.id : "${item.transaction.transaction.id}"`
               )
             }}
             color="danger"

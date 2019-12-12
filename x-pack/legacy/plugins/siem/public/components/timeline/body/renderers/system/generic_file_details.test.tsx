@@ -20,15 +20,13 @@ describe('SystemGenericFileDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
       const browserFields: BrowserFields = {};
       const wrapper = shallow(
-        <TestProviders>
-          <SystemGenericFileDetails
-            contextId="[contextid-123]"
-            text="[generic-text-123]"
-            browserFields={browserFields}
-            data={mockTimelineData[29].ecs}
-            timelineId="test"
-          />
-        </TestProviders>
+        <SystemGenericFileDetails
+          contextId="[contextid-123]"
+          text="[generic-text-123]"
+          browserFields={browserFields}
+          data={mockTimelineData[29].ecs}
+          timelineId="test"
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

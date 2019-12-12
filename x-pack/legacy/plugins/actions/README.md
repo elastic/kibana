@@ -272,7 +272,7 @@ This action type interfaces with the [Slack Incoming Webhooks feature](https://a
 
 ## index, action id: `.index`
 
-The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elastic-stack-overview/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
+The config and params properties are modelled after the [Watcher Index Action](https://www.elastic.co/guide/en/elasticsearch/reference/master/actions-index.html).  The index can be set in the config or params, and if set in config, then the index set in the params will be ignored.
 
 #### config properties
 

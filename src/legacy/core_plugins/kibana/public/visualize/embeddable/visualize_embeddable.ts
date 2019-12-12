@@ -22,7 +22,7 @@ import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { SavedObject } from 'ui/saved_objects/saved_object';
+import { SavedObject } from 'ui/saved_objects/types';
 import { Vis } from 'ui/vis';
 import { queryGeohashBounds } from 'ui/visualize/loader/utils';
 import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
@@ -375,6 +375,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.handler) {
       this.handler.update(this.expression, expressionParams);
     }
+
+    this.vis.emit('apply');
   }
 
   private handleVisUpdate = async () => {

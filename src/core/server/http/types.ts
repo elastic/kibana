@@ -24,6 +24,7 @@ import { SessionStorageFactory } from './session_storage';
 import { AuthenticationHandler } from './lifecycle/auth';
 import { OnPreAuthHandler } from './lifecycle/on_pre_auth';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
+import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { IBasePath } from './base_path_service';
 import { PluginOpaqueId, RequestHandlerContext } from '..';
 
@@ -162,6 +163,18 @@ export interface HttpServiceSetup {
    * @param handler {@link OnPostAuthHandler} - function to call.
    */
   registerOnPostAuth: (handler: OnPostAuthHandler) => void;
+
+  /**
+   * To define custom logic to perform for the server response.
+   *
+   * @remarks
+   * Doesn't provide the whole response object.
+   * Supports extending response with custom headers.
+   * See {@link OnPreResponseHandler}.
+   *
+   * @param handler {@link OnPreResponseHandler} - function to call.
+   */
+  registerOnPreResponse: (handler: OnPreResponseHandler) => void;
 
   /**
    * Access or manipulate the Kibana base path

@@ -18,7 +18,7 @@
  */
 
 // /// Define plugin function
-import { DataPlugin as Plugin, DataSetup, DataStart } from './plugin';
+import { DataPlugin as Plugin, DataStart } from './plugin';
 
 export function plugin() {
   return new Plugin();
@@ -27,15 +27,9 @@ export function plugin() {
 // /// Export types & static code
 
 /** @public types */
-export { DataSetup, DataStart };
+export { DataStart };
 
-export {
-  Field,
-  FieldType,
-  FieldListInterface,
-  IndexPattern,
-  IndexPatterns,
-} from './index_patterns';
+export { Field, FieldType, IFieldList, IndexPattern } from './index_patterns';
 export { SearchBar, SearchBarProps } from './search';
 export {
   SavedQueryAttributes,

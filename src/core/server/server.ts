@@ -33,6 +33,7 @@ import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
 import { config as devConfig } from './dev';
+import { config as pathConfig } from './path';
 import { config as kibanaConfig } from './kibana_config';
 import { config as savedObjectsConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
@@ -208,6 +209,7 @@ export class Server {
 
   public async setupConfigSchemas() {
     const schemas: Array<[ConfigPath, Type<unknown>]> = [
+      [pathConfig.path, pathConfig.schema],
       [elasticsearchConfig.path, elasticsearchConfig.schema],
       [loggingConfig.path, loggingConfig.schema],
       [httpConfig.path, httpConfig.schema],

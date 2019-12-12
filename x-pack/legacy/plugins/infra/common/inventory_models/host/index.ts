@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
 import { InventoryModel } from '../types';
 import {
@@ -13,7 +14,21 @@ import {
 
 export const host: InventoryModel = {
   id: 'host',
+  displayName: i18n.translate('xpack.infra.inventoryModel.host.displayName', {
+    defaultMessage: 'Hosts',
+  }),
   requiredModules: ['system'],
+  crosslinkSupport: {
+    details: true,
+    logs: true,
+    apm: true,
+    uptime: true,
+  },
+  fields: {
+    id: 'host.name',
+    name: 'host.name',
+    ip: 'host.ip',
+  },
   metrics,
   requiredMetrics: [
     'hostSystemOverview',

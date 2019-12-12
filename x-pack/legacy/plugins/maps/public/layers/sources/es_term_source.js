@@ -103,9 +103,13 @@ export class ESTermSource extends AbstractESAggSource {
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
 
-    const requestName = `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`;
-    const requestDesc = this._getRequestDescription(leftSourceName, leftFieldName);
-    const rawEsData = await this._runEsQuery(requestName, searchSource, registerCancelCallback, requestDesc);
+    const rawEsData = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: `${this._descriptor.indexPatternTitle}.${this._termField.getName()}`,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: this._getRequestDescription(leftSourceName, leftFieldName),
+    });
 
     const metricPropertyNames = configStates
       .filter(configState => {

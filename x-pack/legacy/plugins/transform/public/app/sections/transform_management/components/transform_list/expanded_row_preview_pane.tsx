@@ -22,6 +22,8 @@ import { ES_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/p
 import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/utils/date_utils';
 import { transformTableFactory } from './transform_table';
 
+const TransformTable = transformTableFactory<EsDoc>();
+
 interface Props {
   transformConfig: TransformPivotConfig;
 }
@@ -196,8 +198,6 @@ export const ExpandedRowPreviewPane: FC<Props> = ({ transformConfig }) => {
 
   const transformTableLoading = previewData.length === 0 && isLoading === true;
   const dataTestSubj = `transformPreviewTabContent${!transformTableLoading ? ' loaded' : ''}`;
-
-  const TransformTable = transformTableFactory<EsDoc>();
 
   return (
     <div data-test-subj={dataTestSubj}>

@@ -19,12 +19,12 @@
 
 import { join } from 'path';
 
-import { pkg } from '../legacy/utils';
+import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
-import { getData } from '../legacy/server/path';
+import { getDataPath } from '../core/server/path';
 import { Keystore } from '../legacy/server/keystore';
 
-const path = join(getData(), 'kibana.keystore');
+const path = join(getDataPath(), 'kibana.keystore');
 const keystore = new Keystore(path);
 
 import { createCli } from './create';

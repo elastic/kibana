@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraWrappableRequest } from '../../lib/adapters/framework';
-
 export interface InfraTimerange {
   field: string;
   from: number;
@@ -27,7 +25,7 @@ export interface MetricsExplorerMetric {
   field?: string | undefined;
 }
 
-export interface MetricsExplorerRequest {
+export interface MetricsExplorerRequestBody {
   timerange: InfraTimerange;
   indexPattern: string;
   metrics: MetricsExplorerMetric[];
@@ -36,8 +34,6 @@ export interface MetricsExplorerRequest {
   limit?: number;
   filterQuery?: string;
 }
-
-export type MetricsExplorerWrappedRequest = InfraWrappableRequest<MetricsExplorerRequest>;
 
 export interface MetricsExplorerPageInfo {
   total: number;

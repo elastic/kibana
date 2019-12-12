@@ -3,16 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MachineLearningAPIProvider } from './api';
+import { MlApi } from './api';
 
 import { JOB_STATE, DATAFEED_STATE } from '../../../../legacy/plugins/ml/common/constants/states';
 
 export function MachineLearningJobManagementProvider(
   { getService }: FtrProviderContext,
-  mlApi: ProvidedType<typeof MachineLearningAPIProvider>
+  mlApi: MlApi
 ) {
   const testSubjects = getService('testSubjects');
 

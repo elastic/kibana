@@ -12,6 +12,7 @@ import { SavedObjectAttributes } from 'src/core/server';
 
 export const useCreateSavedObject = (type: string) => {
   const [data, setData] = useState<SimpleSavedObject<SavedObjectAttributes> | null>(null);
+  const [createdId, setCreatedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -21,6 +22,7 @@ export const useCreateSavedObject = (type: string) => {
       const save = async () => {
         try {
           const d = await npStart.core.savedObjects.client.create(type, attributes, options);
+          setCreatedId(d.id);
           setError(null);
           setData(d);
           setLoading(false);
@@ -39,5 +41,6 @@ export const useCreateSavedObject = (type: string) => {
     loading,
     error,
     create,
+    createdId,
   };
 };

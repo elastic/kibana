@@ -119,7 +119,7 @@ export function initDashboardApp(app, deps) {
         },
         resolve: {
           dash: function ($rootScope, $route, redirectWhenMissing, kbnUrl) {
-            return ensureDefaultIndexPattern(deps.core, deps.dataStart, $rootScope, kbnUrl).then(() => {
+            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl).then(() => {
               const savedObjectsClient = deps.savedObjectsClient;
               const title = $route.current.params.title;
               if (title) {
@@ -154,7 +154,7 @@ export function initDashboardApp(app, deps) {
         requireUICapability: 'dashboard.createNew',
         resolve: {
           dash: function (redirectWhenMissing, $rootScope, kbnUrl) {
-            return ensureDefaultIndexPattern(deps.core, deps.dataStart, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl)
               .then(() => {
                 return deps.savedDashboards.get();
               })
@@ -174,7 +174,7 @@ export function initDashboardApp(app, deps) {
           dash: function ($rootScope, $route, redirectWhenMissing, kbnUrl, AppState) {
             const id = $route.current.params.id;
 
-            return ensureDefaultIndexPattern(deps.core, deps.dataStart, $rootScope, kbnUrl)
+            return ensureDefaultIndexPattern(deps.core, deps.npDataStart, $rootScope, kbnUrl)
               .then(() => {
                 return deps.savedDashboards.get(id);
               })

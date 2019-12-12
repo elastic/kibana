@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GenericParams } from 'elasticsearch';
 import * as GraphiQL from 'apollo-server-module-graphiql';
-import Boom from 'boom';
-import { ResponseToolkit } from 'hapi';
-import { EnvironmentMode } from 'kibana/public';
 import { GraphQLSchema } from 'graphql';
 import { runHttpQuery } from 'apollo-server-core';
-import { ServerFacade, RequestFacade } from '../../types';
+import { schema as configSchema } from '@kbn/config-schema';
+import {
+  CoreSetup,
+  IRouter,
+  KibanaResponseFactory,
+  RequestHandlerContext,
+  PluginInitializerContext,
+} from 'src/core/server';
+import { IndexPatternsFetcher } from '../../../../../../../src/plugins/data/server';
+import { RequestFacade } from '../../types';
 
 import {
   FrameworkAdapter,
@@ -21,125 +26,119 @@ import {
   WrappableRequest,
 } from './types';
 
-interface CallWithRequestParams extends GenericParams {
-  max_concurrent_shard_requests?: number;
-}
-
 export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
   public version: string;
-  public envMode: EnvironmentMode;
+  private isProductionMode: boolean;
+  private router: IRouter;
 
-  constructor(private server: ServerFacade, mode: EnvironmentMode) {
-    this.version = server.config().get('pkg.version');
-    this.envMode = mode;
+  constructor(core: CoreSetup, env: PluginInitializerContext['env']) {
+    this.version = env.packageInfo.version;
+    this.isProductionMode = env.mode.prod;
+    this.router = core.http.createRouter();
   }
 
   public async callWithRequest(
     req: FrameworkRequest,
     endpoint: string,
-    params: CallWithRequestParams,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...rest: any[]
+    params: Record<string, any>
   ) {
-    const internalRequest = req[internalFrameworkRequest];
-    const { elasticsearch } = internalRequest.server.plugins;
-    const { callWithRequest } = elasticsearch.getCluster('data');
-    const includeFrozen = await internalRequest.getUiSettingsService().get('search:includeFrozen');
+    const { elasticsearch, uiSettings } = req.context.core;
+    const includeFrozen = await uiSettings.client.get('search:includeFrozen');
     const maxConcurrentShardRequests =
       endpoint === 'msearch'
-        ? await internalRequest.getUiSettingsService().get('courier:maxConcurrentShardRequests')
+        ? await uiSettings.client.get('courier:maxConcurrentShardRequests')
         : 0;
-    const fields = await callWithRequest(
-      internalRequest,
-      endpoint,
-      {
-        ...params,
-        ignore_throttled: !includeFrozen,
-        ...(maxConcurrentShardRequests > 0
-          ? { max_concurrent_shard_requests: maxConcurrentShardRequests }
-          : {}),
-      },
-      ...rest
-    );
-    return fields;
-  }
 
-  public exposeStaticDir(urlPath: string, dir: string): void {
-    this.server.route({
-      handler: {
-        directory: {
-          path: dir,
-        },
-      },
-      method: 'GET',
-      path: urlPath,
+    return elasticsearch.dataClient.callAsCurrentUser(endpoint, {
+      ...params,
+      ignore_throttled: !includeFrozen,
+      ...(maxConcurrentShardRequests > 0
+        ? { max_concurrent_shard_requests: maxConcurrentShardRequests }
+        : {}),
     });
   }
 
   public registerGraphQLEndpoint(routePath: string, schema: GraphQLSchema): void {
-    this.server.route({
-      options: {
-        tags: ['access:siem'],
-      },
-      handler: async (request: RequestFacade, h: ResponseToolkit) => {
-        try {
-          const query =
-            request.method === 'post'
-              ? (request.payload as Record<string, any>) // eslint-disable-line @typescript-eslint/no-explicit-any
-              : (request.query as Record<string, any>); // eslint-disable-line @typescript-eslint/no-explicit-any
-
-          const gqlResponse = await runHttpQuery([request], {
-            method: request.method.toUpperCase(),
-            options: (req: RequestFacade) => ({
-              context: { req: wrapRequest(req) },
-              schema,
-            }),
-
-            query,
-          });
-
-          return h.response(gqlResponse).type('application/json');
-        } catch (error) {
-          if ('HttpQueryError' !== error.name) {
-            const queryError = Boom.boomify(error);
-
-            queryError.output.payload.message = error.message;
-
-            return queryError;
-          }
-
-          if (error.isGraphQLError === true) {
-            return h
-              .response(error.message)
-              .code(error.statusCode)
-              .type('application/json');
-          }
-
-          const genericError = new Boom(error.message, { statusCode: error.statusCode });
-
-          if (error.headers) {
-            Object.keys(error.headers).forEach(header => {
-              genericError.output.headers[header] = error.headers[header];
-            });
-          }
-
-          // Boom hides the error when status code is 500
-          genericError.output.payload.message = error.message;
-
-          throw genericError;
-        }
-      },
-      method: ['GET', 'POST'],
-      path: routePath,
-      vhost: undefined,
-    });
-
-    if (!this.envMode.prod) {
-      this.server.route({
+    this.router.post(
+      {
+        path: routePath,
+        validate: {
+          body: configSchema.object({
+            operationName: configSchema.string(),
+            query: configSchema.string(),
+            variables: configSchema.object({}, { allowUnknowns: true }),
+          }),
+        },
         options: {
           tags: ['access:siem'],
         },
-        handler: async (request: RequestFacade, h: ResponseToolkit) => {
+      },
+      async (context, request, response) => {
+        try {
+          const gqlResponse = await runHttpQuery([request], {
+            method: 'POST',
+            options: (req: RequestFacade) => ({
+              context: { req: wrapRequest(req, context) },
+              schema,
+            }),
+            query: request.body,
+          });
+
+          return response.ok({
+            body: gqlResponse,
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
+        } catch (error) {
+          return this.handleError(error, response);
+        }
+      }
+    );
+
+    if (!this.isProductionMode) {
+      this.router.get(
+        {
+          path: routePath,
+          validate: { query: configSchema.object({}, { allowUnknowns: true }) },
+          options: {
+            tags: ['access:siem'],
+          },
+        },
+        async (context, request, response) => {
+          try {
+            const { query } = request;
+            const gqlResponse = await runHttpQuery([request], {
+              method: 'GET',
+              options: (req: RequestFacade) => ({
+                context: { req: wrapRequest(req, context) },
+                schema,
+              }),
+              query,
+            });
+
+            return response.ok({
+              body: gqlResponse,
+              headers: {
+                'content-type': 'application/json',
+              },
+            });
+          } catch (error) {
+            return this.handleError(error, response);
+          }
+        }
+      );
+
+      this.router.get(
+        {
+          path: `${routePath}/graphiql`,
+          validate: false,
+          options: {
+            tags: ['access:siem'],
+          },
+        },
+        async (context, request, response) => {
           const graphiqlString = await GraphiQL.resolveGraphiQLString(
             request.query,
             {
@@ -149,42 +148,60 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
             request
           );
 
-          return h.response(graphiqlString).type('text/html');
-        },
-        method: 'GET',
-        path: `${routePath}/graphiql`,
-      });
+          return response.ok({
+            body: graphiqlString,
+            headers: {
+              'content-type': 'text/html',
+            },
+          });
+        }
+      );
     }
   }
 
-  public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
-    return this.server.indexPatternsServiceFactory({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
-        const fieldCaps = await this.callWithRequest(
-          request,
-          method,
-          { ...args, allowNoIndices: true } as GenericParams,
-          ...rest
-        );
-        return fieldCaps;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleError(error: any, response: KibanaResponseFactory) {
+    if (error.name !== 'HttpQueryError') {
+      return response.internalError({
+        body: error.message,
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
+    }
+
+    return response.customError({
+      statusCode: error.statusCode,
+      body: error.message,
+      headers: {
+        'content-type': 'application/json',
+        ...error.headers,
       },
     });
   }
 
-  public getSavedObjectsService() {
-    return this.server.savedObjects;
+  public getIndexPatternsService(request: FrameworkRequest): FrameworkIndexPatternsService {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const callCluster = async (endpoint: string, params?: Record<string, any>) =>
+      this.callWithRequest(request, endpoint, {
+        ...params,
+        allowNoIndices: true,
+      });
+
+    return new IndexPatternsFetcher(callCluster);
   }
 }
 
 export function wrapRequest<InternalRequest extends WrappableRequest>(
-  req: InternalRequest
+  req: InternalRequest,
+  context: RequestHandlerContext
 ): FrameworkRequest<InternalRequest> {
   const { auth, params, payload, query } = req;
 
   return {
     [internalFrameworkRequest]: req,
     auth,
+    context,
     params,
     payload,
     query,

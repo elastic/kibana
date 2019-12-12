@@ -329,7 +329,7 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        const buffer = new Buffer('abc');
+        const buffer = Buffer.from('abc');
 
         return res.ok({
           body: buffer,

@@ -43,7 +43,7 @@ function NoDataMessage(props) {
 
 export function NoData(props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [useInternalCollection, setUseInternalCollection] = useState(props.isOnCloud);
+  const [useInternalCollection, setUseInternalCollection] = useState(props.isCloudEnabled);
 
   async function startSetup() {
     setIsLoading(true);
@@ -64,7 +64,7 @@ export function NoData(props) {
             <EuiSpacer size="m" />
             <NoDataMessage {...props} />
             <CheckerErrors errors={props.errors} />
-            { !props.isOnCloud ? (
+            { !props.isCloudEnabled ? (
               <Fragment>
                 <EuiHorizontalRule size="half" />
                 <EuiButtonEmpty isDisabled={props.isCollectionEnabledUpdated} onClick={() => setUseInternalCollection(false)}>

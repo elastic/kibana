@@ -20,8 +20,12 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
+import { RecursiveReadonly } from 'kibana/public';
 import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
 import { LoggerFactory } from '../logging';
+import { KibanaConfigType } from '../kibana_config';
+import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
+import { PathConfigType } from '../path';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -195,6 +199,22 @@ export interface Plugin<
   stop?(): void;
 }
 
+export const SharedGlobalConfigKeys = {
+  // We can add more if really needed
+  kibana: ['defaultAppId', 'index'] as const,
+  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
+  path: ['data'] as const,
+};
+
+/**
+ * @public
+ */
+export type SharedGlobalConfig = RecursiveReadonly<{
+  kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
+  elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
+  path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+}>;
+
 /**
  * Context that's available to plugins during initialization stage.
  *
@@ -208,6 +228,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   };
   logger: LoggerFactory;
   config: {
+    legacy: { globalConfig$: Observable<SharedGlobalConfig> };
     create: <T = ConfigSchema>() => Observable<T>;
     createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };

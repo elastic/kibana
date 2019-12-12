@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import remove from './remove';
 import Logger from '../lib/logger';
 import { parse } from './settings';
-import { getConfig } from '../../legacy/server/path';
+import { getConfigPath } from '../../core/server/path';
 import logWarnings from '../lib/log_warnings';
 import { warnIfUsingPluginDirOption } from '../lib/warn_if_plugin_dir_option';
 
@@ -50,7 +50,7 @@ export default function pluginRemove(program) {
     .option(
       '-c, --config <path>',
       'path to the config file',
-      getConfig()
+      getConfigPath()
     )
     .option(
       '-d, --plugin-dir <path>',

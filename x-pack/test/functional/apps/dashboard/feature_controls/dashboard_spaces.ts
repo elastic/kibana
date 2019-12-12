@@ -9,12 +9,11 @@ import {
   createDashboardEditUrl,
   DashboardConstants,
 } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
-import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');

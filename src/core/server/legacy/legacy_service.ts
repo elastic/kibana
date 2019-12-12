@@ -31,6 +31,7 @@ import { Logger } from '../logging';
 import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
+import { PathConfigType } from '../path';
 import { LegacyConfig } from './config';
 
 interface LegacyKbnServer {
@@ -40,7 +41,7 @@ interface LegacyKbnServer {
   close: () => Promise<void>;
 }
 
-function getLegacyRawConfig(config: Config) {
+function getLegacyRawConfig(config: Config, pathConfig: PathConfigType) {
   const rawConfig = config.toRaw();
 
   // Elasticsearch config is solely handled by the core and legacy platform
@@ -49,7 +50,10 @@ function getLegacyRawConfig(config: Config) {
     delete rawConfig.elasticsearch;
   }
 
-  return rawConfig;
+  return {
+    ...rawConfig,
+    path: pathConfig, // We rely heavily in the default value of 'path.data' in the legacy world and, since it has been moved to NP, it won't show up in RawConfig
+  };
 }
 
 /**
@@ -96,7 +100,7 @@ export class LegacyService implements CoreService {
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
   private setupDeps?: LegacyServiceSetupDeps;
-  private update$: ConnectableObservable<Config> | undefined;
+  private update$: ConnectableObservable<[Config, PathConfigType]> | undefined;
   private legacyRawConfig: LegacyConfig | undefined;
   private legacyPlugins:
     | {
@@ -118,22 +122,25 @@ export class LegacyService implements CoreService {
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
-    this.update$ = this.coreContext.configService.getConfig$().pipe(
-      tap(config => {
+    this.update$ = combineLatest(
+      this.coreContext.configService.getConfig$(),
+      this.coreContext.configService.atPath<PathConfigType>('path')
+    ).pipe(
+      tap(([config, pathConfig]) => {
         if (this.kbnServer !== undefined) {
-          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config));
+          this.kbnServer.applyLoggingConfiguration(getLegacyRawConfig(config, pathConfig));
         }
       }),
       tap({ error: err => this.log.error(err) }),
       publishReplay(1)
-    ) as ConnectableObservable<Config>;
+    ) as ConnectableObservable<[Config, PathConfigType]>;
 
     this.configSubscription = this.update$.connect();
 
     this.settings = await this.update$
       .pipe(
         first(),
-        map(config => getLegacyRawConfig(config))
+        map(([config, pathConfig]) => getLegacyRawConfig(config, pathConfig))
       )
       .toPromise();
 
@@ -263,6 +270,7 @@ export class LegacyService implements CoreService {
         registerOnPreAuth: setupDeps.core.http.registerOnPreAuth,
         registerAuth: setupDeps.core.http.registerAuth,
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
+        registerOnPreResponse: setupDeps.core.http.registerOnPreResponse,
         basePath: setupDeps.core.http.basePath,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },

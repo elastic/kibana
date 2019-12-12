@@ -1,33 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Table Helpers #getRowItemDraggable it returns correctly against snapshot 1`] = `
-<Component>
-  <Connect(DraggableWrapperComponent)
-    dataProvider={
-      Object {
-        "and": Array [],
-        "enabled": true,
-        "excluded": false,
-        "id": "idPrefix-attrName-item1",
-        "kqlQuery": "",
-        "name": "item1",
-        "queryMatch": Object {
-          "displayValue": "item1",
-          "field": "attrName",
-          "operator": ":",
-          "value": "item1",
-        },
-      }
+<DraggableWrapper
+  dataProvider={
+    Object {
+      "and": Array [],
+      "enabled": true,
+      "excluded": false,
+      "id": "idPrefix-attrName-item1",
+      "kqlQuery": "",
+      "name": "item1",
+      "queryMatch": Object {
+        "displayValue": "item1",
+        "field": "attrName",
+        "operator": ":",
+        "value": "item1",
+      },
     }
-    key="idPrefix-attrName-item1"
-    render={[Function]}
-  />
-</Component>
+  }
+  key="idPrefix-attrName-item1"
+  render={[Function]}
+/>
 `;
 
 exports[`Table Helpers #getRowItemDraggables it returns correctly against snapshot 1`] = `
-<Component>
-  <Connect(DraggableWrapperComponent)
+<DragDropContext
+  onDragEnd={[MockFunction]}
+>
+  <DraggableWrapper
     dataProvider={
       Object {
         "and": Array [],
@@ -49,7 +49,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
   />
   ,
   <Spacer />
-  <Connect(DraggableWrapperComponent)
+  <DraggableWrapper
     dataProvider={
       Object {
         "and": Array [],
@@ -71,7 +71,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
   />
   ,
   <Spacer />
-  <Connect(DraggableWrapperComponent)
+  <DraggableWrapper
     dataProvider={
       Object {
         "and": Array [],
@@ -92,7 +92,7 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
     render={[Function]}
   />
    
-</Component>
+</DragDropContext>
 `;
 
 exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot 1`] = `

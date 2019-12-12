@@ -6,7 +6,6 @@
 
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { FlowDirection, FlowTarget } from '../../graphql/types';
@@ -58,7 +57,7 @@ const onChangeTarget = (
 
 export type FlowTargetSelectProps = OwnProps;
 
-export const FlowTargetSelect = pure<FlowTargetSelectProps>(
+export const FlowTargetSelect = React.memo<FlowTargetSelectProps>(
   ({
     id,
     isLoading = false,

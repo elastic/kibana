@@ -126,7 +126,8 @@ describe('canSkipSourceUpdate', () => {
           applyGlobalQuery: prevApplyGlobalQuery,
           filters: prevFilters,
           query: prevQuery,
-        }
+        },
+        data: {}
       });
 
       it('can skip update when filter changes', async () => {
@@ -210,7 +211,8 @@ describe('canSkipSourceUpdate', () => {
           applyGlobalQuery: prevApplyGlobalQuery,
           filters: prevFilters,
           query: prevQuery,
-        }
+        },
+        data: {}
       });
 
       it('can not skip update when filter changes', async () => {

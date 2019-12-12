@@ -46,7 +46,7 @@ describe('PointToolTipContent', () => {
         />
       </TestProviders>
     );
-    expect(toJson(wrapper)).toMatchSnapshot();
+    expect(toJson(wrapper.find('PointToolTipContentComponent'))).toMatchSnapshot();
   });
 
   test('renders array filter correctly', () => {

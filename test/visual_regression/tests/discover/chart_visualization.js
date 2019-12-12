@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const visualTesting = getService('visualTesting');
-  const find = getService('find');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:sampleSize': 1
@@ -54,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
       it('should show bars in the correct time zone', async function () {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await find.byCssSelector(`.echChart[data-ech-render-count="${++renderCounter}"]`);
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -64,7 +63,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Hourly');
-        await find.byCssSelector(`.echChart[data-ech-render-count="${++renderCounter}"]`);
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -74,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Daily');
-        await find.byCssSelector(`.echChart[data-ech-render-count="${++renderCounter}"]`);
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -84,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Weekly');
-        await find.byCssSelector(`.echChart[data-ech-render-count="${++renderCounter}"]`);
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -98,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
         });
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await find.byCssSelector(`.echChart[data-ech-render-count="${++renderCounter}"]`);
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -108,7 +107,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Monthly');
-        await find.byCssSelector(`.echChart[data-ech-render-count="${++renderCounter}"]`);
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -118,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Yearly');
-        await find.byCssSelector(`.echChart[data-ech-render-count="${++renderCounter}"]`);
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -128,7 +127,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.discover.setChartInterval('Auto');
-        await find.byCssSelector(`.echChart[data-ech-render-count="${++renderCounter}"]`);
+        await PageObjects.discover.waitForChartLoadingComplete(++renderCounter);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });
@@ -143,6 +142,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForChartLoadingComplete(1);
         await visualTesting.snapshot({
           show: ['discoverChart'],
         });

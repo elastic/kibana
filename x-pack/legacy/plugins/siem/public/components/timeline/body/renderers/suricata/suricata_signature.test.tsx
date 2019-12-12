@@ -34,8 +34,8 @@ describe('SuricataSignature', () => {
 
   describe('Tokens', () => {
     test('should render empty if tokens are empty', () => {
-      const wrapper = mountWithIntl(<Tokens tokens={[]} />);
-      expect(wrapper.isEmptyRender()).toBeTruthy();
+      const wrapper = shallow(<Tokens tokens={[]} />);
+      expect(wrapper.children().length).toEqual(0);
     });
 
     test('should render a single if it is present', () => {

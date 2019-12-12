@@ -28,10 +28,6 @@ export function buildNodeParams(path, child) {
 }
 
 export function toElasticsearchQuery(node, indexPattern, config, context = {}) {
-  if (!indexPattern) {
-    throw new Error('Cannot use nested queries without an index pattern');
-  }
-
   const [path, child] = node.arguments;
   const stringPath = ast.toElasticsearchQuery(path);
   const fullPath = context.nested && context.nested.path ? `${context.nested.path}.${stringPath}` : stringPath;

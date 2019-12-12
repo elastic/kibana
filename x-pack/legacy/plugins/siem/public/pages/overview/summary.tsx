@@ -7,10 +7,9 @@
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { pure } from 'recompose';
 import { documentationLinks } from 'ui/documentation_links';
 
-export const Summary = pure(() => (
+export const Summary = React.memo(() => (
   <EuiFlexItem>
     <EuiText>
       <h2>

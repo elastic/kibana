@@ -515,16 +515,19 @@ describe('Authenticator', () => {
       expect(mockSessionStorage.clear).not.toHaveBeenCalled();
     });
 
-    it('only updates the session lifespan expiration if it does not match the current server config.', async () => {
-      const user = mockAuthenticatedUser();
-      const request = httpServerMock.createKibanaRequest();
+    describe('conditionally updates the session lifespan expiration', () => {
       const hr = 1000 * 60 * 60;
+      const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
 
       async function createAndUpdateSession(
         lifespan: number | null,
         oldExpiration: number | null,
         newExpiration: number | null
       ) {
+        const user = mockAuthenticatedUser();
+        const request = httpServerMock.createKibanaRequest();
+        jest.spyOn(Date, 'now').mockImplementation(() => currentDate);
+
         mockOptions = getMockOptions({
           session: {
             idleTimeout: null,
@@ -536,7 +539,7 @@ describe('Authenticator', () => {
         mockSessionStorage = sessionStorageMock.create();
         mockSessionStorage.get.mockResolvedValue({
           ...mockSessVal,
-          idleTimeoutExpiration: 1,
+          idleTimeoutExpiration: null,
           lifespanExpiration: oldExpiration,
         });
         mockOptions.sessionStorageFactory.asScoped.mockReturnValue(mockSessionStorage);
@@ -554,17 +557,24 @@ describe('Authenticator', () => {
         expect(mockSessionStorage.set).toHaveBeenCalledTimes(1);
         expect(mockSessionStorage.set).toHaveBeenCalledWith({
           ...mockSessVal,
-          idleTimeoutExpiration: 1,
+          idleTimeoutExpiration: null,
           lifespanExpiration: newExpiration,
         });
         expect(mockSessionStorage.clear).not.toHaveBeenCalled();
       }
-      // do not change max expiration
-      createAndUpdateSession(hr * 8, 1234, 1234);
-      createAndUpdateSession(null, null, null);
-      // change max expiration
-      createAndUpdateSession(null, 1234, null);
-      createAndUpdateSession(hr * 8, null, hr * 8);
+
+      it('does not change a non-null lifespan expiration when configured to non-null value.', async () => {
+        await createAndUpdateSession(hr * 8, 1234, 1234);
+      });
+      it('does not change a null lifespan expiration when configured to null value.', async () => {
+        await createAndUpdateSession(null, null, null);
+      });
+      it('does change a non-null lifespan expiration when configured to null value.', async () => {
+        await createAndUpdateSession(null, 1234, null);
+      });
+      it('does change a null lifespan expiration when configured to non-null value', async () => {
+        await createAndUpdateSession(hr * 8, null, currentDate + hr * 8);
+      });
     });
 
     it('does not touch session for system API calls if authentication fails with non-401 reason.', async () => {

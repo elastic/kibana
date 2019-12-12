@@ -75,7 +75,7 @@ describe('telemetry_usage_collector', () => {
     // empty
     writeFileSync(tempFiles.empty, '');
     // 1 byte too big
-    writeFileSync(tempFiles.too_big, new Buffer(MAX_FILE_SIZE + 1));
+    writeFileSync(tempFiles.too_big, Buffer.alloc(MAX_FILE_SIZE + 1));
     // write-only file
     writeFileSync(tempFiles.unreadable, 'valid: true', { mode: 0o222 });
     // valid

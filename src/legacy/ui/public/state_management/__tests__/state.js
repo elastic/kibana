@@ -26,13 +26,11 @@ import { toastNotifications } from '../../notify';
 import * as FatalErrorNS from '../../notify/fatal_error';
 import { StateProvider } from '../state';
 import {
-  unhashQueryString,
-} from '../state_hashing';
-import {
+  unhashQuery,
   createStateHash,
   isStateHash,
-} from '../state_storage';
-import { HashedItemStore } from '../state_storage/hashed_item_store';
+  HashedItemStore
+} from '../../../../../plugins/kibana_utils/public';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { EventsProvider } from '../../events';
 
@@ -60,9 +58,7 @@ describe('State Management', () => {
         const hashedItemStore = new HashedItemStore(store);
         const state = new State(param, initial, hashedItemStore);
 
-        const getUnhashedSearch = state => {
-          return unhashQueryString($location.search(), [ state ]);
-        };
+        const getUnhashedSearch = () => unhashQuery($location.search());
 
         return { store, hashedItemStore, state, getUnhashedSearch };
       };

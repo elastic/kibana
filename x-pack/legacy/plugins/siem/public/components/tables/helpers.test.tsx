@@ -27,7 +27,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('DraggableWrapper'))).toMatchSnapshot();
     });
 
     test('it returns empty value when rowItem is undefined', () => {
@@ -38,7 +38,7 @@ describe('Table Helpers', () => {
         displayCount: 0,
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.text()).toBe(getEmptyValue());
+      expect(wrapper.find('DragDropContext').text()).toBe(getEmptyValue());
     });
 
     test('it returns empty string value when rowItem is empty', () => {
@@ -95,7 +95,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('DragDropContext'))).toMatchSnapshot();
     });
 
     test('it returns empty value when rowItems is undefined', () => {

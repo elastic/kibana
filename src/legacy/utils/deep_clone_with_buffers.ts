@@ -24,7 +24,7 @@ import { cloneDeep } from 'lodash';
 // type of the customizer function doesn't expect that.
 function cloneBuffersCustomizer(val: unknown): any {
   if (Buffer.isBuffer(val)) {
-    return new Buffer(val);
+    return Buffer.from(val);
   }
 }
 

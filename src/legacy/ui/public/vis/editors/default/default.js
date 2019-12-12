@@ -33,12 +33,11 @@ import { keyCodes } from '@elastic/eui';
 import { parentPipelineAggHelper } from 'ui/agg_types/metrics/lib/parent_pipeline_agg_helper';
 import { DefaultEditorSize } from '../../editor_size';
 
-import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_types';
 import { AggGroupNames } from './agg_groups';
 
 import { start as embeddables } from '../../../../../core_plugins/embeddable_api/public/np_ready/public/legacy';
 
-const defaultEditor = function ($rootScope, $compile, getAppState) {
+const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -58,7 +57,7 @@ const defaultEditor = function ($rootScope, $compile, getAppState) {
       }
     }
 
-    render({ uiState, timeRange, filters, query }) {
+    render({ uiState, timeRange, filters, query, appState }) {
       let $scope;
 
       const updateScope = () => {
@@ -161,7 +160,7 @@ const defaultEditor = function ($rootScope, $compile, getAppState) {
 
           this._handler = await embeddables.getEmbeddableFactory('visualization').createFromObject(this.savedObj, {
             uiState: uiState,
-            appState: getAppState(),
+            appState,
             timeRange: timeRange,
             filters: filters || [],
             query: query,
@@ -194,7 +193,5 @@ const defaultEditor = function ($rootScope, $compile, getAppState) {
     }
   };
 };
-
-VisEditorTypesRegistryProvider.register(defaultEditor);
 
 export { defaultEditor };

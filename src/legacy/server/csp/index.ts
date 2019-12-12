@@ -19,8 +19,7 @@
 
 export const DEFAULT_CSP_RULES = Object.freeze([
   `script-src 'unsafe-eval' 'self'`,
-  'worker-src blob:',
-  'child-src blob:',
+  `worker-src blob: 'self'`,
   `style-src 'unsafe-inline' 'self'`,
 ]);
 

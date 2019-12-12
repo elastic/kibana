@@ -10,9 +10,9 @@ import { IHttpFetchError } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
-import { useKibanaCore } from '../../../observability/public';
 import { APMClient } from '../services/rest/createCallApmApi';
 import { useCallApmApi } from './useCallApmApi';
+import { useApmPluginContext } from './useApmPluginContext';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -42,7 +42,7 @@ export function useFetcher<TReturn>(
     preservePreviousData?: boolean;
   } = {}
 ): Result<InferResponseType<TReturn>> & { refetch: () => void } {
-  const { notifications } = useKibanaCore();
+  const { notifications } = useApmPluginContext().core;
   const { preservePreviousData = true } = options;
   const id = useComponentId();
 

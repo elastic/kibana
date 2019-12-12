@@ -133,8 +133,8 @@ describe('once LegacyService is set up with connection info', () => {
 
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: { autoListen: true }, server: { autoListen: true } },
+      { path: { autoListen: true }, server: { autoListen: true } }, // Because of the mock, path also gets the value
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
@@ -159,8 +159,8 @@ describe('once LegacyService is set up with connection info', () => {
 
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: { autoListen: false }, server: { autoListen: true } },
+      { path: { autoListen: false }, server: { autoListen: true } },
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
@@ -296,8 +296,8 @@ describe('once LegacyService is set up without connection info', () => {
   test('creates legacy kbnServer with `autoListen: false`.', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { server: { autoListen: true } },
-      { server: { autoListen: true } },
+      { path: {}, server: { autoListen: true } },
+      { path: {}, server: { autoListen: true } },
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );

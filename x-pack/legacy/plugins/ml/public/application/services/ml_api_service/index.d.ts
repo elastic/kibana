@@ -18,6 +18,7 @@ import { DataFrameAnalyticsConfig } from '../../data_frame_analytics/common/anal
 import { DeepPartial } from '../../../../common/types/common';
 import { annotations } from './annotations';
 import { Calendar, CalendarId, UpdateCalendar } from '../../../../common/types/calendars';
+import { CombinedJob } from '../../jobs/new_job/common/job_creator/configs';
 
 // TODO This is not a complete representation of all methods of `ml.*`.
 // It just satisfies needs for other parts of the code area which use
@@ -63,6 +64,18 @@ export interface MlInfoResponse {
   upgrade_mode: boolean;
   cloudId?: string;
 }
+
+export interface SuccessCardinality {
+  id: 'success_cardinality';
+}
+
+export interface CardinalityModelPlotHigh {
+  id: 'cardinality_model_plot_high';
+  modelPlotCardinality: number;
+}
+
+export type CardinalityValidationResult = SuccessCardinality | CardinalityModelPlotHigh;
+export type CardinalityValidationResults = CardinalityValidationResult[];
 
 declare interface Ml {
   annotations: {
@@ -159,6 +172,7 @@ declare interface Ml {
   mlNodeCount(): Promise<{ count: number }>;
   mlInfo(): Promise<MlInfoResponse>;
   getCardinalityOfFields(obj: Record<string, any>): any;
+  validateCardinality$(job: CombinedJob): Observable<CardinalityValidationResults>;
 }
 
 declare const ml: Ml;

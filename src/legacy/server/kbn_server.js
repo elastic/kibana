@@ -21,7 +21,8 @@ import { constant, once, compact, flatten } from 'lodash';
 
 
 import { isWorker } from 'cluster';
-import { fromRoot, pkg } from '../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot, pkg } from '../../core/server/utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import httpMixin from './http';

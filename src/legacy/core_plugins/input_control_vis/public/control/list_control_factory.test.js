@@ -40,25 +40,18 @@ jest.mock('ui/new_platform', () => ({
             getAppFilters: jest.fn().mockImplementation(() => ([])),
             getGlobalFilters: jest.fn().mockImplementation(() => ([])),
           }
+        },
+        indexPatterns: {
+          get: () => ({
+            fields: { getByName: name => {
+              const fields = { myField: { name: 'myField' } };
+              return fields[name];
+            } }
+          }),
         }
       }
     },
   },
-}));
-
-jest.mock('../../../../core_plugins/data/public/legacy', () => ({
-  start: {
-    indexPatterns: {
-      indexPatterns: {
-        get: () => ({
-          fields: { getByName: name => {
-            const fields = { myField: { name: 'myField' } };
-            return fields[name];
-          } }
-        }),
-      }
-    },
-  }
 }));
 
 chrome.getInjected.mockImplementation((key) => {

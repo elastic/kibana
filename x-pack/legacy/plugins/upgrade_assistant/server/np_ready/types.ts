@@ -12,11 +12,6 @@ export interface ServerShim {
   plugins: {
     elasticsearch: ElasticsearchPlugin;
     xpack_main: XPackMainPlugin;
-    cloud: {
-      config: {
-        isCloudEnabled: boolean;
-      };
-    };
   };
   log: any;
   events: any;

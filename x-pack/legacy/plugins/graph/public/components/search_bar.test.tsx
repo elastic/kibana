@@ -51,6 +51,9 @@ function wrapSearchBarInContext(testProps: OuterSearchBarProps) {
       query: {
         savedQueries: {},
       },
+      autocomplete: {
+        getProvider: () => undefined,
+      },
     },
   };
 
@@ -88,21 +91,23 @@ describe('search_bar', () => {
     );
   });
 
-  function mountSearchBar() {
+  async function mountSearchBar() {
     jest.clearAllMocks();
     const wrappedSearchBar = wrapSearchBarInContext({ ...defaultProps });
 
-    instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
+    await act(async () => {
+      instance = mountWithIntl(<Provider store={store}>{wrappedSearchBar}</Provider>);
+    });
   }
 
-  it('should render search bar and fetch index pattern', () => {
-    mountSearchBar();
+  it('should render search bar and fetch index pattern', async () => {
+    await mountSearchBar();
 
     expect(defaultProps.indexPatternProvider.get).toHaveBeenCalledWith('123');
   });
 
   it('should render search bar and submit queries', async () => {
-    mountSearchBar();
+    await mountSearchBar();
 
     await waitForIndexPatternFetch();
 
@@ -118,7 +123,7 @@ describe('search_bar', () => {
   });
 
   it('should translate kql query into JSON dsl', async () => {
-    mountSearchBar();
+    await mountSearchBar();
 
     await waitForIndexPatternFetch();
 
@@ -136,8 +141,8 @@ describe('search_bar', () => {
     });
   });
 
-  it('should open index pattern picker', () => {
-    mountSearchBar();
+  it('should open index pattern picker', async () => {
+    await mountSearchBar();
 
     // pick the button component out of the tree because
     // it's part of a popover and thus not covered by enzyme

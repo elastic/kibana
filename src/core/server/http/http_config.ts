@@ -38,7 +38,15 @@ export const config = {
           validate: match(validBasePathRegex, "must start with a slash, don't end with one"),
         })
       ),
-      defaultRoute: schema.maybe(schema.string()),
+      defaultRoute: schema.maybe(
+        schema.string({
+          validate(value) {
+            if (!value.startsWith('/')) {
+              return 'must start with a slash';
+            }
+          },
+        })
+      ),
       cors: schema.conditional(
         schema.contextRef('dev'),
         true,

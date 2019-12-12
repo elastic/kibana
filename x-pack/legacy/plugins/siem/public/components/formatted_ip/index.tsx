@@ -6,7 +6,6 @@
 
 import { isArray, isEmpty, isString, uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DragEffects, DraggableWrapper } from '../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
@@ -60,7 +59,7 @@ const getDataProvider = ({
   and: [],
 });
 
-const NonDecoratedIp = pure<{
+const NonDecoratedIp = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
@@ -92,7 +91,7 @@ const NonDecoratedIp = pure<{
 
 NonDecoratedIp.displayName = 'NonDecoratedIp';
 
-const AddressLinks = pure<{
+const AddressLinks = React.memo<{
   addresses: string[];
   contextId: string;
   eventId: string;
@@ -128,7 +127,7 @@ const AddressLinks = pure<{
 
 AddressLinks.displayName = 'AddressLinks';
 
-export const FormattedIp = pure<{
+export const FormattedIp = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;

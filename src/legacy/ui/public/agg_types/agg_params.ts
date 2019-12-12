@@ -44,17 +44,10 @@ export interface AggParamOption {
   enabled?(agg: AggConfig): boolean;
 }
 
-export interface AggParamConfig {
-  type: string;
-}
-
-export const initParams = <
-  TAggParam extends AggParam = AggParam,
-  TAggParamConfig extends AggParamConfig = AggParamConfig
->(
-  params: TAggParamConfig[]
+export const initParams = <TAggParam extends AggParamType = AggParamType>(
+  params: TAggParam[]
 ): TAggParam[] =>
-  params.map((config: TAggParamConfig) => {
+  params.map((config: TAggParam) => {
     const Class = paramTypeMap[config.type] || paramTypeMap._default;
 
     return new Class(config);
@@ -74,20 +67,25 @@ export const initParams = <
  *         output object which is used to create the agg dsl for the search request. All other properties
  *         are dependent on the AggParam#write methods which should be studied for each AggType.
  */
-export const writeParams = (
-  params: AggParam[],
-  aggConfig: AggConfig,
+export const writeParams = <
+  TAggConfig extends AggConfig = AggConfig,
+  TAggParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
+>(
+  params: Array<Partial<TAggParam>> = [],
+  aggConfig: TAggConfig,
   aggs?: AggConfigs,
   locals?: Record<string, any>
 ) => {
   const output = { params: {} as Record<string, any> };
   locals = locals || {};
 
-  params.forEach(function(param) {
+  params.forEach(param => {
     if (param.write) {
       param.write(aggConfig, output, aggs, locals);
     } else {
-      output.params[param.name] = aggConfig.params[param.name];
+      if (param && param.name) {
+        output.params[param.name] = aggConfig.params[param.name];
+      }
     }
   });
 

@@ -23,7 +23,12 @@ function mockGetXPackLicense(callCluster, license, req) {
       local: 'true'
     }
   })
-    .returns(license.then(response => ({ license: response })));
+    .returns(
+      license.then(
+        response => ({ license: response }),
+        () => {} // Catch error so that we don't emit UnhandledPromiseRejectionWarning for tests with invalid license
+      )
+    );
 
   callCluster.withArgs('transport.request', {
     method: 'GET',
@@ -33,7 +38,12 @@ function mockGetXPackLicense(callCluster, license, req) {
     }
   })
     // conveniently wraps the passed in license object as { license: response }, like it really is
-    .returns(license.then(response => ({ license: response })));
+    .returns(
+      license.then(
+        response => ({ license: response }),
+        () => {} // Catch error so that we don't emit UnhandledPromiseRejectionWarning for tests with invalid license
+      )
+    );
 }
 
 function mockGetXPackUsage(callCluster, usage, req) {

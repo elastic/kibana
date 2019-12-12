@@ -95,11 +95,10 @@ export const ml = {
     });
   },
 
-  validateCardinality(obj) {
-    return http({
-      url: `${basePath}/validate/cardinality`,
+  validateCardinality$(obj) {
+    return http$(`${basePath}/validate/cardinality`, {
       method: 'POST',
-      data: obj
+      body: obj
     });
   },
 

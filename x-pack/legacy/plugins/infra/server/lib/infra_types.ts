@@ -5,8 +5,6 @@
  */
 
 import { InfraSourceConfiguration } from '../../public/graphql/types';
-import { InfraConfigurationAdapter } from './adapters/configuration';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from './adapters/framework';
 import { InfraFieldsDomain } from './domains/fields_domain';
 import { InfraLogEntriesDomain } from './domains/log_entries_domain';
 import { InfraMetricsDomain } from './domains/metrics_domain';
@@ -14,6 +12,15 @@ import { InfraLogAnalysis } from './log_analysis/log_analysis';
 import { InfraSnapshot } from './snapshot';
 import { InfraSources } from './sources';
 import { InfraSourceStatus } from './source_status';
+import { InfraConfig } from '../../../../../plugins/infra/server';
+import { KibanaFramework } from './adapters/framework/kibana_framework_adapter';
+
+// NP_TODO: We shouldn't need this context anymore but I am
+// not sure how the graphql stuff uses it, so we can't remove it yet
+export interface InfraContext {
+  req: any;
+  rawReq?: any;
+}
 
 export interface InfraDomainLibs {
   fields: InfraFieldsDomain;
@@ -22,8 +29,8 @@ export interface InfraDomainLibs {
 }
 
 export interface InfraBackendLibs extends InfraDomainLibs {
-  configuration: InfraConfigurationAdapter;
-  framework: InfraBackendFrameworkAdapter;
+  configuration: InfraConfig;
+  framework: KibanaFramework;
   logAnalysis: InfraLogAnalysis;
   snapshot: InfraSnapshot;
   sources: InfraSources;
@@ -39,8 +46,4 @@ export interface InfraConfiguration {
   sources: {
     default: InfraSourceConfiguration;
   };
-}
-
-export interface InfraContext {
-  req: InfraFrameworkRequest;
 }

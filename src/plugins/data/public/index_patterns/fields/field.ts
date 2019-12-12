@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { ObjDefine } from './obj_define';
 import { IndexPattern } from '../index_patterns';
-import { getNotifications, getFieldFormats } from '../services';
+import { getNotifications, getFieldFormats } from '../../services';
 import {
   IFieldType,
   getKbnFieldType,
