@@ -60,8 +60,14 @@ pipeline {
         }
       }
       steps {
+        notifyStatus('Starting services', 'PENDING')
         dir("${APM_ITS}"){
           sh './scripts/compose.py start master --no-kibana --no-xpack-secure'
+        }
+      }
+      post {
+        unsuccessful {
+          notifyStatus('Environmental issue', 'FAILURE')
         }
       }
     }
@@ -77,8 +83,14 @@ pipeline {
         JENKINS_NODE_COOKIE = 'dontKillMe'
       }
       steps {
+        notifyStatus('Preparing kibana', 'PENDING')
         dir("${BASE_DIR}"){
           sh script: "${CYPRESS_DIR}/ci/prepare-kibana.sh"
+        }
+      }
+      post {
+        unsuccessful {
+          notifyStatus('Kibana warm up failed', 'FAILURE')
         }
       }
     }
@@ -91,6 +103,7 @@ pipeline {
         }
       }
       steps{
+        notifyStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){
           sh '''
             jobs -l
@@ -112,6 +125,12 @@ pipeline {
             archiveArtifacts(allowEmptyArchive: false, artifacts: 'apm-its.log')
           }
         }
+        unsuccessful {
+          notifyStatus('Test failures', 'FAILURE')
+        }
+        success {
+          notifyStatus('Tests passed', 'SUCCESS')
+        }
       }
     }
   }
@@ -122,4 +141,8 @@ pipeline {
       }
     }
   }
+}
+
+def notifyStatus(String description, String status) {
+  withGithubNotify.notify('end2end-for-apm-ui', description, status, getBlueoceanDisplayURL())
 }
