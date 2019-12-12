@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { RoleMapping } from '../../../../../../common/model';
-import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
+import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
 import { RuleEditorPanel } from './rule_editor_panel';
 import {
   NoCompatibleRealms,
@@ -50,6 +50,7 @@ interface State {
 
 interface Props {
   name?: string;
+  roleMappingsAPI: RoleMappingsAPI;
 }
 
 export class EditRoleMappingPage extends Component<Props, State> {
@@ -188,7 +189,7 @@ export class EditRoleMappingPage extends Component<Props, State> {
         <EuiFlexItem grow={true} />
         {this.editingExistingRoleMapping() && (
           <EuiFlexItem grow={false}>
-            <DeleteProvider>
+            <DeleteProvider roleMappingsAPI={this.props.roleMappingsAPI}>
               {deleteRoleMappingsPrompt => {
                 return (
                   <EuiButtonEmpty
@@ -236,7 +237,8 @@ export class EditRoleMappingPage extends Component<Props, State> {
       saveInProgress: true,
     });
 
-    RoleMappingApi.saveRoleMapping(this.state.roleMapping)
+    this.props.roleMappingsAPI
+      .saveRoleMapping(this.state.roleMapping)
       .then(() => {
         toastNotifications.addSuccess({
           title: i18n.translate('xpack.security.management.editRoleMapping.saveSuccess', {
@@ -268,9 +270,9 @@ export class EditRoleMappingPage extends Component<Props, State> {
   private async loadAppData() {
     try {
       const [features, roleMapping] = await Promise.all([
-        RoleMappingApi.getRoleMappingFeatures(),
+        this.props.roleMappingsAPI.getRoleMappingFeatures(),
         this.editingExistingRoleMapping()
-          ? RoleMappingApi.getRoleMapping(this.props.name!)
+          ? this.props.roleMappingsAPI.getRoleMapping(this.props.name!)
           : Promise.resolve({
               name: '',
               enabled: true,

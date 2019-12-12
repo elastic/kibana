@@ -9,9 +9,10 @@ import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import { RoleMapping } from '../../../../../../common/model';
-import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
+import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
 
 interface Props {
+  roleMappingsAPI: RoleMappingsAPI;
   children: (deleteMappings: DeleteRoleMappings) => ReactElement;
 }
 
@@ -22,7 +23,7 @@ export type DeleteRoleMappings = (
 
 type OnSuccessCallback = (deletedRoleMappings: string[]) => void;
 
-export const DeleteProvider: React.FunctionComponent<Props> = ({ children }) => {
+export const DeleteProvider: React.FunctionComponent<Props> = ({ roleMappingsAPI, children }) => {
   const [roleMappings, setRoleMappings] = useState<RoleMapping[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteInProgress, setIsDeleteInProgress] = useState(false);
@@ -52,7 +53,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({ children }) => 
     setIsDeleteInProgress(true);
 
     try {
-      result = await RoleMappingApi.deleteRoleMappings(roleMappings.map(rm => rm.name));
+      result = await roleMappingsAPI.deleteRoleMappings(roleMappings.map(rm => rm.name));
     } catch (e) {
       toastNotifications.addError(e, {
         title: i18n.translate(

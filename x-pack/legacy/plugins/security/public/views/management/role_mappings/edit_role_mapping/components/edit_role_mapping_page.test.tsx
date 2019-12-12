@@ -13,7 +13,7 @@ import { findTestSubject } from 'test_utils/find_test_subject';
 // warnings in the console which adds unnecessary noise to the test output.
 import 'test_utils/stub_web_worker';
 
-import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
+import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
 import { EditRoleMappingPage } from '.';
 import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../../components';
 import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
@@ -26,26 +26,19 @@ jest.mock('../../../../../lib/roles_api', () => {
     },
   };
 });
-jest.mock('../../../../../lib/role_mapping_api', () => {
-  return {
-    RoleMappingApi: {
-      getRoleMapping: jest.fn(),
-      saveRoleMapping: jest.fn(),
-      getRoleMappingFeatures: jest.fn(),
-    },
-  };
-});
 
 describe('EditRoleMappingPage', () => {
   // Omitting basic create/update/delete tests as they are covered in the functional test suite.
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
-    (RoleMappingApi as any).getRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: false,
-      hasCompatibleRealms: true,
-    });
+    const roleMappingsAPI = ({
+      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: false,
+        hasCompatibleRealms: true,
+      }),
+    } as unknown) as RoleMappingsAPI;
 
-    const wrapper = mountWithIntl(<EditRoleMappingPage />);
+    const wrapper = mountWithIntl(<EditRoleMappingPage roleMappingsAPI={roleMappingsAPI} />);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
@@ -58,12 +51,14 @@ describe('EditRoleMappingPage', () => {
   });
 
   it('renders a warning when there are no compatible realms enabled', async () => {
-    (RoleMappingApi as any).getRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
-      hasCompatibleRealms: false,
-    });
+    const roleMappingsAPI = ({
+      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: false,
+      }),
+    } as unknown) as RoleMappingsAPI;
 
-    const wrapper = mountWithIntl(<EditRoleMappingPage />);
+    const wrapper = mountWithIntl(<EditRoleMappingPage roleMappingsAPI={roleMappingsAPI} />);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
 
@@ -75,27 +70,30 @@ describe('EditRoleMappingPage', () => {
   });
 
   it('renders a warning when editing a mapping with a stored role template, when stored scripts are disabled', async () => {
-    (RoleMappingApi as any).getRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
-      hasCompatibleRealms: true,
-      canUseInlineScripts: true,
-      canUseStoredScripts: false,
-    });
-
-    (RoleMappingApi as any).getRoleMapping.mockResolvedValue({
-      name: 'foo',
-      role_templates: [
-        {
-          template: { id: 'foo' },
+    const roleMappingsAPI = ({
+      getRoleMapping: jest.fn().mockResolvedValue({
+        name: 'foo',
+        role_templates: [
+          {
+            template: { id: 'foo' },
+          },
+        ],
+        enabled: true,
+        rules: {
+          field: { username: '*' },
         },
-      ],
-      enabled: true,
-      rules: {
-        field: { username: '*' },
-      },
-    });
+      }),
+      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+        canUseInlineScripts: true,
+        canUseStoredScripts: false,
+      }),
+    } as unknown) as RoleMappingsAPI;
 
-    const wrapper = mountWithIntl(<EditRoleMappingPage name={'foo'} />);
+    const wrapper = mountWithIntl(
+      <EditRoleMappingPage name={'foo'} roleMappingsAPI={roleMappingsAPI} />
+    );
 
     expect(findTestSubject(wrapper, 'roleMappingInlineScriptsDisabled')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleMappingStoredScriptsDisabled')).toHaveLength(0);
@@ -108,27 +106,30 @@ describe('EditRoleMappingPage', () => {
   });
 
   it('renders a warning when editing a mapping with an inline role template, when inline scripts are disabled', async () => {
-    (RoleMappingApi as any).getRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
-      hasCompatibleRealms: true,
-      canUseInlineScripts: false,
-      canUseStoredScripts: true,
-    });
-
-    (RoleMappingApi as any).getRoleMapping.mockResolvedValue({
-      name: 'foo',
-      role_templates: [
-        {
-          template: { source: 'foo' },
+    const roleMappingsAPI = ({
+      getRoleMapping: jest.fn().mockResolvedValue({
+        name: 'foo',
+        role_templates: [
+          {
+            template: { source: 'foo' },
+          },
+        ],
+        enabled: true,
+        rules: {
+          field: { username: '*' },
         },
-      ],
-      enabled: true,
-      rules: {
-        field: { username: '*' },
-      },
-    });
+      }),
+      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+        canUseInlineScripts: false,
+        canUseStoredScripts: true,
+      }),
+    } as unknown) as RoleMappingsAPI;
 
-    const wrapper = mountWithIntl(<EditRoleMappingPage name={'foo'} />);
+    const wrapper = mountWithIntl(
+      <EditRoleMappingPage name={'foo'} roleMappingsAPI={roleMappingsAPI} />
+    );
 
     expect(findTestSubject(wrapper, 'roleMappingInlineScriptsDisabled')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'roleMappingStoredScriptsDisabled')).toHaveLength(0);
@@ -141,39 +142,42 @@ describe('EditRoleMappingPage', () => {
   });
 
   it('renders the visual editor by default for simple rule sets', async () => {
-    (RoleMappingApi as any).getRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
-      hasCompatibleRealms: true,
-      canUseInlineScripts: true,
-      canUseStoredScripts: true,
-    });
+    const roleMappingsAPI = ({
+      getRoleMapping: jest.fn().mockResolvedValue({
+        name: 'foo',
+        roles: ['superuser'],
+        enabled: true,
+        rules: {
+          all: [
+            {
+              field: {
+                username: '*',
+              },
+            },
+            {
+              field: {
+                dn: null,
+              },
+            },
+            {
+              field: {
+                realm: ['ldap', 'pki', null, 12],
+              },
+            },
+          ],
+        },
+      }),
+      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+        canUseInlineScripts: true,
+        canUseStoredScripts: true,
+      }),
+    } as unknown) as RoleMappingsAPI;
 
-    (RoleMappingApi as any).getRoleMapping.mockResolvedValue({
-      name: 'foo',
-      roles: ['superuser'],
-      enabled: true,
-      rules: {
-        all: [
-          {
-            field: {
-              username: '*',
-            },
-          },
-          {
-            field: {
-              dn: null,
-            },
-          },
-          {
-            field: {
-              realm: ['ldap', 'pki', null, 12],
-            },
-          },
-        ],
-      },
-    });
-
-    const wrapper = mountWithIntl(<EditRoleMappingPage name={'foo'} />);
+    const wrapper = mountWithIntl(
+      <EditRoleMappingPage name={'foo'} roleMappingsAPI={roleMappingsAPI} />
+    );
 
     await nextTick();
     wrapper.update();
@@ -183,13 +187,6 @@ describe('EditRoleMappingPage', () => {
   });
 
   it('renders the advanced editor by default for complex rule sets', async () => {
-    (RoleMappingApi as any).getRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
-      hasCompatibleRealms: true,
-      canUseInlineScripts: true,
-      canUseStoredScripts: true,
-    });
-
     const createRule = (depth: number): Record<string, any> => {
       if (depth > 0) {
         const rule = {
@@ -212,14 +209,24 @@ describe('EditRoleMappingPage', () => {
       return null as any;
     };
 
-    (RoleMappingApi as any).getRoleMapping.mockResolvedValue({
-      name: 'foo',
-      roles: ['superuser'],
-      enabled: true,
-      rules: createRule(10),
-    });
+    const roleMappingsAPI = ({
+      getRoleMapping: jest.fn().mockResolvedValue({
+        name: 'foo',
+        roles: ['superuser'],
+        enabled: true,
+        rules: createRule(10),
+      }),
+      getRoleMappingFeatures: jest.fn().mockResolvedValue({
+        canManageRoleMappings: true,
+        hasCompatibleRealms: true,
+        canUseInlineScripts: true,
+        canUseStoredScripts: true,
+      }),
+    } as unknown) as RoleMappingsAPI;
 
-    const wrapper = mountWithIntl(<EditRoleMappingPage name={'foo'} />);
+    const wrapper = mountWithIntl(
+      <EditRoleMappingPage name={'foo'} roleMappingsAPI={roleMappingsAPI} />
+    );
 
     await nextTick();
     wrapper.update();

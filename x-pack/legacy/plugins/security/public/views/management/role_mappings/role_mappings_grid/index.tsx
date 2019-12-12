@@ -9,6 +9,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
 // @ts-ignore
 import { I18nContext } from 'ui/i18n';
+import { npSetup } from 'ui/new_platform';
+import { RoleMappingsAPI } from '../../../../lib/role_mappings_api';
 // @ts-ignore
 import template from './role_mappings.html';
 import { ROLE_MAPPINGS_PATH } from '../../management_urls';
@@ -24,7 +26,7 @@ routes.when(ROLE_MAPPINGS_PATH, {
 
       render(
         <I18nContext>
-          <RoleMappingsGridPage />
+          <RoleMappingsGridPage roleMappingsAPI={new RoleMappingsAPI(npSetup.core.http)} />
         </I18nContext>,
         domNode
       );

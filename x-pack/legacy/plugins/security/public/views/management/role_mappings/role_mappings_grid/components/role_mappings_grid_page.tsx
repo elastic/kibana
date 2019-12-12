@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { RoleMapping } from '../../../../../../common/model';
-import { RoleMappingApi } from '../../../../../lib/role_mapping_api';
+import { RoleMappingsAPI } from '../../../../../lib/role_mappings_api';
 import { EmptyPrompt } from './empty_prompt';
 import {
   NoCompatibleRealms,
@@ -35,6 +35,10 @@ import {
   PermissionDenied,
   SectionLoading,
 } from '../../components';
+
+interface Props {
+  roleMappingsAPI: RoleMappingsAPI;
+}
 
 interface State {
   isLoadingApp: boolean;
@@ -55,7 +59,7 @@ const getEditRoleMappingHref = (roleMappingName: string) =>
 
 const getEditRoleHref = (roleName: string) => `${path}roles/edit/${encodeURIComponent(roleName)}`;
 
-export class RoleMappingsGridPage extends Component<any, State> {
+export class RoleMappingsGridPage extends Component<Props, State> {
   constructor(props: any) {
     super(props);
     this.state = {
@@ -203,7 +207,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
 
     const search = {
       toolsLeft: selectedItems.length ? (
-        <DeleteProvider>
+        <DeleteProvider roleMappingsAPI={this.props.roleMappingsAPI}>
           {deleteRoleMappingsPrompt => {
             return (
               <EuiButton
@@ -379,7 +383,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
               return (
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem>
-                    <DeleteProvider>
+                    <DeleteProvider roleMappingsAPI={this.props.roleMappingsAPI}>
                       {deleteRoleMappingPrompt => {
                         return (
                           <EuiToolTip
@@ -429,7 +433,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
       const {
         canManageRoleMappings,
         hasCompatibleRealms,
-      } = await RoleMappingApi.getRoleMappingFeatures();
+      } = await this.props.roleMappingsAPI.getRoleMappingFeatures();
 
       this.setState({
         permissionDenied: !canManageRoleMappings,
@@ -464,7 +468,7 @@ export class RoleMappingsGridPage extends Component<any, State> {
 
   private loadRoleMappings = async () => {
     try {
-      const roleMappings = await RoleMappingApi.getRoleMappings();
+      const roleMappings = await this.props.roleMappingsAPI.getRoleMappings();
       this.setState({ roleMappings });
     } catch (e) {
       this.setState({ error: e });

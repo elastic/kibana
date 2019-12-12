@@ -9,6 +9,8 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import routes from 'ui/routes';
 // @ts-ignore
 import { I18nContext } from 'ui/i18n';
+import { npSetup } from 'ui/new_platform';
+import { RoleMappingsAPI } from '../../../../lib/role_mappings_api';
 // @ts-ignore
 import template from './edit_role_mapping.html';
 import { EDIT_ROLE_MAPPING_PATH } from '../../management_urls';
@@ -26,7 +28,10 @@ routes.when(`${EDIT_ROLE_MAPPING_PATH}/:name?`, {
 
       render(
         <I18nContext>
-          <EditRoleMappingPage name={name} />
+          <EditRoleMappingPage
+            name={name}
+            roleMappingsAPI={new RoleMappingsAPI(npSetup.core.http)}
+          />
         </I18nContext>,
         domNode
       );
