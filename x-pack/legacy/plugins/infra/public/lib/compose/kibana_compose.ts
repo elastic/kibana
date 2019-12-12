@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
 import chrome from 'ui/chrome';
 // @ts-ignore: path dynamic for kibana
@@ -55,13 +54,12 @@ export function compose(): InfraFrontendLibs {
 
   const apolloClient = new ApolloClient(graphQLOptions);
 
-  const infraModule = uiModules.get('app/infa');
+  // const infraModule = uiModules.get('app/infa');
 
-  const framework = new KibanaFramework(infraModule, uiRoutes, timezoneProvider);
+  // const framework = new KibanaFramework(infraModule, uiRoutes, timezoneProvider);
 
   const libs: InfraFrontendLibs = {
     apolloClient,
-    framework,
     observableApi,
   };
   return libs;

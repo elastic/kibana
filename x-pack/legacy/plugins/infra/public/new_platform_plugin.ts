@@ -12,7 +12,6 @@ import { withClientState } from 'apollo-link-state';
 import { startApp } from './apps/start_app';
 import { InfraFrontendLibs } from './lib/lib';
 import introspectionQueryResultData from './graphql/introspection.json';
-import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
 import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/kibana_observable_api';
 
 type ClientPlugins = any;
@@ -55,13 +54,12 @@ export class Plugin {
 
     const apolloClient = new ApolloClient(graphQLOptions);
 
-    const infraModule = legacy.uiModules.get('app/infa');
+    // const infraModule = legacy.uiModules.get('app/infa');
 
-    const framework = new KibanaFramework(infraModule, legacy.uiRoutes, legacy.timezoneProvider);
+    // const framework = new KibanaFramework(infraModule, legacy.uiRoutes, legacy.timezoneProvider);
 
     const libs: InfraFrontendLibs = {
       apolloClient,
-      framework,
       observableApi,
     };
     return libs;
