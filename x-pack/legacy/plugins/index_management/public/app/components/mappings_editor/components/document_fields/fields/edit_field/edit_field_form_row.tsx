@@ -5,7 +5,16 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch, EuiSpacer, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiSwitch,
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import {
   ToggleField,
@@ -19,15 +28,15 @@ import { getFieldConfig } from '../../../../lib';
 
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 
-type DocLink = {
+interface DocLink {
   text: string;
   href: string;
 }
 
 interface Props {
-  title: JSX.Element;
+  title: string;
   description?: string | JSX.Element;
-  docLink?: DocLink,
+  docLink?: DocLink;
   defaultToggleValue?: boolean;
   formFieldPath?: ParameterName;
   children?: React.ReactNode | ChildrenFunc;
@@ -116,9 +125,7 @@ export const EditFieldFormRow = React.memo(
           }}
         >
           <EuiFlexGroup>
-            <EuiFlexItem>
-              {controlsTitle}
-            </EuiFlexItem>
+            <EuiFlexItem>{controlsTitle}</EuiFlexItem>
 
             {docLink ? (
               <EuiFlexItem grow={false}>
