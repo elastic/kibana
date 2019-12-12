@@ -18,7 +18,7 @@
  */
 
 import { stringify as formatQueryString } from 'querystring';
-
+import { CUSTOM_HEADER_USER_ISSUED } from '../../../../common/constants';
 import $ from 'jquery';
 
 const esVersion = [];
@@ -32,7 +32,7 @@ export function getContentType(body) {
   return 'application/json';
 }
 
-export function send(method, path, data) {
+export function send(method, path, data, telemetry) {
   const wrappedDfd = $.Deferred();  // eslint-disable-line new-cap
 
   const options = {
@@ -44,6 +44,10 @@ export function send(method, path, data) {
     type: 'POST',
     dataType: 'text', // disable automatic guessing
   };
+
+  if (telemetry) {
+    options.headers = { [CUSTOM_HEADER_USER_ISSUED]: telemetry };
+  }
 
   $.ajax(options).then(
     function (data, textStatus, jqXHR) {

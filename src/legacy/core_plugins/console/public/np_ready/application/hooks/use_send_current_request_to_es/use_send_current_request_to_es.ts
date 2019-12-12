@@ -22,6 +22,7 @@ import { instance as registry } from '../../contexts/editor_context/editor_regis
 import { useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
 import { useRequestActionContext } from '../../contexts';
+import { getEndpointFromPosition } from '../../../lib/autocomplete/autocomplete';
 // @ts-ignore
 import mappings from '../../../lib/mappings/mappings';
 
@@ -45,8 +46,15 @@ export const useSendCurrentRequestToES = () => {
         return;
       }
 
+      const { patterns } = getEndpointFromPosition(
+        editor,
+        editor.getCoreEditor().getCurrentPosition(),
+        editor.parser
+      );
+
       const results = await sendRequestToES({
         requests,
+        telemetry: patterns.join('|'),
       });
 
       results.forEach(({ request: { path, method, data } }) => {
