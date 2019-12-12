@@ -10,7 +10,7 @@ import { inRange } from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
-import AgentMarker from './AgentMarker';
+import { Marker } from './Marker';
 import { px } from '../../../../style/variables';
 import { getDurationFormatter } from '../../../../utils/formatters';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
@@ -82,13 +82,11 @@ function TimelineAxis({ plotValues, agentMarks, topTraceDuration }) {
                 />
               )}
 
-              {agentMarks.map(agentMark => (
-                <AgentMarker
-                  key={agentMark.name}
-                  agentMark={agentMark}
-                  x={xScale(agentMark.us)}
-                />
-              ))}
+              {agentMarks.map(mark => {
+                return (
+                  <Marker key={mark.name} mark={mark} x={xScale(mark.us)} />
+                );
+              })}
             </XYPlot>
           </div>
         );

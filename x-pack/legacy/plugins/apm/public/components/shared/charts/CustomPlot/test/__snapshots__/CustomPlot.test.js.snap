@@ -2725,11 +2725,13 @@ Array [
           <styled.span
             color="#3185fc"
             radius={11}
+            shape="circle"
           >
             <span
               className="c2"
               color="#3185fc"
               radius={11}
+              shape="circle"
             />
           </styled.span>
           <styled.span>
@@ -2763,11 +2765,13 @@ Array [
           <styled.span
             color="#e6c220"
             radius={11}
+            shape="circle"
           >
             <span
               className="c5"
               color="#e6c220"
               radius={11}
+              shape="circle"
             />
           </styled.span>
           <styled.span>
@@ -2794,11 +2798,13 @@ Array [
           <styled.span
             color="#f98510"
             radius={11}
+            shape="circle"
           >
             <span
               className="c6"
               color="#f98510"
               radius={11}
+              shape="circle"
             />
           </styled.span>
           <styled.span>
@@ -5167,11 +5173,13 @@ Array [
                             <styled.span
                               color="#3185fc"
                               radius={8}
+                              shape="circle"
                             >
                               <span
                                 className="c6"
                                 color="#3185fc"
                                 radius={8}
+                                shape="circle"
                               />
                             </styled.span>
                             Avg.
@@ -5210,11 +5218,13 @@ Array [
                             <styled.span
                               color="#e6c220"
                               radius={8}
+                              shape="circle"
                             >
                               <span
                                 className="c8"
                                 color="#e6c220"
                                 radius={8}
+                                shape="circle"
                               />
                             </styled.span>
                             95th
@@ -5253,11 +5263,13 @@ Array [
                             <styled.span
                               color="#f98510"
                               radius={8}
+                              shape="circle"
                             >
                               <span
                                 className="c9"
                                 color="#f98510"
                                 radius={8}
+                                shape="circle"
                               />
                             </styled.span>
                             99th
@@ -5886,11 +5898,13 @@ Array [
           <styled.span
             color="#3185fc"
             radius={11}
+            shape="circle"
           >
             <span
               className="c2"
               color="#3185fc"
               radius={11}
+              shape="circle"
             />
           </styled.span>
           <styled.span>
@@ -5924,11 +5938,13 @@ Array [
           <styled.span
             color="#e6c220"
             radius={11}
+            shape="circle"
           >
             <span
               className="c5"
               color="#e6c220"
               radius={11}
+              shape="circle"
             />
           </styled.span>
           <styled.span>
@@ -5955,11 +5971,13 @@ Array [
           <styled.span
             color="#f98510"
             radius={11}
+            shape="circle"
           >
             <span
               className="c6"
               color="#f98510"
               radius={11}
+              shape="circle"
             />
           </styled.span>
           <styled.span>
