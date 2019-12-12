@@ -18,7 +18,7 @@
  */
 
 import { AggConfig } from 'ui/vis';
-import { StringParamEditor } from '../../vis/editors/default/controls/string';
+import { StringParamEditor } from 'ui/vis/editors/default/controls/string';
 import { BaseParamType } from './base';
 
 export class StringParamType extends BaseParamType {

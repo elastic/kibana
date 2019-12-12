@@ -18,8 +18,8 @@
  */
 
 import _ from 'lodash';
-import { AggGroupNames } from '../../vis/editors/default/agg_groups';
-import { esFilters, esQuery } from '../../../../../plugins/data/public';
+import { AggGroupNames } from 'ui/vis/editors/default/agg_groups';
+import { esFilters, esQuery } from '../../../../../../../plugins/data/public';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId

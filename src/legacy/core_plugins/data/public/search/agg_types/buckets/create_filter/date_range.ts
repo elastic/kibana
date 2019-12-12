@@ -20,7 +20,7 @@
 import moment from 'moment';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 import { DateRangeKey } from '../date_range';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 
 export const createFilterDateRange = (agg: IBucketAggConfig, { from, to }: DateRangeKey) => {
   const filter: esFilters.RangeFilterParams = {};

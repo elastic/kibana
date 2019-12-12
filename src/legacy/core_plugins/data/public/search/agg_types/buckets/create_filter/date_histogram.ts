@@ -19,7 +19,7 @@
 
 import moment from 'moment';
 import { IBucketDateHistogramAggConfig } from '../date_histogram';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 
 export const createFilterDateHistogram = (
   agg: IBucketDateHistogramAggConfig,

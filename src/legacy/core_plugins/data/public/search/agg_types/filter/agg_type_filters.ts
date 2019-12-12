@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IndexPattern } from '../../index_patterns';
-import { AggConfig } from '../../vis';
+
+import { AggConfig } from 'ui/vis';
+import { IIndexPattern } from '../../../../../../../plugins/data/public';
 import { AggType } from '..';
 
 type AggTypeFilter = (
   aggType: AggType,
-  indexPattern: IndexPattern,
+  indexPattern: IIndexPattern,
   aggConfig: AggConfig
 ) => boolean;
 
@@ -50,7 +51,7 @@ class AggTypeFilters {
    * @param aggConfig The aggConfig for which the returning list will be used.
    * @return A filtered list of the passed aggTypes.
    */
-  public filter(aggTypes: AggType[], indexPattern: IndexPattern, aggConfig: AggConfig) {
+  public filter(aggTypes: AggType[], indexPattern: IIndexPattern, aggConfig: AggConfig) {
     const allFilters = Array.from(this.filters);
     const allowedAggTypes = aggTypes.filter(aggType => {
       const isAggTypeAllowed = allFilters.every(filter => filter(aggType, indexPattern, aggConfig));

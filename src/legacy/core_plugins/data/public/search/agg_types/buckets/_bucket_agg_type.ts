@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { AggConfig } from '../../vis';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { AggConfig } from 'ui/vis';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 

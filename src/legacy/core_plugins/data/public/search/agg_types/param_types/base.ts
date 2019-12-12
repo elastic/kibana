@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { AggConfig } from 'ui/vis';
 import { AggConfigs } from '../agg_configs';
-import { AggConfig } from '../../vis';
-import { ISearchSource, FetchOptions } from '../../courier/types';
+import { ISearchSource, FetchOptions } from '../../types';
 
 export class BaseParamType<TAggConfig extends AggConfig = AggConfig> {
   name: string;

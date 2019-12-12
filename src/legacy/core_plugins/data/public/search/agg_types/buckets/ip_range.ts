@@ -17,21 +17,21 @@
  * under the License.
  */
 
-import { noop, map, omit, isNull } from 'lodash';
+import { isNull, map, noop, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { npStart } from 'ui/new_platform';
-import { BucketAggType } from './_bucket_agg_type';
-import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
-import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
-import { BUCKET_TYPES } from './bucket_agg_types';
 
-// @ts-ignore
+import { npStart } from 'ui/new_platform';
+import { IpRangesParamEditor } from 'ui/vis/editors/default/controls/ip_ranges';
+import { IpRangeTypeParamEditor } from 'ui/vis/editors/default/controls/ip_range_type';
+import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterIpRange } from './create_filter/ip_range';
+import { BucketAggType } from './_bucket_agg_type';
+
 import {
+  FieldFormat,
   KBN_FIELD_TYPES,
   TEXT_CONTEXT_TYPE,
-  FieldFormat,
-} from '../../../../../plugins/data/public';
+} from '../../../../../../../plugins/data/public';
 
 const ipRangeTitle = i18n.translate('common.ui.aggTypes.buckets.ipRangeTitle', {
   defaultMessage: 'IPv4 Range',

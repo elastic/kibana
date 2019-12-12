@@ -18,7 +18,7 @@
  */
 
 import { createFilterRange } from './range';
-import { BytesFormat } from '../../../../../../plugins/data/public';
+import { BytesFormat } from '../../../../../../../../plugins/data/public';
 import { AggConfigs } from '../../agg_configs';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../_bucket_agg_type';

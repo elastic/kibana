@@ -18,18 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+import { AggGroupNames } from 'ui/vis/editors/default/agg_groups';
+import { AutoPrecisionParamEditor } from 'ui/vis/editors/default/controls/auto_precision';
+import { IsFilteredByCollarParamEditor } from 'ui/vis/editors/default/controls/is_filtered_by_collar';
+import { PrecisionParamEditor } from 'ui/vis/editors/default/controls/precision';
+import { UseGeocentroidParamEditor } from 'ui/vis/editors/default/controls/use_geocentroid';
 import { geohashColumns } from 'ui/vis/map/decode_geo_hash';
-import chrome from '../../chrome';
-import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
-import { AutoPrecisionParamEditor } from '../../vis/editors/default/controls/auto_precision';
-import { UseGeocentroidParamEditor } from '../../vis/editors/default/controls/use_geocentroid';
-import { IsFilteredByCollarParamEditor } from '../../vis/editors/default/controls/is_filtered_by_collar';
-import { PrecisionParamEditor } from '../../vis/editors/default/controls/precision';
-import { AggGroupNames } from '../../vis/editors/default/agg_groups';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
-
-import { geoContains, scaleBounds, GeoBoundingBox } from './lib/geo_utils';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { GeoBoundingBox, geoContains, scaleBounds } from './lib/geo_utils';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 
 const config = chrome.getUiSettingsClient();
 

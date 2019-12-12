@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { isValidEsInterval } from '../../../core_plugins/data/public';
-import { leastCommonInterval } from '../vis/lib/least_common_interval';
+import { leastCommonInterval } from 'ui/vis/lib/least_common_interval';
+import { isValidEsInterval } from '../../../common';
 
 /**
  * Check a string if it's a valid JSON.
@@ -26,7 +26,7 @@ import { leastCommonInterval } from '../vis/lib/least_common_interval';
  * @param {string} value a string that should be validated
  * @returns {boolean} true if value is a valid JSON or if value is an empty string, or a string with whitespaces, otherwise false
  */
-function isValidJson(value: string): boolean {
+export function isValidJson(value: string): boolean {
   if (!value || value.length === 0) {
     return true;
   }
@@ -49,7 +49,7 @@ function isValidJson(value: string): boolean {
   }
 }
 
-function isValidInterval(value: string, baseInterval?: string) {
+export function isValidInterval(value: string, baseInterval?: string) {
   if (baseInterval) {
     return _parseWithBase(value, baseInterval);
   } else {
@@ -68,5 +68,3 @@ function _parseWithBase(value: string, baseInterval: string) {
     return false;
   }
 }
-
-export { isValidJson, isValidInterval };

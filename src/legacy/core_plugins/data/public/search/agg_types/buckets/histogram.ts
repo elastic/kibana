@@ -20,16 +20,16 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-
 import { npStart } from 'ui/new_platform';
-import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
-import { createFilterHistogram } from './create_filter/histogram';
-import { NumberIntervalParamEditor } from '../../vis/editors/default/controls/number_interval';
-import { MinDocCountParamEditor } from '../../vis/editors/default/controls/min_doc_count';
-import { HasExtendedBoundsParamEditor } from '../../vis/editors/default/controls/has_extended_bounds';
-import { ExtendedBoundsParamEditor } from '../../vis/editors/default/controls/extended_bounds';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+
+import { ExtendedBoundsParamEditor } from 'ui/vis/editors/default/controls/extended_bounds';
+import { HasExtendedBoundsParamEditor } from 'ui/vis/editors/default/controls/has_extended_bounds';
+import { MinDocCountParamEditor } from 'ui/vis/editors/default/controls/min_doc_count';
+import { NumberIntervalParamEditor } from 'ui/vis/editors/default/controls/number_interval';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { BUCKET_TYPES } from './bucket_agg_types';
+import { createFilterHistogram } from './create_filter/histogram';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
 
 export interface AutoBounds {
   min: number;

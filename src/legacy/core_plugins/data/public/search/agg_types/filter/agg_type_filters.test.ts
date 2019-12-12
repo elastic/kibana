@@ -20,7 +20,7 @@
 import { IndexPattern } from 'ui/index_patterns';
 import { AggTypeFilters } from './agg_type_filters';
 import { AggType } from '..';
-import { AggConfig } from '../../vis';
+import { AggConfig } from 'ui/vis';
 
 describe('AggTypeFilters', () => {
   let registry: AggTypeFilters;

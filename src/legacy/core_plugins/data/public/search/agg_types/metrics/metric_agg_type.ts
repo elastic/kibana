@@ -23,7 +23,7 @@ import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;

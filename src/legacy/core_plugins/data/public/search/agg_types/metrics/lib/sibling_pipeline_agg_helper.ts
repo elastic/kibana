@@ -18,14 +18,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
+// @ts-ignore
+import { Schemas } from 'ui/vis/editors/default/schemas';
+import { SubMetricParamEditor } from 'ui/vis/editors/default/controls/sub_metric';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
-import { SubMetricParamEditor } from '../../../vis/editors/default/controls/sub_metric';
 import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 
 import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
-
-// @ts-ignore
-import { Schemas } from '../../../vis/editors/default/schemas';
 
 const metricAggFilter: string[] = [
   '!top_hits',

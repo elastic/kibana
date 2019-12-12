@@ -19,13 +19,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { PercentileRanksEditor } from '../../vis/editors/default/controls/percentile_ranks';
+import { PercentileRanksEditor } from 'ui/vis/editors/default/controls/percentile_ranks';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 
 import { getPercentileValue } from './percentiles_get_value';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { FIELD_FORMAT_IDS, KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 // required by the values editor
 

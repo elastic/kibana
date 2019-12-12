@@ -17,27 +17,23 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { i18n } from '@kbn/i18n';
-
 import { npStart } from 'ui/new_platform';
-import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
-import { BUCKET_TYPES } from './bucket_agg_types';
-import { createFilterDateHistogram } from './create_filter/date_histogram';
-import { intervalOptions } from './_interval_options';
-import { TimeIntervalParamEditor } from '../../vis/editors/default/controls/time_interval';
-import { timefilter } from '../../timefilter';
-import { DropPartialsParamEditor } from '../../vis/editors/default/controls/drop_partials';
-import { ScaleMetricsParamEditor } from '../../vis/editors/default/controls/scale_metrics';
-import { dateHistogramInterval } from '../../../../core_plugins/data/public';
+import { timefilter } from 'ui/timefilter';
+import { TimeBuckets } from 'ui/time_buckets';
+import { DropPartialsParamEditor } from 'ui/vis/editors/default/controls/drop_partials';
+import { ScaleMetricsParamEditor } from 'ui/vis/editors/default/controls/scale_metrics';
+import { TimeIntervalParamEditor } from 'ui/vis/editors/default/controls/time_interval';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
+import { dateHistogramInterval } from '../../../../common';
 import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
-
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
-
-// @ts-ignore
-import { TimeBuckets } from '../../time_buckets';
+import { BUCKET_TYPES } from './bucket_agg_types';
+import { createFilterDateHistogram } from './create_filter/date_histogram';
+import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
+import { intervalOptions } from './_interval_options';
 
 const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');

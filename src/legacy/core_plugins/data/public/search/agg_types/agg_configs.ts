@@ -28,11 +28,11 @@
 
 import _ from 'lodash';
 import { TimeRange } from 'src/plugins/data/public';
-import { Schema } from '../vis/editors/default/schemas';
+import { AggGroupNames } from 'ui/vis/editors/default/agg_groups';
+import { Schema } from 'ui/vis/editors/default/schemas';
+import { IndexPattern } from '../../../../../core_plugins/data/public';
+import { FetchOptions, ISearchSource } from '../types';
 import { AggConfig, AggConfigOptions } from './agg_config';
-import { AggGroupNames } from '../vis/editors/default/agg_groups';
-import { IndexPattern } from '../../../core_plugins/data/public';
-import { ISearchSource, FetchOptions } from '../courier/types';
 
 type Schemas = Record<string, any>;
 

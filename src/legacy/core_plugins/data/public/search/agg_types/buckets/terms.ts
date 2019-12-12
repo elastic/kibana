@@ -20,23 +20,30 @@
 import chrome from 'ui/chrome';
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ISearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
+
+import { OrderAggParamEditor } from 'ui/vis/editors/default/controls/order_agg';
+import { OrderParamEditor } from 'ui/vis/editors/default/controls/order';
+import { OrderByParamEditor, aggFilter } from 'ui/vis/editors/default/controls/order_by';
+import { SizeParamEditor } from 'ui/vis/editors/default/controls/size';
+import { MissingBucketParamEditor } from 'ui/vis/editors/default/controls/missing_bucket';
+import { OtherBucketParamEditor } from 'ui/vis/editors/default/controls/other_bucket';
+
+import { ISearchSource } from '../../search_source';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../utils';
 import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-import { OrderAggParamEditor } from '../../vis/editors/default/controls/order_agg';
-import { OrderParamEditor } from '../../vis/editors/default/controls/order';
-import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/controls/order_by';
-import { SizeParamEditor } from '../../vis/editors/default/controls/size';
-import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
-import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
 import { AggConfigs } from '../agg_configs';
 
-import { Adapters } from '../../../../../plugins/inspector/public';
-import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { Adapters } from '../../../../../../../plugins/inspector/public';
+import {
+  ContentType,
+  FieldFormat,
+  KBN_FIELD_TYPES,
+} from '../../../../../../../plugins/data/public';
 
 // @ts-ignore
 import { Schemas } from '../../vis/editors/default/schemas';

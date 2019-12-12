@@ -19,13 +19,13 @@
 
 // @ts-ignore
 import { i18n } from '@kbn/i18n';
-import { AggConfig } from '../../vis';
-import { SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-import { FieldParamEditor } from '../../vis/editors/default/controls/field';
+import { AggConfig } from 'ui/vis';
+import { toastNotifications } from 'ui/notify';
+import { FieldParamEditor } from 'ui/vis/editors/default/controls/field';
+import { SavedObjectNotFound } from '../../../../../../../plugins/kibana_utils/public';
 import { BaseParamType } from './base';
-import { toastNotifications } from '../../notify';
 import { propFilter } from '../filter';
-import { Field, IFieldList } from '../../index_patterns';
+import { Field, IFieldList } from '../../../../../../../plugins/data/public';
 
 const filterByType = propFilter('type');
 

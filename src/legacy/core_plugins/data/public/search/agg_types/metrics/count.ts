@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 

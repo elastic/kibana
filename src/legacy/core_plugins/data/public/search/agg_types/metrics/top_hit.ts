@@ -19,15 +19,17 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+
+import { TopSortFieldParamEditor } from 'ui/vis/editors/default/controls/top_sort_field';
+import { OrderParamEditor } from 'ui/vis/editors/default/controls/order';
+import { TopFieldParamEditor } from 'ui/vis/editors/default/controls/top_field';
+import { TopSizeParamEditor } from 'ui/vis/editors/default/controls/top_size';
+import { TopAggregateParamEditor } from 'ui/vis/editors/default/controls/top_aggregate';
+
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
-import { TopSortFieldParamEditor } from '../../vis/editors/default/controls/top_sort_field';
-import { OrderParamEditor } from '../../vis/editors/default/controls/order';
-import { TopFieldParamEditor } from '../../vis/editors/default/controls/top_field';
-import { TopSizeParamEditor } from '../../vis/editors/default/controls/top_size';
-import { TopAggregateParamEditor } from '../../vis/editors/default/controls/top_aggregate';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 // @ts-ignore
 import { wrapWithInlineComp } from '../buckets/inline_comp_wrapper';

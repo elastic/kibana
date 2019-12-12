@@ -18,7 +18,7 @@
  */
 
 import { IBucketAggConfig } from '../_bucket_agg_type';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../../../../../plugins/data/public';
 
 export const createFilterTerms = (aggConfig: IBucketAggConfig, key: string, params: any) => {
   const field = aggConfig.params.field;

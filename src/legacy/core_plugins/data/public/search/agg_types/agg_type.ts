@@ -20,15 +20,15 @@
 import { constant, noop, identity } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { initParams } from './agg_params';
+import { Adapters } from 'ui/inspector';
+import { AggConfig } from 'ui/vis';
 
-import { AggConfig } from '../vis';
+import { initParams } from './agg_params';
 import { AggConfigs } from './agg_configs';
-import { ISearchSource } from '../courier';
-import { Adapters } from '../inspector';
+import { ISearchSource } from '../types';
 import { BaseParamType } from './param_types/base';
 import { AggParamType } from '../agg_types/param_types/agg';
-import { KBN_FIELD_TYPES, FieldFormat } from '../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, FieldFormat } from '../../../../../../plugins/data/public';
 
 export interface AggTypeConfig<
   TAggConfig extends AggConfig = AggConfig,
