@@ -6,6 +6,7 @@
 
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleParams } from './types';
+import { addRuleIdToTags } from './add_rule_id_to_tags';
 
 export const createRules = async ({
   alertsClient,
@@ -37,7 +38,7 @@ export const createRules = async ({
   return alertsClient.create({
     data: {
       name,
-      tags,
+      tags: addRuleIdToTags(tags, ruleId),
       alertTypeId: SIGNALS_ID,
       params: {
         description,
