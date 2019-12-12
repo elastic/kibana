@@ -547,8 +547,6 @@ export class VectorStyle extends AbstractStyle {
       return new StaticColorProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
-      const fieldMeta = this._getFieldMeta(field.getName());
-      console.log('field meta at inst time...', fieldMeta);
       return new DynamicColorProperty(descriptor.options, styleName, field);
     } else {
       throw new Error(`${descriptor} not implemented`);
