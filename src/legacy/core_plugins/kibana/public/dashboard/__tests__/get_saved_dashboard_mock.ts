@@ -41,5 +41,5 @@ export function getSavedDashboardMock(
     getQuery: () => ({ query: '', language: 'kuery' }),
     getFilters: () => [],
     ...config,
-  };
+  } as SavedObjectDashboard;
 }
