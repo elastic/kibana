@@ -30,6 +30,7 @@ export {
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
+  SavedObjectsImportRetry,
 } from './import/types';
 
 /**

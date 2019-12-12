@@ -89,6 +89,13 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCreateOptions](./kibana-plugin-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-public.savedobjectsfindoptions.md) |  |
 |  [SavedObjectsFindResponsePublic](./kibana-plugin-public.savedobjectsfindresponsepublic.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
+|  [SavedObjectsImportConflictError](./kibana-plugin-public.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |
+|  [SavedObjectsImportError](./kibana-plugin-public.savedobjectsimporterror.md) | Represents a failure to import. |
+|  [SavedObjectsImportMissingReferencesError](./kibana-plugin-public.savedobjectsimportmissingreferenceserror.md) | Represents a failure to import due to missing references. |
+|  [SavedObjectsImportResponse](./kibana-plugin-public.savedobjectsimportresponse.md) | The response describing the result of an import. |
+|  [SavedObjectsImportRetry](./kibana-plugin-public.savedobjectsimportretry.md) | Describes a retry operation for importing a saved object. |
+|  [SavedObjectsImportUnknownError](./kibana-plugin-public.savedobjectsimportunknownerror.md) | Represents a failure to import due to an unknown reason. |
+|  [SavedObjectsImportUnsupportedTypeError](./kibana-plugin-public.savedobjectsimportunsupportedtypeerror.md) | Represents a failure to import due to having an unsupported saved object type. |
 |  [SavedObjectsMigrationVersion](./kibana-plugin-public.savedobjectsmigrationversion.md) | Information about the migrations that have been applied to this SavedObject. When Kibana starts up, KibanaMigrator detects outdated documents and migrates them based on this value. For each migration that has been applied, the plugin's name is used as a key and the latest migration version as the value. |
 |  [SavedObjectsStart](./kibana-plugin-public.savedobjectsstart.md) |  |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-public.savedobjectsupdateoptions.md) |  |

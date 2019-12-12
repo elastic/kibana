@@ -46,4 +46,5 @@ export {
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
+  SavedObjectsImportRetry,
 } from '../../server/types';
