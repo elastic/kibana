@@ -19,9 +19,9 @@ if (timefield) {
         tooltip-append-to-body="1"
         data-test-subj="docTableCellFilter"
         tooltip="{{ ::'kbn.docTable.tableRow.filterForValueButtonTooltip' | i18n: {defaultMessage: 'Filter for value'} }}"
+        tooltip-placement="bottom"
         aria-label="{{ ::'kbn.docTable.tableRow.filterForValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter for value'} }}"
       ></button>
-
       <button
         ng-click="inlineFilter($event, '-')"
         class="fa fa-search-minus kbnDocTableRowFilterButton"
@@ -30,6 +30,7 @@ if (timefield) {
         tooltip="{{ ::'kbn.docTable.tableRow.filterOutValueButtonTooltip' | i18n: {defaultMessage: 'Filter out value'} }}"
         aria-label="{{ ::'kbn.docTable.tableRow.filterOutValueButtonAriaLabel' | i18n: {defaultMessage: 'Filter out value'} }}"
         tooltip-append-to-body="1"
+        tooltip-placement="bottom"
       ></button>
     <% } %>
   </span>

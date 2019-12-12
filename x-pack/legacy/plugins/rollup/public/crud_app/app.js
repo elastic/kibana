@@ -6,22 +6,20 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { HashRouter, Switch, Route, Redirect, withRouter } from 'react-router-dom';
 
 import { UIM_APP_LOAD } from '../../common';
 import { CRUD_APP_BASE_PATH } from './constants';
 import { registerRouter, setUserHasLeftApp, trackUiMetric, METRIC_TYPE } from './services';
 import { JobList, JobCreate } from './sections';
 
-class ShareRouter extends Component {
-  static contextTypes = {
-    router: PropTypes.shape({
-      history: PropTypes.shape({
-        push: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired
-      }).isRequired
-    }).isRequired
-  }
+class ShareRouterComponent extends Component {
+  static propTypes = {
+    history: PropTypes.shape({
+      push: PropTypes.func.isRequired,
+      createHref: PropTypes.func.isRequired,
+    }).isRequired,
+  };
 
   constructor(...args) {
     super(...args);
@@ -30,14 +28,16 @@ class ShareRouter extends Component {
 
   registerRouter() {
     // Share the router with the app without requiring React or context.
-    const { router } = this.context;
-    registerRouter(router);
+    const { history } = this.props;
+    registerRouter({ history });
   }
 
   render() {
     return this.props.children;
   }
 }
+
+const ShareRouter = withRouter(ShareRouterComponent);
 
 export class App extends Component { // eslint-disable-line react/no-multi-comp
   componentDidMount() {

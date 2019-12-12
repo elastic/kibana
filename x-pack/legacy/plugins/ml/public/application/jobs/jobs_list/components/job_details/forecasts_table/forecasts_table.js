@@ -23,7 +23,6 @@ import {
   EuiLoadingSpinner
 } from '@elastic/eui';
 import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
-import chrome from 'ui/chrome';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
@@ -128,7 +127,7 @@ class ForecastsTableUI extends Component {
 
     const url = `?_g=${_g}&_a=${_a}`;
     addItemToRecentlyAccessed('timeseriesexplorer', this.props.job.job_id, url);
-    window.open(`${chrome.getBasePath()}/app/ml#/timeseriesexplorer${url}`, '_self');
+    window.open(`#/timeseriesexplorer${url}`, '_self');
   }
 
   render() {

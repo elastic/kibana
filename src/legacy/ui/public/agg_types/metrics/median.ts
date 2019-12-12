@@ -17,7 +17,7 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 
 // @ts-ignore
@@ -49,7 +49,7 @@ export const medianMetricAgg = new MetricAggType({
       default: [50],
     },
     {
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         output.params.keyed = false;
       },
     },

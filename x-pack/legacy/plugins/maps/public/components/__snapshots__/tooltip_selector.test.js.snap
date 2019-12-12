@@ -2,20 +2,6 @@
 
 exports[`TooltipSelector should render component 1`] = `
 <div>
-  <EuiTitle
-    size="xxs"
-  >
-    <h6>
-      <FormattedMessage
-        defaultMessage="Fields to display in tooltip"
-        id="xpack.maps.tooltipSelectorLabel"
-        values={Object {}}
-      />
-    </h6>
-  </EuiTitle>
-  <EuiSpacer
-    size="xs"
-  />
   <EuiDragDropContext
     onDragEnd={[Function]}
   >

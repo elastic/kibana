@@ -67,14 +67,16 @@ describe('GET all roles', () => {
   };
 
   describe('failure', () => {
-    getRolesTest(`returns result of license check`, {
+    getRolesTest('returns result of license checker', {
       licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
 
     const error = Boom.notAcceptable('test not acceptable message');
-    getRolesTest(`returns error from cluster client`, {
-      apiResponse: () => Promise.reject(error),
+    getRolesTest('returns error from cluster client', {
+      apiResponse: async () => {
+        throw error;
+      },
       asserts: { statusCode: 406, result: error },
     });
 
