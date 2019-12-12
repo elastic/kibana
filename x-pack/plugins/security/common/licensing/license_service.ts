@@ -5,7 +5,7 @@
  */
 
 import { Observable, Subscription, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { ILicense } from '../../../licensing/common/types';
 import { SecurityLicenseFeatures } from './license_features';
 
@@ -36,7 +36,7 @@ export class SecurityLicenseService {
         getFeatures: () => this.calculateFeaturesFromRawLicense(rawLicense),
 
         features$: license$.pipe(
-          switchMap(nextRawLicense => of(this.calculateFeaturesFromRawLicense(nextRawLicense)))
+          map(nextRawLicense => this.calculateFeaturesFromRawLicense(nextRawLicense))
         ),
       }),
     };

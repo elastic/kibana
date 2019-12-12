@@ -65,8 +65,9 @@ describe('Security Plugin', () => {
                   "license": Object {
                     "features$": Observable {
                       "_isScalar": false,
-                      "operator": SwitchMapOperator {
+                      "operator": MapOperator {
                         "project": [Function],
+                        "thisArg": undefined,
                       },
                       "source": Observable {
                         "_isScalar": false,
