@@ -35,7 +35,6 @@ import {
 } from '@elastic/eui/lib/services';
 
 import { formatDate } from '@elastic/eui/lib/services/format';
-import chrome from 'ui/chrome';
 
 import { addItemToRecentlyAccessed } from '../../../util/recently_accessed';
 import { ml } from '../../../services/ml_api_service';
@@ -87,7 +86,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
         earliestMs: null,
         latestMs: null,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-      }).then((resp) => {
+      }).toPromise().then((resp) => {
         this.setState((prevState, props) => ({
           annotations: resp.annotations[props.jobs[0].job_id] || [],
           errorMessage: undefined,
@@ -206,7 +205,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
 
     const url = `?_g=${_g}&_a=${_a}`;
     addItemToRecentlyAccessed('timeseriesexplorer', job.job_id, url);
-    window.open(`${chrome.getBasePath()}/app/ml#/timeseriesexplorer${url}`, '_self');
+    window.open(`#/timeseriesexplorer${url}`, '_self');
   }
 
   onMouseOverRow = (record) => {

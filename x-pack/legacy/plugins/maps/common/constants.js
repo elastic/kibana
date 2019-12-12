@@ -57,6 +57,8 @@ export const FIELD_ORIGIN = {
 };
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
+export const META_ID_ORIGIN_SUFFIX = 'meta';
+export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 
@@ -68,7 +70,7 @@ export const ZOOM_PRECISION = 2;
 export const ES_SIZE_LIMIT = 10000;
 
 export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
-export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn__isvisible__';
+export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
 
 export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
 
@@ -124,6 +126,11 @@ export const COUNT_PROP_LABEL =  i18n.translate('xpack.maps.aggs.defaultCountLab
 export const COUNT_PROP_NAME = 'doc_count';
 
 export const STYLE_TYPE = {
-  'STATIC': 'STATIC',
-  'DYNAMIC': 'DYNAMIC'
+  STATIC: 'STATIC',
+  DYNAMIC: 'DYNAMIC'
+};
+
+export const LAYER_STYLE_TYPE = {
+  VECTOR: 'VECTOR',
+  HEATMAP: 'HEATMAP'
 };
