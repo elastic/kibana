@@ -215,7 +215,7 @@ export class Server {
     );
   }
 
-  public async setupConfigSchemas() {
+  public async setupCoreConfig() {
     const schemas: Array<[ConfigPath, Type<unknown>]> = [
       [pathConfig.path, pathConfig.schema],
       [elasticsearchConfig.path, elasticsearchConfig.schema],

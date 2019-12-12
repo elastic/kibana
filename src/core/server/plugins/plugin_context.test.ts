@@ -56,7 +56,7 @@ describe('Plugin Context', () => {
     env = Env.createDefault(getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
-    await server.setupConfigSchemas();
+    await server.setupCoreConfig();
     coreContext = { coreId, env, logger, configService: server.configService };
   });
 
