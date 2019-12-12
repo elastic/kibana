@@ -47,16 +47,16 @@ export class TimePicker extends Component<Props, State> {
     isDirty: false,
   };
 
-  // componentDidUpdate(prevProps: Props) {
-  //   const { to, from } = this.props;
+  componentDidUpdate(prevProps: Props) {
+    const { to, from } = this.props;
 
-  //   if (prevProps.from !== from || to !== to) {
-  //     this.setState({
-  //       range: { from, to },
-  //       isDirty: false,
-  //     });
-  //   }
-  // }
+    if (prevProps.from !== from || to !== to) {
+      this.setState({
+        range: { from, to },
+        isDirty: false,
+      });
+    }
+  }
 
   _absoluteSelect = (from?: moment.Moment, to?: moment.Moment) => {
     if (from && to) {
