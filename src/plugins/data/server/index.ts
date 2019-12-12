@@ -57,6 +57,7 @@ export {
   IndexPatternsFetcher,
   FieldDescriptor,
   shouldReadFieldFromDocValues,
+  indexPatternsUtils,
 } from './index_patterns';
 export * from './search';
 export {

@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { Legacy } from 'kibana';
 import { registerValueSuggestions } from './register_value_suggestions';
 
-export function registerSuggestionsApi(server) {
+export function registerSuggestionsApi(server: Legacy.Server) {
   registerValueSuggestions(server);
 }

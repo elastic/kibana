@@ -526,4 +526,5 @@ export interface ElasticsearchPlugin {
   getCluster(name: string): Cluster;
   createCluster(name: string, config: ClusterConfig): Cluster;
   waitUntilReady(): Promise<void>;
+  handleESError: (error: any) => Error;
 }

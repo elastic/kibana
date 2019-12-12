@@ -17,47 +17,47 @@
  * under the License.
  */
 
+import { Legacy } from 'kibana';
 import { get, map } from 'lodash';
+
+import {
+  IFieldType,
+  indexPatternsUtils,
+  esFilters,
+} from '../../../../../../../plugins/data/server';
+
+interface ISuggestionsValuesPayload {
+  field: string;
+  query: string;
+  boolFilter: esFilters.Filter[];
+}
+
+// @ts-ignore
 import { abortableRequestHandler } from '../../../../../elasticsearch/lib/abortable_request_handler';
 
-export function registerValueSuggestions(server) {
-  const serverConfig = server.config();
-  const autocompleteTerminateAfter = serverConfig.get('kibana.autocompleteTerminateAfter');
-  const autocompleteTimeout = serverConfig.get('kibana.autocompleteTimeout');
+const PATH = '/api/kibana/suggestions/values/{index}';
+
+export function registerValueSuggestions(server: Legacy.Server) {
   server.route({
-    path: '/api/kibana/suggestions/values/{index}',
+    path: PATH,
     method: ['POST'],
-    handler: abortableRequestHandler(async function(signal, req) {
+    handler: abortableRequestHandler(async (signal: AbortSignal, req: Legacy.Request) => {
       const { index } = req.params;
-      const { field: fieldName, query, boolFilter } = req.payload;
+      const { field: fieldName, query, boolFilter } = req.payload as ISuggestionsValuesPayload;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-
       const savedObjectsClient = req.getSavedObjectsClient();
-      const savedObjectsResponse = await savedObjectsClient.find({
-        type: 'index-pattern',
-        fields: ['fields'],
-        search: `"${index}"`,
-        searchFields: ['title'],
-      });
-      const indexPattern =
-        savedObjectsResponse.total > 0 ? savedObjectsResponse.saved_objects[0] : null;
-      const fields = indexPattern ? JSON.parse(indexPattern.attributes.fields) : null;
-      const field = fields ? fields.find(field => field.name === fieldName) : fieldName;
 
-      const body = getBody(
-        { field, query, boolFilter },
-        autocompleteTerminateAfter,
-        autocompleteTimeout
-      );
+      const indexPattern = await indexPatternsUtils.findIndexPatternById(savedObjectsClient, index);
+      const field = indexPatternsUtils.getFieldByName(fieldName, indexPattern);
+      const body = getBody(server, field || fieldName, query, boolFilter);
 
       try {
         const response = await callWithRequest(req, 'search', { index, body }, { signal });
-        const buckets =
+        const buckets: any[] =
           get(response, 'aggregations.suggestions.buckets') ||
-          get(response, 'aggregations.nestedSuggestions.suggestions.buckets') ||
-          [];
-        const suggestions = map(buckets, 'key');
-        return suggestions;
+          get(response, 'aggregations.nestedSuggestions.suggestions.buckets');
+
+        return map(buckets || [], 'key');
       } catch (error) {
         throw server.plugins.elasticsearch.handleESError(error);
       }
@@ -65,7 +65,12 @@ export function registerValueSuggestions(server) {
   });
 }
 
-function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
+function getBody(
+  server: Legacy.Server,
+  field: IFieldType | string,
+  query: string,
+  boolFilter: esFilters.Filter[]
+) {
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
 
@@ -73,10 +78,12 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
   // the amount of information that needs to be transmitted to the coordinating node
   const shardSize = 10;
 
+  const { timeout, terminate_after } = getAutocompleteOptions(server);
+
   const body = {
     size: 0,
-    timeout: `${timeout}ms`,
-    terminate_after: terminateAfter,
+    timeout,
+    terminate_after,
     query: {
       bool: {
         filter: boolFilter,
@@ -85,7 +92,7 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
     aggs: {
       suggestions: {
         terms: {
-          field: field.name || field,
+          field: isFieldObject(field) ? field.name : field,
           include: `${getEscapedQuery(query)}.*`,
           execution_hint: executionHint,
           shard_size: shardSize,
@@ -94,7 +101,7 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
     },
   };
 
-  if (field.subType && field.subType.nested) {
+  if (isFieldObject(field) && field.subType && field.subType.nested) {
     return {
       ...body,
       aggs: {
@@ -111,7 +118,20 @@ function getBody({ field, query, boolFilter = [] }, terminateAfter, timeout) {
   return body;
 }
 
-function getEscapedQuery(query = '') {
+function getAutocompleteOptions(server: Legacy.Server) {
+  const serverConfig = server.config();
+
+  return {
+    terminate_after: serverConfig.get<number>('kibana.autocompleteTerminateAfter'),
+    timeout: `${serverConfig.get<number>('kibana.autocompleteTimeout')}ms`,
+  };
+}
+
+function isFieldObject(field: any): field is IFieldType {
+  return Boolean(field && field.name);
+}
+
+function getEscapedQuery(query: string = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
   return query.replace(/[.?+*|{}[\]()"\\#@&<>~]/g, match => `\\${match}`);
 }
