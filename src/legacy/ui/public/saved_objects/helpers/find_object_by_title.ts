@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { find } from 'lodash';
 import { SavedObjectAttributes } from 'src/core/server';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { SimpleSavedObject } from 'src/core/public';
@@ -30,30 +29,23 @@ import { SimpleSavedObject } from 'src/core/public';
  * @param title {string}
  * @returns {Promise<SimpleSavedObject|undefined>}
  */
-export function findObjectByTitle<T extends SavedObjectAttributes>(
+export async function findObjectByTitle<T extends SavedObjectAttributes>(
   savedObjectsClient: SavedObjectsClientContract,
   type: string,
   title: string
 ): Promise<SimpleSavedObject<T> | void> {
   if (!title) {
-    return Promise.resolve();
+    return;
   }
 
   // Elastic search will return the most relevant results first, which means exact matches should come
   // first, and so we shouldn't need to request everything. Using 10 just to be on the safe side.
-  return savedObjectsClient
-    .find<T>({
-      type,
-      perPage: 10,
-      search: `"${title}"`,
-      searchFields: ['title'],
-      fields: ['title'],
-    })
-    .then(response => {
-      const match = find(response.savedObjects, obj => {
-        return obj.get('title').toLowerCase() === title.toLowerCase();
-      });
-
-      return match;
-    });
+  const response = await savedObjectsClient.find<T>({
+    type,
+    perPage: 10,
+    search: `"${title}"`,
+    searchFields: ['title'],
+    fields: ['title'],
+  });
+  return response.savedObjects.find(obj => obj.get('title').toLowerCase() === title.toLowerCase());
 }
