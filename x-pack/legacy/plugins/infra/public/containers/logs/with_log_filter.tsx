@@ -6,7 +6,7 @@
 
 import React, { useContext } from 'react';
 import { IIndexPattern } from 'src/plugins/data/public';
-import { LogFilterState, LogFilterStateParams, FilterQuery } from './log_filter';
+import { LogFilterState, LogFilterStateParams, KueryFilterQuery } from './log_filter';
 
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { RendererFunction } from '../../utils/typed_react';
@@ -16,9 +16,9 @@ interface WithLogFilterProps {
   indexPattern: IIndexPattern;
   children: RendererFunction<
     LogFilterStateParams & {
-      applyFilterQuery: (query: FilterQuery) => void;
+      applyFilterQuery: (query: KueryFilterQuery) => void;
       applyFilterQueryFromKueryExpression: (expression: string) => void;
-      setFilterQueryDraft: (expression: FilterQuery) => void;
+      setFilterQueryDraft: (expression: KueryFilterQuery) => void;
       setFilterQueryDraftFromKueryExpression: (expression: string) => void;
     }
   >;
@@ -28,7 +28,7 @@ export const WithLogFilter: React.FC<WithLogFilterProps> = ({ children, indexPat
   const [logFilterState, logFilterCallbacks] = useContext(LogFilterState.Context);
   return children({
     ...logFilterState,
-    applyFilterQuery: (query: FilterQuery) =>
+    applyFilterQuery: (query: KueryFilterQuery) =>
       logFilterCallbacks.applyLogFilterQuery({
         query,
         serializedQuery: convertKueryToElasticSearchQuery(query.expression, indexPattern),
@@ -54,15 +54,15 @@ export const WithLogFilter: React.FC<WithLogFilterProps> = ({ children, indexPat
  * Url State
  */
 
-type LogFilterUrlState = LogFilterStateParams['filterQuery'];
+type LogFilterUrlState = LogFilterStateParams['filterQueryAsKuery'];
 
 type WithLogFilterUrlStateProps = Omit<WithLogFilterProps, 'children'>;
 
 export const WithLogFilterUrlState: React.FC<WithLogFilterUrlStateProps> = ({ indexPattern }) => (
   <WithLogFilter indexPattern={indexPattern}>
-    {({ applyFilterQuery, filterQuery }) => (
+    {({ applyFilterQuery, filterQueryAsKuery }) => (
       <UrlStateContainer
-        urlState={filterQuery}
+        urlState={filterQueryAsKuery}
         urlStateKey="logFilter"
         mapToUrlState={mapToFilterQuery}
         onChange={urlState => {

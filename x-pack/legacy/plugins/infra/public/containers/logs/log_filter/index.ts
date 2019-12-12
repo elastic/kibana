@@ -4,65 +4,54 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useReducer, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import createContainer from 'constate';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
-
-enum Action {
-  SetDraftFilterQuery,
-  ApplyFilterQuery,
-}
-
-interface SetDraftQueryAction {
-  type: Action.SetDraftFilterQuery;
-  payload: FilterQuery | null;
-}
-
-interface ApplyFilterQueryAction {
-  type: Action.ApplyFilterQuery;
-  payload: SerializedFilterQuery;
-}
-
-type ActionObj = SetDraftQueryAction | ApplyFilterQueryAction;
 
 export interface KueryFilterQuery {
   kind: 'kuery';
   expression: string;
 }
 
-export type FilterQuery = KueryFilterQuery;
-
 export interface SerializedFilterQuery {
-  query: FilterQuery;
+  query: KueryFilterQuery;
   serializedQuery: string;
 }
 
-interface LogFilterBaseStateParams {
+interface LogFilterInternalStateParams {
   filterQuery: SerializedFilterQuery | null;
   filterQueryDraft: KueryFilterQuery | null;
 }
 
-export const logFilterInitialState: LogFilterBaseStateParams = {
+export const logFilterInitialState: LogFilterInternalStateParams = {
   filterQuery: null,
   filterQueryDraft: null,
 };
 
-interface LogFilterDerivatives {
+export type LogFilterStateParams = Omit<LogFilterInternalStateParams, 'filterQuery'> & {
+  filterQuery: SerializedFilterQuery['serializedQuery'] | null;
+  filterQueryAsKuery: SerializedFilterQuery['query'] | null;
   isFilterQueryDraftValid: boolean;
-  filterQueryAsJson: SerializedFilterQuery['serializedQuery'] | null;
-  filterQuery: FilterQuery | null;
-}
-
-export type LogFilterStateParams = Omit<LogFilterBaseStateParams, 'filterQuery'> &
-  LogFilterDerivatives;
-
+};
 export interface LogFilterCallbacks {
-  setLogFilterQueryDraft: (payload: FilterQuery) => void;
+  setLogFilterQueryDraft: (payload: KueryFilterQuery) => void;
   applyLogFilterQuery: (payload: SerializedFilterQuery) => void;
 }
 
-const getDerivatives = (state: LogFilterBaseStateParams) => ({
-  get isFilterQueryDraftValid() {
+export const useLogFilterState: () => [LogFilterStateParams, LogFilterCallbacks] = () => {
+  const [state, setState] = useState(logFilterInitialState);
+  const callbacks = useMemo(
+    () => ({
+      setLogFilterQueryDraft: (payload: KueryFilterQuery) =>
+        setState({ ...state, filterQueryDraft: payload }),
+
+      applyLogFilterQuery: (payload: SerializedFilterQuery) =>
+        setState({ ...state, filterQueryDraft: payload.query, filterQuery: payload }),
+    }),
+    []
+  );
+
+  const isFilterQueryDraftValid = useMemo(() => {
     const { filterQueryDraft } = state;
     if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
       try {
@@ -73,45 +62,22 @@ const getDerivatives = (state: LogFilterBaseStateParams) => ({
     }
 
     return true;
-  },
-  get filterQueryAsJson() {
-    const { filterQuery } = state;
-    return filterQuery ? filterQuery.serializedQuery : null;
-  },
-  get filterQuery() {
-    const { filterQuery } = state;
-    return filterQuery ? filterQuery.query : null;
-  },
-});
+  }, [esKuery.fromKueryExpression, state.filterQueryDraft]);
 
-export const useLogFilterState: () => [LogFilterStateParams, LogFilterCallbacks] = () => {
-  const [state, dispatch] = useReducer(logFilterStateReducer, logFilterInitialState);
-
-  const callbacks = useMemo(
-    () => ({
-      setLogFilterQueryDraft: (payload: FilterQuery) =>
-        dispatch({ type: Action.SetDraftFilterQuery, payload }),
-
-      applyLogFilterQuery: (payload: SerializedFilterQuery) =>
-        dispatch({ type: Action.ApplyFilterQuery, payload }),
-    }),
-    []
+  const serializedFilterQuery = useMemo(
+    () => (state.filterQuery ? state.filterQuery.serializedQuery : null),
+    [esKuery.fromKueryExpression, state.filterQuery]
   );
 
-  const derivatives = useMemo(() => getDerivatives(state), [state]);
-
-  return [{ ...state, ...derivatives }, callbacks];
-};
-
-const logFilterStateReducer = (prevState: LogFilterBaseStateParams, action: ActionObj) => {
-  switch (action.type) {
-    case Action.SetDraftFilterQuery:
-      return { ...prevState, filterQueryDraft: action.payload };
-    case Action.ApplyFilterQuery:
-      return { ...prevState, filterQueryDraft: action.payload.query, filterQuery: action.payload };
-    default:
-      throw new Error();
-  }
+  return [
+    {
+      ...state,
+      filterQueryAsKuery: state.filterQuery ? state.filterQuery.query : null,
+      filterQuery: serializedFilterQuery,
+      isFilterQueryDraftValid,
+    },
+    callbacks,
+  ];
 };
 
 export const LogFilterState = createContainer(useLogFilterState);
