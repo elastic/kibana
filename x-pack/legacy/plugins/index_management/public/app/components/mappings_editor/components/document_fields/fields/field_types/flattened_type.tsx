@@ -45,7 +45,7 @@ export const FlattenedType = React.memo(({ field }: Props) => {
         {/* index */}
         <IndexParameter
           config={getFieldConfig('index_options_flattened')}
-          indexOptions={PARAMETERS_OPTIONS.index_options_keyword}
+          indexOptions={PARAMETERS_OPTIONS.index_options_flattened}
         />
 
         {/* doc_values */}
