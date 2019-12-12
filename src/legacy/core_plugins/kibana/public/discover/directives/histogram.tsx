@@ -61,24 +61,34 @@ interface DiscoverHistogramState {
   chartsTheme: EuiChartThemeType['theme'];
 }
 
-function findIntervalFromDuration(dateValue: number, esUnit: unitOfTime.Base, timeZone: string) {
+function findIntervalFromDuration(
+  dateValue: number,
+  esValue: number,
+  esUnit: unitOfTime.Base,
+  timeZone: string
+) {
   const date = moment.tz(dateValue, timeZone);
   const startOfDate = moment.tz(date, timeZone).startOf(esUnit);
   const endOfDate = moment
     .tz(date, timeZone)
     .startOf(esUnit)
-    .add(1, esUnit);
+    .add(esValue, esUnit);
   return endOfDate.valueOf() - startOfDate.valueOf();
 }
 
-function getSingleUnitInterval(value: number, esUnit: unitOfTime.Base, timeZone: string) {
+function getIntervalInMs(
+  value: number,
+  esValue: number,
+  esUnit: unitOfTime.Base,
+  timeZone: string
+): number {
   switch (esUnit) {
     case 's':
-      return 1000;
+      return 1000 * esValue;
     case 'ms':
-      return 1;
+      return 1 * esValue;
     default:
-      return findIntervalFromDuration(value, esUnit, timeZone);
+      return findIntervalFromDuration(value, esValue, esUnit, timeZone);
   }
 }
 
@@ -88,19 +98,19 @@ export function findMinInterval(
   esUnit: string,
   timeZone: string
 ): number {
-  // if the interval is a single unit we need to find the minimum fixed interval in ms
-  // between the available dates
-  if (esValue === 1) {
-    return xValues.reduce((minInterval, currentXvalue) => {
-      return Math.min(
-        minInterval,
-        getSingleUnitInterval(currentXvalue, esUnit as unitOfTime.Base, timeZone)
-      );
-    }, Number.MAX_SAFE_INTEGER);
-  } else {
-    // if it's a multiple unit interval, than it's a fixed interval directly convertible to ms
-    return +moment.duration(esValue, esUnit as unitOfTime.Base);
-  }
+  return xValues.reduce((minInterval, currentXvalue, index) => {
+    let currentDiff = minInterval;
+    if (index > 0) {
+      currentDiff = Math.abs(xValues[index - 1] - currentXvalue);
+    }
+    const singleUnitInterval = getIntervalInMs(
+      currentXvalue,
+      esValue,
+      esUnit as unitOfTime.Base,
+      timeZone
+    );
+    return Math.min(minInterval, singleUnitInterval, currentDiff);
+  }, Number.MAX_SAFE_INTEGER);
 }
 
 export class DiscoverHistogram extends Component<DiscoverHistogramProps, DiscoverHistogramState> {

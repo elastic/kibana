@@ -41,7 +41,8 @@ export default function ({ getService, getPageObjects }) {
 
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
-
+      await esArchiver.loadIfNeeded('long_window_logstash');
+      await esArchiver.loadIfNeeded('visualize');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('discover');
