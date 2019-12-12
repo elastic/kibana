@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { CoreStart, PackageInfo } from 'kibana/public';
 import { createContext } from 'react';
-import { AppMountContext, PackageInfo } from 'kibana/public';
-import { ApmPluginSetupDeps, ConfigSchema } from '../new-platform/plugin';
+import { ApmPluginStartDeps, ConfigSchema } from '../new-platform/plugin';
 
 export interface ApmPluginContextValue {
   config: ConfigSchema;
-  core: AppMountContext['core'];
+  core: CoreStart;
   packageInfo: PackageInfo;
-  plugins: ApmPluginSetupDeps;
+  plugins: ApmPluginStartDeps;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);
