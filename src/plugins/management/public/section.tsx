@@ -17,6 +17,12 @@
  * under the License.
  */
 
+import * as React from 'react';
+import ReactDOM from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
+import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { SidebarNav } from 'ui/management/components';
+// import { management } from 'ui/management/sections_register';
 import { ManagementApp, CreateSection, ISection, RegisterManagementAppArgs } from './types';
 import { KibanaLegacySetup } from '../../kibana_legacy/public';
 
@@ -27,14 +33,20 @@ export class Section implements ISection {
   public readonly order?: number;
   public readonly euiIconType?: string;
   public readonly icon?: string;
+  private readonly sections: Section[];
   private readonly registerLegacyApp: KibanaLegacySetup['registerLegacyApp'];
 
-  constructor(section: CreateSection, registerLegacyApp: KibanaLegacySetup['registerLegacyApp']) {
+  constructor(
+    section: CreateSection,
+    sections: Section[],
+    registerLegacyApp: KibanaLegacySetup['registerLegacyApp']
+  ) {
     this.id = section.id;
     this.title = section.title;
     this.order = section.order;
     this.euiIconType = section.euiIconType;
     this.icon = section.icon;
+    this.sections = sections;
     this.registerLegacyApp = registerLegacyApp;
   }
 
@@ -45,8 +57,47 @@ export class Section implements ISection {
       id: `management/${this.id}/${id}`,
       title,
       mount: async (appMountContext, params) => {
-        console.log('abstract mount', appMountContext, params);
-        return await mount(appMountContext, { sectionBasePath: '', ...params });
+        // return await mount(appMountContext, { sectionBasePath: '', ...params });
+
+        // TODO - move SidebarNav, get access to management
+
+        ReactDOM.render(
+          <I18nProvider>
+            <EuiPage>
+              <SidebarNav
+                sections={this.sections}
+                // legacySections={management.getVisible()}
+                // sections={[]}
+                legacySections={[]}
+                selectedId={id}
+                className="mgtSideNav"
+              />
+              <EuiPageBody>hihihi</EuiPageBody>
+            </EuiPage>
+          </I18nProvider>,
+          params.element
+        );
+        /*
+        ReactDOM.render(
+          <I18nProvider>
+            <EuiPage>
+              <SidebarNav
+                sections={this.sections}
+                // legacySections={management.getVisible()}
+                legacySections={[]}
+                selectedId={id}
+                className="mgtSideNav"
+              />
+              <EuiPageBody>hihihi</EuiPageBody>
+            </EuiPage>
+          </I18nProvider>,
+          params.element
+        );
+        */
+
+        return () => {
+          ReactDOM.unmountComponentAtNode(params.element);
+        };
       },
     });
 

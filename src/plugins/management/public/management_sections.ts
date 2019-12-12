@@ -36,7 +36,7 @@ export class ManagementSections {
       euiIconType?: string; // takes precedence over `icon` property.
       icon?: string; // URL to image file; fallback if no `euiIconType`
     }) => {
-      const newSection = new Section(section, registerLegacyApp);
+      const newSection = new Section(section, this.sections, registerLegacyApp);
       this.sections.push(newSection);
       return newSection;
     };
