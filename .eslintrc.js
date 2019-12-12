@@ -132,12 +132,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/eui_utils/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/kibana_react/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',

@@ -9,9 +9,9 @@ import { jobsQueryFactory } from '../../lib/jobs_query';
 import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
 import { getDocumentPayloadFactory } from './get_document_payload';
 
-export function jobResponseHandlerFactory(server) {
+export function jobResponseHandlerFactory(server, exportTypesRegistry) {
   const jobsQuery = jobsQueryFactory(server);
-  const getDocumentPayload = getDocumentPayloadFactory(server);
+  const getDocumentPayload = getDocumentPayloadFactory(server, exportTypesRegistry);
 
   return function jobResponseHandler(validJobTypes, user, h, params, opts = {}) {
     const { docId } = params;
