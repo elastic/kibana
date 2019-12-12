@@ -106,10 +106,9 @@ export function getActionType(): ActionTypeModel {
       };
       validationResult.errors = errors;
       if (
-        ((!actionParams.to || actionParams.to.length === 0) &&
-          (!actionParams.cc || actionParams.cc.length === 0)) ||
-        !actionParams.bcc ||
-        actionParams.bcc.length === 0
+        (!actionParams.to || actionParams.to.length === 0) &&
+        (!actionParams.cc || actionParams.cc.length === 0) &&
+        (!actionParams.bcc || actionParams.bcc.length === 0)
       ) {
         const errorText = i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredEntryText',
