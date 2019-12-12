@@ -115,12 +115,11 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
 
         // Fire and forget.
         $.ajax(loadFrom).done(async data => {
-          const coreEditor = editor.getCoreEditor();
           await editor.update(data, true);
           editor.moveToNextRequestEdge(false);
-          coreEditor.clearSelection();
+          editor.clearSelection();
           editor.highlightCurrentRequestsAndUpdateActionBar();
-          coreEditor.getContainer().focus();
+          editor.container.focus();
         });
       }
     };
