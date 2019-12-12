@@ -8,14 +8,14 @@ import _ from 'lodash';
 import React from 'react';
 import { FieldSelect } from '../field_select';
 
-export function DynamicLabelSelector({ ordinalFields, styleOptions, onChange }) {
+export function DynamicLabelSelector({ fields, styleOptions, onChange }) {
   const onFieldChange = ({ field }) => {
     onChange({ ...styleOptions, field });
   };
 
   return (
     <FieldSelect
-      fields={ordinalFields}
+      fields={fields}
       selectedFieldName={_.get(styleOptions, 'field.name')}
       onChange={onFieldChange}
       compressed

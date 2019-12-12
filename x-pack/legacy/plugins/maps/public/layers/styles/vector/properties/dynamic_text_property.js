@@ -14,6 +14,10 @@ export class DynamicTextProperty extends DynamicStyleProperty {
     mbMap.setLayoutProperty(mbLayerId, 'text-field', ['coalesce', ['get', targetName], '']);
   }
 
+  isOrdinal() {
+    return false;
+  }
+
   supportsFieldMeta() {
     return false;
   }

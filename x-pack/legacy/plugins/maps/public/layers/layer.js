@@ -358,6 +358,10 @@ export class AbstractLayer {
     return [];
   }
 
+  async getFields() {
+    return [];
+  }
+
   syncVisibilityWithMb(mbMap, mbLayerId) {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }

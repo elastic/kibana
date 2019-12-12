@@ -432,6 +432,7 @@ export class VectorStyle extends AbstractStyle {
         return {
           supportsFeatureState,
           isScaled,
+          isOrdinal: styleProperty.isOrdinal(),
           name: field.getName(),
           range: this._getFieldRange(field.getName()),
           computedName: getComputedFieldName(styleProperty.getStyleName(), field.getName()),
@@ -450,6 +451,20 @@ export class VectorStyle extends AbstractStyle {
       tmpFeatureIdentifier.id = feature.id;
       mbMap.removeFeatureState(tmpFeatureIdentifier);
     }
+  }
+
+  _getOrdinalValue(value, isScaled, range) {
+    const valueAsFloat = parseFloat(value);
+
+    if (isScaled) {
+      return scaleValue(valueAsFloat, range);
+    }
+
+    if (isNaN(valueAsFloat)) {
+      return 0;
+    }
+
+    return valueAsFloat;
   }
 
   setFeatureState(featureCollection, mbMap, sourceId) {
@@ -474,20 +489,8 @@ export class VectorStyle extends AbstractStyle {
       const feature = featureCollection.features[i];
 
       for (let j = 0; j < styleFields.length; j++) {
-        const { supportsFeatureState, isScaled, name, range, computedName } = styleFields[j];
-        const value = parseFloat(feature.properties[name]);
-        let styleValue;
-        if (isScaled) {
-          styleValue = scaleValue(value, range);
-        } else {
-          // TODO this check is going to cause problems for string values
-          if (isNaN(value)) {
-            styleValue = 0;
-          } else {
-            styleValue = value;
-          }
-        }
-
+        const { supportsFeatureState, isScaled, isOrdinal, name, range, computedName } = styleFields[j];
+        const styleValue = isOrdinal ? this._getOrdinalValue(feature.properties[name], isScaled, range) : feature.properties[name];
         if (supportsFeatureState) {
           tmpFeatureState[computedName] = styleValue;
         } else {

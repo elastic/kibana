@@ -117,6 +117,23 @@ export class ESSearchSource extends AbstractESSource {
     }
   }
 
+  async getFields() {
+    try {
+      const indexPattern = await this.getIndexPattern();
+      return indexPattern.fields
+        .filter(field => {
+          // Ensure fielddata is enabled for field.
+          // Search does not request _source
+          return field.aggregatable;
+        })
+        .map(field => {
+          return this.createField({ fieldName: field.name });
+        });
+    } catch (error) {
+      return [];
+    }
+  }
+
   getFieldNames() {
     return [this._descriptor.geoField];
   }
@@ -374,6 +391,7 @@ export class ESSearchSource extends AbstractESSource {
     try {
       const geoField = await this._getGeoField();
       featureCollection = hitsToGeoJson(hits, flattenHit, geoField.name, geoField.type);
+      console.log(featureCollection);
     } catch(error) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.convertToGeoJsonErrorMsg', {

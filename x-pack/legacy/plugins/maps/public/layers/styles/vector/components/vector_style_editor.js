@@ -29,6 +29,7 @@ export class VectorStyleEditor extends Component {
   state = {
     dateFields: [],
     numberFields: [],
+    fields: [],
     defaultDynamicProperties: getDefaultDynamicProperties(),
     defaultStaticProperties: getDefaultStaticProperties(),
     supportedFeatures: undefined,
@@ -41,17 +42,16 @@ export class VectorStyleEditor extends Component {
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadOrdinalFields();
+    this._loadFields();
     this._loadSupportedFeatures();
   }
 
   componentDidUpdate() {
-    this._loadOrdinalFields();
+    this._loadFields();
     this._loadSupportedFeatures();
   }
 
-  async _loadOrdinalFields() {
-
+  async _loadFields() {
     const getFieldMeta = async (field) => {
       return {
         label: await field.getLabel(),
@@ -59,22 +59,27 @@ export class VectorStyleEditor extends Component {
         origin: field.getOrigin()
       };
     };
+
     const dateFields = await this.props.layer.getDateFields();
     const dateFieldPromises = dateFields.map(getFieldMeta);
     const dateFieldsArray = await Promise.all(dateFieldPromises);
-
     if (this._isMounted && !_.isEqual(dateFieldsArray, this.state.dateFields)) {
       this.setState({ dateFields: dateFieldsArray });
     }
 
     const numberFields = await this.props.layer.getNumberFields();
     const numberFieldPromises = numberFields.map(getFieldMeta);
-
     const numberFieldsArray = await Promise.all(numberFieldPromises);
     if (this._isMounted && !_.isEqual(numberFieldsArray, this.state.numberFields)) {
       this.setState({ numberFields: numberFieldsArray });
     }
 
+    const fields = await this.props.layer.getFields();
+    const fieldPromises = fields.map(getFieldMeta);
+    const fieldsArray = await Promise.all(fieldPromises);
+    if (this._isMounted && !_.isEqual(fieldsArray, this.state.fields)) {
+      this.setState({ fields: fieldsArray });
+    }
   }
 
   async _loadSupportedFeatures() {
@@ -132,7 +137,7 @@ export class VectorStyleEditor extends Component {
         swatches={DEFAULT_FILL_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.fillColor}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.fillColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.fillColor.options}
       />
@@ -145,7 +150,7 @@ export class VectorStyleEditor extends Component {
         swatches={DEFAULT_LINE_COLORS}
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.lineColor}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineColor.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineColor.options}
       />
@@ -157,7 +162,7 @@ export class VectorStyleEditor extends Component {
       <VectorStyleSizeEditor
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.lineWidth}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.lineWidth.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.lineWidth.options}
       />
@@ -169,7 +174,7 @@ export class VectorStyleEditor extends Component {
       <VectorStyleSizeEditor
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.iconSize}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this._getOrdinalFields()}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.iconSize.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconSize.options}
       />
@@ -181,7 +186,7 @@ export class VectorStyleEditor extends Component {
       <VectorStyleLabelEditor
         handlePropertyChange={this.props.handlePropertyChange}
         styleProperty={this.props.styleProperties.label}
-        ordinalFields={this._getOrdinalFields()}
+        fields={this.state.fields}
         defaultStaticStyleOptions={this.state.defaultStaticProperties.label.options}
         defaultDynamicStyleOptions={this.state.defaultDynamicProperties.label.options}
       />
@@ -205,7 +210,7 @@ export class VectorStyleEditor extends Component {
           swatches={DEFAULT_LINE_COLORS}
           handlePropertyChange={this.props.handlePropertyChange}
           styleProperty={this.props.styleProperties.labelColor}
-          ordinalFields={this._getOrdinalFields()}
+          fields={this._getOrdinalFields()}
           defaultStaticStyleOptions={this.state.defaultStaticProperties.labelColor.options}
           defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelColor.options}
         />
@@ -214,7 +219,7 @@ export class VectorStyleEditor extends Component {
         <VectorStyleSizeEditor
           handlePropertyChange={this.props.handlePropertyChange}
           styleProperty={this.props.styleProperties.labelSize}
-          ordinalFields={this._getOrdinalFields()}
+          fields={this._getOrdinalFields()}
           defaultStaticStyleOptions={this.state.defaultStaticProperties.labelSize.options}
           defaultDynamicStyleOptions={this.state.defaultDynamicProperties.labelSize.options}
         />
@@ -230,7 +235,7 @@ export class VectorStyleEditor extends Component {
         <OrientationEditor
           handlePropertyChange={this.props.handlePropertyChange}
           styleProperty={this.props.styleProperties.iconOrientation}
-          ordinalFields={this.state.numberFields}
+          fields={this.state.numberFields}
           defaultStaticStyleOptions={this.state.defaultStaticProperties.iconOrientation.options}
           defaultDynamicStyleOptions={this.state.defaultDynamicProperties.iconOrientation.options}
         />

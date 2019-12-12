@@ -100,6 +100,10 @@ export class AbstractVectorSource extends AbstractSource {
     return [];
   }
 
+  async getFields() {
+    return [];
+  }
+
   async getLeftJoinFields() {
     return [];
   }

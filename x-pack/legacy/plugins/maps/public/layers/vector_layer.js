@@ -191,18 +191,22 @@ export class VectorLayer extends AbstractLayer {
     return this._source.getDisplayName();
   }
 
+  _getJoinFields() {
+    const joinFields = [];
+    this.getValidJoins().forEach(join => {
+      const fields = join.getJoinFields();
+      joinFields.push(...fields);
+    });
+    return joinFields;
+  }
+
   async getDateFields() {
     return await this._source.getDateFields();
   }
 
   async getNumberFields() {
     const numberFieldOptions = await this._source.getNumberFields();
-    const joinFields = [];
-    this.getValidJoins().forEach(join => {
-      const fields = join.getJoinFields();
-      joinFields.push(...fields);
-    });
-    return [...numberFieldOptions, ...joinFields];
+    return [...numberFieldOptions, ...this._getJoinFields()];
   }
 
   async getOrdinalFields() {
@@ -210,6 +214,11 @@ export class VectorLayer extends AbstractLayer {
       ...await this.getDateFields(),
       ...await this.getNumberFields()
     ];
+  }
+
+  async getFields() {
+    const sourceFields = await this._source.getFields();
+    return [...sourceFields, ...this._getJoinFields()];
   }
 
   getIndexPatternIds() {
@@ -513,9 +522,6 @@ export class VectorLayer extends AbstractLayer {
     if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
       mbGeoJSONSource.setData(featureCollection);
     }
-
-    console.log(featureCollection);
-
   }
 
   _setMbPointsProperties(mbMap) {
