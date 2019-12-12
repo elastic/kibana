@@ -35,7 +35,7 @@ export function toAbsoluteDates(dateRange?: DateRange) {
 }
 
 export function autoIntervalFromDateRange(dateRange?: DateRange, defaultValue: string = '1h') {
-  const dates = toConcreteDates(dateRange);
+  const dates = toAbsoluteDates(dateRange);
   if (!dates) {
     return defaultValue;
   }

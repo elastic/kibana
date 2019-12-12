@@ -5,10 +5,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import dateMath from '@elastic/datemath';
 import { ExpressionFunction, KibanaContext, KibanaDatatable } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
-import { toConcreteDates } from '../indexpattern_plugin/auto_date';
+import { toAbsoluteDates } from '../indexpattern_plugin/auto_date';
 
 interface MergeTables {
   layerIds: string[];
@@ -59,7 +58,7 @@ function getDateRange(ctx?: KibanaContext | null) {
     return;
   }
 
-  const dateRange = toConcreteDates({ fromDate: ctx.timeRange.from, toDate: ctx.timeRange.to });
+  const dateRange = toAbsoluteDates({ fromDate: ctx.timeRange.from, toDate: ctx.timeRange.to });
 
   if (!dateRange) {
     return;
