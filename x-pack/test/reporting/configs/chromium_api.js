@@ -21,7 +21,9 @@ export default async function ({ readConfigFile }) {
     kbnTestServer: {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'), // optimizer config
+        // Reporting API tests use functionalConfig instead of apiConfig because they needs a fully working UI. By default, the API config
+        // does not have optimize setting enabled, and Kibana would not have a working UI.
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
         '--logging.events.log', '["info","warning","error","fatal","optimize","reporting"]',
         '--xpack.endpoint.enabled=true',
         '--xpack.reporting.csv.enablePanelActionDownload=true',
