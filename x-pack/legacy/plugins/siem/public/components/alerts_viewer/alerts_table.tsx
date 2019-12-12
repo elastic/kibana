@@ -60,10 +60,7 @@ export const AlertsTable = React.memo(
   }: {
     endDate: number;
     startDate: number;
-    pageFilters: Array<{
-      meta: {};
-      query: AlertsComponentPageFilterDsl;
-    }>;
+    pageFilters: AlertsComponentPageFilterDsl;
   }) => {
     return (
       <StatefulEventsViewer
