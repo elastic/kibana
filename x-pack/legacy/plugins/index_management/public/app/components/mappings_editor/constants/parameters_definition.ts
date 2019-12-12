@@ -174,6 +174,7 @@ export const PARAMETERS_DEFINITION = {
   },
   null_value_numeric: {
     fieldConfig: {
+      defaultValue: '', // Needed for FieldParams typing
       label: nullValueLabel,
       formatters: [toInt],
       validations: [
@@ -193,6 +194,7 @@ export const PARAMETERS_DEFINITION = {
   },
   null_value_geo_point: {
     fieldConfig: {
+      defaultValue: '', // Needed for FieldParams typing
       label: nullValueLabel,
       validations: [
         {
