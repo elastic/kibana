@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { DEFAULT_PANEL, DetailProps } from '.';
 import { PackageInfo } from '../../../common/types';
 import { AssetsFacetGroup } from '../../components/assets_facet_group';
-import { AssetAccordion } from '../../components/asset_accordion';
 import { Requirements } from '../../components/requirements';
 import { CenterColumn, LeftColumn, RightColumn } from './layout';
 import { OverviewPanel } from './overview_panel';
 import { SideNavLinks } from './side_nav_links';
+import { DataSourcesPanel } from './data_sources_panel';
 
 type ContentProps = PackageInfo & Pick<DetailProps, 'panel'> & { hasIconPanel: boolean };
 export function Content(props: ContentProps) {
@@ -49,16 +49,10 @@ export function Content(props: ContentProps) {
 
 type ContentPanelProps = PackageInfo & Pick<DetailProps, 'panel'>;
 export function ContentPanel(props: ContentPanelProps) {
-  const { assets, panel } = props;
+  const { panel, name, version } = props;
   switch (panel) {
-    case 'assets':
-      return <AssetAccordion assets={assets} />;
     case 'data-sources':
-      return (
-        <EuiTitle size="xs">
-          <span>Data Sources</span>
-        </EuiTitle>
-      );
+      return <DataSourcesPanel name={name} version={version} />;
     case 'overview':
     default:
       return <OverviewPanel {...props} />;

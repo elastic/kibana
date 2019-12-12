@@ -25,7 +25,6 @@ export function InstallationButton(props: InstallationButtonProps) {
   const isInstalling = installationStatus === InstallStatus.installing;
   const isRemoving = installationStatus === InstallStatus.uninstalling;
   const isInstalled = installationStatus === InstallStatus.installed;
-
   const [isModalVisible, setModalVisible] = useState<boolean>(false);
   const toggleModal = useCallback(() => {
     setModalVisible(!isModalVisible);

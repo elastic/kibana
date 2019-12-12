@@ -11,7 +11,7 @@ import { Plugin, PluginInitializerContext } from './plugin';
 import { routes } from './routes';
 
 // create './types' later and move there?
-export type DetailViewPanelName = 'overview' | 'assets' | 'data-sources';
+export type DetailViewPanelName = 'overview' | 'data-sources';
 
 const REACT_APP_ROOT_ID = 'epm__root';
 const template = `<div id="${REACT_APP_ROOT_ID}" style="flex-grow: 1; display: flex; flex-direction: column"></div>`;

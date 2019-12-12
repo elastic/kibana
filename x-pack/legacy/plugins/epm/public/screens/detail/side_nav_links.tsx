@@ -10,7 +10,8 @@ import styled from 'styled-components';
 import { DetailViewPanelName } from '../../';
 import { PackageInfo } from '../../../common/types';
 import { entries } from '../../../common/type_utils';
-import { useLinks } from '../../hooks';
+import { useLinks, useGetPackageInstallStatus } from '../../hooks';
+import { InstallStatus } from '../../types';
 
 export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {
   active: DetailViewPanelName;
@@ -18,12 +19,13 @@ export type NavLinkProps = Pick<PackageInfo, 'name' | 'version'> & {
 
 const PanelDisplayNames: Record<DetailViewPanelName, string> = {
   overview: 'Overview',
-  assets: 'Assets',
   'data-sources': 'Data Sources',
 };
 
 export function SideNavLinks({ name, version, active }: NavLinkProps) {
   const { toDetailView } = useLinks();
+  const getPackageInstallStatus = useGetPackageInstallStatus();
+  const packageInstallStatus = getPackageInstallStatus(name);
 
   return (
     <Fragment>
@@ -36,6 +38,10 @@ export function SideNavLinks({ name, version, active }: NavLinkProps) {
               ? p.theme.eui.euiFontWeightSemiBold
               : p.theme.eui.euiFontWeightRegular};
         `;
+        // don't display Data Sources tab if the package is not installed
+        if (packageInstallStatus !== InstallStatus.installed && panel === 'data-sources')
+          return null;
+
         return (
           <div key={panel}>
             <Link>{display}</Link>

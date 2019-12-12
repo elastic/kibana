@@ -17,8 +17,7 @@ import { FormState } from './add_data_source_form';
 
 interface AddDataSourceFormProps {
   formState: FormState;
-  // EuiCheckboxGroup onChange prop type says parameter is an event, but it is a string of the input name
-  onCheckboxChange: (name: any) => void;
+  onCheckboxChange: (name: string) => void;
   onTextChange: (evt: React.ChangeEvent<HTMLInputElement>) => void;
   datasetCheckboxes: EuiCheckboxGroupOption[];
 }
