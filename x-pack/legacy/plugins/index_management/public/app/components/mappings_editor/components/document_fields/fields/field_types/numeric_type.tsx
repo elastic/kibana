@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, FormDataProvider, NumericField } from '../../../../shared_imports';
+import { UseField, FormDataProvider, NumericField, Field } from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,
@@ -21,6 +20,7 @@ import {
   CopyToParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { PARAMETERS_DEFINITION } from '../../../../constants';
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
@@ -44,6 +44,26 @@ interface Props {
 export const NumericType = ({ field }: Props) => {
   return (
     <>
+      {/* scaling_factor only applies to scaled_float numeric type*/}
+      <FormDataProvider pathsToWatch="subType">
+        {formData =>
+          formData.subType === 'scaled_float' ? (
+            <EditFieldSection>
+              <EditFieldFormRow
+                title={<h3>{PARAMETERS_DEFINITION.scaling_factor.title}</h3>}
+                description={PARAMETERS_DEFINITION.scaling_factor.description}
+                withToggle={false}
+              >
+                <UseField
+                  path="scaling_factor"
+                  config={getFieldConfig('scaling_factor')}
+                  component={Field}
+                />
+              </EditFieldFormRow>
+            </EditFieldSection>
+          ) : null
+        }
+      </FormDataProvider>
       <EditFieldSection>
         <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
@@ -57,43 +77,6 @@ export const NumericType = ({ field }: Props) => {
 
           {/* ignore_malformed */}
           <IgnoreMalformedParameter />
-
-          {/* scaling_factor */}
-          <FormDataProvider pathsToWatch="subType">
-            {formData =>
-              formData.subType === 'scaled_float' ? (
-                <EditFieldFormRow
-                  title={
-                    <h3>
-                      {i18n.translate('xpack.idxMgmt.mappingsEditor.scalingFactorFieldTitle', {
-                        defaultMessage: 'Set scaling factor',
-                      })}
-                    </h3>
-                  }
-                  description={i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.scalingFactorFieldDescription',
-                    {
-                      defaultMessage: 'The scaling factor to use when encoding values.',
-                    }
-                  )}
-                  toggleDefaultValue={true}
-                >
-                  {/* Boost level */}
-                  <UseField path="scaling_factor" config={getFieldConfig('scaling_factor')}>
-                    {scalingFactorField => (
-                      <EuiRange
-                        min={1}
-                        max={50}
-                        value={scalingFactorField.value as string}
-                        onChange={scalingFactorField.onChange as any}
-                        showInput
-                      />
-                    )}
-                  </UseField>
-                </EditFieldFormRow>
-              ) : null
-            }
-          </FormDataProvider>
 
           {/* null_value */}
           <NullValueParameter

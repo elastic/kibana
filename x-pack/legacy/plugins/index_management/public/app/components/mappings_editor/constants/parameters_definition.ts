@@ -339,19 +339,52 @@ export const PARAMETERS_DEFINITION = {
     } as FieldConfig,
   },
   scaling_factor: {
+    title: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldTitle', {
+      defaultMessage: 'Scaling factor',
+    }),
+    description: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldDescription',
+      {
+        defaultMessage:
+          'Values will be multiplied by this factor at index time and rounded to the closest long value. High factor values improve accuracy, but also increase space requirements.',
+      }
+    ),
     fieldConfig: {
-      defaultValue: 1.0,
+      defaultValue: '',
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorLabel', {
+        defaultMessage: 'Scaling factor',
+      }),
       validations: [
         {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.scalingFactorIsRequiredErrorMessage',
+              {
+                defaultMessage: 'A scaling factor is required.',
+              }
+            )
+          ),
+        },
+        {
           validator: ({ value }: ValidationFuncArg<any, number>) => {
-            if (value < 0) {
-              return { message: commonErrorMessages.smallerThanZero };
+            if (value <= 0) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.validations.greaterThanZeroErrorMessage',
+                  {
+                    defaultMessage: 'The scaling factor must be greater than 0.',
+                  }
+                ),
+              };
             }
           },
         },
       ],
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorHelpText', {
+        defaultMessage: 'Value must be greater than 0.',
+      }),
     } as FieldConfig,
   },
   dynamic: {
