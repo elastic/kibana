@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const VISUAL_MAX_RULE_DEPTH = 10;
-export const DEFAULT_VISUAL_EDITOR_RULE_DEPTH_CUTOFF = 5;
+export const VISUAL_MAX_RULE_DEPTH = 5;

@@ -24,10 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { RoleMapping } from '../../../../../../../common/model';
 import { VisualRuleEditor } from './visual_rule_editor';
 import { AdvancedRuleEditor } from './advanced_rule_editor';
-import {
-  DEFAULT_VISUAL_EDITOR_RULE_DEPTH_CUTOFF,
-  VISUAL_MAX_RULE_DEPTH,
-} from '../../services/role_mapping_constants';
+import { VISUAL_MAX_RULE_DEPTH } from '../../services/role_mapping_constants';
 import { Rule, generateRulesFromRaw } from '../../../model';
 import { validateRoleMappingRules } from '../../services/role_mapping_validation';
 
@@ -111,8 +108,7 @@ export class RuleEditorPanel extends Component<Props, State> {
 
   private initializeFromRawRules = (rawRules: Props['rawRules']) => {
     const { rules, maxDepth } = generateRulesFromRaw(rawRules);
-    const mode: State['mode'] =
-      maxDepth > DEFAULT_VISUAL_EDITOR_RULE_DEPTH_CUTOFF ? 'advanced' : 'visual';
+    const mode: State['mode'] = maxDepth >= VISUAL_MAX_RULE_DEPTH ? 'advanced' : 'visual';
     return {
       rules,
       mode,
