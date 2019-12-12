@@ -15,7 +15,7 @@ import {
 } from 'puppeteer';
 import del from 'del';
 import * as Rx from 'rxjs';
-import { ignoreElements, mergeMap, tap } from 'rxjs/operators';
+import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 
 import { BrowserConfig, NetworkPolicy } from '../../../../types';
@@ -144,7 +144,7 @@ export class HeadlessChromiumDriverFactory {
         terminate$
           .pipe(
             tap(signal => {
-              this.logger.debug(`Observer got signal: ${signal}`);
+              this.logger.debug(`Termination signal received: ${signal}`);
             }),
             ignoreElements()
           )
@@ -156,7 +156,6 @@ export class HeadlessChromiumDriverFactory {
       this.getProcessLogger(browser).subscribe();
 
       const driver$ = Rx.of(new HeadlessChromiumDriver(page, { inspect: this.browserConfig.inspect, networkPolicy: this.networkPolicy })); //  prettier-ignore
-
       const exit$ = this.getPageExit(browser, page);
 
       observer.next({ driver$, exit$ });
@@ -173,9 +172,9 @@ export class HeadlessChromiumDriverFactory {
     });
   }
 
-  getBrowserLogger(page: Page): Rx.Observable<ConsoleMessage> {
-    return Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
-      tap(line => {
+  getBrowserLogger(page: Page): Rx.Observable<void> {
+    const consoleMessages$ = Rx.fromEvent<ConsoleMessage>(page, 'console').pipe(
+      map(line => {
         if (line.type() === 'error') {
           this.logger.error(line.text(), ['headless-browser-console']);
         } else {
@@ -183,6 +182,19 @@ export class HeadlessChromiumDriverFactory {
         }
       })
     );
+
+    const pageRequestFailed$ = Rx.fromEvent<PuppeteerRequest>(page, 'requestfailed').pipe(
+      map(req => {
+        const failure = req.failure && req.failure();
+        if (failure) {
+          this.logger.warning(
+            `Request to [${req.url()}] failed! [${failure.errorText}]. This error will be ignored.`
+          );
+        }
+      })
+    );
+
+    return Rx.merge(consoleMessages$, pageRequestFailed$);
   }
 
   getProcessLogger(browser: Browser) {
@@ -208,18 +220,6 @@ export class HeadlessChromiumDriverFactory {
       mergeMap(err => Rx.throwError(err))
     );
 
-    const pageRequestFailed$ = Rx.fromEvent<PuppeteerRequest>(page, 'requestfailed').pipe(
-      mergeMap(req => {
-        const failure = req.failure && req.failure();
-        if (failure) {
-          return Rx.throwError(
-            new Error(`Request to [${req.url()}] failed! [${failure.errorText}]`)
-          );
-        }
-        return Rx.throwError(new Error(`Unknown failure!`));
-      })
-    );
-
     const browserDisconnect$ = Rx.fromEvent(browser, 'disconnected').pipe(
       mergeMap(() =>
         Rx.throwError(
@@ -230,11 +230,6 @@ export class HeadlessChromiumDriverFactory {
       )
     );
 
-    return Rx.merge(
-      pageError$,
-      uncaughtExceptionPageError$,
-      pageRequestFailed$,
-      browserDisconnect$
-    );
+    return Rx.merge(pageError$, uncaughtExceptionPageError$, browserDisconnect$);
   }
 }

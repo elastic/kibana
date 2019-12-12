@@ -45,6 +45,7 @@ export const SIGNALS_ID = `${APP_ID}.signals`;
  */
 export const DETECTION_ENGINE_URL = '/api/detection_engine';
 export const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules`;
+export const DETECTION_ENGINE_PRIVILEGES_URL = `${DETECTION_ENGINE_URL}/privileges`;
 export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 
 /**
@@ -53,3 +54,4 @@ export const DETECTION_ENGINE_INDEX_URL = `${DETECTION_ENGINE_URL}/index`;
 export const SIGNALS_INDEX_KEY = 'signalsIndex';
 export const DETECTION_ENGINE_SIGNALS_URL = `${DETECTION_ENGINE_URL}/signals`;
 export const DETECTION_ENGINE_SIGNALS_STATUS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/status`;
+export const DETECTION_ENGINE_QUERY_SIGNALS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/search`;

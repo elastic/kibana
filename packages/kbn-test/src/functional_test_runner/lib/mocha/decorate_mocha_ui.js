@@ -58,7 +58,7 @@ export function decorateMochaUi(lifecycle, context) {
 
         argumentsList[1] = function() {
           before(async () => {
-            await lifecycle.trigger('beforeTestSuite', this);
+            await lifecycle.beforeTestSuite.trigger(this);
           });
 
           this.tags = tags => {
@@ -68,7 +68,7 @@ export function decorateMochaUi(lifecycle, context) {
           provider.call(this);
 
           after(async () => {
-            await lifecycle.trigger('afterTestSuite', this);
+            await lifecycle.afterTestSuite.trigger(this);
           });
         };
 
@@ -94,7 +94,7 @@ export function decorateMochaUi(lifecycle, context) {
     return wrapNonSuiteFunction(
       name,
       wrapRunnableArgsWithErrorHandler(fn, async (err, test) => {
-        await lifecycle.trigger('testFailure', err, test);
+        await lifecycle.testFailure.trigger(err, test);
       })
     );
   }
@@ -112,7 +112,7 @@ export function decorateMochaUi(lifecycle, context) {
     return wrapNonSuiteFunction(
       name,
       wrapRunnableArgsWithErrorHandler(fn, async (err, test) => {
-        await lifecycle.trigger('testHookFailure', err, test);
+        await lifecycle.testHookFailure.trigger(err, test);
       })
     );
   }

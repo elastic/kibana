@@ -18,7 +18,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBucketAggConfig } from './_bucket_agg_type';
 import { BucketAggType } from './_bucket_agg_type';
 import { FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { RangeKey } from './range_key';
@@ -102,7 +101,7 @@ export const rangeBucketAgg = new BucketAggType({
         { from: 1000, to: 2000 },
       ],
       editorComponent: RangesEditor,
-      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         output.params.ranges = aggConfig.params.ranges;
         output.params.keyed = true;
       },
