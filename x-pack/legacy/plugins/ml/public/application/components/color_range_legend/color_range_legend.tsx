@@ -47,6 +47,10 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
     const wrapperHeight = 32;
     const wrapperWidth = width;
 
+    // top: 2        — adjust vertical alignment with title text
+    // bottom: 20    — room for axis ticks and labels
+    // left/right: 1 — room for first and last axis tick
+    // when justifyTicks is enabled, the left margin is increased to not cut off the first tick label
     const margin = { top: 2, bottom: 20, left: justifyTicks ? 1 : 4, right: 1 };
 
     const legendWidth = wrapperWidth - margin.left - margin.right;
