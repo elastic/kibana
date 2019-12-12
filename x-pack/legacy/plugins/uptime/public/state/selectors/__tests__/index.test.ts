@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getBasePath, isIntegrationsPopupOpen } from '../index';
+import { getBasePath, isIntegrationsPopupOpen, getFilters } from '../index';
 import { AppState } from '../../../state';
 
 describe('state selectors', () => {
@@ -24,7 +24,12 @@ describe('state selectors', () => {
       errors: [],
       loading: false,
     },
-    ui: { basePath: 'yyz', integrationsPopoverOpen: null, lastRefresh: 125 },
+    ui: {
+      basePath: 'yyz',
+      integrationsPopoverOpen: null,
+      lastRefresh: 125,
+      filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
+    },
   };
 
   it('selects base path from state', () => {
@@ -38,5 +43,11 @@ describe('state selectors', () => {
     };
     state.ui.integrationsPopoverOpen = integrationsPopupOpen;
     expect(isIntegrationsPopupOpen(state)).toBe(integrationsPopupOpen);
+  });
+
+  it('get filter from ui state', () => {
+    const filters = new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]);
+    state.ui.filters = filters;
+    expect(getFilters(state)).toBe(filters);
   });
 });

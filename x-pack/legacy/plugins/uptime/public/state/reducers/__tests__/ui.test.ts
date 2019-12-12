@@ -4,21 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UiActionTypes } from '../../actions';
+import {
+  setBasePath,
+  toggleIntegrationsPopover,
+  triggerAppRefresh,
+  setFilters,
+} from '../../actions';
 import { uiReducer } from '../ui';
+import { Action } from 'redux-actions';
 
 describe('ui reducer', () => {
   it(`sets the application's base path`, () => {
-    const action: UiActionTypes = {
-      type: 'SET_BASE_PATH',
-      payload: 'yyz',
-    };
+    const action = setBasePath('yyz') as Action<never>;
     expect(
       uiReducer(
         {
           basePath: 'abc',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
+          filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
         },
         action
       )
@@ -26,19 +30,17 @@ describe('ui reducer', () => {
   });
 
   it('adds integration popover status to state', () => {
-    const action: UiActionTypes = {
-      type: 'SET_INTEGRATION_POPOVER_STATE',
-      payload: {
-        id: 'popover-2',
-        open: true,
-      },
-    };
+    const action = toggleIntegrationsPopover({
+      id: 'popover-2',
+      open: true,
+    }) as Action<never>;
     expect(
       uiReducer(
         {
           basePath: '',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
+          filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
         },
         action
       )
@@ -46,10 +48,14 @@ describe('ui reducer', () => {
   });
 
   it('updates the refresh value', () => {
-    const action: UiActionTypes = {
-      type: 'REFRESH_APP',
-      payload: 125,
-    };
+    const action = triggerAppRefresh(125) as Action<never>;
+    expect(uiReducer(undefined, action)).toMatchSnapshot();
+  });
+
+  it('updates the filter value', () => {
+    const action = setFilters(
+      new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]])
+    ) as Action<never>;
     expect(uiReducer(undefined, action)).toMatchSnapshot();
   });
 });
