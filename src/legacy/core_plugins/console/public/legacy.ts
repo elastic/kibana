@@ -21,11 +21,16 @@ import { npSetup, npStart } from 'ui/new_platform';
 import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { createUiStatsReporter, METRIC_TYPE } from '../../ui_metric/public';
 
 export interface XPluginSet {
   dev_tools: DevToolsSetup;
   home: HomePublicPluginSetup;
   __LEGACY: {
+    metrics: {
+      trackMetric: ReturnType<typeof createUiStatsReporter>;
+      METRIC_TYPE: typeof METRIC_TYPE;
+    };
     I18nContext: any;
     elasticsearchUrl: string;
     category: FeatureCatalogueCategory;
@@ -42,6 +47,10 @@ const pluginInstance = plugin({} as any);
   await pluginInstance.setup(npSetup.core, {
     ...npSetup.plugins,
     __LEGACY: {
+      metrics: {
+        trackMetric: createUiStatsReporter('console'),
+        METRIC_TYPE,
+      },
       elasticsearchUrl: chrome.getInjected('elasticsearchUrl'),
       I18nContext,
       category: FeatureCatalogueCategory.ADMIN,

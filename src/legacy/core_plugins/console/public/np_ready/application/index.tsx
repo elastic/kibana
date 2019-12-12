@@ -22,6 +22,7 @@ import { NotificationsSetup } from 'kibana/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
+import { XPluginSet } from '../../legacy';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
@@ -33,8 +34,17 @@ export function boot(deps: {
   I18nContext: any;
   notifications: NotificationsSetup;
   elasticsearchUrl: string;
+  metrics: XPluginSet['__LEGACY']['metrics'];
 }) {
-  const { I18nContext, notifications, docLinkVersion, elasticsearchUrl } = deps;
+  const {
+    I18nContext,
+    notifications,
+    docLinkVersion,
+    elasticsearchUrl,
+    metrics: { METRIC_TYPE, trackMetric },
+  } = deps;
+
+  trackMetric(METRIC_TYPE.LOADED, 'opened_app');
 
   const storage = createStorage({
     engine: window.localStorage,
