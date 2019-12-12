@@ -188,11 +188,7 @@ describe('LogEntryActionsMenu component', () => {
 
       expect(
         elementWrapper.find(`a${testSubject('~apmLogEntryActionsMenuItem')}`).prop('href')
-      ).toMatchInlineSnapshot(
-        `"/app/apm#/traces?kuery=${encodeURIComponent(
-          'trace.id:1234567'
-        )}&rangeFrom=now-1y&rangeTo=now"`
-      );
+      ).toMatchInlineSnapshot(`"/app/apm#/link-to/trace/1234567?rangeFrom=now-1y&rangeTo=now"`);
     });
 
     it('renders with a trace id filter and timestamp when present in log entry', () => {
@@ -225,9 +221,9 @@ describe('LogEntryActionsMenu component', () => {
       expect(
         elementWrapper.find(`a${testSubject('~apmLogEntryActionsMenuItem')}`).prop('href')
       ).toMatchInlineSnapshot(
-        `"/app/apm#/traces?kuery=${encodeURIComponent(
-          'trace.id:1234567'
-        )}&rangeFrom=2019-06-27T17:34:08.693Z&rangeTo=2019-06-27T17:54:08.693Z"`
+        `"/app/apm#/link-to/trace/1234567?rangeFrom=${encodeURIComponent(
+          '2019-06-27T17:34:08.693Z'
+        )}&rangeTo=${encodeURIComponent('2019-06-27T17:54:08.693Z')}"`
       );
     });
 
