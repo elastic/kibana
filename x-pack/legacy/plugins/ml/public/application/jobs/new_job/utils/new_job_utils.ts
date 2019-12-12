@@ -5,11 +5,7 @@
  */
 
 import { IndexPattern } from 'ui/index_patterns';
-<<<<<<< HEAD
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/types';
-=======
 import { esQuery, Query, esKuery } from '../../../../../../../../../src/plugins/data/public';
->>>>>>> upstream/master
 import { KibanaConfigTypeFix } from '../../../contexts/kibana';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../common/constants/search';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';

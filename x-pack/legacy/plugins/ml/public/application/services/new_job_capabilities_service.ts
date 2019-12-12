@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-<<<<<<< HEAD
-import { SavedSearchLoader } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/types';
-
-=======
->>>>>>> upstream/master
 import {
   Field,
   Aggregation,

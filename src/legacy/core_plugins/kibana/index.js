@@ -65,8 +65,8 @@ export default function (kibana) {
         'plugins/kibana/visualize',
       ],
       savedObjectTypes: [
-        'plugins/kibana/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/saved_dashboard/saved_dashboard_register',
+        'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
+        'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
       ],
       app: {
         id: 'kibana',

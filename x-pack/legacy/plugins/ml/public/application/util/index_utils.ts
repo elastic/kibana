@@ -7,12 +7,7 @@
 import { toastNotifications } from 'ui/notify';
 import { i18n } from '@kbn/i18n';
 import chrome from 'ui/chrome';
-<<<<<<< HEAD
-import { npStart } from 'ui/new_platform';
-import { SavedSearchLoader } from '../../../../../../../src/legacy/core_plugins/kibana/public/discover/np_ready/types';
-=======
 import { Query } from 'src/plugins/data/public';
->>>>>>> upstream/master
 import { IndexPattern, IndexPatternsContract } from '../../../../../../../src/plugins/data/public';
 import { IndexPatternSavedObject, SavedSearchSavedObject } from '../../../common/types/kibana';
 
