@@ -17,9 +17,18 @@
  * under the License.
  */
 
-export function extractReferences({ attributes, references = [] }) {
-  const panelReferences = [];
-  const panels = JSON.parse(attributes.panelsJSON);
+import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
+import { SavedObjectDashboard } from './saved_dashboard';
+
+export function extractReferences({
+  attributes,
+  references = [],
+}: {
+  attributes: SavedObjectAttributes;
+  references: SavedObjectReference[];
+}) {
+  const panelReferences: SavedObjectReference[] = [];
+  const panels: Array<Record<string, string>> = JSON.parse(String(attributes.panelsJSON));
   panels.forEach((panel, i) => {
     if (!panel.type) {
       throw new Error(`"type" attribute is missing from panel "${i}"`);
@@ -38,10 +47,7 @@ export function extractReferences({ attributes, references = [] }) {
     delete panel.id;
   });
   return {
-    references: [
-      ...references,
-      ...panelReferences,
-    ],
+    references: [...references, ...panelReferences],
     attributes: {
       ...attributes,
       panelsJSON: JSON.stringify(panels),
@@ -49,7 +55,10 @@ export function extractReferences({ attributes, references = [] }) {
   };
 }
 
-export function injectReferences(savedObject, references) {
+export function injectReferences(
+  savedObject: SavedObjectDashboard,
+  references: SavedObjectReference[]
+) {
   // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
   // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
   // object has panelsJSON in all previous versions of kibana.
@@ -61,11 +70,11 @@ export function injectReferences(savedObject, references) {
   if (!Array.isArray(panels)) {
     return;
   }
-  panels.forEach((panel) => {
+  panels.forEach(panel => {
     if (!panel.panelRefName) {
       return;
     }
-    const reference = references.find(reference => reference.name === panel.panelRefName);
+    const reference = references.find(ref => ref.name === panel.panelRefName);
     if (!reference) {
       // Throw an error since "panelRefName" means the reference exists within
       // "references" and in this scenario we have bad data.

@@ -17,13 +17,9 @@
  * under the License.
  */
 import angular from 'angular';
-import { npStart } from 'ui/new_platform';
 import { SearchSourceContract } from 'ui/courier';
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { SavedObject } from 'ui/saved_objects/types';
+import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
-// @ts-ignore
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 import { createDashboardEditUrl } from '../dashboard_constants';
 
@@ -46,16 +42,8 @@ export interface SavedObjectDashboard extends SavedObject {
   getFilters(): esFilters.Filter[];
 }
 
-const module = uiModules.get('app/dashboard');
-
 // Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedDashboard', function() {
-  const services = {
-    savedObjectsClient: npStart.core.savedObjects.client,
-    indexPatterns: npStart.plugins.data.indexPatterns,
-    chrome: npStart.core.chrome,
-    overlays: npStart.core.overlays,
-  };
+export function createSavedDashboardClass(services: SavedObjectKibanaServices) {
   const SavedObjectClass = createSavedObjectClass(services);
   class SavedDashboard extends SavedObjectClass {
     // save these objects with the 'dashboard' type
@@ -126,4 +114,4 @@ module.factory('SavedDashboard', function() {
   }
 
   return SavedDashboard;
-});
+}
