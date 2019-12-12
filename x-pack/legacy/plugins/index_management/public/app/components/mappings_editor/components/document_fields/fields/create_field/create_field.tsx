@@ -49,7 +49,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
 }: Props) {
   const dispatch = useDispatch();
 
-  const { form } = useForm<Field>({ serializer: fieldSerializer });
+  const { form } = useForm<Field>({
+    serializer: fieldSerializer,
+    options: { stripEmptyFields: false },
+  });
 
   useEffect(() => {
     const subscription = form.subscribe(updatedFieldForm => {

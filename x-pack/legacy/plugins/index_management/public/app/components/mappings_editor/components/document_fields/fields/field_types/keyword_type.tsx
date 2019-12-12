@@ -33,7 +33,7 @@ const getDefaultValueToggle = (param: string, field: FieldType) => {
     }
     case 'copy_to':
     case 'null_value': {
-      return field.null_value !== undefined && field.null_value !== '';
+      return field.null_value !== undefined;
     }
     case 'normalizer': {
       return field.normalizer === undefined;

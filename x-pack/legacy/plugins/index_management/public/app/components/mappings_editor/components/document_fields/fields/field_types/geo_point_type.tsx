@@ -16,7 +16,7 @@ import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
     case 'null_value': {
-      return field.null_value !== undefined && field.null_value !== '';
+      return field.null_value !== undefined;
     }
     default:
       return false;
