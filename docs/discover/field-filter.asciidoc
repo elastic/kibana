@@ -1,9 +1,9 @@
 [[field-filter]]
 == Filtering by field
 
-You can narrow your search results to a  
+You can narrow your search results to a
 smaller set of data and then use that subset for viewing and analysis.
-For example, you might look at the results for a 
+For example, you might look at the results for a
 particular period of time. Or, you might include&mdash;or exclude&mdash;
 all HTTP redirects that come from a specific IP and port. *Discover* offers
 various types of filters, so you can restrict your documents to the exact data you want.
@@ -13,21 +13,21 @@ various types of filters, so you can restrict your documents to the exact data y
 
 A quick way to add a filter is from the fields list.
 
-. Click the field to filter on. 
+. Click the field to filter on.
 +
-You'll see the number of documents that contain 
-the field, the top 5 values for the field, and the percentage of documents 
+You'll see the number of documents that contain
+the field, the top 5 values for the field, and the percentage of documents
 that contain each value.
 +
 [role="screenshot"]
 image::images/filter-field.png[height=317]
 
-. Use the image:images/PositiveFilter.jpg[Positive Filter] icon to 
+. Use the image:images/PositiveFilter.jpg[Positive Filter] icon to
 show only documents that contain that value
 or image:images/NegativeFilter.jpg[Negative Filter] to exclude all documents with that value.
 +
-If there is no data to display, you might need to set a <<set-time-filter, date time filter>>.  
-You can choose a time from the quick filter or choose your 
+If there is no data to display, you might need to set a <<set-time-filter, date time filter>>.
+You can choose a time from the quick filter or choose your
 own using absolute or relative times.
 
 Additional filtering options:
@@ -35,24 +35,24 @@ Additional filtering options:
 * To filter for whether a field is present, expand the document in
 the document table, and click the filter for field present icon.
 
-*  To limit the field 
+*  To limit the field
 list to a particular data type, click *Filter by type*.
 You can also filter for whether that type is
-aggregatable or searchable.  
+aggregatable or searchable.
 
 [float]
 === Filter by condition
 
-An important filter option is to apply a condition. 
-For example, you might filter for sales that 
-are higher than a certain amount. 
+An important filter option is to apply a condition.
+For example, you might filter for sales that
+are higher than a certain amount.
 
 . Click *Add Filter*.
 +
 You'll see a list of fields from the
 index pattern that you are currently querying against.
 
-. Select a field. 
+. Select a field.
 
 ////
 +
@@ -71,7 +71,7 @@ image::images/add_filter_field.png[]
 `is not between`:: The value for the field is not in the given range.
 `exists`:: Any value is present for the field.
 `does not exist`:: No value is present for the field.
-. Choose values for your filter. 
+. Choose values for your filter.
 +
 Values from your indices may be suggested
 as selections if you are filtering against an aggregatable field.
@@ -87,9 +87,9 @@ turn off the suggestions by setting the advanced setting, `filterEditor:suggestV
 [[filter-pinning]]
 === Edit, disable, and delete filters
 
-Each filter is displayed as a tag, which you can 
-temporarily disable or remove completely. Click the tag, and then click 
-one of the actions in the dropdown menu.  
+Each filter is displayed as a tag, which you can
+temporarily disable or remove completely. Click the tag, and then click
+one of the actions in the dropdown menu.
 To apply a filter action to all of the applied filters,
 click the *Actions* icon and select the action.
 
@@ -118,7 +118,7 @@ You can directly modify
 the query that filters your search results.  This enables you
 to create more complex filters using multiple fields.
 
-. Click the fitler tag > Edit > *Edit Query DSL*.
+. Click the filter tag > Edit > *Edit Query DSL*.
 
 . Edit the query for the filter.
 +

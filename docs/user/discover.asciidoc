@@ -3,7 +3,7 @@
 
 [partintro]
 --
-Use *Discover* to drill down into and understand your data, so you can determine the best way 
+Use *Discover* to drill down into and understand your data, so you can determine the best way
 to visualize it. This saves you time
 in creating your visualizations and helps you build better dashboards.
 
@@ -15,17 +15,17 @@ With *Discover*, you can:
 * Access every document in every index that matches your selected index pattern
 * Search your data and filter the search results
 * Get field-level details about the documents that match your search
-* View what events occurred just before and after a document
+* View the events that occurred just before and after a document
 
 
 [float]
-=== Set up your index pattern 
+=== Set up your index pattern
 
 The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>
-to define the data to work with. The current index pattern and options for 
+to define the data to work with. The current index pattern and options for
 changing it are in the upper left.
-If you haven't yet created an index pattern, you can download a <<add-sample-data, sample data set>>, 
-which has pre-built index patterns. 
+If you haven't yet created an index pattern, you can add a <<add-sample-data, sample data set>>,
+which has pre-built index patterns.
 
 [float]
 === Set a time filter
@@ -39,59 +39,61 @@ from now, or an absolute time range.
 [float]
 === Search your data
 
-Now that you have your data and set the time span, you can start asking your questions. 
+Now that you have your data and set the time span, you can start asking your questions.
 You can search your data using the <<kuery-query, Kibana Query language>>,
-which offers a simplified query syntax. 
-For example, if 
-you search for `day_of_week : Friday`, you'll get a list of all documents 
-in which `day_of_week` is set to `Friday`. If you prefer 
-Lucene query syntax, you can switch to it from the KQL menu. 
+which offers a simplified query syntax.
+For example, if
+you search for `day_of_week : Friday`, you'll get a list of all documents
+in which `day_of_week` is set to `Friday`. If you prefer
+Lucene query syntax, you can switch to it from the KQL menu.
 
 [float]
 === Filter your search results
 
 Next, you'll want narrow your search results to a more manageable set of data.
-When you click on a name in the field list, you'll see 
-the top five values for the field, the number of documents that contain the field, 
+When you click on a name in the field list, you'll see
+the top five values for the field, the number of documents that contain the field,
 and the percentage of documents that contain each value. From this view, you can
-use the (+) magnifier icon to quickly find all 
-documents that have that value or (-) to exclude all 
-documents with that value. For more filter options, see <<field-filter, filtering by field>> 
+use the (+) magnifier icon to quickly find all
+documents that have that value or (-) to exclude all
+documents with that value. For more filter options, see <<field-filter, filtering by field>>.
 
 [role="screenshot"]
 image::images/filter-field.png[height=317]
 
 
 [float]
-=== Add and remove fields 
+=== Add and remove fields
 
-The sortable documents table 
-provides field-level details about the documents that match your search.
-If you are only interested in some of the fields of each document, you can 
-modify the table by clicking on the add behind a field name in the left panel. 
-For example, you might add the `clientip`, `response`, and `request` field as a column to the table.
-
+The sortable documents table
+lists the documents that match your search.
+By default, the table shows all fields and values in each document, which can be a bit overwhelming.
+To zero in on specific a field, click *add* next to the field name in the left sidebar,
+and a column for that field appears in the table.
+For example, if you add the `clientip`, `response`, and `request` fields,
+the document table will include columns for those three fields.
 
 [float]
 === Examine document contents
 
-You can expand a document to 
-examine its contents in either table for JSON format.
-YOu can add filters from here as well.  See <<document-data, Viewing document data>> for more options.
+From the documents table, you can expand a document to
+examine its field data in either table for JSON format.
+The table view provides yet another filtering option&mdash;filtering for whether the field
+is present.  See <<document-data, Viewing document data>> for details.
 
 [float]
 === View a document in context
 
-Suppose you're troubleshooting your data, and you've narrowed down your results to a single document.  
-Now you want to to see all the documents that occurred just before and after the 
-document that you are looking at. You can do that by expanding the document and 
+Suppose you're troubleshooting your data, and you've narrowed down your results to a single document.
+Now you want to to see all the documents that occurred just before and after the
+document that you are looking at. You can do that by expanding the document and
 clicking <<document-context, View surrounding documents>>.
 
 [float]
 === Save and share your search
 
-Finally, its time to share your data.  You can export your data as a CSV filterEditor
-or create direct link to share.  The *Share* action is in the menu bar.
+Finally, its time to save and share your data.  You can export your data as a CSV file
+or create a direct link to share.  The *Save* and *Share* actions are in the menu bar.
 
 
 

@@ -2,31 +2,33 @@
 == Viewing document data
 
 When you submit a search query in *Discover*, the most recent documents that match the query
-are listed in the documents table. 
-By default, the table includes columns for 
+are listed in the documents table.
+By default, the table includes columns for
 the time field and the document _source, which shows all fields and values in the document.
 
 [float]
 [[sorting]]
 === Add and remove fields from the document table
 
-Use the following commands to 
-tailor the documents table to show specific events.
-
-Click the 
-arrow to expand the row to view the details in table or JSON format.
+Use the following commands to
+tailor the documents table to show specific field.
 
 [horizontal]
-Add a field column:: 
-Hover over the list of *Available fields* and then click *add* next to each field you want include in the table.
-The first column you add replaces the _source column.  
-Change sort order:: By default, columns are sorted by the values in the field.  
-If a time field is configured for the current index pattern, 
-the documents are sorted in reverse chronological order.  To change the sort order, hover over the column 
-and click image:images/sort-icon.png[] 
-Move a field column:: Hover over the column header and click the move left (<<) or move right icon (>>). 
-Remove&nbsp;a&nbsp;field&nbsp;column&nbsp;:: Hover over the list of *Specified fields* 
-and then click *remove* next to each. 
+Add a field column::
+Hover over the list of *Available fields* and then click *add* next to each field you want include as a column in the table.
+The first field you add replaces the _source column.
+Change sort order:: By default, columns are sorted by the values in the field.
+If a time field is configured for the current index pattern,
+the documents are sorted in reverse chronological order.
++
+To change the sort order, hover over the column
+and click image:images/sort-icon.png[].
+The first click sorts by ascending order, the second click sorts by descending order, and the third
+click removes the field from the sorted fields.
+
+Move a field column:: Hover over the column header and click the move left (<<) or move right icon (>>).
+Remove&nbsp;a&nbsp;field&nbsp;column&nbsp;:: Hover over the list of *Specified fields*
+and then click *remove* next to each.
 Or, use the control in the column header.
 
 [float]
@@ -37,10 +39,10 @@ The expanded view provides these options for viewing your document:
 * For filtering options, hover over a row in the Table view.
 
 * To view the events that surround your document, click <<document-context, Context view>>
-For example, you might want to see the 10 documents that occurred 
-immediately before and after your event.  
+For example, you might want to see the 10 documents that occurred
+immediately before and after your event.
 
-* View the document data as a separate page. You can bookmark and 
+* View the document data as a separate page. You can bookmark and
 share the link for direct access to a particular document.
 
 [role="screenshot"]
@@ -50,8 +52,6 @@ image::images/Expanded-Document.png[]
 [float]
 === Configure the number of documents to show
 
-By default, the documents table includes the 500 most recent documents that 
+By default, the documents table includes the 500 most recent documents that
 match the query. To change this number, set the `discover:sampleSize` property in <<advanced-options,
 Advanced Settings>>.
-
-
