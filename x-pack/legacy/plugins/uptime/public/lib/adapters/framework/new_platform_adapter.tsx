@@ -13,7 +13,11 @@ import { i18n as i18nFormatter } from '@kbn/i18n';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
-import { INTEGRATED_SOLUTIONS, PLUGIN } from '../../../../common/constants';
+import {
+  INTEGRATED_SOLUTIONS,
+  PLUGIN,
+  DEFAULT_TIMEPICKER_QUICK_RANGES,
+} from '../../../../common/constants';
 import { getTelemetryMonitorPageLogger, getTelemetryOverviewPageLogger } from '../telemetry';
 import { UMFrameworkAdapter, BootstrapUptimeApp } from '../../lib';
 import { createApolloClient } from './apollo_client_adapter';
@@ -44,6 +48,7 @@ export const getKibanaFrameworkAdapter = (
     canSave,
     client: createApolloClient(`${basePath.get()}/api/uptime/graphql`, 'true'),
     darkMode: core.uiSettings.get('theme:darkMode'),
+    commonlyUsedRanges: core.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     i18n,
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,

@@ -11,3 +11,5 @@ export { INDEX_NAMES } from './index_names';
 export { INTEGRATED_SOLUTIONS } from './capabilities';
 export { PLUGIN } from './plugin';
 export { QUERY, STATES } from './query';
+
+export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
