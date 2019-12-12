@@ -8,9 +8,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EditFieldFormRow } from '../fields/edit_field';
+import { documentationService } from '../../../../../services/documentation';
 import { getFieldConfig } from '../../../lib';
 import { UseField, Field } from '../../../shared_imports';
+import { EditFieldFormRow } from '../fields/edit_field';
 
 interface Props {
   defaultToggleValue: boolean;
@@ -31,6 +32,12 @@ export const NullValueParameter = ({ defaultToggleValue, description, children }
               'Accepts a string value which is substituted for any explicit null values.',
           })
     }
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueDocLinkText', {
+        defaultMessage: 'Null value documentation',
+      }),
+      href: documentationService.getNullValueLink(),
+    }}
     defaultToggleValue={defaultToggleValue}
   >
     {children ? (

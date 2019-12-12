@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch, EuiSpacer, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import {
   ToggleField,
@@ -19,9 +19,15 @@ import { getFieldConfig } from '../../../../lib';
 
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 
+type DocLink = {
+  text: string;
+  href: string;
+}
+
 interface Props {
   title: JSX.Element;
   description?: string | JSX.Element;
+  docLink?: DocLink,
   defaultToggleValue?: boolean;
   formFieldPath?: ParameterName;
   children?: React.ReactNode | ChildrenFunc;
@@ -32,6 +38,7 @@ export const EditFieldFormRow = React.memo(
   ({
     title,
     description,
+    docLink,
     defaultToggleValue,
     formFieldPath,
     children,
@@ -108,7 +115,24 @@ export const EditFieldFormRow = React.memo(
             paddingLeft: withToggle === false ? '0' : undefined,
           }}
         >
-          {controlsTitle}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {controlsTitle}
+            </EuiFlexItem>
+
+            {docLink ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={docLink.text}>
+                  <EuiButtonIcon
+                    href={docLink.href}
+                    target="_blank"
+                    iconType="help"
+                    aria-label={docLink.text}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
           {controlsDescription}
         </div>
       );
