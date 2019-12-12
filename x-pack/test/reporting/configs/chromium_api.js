@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as path from 'path';
 import { ReportingAPIProvider } from '../services';
 
 export default async function ({ readConfigFile }) {
@@ -30,9 +29,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.spaces.enabled=false',
       ],
     },
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
-    },
+    esArchiver: apiConfig.get('esArchiver'),
     esTestCluster: apiConfig.get('esTestCluster'),
   };
 }

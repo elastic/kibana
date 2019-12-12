@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import * as path from 'path';
-
 export default async function ({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../../functional/config.js'));
 
@@ -13,11 +11,7 @@ export default async function ({ readConfigFile }) {
     services: functionalConfig.get('services'),
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
-    esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
-    esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
-    },
     screenshots: functionalConfig.get('screenshots'),
     junit: {
       reportName: 'X-Pack Chromium Functional Reporting Tests',
@@ -34,5 +28,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.spaces.enabled=false',
       ],
     },
+    esArchiver: functionalConfig.get('esArchiver'),
+    esTestCluster: functionalConfig.get('esTestCluster'),
   };
 }

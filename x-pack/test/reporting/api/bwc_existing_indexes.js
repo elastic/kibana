@@ -28,7 +28,7 @@ export default function ({ getService }) {
     describe('existing 6_2 index', () => {
       before('load data and add index alias', async () => {
         await reportingAPI.deleteAllReportingIndexes();
-        await esArchiver.load('bwc/6_2');
+        await esArchiver.load('reporting/bwc/6_2');
 
         // The index name in the 6_2 archive.
         const ARCHIVED_REPORTING_INDEX = '.reporting-2018.03.11';
@@ -36,6 +36,8 @@ export default function ({ getService }) {
 
         const stats = await usageAPI.getUsageStats();
         expectedCompletedReportCount = await reportingAPI.getCompletedReportCount(stats);
+
+        await esArchiver.unload('reporting/bwc/6_2');
       });
 
       after('remove index alias', async () => {
