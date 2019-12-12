@@ -5,8 +5,14 @@
  */
 
 import { DynamicStyleProperty } from './dynamic_style_property';
+import { getComputedFieldName } from '../style_util';
 
 export class DynamicTextProperty extends DynamicStyleProperty {
+
+  syncTextFieldWithMb(mbLayerId, mbMap) {
+    const targetName = getComputedFieldName(this._styleName, this._options.field.name);
+    mbMap.setLayoutProperty(mbLayerId, 'text-field', ['coalesce', ['get', targetName], '']);
+  }
 
   supportsFieldMeta() {
     return false;

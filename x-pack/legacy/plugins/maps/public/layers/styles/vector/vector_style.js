@@ -418,6 +418,7 @@ export class VectorStyle extends AbstractStyle {
         // To work around this limitation, some styling values must fall back to geojson property values.
         let supportsFeatureState;
         let isScaled;
+        // TODO move first check into DynamicSizeProperty.supportsFeatureState
         if (styleProperty.getStyleName() === VECTOR_STYLES.ICON_SIZE
           && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
           supportsFeatureState = false;
@@ -479,6 +480,7 @@ export class VectorStyle extends AbstractStyle {
         if (isScaled) {
           styleValue = scaleValue(value, range);
         } else {
+          // TODO this check is going to cause problems for string values
           if (isNaN(value)) {
             styleValue = 0;
           } else {
@@ -520,14 +522,20 @@ export class VectorStyle extends AbstractStyle {
     this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
   }
 
-  setMBPropertiesForText({ mbMap, textLayerId }) {
-    mbMap.setLayoutProperty(textLayerId, 'text-field', ['coalesce', ['get', 'test'], '']);
-    mbMap.setPaintProperty(textLayerId, 'text-color', '#ff0000');
+  setMBPropertiesForText({ alpha, isLayerVisible, mbMap, textLayerId }) {
+    if (!isLayerVisible || !this._labelStyleProperty.isComplete()) {
+      mbMap.setLayoutProperty(textLayerId, 'visibility', 'none');
+      return;
+    }
+
+    mbMap.setLayoutProperty(textLayerId, 'visibility', 'visible');
     mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
+    this._labelStyleProperty.syncTextFieldWithMb(textLayerId, mbMap);
+    this._labelColorStyleProperty.syncLabelColorWithMb(textLayerId, mbMap, alpha);
+    this._labelSizeStyleProperty.syncLabelSizeWithMb(textLayerId, mbMap);
   }
 
   setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
-
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-ignore-placement', true);
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
@@ -539,7 +547,6 @@ export class VectorStyle extends AbstractStyle {
     this._lineWidthStyleProperty.syncHaloWidthWithMb(symbolLayerId, mbMap);
     this._iconSizeStyleProperty.syncIconImageAndSizeWithMb(symbolLayerId, mbMap, symbolId);
     this._iconOrientationProperty.syncIconRotationWithMb(symbolLayerId, mbMap);
-
   }
 
   arePointsSymbolizedAsCircles() {

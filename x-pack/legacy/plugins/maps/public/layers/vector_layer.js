@@ -510,12 +510,9 @@ export class VectorLayer extends AbstractLayer {
     // To work around this limitation,
     // scaled layout properties (like icon-size) must fall back to geojson property values :(
     const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
-    featureCollection.features.forEach(feature => {
-      feature.properties.test = 'hello world';
-    })
-    //if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
+    if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
       mbGeoJSONSource.setData(featureCollection);
-    //}
+    }
 
     console.log(featureCollection);
 
@@ -527,28 +524,25 @@ export class VectorLayer extends AbstractLayer {
     const pointLayer = mbMap.getLayer(pointLayerId);
     const symbolLayer = mbMap.getLayer(symbolLayerId);
 
-    let mbLayerId;
+    let markerLayerId;
     if (this._style.arePointsSymbolizedAsCircles()) {
-      mbLayerId = pointLayerId;
+      markerLayerId = pointLayerId;
       if (symbolLayer) {
         mbMap.setLayoutProperty(symbolLayerId, 'visibility', 'none');
       }
       this._setMbCircleProperties(mbMap);
     } else {
-      mbLayerId = symbolLayerId;
+      markerLayerId = symbolLayerId;
       if (pointLayer) {
         mbMap.setLayoutProperty(pointLayerId, 'visibility', 'none');
       }
       this._setMbSymbolProperties(mbMap);
     }
 
-    this._setMbTextProperties(mbMap);
-    const textLayerId = this._getMbTextLayerId();
-    mbMap.setLayoutProperty(textLayerId, 'visibility', 'visible');
-    mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this.syncVisibilityWithMb(mbMap, markerLayerId);
+    mbMap.setLayerZoomRange(markerLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
 
-    this.syncVisibilityWithMb(mbMap, mbLayerId);
-    mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
+    this._setMbTextProperties(mbMap);
   }
 
   _setMbCircleProperties(mbMap) {
@@ -596,9 +590,13 @@ export class VectorLayer extends AbstractLayer {
     }
 
     this._style.setMBPropertiesForText({
+      isLayerVisible: this.isVisible(),
+      alpha: this.getAlpha(),
       mbMap,
       textLayerId,
     });
+
+    mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
   }
 
   _setMbSymbolProperties(mbMap) {

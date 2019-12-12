@@ -11,4 +11,8 @@ export class StaticTextProperty extends StaticStyleProperty {
   isComplete() {
     return this.getOptions().value.length > 0;
   }
+
+  syncTextFieldWithMb(mbLayerId, mbMap) {
+    mbMap.setLayoutProperty(mbLayerId, 'text-field', this.getOptions().value);
+  }
 }

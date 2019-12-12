@@ -42,5 +42,7 @@ export class StaticSizeProperty extends StaticStyleProperty {
     mbMap.setPaintProperty(mbLayerId, 'line-width', this._options.size);
   }
 
-
+  syncLabelSizeWithMb(mbLayerId, mbMap) {
+    mbMap.setLayoutProperty(mbLayerId, 'text-size', this._options.size);
+  }
 }
