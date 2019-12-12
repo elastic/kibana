@@ -22,6 +22,7 @@ import {
 export interface InfraFrontendLibs {
   apolloClient: InfraApolloClient;
   observableApi: InfraObservableApi;
+  kibanaFramework: any;
 }
 
 export type InfraTimezoneProvider = () => string;

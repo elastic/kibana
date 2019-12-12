@@ -58,9 +58,20 @@ export class Plugin {
 
     // const framework = new KibanaFramework(infraModule, legacy.uiRoutes, legacy.timezoneProvider);
 
+    const kibanaFramework = {
+      uiCapabilities: core.application.capabilities,
+      http: core.http,
+      notifications: {
+        notfications: core.notifications,
+        overlays: core.overlays,
+      },
+      chrome: core.chrome,
+    };
+
     const libs: InfraFrontendLibs = {
       apolloClient,
       observableApi,
+      kibanaFramework,
     };
     return libs;
   }

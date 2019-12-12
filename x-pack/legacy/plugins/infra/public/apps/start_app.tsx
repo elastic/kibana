@@ -29,6 +29,7 @@ import {
   KibanaContextProvider,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { ROOT_ELEMENT_ID } from '../index';
+import { KibanaFrameworkProvider } from '../containers/kibana_framework';
 
 const { uiSettings } = npStart.core;
 
@@ -45,25 +46,27 @@ export async function startApp(libs: InfraFrontendLibs) {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
     return (
-      <I18nContext>
-        <UICapabilitiesProvider>
-          <EuiErrorBoundary>
-            <ReduxStoreProvider store={store}>
-              <ReduxStateContextProvider>
-                <ApolloProvider client={libs.apolloClient}>
-                  <ApolloClientContext.Provider value={libs.apolloClient}>
-                    <EuiThemeProvider darkMode={darkMode}>
-                      <HistoryContext.Provider value={history}>
-                        <PageRouter history={history} />
-                      </HistoryContext.Provider>
-                    </EuiThemeProvider>
-                  </ApolloClientContext.Provider>
-                </ApolloProvider>
-              </ReduxStateContextProvider>
-            </ReduxStoreProvider>
-          </EuiErrorBoundary>
-        </UICapabilitiesProvider>
-      </I18nContext>
+      <KibanaFrameworkProvider value={{ ...libs.kibanaFramework }}>
+        <I18nContext>
+          <UICapabilitiesProvider>
+            <EuiErrorBoundary>
+              <ReduxStoreProvider store={store}>
+                <ReduxStateContextProvider>
+                  <ApolloProvider client={libs.apolloClient}>
+                    <ApolloClientContext.Provider value={libs.apolloClient}>
+                      <EuiThemeProvider darkMode={darkMode}>
+                        <HistoryContext.Provider value={history}>
+                          <PageRouter history={history} />
+                        </HistoryContext.Provider>
+                      </EuiThemeProvider>
+                    </ApolloClientContext.Provider>
+                  </ApolloProvider>
+                </ReduxStateContextProvider>
+              </ReduxStoreProvider>
+            </EuiErrorBoundary>
+          </UICapabilitiesProvider>
+        </I18nContext>
+      </KibanaFrameworkProvider>
     );
   };
 
