@@ -185,6 +185,7 @@ export class TestScript extends Component {
       <Fragment>
         <EuiFormRow
           label="Additional fields"
+          fullWidth
         >
           <EuiComboBox
             placeholder="Select..."
@@ -192,10 +193,11 @@ export class TestScript extends Component {
             selectedOptions={this.state.additionalFields}
             onChange={this.onAdditionalFieldsChange}
             data-test-subj="additionalFieldsSelect"
+            fullWidth
           />
         </EuiFormRow>
 
-        <div className="testScriptSearchBar">
+        <div className="testScript__searchBar">
           <SearchBar
             showFilterBar={false}
             showDatePicker={false}
