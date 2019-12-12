@@ -187,7 +187,7 @@ export default function(kibana: any) {
         },
       });
 
-      collectors.register(server.newPlatform.setup.plugins.usageCollection);
+      collectors.register(server.newPlatform.setup.plugins.usageCollection, savedObjectsClient);
     },
 
     uiExports: {

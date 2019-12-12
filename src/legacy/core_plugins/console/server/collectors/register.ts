@@ -17,14 +17,21 @@
  * under the License.
  */
 
+import { SavedObjectsClientContract } from 'src/core/server';
 import { UsageCollectionSetup } from '../../../../../plugins/usage_collection/server';
+import { fetchRequests, CONSOLE_REQUEST_TELEMETRY_SAVED_OBJECTS_TYPE } from '.';
 
-const fetchConsoleUsage = () => {};
-
-export const register = (collectorRegistrar: UsageCollectionSetup) => {
-  if (collectorRegistrar) {
+export const register = (
+  collectorRegistrar: UsageCollectionSetup,
+  savedObjectsClient: SavedObjectsClientContract
+) => {
+  if (!collectorRegistrar) {
     return;
   }
-  const collector = collectorRegistrar.makeUsageCollector({});
+  const collector = collectorRegistrar.makeUsageCollector({
+    type: CONSOLE_REQUEST_TELEMETRY_SAVED_OBJECTS_TYPE,
+    isReady: () => true,
+    fetch: () => fetchRequests(savedObjectsClient),
+  });
   collectorRegistrar.registerCollector(collector);
 };
