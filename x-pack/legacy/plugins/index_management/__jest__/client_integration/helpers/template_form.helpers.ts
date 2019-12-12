@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TestBed, SetupFunc } from '../../../../../../test_utils';
+import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../../test_utils';
 import { Template } from '../../../common/types';
 import { nextTick } from './index';
 
@@ -13,27 +13,12 @@ interface MappingField {
   type: string;
 }
 
-export interface TemplateFormTestBed extends TestBed<TemplateFormTestSubjects> {
-  actions: {
-    clickNextButton: () => void;
-    clickBackButton: () => void;
-    clickSubmitButton: () => void;
-    clickEditButtonAtField: (index: number) => void;
-    clickEditFieldUpdateButton: () => void;
-    clickRemoveButtonAtField: (index: number) => void;
-    clickCancelCreateFieldButton: () => void;
-    completeStepOne: ({ name, indexPatterns, order, version }: Partial<Template>) => void;
-    completeStepTwo: (settings: string) => void;
-    completeStepThree: (mappingFields?: MappingField[]) => void;
-    completeStepFour: (aliases: string) => void;
-    selectSummaryTab: (tab: 'summary' | 'request') => void;
-    addMappingField: (name: string, type: string) => void;
-  };
-}
+// Look at the return type of formSetup and form a union between that type and the TestBed type.
+// This way we an define the formSetup return object and use that to dynamically define our type.
+export type TemplateFormTestBed = TestBed<TemplateFormTestSubjects> &
+  UnwrapPromise<ReturnType<typeof formSetup>>;
 
-export const formSetup = async (
-  initTestBed: SetupFunc<TestSubjects>
-): Promise<TemplateFormTestBed> => {
+export const formSetup = async (initTestBed: SetupFunc<TestSubjects>) => {
   const testBed = await initTestBed();
 
   // User actions
@@ -71,7 +56,12 @@ export const formSetup = async (
     testBed.find('createFieldWrapper.cancelButton').simulate('click');
   };
 
-  const completeStepOne = async ({ name, indexPatterns, order, version }: Partial<Template>) => {
+  const completeStepOne = async ({
+    name,
+    indexPatterns,
+    order,
+    version,
+  }: Partial<Template> = {}) => {
     const { form, find, component } = testBed;
 
     if (name) {
@@ -101,7 +91,7 @@ export const formSetup = async (
     component.update();
   };
 
-  const completeStepTwo = async (settings: string) => {
+  const completeStepTwo = async (settings?: string) => {
     const { find, component } = testBed;
 
     if (settings) {
@@ -134,7 +124,7 @@ export const formSetup = async (
     component.update();
   };
 
-  const completeStepFour = async (aliases: string) => {
+  const completeStepFour = async (aliases?: string) => {
     const { find, component } = testBed;
 
     if (aliases) {

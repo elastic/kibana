@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
+import { PARAMETERS_OPTIONS } from '../../../../constants';
 import {
   DocValuesParameter,
   IndexParameter,
@@ -41,25 +42,11 @@ export const FlattenedType = React.memo(({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        {/* depth_limit */}
-        <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
-                defaultMessage: 'Set depth limit',
-              })}
-            </h3>
-          }
-          description={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitDescription', {
-            defaultMessage:
-              'The maximum allowed depth of the flattened object field, in terms of nested inner objects.',
-          })}
-        >
-          <UseField path="depth_limit" config={getFieldConfig('depth_limit')} component={Field} />
-        </EditFieldFormRow>
-
         {/* index */}
-        <IndexParameter />
+        <IndexParameter
+          config={getFieldConfig('index_options_flattened')}
+          indexOptions={PARAMETERS_OPTIONS.index_options_flattened}
+        />
 
         {/* doc_values */}
         <DocValuesParameter />
@@ -67,22 +54,45 @@ export const FlattenedType = React.memo(({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
+          {/* null_value */}
+          <NullValueParameter
+            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+          />
+
           {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
+
+          {/* depth_limit */}
+          <EditFieldFormRow
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
+                  defaultMessage: 'Customize depth limit',
+                })}
+              </h3>
+            }
+            description={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitDescription', {
+              defaultMessage:
+                'The maximum allowed depth of the flattened object field, in terms of nested inner objects. Defaults to 20.',
+            })}
+          >
+            <UseField path="depth_limit" config={getFieldConfig('depth_limit')} component={Field} />
+          </EditFieldFormRow>
 
           {/* ignore_above */}
           <EditFieldFormRow
             title={
               <h3>
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldTitle', {
-                  defaultMessage: 'Set leaf value length limit',
+                  defaultMessage: 'Set length limit',
                 })}
               </h3>
             }
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldDescription',
               {
-                defaultMessage: 'Leaf values longer than this limit will not be indexed.',
+                defaultMessage:
+                  'Prevent leaf values from being indexed if they are beyond a certain length. This is useful for protecting against Lucene’s term character-length limit of 8,191 UTF-8 characters.',
               }
             )}
             toggleDefaultValue={getDefaultValueToggle('ignore_above', field.source)}
@@ -93,9 +103,7 @@ export const FlattenedType = React.memo(({ field }: Props) => {
               component={Field}
             />
           </EditFieldFormRow>
-        </EditFieldSection>
 
-        <EditFieldSection>
           {/* split_queries_on_whitespace */}
           <EditFieldFormRow
             title={
@@ -117,11 +125,6 @@ export const FlattenedType = React.memo(({ field }: Props) => {
           {/* similarity */}
           <SimilarityParameter
             defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
-          />
-
-          {/* null_value */}
-          <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
           />
 
           {/* boost */}

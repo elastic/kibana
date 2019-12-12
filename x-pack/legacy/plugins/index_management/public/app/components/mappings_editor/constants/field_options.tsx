@@ -72,6 +72,26 @@ export const PARAMETERS_OPTIONS: {
       ...getOptionTexts('indexOptions.offsets'),
     },
   ] as SuperSelectOption[],
+  index_options_flattened: [
+    {
+      value: 'docs',
+      ...getOptionTexts('indexOptions.docs'),
+    },
+    {
+      value: 'freqs',
+      ...getOptionTexts('indexOptions.freqs'),
+    },
+  ] as SuperSelectOption[],
+  index_options_keyword: [
+    {
+      value: 'docs',
+      ...getOptionTexts('indexOptions.docs'),
+    },
+    {
+      value: 'freqs',
+      ...getOptionTexts('indexOptions.freqs'),
+    },
+  ] as SuperSelectOption[],
   analyzer: [
     {
       value: INDEX_DEFAULT,

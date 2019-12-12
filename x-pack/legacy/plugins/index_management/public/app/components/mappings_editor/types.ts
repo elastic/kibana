@@ -18,6 +18,12 @@ export interface DataTypeDefinition {
   subTypes?: { label: string; types: SubType[] };
 }
 
+export type ConfigType =
+  | 'dynamic'
+  | 'date_detection'
+  | 'numeric_detection'
+  | 'dynamic_date_formats';
+
 export type MainType =
   | 'text'
   | 'keyword'
@@ -89,6 +95,8 @@ export type ParameterName =
   | 'search_analyzer'
   | 'search_quote_analyzer'
   | 'index_options'
+  | 'index_options_flattened'
+  | 'index_options_keyword'
   | 'eager_global_ordinals'
   | 'index_prefixes'
   | 'index_phrases'
@@ -108,6 +116,7 @@ export type ParameterName =
   | 'orientation'
   | 'points_only'
   | 'path'
+  | 'dims'
   | 'depth_limit';
 
 export interface Parameter {
