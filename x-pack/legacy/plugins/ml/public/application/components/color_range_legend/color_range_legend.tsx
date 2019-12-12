@@ -14,6 +14,7 @@ const COLOR_RANGE_RESOLUTION = 10;
 interface ColorRangeLegendProps {
   colorRange: (d: number) => string;
   justifyTicks?: boolean;
+  showTicks?: boolean;
   title?: string;
   width?: number;
 }
@@ -29,6 +30,7 @@ interface ColorRangeLegendProps {
 export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
   colorRange,
   justifyTicks = false,
+  showTicks = true,
   title,
   width = 250,
 }) => {
@@ -51,7 +53,7 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
     // bottom: 20    — room for axis ticks and labels
     // left/right: 1 — room for first and last axis tick
     // when justifyTicks is enabled, the left margin is increased to not cut off the first tick label
-    const margin = { top: 2, bottom: 20, left: justifyTicks ? 1 : 4, right: 1 };
+    const margin = { top: 2, bottom: 20, left: justifyTicks || !showTicks ? 1 : 4, right: 1 };
 
     const legendWidth = wrapperWidth - margin.left - margin.right;
     const legendHeight = wrapperHeight - margin.top - margin.bottom;
@@ -119,12 +121,16 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
 
     // Adjust the alignment of the first and last tick text
     // so that the tick labels don't overflow the color range.
-    if (justifyTicks) {
+    if (justifyTicks || !showTicks) {
       const text = wrapper.selectAll('text')[0];
       if (text.length > 1) {
         d3.select(text[0]).style('text-anchor', 'start');
         d3.select(text[text.length - 1]).style('text-anchor', 'end');
       }
+    }
+
+    if (!showTicks) {
+      wrapper.selectAll('.axis line').style('display', 'none');
     }
   }, [JSON.stringify(scale), d3Container.current]);
 
