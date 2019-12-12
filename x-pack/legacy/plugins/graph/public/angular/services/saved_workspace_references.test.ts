@@ -78,8 +78,8 @@ describe('injectReferences', () => {
     injectReferences(context, references);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "test": "test",
   "id": "1",
+  "title": "test",
   "wsState": "{\\"bar\\":true,\\"indexPattern\\":\\"pattern*\\"}",
 }
 `);
@@ -93,8 +93,8 @@ Object {
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "test": "test",
   "id": "1",
+  "title": "test",
 }
 `);
   });
