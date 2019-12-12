@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export * from './agg_types';
-export * from './search_bar';
-export * from './search_service';
-export * from './utils';
+export { AggParam, AggParamOption } from './agg_params';
+export { DateRangeKey } from './buckets/date_range';
+export { IpRangeKey } from './buckets/ip_range';
+export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';

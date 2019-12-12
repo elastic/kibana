@@ -31,7 +31,20 @@ export { DataStart };
 
 export { Field, FieldType, IFieldList, IndexPattern } from './index_patterns';
 export { SearchBar, SearchBarProps } from './search';
-export { EsQuerySortValue, FetchOptions, ISearchSource, SortDirection } from './search/types';
+export {
+  // agg_types
+  AggParam,
+  AggParamOption,
+  DateRangeKey,
+  IpRangeKey,
+  OptionedParamEditorProps,
+  OptionedValueProp,
+  // search_source
+  EsQuerySortValue,
+  FetchOptions,
+  ISearchSource,
+  SortDirection,
+} from './search/types';
 export {
   SavedQueryAttributes,
   SavedQuery,
@@ -42,4 +55,22 @@ export {
 export * from '../common';
 export { FilterStateManager } from './filter/filter_manager';
 export { getFromSavedObject, getRoutes, flattenHitWrapper } from './index_patterns';
-export { getRequestInspectorStats, getResponseInspectorStats } from './search';
+export {
+  // agg_types
+  AggParamType,
+  aggTypeFilters,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions, // only used in Discover
+  isDateHistogramBucketAggConfig,
+  isStringType,
+  isType,
+  isValidInterval,
+  isValidJson,
+  OptionedParamType,
+  propFilter,
+  // search_source
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from './search';

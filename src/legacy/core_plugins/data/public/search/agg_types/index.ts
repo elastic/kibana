@@ -108,9 +108,3 @@ export { convertIPRangeToString } from './buckets/ip_range';
 export { aggTypeFilters, propFilter } from './filter';
 export { OptionedParamType } from './param_types/optioned';
 export { isValidJson, isValidInterval } from './utils';
-
-// types
-export { AggParam, AggParamOption } from './agg_params';
-export { DateRangeKey } from './buckets/date_range';
-export { IpRangeKey } from './buckets/ip_range';
-export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';

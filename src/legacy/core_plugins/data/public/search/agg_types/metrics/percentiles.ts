@@ -19,13 +19,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { PercentilesEditor } from 'ui/vis/editors/default/controls/percentiles';
+
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
 import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';
-import { PercentilesEditor } from 'ui/vis/editors/default/controls/percentiles';
 
 // @ts-ignore
 import { ordinalSuffix } from './lib/ordinal_suffix';
