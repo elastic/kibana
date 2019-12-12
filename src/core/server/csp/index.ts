@@ -17,6 +17,7 @@
  * under the License.
  */
 
-export * from './config';
-export * from './types';
-export * from './csp';
+import { CspConfig } from './csp_config';
+import { CspConfigType, config } from './config';
+
+export { CspConfig, CspConfigType, config };

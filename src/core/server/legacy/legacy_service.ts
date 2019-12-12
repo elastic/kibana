@@ -25,6 +25,7 @@ import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { SavedObjectsLegacyUiExports } from '../types';
 import { Config, ConfigDeprecationProvider } from '../config';
 import { CoreContext } from '../core_context';
+import { CspConfigType } from '../csp';
 import { DevConfig, DevConfigType } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
 import { Logger } from '../logging';
@@ -116,9 +117,15 @@ export class LegacyService implements CoreService {
     this.devConfig$ = coreContext.configService
       .atPath<DevConfigType>('dev')
       .pipe(map(rawConfig => new DevConfig(rawConfig)));
-    this.httpConfig$ = coreContext.configService
-      .atPath<HttpConfigType>('server')
-      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
+    this.httpConfig$ = combineLatest(
+      coreContext.configService.atPath<HttpConfigType>('server'),
+      coreContext.configService.atPath<CspConfigType>('csp')
+    ).pipe(
+      map(
+        ([rawHttpConfig, rawCspConfig]) =>
+          new HttpConfig(rawHttpConfig, rawCspConfig, coreContext.env)
+      )
+    );
   }
 
   public async discoverPlugins(): Promise<LegacyServiceDiscoverPlugins> {
@@ -284,6 +291,7 @@ export class LegacyService implements CoreService {
         registerOnPostAuth: setupDeps.core.http.registerOnPostAuth,
         registerOnPreResponse: setupDeps.core.http.registerOnPreResponse,
         basePath: setupDeps.core.http.basePath,
+        csp: setupDeps.core.http.csp,
         isTlsEnabled: setupDeps.core.http.isTlsEnabled,
       },
       savedObjects: {

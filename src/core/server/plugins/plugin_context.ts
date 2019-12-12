@@ -28,7 +28,6 @@ import {
   PluginOpaqueId,
   SharedGlobalConfigKeys,
 } from './types';
-import { CspConfigType, config as cspConfig } from '../csp';
 import { PathConfigType, config as pathConfig } from '../path';
 import { KibanaConfigType, config as kibanaConfig } from '../kibana_config';
 import {
@@ -89,15 +88,13 @@ export function createPluginInitializerContext(
         globalConfig$: combineLatest(
           coreContext.configService.atPath<KibanaConfigType>(kibanaConfig.path),
           coreContext.configService.atPath<ElasticsearchConfigType>(elasticsearchConfig.path),
-          coreContext.configService.atPath<PathConfigType>(pathConfig.path),
-          coreContext.configService.atPath<CspConfigType>(cspConfig.path)
+          coreContext.configService.atPath<PathConfigType>(pathConfig.path)
         ).pipe(
-          map(([kibana, elasticsearch, path, csp]) =>
+          map(([kibana, elasticsearch, path]) =>
             deepFreeze({
               kibana: pick(kibana, SharedGlobalConfigKeys.kibana),
               elasticsearch: pick(elasticsearch, SharedGlobalConfigKeys.elasticsearch),
               path: pick(path, SharedGlobalConfigKeys.path),
-              csp: pick(csp, SharedGlobalConfigKeys.csp),
             })
           )
         ),
@@ -164,6 +161,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
+      csp: deps.http.csp,
       isTlsEnabled: deps.http.isTlsEnabled,
     },
     savedObjects: {

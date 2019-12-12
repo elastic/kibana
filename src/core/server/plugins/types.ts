@@ -24,7 +24,6 @@ import { RecursiveReadonly } from 'kibana/public';
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
-import { CspConfigType } from '../csp';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { PathConfigType } from '../path';
 import { CoreSetup, CoreStart } from '..';
@@ -213,7 +212,6 @@ export const SharedGlobalConfigKeys = {
   kibana: ['defaultAppId', 'index'] as const,
   elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
   path: ['data'] as const,
-  csp: ['directives', 'rules'] as const,
 };
 
 /**
@@ -223,7 +221,6 @@ export type SharedGlobalConfig = RecursiveReadonly<{
   kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
   elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
-  csp: Pick<CspConfigType, typeof SharedGlobalConfigKeys.csp[number]>;
 }>;
 
 /**

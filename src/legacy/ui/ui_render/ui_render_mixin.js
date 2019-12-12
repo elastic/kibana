@@ -246,6 +246,8 @@ export function uiRenderMixin(kbnServer, server, config) {
       }
     }));
 
+    console.log(config.get('csp'));
+
     const response = h.view('ui_app', {
       strictCsp: config.get('csp.strict'),
       uiPublicUrl: `${basePath}/ui`,

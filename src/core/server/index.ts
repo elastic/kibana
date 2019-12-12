@@ -68,7 +68,7 @@ export {
   HandlerParameters,
 } from './context';
 export { CoreId } from './core_context';
-export { CspOptions, DEFAULT_CSP_OPTIONS } from './csp';
+export { CspConfig } from './csp';
 export {
   ClusterClient,
   IClusterClient,

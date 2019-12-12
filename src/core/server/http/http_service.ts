@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import { Server } from 'hapi';
 
@@ -28,6 +28,7 @@ import { Logger } from '../logging';
 import { ContextSetup } from '../context';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
+import { CspConfigType } from '../csp';
 
 import { Router } from './router';
 import { HttpConfig, HttpConfigType } from './http_config';
@@ -62,10 +63,15 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger;
     this.log = coreContext.logger.get('http');
-    this.config$ = coreContext.configService
-      .atPath<HttpConfigType>('server')
-      .pipe(map(rawConfig => new HttpConfig(rawConfig, coreContext.env)));
-
+    this.config$ = combineLatest(
+      coreContext.configService.atPath<HttpConfigType>('server'),
+      coreContext.configService.atPath<CspConfigType>('csp')
+    ).pipe(
+      map(
+        ([rawHttpConfig, rawCspConfig]) =>
+          new HttpConfig(rawHttpConfig, rawCspConfig, coreContext.env)
+      )
+    );
     this.httpServer = new HttpServer(coreContext.logger, 'Kibana');
     this.httpsRedirectServer = new HttpsRedirectServer(
       coreContext.logger.get('http', 'redirect', 'server')
@@ -79,7 +85,7 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
         // If the server is already running we can't make any config changes
         // to it, so we warn and don't allow the config to pass through.
         this.log.warn(
-          'Received new HTTP config after server was started. ' + 'Config will **not** be applied.'
+          'Received new HTTP config after server was started. Config will **not** be applied.'
         );
       }
     });

@@ -17,31 +17,50 @@
  * under the License.
  */
 
+import { CspConfigType, config } from './config';
+
+const DEFAULT = Object.freeze(config.schema.validate({}));
+
 /**
- * The CSP options used for Kibana.
+ * CSP configuration for use in Kibana.
  * @public
  */
-export interface CspOptions {
-  /**
-   * The CSP rules in a formatted directives string for use
-   * in a `Content-Security-Policy` header.
-   */
-  directives: string;
-
+export class CspConfig {
   /**
    * The CSP rules used for Kibana.
    */
-  rules: string[];
+  public rules: string[];
 
   /**
    * Specify whether browsers that do not support CSP should be
    * able to use Kibana. Use `true` to block and `false` to allow.
    */
-  strict: boolean;
+  public strict: boolean;
 
   /**
    * Specify whether users with legacy browsers should be warned
    * about their lack of Kibana security compliance.
    */
-  warnLegacyBrowsers: boolean;
+  public warnLegacyBrowsers: boolean;
+
+  /**
+   * The CSP rules in a formatted directives string for use
+   * in a `Content-Security-Policy` header.
+   */
+  public header!: string;
+
+  /**
+   * Returns the default CSP configuration when passed with no config
+   */
+  constructor(rawCspConfig: Partial<CspConfigType> = {}) {
+    const source = { ...DEFAULT, ...rawCspConfig };
+
+    this.rules = source.rules;
+    this.strict = source.strict;
+    this.warnLegacyBrowsers = source.warnLegacyBrowsers;
+    Object.defineProperty(this, 'header', {
+      enumerable: true,
+      get: () => this.rules.join('; '),
+    });
+  }
 }

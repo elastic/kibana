@@ -17,6 +17,7 @@
  * under the License.
  */
 import { IContextProvider, IContextContainer } from '../context';
+import { CspConfig } from '../csp';
 import { RequestHandler, IRouter } from './router';
 import { HttpServerSetup } from './http_server';
 import { SessionStorageCookieOptions } from './cookie_session_storage';
@@ -181,6 +182,11 @@ export interface HttpServiceSetup {
    * See {@link IBasePath}.
    */
   basePath: IBasePath;
+
+  /**
+   * The CSP config used for Kibana.
+   */
+  csp: CspConfig;
 
   /**
    * Flag showing whether a server was configured to use TLS connection.

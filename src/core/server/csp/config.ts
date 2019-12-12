@@ -21,22 +21,17 @@ import { TypeOf, schema } from '@kbn/config-schema';
 
 export type CspConfigType = TypeOf<typeof config.schema>;
 
-const rules = [
-  `script-src 'unsafe-eval' 'self'`,
-  `worker-src blob: 'self'`,
-  `style-src 'unsafe-inline' 'self'`,
-];
-
 export const config = {
   // TODO: Move this to server.csp using config deprecations
   // ? https://github.com/elastic/kibana/pull/52251
   path: 'csp',
   schema: schema.object({
-    rules: schema.arrayOf(schema.string(), { defaultValue: rules }),
-    directives: schema.string({
-      // TODO: Consider making this bidirectional in the future
-      validate: value => (value ? 'Specify `csp.rules` to compute `csp.directives`' : undefined),
-      defaultValue: (context: { rules: string[] } = { rules }) => context.rules.join('; '),
+    rules: schema.arrayOf(schema.string(), {
+      defaultValue: [
+        `script-src 'unsafe-eval' 'self'`,
+        `worker-src blob: 'self'`,
+        `style-src 'unsafe-inline' 'self'`,
+      ],
     }),
     strict: schema.boolean({ defaultValue: true }),
     warnLegacyBrowsers: schema.boolean({ defaultValue: true }),

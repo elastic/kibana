@@ -4,6 +4,7 @@
 
 ## SharedGlobalConfig type
 
+
 <b>Signature:</b>
 
 ```typescript
@@ -11,6 +12,5 @@ export declare type SharedGlobalConfig = RecursiveReadonly<{
     kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
     elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
     path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
-    csp: Pick<CspConfigType, typeof SharedGlobalConfigKeys.csp[number]>;
 }>;
 ```
