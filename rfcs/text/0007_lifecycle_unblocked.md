@@ -2,32 +2,19 @@
 - RFC PR: (leave this empty)
 - Kibana Issue: (leave this empty)
 
+## Table of contents
 - [Summary](#summary)
 - [Motivation](#motivation)
 - [Detailed design](#detailed-design)
-    - [<ol>
-<li>Synchronous lifecycle methods</li>
-</ol>](#ollisynchronous-lifecycle-methodsliol)
-    - [<ol start="2">
-<li>Synchronous Context Provider functions</li>
-</ol>](#ol-start2lisynchronous-context-provider-functionsliol)
-    - [<ol start="3">
-<li>Core should not expose API's as observables</li>
-</ol>](#ol-start3licore-should-not-expose-apis-as-observablesliol)
-    - [<ol start="4">
-<li>Complete example code</li>
-</ol>](#ol-start4licomplete-example-codeliol)
-    - [<ol start="5">
-<li>Core should expose a status signal for Core services &amp; plugins</li>
-</ol>](#ol-start5licore-should-expose-a-status-signal-for-core-services-amp-pluginsliol)
+    - [<ol><li>Synchronous lifecycle methods</li></ol>](#ollisynchronous-lifecycle-methodsliol)
+    - [<ol start="2"><li>Synchronous Context Provider functions</li></ol>](#ol-start2lisynchronous-context-provider-functionsliol)
+    - [<ol start="3"><li>Core should not expose API's as observables</li></ol>](#ol-start3licore-should-not-expose-apis-as-observablesliol)
+    - [<ol start="4"><li>Complete example code</li></ol>](#ol-start4licomplete-example-codeliol)
+    - [<ol start="5"><li>Core should expose a status signal for Core services &amp; plugins</li></ol>](#ol-start5licore-should-expose-a-status-signal-for-core-services-amp-pluginsliol)
 - [Drawbacks](#drawbacks)
 - [Alternatives](#alternatives)
-  - [<ol>
-<li>Introduce a lifecycle/context provider timeout</li>
-</ol>](#olliintroduce-a-lifecyclecontext-provider-timeoutliol)
-  - [<ol start="2">
-<li>Treat anything that blocks Kibana from starting up as a bug</li>
-</ol>](#ol-start2litreat-anything-that-blocks-kibana-from-starting-up-as-a-bugliol)
+  - [<ol><li>Introduce a lifecycle/context provider timeout</li></ol>](#olliintroduce-a-lifecyclecontext-provider-timeoutliol)
+  - [<ol start="2"><li>Treat anything that blocks Kibana from starting up as a bug</li></ol>](#ol-start2litreat-anything-that-blocks-kibana-from-starting-up-as-a-bugliol)
 - [Adoption strategy](#adoption-strategy)
 - [How we teach this](#how-we-teach-this)
 - [Unresolved questions](#unresolved-questions)
