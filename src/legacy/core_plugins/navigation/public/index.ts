@@ -21,9 +21,3 @@
 // Once the new platform is ready, they can get removed
 // and handled by the platform itself in the setup method
 // of the ExpressionExectorService
-
-/** @public types */
-import { NavigationPlugin as Plugin } from './plugin';
-export function plugin() {
-  return new Plugin();
-}

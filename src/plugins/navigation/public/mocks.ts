@@ -16,13 +16,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Plugin } from '.';
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
+export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
 
-export class NavigationPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup): void {}
+const createSetupContract = (): jest.Mocked<Setup> => {
+  const setupContract = {
+    registerMenuItem: jest.fn(),
+  };
 
-  public start(core: CoreStart) {}
+  return setupContract;
+};
 
-  public stop() {}
-}
+const createStartContract = (): jest.Mocked<Start> => {
+  const startContract = {
+    ui: {
+      TopNavMenu: jest.fn(),
+    },
+  };
+  return startContract;
+};
+
+export const navigationPluginMock = {
+  createSetupContract,
+  createStartContract,
+};

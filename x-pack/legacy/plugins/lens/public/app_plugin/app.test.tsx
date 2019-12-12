@@ -20,11 +20,18 @@ import { TopNavMenuData } from '../../../../../../src/plugins/navigation/public'
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
 
-const TopNavMenu = jest.fn(() => null);
-
 jest.mock('ui/new_platform');
 jest.mock('../persistence');
 jest.mock('src/core/public');
+
+import { npStart } from 'ui/new_platform';
+jest
+  .spyOn(npStart.plugins.navigation.ui.TopNavMenu.prototype, 'constructor')
+  .mockImplementation(() => {
+    return <div className="topNavMenu" />;
+  });
+
+const { TopNavMenu } = npStart.plugins.navigation.ui;
 
 const waitForPromises = () => new Promise(resolve => setTimeout(resolve));
 
