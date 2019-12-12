@@ -20,25 +20,20 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'home']);
+  const PageObjects = getPageObjects(['common', 'console']);
   const a11y = getService('a11y');
 
-  describe('Kibana Home', () => {
+  describe('Dev tools console', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('home');
+      await PageObjects.common.navigateToApp('console');
     });
 
-    it('Kibana Home view', async () => {
+    it('Dev tools console view', async () => {
       await a11y.testAppSnapshot();
     });
 
-    it('Add Kibana sample data page', async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
-      await a11y.testAppSnapshot();
-    });
-
-    it('Add flights sample data set', async () => {
-      await PageObjects.home.addSampleDataSet('flights');
+    it('Dev tools settings page', async () => {
+      await PageObjects.console.setFontSizeSetting(20);
       await a11y.testAppSnapshot();
     });
   });

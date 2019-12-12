@@ -20,25 +20,37 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'home']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header']);
   const a11y = getService('a11y');
+  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('Kibana Home', () => {
+  describe('Dashboard', () => {
+    const dashboardName = 'Dashboard Listing A11y';
     before(async () => {
-      await PageObjects.common.navigateToApp('home');
+      await esArchiver.loadIfNeeded('logstash_functional');
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'logstash-*',
+      });
+      await PageObjects.common.navigateToApp('dashboard');
     });
 
-    it('Kibana Home view', async () => {
+    it('dashboard', async () => {
       await a11y.testAppSnapshot();
     });
 
-    it('Add Kibana sample data page', async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+    it('create dashboard button', async () => {
+      await PageObjects.dashboard.clickCreateDashboardPrompt();
       await a11y.testAppSnapshot();
     });
 
-    it('Add flights sample data set', async () => {
-      await PageObjects.home.addSampleDataSet('flights');
+    it('save empty dashboard', async () => {
+      await PageObjects.dashboard.saveDashboard(dashboardName);
+      await a11y.testAppSnapshot();
+    });
+
+    it('Dashboard listing table', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
       await a11y.testAppSnapshot();
     });
   });
