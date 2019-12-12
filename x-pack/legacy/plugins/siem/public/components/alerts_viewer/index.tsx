@@ -26,7 +26,7 @@ export const AlertsView = ({
   startDate,
   type,
   updateDateRange = () => {},
-}: AlertsComponentsQueryProps & { pageFilters: AlertsComponentPageFilterDsl[] }) => (
+}: AlertsComponentsQueryProps & { pageFilters: AlertsComponentPageFilterDsl }) => (
   <>
     <AlertsOverTimeQuery
       endDate={endDate}

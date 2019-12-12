@@ -10,7 +10,7 @@ import { UpdateDateRange } from '../charts/common';
 import { InspectQuery, Refetch } from '../../store/inputs/model';
 import { NarrowDateRange } from '../ml/types';
 
-interface PageFilterDsl {
+export interface PageFilterDsl {
   exists: {
     field: string;
   };
@@ -19,7 +19,7 @@ interface PageFilterDsl {
 export type AlertsComponentPageFilterDsl = Array<{
   bool: {
     should: PageFilterDsl[];
-    minimum_should_match: 1;
+    minimum_should_match: number;
   };
 }>;
 
