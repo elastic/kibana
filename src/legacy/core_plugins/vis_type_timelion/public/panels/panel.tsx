@@ -20,7 +20,7 @@
 import React, { useRef } from 'react';
 import $ from 'jquery';
 import moment from 'moment-timezone';
-import { debounce, compact, get,each } from 'lodash';
+import { debounce, compact, get, each, noop } from 'lodash';
 
 import './timechart/flot';
 
@@ -33,33 +33,208 @@ import { generateTicksProvider } from './timechart/tick_generator';
 import { useEventListener } from './useEventListener';
 
 import { getServices } from '../kibana_services';
+import { DEBOUNCE_DELAY, emptyCaption, staticDefaultOptions } from './constants';
 
 interface PanelProps {
   name: string;
+  interval: any;
+  search?: any;
+  seriesList: any;
 }
 
-const DEBOUNCE_DELAY = 50;
-
-function Panel(props: PanelProps) {
+function Panel({ interval: intervalProp, search = noop, seriesList }: PanelProps) {
+  console.log('Panel')
+  const chart = seriesList.list;
+  const elementRef = useRef(null);
+  const canvasElem = useRef(null);
+  const legendElem = useRef(null);
   const { uiSettings, timefilter } = getServices();
   const formatters = tickFormatters() as any;
   const getxAxisFormatter = xaxisFormatterProvider(uiSettings);
   const generateTicks = generateTicksProvider();
 
-  moment.tz.setDefault(uiSettings.get('dateFormat:tz'));
+  if (!canvasElem.current) {
+    //return null;
+  }
 
-  let canvasElem: any;
-  // @ts-ignore
-  const plot = $.plot(canvasElem, compact(series), options);
-
-  let legendValueNumbers: any;
+  let legendValueNumbers: any = [];
   let legendCaption: any;
+
+  let highlightedSeries: any;
+  let focusedSeries: any;
+  const originalColorMap = new Map();
+
+  let legendScope = {};
+
+  const highlightSeries = debounce((id: any) => {
+    if (highlightedSeries === id) {
+      return;
+    }
+
+    highlightedSeries = id;
+    chart.forEach((series: any, seriesIndex: any) => {
+      if (seriesIndex !== id) {
+        series.color = 'rgba(128,128,128,0.1)'; // mark as grey
+      } else {
+        series.color = originalColorMap.get(series); // color it like it was
+      }
+    });
+    // drawPlot(chart);
+  }, DEBOUNCE_DELAY);
+
+  const focusSeries = (id: any) => {
+    focusedSeries = id;
+    highlightSeries(id);
+  };
+
+  const toggleSeries = (id: any) => {
+    const series = chart[id];
+    series._hide = !series._hide;
+    // drawPlot(chart);
+  };
+
+  const reactLegend = (
+    <span ref={legendElem} className="ngLegendValue" onKeyDown={() => {}}>
+      <span />
+      <span className="ngLegendValueNumber" />
+    </span>
+  );
+
+  const defaultOptions = {
+    ...staticDefaultOptions,
+    grid: {
+      show: seriesList.render.grid,
+      borderWidth: 0,
+      borderColor: null,
+      margin: 10,
+      hoverable: true,
+      autoHighlight: false,
+    },
+    legend: {
+      backgroundColor: 'rgb(255,255,255,0)',
+      position: 'nw',
+      labelBoxBorderColor: 'rgb(255,255,255,0)',
+      labelFormatter(label: any, series: any) {
+        const legend = $(
+          `<span><span
+            class="ngLegendValue"
+          >
+            <span>${label}</span>
+            <span class="ngLegendValueNumber" />
+          </span></span>`
+        );
+        legend.find('.ngLegendValue').click(() => toggleSeries(series._id));
+        const legendNumber = `<span className="ngLegendValueNumber"></span>`;
+        legendValueNumbers.push(legendNumber);
+        // if (legendElem.current) {
+        //   legendElem.current.firstElementChild.innerText = label;
+        //   legendElem.current.onclick = () => toggleSeries(series._id);
+        // }
+        // return `<span
+        //     className="ngLegendValue"
+        //     onClick="toggleSeries(${series._id})"
+        //     onFocus="focusSeries(${series._id})"
+        //     onMouseOver="highlightSeries(${series._id})"
+        //   >
+        //     <span>${label}</span>
+        //     ${legendNumber}
+        //   </span>`;
+        return legend.html();
+      },
+    },
+  };
+
+  $(canvasElem.current).find('.legendLabel').click(() => toggleSeries(0));
+  const options = _.cloneDeep(defaultOptions) as any;
+
+  // Get the X-axis tick format
+  const time = timefilter.getBounds() as any;
+  const interval = calculateInterval(
+    time.min.valueOf(),
+    time.max.valueOf(),
+    uiSettings.get('timelion:target_buckets') || 200,
+    intervalProp,
+    uiSettings.get('timelion:min_interval') || '1ms'
+  );
+  const format = getxAxisFormatter(interval);
+
+  // Use moment to format ticks so we get timezone correction
+  options.xaxis.tickFormatter = function (val: any) {
+    return moment(val).format(format);
+  };
+
+  // Calculate how many ticks can fit on the axis
+  const tickLetterWidth = 7;
+  const tickPadding = 45;
+  options.xaxis.ticks = Math.floor(
+    elementRef.current
+      ? elementRef.current.clientWidth
+      : 0 / (format.length * tickLetterWidth + tickPadding)
+  );
+
+  const series = _.map(chart, function (serie: any, index) {
+    serie = _.cloneDeep(
+      _.defaults(serie, {
+        shadowSize: 0,
+        lines: {
+          lineWidth: 3,
+        },
+      })
+    );
+    serie._id = index;
+
+    if (serie.color) {
+      const span = document.createElement('span');
+      span.style.color = serie.color;
+      serie.color = span.style.color;
+    }
+
+    if (serie._hide) {
+      serie.data = [];
+      serie.stack = false;
+      // serie.color = "#ddd";
+      serie.label = '(hidden) ' + serie.label;
+    }
+
+    if (serie._global) {
+      _.merge(options, serie._global, function (objVal, srcVal) {
+        // This is kind of gross, it means that you can't replace a global value with a null
+        // best you can do is an empty string. Deal with it.
+        if (objVal == null) return srcVal;
+        if (srcVal == null) return objVal;
+      });
+    }
+
+    return serie;
+  });
+
+  if (options.yaxes) {
+    options.yaxes.forEach((yaxis: any) => {
+      if (yaxis && yaxis.units) {
+        yaxis.tickFormatter = formatters[yaxis.units.type];
+        const byteModes = ['bytes', 'bytes/s'];
+        if (byteModes.includes(yaxis.units.type)) {
+          yaxis.tickGenerator = generateTicks;
+        }
+      }
+    });
+  }
+
+  // @ts-ignore
+  const plot =
+    canvasElem.current &&
+      canvasElem.current.clientHeight > 0 &&
+      canvasElem.current.clientWidth > 0
+      ? $.plot(canvasElem.current, compact(series), options)
+      : null;
+
+  moment.tz.setDefault(uiSettings.get('dateFormat:tz'));
 
   const clearLegendNumbers = () => {
     if (legendCaption) {
       legendCaption.html(emptyCaption);
     }
-    each(legendValueNumbers, function(num) {
+    each(legendValueNumbers, (num: any) => {
       $(num).empty();
     });
   };
@@ -85,22 +260,9 @@ function Panel(props: PanelProps) {
     });
   };
 
-  const elementRef = useRef(null);
   useEventListener(elementRef, 'plothover', plothoverHandler);
   useEventListener(elementRef, 'plotselected', plotselectedHandler);
   useEventListener(elementRef, 'mouseleave', mouseleaveHandler);
-
-  const {
-    interval,
-    search,
-    seriesList: { list: chart },
-  } = props;
-
-
-  let highlightedSeries: any;
-  let focusedSeries: any;
-  const originalColorMap = new Map();
-
 
   const unhighlightSeries = () => {
     if (highlightedSeries === null) {
@@ -169,91 +331,7 @@ function Panel(props: PanelProps) {
     trailing: false,
   });
 
-  // ensure legend is the same height with or without a caption so legend items do not move around
-  const emptyCaption = '<br>';
-
-  const highlightSeries = debounce((id: any) => {
-    if (highlightedSeries === id) {
-      return;
-    }
-
-    highlightedSeries = id;
-    chart.forEach((series: any, seriesIndex: any) => {
-      if (seriesIndex !== id) {
-        series.color = 'rgba(128,128,128,0.1)'; // mark as grey
-      } else {
-        series.color = originalColorMap.get(series); // color it like it was
-      }
-    });
-    // drawPlot(chart);
-  }, DEBOUNCE_DELAY);
-
-  const focusSeries = (id: any) => {
-    focusedSeries = id;
-    highlightSeries(id);
-  };
-
-  const toggleSeries = (id: any) => {
-    const series = chart[id];
-    series._hide = !series._hide;
-    // drawPlot(chart);
-  };
-
-  const defaultOptions = {
-    xaxis: {
-      mode: 'time',
-      tickLength: 5,
-      timezone: 'browser',
-    },
-    selection: {
-      mode: 'x',
-      color: '#ccc',
-    },
-    crosshair: {
-      mode: 'x',
-      color: '#C66',
-      lineWidth: 2,
-    },
-    grid: {
-      show: props.seriesList.render.grid,
-      borderWidth: 0,
-      borderColor: null,
-      margin: 10,
-      hoverable: true,
-      autoHighlight: false,
-    },
-    legend: {
-      backgroundColor: 'rgb(255,255,255,0)',
-      position: 'nw',
-      labelBoxBorderColor: 'rgb(255,255,255,0)',
-      labelFormatter(label: any, series: any) {
-        return (
-          <span
-            className="ngLegendValue"
-            onClick={() => toggleSeries(series._id)}
-            onFocus={() => focusSeries(series._id)}
-            onMouseover={() => highlightSeries(series._id)}
-          >
-            <span>{label}</span>
-            <span className="ngLegendValueNumber">{label}</span>
-          </span>
-        );
-      },
-    },
-    colors: [
-      '#01A4A4',
-      '#C66',
-      '#D0D102',
-      '#616161',
-      '#00A1CB',
-      '#32742C',
-      '#F18D05',
-      '#113F8C',
-      '#61AE24',
-      '#D70060',
-    ],
-  };
-
+  // setting originalColorMap
   chart.forEach((series: any, seriesIndex: any) => {
     if (!series.color) {
       const colorIndex = seriesIndex % defaultOptions.colors.length;
@@ -273,128 +351,42 @@ function Panel(props: PanelProps) {
   //   $elem.off('mouseleave');
   // });
 
-  let legendScope = {};
-
   // const drawPlot = (plotConfig: any) => {
-  //   if (!$('.chart-canvas', $elem).length) $elem.html(template);
-  //   const canvasElem = $('.chart-canvas', $elem);
 
-  //   // we can't use `$.plot` to draw the chart when the height or width is 0
-  //   // so, we'll need another event to trigger drawPlot to actually draw it
-  //   if (canvasElem.height() === 0 || canvasElem.width() === 0) {
-  //     return;
-  //   }
-
-  //   const title = _(plotConfig)
-  //     .map('_title')
-  //     .compact()
-  //     .last() as any;
-  //   $('.chart-top-title', $elem).text(title == null ? '' : title);
-
-  //   const options = _.cloneDeep(defaultOptions) as any;
-
-  //   // Get the X-axis tick format
-  //   const time = timefilter.getBounds() as any;
-  //   const interval = calculateInterval(
-  //     time.min.valueOf(),
-  //     time.max.valueOf(),
-  //     uiSettings.get('timelion:target_buckets') || 200,
-  //     $scope.interval,
-  //     uiSettings.get('timelion:min_interval') || '1ms'
-  //   );
-  //   const format = getxAxisFormatter(interval);
-
-  //   // Use moment to format ticks so we get timezone correction
-  //   options.xaxis.tickFormatter = function(val: any) {
-  //     return moment(val).format(format);
-  //   };
-
-  //   // Calculate how many ticks can fit on the axis
-  //   const tickLetterWidth = 7;
-  //   const tickPadding = 45;
-  //   options.xaxis.ticks = Math.floor(
-  //     $elem.width() / (format.length * tickLetterWidth + tickPadding)
-  //   );
-
-  //   const series = _.map(plotConfig, function(serie: any, index) {
-  //     serie = _.cloneDeep(
-  //       _.defaults(serie, {
-  //         shadowSize: 0,
-  //         lines: {
-  //           lineWidth: 3,
-  //         },
-  //       })
-  //     );
-  //     serie._id = index;
-
-  //     if (serie.color) {
-  //       const span = document.createElement('span');
-  //       span.style.color = serie.color;
-  //       serie.color = span.style.color;
-  //     }
-
-  //     if (serie._hide) {
-  //       serie.data = [];
-  //       serie.stack = false;
-  //       // serie.color = "#ddd";
-  //       serie.label = '(hidden) ' + serie.label;
-  //     }
-
-  //     if (serie._global) {
-  //       _.merge(options, serie._global, function(objVal, srcVal) {
-  //         // This is kind of gross, it means that you can't replace a global value with a null
-  //         // best you can do is an empty string. Deal with it.
-  //         if (objVal == null) return srcVal;
-  //         if (srcVal == null) return objVal;
-  //       });
-  //     }
-
-  //     return serie;
-  //   });
-
-  //   if (options.yaxes) {
-  //     options.yaxes.forEach((yaxis: any) => {
-  //       if (yaxis && yaxis.units) {
-  //         yaxis.tickFormatter = formatters[yaxis.units.type];
-  //         const byteModes = ['bytes', 'bytes/s'];
-  //         if (byteModes.includes(yaxis.units.type)) {
-  //           yaxis.tickGenerator = generateTicks;
-  //         }
-  //       }
-  //     });
-  //   }
-
-  //   // @ts-ignore
-  //   $scope.plot = $.plot(canvasElem, _.compact(series), options);
-
-  //   if ($scope.plot) {
-  //     $scope.$emit('timelionChartRendered');
-  //   }
-
-  //   legendScope.$destroy();
-  //   legendScope = $scope.$new();
-  //   // Used to toggle the series, and for displaying values on hover
-  //   legendValueNumbers = canvasElem.find('.ngLegendValueNumber');
-  //   _.each(canvasElem.find('.ngLegendValue'), function(elem) {
-  //     $compile(elem)(legendScope);
-  //   });
-
-  //   if (_.get($scope.plot.getData(), '[0]._global.legend.showTime', true)) {
-  //     legendCaption = $('<caption class="timChart__legendCaption"></caption>');
-  //     legendCaption.html(emptyCaption);
-  //     canvasElem.find('div.legend table').append(legendCaption);
-
-  //     // legend has been re-created. Apply focus on legend element when previously set
-  //     if (focusedSeries || focusedSeries === 0) {
-  //       const $legendLabels = canvasElem.find('div.legend table .legendLabel>span');
-  //       $legendLabels.get(focusedSeries).focus();
-  //     }
-  //   }
   // }
 
+  // we can't use `$.plot` to draw the chart when the height or width is 0
+  // so, we'll need another event to trigger drawPlot to actually draw it
+
+  const title =
+    (_(chart)
+      .map('_title')
+      .compact()
+      .last() as any) || '';
+
+  // // Used to toggle the series, and for displaying values on hover
+  // legendValueNumbers =
+  //   canvasElem && canvasElem.current && canvasElem.current.find('.ngLegendValueNumber');
+
+  if (plot && get(plot.getData(), '[0]._global.legend.showTime', true)) {
+    legendCaption = $('<caption class="timChart__legendCaption"></caption>');
+    legendCaption.html(emptyCaption);
+    // canvasElem.current.find('div.legend table').append(legendCaption);
+
+    // legend has been re-created. Apply focus on legend element when previously set
+    if (focusedSeries || focusedSeries === 0) {
+      // const $legendLabels = canvasElem.current.find('div.legend table .legendLabel>span');
+      //$legendLabels.get(focusedSeries).focus();
+    }
+  }
+
   return (
-    <div ref={elementRef} className="chart-top-title">
-      <div className="chart-canvas">New Panel</div>
+    <div className="timChart">
+      <div ref={elementRef} className="chart-top-title">
+        {title}
+      </div>
+      <div ref={canvasElem} className="chart-canvas" />
+      {reactLegend}
     </div>
   );
 }

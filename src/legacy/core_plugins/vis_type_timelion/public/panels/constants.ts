@@ -17,24 +17,37 @@
  * under the License.
  */
 
-import { Panel } from './panels/panel';
+const DEBOUNCE_DELAY = 50;
+// ensure legend is the same height with or without a caption so legend items do not move around
+const emptyCaption = '<br>';
 
-export interface TimelionKibanaServices {
-  timelionPanels: Map<string, Panel>;
-  uiSettings: any;
-  timefilter: any;
-}
-let services: TimelionKibanaServices | null = null;
+const staticDefaultOptions = {
+  xaxis: {
+    mode: 'time',
+    tickLength: 5,
+    timezone: 'browser',
+  },
+  selection: {
+    mode: 'x',
+    color: '#ccc',
+  },
+  crosshair: {
+    mode: 'x',
+    color: '#C66',
+    lineWidth: 2,
+  },
+  colors: [
+    '#01A4A4',
+    '#C66',
+    '#D0D102',
+    '#616161',
+    '#00A1CB',
+    '#32742C',
+    '#F18D05',
+    '#113F8C',
+    '#61AE24',
+    '#D70060',
+  ],
+};
 
-export function setServices(newServices: TimelionKibanaServices) {
-  services = newServices;
-}
-
-export function getServices() {
-  if (!services) {
-    throw new Error(
-      'Kibana services not set - are you trying to import this module from outside of the timelion app?'
-    );
-  }
-  return services;
-}
+export { DEBOUNCE_DELAY, emptyCaption, staticDefaultOptions };

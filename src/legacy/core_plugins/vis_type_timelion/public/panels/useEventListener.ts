@@ -28,7 +28,8 @@ export const useEventListener = (target: any, type: any, listener: any) => {
     }
     return () => {
       if (currentTarget) {
-        currentTarget.removeEventListener(type, listener);}
+        currentTarget.removeEventListener(type, listener);
+      }
     };
   }, [target, type, listener]);
 };
