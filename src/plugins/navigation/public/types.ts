@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { TopNavMenuProps, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
+import { DataPublicPluginStart } from '../../data/public';
 
-export class NavigationPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup): void {}
+export interface NavigationPublicPluginSetup {
+  registerMenuItem: TopNavMenuExtensionsRegistrySetup['register'];
+}
 
-  public start(core: CoreStart) {}
+export interface NavigationPublicPluginStart {
+  ui: {
+    TopNavMenu: React.ComponentType<TopNavMenuProps>;
+  };
+}
 
-  public stop() {}
+export interface NavigationPluginStartDependencies {
+  data: DataPublicPluginStart;
 }

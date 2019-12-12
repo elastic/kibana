@@ -17,12 +17,10 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-
-export class NavigationPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup): void {}
-
-  public start(core: CoreStart) {}
-
-  public stop() {}
-}
+export { createTopNav } from './create_top_nav_menu';
+export { TopNavMenu, TopNavMenuProps } from './top_nav_menu';
+export { TopNavMenuData } from './top_nav_menu_data';
+export {
+  TopNavMenuExtensionsRegistrySetup,
+  TopNavMenuExtensionsRegistry,
+} from './top_nav_menu_extensions_registry';

@@ -16,13 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
-
-export class NavigationPlugin implements Plugin<void, void> {
-  public setup(core: CoreSetup): void {}
-
-  public start(core: CoreStart) {}
-
-  public stop() {}
-}

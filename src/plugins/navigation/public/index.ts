@@ -17,6 +17,15 @@
  * under the License.
  */
 
-export { TopNavMenu } from './top_nav_menu';
-export { TopNavMenuData } from './top_nav_menu_data';
-export * from './top_nav_menu_extensions_registry';
+import { PluginInitializerContext } from '../../../core/public';
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new NavigationPublicPlugin(initializerContext);
+}
+
+export * from './types';
+
+export { TopNavMenuData } from './top_nav_menu';
+
+// Export plugin after all other imports
+import { NavigationPublicPlugin } from './plugin';
+export { NavigationPublicPlugin as Plugin };

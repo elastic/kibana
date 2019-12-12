@@ -23,9 +23,6 @@
 // of the ExpressionExectorService
 
 /** @public types */
-export { TopNavMenu, TopNavMenuData } from './top_nav_menu';
-export { NavigationSetup, NavigationStart } from './plugin';
-
 import { NavigationPlugin as Plugin } from './plugin';
 export function plugin() {
   return new Plugin();

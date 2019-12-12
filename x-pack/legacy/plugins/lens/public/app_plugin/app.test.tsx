@@ -16,21 +16,11 @@ import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plug
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
-import { TopNavMenuData } from '../../../../../../src/legacy/core_plugins/navigation/public';
+import { TopNavMenuData } from '../../../../../../src/plugins/navigation/public';
 import { DataStart } from '../../../../../../src/legacy/core_plugins/data/public';
 import { coreMock } from 'src/core/public/mocks';
 
-jest.mock('../../../../../../src/legacy/core_plugins/navigation/public/legacy', () => ({
-  start: {
-    ui: {
-      TopNavMenu: jest.fn(() => null),
-    },
-  },
-}));
-
-import { start as navigation } from '../../../../../../src/legacy/core_plugins/navigation/public/legacy';
-
-const { TopNavMenu } = navigation.ui;
+const TopNavMenu = jest.fn(() => null);
 
 jest.mock('ui/new_platform');
 jest.mock('../persistence');
