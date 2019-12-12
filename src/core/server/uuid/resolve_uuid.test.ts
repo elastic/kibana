@@ -19,7 +19,7 @@
 
 import { readFile, writeFile } from 'fs';
 import { join } from 'path';
-import { manageInstanceUuid } from './manage_uuid';
+import { resolveInstanceUuid } from './resolve_uuid';
 import { configServiceMock } from '../config/config_service.mock';
 import { BehaviorSubject } from 'rxjs';
 
@@ -71,7 +71,7 @@ const getConfigService = (serverUuid: string | undefined) => {
   return configService;
 };
 
-describe('manageInstanceUUID', () => {
+describe('resolveInstanceUuid', () => {
   let configService: ReturnType<typeof configServiceMock.create>;
 
   beforeEach(() => {
@@ -82,7 +82,7 @@ describe('manageInstanceUUID', () => {
 
   describe('when file is present and config property is set', () => {
     it('writes to file and returns the config uuid if they mismatch', async () => {
-      const uuid = await manageInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService);
       expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
@@ -93,7 +93,7 @@ describe('manageInstanceUUID', () => {
     });
     it('does not write to file if they match', async () => {
       mockReadFile({ uuid: DEFAULT_CONFIG_UUID });
-      const uuid = await manageInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService);
       expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
       expect(writeFile).not.toHaveBeenCalled();
     });
@@ -102,7 +102,7 @@ describe('manageInstanceUUID', () => {
   describe('when file is not present and config property is set', () => {
     it('writes the uuid to file and returns the config uuid', async () => {
       mockReadFile({ error: fileNotFoundError });
-      const uuid = await manageInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService);
       expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
@@ -116,7 +116,7 @@ describe('manageInstanceUUID', () => {
   describe('when file is present and config property is not set', () => {
     it('does not write to file and returns the file uuid', async () => {
       configService = getConfigService(undefined);
-      const uuid = await manageInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService);
       expect(uuid).toEqual(DEFAULT_FILE_UUID);
       expect(writeFile).not.toHaveBeenCalled();
     });
@@ -126,7 +126,7 @@ describe('manageInstanceUUID', () => {
     it('generates a new uuid and write it to file', async () => {
       configService = getConfigService(undefined);
       mockReadFile({ error: fileNotFoundError });
-      const uuid = await manageInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService);
       expect(uuid).toEqual('NEW_UUID');
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),

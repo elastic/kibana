@@ -32,7 +32,7 @@ const FILE_NAME = 'uuid';
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
-export async function manageInstanceUuid(configService: IConfigService): Promise<string> {
+export async function resolveInstanceUuid(configService: IConfigService): Promise<string> {
   const [pathConfig, serverConfig] = await Promise.all([
     configService
       .atPath<PathConfigType>(pathConfigDef.path)

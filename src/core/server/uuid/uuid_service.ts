@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { manageInstanceUuid } from './manage_uuid';
+import { resolveInstanceUuid } from './resolve_uuid';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { IConfigService } from '../config';
@@ -49,7 +49,7 @@ export class UuidService {
   }
 
   public async setup({ legacyPlugins }: SetupDeps) {
-    this.uuid = await manageInstanceUuid(this.configService);
+    this.uuid = await resolveInstanceUuid(this.configService);
     this.log.info(`Kibana instance UUID: ${this.uuid}`);
 
     // propagate the instance uuid to the legacy config, as it was the legacy way to access it.

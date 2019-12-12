@@ -18,15 +18,15 @@
  */
 
 import { UuidService } from './uuid_service';
-import { manageInstanceUuid } from './manage_uuid';
+import { resolveInstanceUuid } from './resolve_uuid';
 import { CoreContext } from '../core_context';
 
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { mockCoreContext } from '../core_context.mock';
 import { legacyServiceMock } from '../legacy/legacy_service.mock';
 
-jest.mock('./manage_uuid', () => ({
-  manageInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
+jest.mock('./resolve_uuid', () => ({
+  resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
 }));
 
 describe('UuidService', () => {
@@ -46,8 +46,8 @@ describe('UuidService', () => {
   describe('#setup()', () => {
     it('calls manageInstanceUuid with core configuration service', async () => {
       await service.setup({ legacyPlugins: legacyDiscover });
-      expect(manageInstanceUuid).toHaveBeenCalledTimes(1);
-      expect(manageInstanceUuid).toHaveBeenCalledWith(coreContext.configService);
+      expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
+      expect(resolveInstanceUuid).toHaveBeenCalledWith(coreContext.configService);
     });
 
     it('logs a message containing the UUID', async () => {
