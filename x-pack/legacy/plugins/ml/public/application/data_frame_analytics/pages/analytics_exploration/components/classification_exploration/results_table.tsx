@@ -56,12 +56,11 @@ import { getTaskStateBadge } from '../../../analytics_management/components/anal
 import { DATA_FRAME_TASK_STATE } from '../../../analytics_management/components/analytics_list/common';
 
 import { useExploreData, TableItem } from './use_explore_data';
-import { ExplorationTitle } from './regression_exploration';
+import { ExplorationTitle } from './classification_exploration';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 const MlInMemoryTableBasic = mlInMemoryTableBasicFactory<TableItem>();
-
 interface Props {
   jobConfig: DataFrameAnalyticsConfig;
   jobStatus: DATA_FRAME_TASK_STATE;
@@ -133,7 +132,7 @@ export const ResultsTable: FC<Props> = React.memo(
               return (
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.ml.dataframe.analytics.regressionExploration.indexArrayToolTipContent',
+                    'xpack.ml.dataframe.analytics.classificationExploration.indexArrayToolTipContent',
                     {
                       defaultMessage:
                         'The full content of this array based column cannot be displayed.',
@@ -142,7 +141,7 @@ export const ResultsTable: FC<Props> = React.memo(
                 >
                   <EuiBadge>
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.regressionExploration.indexArrayBadgeContent',
+                      'xpack.ml.dataframe.analytics.classificationExploration.indexArrayBadgeContent',
                       {
                         defaultMessage: 'array',
                       }
@@ -156,7 +155,7 @@ export const ResultsTable: FC<Props> = React.memo(
               return (
                 <EuiToolTip
                   content={i18n.translate(
-                    'xpack.ml.dataframe.analytics.regressionExploration.indexObjectToolTipContent',
+                    'xpack.ml.dataframe.analytics.classificationExploration.indexObjectToolTipContent',
                     {
                       defaultMessage:
                         'The full content of this object based column cannot be displayed.',
@@ -165,7 +164,7 @@ export const ResultsTable: FC<Props> = React.memo(
                 >
                   <EuiBadge>
                     {i18n.translate(
-                      'xpack.ml.dataframe.analytics.regressionExploration.indexObjectBadgeContent',
+                      'xpack.ml.dataframe.analytics.classificationExploration.indexObjectBadgeContent',
                       {
                         defaultMessage: 'object',
                       }
@@ -366,7 +365,7 @@ export const ResultsTable: FC<Props> = React.memo(
         : searchError;
 
     return (
-      <EuiPanel grow={false}>
+      <EuiPanel grow={false} id="mlDataFrameAnalyticsTableResultsPanel">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
@@ -449,7 +448,7 @@ export const ResultsTable: FC<Props> = React.memo(
             {tableItems.length === SEARCH_SIZE && (
               <EuiFormRow
                 helpText={i18n.translate(
-                  'xpack.ml.dataframe.analytics.regressionExploration.documentsShownHelpText',
+                  'xpack.ml.dataframe.analytics.classificationExploration.documentsShownHelpText',
                   {
                     defaultMessage: 'Showing first {searchSize} documents',
                     values: { searchSize: SEARCH_SIZE },
