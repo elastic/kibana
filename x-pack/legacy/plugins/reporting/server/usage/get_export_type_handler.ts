@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { exportTypesRegistryFactory } from '../lib/export_types_registry';
+import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
+import { ExportTypesRegistry } from '../lib/export_types_registry';
 
 /*
  * Gets a handle to the Reporting export types registry and returns a few
  * functions for examining them
- * @param {Object} server: Kibana server
  * @return {Object} export type handler
  */
-export async function getExportTypesHandler(server) {
-  const exportTypesRegistry = await exportTypesRegistryFactory(server);
-
+export function getExportTypesHandler(exportTypesRegistry: ExportTypesRegistry) {
   return {
     /*
      * Based on the X-Pack license and which export types are available,
@@ -23,12 +21,17 @@ export async function getExportTypesHandler(server) {
      * @param {Object} xpackInfo: xpack_main plugin info object
      * @return {Object} availability of each export type
      */
-    getAvailability(xpackInfo) {
-      const exportTypesAvailability = {};
+    getAvailability(xpackInfo: XPackMainPlugin['info']) {
+      const exportTypesAvailability: { [exportType: string]: boolean } = {};
       const xpackInfoAvailable = xpackInfo && xpackInfo.isAvailable();
-      const licenseType = xpackInfo.license.getType();
-      for(const exportType of exportTypesRegistry.getAll()) {
-        exportTypesAvailability[exportType.jobType] = xpackInfoAvailable ? exportType.validLicenses.includes(licenseType) : false;
+      const licenseType: string | undefined = xpackInfo.license.getType();
+      if (!licenseType) {
+        throw new Error('No license type returned from XPackMainPlugin#info!');
+      }
+      for (const exportType of exportTypesRegistry.getAll()) {
+        exportTypesAvailability[exportType.jobType] = xpackInfoAvailable
+          ? exportType.validLicenses.includes(licenseType)
+          : false;
       }
 
       return exportTypesAvailability;
@@ -39,6 +42,6 @@ export async function getExportTypesHandler(server) {
      */
     getNumExportTypes() {
       return exportTypesRegistry.getSize();
-    }
+    },
   };
 }

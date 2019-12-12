@@ -5,40 +5,32 @@
  */
 
 import {
-  CSV_FROM_SAVEDOBJECT_JOB_TYPE,
+  PDF_JOB_TYPE as jobType,
   LICENSE_TYPE_TRIAL,
-  LICENSE_TYPE_BASIC,
   LICENSE_TYPE_STANDARD,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
 } from '../../common/constants';
-import { ExportTypeDefinition, ImmediateCreateJobFn, ImmediateExecuteFn } from '../../types';
+import { ExportTypeDefinition, ESQueueCreateJobFn, ESQueueWorkerExecuteFn } from '../../types';
 import { createJobFactory } from './server/create_job';
 import { executeJobFactory } from './server/execute_job';
 import { metadata } from './metadata';
-import { JobParamsPanelCsv } from './types';
-
-/*
- * These functions are exported to share with the API route handler that
- * generates csv from saved object immediately on request.
- */
-export { executeJobFactory } from './server/execute_job';
-export { createJobFactory } from './server/create_job';
+import { JobParamsPDF, JobDocPayloadPDF } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  JobParamsPanelCsv,
-  ImmediateCreateJobFn<JobParamsPanelCsv>,
-  JobParamsPanelCsv,
-  ImmediateExecuteFn<JobParamsPanelCsv>
+  JobParamsPDF,
+  ESQueueCreateJobFn<JobParamsPDF>,
+  JobDocPayloadPDF,
+  ESQueueWorkerExecuteFn<JobDocPayloadPDF>
 > => ({
   ...metadata,
-  jobType: CSV_FROM_SAVEDOBJECT_JOB_TYPE,
-  jobContentExtension: 'csv',
+  jobType,
+  jobContentEncoding: 'base64',
+  jobContentExtension: 'pdf',
   createJobFactory,
   executeJobFactory,
   validLicenses: [
     LICENSE_TYPE_TRIAL,
-    LICENSE_TYPE_BASIC,
     LICENSE_TYPE_STANDARD,
     LICENSE_TYPE_GOLD,
     LICENSE_TYPE_PLATINUM,
