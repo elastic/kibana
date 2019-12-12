@@ -22,12 +22,7 @@ import { first } from 'rxjs/operators';
 import { resolve, join } from 'path';
 import url from 'url';
 import { has, isEmpty, head, pick } from 'lodash';
-import { SavedObjectsClient } from '../../../core/server';
 
-import * as collectors from './server/collectors';
-
-// @ts-ignore
-import mappings from './saved_objects_mappings/telemetry_mappings.json';
 // @ts-ignore
 import { addProcessorDefinition } from './server/api_server/es_6_0/ingest';
 // @ts-ignore
@@ -38,7 +33,6 @@ import { addExtensionSpecFilePath } from './server/api_server/spec';
 import { setHeaders } from './server/set_headers';
 // @ts-ignore
 import { ProxyConfigCollection, getElasticsearchProxyConfig, createProxyRoute } from './server';
-import KbnServer from '../../server/kbn_server';
 
 function filterHeaders(originalHeaders: any, headersToKeep: any) {
   const normalizeHeader = function(header: any) {
@@ -126,10 +120,6 @@ export default function(kibana: any) {
       server.expose('addExtensionSpecFilePath', addExtensionSpecFilePath);
       server.expose('addProcessorDefinition', addProcessorDefinition);
 
-      const savedObjectsService = (server as KbnServer).newPlatform.setup.core.savedObjects;
-      const internalRepo = savedObjectsService.createInternalRepository();
-      const savedObjectsClient = new SavedObjectsClient(internalRepo);
-
       if (options.ssl && options.ssl.verify) {
         throw new Error('sense.ssl.verify is no longer supported.');
       }
@@ -149,7 +139,6 @@ export default function(kibana: any) {
 
       server.route(
         createProxyRoute({
-          savedObjects: savedObjectsClient,
           hosts: legacyEsConfig.hosts,
           pathFilters: proxyPathFilters,
           getConfigForReq(req: any, uri: any) {
@@ -186,8 +175,6 @@ export default function(kibana: any) {
           return resolveApi(version, apis.split(','), h);
         },
       });
-
-      collectors.register(server.newPlatform.setup.plugins.usageCollection, savedObjectsClient);
     },
 
     uiExports: {
@@ -195,7 +182,6 @@ export default function(kibana: any) {
       styleSheetPaths: resolve(npSrc, 'application/styles/index.scss'),
       injectDefaultVars: () => defaultVars,
       noParse: [join(npSrc, 'application/models/legacy_core_editor/mode/worker/worker.js')],
-      mappings,
     },
   } as any);
 }

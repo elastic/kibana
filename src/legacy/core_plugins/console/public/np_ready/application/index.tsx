@@ -22,7 +22,7 @@ import { NotificationsSetup } from 'kibana/public';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { Main } from './containers';
 import { createStorage, createHistory, createSettings, Settings } from '../services';
-import { XPluginSet } from '../../legacy';
+import { Metrics } from '../../legacy';
 
 let settingsRef: Settings;
 export function legacyBackDoorToSettings() {
@@ -34,7 +34,7 @@ export function boot(deps: {
   I18nContext: any;
   notifications: NotificationsSetup;
   elasticsearchUrl: string;
-  metrics: XPluginSet['__LEGACY']['metrics'];
+  metrics: Metrics;
 }) {
   const {
     I18nContext,
@@ -60,7 +60,13 @@ export function boot(deps: {
         value={{
           elasticsearchUrl,
           docLinkVersion,
-          services: { storage, history, settings, notifications },
+          services: {
+            storage,
+            history,
+            settings,
+            notifications,
+            metrics: { trackMetric, METRIC_TYPE },
+          },
         }}
       >
         <RequestContextProvider>

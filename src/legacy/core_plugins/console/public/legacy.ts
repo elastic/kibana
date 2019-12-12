@@ -23,14 +23,16 @@ import chrome from 'ui/chrome';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { createUiStatsReporter, METRIC_TYPE } from '../../ui_metric/public';
 
+export interface Metrics {
+  trackMetric: ReturnType<typeof createUiStatsReporter>;
+  METRIC_TYPE: typeof METRIC_TYPE;
+}
+
 export interface XPluginSet {
   dev_tools: DevToolsSetup;
   home: HomePublicPluginSetup;
   __LEGACY: {
-    metrics: {
-      trackMetric: ReturnType<typeof createUiStatsReporter>;
-      METRIC_TYPE: typeof METRIC_TYPE;
-    };
+    metrics: Metrics;
     I18nContext: any;
     elasticsearchUrl: string;
     category: FeatureCatalogueCategory;

@@ -24,7 +24,6 @@ import { BaseResponseType } from '../../../types/common';
 
 export interface EsRequestArgs {
   requests: any;
-  telemetry: string;
 }
 
 export interface ESRequestResult {
@@ -40,10 +39,7 @@ export interface ESRequestResult {
 }
 
 let CURRENT_REQ_ID = 0;
-export function sendRequestToES({
-  requests,
-  telemetry,
-}: EsRequestArgs): Promise<ESRequestResult[]> {
+export function sendRequestToES({ requests }: EsRequestArgs): Promise<ESRequestResult[]> {
   return new Promise((resolve, reject) => {
     const reqId = ++CURRENT_REQ_ID;
     const results: ESRequestResult[] = [];
@@ -74,7 +70,7 @@ export function sendRequestToES({
         esData += '\n';
       } // append a new line for bulk requests.
 
-      es.send(esMethod, esPath, esData, telemetry).always(
+      es.send(esMethod, esPath, esData).always(
         (dataOrjqXHR: any, textStatus: string, jqXhrORerrorThrown: any) => {
           if (reqId !== CURRENT_REQ_ID) {
             return;

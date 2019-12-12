@@ -19,16 +19,20 @@
 import { i18n } from '@kbn/i18n';
 import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
-import { useServicesContext } from '../../contexts';
+import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
-import { useRequestActionContext } from '../../contexts';
 import { getEndpointFromPosition } from '../../../lib/autocomplete/autocomplete';
 // @ts-ignore
 import mappings from '../../../lib/mappings/mappings';
 
 export const useSendCurrentRequestToES = () => {
   const {
-    services: { history, settings, notifications },
+    services: {
+      history,
+      settings,
+      notifications,
+      metrics: { trackMetric, METRIC_TYPE },
+    },
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -52,10 +56,9 @@ export const useSendCurrentRequestToES = () => {
         editor.parser
       );
 
-      const results = await sendRequestToES({
-        requests,
-        telemetry: patterns.join('|'),
-      });
+      trackMetric(METRIC_TYPE.COUNT, `${requests[0].method} ${patterns.join('|')}`);
+
+      const results = await sendRequestToES({ requests });
 
       results.forEach(({ request: { path, method, data } }) => {
         history.addToHistory(path, method, data);
@@ -90,5 +93,5 @@ export const useSendCurrentRequestToES = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications]);
+  }, [dispatch, settings, history, notifications, trackMetric, METRIC_TYPE.COUNT]);
 };

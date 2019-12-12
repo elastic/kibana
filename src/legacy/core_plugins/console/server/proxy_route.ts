@@ -17,15 +17,12 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
 import Joi from 'joi';
 import * as url from 'url';
 import { IncomingMessage } from 'http';
 import Boom from 'boom';
 import { trimLeft, trimRight } from 'lodash';
 import { sendRequest } from './request';
-import { CUSTOM_HEADER_USER_ISSUED } from '../common/constants';
-import { incrementRequestCounter } from './collectors';
 
 function toURL(base: string, path: string) {
   const urlResult = new url.URL(`${trimRight(base, '/')}/${trimLeft(path, '/')}`);
@@ -62,12 +59,10 @@ function getProxyHeaders(req: any) {
 }
 
 export const createProxyRoute = ({
-  savedObjects,
   hosts,
   pathFilters = [/.*/],
   getConfigForReq = () => ({}),
 }: {
-  savedObjects: SavedObjectsClientContract;
   hosts: string[];
   pathFilters: RegExp[];
   getConfigForReq: (...args: any[]) => any;
@@ -113,13 +108,6 @@ export const createProxyRoute = ({
       const { path, method } = query;
 
       let esIncomingMessage: IncomingMessage;
-
-      if (req.headers && req.headers[CUSTOM_HEADER_USER_ISSUED]) {
-        const pathPattern = req.headers[CUSTOM_HEADER_USER_ISSUED];
-        delete req.headers[CUSTOM_HEADER_USER_ISSUED];
-        // Fire and forget.
-        incrementRequestCounter(savedObjects, method, pathPattern).catch(() => {});
-      }
 
       for (let idx = 0; idx < hosts.length; ++idx) {
         const host = hosts[idx];
