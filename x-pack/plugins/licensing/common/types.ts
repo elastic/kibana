@@ -58,6 +58,7 @@ export interface PublicLicense {
   type: LicenseType;
   /**
    * The license type, being usually one of basic, standard, gold, platinum, or trial.
+   * @deprecated use 'type' instead
    */
   mode: LicenseType;
 }
@@ -115,7 +116,6 @@ export interface ILicense {
   /**
    * Unix epoch of the expiration date of the license.
    */
-
   expiryDateInMillis?: number;
 
   /**
