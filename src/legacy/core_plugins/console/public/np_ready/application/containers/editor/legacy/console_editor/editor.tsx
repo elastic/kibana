@@ -85,18 +85,19 @@ function EditorUI() {
 
   useEffect(() => {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
+    const editor = editorInstanceRef.current;
 
-    const getQueryParams = () => {
-      const [, queryString] = window.location.hash.split('?');
+    const readQueryParams = () => {
+      const [, queryString] = (window.location.hash || '').split('?');
       return qs.parse(queryString || '');
     };
 
+    // Support for loading a console snippet from a remote source, like support docs.
     const onHashChange = debounce(() => {
-      const qParams = getQueryParams();
-      if (!qParams || !qParams.load_from) {
+      const { load_from: sourceLocation } = readQueryParams();
+      if (!sourceLocation) {
         return;
       }
-      const sourceLocation: string = qParams.load_from;
       if (/^https?:\/\//.test(sourceLocation)) {
         const loadFrom: Record<string, any> = {
           url: sourceLocation,
@@ -111,35 +112,32 @@ function EditorUI() {
         }
 
         $.ajax(loadFrom).done(async data => {
-          await editorInstanceRef.current!.update(data);
-          editorInstanceRef.current!.moveToNextRequestEdge(false);
-          editorInstanceRef.current!.highlightCurrentRequestsAndUpdateActionBar();
-          editorInstanceRef
-            .current!.getCoreEditor()
-            .getContainer()
-            .focus();
+          const coreEditor = editor.getCoreEditor();
+          await editor.update(data, true);
+          editor.moveToNextRequestEdge(false);
+          coreEditor.clearSelection();
+          editor.highlightCurrentRequestsAndUpdateActionBar();
+          coreEditor.getContainer().focus();
         });
       }
     }, 200);
-
     window.addEventListener('hashchange', onHashChange);
 
-    const firstParamsCheck = getQueryParams();
-    if (firstParamsCheck && firstParamsCheck.load_from) {
-      // Process initial loading
+    if (readQueryParams().load_from) {
+      // Do an initial check against the current hash value.
       onHashChange();
     } else {
       const { content: text } = history.getSavedEditorState() || {
         content: DEFAULT_INPUT_VALUE,
       };
-      editorInstanceRef.current.update(text);
+      editor.update(text);
     }
 
     function setupAutosave() {
       let timer: number;
       const saveDelay = 500;
 
-      editorInstanceRef.current!.getCoreEditor().on('change', () => {
+      editor.getCoreEditor().on('change', () => {
         if (timer) {
           clearTimeout(timer);
         }
@@ -149,22 +147,19 @@ function EditorUI() {
 
     function saveCurrentState() {
       try {
-        const content = editorInstanceRef.current!.getCoreEditor().getValue();
+        const content = editor.getCoreEditor().getValue();
         history.updateCurrentState(content);
       } catch (e) {
         // Ignoring saving error
       }
     }
 
-    setInputEditor(editorInstanceRef.current);
+    setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
     mappings.retrieveAutoCompleteInfo();
 
-    const unsubscribeResizer = subscribeResizeChecker(
-      editorRef.current!,
-      editorInstanceRef.current.getCoreEditor()
-    );
+    const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor.getCoreEditor());
     setupAutosave();
 
     return () => {
@@ -175,10 +170,11 @@ function EditorUI() {
   }, [history, setInputEditor]);
 
   useEffect(() => {
-    applyCurrentSettings(editorInstanceRef.current!.getCoreEditor(), settings);
+    const { current: editor } = editorInstanceRef;
+    applyCurrentSettings(editor!.getCoreEditor(), settings);
     // Preserve legacy focus behavior after settings have updated.
-    editorInstanceRef
-      .current!.getCoreEditor()
+    editor!
+      .getCoreEditor()
       .getContainer()
       .focus();
   }, [settings]);
