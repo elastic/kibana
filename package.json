@@ -84,7 +84,8 @@
     "**/graphql-toolkit/lodash": "^4.17.13",
     "**/isomorphic-git/**/base64-js": "^1.2.1",
     "**/babel-plugin-inline-react-svg/svgo/js-yaml": "^3.13.1",
-    "**/serialize-javascript": "^2.1.1"
+    "**/serialize-javascript": "^2.1.1",
+    "**/yarn": "^1.21.1"
   },
   "workspaces": {
     "packages": [
