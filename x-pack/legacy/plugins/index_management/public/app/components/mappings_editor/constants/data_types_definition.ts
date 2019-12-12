@@ -276,7 +276,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
         defaultMessage: 'Specialised type',
       }),
       types: [
-        'alias',
         'completion',
         'dense_vector',
         'flattened',
@@ -376,6 +375,7 @@ export const MAIN_TYPES: MainType[] = [
   'range',
   'object',
   'nested',
+  'alias',
   'specialised',
 ];
 

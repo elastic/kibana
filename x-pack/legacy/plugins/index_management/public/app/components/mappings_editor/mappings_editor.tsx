@@ -34,7 +34,10 @@ export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSetting
     [defaultValue]
   );
 
-  const fieldsDefaultValue = defaultValue === undefined ? {} : defaultValue.properties;
+  const fieldsDefaultValue =
+    defaultValue === undefined || defaultValue.properties === undefined
+      ? {}
+      : defaultValue.properties;
 
   return (
     <IndexSettingsProvider indexSettings={indexSettings}>

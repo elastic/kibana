@@ -7,7 +7,7 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { NormalizedField, Field as FieldType, SuperSelectOption } from '../../../../types';
+import { NormalizedField, Field as FieldType } from '../../../../types';
 import { UseField, Field } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
@@ -53,11 +53,8 @@ export const KeywordType = ({ field }: Props) => {
       <EditFieldSection>
         <StoreParameter />
         <IndexParameter
-          config={{ ...getFieldConfig('index_options'), defaultValue: 'docs' }}
-          indexOptions={(PARAMETERS_OPTIONS.index_options! as SuperSelectOption[]).filter(
-            // keyword type do not allow "positions" for index_options
-            option => option.value !== 'positions' && option.value !== 'offsets'
-          )}
+          config={{ ...getFieldConfig('index_options_keyword') }}
+          indexOptions={PARAMETERS_OPTIONS.index_options_keyword}
         />
         <DocValuesParameter />
         {/* normalizer */}

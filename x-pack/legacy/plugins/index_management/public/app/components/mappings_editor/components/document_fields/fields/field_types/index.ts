@@ -23,6 +23,7 @@ import { GeoShapeType } from './geo_shape_type';
 import { SearchAsYouType } from './search_as_you_type';
 import { FlattenedType } from './flattened_type';
 import { ShapeType } from './shape_type';
+import { DenseVectorType } from './dense_vector_type';
 
 const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   alias: AliasType,
@@ -42,6 +43,7 @@ const typeToParametersFormMap: { [key in DataType]?: ComponentType<any> } = {
   search_as_you_type: SearchAsYouType,
   flattened: FlattenedType,
   shape: ShapeType,
+  dense_vector: DenseVectorType,
 };
 
 export const getParametersFormForType = (
