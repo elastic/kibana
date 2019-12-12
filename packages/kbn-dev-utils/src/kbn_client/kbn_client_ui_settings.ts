@@ -40,7 +40,7 @@ export class KbnClientUiSettings {
 
   async get(setting: string) {
     const all = await this.getAll();
-    const value = all[setting]?.userValue;
+    const value = all[setting] === undefined ? undefined : all[setting].userValue;
 
     this.log.verbose('uiSettings.value: %j', value);
     return value;
