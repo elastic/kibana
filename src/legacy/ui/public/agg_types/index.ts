@@ -17,100 +17,52 @@
  * under the License.
  */
 
-import { countMetricAgg } from './metrics/count';
-import { avgMetricAgg } from './metrics/avg';
-import { sumMetricAgg } from './metrics/sum';
-import { medianMetricAgg } from './metrics/median';
-import { minMetricAgg } from './metrics/min';
-import { maxMetricAgg } from './metrics/max';
-import { topHitMetricAgg } from './metrics/top_hit';
-import { stdDeviationMetricAgg } from './metrics/std_deviation';
-import { cardinalityMetricAgg } from './metrics/cardinality';
-import { percentilesMetricAgg } from './metrics/percentiles';
-import { geoBoundsMetricAgg } from './metrics/geo_bounds';
-import { geoCentroidMetricAgg } from './metrics/geo_centroid';
-import { percentileRanksMetricAgg } from './metrics/percentile_ranks';
-import { derivativeMetricAgg } from './metrics/derivative';
-import { cumulativeSumMetricAgg } from './metrics/cumulative_sum';
-import { movingAvgMetricAgg } from './metrics/moving_avg';
-import { serialDiffMetricAgg } from './metrics/serial_diff';
-import { dateHistogramBucketAgg } from './buckets/date_histogram';
-import { histogramBucketAgg } from './buckets/histogram';
-import { rangeBucketAgg } from './buckets/range';
-import { dateRangeBucketAgg } from './buckets/date_range';
-import { ipRangeBucketAgg } from './buckets/ip_range';
-import { termsBucketAgg } from './buckets/terms';
-import { filterBucketAgg } from './buckets/filter';
-import { filtersBucketAgg } from './buckets/filters';
-import { significantTermsBucketAgg } from './buckets/significant_terms';
-import { geoHashBucketAgg } from './buckets/geo_hash';
-import { geoTileBucketAgg } from './buckets/geo_tile';
-import { bucketSumMetricAgg } from './metrics/bucket_sum';
-import { bucketAvgMetricAgg } from './metrics/bucket_avg';
-import { bucketMinMetricAgg } from './metrics/bucket_min';
-import { bucketMaxMetricAgg } from './metrics/bucket_max';
+/**
+ * Nothing to see here!
+ *
+ * Agg Types have moved to the data plugin, and are being
+ * re-exported from ui/agg_types for backwards compatibility.
+ */
 
-export const aggTypes = {
-  metrics: [
-    countMetricAgg,
-    avgMetricAgg,
-    sumMetricAgg,
-    medianMetricAgg,
-    minMetricAgg,
-    maxMetricAgg,
-    stdDeviationMetricAgg,
-    cardinalityMetricAgg,
-    percentilesMetricAgg,
-    percentileRanksMetricAgg,
-    topHitMetricAgg,
-    derivativeMetricAgg,
-    cumulativeSumMetricAgg,
-    movingAvgMetricAgg,
-    serialDiffMetricAgg,
-    bucketAvgMetricAgg,
-    bucketSumMetricAgg,
-    bucketMinMetricAgg,
-    bucketMaxMetricAgg,
-    geoBoundsMetricAgg,
-    geoCentroidMetricAgg,
-  ],
-  buckets: [
-    dateHistogramBucketAgg,
-    histogramBucketAgg,
-    rangeBucketAgg,
-    dateRangeBucketAgg,
-    ipRangeBucketAgg,
-    termsBucketAgg,
-    filterBucketAgg,
-    filtersBucketAgg,
-    significantTermsBucketAgg,
-    geoHashBucketAgg,
-    geoTileBucketAgg,
-  ],
-};
+import { start as dataStart } from '../../../core_plugins/data/public/legacy';
 
-export { AggType } from './agg_type';
-export { AggConfig } from './agg_config';
-export { AggConfigs } from './agg_configs';
-export { FieldParamType } from './param_types';
-export { aggTypeFieldFilters } from './param_types/filter';
-export { setBounds } from './buckets/date_histogram';
-export { parentPipelineAggHelper } from './metrics/lib/parent_pipeline_agg_helper';
-
-// static code
-export { AggParamType } from './param_types/agg';
-export { intervalOptions } from './buckets/_interval_options'; // only used in Discover
-export { isDateHistogramBucketAggConfig } from './buckets/date_histogram';
-export { isType, isStringType } from './buckets/migrate_include_exclude_format';
-export { CidrMask } from './buckets/lib/cidr_mask';
-export { convertDateRangeToString } from './buckets/date_range';
-export { convertIPRangeToString } from './buckets/ip_range';
-export { aggTypeFilters, propFilter } from './filter';
-export { OptionedParamType } from './param_types/optioned';
-export { isValidJson, isValidInterval } from './utils';
+// runtime contracts
+export const {
+  types: aggTypes,
+  AggConfig,
+  AggConfigs,
+  AggType,
+  aggTypeFieldFilters,
+  FieldParamType,
+  parentPipelineAggHelper,
+  setBounds,
+} = dataStart.search.aggs;
 
 // types
-export { AggParam, AggParamOption } from './agg_params';
-export { DateRangeKey } from './buckets/date_range';
-export { IpRangeKey } from './buckets/ip_range';
-export { OptionedValueProp, OptionedParamEditorProps } from './param_types/optioned';
+export {
+  // agg_types
+  AggParam,
+  AggParamOption,
+  DateRangeKey,
+  IpRangeKey,
+  OptionedParamEditorProps,
+  OptionedValueProp,
+} from '../../../core_plugins/data/public';
+
+// static code
+export {
+  // agg_types
+  AggParamType,
+  aggTypeFilters,
+  CidrMask,
+  convertDateRangeToString,
+  convertIPRangeToString,
+  intervalOptions, // only used in Discover
+  isDateHistogramBucketAggConfig,
+  isStringType,
+  isType,
+  isValidInterval,
+  isValidJson,
+  OptionedParamType,
+  propFilter,
+} from '../../../core_plugins/data/public';
