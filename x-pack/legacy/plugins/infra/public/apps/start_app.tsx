@@ -6,6 +6,7 @@
 
 import { createHashHistory } from 'history';
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
@@ -27,6 +28,7 @@ import {
   useUiSetting$,
   KibanaContextProvider,
 } from '../../../../../../src/plugins/kibana_react/public';
+import { ROOT_ELEMENT_ID } from '../index';
 
 const { uiSettings } = npStart.core;
 
@@ -65,9 +67,15 @@ export async function startApp(libs: InfraFrontendLibs) {
     );
   };
 
-  libs.framework.render(
+  const node = await document.getElementById(ROOT_ELEMENT_ID);
+
+  const App = (
     <KibanaContextProvider services={{ uiSettings }}>
       <InfraPluginRoot />
     </KibanaContextProvider>
   );
+
+  if (node) {
+    ReactDOM.render(App, node);
+  }
 }

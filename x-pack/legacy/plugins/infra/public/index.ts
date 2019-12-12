@@ -29,10 +29,10 @@ const __LEGACY = {
 // migration is complete.
 // @ts-ignore
 chrome.setRootTemplate(`
-<main
-  id="${ROOT_ELEMENT_ID}"
-  class="infReactRoot"
-></main>
+  <main
+    id="${ROOT_ELEMENT_ID}"
+    class="infReactRoot"
+  ></main>
 `);
 
 const checkForRoot = () => {
