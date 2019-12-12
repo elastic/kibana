@@ -18,7 +18,6 @@ exports['Example contract tests should have loaded sample data use esArchive - s
       "hits": [
         {
           "_index": ".management-beats",
-          "_type": "_doc",
           "_id": "beat:qux",
           "_score": 0.9102117,
           "_source": {
@@ -36,7 +35,6 @@ exports['Example contract tests should have loaded sample data use esArchive - s
         },
         {
           "_index": ".management-beats",
-          "_type": "_doc",
           "_id": "beat:baz",
           "_score": 0.9102117,
           "_source": {
@@ -54,7 +52,6 @@ exports['Example contract tests should have loaded sample data use esArchive - s
         },
         {
           "_index": ".management-beats",
-          "_type": "_doc",
           "_id": "beat:foo",
           "_score": 0.9102117,
           "_source": {
@@ -77,7 +74,6 @@ exports['Example contract tests should have loaded sample data use esArchive - s
         },
         {
           "_index": ".management-beats",
-          "_type": "_doc",
           "_id": "beat:bar",
           "_score": 0.9102117,
           "_source": {

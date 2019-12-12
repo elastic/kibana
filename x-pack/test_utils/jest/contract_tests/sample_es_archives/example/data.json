@@ -131,8 +131,7 @@
         "type": "output"
       },
       "type": "configuration_block"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -148,8 +147,7 @@
         "type": "metricbeat.modules"
       },
       "type": "configuration_block"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -165,7 +163,6 @@
         "type": "metricbeat.modules"
       },
       "type": "configuration_block"
-    },
-    "type": "_doc"
+    }
   }
 }

@@ -1,7 +1,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "beat:qux",
     "source": {
       "type": "beat",
@@ -21,7 +20,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "beat:baz",
     "source": {
       "type": "beat",
@@ -41,7 +39,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "beat:foo",
     "source": {
       "type": "beat",
@@ -66,7 +63,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "beat:bar",
     "source": {
       "type": "beat",
@@ -86,7 +82,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "tag:production",
     "source": {
       "type": "tag",
@@ -100,7 +95,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "tag:development",
     "source": {
       "type": "tag",
@@ -114,7 +108,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "tag:qa",
     "source": {
       "type": "tag",
@@ -128,7 +121,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "configuration_block:SDfsdfIBdsfsf50zbta",
     "source": {
       "type": "configuration_block",
@@ -146,7 +138,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "configuration_block:W0tpsmIBdsfsf50zbta",
     "source": {
       "type": "configuration_block",
@@ -163,7 +154,6 @@
 {
   "value": {
     "index": ".management-beats",
-    "type": "_doc",
     "id": "configuration_block:W0tpsmIBdwcYyG50zbta",
     "source": {
       "type": "configuration_block",

@@ -12,8 +12,7 @@
       },
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -30,8 +29,7 @@
       },
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -48,8 +46,7 @@
       },
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -66,8 +63,7 @@
       "namespace": "space_2",
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -84,8 +80,7 @@
       "namespace": "space_1",
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -101,8 +96,7 @@
       },
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -131,8 +125,7 @@
       }],
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -159,8 +152,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -187,8 +179,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -215,8 +206,7 @@
       ],
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -250,8 +240,7 @@
       "type": "dashboard",
       "updated_at": "2017-09-21T18:49:16.270Z",
       "namespace": "space_1"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -279,8 +268,7 @@
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
       "namespace": "space_1"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -308,8 +296,7 @@
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
       "namespace": "space_1"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -337,8 +324,7 @@
       "type": "visualization",
       "updated_at": "2017-09-21T18:49:16.270Z",
       "namespace": "space_1"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -354,8 +340,7 @@
       "references": [],
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z"
-    },
-    "type": "_doc"
+    }
   }
 }
 
@@ -372,7 +357,6 @@
       "type": "index-pattern",
       "updated_at": "2017-09-21T18:49:16.270Z",
       "namespace": "space_1"
-    },
-    "type": "_doc"
+    }
   }
 }

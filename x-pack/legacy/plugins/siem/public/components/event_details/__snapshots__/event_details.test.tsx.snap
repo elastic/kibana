@@ -1252,13 +1252,6 @@ In other use cases the message field can be used to concatenate different values
                   ],
                 },
                 Object {
-                  "field": "_type",
-                  "originalValue": "_doc",
-                  "values": Array [
-                    "_doc",
-                  ],
-                },
-                Object {
                   "field": "_score",
                   "originalValue": 1,
                   "values": Array [
@@ -1403,13 +1396,6 @@ In other use cases the message field can be used to concatenate different values
                   "originalValue": "filebeat-8.0.0-2019.02.19-000001",
                   "values": Array [
                     "filebeat-8.0.0-2019.02.19-000001",
-                  ],
-                },
-                Object {
-                  "field": "_type",
-                  "originalValue": "_doc",
-                  "values": Array [
-                    "_doc",
                   ],
                 },
                 Object {
