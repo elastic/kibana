@@ -62,7 +62,7 @@ describe('ui reducer', () => {
           basePath: '',
           integrationsPopoverOpen: null,
           lastRefresh: 125,
-          filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
+          filters: new Map([['observer.geo.name', ['Tokyo', 'London']]]),
         },
         action
       )
