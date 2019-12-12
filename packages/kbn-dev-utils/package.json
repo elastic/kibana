@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
+    "kbn:watch": "yarn build --watch",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "dependencies": {
     "chalk": "^2.4.2",
@@ -18,11 +20,13 @@
     "moment": "^2.24.0",
     "rxjs": "^6.5.3",
     "tree-kill": "^1.2.1",
-    "tslib": "^1.9.3"
+    "tslib": "^1.9.3",
+    "snyk": "^1.258.2"
   },
   "devDependencies": {
     "typescript": "3.7.2",
     "@kbn/expect": "1.0.0",
     "chance": "1.0.18"
-  }
+  },
+  "snyk": true
 }
