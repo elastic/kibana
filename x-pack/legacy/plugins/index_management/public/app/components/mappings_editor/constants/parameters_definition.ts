@@ -46,6 +46,15 @@ const nullValueLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFie
   defaultMessage: 'Null value',
 });
 
+const nullValueValidateEmptyField = emptyField(
+  i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.parameters.validations.nullValueIsRequiredErrorMessage',
+    {
+      defaultMessage: 'Specify a null value.',
+    }
+  )
+);
+
 const mapIndexToValue = ['true', true, 'false', false];
 
 export const PARAMETERS_DEFINITION = {
@@ -161,30 +170,22 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.nullValueIsRequiredErrorMessage',
-              {
-                defaultMessage: 'Specify a null value.',
-              }
-            )
-          ),
-        },
-      ],
     },
   },
   null_value_numeric: {
     fieldConfig: {
-      defaultValue: '',
       label: nullValueLabel,
       formatters: [toInt],
+      validations: [
+        {
+          validator: nullValueValidateEmptyField,
+        },
+      ],
     },
   },
   null_value_boolean: {
     fieldConfig: {
-      defaultValue: '',
+      defaultValue: false,
       label: nullValueLabel,
       deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
       serializer: (value: number) => mapIndexToValue[value],
@@ -192,8 +193,12 @@ export const PARAMETERS_DEFINITION = {
   },
   null_value_geo_point: {
     fieldConfig: {
-      defaultValue: '',
       label: nullValueLabel,
+      validations: [
+        {
+          validator: nullValueValidateEmptyField,
+        },
+      ],
       deserializer: (value: any) => {
         if (value === '') {
           return value;
