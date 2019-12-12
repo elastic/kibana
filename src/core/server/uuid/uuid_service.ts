@@ -44,8 +44,7 @@ export class UuidService {
   }
 
   public async setup() {
-    this.uuid = await resolveInstanceUuid(this.configService);
-    this.log.info(`Kibana instance UUID: ${this.uuid}`);
+    this.uuid = await resolveInstanceUuid(this.configService, this.log);
 
     return {
       getInstanceUuid: () => this.uuid,

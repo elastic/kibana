@@ -25,6 +25,7 @@ import { take } from 'rxjs/operators';
 import { IConfigService } from '../config';
 import { PathConfigType, config as pathConfigDef } from '../path';
 import { HttpConfigType, config as httpConfigDef } from '../http';
+import { Logger } from '../logging';
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';
@@ -32,7 +33,10 @@ const FILE_NAME = 'uuid';
 const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 
-export async function resolveInstanceUuid(configService: IConfigService): Promise<string> {
+export async function resolveInstanceUuid(
+  configService: IConfigService,
+  logger: Logger
+): Promise<string> {
   const [pathConfig, serverConfig] = await Promise.all([
     configService
       .atPath<PathConfigType>(pathConfigDef.path)
@@ -52,19 +56,28 @@ export async function resolveInstanceUuid(configService: IConfigService): Promis
   if (uuidFromConfig) {
     if (uuidFromConfig === uuidFromFile) {
       // uuid matches, nothing to do
+      logger.debug(`Kibana instance UUID: ${uuidFromConfig}`);
       return uuidFromConfig;
     } else {
       // uuid in file don't match, or file was not present, we need to write it.
+      if (uuidFromFile === undefined) {
+        logger.debug(`Setting new Kibana instance UUID: ${uuidFromConfig}`);
+      } else {
+        logger.debug(`Updating Kibana instance UUID to: ${uuidFromConfig} (was: ${uuidFromFile})`);
+      }
       await writeUuidToFile(uuidFilePath, uuidFromConfig);
       return uuidFromConfig;
     }
   }
   if (uuidFromFile === undefined) {
-    // no uuid either in config or file, we need to generate and write it.
     const newUuid = uuid.v4();
+    // no uuid either in config or file, we need to generate and write it.
+    logger.debug(`Setting new Kibana instance UUID: ${newUuid}`);
     await writeUuidToFile(uuidFilePath, newUuid);
     return newUuid;
   }
+
+  logger.debug(`Resuming persistent Kibana instance UUID: ${uuidFromFile}`);
   return uuidFromFile;
 }
 

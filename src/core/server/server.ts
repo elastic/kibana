@@ -100,7 +100,7 @@ export class Server {
       ]),
     });
 
-    const uuidSetup = await this.uuid.setup({ legacyPlugins });
+    const uuidSetup = await this.uuid.setup();
 
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,

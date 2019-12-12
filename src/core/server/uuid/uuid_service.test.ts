@@ -44,18 +44,10 @@ describe('UuidService', () => {
     it('calls manageInstanceUuid with core configuration service', async () => {
       await service.setup();
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
-      expect(resolveInstanceUuid).toHaveBeenCalledWith(coreContext.configService);
-    });
-
-    it('logs a message containing the UUID', async () => {
-      await service.setup();
-      expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            "Kibana instance UUID: SOME_UUID",
-          ],
-        ]
-      `);
+      expect(resolveInstanceUuid).toHaveBeenCalledWith(
+        coreContext.configService,
+        logger.get('uuid')
+      );
     });
 
     it('returns the uuid resolved from manageInstanceUuid', async () => {

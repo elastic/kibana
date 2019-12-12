@@ -21,7 +21,9 @@ import { readFile, writeFile } from 'fs';
 import { join } from 'path';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { configServiceMock } from '../config/config_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { BehaviorSubject } from 'rxjs';
+import { Logger } from '../logging';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
@@ -73,16 +75,18 @@ const getConfigService = (serverUuid: string | undefined) => {
 
 describe('resolveInstanceUuid', () => {
   let configService: ReturnType<typeof configServiceMock.create>;
+  let logger: jest.Mocked<Logger>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockReadFile({ uuid: DEFAULT_FILE_UUID });
     configService = getConfigService(DEFAULT_CONFIG_UUID);
+    logger = loggingServiceMock.create().get() as any;
   });
 
   describe('when file is present and config property is set', () => {
     it('writes to file and returns the config uuid if they mismatch', async () => {
-      const uuid = await resolveInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService, logger);
       expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
@@ -90,19 +94,31 @@ describe('resolveInstanceUuid', () => {
         expect.any(Object),
         expect.any(Function)
       );
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Updating Kibana instance UUID to: CONFIG_UUID (was: FILE_UUID)",
+        ]
+      `);
     });
     it('does not write to file if they match', async () => {
       mockReadFile({ uuid: DEFAULT_CONFIG_UUID });
-      const uuid = await resolveInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService, logger);
       expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
       expect(writeFile).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Kibana instance UUID: CONFIG_UUID",
+        ]
+      `);
     });
   });
 
   describe('when file is not present and config property is set', () => {
     it('writes the uuid to file and returns the config uuid', async () => {
       mockReadFile({ error: fileNotFoundError });
-      const uuid = await resolveInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService, logger);
       expect(uuid).toEqual(DEFAULT_CONFIG_UUID);
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
@@ -110,15 +126,27 @@ describe('resolveInstanceUuid', () => {
         expect.any(Object),
         expect.any(Function)
       );
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Setting new Kibana instance UUID: CONFIG_UUID",
+        ]
+      `);
     });
   });
 
   describe('when file is present and config property is not set', () => {
     it('does not write to file and returns the file uuid', async () => {
       configService = getConfigService(undefined);
-      const uuid = await resolveInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService, logger);
       expect(uuid).toEqual(DEFAULT_FILE_UUID);
       expect(writeFile).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Resuming persistent Kibana instance UUID: FILE_UUID",
+        ]
+      `);
     });
   });
 
@@ -126,7 +154,7 @@ describe('resolveInstanceUuid', () => {
     it('generates a new uuid and write it to file', async () => {
       configService = getConfigService(undefined);
       mockReadFile({ error: fileNotFoundError });
-      const uuid = await resolveInstanceUuid(configService);
+      const uuid = await resolveInstanceUuid(configService, logger);
       expect(uuid).toEqual('NEW_UUID');
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
@@ -134,6 +162,12 @@ describe('resolveInstanceUuid', () => {
         expect.any(Object),
         expect.any(Function)
       );
+      expect(logger.debug).toHaveBeenCalledTimes(1);
+      expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "Setting new Kibana instance UUID: NEW_UUID",
+        ]
+      `);
     });
   });
 });
