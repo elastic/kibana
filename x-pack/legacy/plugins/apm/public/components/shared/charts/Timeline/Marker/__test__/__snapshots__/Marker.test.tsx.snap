@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Marker renders agent marker 1`] = `
+<styled.div
+  style={
+    Object {
+      "left": "4.5px",
+    }
+  }
+>
+  <AgentMarker
+    mark={
+      Object {
+        "name": "agent",
+        "type": "AGENT",
+        "us": 1000,
+      }
+    }
+  />
+</styled.div>
+`;
+
+exports[`Marker renders error marker 1`] = `
+<styled.div
+  style={
+    Object {
+      "left": "4.5px",
+    }
+  }
+>
+  <ErrorMarker
+    mark={
+      Object {
+        "name": "error",
+        "type": "ERROR",
+        "us": 5000,
+      }
+    }
+  />
+</styled.div>
+`;

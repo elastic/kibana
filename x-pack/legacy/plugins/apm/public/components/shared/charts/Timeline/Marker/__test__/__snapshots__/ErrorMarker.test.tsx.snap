@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ErrorMarker renders 1`] = `
+<Fragment>
+  <EuiToolTip
+    content={
+      <div>
+        foo
+      </div>
+    }
+    delay="regular"
+    id="foo"
+    position="top"
+  >
+    <Legend
+      clickable={true}
+      color="#bd271e"
+      shape="square"
+    />
+  </EuiToolTip>
+</Fragment>
+`;

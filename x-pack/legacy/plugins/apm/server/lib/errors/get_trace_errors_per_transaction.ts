@@ -48,6 +48,14 @@ export async function getTraceErrorsPerTransaction(
             field: TRANSACTION_ID,
             // high cardinality
             execution_hint: 'map'
+          },
+          aggs: {
+            error: {
+              top_hits: {
+                _source: ['timestamp'],
+                size: 1
+              }
+            }
           }
         }
       }

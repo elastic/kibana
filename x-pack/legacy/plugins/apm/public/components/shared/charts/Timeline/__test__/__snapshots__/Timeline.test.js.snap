@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Timeline should render with data 1`] = `
-.c0 {
+.c1 {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -20,12 +20,17 @@ exports[`Timeline should render with data 1`] = `
   user-select: none;
 }
 
-.c1 {
+.c2 {
   width: 11px;
   height: 11px;
   margin-right: 5.5px;
   background: #98a2b3;
   border-radius: 100%;
+}
+
+.c0 {
+  position: absolute;
+  bottom: 0;
 }
 
 <div
@@ -526,132 +531,159 @@ exports[`Timeline should render with data 1`] = `
                 </text>
               </g>
             </svg>
-            <div
+            <styled.div
               style={
                 Object {
-                  "bottom": 0,
                   "left": "494.5px",
-                  "position": "absolute",
                 }
               }
             >
-              <span
-                className="euiToolTipAnchor"
-                onMouseOut={[Function]}
-                onMouseOver={[Function]}
+              <div
+                className="c0"
+                style={
+                  Object {
+                    "left": "494.5px",
+                  }
+                }
               >
-                <styled.div
-                  clickable={true}
-                  disabled={false}
-                  fontSize="12px"
-                  onBlur={[Function]}
-                  onFocus={[Function]}
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
                 >
-                  <div
-                    className="c0"
+                  <styled.div
+                    clickable={true}
                     disabled={false}
                     fontSize="12px"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
-                    <styled.span
-                      color="#98a2b3"
-                      radius={11}
+                    <div
+                      className="c1"
+                      disabled={false}
+                      fontSize="12px"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
                     >
-                      <span
-                        className="c1"
+                      <styled.span
                         color="#98a2b3"
                         radius={11}
-                      />
-                    </styled.span>
-                  </div>
-                </styled.div>
-              </span>
-            </div>
-            <div
+                        shape="circle"
+                      >
+                        <span
+                          className="c2"
+                          color="#98a2b3"
+                          radius={11}
+                          shape="circle"
+                        />
+                      </styled.span>
+                    </div>
+                  </styled.div>
+                </span>
+              </div>
+            </styled.div>
+            <styled.div
               style={
                 Object {
-                  "bottom": 0,
                   "left": "539.5px",
-                  "position": "absolute",
                 }
               }
             >
-              <span
-                className="euiToolTipAnchor"
-                onMouseOut={[Function]}
-                onMouseOver={[Function]}
+              <div
+                className="c0"
+                style={
+                  Object {
+                    "left": "539.5px",
+                  }
+                }
               >
-                <styled.div
-                  clickable={true}
-                  disabled={false}
-                  fontSize="12px"
-                  onBlur={[Function]}
-                  onFocus={[Function]}
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
                 >
-                  <div
-                    className="c0"
+                  <styled.div
+                    clickable={true}
                     disabled={false}
                     fontSize="12px"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
-                    <styled.span
-                      color="#98a2b3"
-                      radius={11}
+                    <div
+                      className="c1"
+                      disabled={false}
+                      fontSize="12px"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
                     >
-                      <span
-                        className="c1"
+                      <styled.span
                         color="#98a2b3"
                         radius={11}
-                      />
-                    </styled.span>
-                  </div>
-                </styled.div>
-              </span>
-            </div>
-            <div
+                        shape="circle"
+                      >
+                        <span
+                          className="c2"
+                          color="#98a2b3"
+                          radius={11}
+                          shape="circle"
+                        />
+                      </styled.span>
+                    </div>
+                  </styled.div>
+                </span>
+              </div>
+            </styled.div>
+            <styled.div
               style={
                 Object {
-                  "bottom": 0,
                   "left": "899.5px",
-                  "position": "absolute",
                 }
               }
             >
-              <span
-                className="euiToolTipAnchor"
-                onMouseOut={[Function]}
-                onMouseOver={[Function]}
+              <div
+                className="c0"
+                style={
+                  Object {
+                    "left": "899.5px",
+                  }
+                }
               >
-                <styled.div
-                  clickable={true}
-                  disabled={false}
-                  fontSize="12px"
-                  onBlur={[Function]}
-                  onFocus={[Function]}
+                <span
+                  className="euiToolTipAnchor"
+                  onMouseOut={[Function]}
+                  onMouseOver={[Function]}
                 >
-                  <div
-                    className="c0"
+                  <styled.div
+                    clickable={true}
                     disabled={false}
                     fontSize="12px"
                     onBlur={[Function]}
                     onFocus={[Function]}
                   >
-                    <styled.span
-                      color="#98a2b3"
-                      radius={11}
+                    <div
+                      className="c1"
+                      disabled={false}
+                      fontSize="12px"
+                      onBlur={[Function]}
+                      onFocus={[Function]}
                     >
-                      <span
-                        className="c1"
+                      <styled.span
                         color="#98a2b3"
                         radius={11}
-                      />
-                    </styled.span>
-                  </div>
-                </styled.div>
-              </span>
-            </div>
+                        shape="circle"
+                      >
+                        <span
+                          className="c2"
+                          color="#98a2b3"
+                          radius={11}
+                          shape="circle"
+                        />
+                      </styled.span>
+                    </div>
+                  </styled.div>
+                </span>
+              </div>
+            </styled.div>
           </div>
         </div>
       </div>

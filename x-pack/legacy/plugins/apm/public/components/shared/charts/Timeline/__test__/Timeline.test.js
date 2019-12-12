@@ -30,9 +30,9 @@ describe('Timeline', () => {
       },
       animation: null,
       agentMarks: [
-        { name: 'timeToFirstByte', us: 100000 },
-        { name: 'domInteractive', us: 110000 },
-        { name: 'domComplete', us: 190000 }
+        { name: 'timeToFirstByte', us: 100000, type: 'AGENT' },
+        { name: 'domInteractive', us: 110000, type: 'AGENT' },
+        { name: 'domComplete', us: 190000, type: 'AGENT' }
       ]
     };
 
