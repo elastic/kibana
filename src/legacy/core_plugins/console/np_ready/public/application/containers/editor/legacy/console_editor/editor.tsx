@@ -16,12 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { debounce } from 'lodash';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import $ from 'jquery';
+
+// Node v5 querystring for browser.
+// @ts-ignore
+import * as qs from 'querystring-browser';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAppContext } from '../../../../context';
@@ -39,7 +43,6 @@ import mappings from '../../../../../../../public/quarantined/src/mappings';
 
 import { useEditorActionContext, useEditorReadContext } from '../../context';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
-import { loadRemoteState } from './load_remote_editor_state';
 
 export interface EditorProps {
   previousStateLocation?: 'stored' | string;
@@ -89,14 +92,57 @@ function _Editor({ previousStateLocation = 'stored' }: EditorProps) {
     const $editor = $(editorRef.current!);
     const $actions = $(actionsRef.current!);
     editorInstanceRef.current = initializeInput($editor, $actions);
+    const editor = editorInstanceRef.current;
 
-    if (previousStateLocation === 'stored') {
+    const readQueryParams = () => {
+      const [, queryString] = (window.location.hash || '').split('?');
+      return qs.parse(queryString || '');
+    };
+
+    const loadBufferFromRemote = (url: string) => {
+      if (/^https?:\/\//.test(url)) {
+        const loadFrom: Record<string, any> = {
+          url,
+          // Having dataType here is required as it doesn't allow jQuery to `eval` content
+          // coming from the external source thereby preventing XSS attack.
+          dataType: 'text',
+          kbnXsrfToken: false,
+        };
+
+        if (/https?:\/\/api\.github\.com/.test(url)) {
+          loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
+        }
+
+        // Fire and forget.
+        $.ajax(loadFrom).done(async data => {
+          const coreEditor = editor.getCoreEditor();
+          await editor.update(data, true);
+          editor.moveToNextRequestEdge(false);
+          coreEditor.clearSelection();
+          editor.highlightCurrentRequestsAndUpdateActionBar();
+          coreEditor.getContainer().focus();
+        });
+      }
+    };
+
+    // Support for loading a console snippet from a remote source, like support docs.
+    const onHashChange = debounce(() => {
+      const { load_from: url } = readQueryParams();
+      if (!url) {
+        return;
+      }
+      loadBufferFromRemote(url);
+    }, 200);
+    window.addEventListener('hashchange', onHashChange);
+
+    const initialQueryParams = readQueryParams();
+    if (initialQueryParams.load_from) {
+      loadBufferFromRemote(initialQueryParams.load_from);
+    } else {
       const { content } = history.getSavedEditorState() || {
         content: DEFAULT_INPUT_VALUE,
       };
       editorInstanceRef.current.update(content);
-    } else {
-      loadRemoteState({ url: previousStateLocation, input: editorInstanceRef.current });
     }
 
     function setupAutosave() {
