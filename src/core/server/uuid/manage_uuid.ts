@@ -23,8 +23,8 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { take } from 'rxjs/operators';
 import { IConfigService } from '../config';
-import { PathConfigType } from '../path';
-import { HttpConfigType } from '../http';
+import { PathConfigType, config as pathConfigDef } from '../path';
+import { HttpConfigType, config as httpConfigDef } from '../http';
 
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';
@@ -35,11 +35,11 @@ const writeFile = promisify(fs.writeFile);
 export async function manageInstanceUuid(configService: IConfigService): Promise<string> {
   const [pathConfig, serverConfig] = await Promise.all([
     configService
-      .atPath<PathConfigType>('path')
+      .atPath<PathConfigType>(pathConfigDef.path)
       .pipe(take(1))
       .toPromise(),
     configService
-      .atPath<HttpConfigType>('server')
+      .atPath<HttpConfigType>(httpConfigDef.path)
       .pipe(take(1))
       .toPromise(),
   ]);

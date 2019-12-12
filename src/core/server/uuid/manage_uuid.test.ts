@@ -28,6 +28,7 @@ jest.mock('uuid', () => ({
 }));
 
 jest.mock('fs', () => ({
+  ...jest.requireActual('fs'),
   readFile: jest.fn((path, callback) => callback(null, Buffer.from(''))),
   writeFile: jest.fn((path, value, options, callback) => callback(null, null)),
 }));
