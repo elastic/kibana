@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { createCspDirectives, DEFAULT_CSP_OPTIONS } from './csp';
+import { DEFAULT_CSP_OPTIONS } from './csp';
 
 // CSP rules aren't strictly additive, so any change can potentially expand or
 // restrict the policy in a way we consider a breaking change. For that reason,
@@ -44,16 +44,4 @@ test('default CSP rules', () => {
       "warnLegacyBrowsers": true,
     }
   `);
-});
-
-test('createCspDirectives() converts an array of rules into a CSP header string', () => {
-  const directives = createCspDirectives([
-    `string-src 'self'`,
-    'worker-src blob:',
-    'img-src data: blob:',
-  ]);
-
-  expect(directives).toMatchInlineSnapshot(
-    `"string-src 'self'; worker-src blob:; img-src data: blob:"`
-  );
 });

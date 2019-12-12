@@ -20,7 +20,6 @@
 import Joi from 'joi';
 import os from 'os';
 import { join } from 'path';
-import { DEFAULT_CSP_OPTIONS } from '../../../core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getDataPath } from '../../../core/server/path'; // Still used by optimize config schema
 
@@ -48,11 +47,7 @@ export default () => Joi.object({
     exclusive: Joi.boolean().default(false)
   }).default(),
 
-  csp: Joi.object({
-    rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_OPTIONS.rules),
-    strict: Joi.boolean().default(DEFAULT_CSP_OPTIONS.strict),
-    warnLegacyBrowsers: Joi.boolean().default(DEFAULT_CSP_OPTIONS.warnLegacyBrowsers),
-  }).default(),
+  csp: HANDLED_IN_NEW_PLATFORM,
 
   cpu: Joi.object({
     cgroup: Joi.object({

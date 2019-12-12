@@ -574,9 +574,6 @@ export interface CoreStart {
     savedObjects: SavedObjectsServiceStart;
 }
 
-// @internal
-export function createCspDirectives(rules: string[]): string;
-
 // @public
 export interface CspOptions {
     directives: string;

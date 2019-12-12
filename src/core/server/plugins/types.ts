@@ -213,7 +213,7 @@ export const SharedGlobalConfigKeys = {
   kibana: ['defaultAppId', 'index'] as const,
   elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
   path: ['data'] as const,
-  csp: ['rules', 'strict', 'warnLegacyBrowsers'] as const,
+  csp: ['directives', 'rules'] as const,
 };
 
 /**

@@ -17,6 +17,31 @@
  * under the License.
  */
 
-export * from './config';
-export * from './types';
-export * from './csp';
+/**
+ * The CSP options used for Kibana.
+ * @public
+ */
+export interface CspOptions {
+  /**
+   * The CSP rules in a formatted directives string for use
+   * in a `Content-Security-Policy` header.
+   */
+  directives: string;
+
+  /**
+   * The CSP rules used for Kibana.
+   */
+  rules: string[];
+
+  /**
+   * Specify whether browsers that do not support CSP should be
+   * able to use Kibana. Use `true` to block and `false` to allow.
+   */
+  strict: boolean;
+
+  /**
+   * Specify whether users with legacy browsers should be warned
+   * about their lack of Kibana security compliance.
+   */
+  warnLegacyBrowsers: boolean;
+}

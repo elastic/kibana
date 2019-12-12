@@ -26,7 +26,6 @@ import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppBootstrap } from './bootstrap';
 import { mergeVariables } from './lib';
-import { createCspDirectives } from '../../../core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { fromRoot } from '../../../core/server/utils';
 
@@ -283,8 +282,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       },
     });
 
-    const csp = createCspDirectives(config.get('csp.rules'));
-    response.header('content-security-policy', csp);
+    response.header('content-security-policy', config.get('csp.directives'));
 
     return response;
   }
