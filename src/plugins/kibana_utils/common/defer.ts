@@ -25,3 +25,5 @@ export class Defer<T> {
     (this as any).reject = reject;
   });
 }
+
+export const defer = <T>() => new Defer<T>();

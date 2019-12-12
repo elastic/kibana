@@ -22,8 +22,17 @@ import { Observable, Subject } from 'rxjs';
 /**
  * Receives observable that emits strings, and returns a new observable
  * that also returns strings separated by delimiter.
+ *
+ * Input stream:
+ *
+ *     asdf.f -> df..aaa. -> dfsdf
+ *
+ * Output stream, assuming "." is used as delimiter:
+ *
+ *     asdf -> fdf -> aaa -> dfsdf
+ *
  */
-export const split = (in$: Observable<string>, splitter: string = '\n'): Observable<string> => {
+export const split = (splitter: string = '\n') => (in$: Observable<string>): Observable<string> => {
   const out$ = new Subject<string>();
   let startingText = '';
 
