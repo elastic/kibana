@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'ui/saved_objects/saved_object';
+import { SavedObject } from 'ui/saved_objects/types';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 

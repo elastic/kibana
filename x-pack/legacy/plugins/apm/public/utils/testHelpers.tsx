@@ -11,7 +11,7 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import React, { FunctionComponent, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { render, waitForElement } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { MemoryRouter } from 'react-router-dom';
@@ -20,10 +20,10 @@ import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
 import { ESFilter } from '../../typings/elasticsearch';
 import {
-  PluginsContext,
-  ConfigSchema,
-  ApmPluginStartDeps
-} from '../new-platform/plugin';
+  ApmPluginContext,
+  ApmPluginContextValue
+} from '../context/ApmPluginContext';
+import { ConfigSchema } from '../new-platform/plugin';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -51,11 +51,13 @@ export function mockMoment() {
 // Useful for getting the rendered href from any kind of link component
 export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
-    <MemoryRouter initialEntries={[location]}>
-      <LocationProvider>
-        <Component />
-      </LocationProvider>
-    </MemoryRouter>
+    <MockApmPluginContextWrapper>
+      <MemoryRouter initialEntries={[location]}>
+        <LocationProvider>
+          <Component />
+        </LocationProvider>
+      </MemoryRouter>
+    </MockApmPluginContextWrapper>
   );
 
   await waitForElement(() => el.container.querySelector('a'));
@@ -181,22 +183,52 @@ export async function inspectSearchParams(
 
 export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
 
-export const MockPluginContextWrapper: FunctionComponent<{}> = ({
-  children
+const mockCore = {
+  chrome: {
+    setBreadcrumbs: () => {}
+  },
+  http: {
+    basePath: {
+      prepend: (path: string) => `/basepath${path}`
+    }
+  },
+  notifications: {
+    toasts: {
+      addWarning: () => {}
+    }
+  }
+};
+
+const mockConfig: ConfigSchema = {
+  indexPatternTitle: 'apm-*',
+  serviceMapEnabled: false,
+  ui: {
+    enabled: false
+  }
+};
+
+export const mockApmPluginContextValue = {
+  config: mockConfig,
+  core: mockCore,
+  packageInfo: { version: '0' },
+  plugins: {}
+};
+
+export function MockApmPluginContextWrapper({
+  children,
+  value = {} as ApmPluginContextValue
 }: {
   children?: ReactNode;
-}) => {
+  value?: ApmPluginContextValue;
+}) {
   return (
-    <PluginsContext.Provider
-      value={
-        {
-          apm: { config: {} as ConfigSchema, stackVersion: '0' }
-        } as ApmPluginStartDeps & {
-          apm: { config: ConfigSchema; stackVersion: string };
-        }
-      }
+    <ApmPluginContext.Provider
+      value={{
+        ...mockApmPluginContextValue,
+        ...value
+      }}
     >
       {children}
-    </PluginsContext.Provider>
+    </ApmPluginContext.Provider>
   );
-};
+}

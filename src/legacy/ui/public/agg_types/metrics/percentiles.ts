@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
@@ -67,7 +67,7 @@ export const percentilesMetricAgg = new MetricAggType<IPercentileAggConfig>({
       default: [1, 5, 25, 50, 75, 95, 99],
     },
     {
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         output.params.keyed = false;
       },
     },

@@ -24,6 +24,8 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
   describe('empty dashboard', () => {
@@ -54,6 +56,12 @@ export default function ({ getService, getPageObjects }) {
       expect(isAddPanelOpen).to.be(true);
     });
 
+    it('should add new visualization from dashboard', async () => {
+      await testSubjects.click('addVisualizationButton');
+      await dashboardVisualizations.createAndAddMarkdown({ name: 'Dashboard Test Markdown', markdown: 'Markdown text' }, false);
+      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboardExpect.markdownWithValuesExists(['Markdown text']);
+    });
   });
 }
 

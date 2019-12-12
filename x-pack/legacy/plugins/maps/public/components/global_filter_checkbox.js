@@ -6,13 +6,8 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
-const label = i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
-  defaultMessage: `Apply global filter to source`,
-});
-
-export function GlobalFilterCheckbox({ applyGlobalQuery, customLabel, setApplyGlobalQuery }) {
+export function GlobalFilterCheckbox({ applyGlobalQuery, label, setApplyGlobalQuery }) {
   const onApplyGlobalQueryChange = event => {
     setApplyGlobalQuery(event.target.checked);
   };
@@ -22,7 +17,7 @@ export function GlobalFilterCheckbox({ applyGlobalQuery, customLabel, setApplyGl
       display="columnCompressedSwitch"
     >
       <EuiSwitch
-        label={customLabel ? customLabel : label}
+        label={label}
         checked={applyGlobalQuery}
         onChange={onApplyGlobalQueryChange}
         data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
