@@ -134,14 +134,7 @@ export const IPDetailsComponent = ({
                           setQuery={setQuery}
                           startDate={from}
                           endDate={to}
-                          narrowDateRange={(score, interval) => {
-                            const fromTo = scoreIntervalToDateTime(score, interval);
-                            setAbsoluteRangeDatePicker({
-                              id: 'global',
-                              from: fromTo.from,
-                              to: fromTo.to,
-                            });
-                          }}
+                          narrowDateRange={narrowDateRange}
                         />
                       )}
                     </AnomalyTableProvider>

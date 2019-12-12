@@ -77,6 +77,26 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
     type,
     updateNetworkTable,
   }) => {
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type]
+    );
+
     const onChange = useCallback(
       (criteria: Criteria) => {
         if (criteria.sort != null) {
@@ -93,7 +113,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
           }
         }
       },
-      [sort, type]
+      [sort, type, tableType]
     );
 
     const onChangePtrIncluded = useCallback(
@@ -123,7 +143,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
         isInspect={isInspect}
         limit={limit}
         loading={loading}
-        loadPage={newActivePage => loadPage(newActivePage)}
+        loadPage={loadPage}
         onChange={onChange}
         pageOfItems={data}
         showMorePagesIndicator={showMorePagesIndicator}
@@ -132,20 +152,8 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
           direction: sort.direction,
         }}
         totalCount={fakeTotalCount}
-        updateActivePage={newPage =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { activePage: newPage },
-          })
-        }
-        updateLimitPagination={newLimit =>
-          updateNetworkTable({
-            networkType: type,
-            tableType,
-            updates: { limit: newLimit },
-          })
-        }
+        updateActivePage={updateActivePage}
+        updateLimitPagination={updateLimitPagination}
       />
     );
   }
