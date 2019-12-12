@@ -107,7 +107,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
               expect(resp.status).to.eql(302);
               expect(resp.headers.location).to.eql('/app/kibana#foo/bar/baz');
             } else {
-              expect(resp.status).to.eql(500);
+              expect(resp.status).to.eql(403);
               expect(resp.headers.location).to.eql(undefined);
             }
           });

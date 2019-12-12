@@ -11,7 +11,6 @@
  * crashing due to the requirement of the `window` object.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 
 import { ReactNode, FunctionComponent } from 'react';
@@ -32,7 +31,7 @@ const layouts: Layouts = {
 };
 
 export const findLayout = (type: InventoryItemType) => {
-  const Layout = idx(layouts, _ => _[type]);
+  const Layout = layouts?.[type];
   if (!Layout) {
     throw new Error(
       i18n.translate('xpack.infra.inventoryModels.findLayout.error', {

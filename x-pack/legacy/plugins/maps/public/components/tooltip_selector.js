@@ -13,11 +13,9 @@ import {
   EuiDroppable,
   EuiText,
   EuiTextAlign,
-  EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
 import { AddTooltipFieldPopover } from './add_tooltip_field_popover';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 // TODO import reorder from EUI once its exposed as service
@@ -213,13 +211,6 @@ export class TooltipSelector extends Component {
   render() {
     return (
       <div>
-        <EuiTitle size="xxs">
-          <h6>
-            <FormattedMessage id="xpack.maps.tooltipSelectorLabel" defaultMessage="Fields to display in tooltip" />
-          </h6>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-
         {this._renderProperties()}
 
         <EuiSpacer size="s" />

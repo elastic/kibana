@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPatternListConfigRegistry } from 'ui/management/index_pattern_list';
+import { setup as managementSetup } from '../../../../../../src/legacy/core_plugins/management/public/legacy';
 import { RollupIndexPatternListConfig } from './rollup_index_pattern_list_config';
 
 export function initIndexPatternList() {
-  IndexPatternListConfigRegistry.register(() => RollupIndexPatternListConfig);
+  managementSetup.indexPattern.list.add(RollupIndexPatternListConfig);
 }

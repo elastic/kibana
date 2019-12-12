@@ -22,7 +22,6 @@ import { toastNotifications } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 import { VegaMapView } from './vega_view/vega_map_view';
 import { timefilter } from 'ui/timefilter';
-import { start as data } from '../../../core_plugins/data/public/legacy';
 import { npStart } from 'ui/new_platform';
 
 import { findIndexPatternByTitle } from '../../data/public/index_patterns';
@@ -50,7 +49,7 @@ export const createVegaVisualization = ({ serviceSettings }) => class VegaVisual
         }));
       }
     } else {
-      idxObj = await data.indexPatterns.indexPatterns.getDefault();
+      idxObj = await npStart.plugins.data.indexPatterns.getDefault();
       if (!idxObj) {
         throw new Error(i18n.translate('visTypeVega.visualization.unableToFindDefaultIndexErrorMessage', {
           defaultMessage: 'Unable to find default index',

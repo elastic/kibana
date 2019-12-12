@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LicenseStatus } from '../public/sections/license_dashboard/license_status';
+import { LicenseStatus } from '../public/np_ready/application/sections/license_dashboard/license_status';
 import { createMockLicense, getComponent } from './util';
 
 describe('LicenseStatus component', () => {

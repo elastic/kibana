@@ -964,7 +964,6 @@ describe('OnPreResponse', () => {
         headers: { 'x-kibana-header': 'value' },
       })
     );
-
     registerOnPreResponse((req, res, t) =>
       t.next({
         headers: { 'x-kibana-header': 'value' },

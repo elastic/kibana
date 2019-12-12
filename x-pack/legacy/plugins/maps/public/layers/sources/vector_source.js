@@ -79,6 +79,10 @@ export class AbstractVectorSource extends AbstractSource {
     return false;
   }
 
+  isFilterByMapBoundsConfigurable() {
+    return false;
+  }
+
   isBoundsAware() {
     return false;
   }

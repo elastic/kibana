@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+export type MlCustomUrls = ProvidedType<typeof MachineLearningCustomUrlsProvider>;
 
 export function MachineLearningCustomUrlsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

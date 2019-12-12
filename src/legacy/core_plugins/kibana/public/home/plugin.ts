@@ -20,7 +20,7 @@
 import { CoreSetup, CoreStart, LegacyNavLink, Plugin, UiSettingsState } from 'kibana/public';
 import { UiStatsMetricType } from '@kbn/analytics';
 
-import { DataStart } from '../../../data/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { setServices } from './kibana_services';
 import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 import { FeatureCatalogueEntry } from '../../../../../plugins/home/public';
@@ -31,7 +31,7 @@ export interface LegacyAngularInjectedDependencies {
 }
 
 export interface HomePluginStartDependencies {
-  data: DataStart;
+  data: DataPublicPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -58,7 +58,7 @@ export interface HomePluginSetupDependencies {
 }
 
 export class HomePlugin implements Plugin {
-  private dataStart: DataStart | null = null;
+  private dataStart: DataPublicPluginStart | null = null;
   private savedObjectsClient: any = null;
 
   setup(
@@ -85,7 +85,7 @@ export class HomePlugin implements Plugin {
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
-          indexPatternService: this.dataStart!.indexPatterns.indexPatterns,
+          indexPatternService: this.dataStart!.indexPatterns,
           ...angularDependencies,
         });
         const { renderApp } = await import('./render_app');

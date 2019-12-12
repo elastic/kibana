@@ -146,8 +146,6 @@ export class ESPewPewSource extends AbstractESAggSource {
             name: COUNT_PROP_NAME,
             origin: SOURCE_DATA_ID_ORIGIN
           },
-          minSize: 4,
-          maxSize: 32,
         }
       }
     });

@@ -73,12 +73,17 @@ it('rewrites ftr reports with minimal changes', async () => {
     ===================================================================
     --- ftr.xml	[object Object]
     +++ ftr.xml
-    @@ -2,52 +2,56 @@
+    @@ -1,53 +1,56 @@
+     ‹?xml version="1.0" encoding="utf-8"?›
      ‹testsuites›
        ‹testsuite timestamp="2019-06-05T23:37:10" time="903.670" tests="129" failures="5" skipped="71"›
          ‹testcase name="maps app  maps loaded from sample data ecommerce &quot;before all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps/sample_data·js" time="154.378"›
-           ‹system-out›
+    -      ‹system-out›
     -        ‹![CDATA[[00:00:00]       │
+    +      ‹system-out›Failed Tests Reporter:
+    +  - foo bar
+    +
+    +
     +        [00:00:00]       │
      [00:07:04]         └-: maps app
      ...
@@ -94,13 +99,8 @@ it('rewrites ftr reports with minimal changes', async () => {
          at process._tickCallback (internal/process/next_tick.js:68:7)
          at lastError (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:28:9)
     -    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)]]›
-    -      ‹/failure›
     +    at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)
-    +
-    +
-    +Failed Tests Reporter:
-    +  - foo bar
-    +‹/failure›
+           ‹/failure›
          ‹/testcase›
          ‹testcase name="maps app &quot;after all&quot; hook" classname="Chrome X-Pack UI Functional Tests.x-pack/test/functional/apps/maps" time="0.179"›
            ‹system-out›
@@ -181,11 +181,11 @@ it('rewrites jest reports with minimal changes', async () => {
     +      ‹failure›‹![CDATA[
     +        TypeError: Cannot read property '0' of undefined
     +    at Object.‹anonymous›.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
-    +
-    +
-    +Failed Tests Reporter:
+    +      ]]›‹/failure›
+    +      ‹system-out›Failed Tests Reporter:
     +  - foo bar
-    +]]›‹/failure›
+    +
+    +‹/system-out›
          ‹/testcase›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="passive launcher can start and end a process" time="0.435"/›
          ‹testcase classname="X-Pack Jest Tests.x-pack/legacy/plugins/code/server/lsp" name="passive launcher should restart a process if a process died before connected" time="1.502"/›
@@ -216,12 +216,17 @@ it('rewrites mocha reports with minimal changes', async () => {
     ===================================================================
     --- mocha.xml	[object Object]
     +++ mocha.xml
-    @@ -2,12 +2,12 @@
+    @@ -1,13 +1,16 @@
+     ‹?xml version="1.0" encoding="utf-8"?›
      ‹testsuites›
        ‹testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3"›
          ‹testcase name="code in multiple nodes &quot;before all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.121"›
-           ‹system-out›
+    -      ‹system-out›
     -        ‹![CDATA[]]›
+    +      ‹system-out›Failed Tests Reporter:
+    +  - foo bar
+    +
+    +
     +
            ‹/system-out›
     -      ‹failure›
@@ -232,7 +237,7 @@ it('rewrites mocha reports with minimal changes', async () => {
      ‹head›‹title›503 Service Temporarily Unavailable‹/title›‹/head›
      ‹body bgcolor="white"›
      ‹center›‹h1›503 Service Temporarily Unavailable‹/h1›‹/center›
-    @@ -15,24 +15,28 @@
+    @@ -15,24 +18,24 @@
      ‹/body›
      ‹/html›
 
@@ -240,11 +245,7 @@ it('rewrites mocha reports with minimal changes', async () => {
     -    at process._tickCallback (internal/process/next_tick.js:68:7)]]›
     -      ‹/failure›
     +    at process._tickCallback (internal/process/next_tick.js:68:7)
-    +
-    +
-    +Failed Tests Reporter:
-    +  - foo bar
-    +]]›‹/failure›
+    +      ]]›‹/failure›
          ‹/testcase›
          ‹testcase name="code in multiple nodes &quot;after all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.003"›
            ‹system-out›
@@ -324,11 +325,11 @@ it('rewrites karma reports with minimal changes', async () => {
     +    at Generator.prototype.‹computed› [as next] (webpack://%5Bname%5D/./node_modules/regenerator-runtime/runtime.js?:114:21)
     +    at asyncGeneratorStep (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158772:103)
     +    at _next (http://localhost:5610/bundles/tests.bundle.js?shards=4&shard_num=1:158774:194)
-    +
-    +
-    +Failed Tests Reporter:
-    +  - foo bar
     +]]›‹/failure›
+    +    ‹system-out›Failed Tests Reporter:
+    +  - foo bar
+    +
+    +‹/system-out›
        ‹/testcase›
        ‹testcase name="CoordinateMapsVisualizationTest CoordinateMapsVisualization - basics should toggle to Heatmap OK" time="0.055" classname="Browser Unit Tests.CoordinateMapsVisualizationTest"/›
        ‹testcase name="VegaParser._parseSchema should warn on vega-lite version too new to be supported" time="0.001" classname="Browser Unit Tests.VegaParser·_parseSchema"/›

@@ -27,14 +27,14 @@ export function getSuggestionsProvider({ indexPatterns, boolFilter }) {
     suffix,
     fieldName,
     nestedPath,
-  }) {
+  }, signal) {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
     const fields = allFields.filter(field => field.name === fullFieldName);
     const query = `${prefix}${suffix}`.trim();
     const { getSuggestions } = npStart.plugins.data;
 
     const suggestionsByField = fields.map(field => {
-      return getSuggestions(field.indexPatternTitle, field, query, boolFilter).then(data => {
+      return getSuggestions(field.indexPatternTitle, field, query, boolFilter, signal).then(data => {
         const quotedValues = data.map(value => typeof value === 'string' ? `"${escapeQuotes(value)}"` : `${value}`);
         return wrapAsSuggestions(start, end, query, quotedValues);
       });

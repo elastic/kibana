@@ -60,7 +60,7 @@ which will:
 - Delete any existing alert tasks you have
 - Delete any existing signal mapping, policies, and template, you might have previously had.
 - Add the latest signal index and its mappings using your settings from `kibana.dev.yml` environment variable of `xpack.siem.signalsIndex`.
-- Posts the sample rule from `rules/root_or_admin_1.json`
+- Posts the sample rule from `./rules/queries/query_with_rule_id.json`
 - The sample rule checks for root or admin every 5 minutes and reports that as a signal if it is a positive hit
 
 Now you can run
@@ -154,11 +154,12 @@ logging.events:
 See these two README.md's pages for more references on the alerting and actions API:
 https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/alerting/README.md
 https://github.com/elastic/kibana/tree/master/x-pack/legacy/plugins/actions
+
 ### Signals API
 
 To update the status of a signal or group of signals, the following scripts provide an example of how to
 go about doing so.
-` cd x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts`
+`cd x-pack/legacy/plugins/siem/server/lib/detection_engine/scripts`
 `./signals/put_signal_doc.sh` will post a sample signal doc into the signals index to play with
 `./signals/set_status_with_id.sh closed` will update the status of the sample signal to closed
 `./signals/set_status_with_id.sh open` will update the status of the sample signal to open

@@ -18,7 +18,6 @@ import {
   EuiOverlayMask,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 
 import { NavigationMenu } from '../../../components/navigation_menu';
@@ -153,7 +152,7 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
 
       try {
         await ml.addCalendar(calendar);
-        window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+        window.location = '#/settings/calendars_list';
       } catch (error) {
         console.log('Error saving calendar', error);
         this.setState({ saving: false });
@@ -176,7 +175,7 @@ export const NewCalendar = injectI18n(class NewCalendar extends Component {
 
     try {
       await ml.updateCalendar(calendar);
-      window.location = `${chrome.getBasePath()}/app/ml#/settings/calendars_list`;
+      window.location = '#/settings/calendars_list';
     } catch (error) {
       console.log('Error saving calendar', error);
       this.setState({ saving: false });

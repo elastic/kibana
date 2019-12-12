@@ -29,7 +29,6 @@ import { npSetup } from 'ui/new_platform';
 import 'uiExports/home';
 import 'uiExports/visTypes';
 
-import 'uiExports/visEditorTypes';
 import 'uiExports/visualize';
 import 'uiExports/savedObjectTypes';
 import 'uiExports/fieldFormatEditors';

@@ -21,18 +21,6 @@ import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { NewVisHelp } from './new_vis_help';
 
-jest.mock('../../kibana_services', () => {
-  return {
-    getServices: () => ({
-      addBasePath: jest.fn((url: string) => `testbasepath${url}`),
-    }),
-  };
-});
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('NewVisHelp', () => {
   it('should render as expected', () => {
     expect(
@@ -53,6 +41,7 @@ describe('NewVisHelp', () => {
               stage: 'production',
             },
           ]}
+          addBasePath={(url: string) => `testbasepath${url}`}
         />
       )
     ).toMatchInlineSnapshot(`

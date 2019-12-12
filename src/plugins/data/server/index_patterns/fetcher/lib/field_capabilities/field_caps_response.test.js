@@ -144,6 +144,13 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(child).toHaveProperty('subType', { nested: { path: 'nested_object_parent' } });
       });
 
+      it('returns nested sub-fields as non-aggregatable', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        // Normally a keyword field would be aggregatable, but the fact that it is nested overrides that
+        const child = fields.find(f => f.name === 'nested_object_parent.child.keyword');
+        expect(child).toHaveProperty('aggregatable', false);
+      });
+
       it('handles fields that are both nested and multi', () => {
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'nested_object_parent.child.keyword');

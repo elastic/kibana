@@ -35,4 +35,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/ui_capabilities/security_only/config'),
   require.resolve('../test/ui_capabilities/spaces_only/config'),
   require.resolve('../test/upgrade_assistant_integration/config'),
+  require.resolve('../test/licensing_plugin/config'),
 ]);
