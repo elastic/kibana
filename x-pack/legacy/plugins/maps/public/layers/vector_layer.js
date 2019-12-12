@@ -510,9 +510,14 @@ export class VectorLayer extends AbstractLayer {
     // To work around this limitation,
     // scaled layout properties (like icon-size) must fall back to geojson property values :(
     const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
-    if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
+    featureCollection.features.forEach(feature => {
+      feature.properties.test = 'hello world';
+    })
+    //if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
       mbGeoJSONSource.setData(featureCollection);
-    }
+    //}
+
+    console.log(featureCollection);
 
   }
 
@@ -536,6 +541,11 @@ export class VectorLayer extends AbstractLayer {
       }
       this._setMbSymbolProperties(mbMap);
     }
+
+    this._setMbTextProperties(mbMap);
+    const textLayerId = this._getMbTextLayerId();
+    mbMap.setLayoutProperty(textLayerId, 'visibility', 'visible');
+    mbMap.setLayerZoomRange(textLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
 
     this.syncVisibilityWithMb(mbMap, mbLayerId);
     mbMap.setLayerZoomRange(mbLayerId, this._descriptor.minZoom, this._descriptor.maxZoom);
@@ -564,6 +574,30 @@ export class VectorLayer extends AbstractLayer {
       alpha: this.getAlpha(),
       mbMap,
       pointLayerId: pointLayerId,
+    });
+  }
+
+  _setMbTextProperties(mbMap) {
+    const sourceId = this.getId();
+    const textLayerId = this._getMbTextLayerId();
+    const textLayer = mbMap.getLayer(textLayerId);
+
+    if (!textLayer) {
+      mbMap.addLayer({
+        id: textLayerId,
+        type: 'symbol',
+        source: sourceId,
+      });
+    }
+
+    const filterExpr = getPointFilterExpression(this._hasJoins());
+    if (filterExpr !== mbMap.getFilter(textLayerId)) {
+      mbMap.setFilter(textLayerId, filterExpr);
+    }
+
+    this._style.setMBPropertiesForText({
+      mbMap,
+      textLayerId,
     });
   }
 
@@ -660,6 +694,10 @@ export class VectorLayer extends AbstractLayer {
     return this.makeMbLayerId('circle');
   }
 
+  _getMbTextLayerId() {
+    return this.makeMbLayerId('text');
+  }
+
   _getMbSymbolLayerId() {
     return this.makeMbLayerId('symbol');
   }
@@ -678,6 +716,7 @@ export class VectorLayer extends AbstractLayer {
 
   ownsMbLayerId(mbLayerId) {
     return this._getMbPointLayerId() === mbLayerId ||
+      this._getMbTextLayerId() === mbLayerId ||
       this._getMbLineLayerId() === mbLayerId ||
       this._getMbPolygonLayerId() === mbLayerId ||
       this._getMbSymbolLayerId() === mbLayerId;

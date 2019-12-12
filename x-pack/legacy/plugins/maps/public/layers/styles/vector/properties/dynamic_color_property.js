@@ -17,6 +17,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
 
   syncCircleColorWithMb(mbLayerId, mbMap, alpha) {
     const color = this._getMbColor();
+    console.log(color);
     mbMap.setPaintProperty(mbLayerId, 'circle-color', color);
     mbMap.setPaintProperty(mbLayerId, 'circle-opacity', alpha);
   }

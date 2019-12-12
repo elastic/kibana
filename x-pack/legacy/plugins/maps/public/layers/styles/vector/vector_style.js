@@ -512,6 +512,12 @@ export class VectorStyle extends AbstractStyle {
     this._iconSizeStyleProperty.syncCircleRadiusWithMb(pointLayerId, mbMap);
   }
 
+  setMBPropertiesForText({ mbMap, textLayerId }) {
+    mbMap.setLayoutProperty(textLayerId, 'text-field', ['coalesce', ['get', 'test'], '']);
+    mbMap.setPaintProperty(textLayerId, 'text-color', '#ff0000');
+    mbMap.setLayoutProperty(textLayerId, 'text-allow-overlap', true);
+  }
+
   setMBSymbolPropertiesForPoints({ mbMap, symbolLayerId, alpha }) {
 
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
