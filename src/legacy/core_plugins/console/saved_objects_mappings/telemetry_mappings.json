@@ -1,0 +1,6 @@
+{
+  "console-telemetry-requests-count": {
+    "dynamic": true,
+    "properties": {}
+  }
+}
