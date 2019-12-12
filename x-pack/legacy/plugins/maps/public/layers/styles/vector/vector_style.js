@@ -458,6 +458,10 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setFeatureState(tmpFeatureIdentifier, tmpFeatureState);
     }
 
+    //returns boolean indicating if styles do not support feature-state and some values are stored in geojson properties
+    //this return-value is used in an optimization for style-updates with mapbox-gl.
+    //`true` indicates the entire data needs to reset on the source (otherwise the style-rules will not be reapplied)
+    //`false` indicates the data does not need to be reset on the store, because styles are re-evaluated if they use featureState
     return featureStateParams.some(({ supportsFeatureState }) => !supportsFeatureState);
   }
 
@@ -543,6 +547,8 @@ export class VectorStyle extends AbstractStyle {
       return new StaticColorProperty(descriptor.options, styleName);
     } else if (descriptor.type === DynamicStyleProperty.type) {
       const field = this._makeField(descriptor.options.field);
+      const fieldMeta = this._getFieldMeta(field.getName());
+      console.log('field meta at inst time...', fieldMeta);
       return new DynamicColorProperty(descriptor.options, styleName, field);
     } else {
       throw new Error(`${descriptor} not implemented`);
