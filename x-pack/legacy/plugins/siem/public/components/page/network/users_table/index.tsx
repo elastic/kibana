@@ -85,7 +85,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
           tableType,
           updates: { limit: newLimit },
         }),
-      [type]
+      [type, updateNetworkTable]
     );
 
     const updateActivePage = useCallback(
@@ -95,7 +95,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
           tableType,
           updates: { activePage: newPage },
         }),
-      [type]
+      [type, updateNetworkTable]
     );
 
     const onChange = useCallback(
@@ -115,7 +115,7 @@ const UsersTableComponent = React.memo<UsersTableProps>(
           }
         }
       },
-      [sort, type]
+      [sort, type, updateNetworkTable]
     );
 
     return (

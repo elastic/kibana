@@ -54,7 +54,7 @@ export const MatrixHistogram = ({
     if (totalCount >= 0 && loadingInitial) {
       setLoadingInitial(false);
     }
-  }, [loading]);
+  }, [loading, loadingInitial, totalCount]);
 
   const handleOnMouseEnter = useCallback(() => setShowInspect(true), []);
   const handleOnMouseLeave = useCallback(() => setShowInspect(false), []);

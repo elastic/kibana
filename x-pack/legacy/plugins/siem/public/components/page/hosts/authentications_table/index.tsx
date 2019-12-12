@@ -106,7 +106,7 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
           limit: newLimit,
           tableType,
         }),
-      [type]
+      [type, updateTableLimit]
     );
 
     const updateActivePage = useCallback(
@@ -116,7 +116,7 @@ const AuthenticationTableComponent = React.memo<AuthenticationTableProps>(
           hostsType: type,
           tableType,
         }),
-      [type]
+      [type, updateTableActivePage]
     );
 
     return (

@@ -68,13 +68,13 @@ export const IPDetailsComponent = ({
         to: fromTo.to,
       });
     },
-    [scoreIntervalToDateTime, setAbsoluteRangeDatePicker]
+    [setAbsoluteRangeDatePicker]
   );
   const core = useKibanaCore();
 
   useEffect(() => {
     setIpDetailsTablesActivePageToZero(null);
-  }, [detailName]);
+  }, [detailName, setIpDetailsTablesActivePageToZero]);
 
   return (
     <>

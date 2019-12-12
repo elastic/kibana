@@ -76,6 +76,11 @@ const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
     type,
     updateNetworkTable,
   }) => {
+    const tableType =
+      type === networkModel.NetworkType.page
+        ? networkModel.NetworkTableType.http
+        : networkModel.IpDetailsTableType.http;
+
     const updateLimitPagination = useCallback(
       newLimit =>
         updateNetworkTable({
@@ -83,7 +88,7 @@ const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
           tableType,
           updates: { limit: newLimit },
         }),
-      [type]
+      [type, updateNetworkTable, tableType]
     );
 
     const updateActivePage = useCallback(
@@ -93,13 +98,8 @@ const NetworkHttpTableComponent = React.memo<NetworkHttpTableProps>(
           tableType,
           updates: { activePage: newPage },
         }),
-      [type]
+      [type, updateNetworkTable, tableType]
     );
-
-    const tableType =
-      type === networkModel.NetworkType.page
-        ? networkModel.NetworkTableType.http
-        : networkModel.IpDetailsTableType.http;
 
     const onChange = useCallback(
       (criteria: Criteria) => {

@@ -42,14 +42,15 @@ const TabNavigationItem = React.memo(TabNavigationItemComponent);
 export const TabNavigationComponent = (props: TabNavigationProps) => {
   const { display, navTabs, pageName, tabName } = props;
 
-  const mapLocationToTab = (): string => {
-    return getOr(
-      '',
-      'id',
-      Object.values(navTabs).find(item => tabName === item.id || pageName === item.id)
-    );
-  };
-
+  const mapLocationToTab = useCallback(
+    (): string =>
+      getOr(
+        '',
+        'id',
+        Object.values(navTabs).find(item => tabName === item.id || pageName === item.id)
+      ),
+    [pageName, tabName, navTabs]
+  );
   const [selectedTabId, setSelectedTabId] = useState(mapLocationToTab());
   useEffect(() => {
     const currentTabSelected = mapLocationToTab();
@@ -59,7 +60,7 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
     }
 
     // we do need navTabs in case the selectedTabId appears after initial load (ex. checking permissions for anomalies)
-  }, [pageName, tabName, navTabs]);
+  }, [pageName, tabName, navTabs, mapLocationToTab, selectedTabId]);
 
   const renderTabs = useMemo(
     () =>
@@ -79,7 +80,7 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
           />
         );
       }),
-    [navTabs, selectedTabId]
+    [navTabs, selectedTabId, props]
   );
 
   return <EuiTabs display={display}>{renderTabs}</EuiTabs>;

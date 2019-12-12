@@ -40,7 +40,7 @@ export const JobsTableFiltersComponent = ({ siemJobs, onFilterChanged }: JobsTab
   // Propagate filter changes to parent
   useEffect(() => {
     onFilterChanged({ filterQuery, showCustomJobs, showElasticJobs, selectedGroups });
-  }, [filterQuery, selectedGroups.sort().join(), showCustomJobs, showElasticJobs]);
+  }, [filterQuery, selectedGroups, showCustomJobs, showElasticJobs, onFilterChanged]);
 
   const handleChange = useCallback(
     (query: EuiSearchBarQuery) => setFilterQuery(query.queryText.trim()),

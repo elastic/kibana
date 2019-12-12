@@ -88,26 +88,6 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
     type,
     updateNetworkTable,
   }) => {
-    const updateLimitPagination = useCallback(
-      newLimit =>
-        updateNetworkTable({
-          networkType: type,
-          tableType,
-          updates: { limit: newLimit },
-        }),
-      [type]
-    );
-
-    const updateActivePage = useCallback(
-      newPage =>
-        updateNetworkTable({
-          networkType: type,
-          tableType,
-          updates: { activePage: newPage },
-        }),
-      [type]
-    );
-
     let tableType: networkModel.TopCountriesTableType;
     const headerTitle: string =
       flowTargeted === FlowTargetSourceDest.source
@@ -132,6 +112,26 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
         ? `node.network.${sort.field}`
         : `node.${flowTargeted}.${sort.field}`;
 
+    const updateLimitPagination = useCallback(
+      newLimit =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { limit: newLimit },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
+    const updateActivePage = useCallback(
+      newPage =>
+        updateNetworkTable({
+          networkType: type,
+          tableType,
+          updates: { activePage: newPage },
+        }),
+      [type, updateNetworkTable, tableType]
+    );
+
     const onChange = useCallback(
       (criteria: Criteria) => {
         if (criteria.sort != null) {
@@ -154,7 +154,7 @@ const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTablePro
           }
         }
       },
-      [type, sort.field, sort.direction]
+      [type, sort, tableType, updateNetworkTable]
     );
 
     const columns = useMemo(

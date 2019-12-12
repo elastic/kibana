@@ -61,7 +61,7 @@ const HostDetailsComponent = React.memo<HostDetailsComponentProps>(
   }) => {
     useEffect(() => {
       setHostDetailsTablesActivePageToZero(null);
-    }, [detailName]);
+    }, [setHostDetailsTablesActivePageToZero, detailName]);
     const capabilities = useContext(MlCapabilitiesContext);
     const core = useKibanaCore();
     const narrowDateRange = useCallback(

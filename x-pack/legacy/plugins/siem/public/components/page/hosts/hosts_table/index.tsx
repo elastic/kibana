@@ -122,7 +122,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
           limit: newLimit,
           tableType,
         }),
-      [type]
+      [type, updateTableLimit]
     );
 
     const updateActivePage = useCallback(
@@ -132,7 +132,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
           hostsType: type,
           tableType,
         }),
-      [type]
+      [type, updateTableActivePage]
     );
 
     const onChange = useCallback(
@@ -150,7 +150,7 @@ const HostsTableComponent = React.memo<HostsTableProps>(
           }
         }
       },
-      [direction, sortField, type]
+      [direction, sortField, type, updateHostsSort]
     );
 
     const hostsColumns = useMemo(() => getHostsColumns(), []);

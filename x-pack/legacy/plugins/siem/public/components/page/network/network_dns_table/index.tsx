@@ -84,7 +84,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
           tableType,
           updates: { limit: newLimit },
         }),
-      [type]
+      [type, updateNetworkTable]
     );
 
     const updateActivePage = useCallback(
@@ -94,7 +94,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
           tableType,
           updates: { activePage: newPage },
         }),
-      [type]
+      [type, updateNetworkTable]
     );
 
     const onChange = useCallback(
@@ -113,7 +113,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
           }
         }
       },
-      [sort, type, tableType]
+      [sort, type, updateNetworkTable]
     );
 
     const onChangePtrIncluded = useCallback(
@@ -123,7 +123,7 @@ export const NetworkDnsTableComponent = React.memo<NetworkDnsTableProps>(
           tableType,
           updates: { isPtrIncluded: !isPtrIncluded },
         }),
-      [type, isPtrIncluded]
+      [type, updateNetworkTable, isPtrIncluded]
     );
 
     return (

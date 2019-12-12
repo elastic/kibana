@@ -104,7 +104,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
           limit: newLimit,
           tableType,
         }),
-      [type]
+      [type, updateTableLimit]
     );
 
     const updateActivePage = useCallback(
@@ -114,7 +114,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
           hostsType: type,
           tableType,
         }),
-      [type]
+      [type, updateTableActivePage]
     );
 
     return (

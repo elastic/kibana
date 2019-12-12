@@ -45,7 +45,7 @@ const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
           to: fromTo.to,
         });
       },
-      [setAbsoluteRangeDatePicker, scoreIntervalToDateTime]
+      [setAbsoluteRangeDatePicker]
     );
 
     const updateDateRange = useCallback(
