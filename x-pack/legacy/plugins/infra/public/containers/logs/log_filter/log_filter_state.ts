@@ -6,7 +6,9 @@
 
 import { useState, useMemo } from 'react';
 import createContainer from 'constate';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { esKuery } from '../../../../../../../../src/plugins/data/public';
+import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 
 export interface KueryFilterQuery {
   kind: 'kuery';
@@ -34,25 +36,39 @@ export type LogFilterStateParams = Omit<LogFilterInternalStateParams, 'filterQue
   isFilterQueryDraftValid: boolean;
 };
 export interface LogFilterCallbacks {
-  setLogFilterQueryDraft: (payload: KueryFilterQuery) => void;
-  applyLogFilterQuery: (payload: SerializedFilterQuery) => void;
+  setLogFilterQueryDraft: (expression: string) => void;
+  applyLogFilterQuery: (expression: string) => void;
 }
 
-export const useLogFilterState: () => [LogFilterStateParams, LogFilterCallbacks] = () => {
+export const useLogFilterState: (props: {
+  indexPattern: IIndexPattern;
+}) => [LogFilterStateParams, LogFilterCallbacks] = ({ indexPattern }) => {
   const [state, setState] = useState(logFilterInitialState);
-  const callbacks = useMemo(
-    () => ({
-      setLogFilterQueryDraft: (payload: KueryFilterQuery) =>
-        setState({ ...state, filterQueryDraft: payload }),
+  const { filterQuery, filterQueryDraft } = state;
 
-      applyLogFilterQuery: (payload: SerializedFilterQuery) =>
-        setState({ ...state, filterQueryDraft: payload.query, filterQuery: payload }),
-    }),
-    []
-  );
+  const callbacks: LogFilterCallbacks = useMemo(() => {
+    const setLogFilterQueryDraft = (payload: KueryFilterQuery) =>
+      setState({ ...state, filterQueryDraft: payload });
+    const applyLogFilterQuery = (payload: SerializedFilterQuery) =>
+      setState({ ...state, filterQueryDraft: payload.query, filterQuery: payload });
+    return {
+      setLogFilterQueryDraft: expression =>
+        setLogFilterQueryDraft({
+          kind: 'kuery',
+          expression,
+        }),
+      applyLogFilterQuery: expression =>
+        applyLogFilterQuery({
+          query: {
+            kind: 'kuery',
+            expression,
+          },
+          serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
+        }),
+    };
+  }, [state, indexPattern]);
 
   const isFilterQueryDraftValid = useMemo(() => {
-    const { filterQueryDraft } = state;
     if (filterQueryDraft && filterQueryDraft.kind === 'kuery') {
       try {
         esKuery.fromKueryExpression(filterQueryDraft.expression);
@@ -62,12 +78,11 @@ export const useLogFilterState: () => [LogFilterStateParams, LogFilterCallbacks]
     }
 
     return true;
-  }, [esKuery.fromKueryExpression, state.filterQueryDraft]);
+  }, [filterQueryDraft]);
 
-  const serializedFilterQuery = useMemo(
-    () => (state.filterQuery ? state.filterQuery.serializedQuery : null),
-    [esKuery.fromKueryExpression, state.filterQuery]
-  );
+  const serializedFilterQuery = useMemo(() => (filterQuery ? filterQuery.serializedQuery : null), [
+    filterQuery,
+  ]);
 
   return [
     {

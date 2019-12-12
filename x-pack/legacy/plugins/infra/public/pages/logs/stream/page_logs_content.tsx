@@ -15,7 +15,7 @@ import { PageContent } from '../../../components/page';
 
 import { WithSummary } from '../../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../../containers/logs/log_view_configuration';
-import { WithLogFilter, WithLogFilterUrlState } from '../../../containers/logs/with_log_filter';
+import { LogFilterState } from '../../../containers/logs/log_filter';
 import {
   LogFlyout as LogFlyoutState,
   WithFlyoutOptionsUrlState,
@@ -31,7 +31,7 @@ import { LogsToolbar } from './page_toolbar';
 import { LogHighlightsBridge, LogHighlightsState } from '../../../containers/logs/log_highlights';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { createDerivedIndexPattern, source, sourceId, version } = useContext(Source.Context);
+  const { source, sourceId, version } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const {
     setFlyoutVisibility,
@@ -43,37 +43,32 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     isLoading,
   } = useContext(LogFlyoutState.Context);
   const { logSummaryHighlights } = useContext(LogHighlightsState.Context);
-  const derivedIndexPattern = createDerivedIndexPattern('logs');
+  const [, { applyLogFilterQuery }] = useContext(LogFilterState.Context);
   return (
     <>
       <LogHighlightsBridge />
-      <WithLogFilterUrlState indexPattern={derivedIndexPattern} />
       <WithLogPositionUrlState />
       <WithLogMinimapUrlState />
       <WithLogTextviewUrlState />
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
-      <WithLogFilter indexPattern={derivedIndexPattern}>
-        {({ applyFilterQueryFromKueryExpression }) => (
-          <WithLogPosition>
-            {({ jumpToTargetPosition, stopLiveStreaming }) =>
-              flyoutVisible ? (
-                <LogEntryFlyout
-                  setFilter={applyFilterQueryFromKueryExpression}
-                  setTarget={(timeKey, flyoutItemId) => {
-                    jumpToTargetPosition(timeKey);
-                    setSurroundingLogsId(flyoutItemId);
-                    stopLiveStreaming();
-                  }}
-                  setFlyoutVisibility={setFlyoutVisibility}
-                  flyoutItem={flyoutItem}
-                  loading={isLoading}
-                />
-              ) : null
-            }
-          </WithLogPosition>
-        )}
-      </WithLogFilter>
+      <WithLogPosition>
+        {({ jumpToTargetPosition, stopLiveStreaming }) =>
+          flyoutVisible ? (
+            <LogEntryFlyout
+              setFilter={applyLogFilterQuery}
+              setTarget={(timeKey, flyoutItemId) => {
+                jumpToTargetPosition(timeKey);
+                setSurroundingLogsId(flyoutItemId);
+                stopLiveStreaming();
+              }}
+              setFlyoutVisibility={setFlyoutVisibility}
+              flyoutItem={flyoutItem}
+              loading={isLoading}
+            />
+          ) : null
+        }
+      </WithLogPosition>
       <PageContent key={`${sourceId}-${version}`}>
         <WithLogPosition>
           {({
