@@ -26,42 +26,12 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   private managementSections = new ManagementSections();
 
   public setup(core: CoreSetup, { kibana_legacy }: { kibana_legacy: KibanaLegacySetup }) {
-    // public setup(core: CoreSetup) {
-    // console.log('ManagementPlugin setup');
-
-    // console.log('core', core);
-    // console.log(kibana_legacy);
-    /*
-    kibana_legacy.registerLegacyApp({
-      id: 'management/foo',
-      title: 'Management',
-      mount: async (appMountContext, params) => {
-        render(<div>hello foo</div>, params.element);
-
-        return () => unmountComponentAtNode(params.element);
-      },
-    });
-    */
-
-    /*
-    kibana_legacy.registerLegacyApp({
-      id: 'management',
-      title: 'Management',
-      mount: async (appMountContext, params) => {
-        const { renderApp } = await import('./application');
-        return renderApp(params.element, appMountContext, params.appBasePath);
-      },
-    });
-    */
-
     return {
       sections: this.managementSections.setup(kibana_legacy),
     };
   }
 
   public start(core: CoreStart) {
-    // console.log('ManagementPlugin start');
-    // console.log('core', core);
     return {
       sections: this.managementSections.start(core.application.capabilities),
     };

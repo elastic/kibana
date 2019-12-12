@@ -29,7 +29,6 @@ export interface ManagementStart {
 
 interface SectionsServiceSetup {
   get: (sectionId: ISection['id']) => ISection | undefined;
-  getAvailable: () => ISection[]; // filtered based on capabilities
   register: RegisterSection;
 }
 
