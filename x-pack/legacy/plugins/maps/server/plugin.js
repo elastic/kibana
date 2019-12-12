@@ -11,10 +11,11 @@ import { getFlightsSavedObjects } from './sample_data/flights_saved_objects.js';
 import { getWebLogsSavedObjects } from './sample_data/web_logs_saved_objects.js';
 import { checkLicense } from '../check_license';
 import { watchStatusAndLicenseToInitialize } from	'../../../server/lib/watch_status_and_license_to_initialize';
+import { registerMapsUsageCollector } from './maps_telemetry/collectors/register';
 
 export class MapPlugin {
   setup(core, plugins, __LEGACY) {
-    const { featuresPlugin } = plugins;
+    const { featuresPlugin, usageCollection } = plugins;
     let routesInitialized = false;
 
     featuresPlugin.registerFeature({
@@ -55,6 +56,10 @@ export class MapPlugin {
     __LEGACY.plugins.xpackMainPlugin.info
       .feature(APP_ID)
       .registerLicenseCheckResultsGenerator(checkLicense);
+
+    // Init telemetry
+    const { savedObjectsClient } = __LEGACY.savedObjects;
+    registerMapsUsageCollector(usageCollection, savedObjectsClient, __LEGACY.config);
 
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map'
