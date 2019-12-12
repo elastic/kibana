@@ -18,19 +18,41 @@
  */
 
 import { Plugin, CoreSetup, CoreStart } from '../../../../../core/public';
+import {
+  aggTypes,
+  AggType,
+  AggConfig,
+  AggConfigs,
+  FieldParamType,
+  aggTypeFieldFilters,
+  setBounds,
+  parentPipelineAggHelper,
+} from './agg_types';
 import { SearchSource } from './search_source';
 import { defaultSearchStrategy } from './search_strategy';
 import { SearchStrategyProvider } from './search_strategy/types';
 
+interface AggTypesStart {
+  types: typeof aggTypes;
+  AggConfig: typeof AggConfig;
+  AggConfigs: typeof AggConfigs;
+  AggType: typeof AggType;
+  aggTypeFieldFilters: typeof aggTypeFieldFilters;
+  FieldParamType: typeof FieldParamType;
+  parentPipelineAggHelper: typeof parentPipelineAggHelper;
+  setBounds: typeof setBounds;
+}
+
 export interface SearchSetup {} // eslint-disable-line @typescript-eslint/no-empty-interface
 
 export interface SearchStart {
+  aggs: AggTypesStart;
   defaultSearchStrategy: SearchStrategyProvider;
   SearchSource: typeof SearchSource;
 }
 
 /**
- * The contract provided here is a new platform shim for ui/courier.
+ * The contract provided here is a new platform shim for ui/courier and ui/agg_types.
  *
  * Once it has been refactored to work with new platform services,
  * it will move into the existing search service in src/plugins/data/public/search
@@ -42,6 +64,16 @@ export class SearchService implements Plugin<SearchSetup, SearchStart> {
 
   public start(core: CoreStart): SearchStart {
     return {
+      aggs: {
+        types: aggTypes,
+        AggConfig,
+        AggConfigs,
+        AggType,
+        aggTypeFieldFilters,
+        FieldParamType,
+        parentPipelineAggHelper,
+        setBounds,
+      },
       defaultSearchStrategy,
       SearchSource,
     };
