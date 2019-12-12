@@ -7,11 +7,11 @@
 import { FC } from 'react';
 
 import { IndexPattern } from 'ui/index_patterns';
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/np_ready/types';
+import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 
 declare const DataRecognizer: FC<{
   indexPattern: IndexPattern;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedSearchSavedObject | null;
   results: {
     count: number;
     onChange?: Function;
