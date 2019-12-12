@@ -3,23 +3,28 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FrameworkAdapter, FrameworkRequest } from '../framework';
+import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 
 import { ElasticsearchAlertsAdapter } from './elasticsearch_adapter';
-import { mockAlertsQueryDsl, mockOptions, mockRequest, mockAlertsResponse } from './mock';
+import {
+  mockRequest,
+  mockOptions,
+  mockAlertsHistogramDataResponse,
+  mockAlertsHistogramQueryDsl,
+} from './mock';
 
 jest.mock('./query.dsl', () => {
   return {
-    buildAlertsQuery: jest.fn(() => mockAlertsQueryDsl),
+    buildAlertsHistogramQuery: jest.fn(() => mockAlertsHistogramQueryDsl),
   };
 });
 
 describe('alerts elasticsearch_adapter', () => {
-  describe('alerts', () => {
+  describe('getAlertsHistogramData', () => {
     test('Happy Path ', async () => {
       const mockCallWithRequest = jest.fn();
       mockCallWithRequest.mockImplementation((req: FrameworkRequest, method: string) => {
-        return mockAlertsResponse;
+        return mockAlertsHistogramDataResponse;
       });
       const mockFramework: FrameworkAdapter = {
         version: 'mock',
@@ -34,9 +39,9 @@ describe('alerts elasticsearch_adapter', () => {
       }));
 
       const EsNetworkTimelineAlerts = new ElasticsearchAlertsAdapter(mockFramework);
-      const data = await EsNetworkTimelineAlerts.getAlertsData(
-        mockRequest as FrameworkRequest,
-        mockOptions
+      const data = await EsNetworkTimelineAlerts.getAlertsHistogramData(
+        (mockRequest as unknown) as FrameworkRequest,
+        (mockOptions as unknown) as RequestBasicOptions
       );
 
       expect(data).toEqual({});

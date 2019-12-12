@@ -17,4 +17,3 @@ export const TOTAL_COUNT_OF_ALERTS = i18n.translate('xpack.siem.hosts.totalCount
 export const ALERTS_TABLE_TITLE = i18n.translate('xpack.siem.hosts.alertsDocumentType', {
   defaultMessage: 'Alerts',
 });
-

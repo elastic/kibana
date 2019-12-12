@@ -14,6 +14,8 @@ import { DispatchUpdateTimeline } from '../open_timeline/types';
 import { NavTab } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
+import { NetworkRouteType } from '../../pages/network/navigation/types';
+import { HostsTableType } from '../../store/hosts/model';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.appQuery,
@@ -90,7 +92,7 @@ export interface UrlStateDispatchToPropsType {
   updateTimelineIsLoading: ActionCreator<UpdateTimelineIsLoading>;
 }
 
-export type UrlStateContainerPropTypes = RouteSpyState &
+export type UrlStateContainerPropTypes = RouteSpyState<HostsTableType | NetworkRouteType> &
   UrlStateStateToPropsType &
   UrlStateDispatchToPropsType &
   UrlStateProps;

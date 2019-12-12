@@ -9,29 +9,28 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { HostsTableType } from '../../store/hosts/model';
-import { NetworkRouteType } from '../../pages/network/navigation/types';
 
-export interface RouteSpyState {
+export interface RouteSpyState<T> {
   pageName: string;
   detailName: string | undefined;
-  tabName: HostsTableType | NetworkRouteType | undefined;
+  tabName: T | undefined;
   search: string;
   pathName: string;
   history?: H.History;
 }
 
-export type RouteSpyAction =
+export type RouteSpyAction<T> =
   | {
       type: 'updateSearch';
       search: string;
     }
   | {
       type: 'updateRouteWithOutSearch';
-      route: Pick<RouteSpyState, 'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history'>;
+      route: Pick<RouteSpyState<T>, 'pageName' & 'detailName' & 'tabName' & 'pathName' & 'history'>;
     }
   | {
       type: 'updateRoute';
-      route: RouteSpyState;
+      route: RouteSpyState<T>;
     };
 
 export interface ManageRoutesSpyProps {

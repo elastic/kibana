@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultHeaders as alertsDefaultHeaders } from '../../components/alerts_viewer/default_headers';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';

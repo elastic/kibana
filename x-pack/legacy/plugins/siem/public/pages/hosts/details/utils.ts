@@ -15,7 +15,7 @@ import { RouteSpyState } from '../../../utils/route/types';
 
 export const type = hostsModel.HostsType.details;
 
-const TabNameMappedToI18nKey = {
+const TabNameMappedToI18nKey: Record<HostsTableType, string> = {
   [HostsTableType.hosts]: i18n.NAVIGATION_ALL_HOSTS_TITLE,
   [HostsTableType.authentications]: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
   [HostsTableType.uncommonProcesses]: i18n.NAVIGATION_UNCOMMON_PROCESSES_TITLE,
@@ -24,7 +24,10 @@ const TabNameMappedToI18nKey = {
   [HostsTableType.alerts]: i18n.NAVIGATION_ALERTS_TITLE,
 };
 
-export const getBreadcrumbs = (params: RouteSpyState, search: string[]): Breadcrumb[] => {
+export const getBreadcrumbs = (
+  params: RouteSpyState<HostsTableType>,
+  search: string[]
+): Breadcrumb[] => {
   let breadcrumb = [
     {
       text: i18n.PAGE_TITLE,

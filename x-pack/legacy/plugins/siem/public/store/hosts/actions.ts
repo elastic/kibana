@@ -6,7 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
-import { HostsSortField, AlertsSortField } from '../../graphql/types';
+import { HostsSortField } from '../../graphql/types';
 
 import { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/siem/local/hosts');
@@ -32,9 +32,5 @@ export const updateTableLimit = actionCreator<{
 export const updateHostsSort = actionCreator<{
   sort: HostsSortField;
   hostsType: HostsType;
+  tableType: HostsTableType;
 }>('UPDATE_HOSTS_SORT');
-
-export const updateAlertsSort = actionCreator<{
-  sort: AlertsSortField;
-  hostsType: HostsType;
-}>('UPDATE_ALERTS_SORT');

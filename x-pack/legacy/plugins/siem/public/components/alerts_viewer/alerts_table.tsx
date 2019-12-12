@@ -10,6 +10,7 @@ import { esFilters } from 'src/plugins/data/common/es_query';
 import { StatefulEventsViewer } from '../events_viewer';
 import * as i18n from './translations';
 import { alertsDefaultModel } from './default_headers';
+import { AlertsComponentPageFilterDsl } from './types';
 
 export interface OwnProps {
   end: number;
@@ -51,30 +52,40 @@ const filter: esFilters.Filter[] = [
   },
 ];
 
-export const AlertsTable = React.memo(({ endDate, startDate, pageFilters = [] }) => {
-  return (
-    <StatefulEventsViewer
-      pageFilters={[
-        {
-          meta: { ...filter[0].meta },
-          query: {
-            bool: {
-              filter: [...filter[0].query.bool.filter, ...pageFilters],
+export const AlertsTable = React.memo(
+  ({
+    endDate,
+    startDate,
+    pageFilters,
+  }: {
+    endDate: number;
+    startDate: number;
+    pageFilters: AlertsComponentPageFilterDsl[];
+  }) => {
+    return (
+      <StatefulEventsViewer
+        pageFilters={[
+          {
+            meta: { ...filter[0].meta },
+            query: {
+              bool: {
+                filter: [...filter[0].query.bool.filter, ...pageFilters],
+              },
             },
           },
-        },
-      ]}
-      defaultModel={alertsDefaultModel}
-      end={endDate}
-      id={ALERTS_TABLE_ID}
-      start={startDate}
-      timelineTypeContext={{
-        documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        footerText: i18n.TOTAL_COUNT_OF_ALERTS,
-        showCheckboxes: false,
-        showRowRenderers: false,
-        title: i18n.ALERTS_TABLE_TITLE,
-      }}
-    />
-  );
-});
+        ]}
+        defaultModel={alertsDefaultModel}
+        end={endDate}
+        id={ALERTS_TABLE_ID}
+        start={startDate}
+        timelineTypeContext={{
+          documentType: i18n.ALERTS_DOCUMENT_TYPE,
+          footerText: i18n.TOTAL_COUNT_OF_ALERTS,
+          showCheckboxes: false,
+          showRowRenderers: false,
+          title: i18n.ALERTS_TABLE_TITLE,
+        }}
+      />
+    );
+  }
+);

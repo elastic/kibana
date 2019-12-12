@@ -62,4 +62,3 @@ export const EMPTY_ACTION_PRIMARY = i18n.translate('xpack.siem.hosts.emptyAction
 export const EMPTY_ACTION_SECONDARY = i18n.translate('xpack.siem.hosts.emptyActionSecondary', {
   defaultMessage: 'Go to documentation',
 });
-

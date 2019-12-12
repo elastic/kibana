@@ -16,16 +16,17 @@ interface PageFilterDsl {
   };
 }
 
+export type AlertsComponentPageFilterDsl = Array<{
+  bool: {
+    should: PageFilterDsl[];
+    minimum_should_match: 1;
+  };
+}>;
+
 export type AlertsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: ({ id }: { id: string }) => void;
   indexPattern: IIndexPattern;
   narrowDateRange?: NarrowDateRange;
-  pageFilters: Array<{
-    bool: {
-      should: PageFilterDsl[];
-      minimum_should_match: 1;
-    };
-  }>;
   setQuery: ({
     id,
     inspect,

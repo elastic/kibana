@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { manageQuery } from '../page/manage_query';
 import { AlertsOverTimeHistogram } from '../page/hosts/alerts_over_time';
-import { AlertsComponentsQueryProps } from './types';
+import { AlertsComponentsQueryProps, AlertsComponentPageFilterDsl } from './types';
 import { AlertsOverTimeQuery } from '../../containers/alerts/alerts_over_time';
 import { hostsModel } from '../../store/model';
 import { AlertsTable } from './alerts_table';
@@ -26,7 +26,7 @@ export const AlertsView = ({
   startDate,
   type,
   updateDateRange = () => {},
-}: AlertsComponentsQueryProps) => (
+}: AlertsComponentsQueryProps & { pageFilters: AlertsComponentPageFilterDsl[] }) => (
   <>
     <AlertsOverTimeQuery
       endDate={endDate}

@@ -7,17 +7,6 @@
 import gql from 'graphql-tag';
 
 export const alertsSchema = gql`
-  type AlertsData {
-    edges: [TimelineEdges!]!
-    totalCount: Float!
-    pageInfo: PageInfo!
-    inspect: Inspect
-  }
-
-  enum AlertsFields {
-    hostName
-  }
-
   type AlertsOverTimeData {
     inspect: Inspect
     alertsOverTimeByModule: [MatrixOverTimeHistogramData!]!
@@ -25,14 +14,6 @@ export const alertsSchema = gql`
   }
 
   extend type Source {
-    Alerts(
-      pagination: PaginationInput!
-      sortField: SortField!
-      fieldRequested: [String!]!
-      timerange: TimerangeInput
-      filterQuery: String
-      defaultIndex: [String!]!
-    ): AlertsData!
     AlertsHistogram(
       filterQuery: String
       defaultIndex: [String!]!
