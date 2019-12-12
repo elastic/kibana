@@ -56,6 +56,16 @@ describe('ui reducer', () => {
     const action = setFilters(
       new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]])
     ) as Action<never>;
-    expect(uiReducer(undefined, action)).toMatchSnapshot();
+    expect(
+      uiReducer(
+        {
+          basePath: '',
+          integrationsPopoverOpen: null,
+          lastRefresh: 125,
+          filters: new Map([['observer.geo.name', ['Tokyo', 'London', 'Karachi']]]),
+        },
+        action
+      )
+    ).toMatchSnapshot();
   });
 });
