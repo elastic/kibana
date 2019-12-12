@@ -37,19 +37,6 @@ export interface IWaterfall {
 interface IWaterfallItemBase {
   parent?: IWaterfallItem;
   id: string;
-  parentId?: string;
-  serviceName: string;
-  name: string;
-
-  /**
-   * Duration in us
-   */
-  duration: number;
-
-  /**
-   * start timestamp in us
-   */
-  timestamp: number;
 
   /**
    * offset from first item in us
@@ -63,13 +50,13 @@ interface IWaterfallItemBase {
 }
 
 interface IWaterfallItemTransaction extends IWaterfallItemBase {
-  transaction: Transaction;
+  trace: Transaction; // TODO: check this name
   docType: 'transaction';
   errorCount: number;
 }
 
 interface IWaterfallItemSpan extends IWaterfallItemBase {
-  span: Span;
+  trace: Span; // TODO: check this name
   docType: 'span';
 }
 
@@ -81,15 +68,10 @@ function getTransactionItem(
 ): IWaterfallItemTransaction {
   return {
     id: transaction.transaction.id,
-    parentId: transaction.parent?.id,
-    serviceName: transaction.service.name,
-    name: transaction.transaction.name,
-    duration: transaction.transaction.duration.us,
-    timestamp: transaction.timestamp.us,
     offset: 0,
     skew: 0,
     docType: 'transaction',
-    transaction,
+    trace: transaction,
     errorCount:
       errorsPerTransaction[transaction.transaction.id]?.doc_count || 0,
     errorTimestamp:
@@ -100,15 +82,10 @@ function getTransactionItem(
 function getSpanItem(span: Span): IWaterfallItemSpan {
   return {
     id: span.span.id,
-    parentId: span.parent?.id,
-    serviceName: span.service.name,
-    name: span.span.name,
-    duration: span.span.duration.us,
-    timestamp: span.timestamp.us,
     offset: 0,
     skew: 0,
     docType: 'span',
-    span
+    trace: span
   };
 }
 
@@ -127,12 +104,18 @@ export function getClockSkew(
 
     // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
     case 'transaction': {
-      const parentStart = parentItem.timestamp + parentItem.skew;
+      const parentStart = parentItem.trace.timestamp.us + parentItem.skew;
 
       // determine if child starts before the parent
-      const offsetStart = parentStart - item.timestamp;
+      const offsetStart = parentStart - item.trace.timestamp.us;
       if (offsetStart > 0) {
-        const latency = Math.max(parentItem.duration - item.duration, 0) / 2;
+        const parentDuration =
+          parentItem.docType === 'span'
+            ? parentItem.trace.span.duration.us
+            : parentItem.trace.transaction.duration.us;
+
+        const latency =
+          Math.max(parentDuration - item.trace.transaction.duration.us, 0) / 2;
         return offsetStart + latency;
       }
 
@@ -149,6 +132,9 @@ export function sortWaterfallByParentId(
   if (!entryWaterfallTransaction) {
     return [];
   }
+  const entryTransactionTimestamp =
+    entryWaterfallTransaction?.trace.timestamp.us || 0;
+
   const visitedWaterfallItemSet = new Set();
   function getSortedChildren(
     item: IWaterfallItem,
@@ -158,12 +144,14 @@ export function sortWaterfallByParentId(
       return [];
     }
     visitedWaterfallItemSet.add(item);
-    const children = sortBy(childrenByParentId[item.id] || [], 'timestamp');
+    const children = sortBy(
+      childrenByParentId[item.id] || [],
+      'trace.timestamp.us'
+    );
 
-    const entryTransactionTimestamp = entryWaterfallTransaction?.timestamp || 0;
-    item.parent = parentItem;
-    item.offset = item.timestamp - entryTransactionTimestamp;
+    item.offset = item.trace.timestamp.us - entryTransactionTimestamp;
     item.skew = getClockSkew(item, parentItem);
+    item.parent = parentItem;
 
     const deepChildren = flatten(
       children.map(child => getSortedChildren(child, item))
@@ -177,14 +165,14 @@ export function sortWaterfallByParentId(
 function getRootTransaction(childrenByParentId: IWaterfallGroup) {
   const item = first(childrenByParentId.root);
   if (item && item.docType === 'transaction') {
-    return item.transaction;
+    return item.trace;
   }
 }
 
 export type IServiceColors = Record<string, string>;
 
 function getServiceColors(items: IWaterfallItem[]) {
-  const services = uniq(items.map(item => item.serviceName));
+  const services = uniq(items.map(item => item.trace.service.name));
   const assignedColors = [
     theme.euiColorVis1,
     theme.euiColorVis0,
@@ -202,9 +190,16 @@ function getWaterfallDuration(items: IWaterfallItem[]) {
   if (items.length === 0) {
     return 0;
   }
-  const timestampStart = items[0].timestamp;
+  const timestampStart = items[0].trace.timestamp.us;
+
   const timestampEnd = Math.max(
-    ...items.map(item => item.timestamp + item.duration + item.skew)
+    ...items.map(item => {
+      const duration =
+        item.docType === 'span'
+          ? item.trace.span.duration.us
+          : item.trace.transaction.duration.us;
+      return item.trace.timestamp.us + duration + item.skew;
+    })
   );
   return timestampEnd - timestampStart;
 }
@@ -256,7 +251,7 @@ export function getWaterfall(
   );
 
   const childrenByParentId = groupBy(waterfallItems, item =>
-    item.parentId ? item.parentId : 'root'
+    item.trace.parent?.id ? item.trace.parent?.id : 'root'
   );
 
   const rootTransaction = getRootTransaction(childrenByParentId);
@@ -275,7 +270,7 @@ export function getWaterfall(
   return {
     duration: getWaterfallDuration(items),
     serviceColors: getServiceColors(items),
-    entryTransaction: entryWaterfallTransaction?.transaction,
+    entryTransaction: entryWaterfallTransaction?.trace,
     rootTransaction,
     errorsPerTransaction,
     items,

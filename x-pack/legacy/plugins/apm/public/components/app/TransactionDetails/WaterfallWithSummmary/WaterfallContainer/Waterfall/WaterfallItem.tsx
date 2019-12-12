@@ -91,7 +91,7 @@ interface IWaterfallItemProps {
 function PrefixIcon({ item }: { item: IWaterfallItem }) {
   if (item.docType === 'span') {
     // icon for database spans
-    const isDbType = item.span.span.type.startsWith('db');
+    const isDbType = item.trace.span.type.startsWith('db');
     if (isDbType) {
       return <EuiIcon type="database" />;
     }
@@ -100,13 +100,13 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
     return null;
   }
 
-  // icon for RUM agent transactions
-  if (isRumAgentName(item.transaction.agent.name)) {
+  if (isRumAgentName(item.trace.agent.name)) {
     return <EuiIcon type="globe" />;
   }
 
   // icon for other transactions
   return <EuiIcon type="merge" />;
+  // icon for RUM agent transactions
 }
 
 interface SpanActionToolTipProps {
@@ -120,7 +120,7 @@ const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
   if (item && item.docType === 'span') {
     return (
       <EuiToolTip
-        content={`${item.span.span.subtype}.${item.span.span.action}`}
+        content={`${item.trace.span.subtype}.${item.trace.span.action}`}
       >
         <>{children}</>
       </EuiToolTip>
@@ -130,9 +130,13 @@ const SpanActionToolTip: React.FC<SpanActionToolTipProps> = ({
 };
 
 function Duration({ item }: { item: IWaterfallItem }) {
+  const duration =
+    item.docType === 'span'
+      ? item.trace.span.duration.us
+      : item.trace.transaction.duration.us;
   return (
     <EuiText color="subdued" size="xs">
-      {asDuration(item.duration)}
+      {asDuration(duration)}
     </EuiText>
   );
 }
@@ -140,9 +144,8 @@ function Duration({ item }: { item: IWaterfallItem }) {
 function HttpStatusCode({ item }: { item: IWaterfallItem }) {
   // http status code for transactions of type 'request'
   const httpStatusCode =
-    item.docType === 'transaction' &&
-    item.transaction.transaction.type === 'request'
-      ? item.transaction.transaction.result
+    item.docType === 'transaction' && item.trace.transaction.type === 'request'
+      ? item.trace.transaction.result
       : undefined;
 
   if (!httpStatusCode) {
@@ -154,11 +157,11 @@ function HttpStatusCode({ item }: { item: IWaterfallItem }) {
 
 function NameLabel({ item }: { item: IWaterfallItem }) {
   if (item.docType === 'span') {
-    return <EuiText size="s">{item.name}</EuiText>;
+    return <EuiText size="s">{item.trace.span.name}</EuiText>;
   }
   return (
     <EuiTitle size="xxs">
-      <h5>{item.name}</h5>
+      <h5>{item.trace.transaction.name}</h5>
     </EuiTitle>
   );
 }
@@ -175,8 +178,12 @@ export function WaterfallItem({
   if (!totalDuration) {
     return null;
   }
+  const duration =
+    item.docType === 'span'
+      ? item.trace.span.duration.us
+      : item.trace.transaction.duration.us;
 
-  const width = (item.duration / totalDuration) * 100;
+  const width = (duration / totalDuration) * 100;
   const left = ((item.offset + item.skew) / totalDuration) * 100;
 
   const tooltipContent = i18n.translate(
@@ -210,10 +217,10 @@ export function WaterfallItem({
         <NameLabel item={item} />
         {errorCount > 0 && item.docType === 'transaction' ? (
           <ErrorOverviewLink
-            serviceName={item.transaction.service.name}
+            serviceName={item.trace.service.name}
             query={{
               kuery: encodeURIComponent(
-                `${TRACE_ID} : "${item.transaction.trace.id}" and transaction.id : "${item.transaction.transaction.id}"`
+                `${TRACE_ID} : "${item.trace.trace.id}" and transaction.id : "${item.trace.transaction.id}"`
               )
             }}
             color="danger"

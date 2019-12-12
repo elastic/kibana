@@ -85,15 +85,14 @@ export const Waterfall: React.FC<Props> = ({
   const renderWaterfallItem = (item: IWaterfallItem) => {
     const errorCount =
       item.docType === 'transaction'
-        ? waterfall.errorsPerTransaction[item.transaction.transaction.id]
-            ?.doc_count
+        ? waterfall.errorsPerTransaction[item.id]?.doc_count
         : 0;
 
     return (
       <WaterfallItem
         key={item.id}
         timelineMargins={TIMELINE_MARGINS}
-        color={serviceColors[item.serviceName]}
+        color={serviceColors[item.trace.service.name]}
         item={item}
         totalDuration={duration}
         isSelected={item.id === waterfallItemId}
