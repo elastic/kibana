@@ -244,6 +244,11 @@ export const npStart = {
         register: sinon.fake(),
       },
     },
+    navigation: {
+      ui: {
+        TopNavMenu: mockComponent,
+      }
+    }
   },
 };
 
