@@ -46,7 +46,7 @@ export async function manageInstanceUuid(configService: IConfigService): Promise
 
   const uuidFilePath = join(pathConfig.data, FILE_NAME);
 
-  const uuidFromFile = await readUUIDFromFile(uuidFilePath);
+  const uuidFromFile = await readUuidFromFile(uuidFilePath);
   const uuidFromConfig = serverConfig.uuid;
 
   if (uuidFromConfig) {
@@ -55,20 +55,20 @@ export async function manageInstanceUuid(configService: IConfigService): Promise
       return uuidFromConfig;
     } else {
       // uuid in file don't match, or file was not present, we need to write it.
-      await writeUUIDToFile(uuidFilePath, uuidFromConfig);
+      await writeUuidToFile(uuidFilePath, uuidFromConfig);
       return uuidFromConfig;
     }
   }
   if (uuidFromFile === undefined) {
     // no uuid either in config or file, we need to generate and write it.
-    const newUUID = uuid.v4();
-    await writeUUIDToFile(uuidFilePath, newUUID);
-    return newUUID;
+    const newUuid = uuid.v4();
+    await writeUuidToFile(uuidFilePath, newUuid);
+    return newUuid;
   }
   return uuidFromFile;
 }
 
-async function readUUIDFromFile(filepath: string): Promise<string | undefined> {
+async function readUuidFromFile(filepath: string): Promise<string | undefined> {
   try {
     const content = await readFile(filepath);
     return content.toString(FILE_ENCODING);
@@ -81,6 +81,6 @@ async function readUUIDFromFile(filepath: string): Promise<string | undefined> {
   }
 }
 
-async function writeUUIDToFile(filepath: string, uuidValue: string) {
+async function writeUuidToFile(filepath: string, uuidValue: string) {
   return await writeFile(filepath, uuidValue, { encoding: FILE_ENCODING });
 }

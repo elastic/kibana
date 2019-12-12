@@ -52,7 +52,7 @@ const mockReadFile = ({
   });
 };
 
-const getConfigService = (serverUUID: string | undefined) => {
+const getConfigService = (serverUuid: string | undefined) => {
   const configService = configServiceMock.create();
   configService.atPath.mockImplementation(path => {
     if (path === 'path') {
@@ -62,7 +62,7 @@ const getConfigService = (serverUUID: string | undefined) => {
     }
     if (path === 'server') {
       return new BehaviorSubject({
-        uuid: serverUUID,
+        uuid: serverUuid,
       });
     }
     return new BehaviorSubject({});
