@@ -25,7 +25,7 @@ The first thing to do in *Discover* is to select an <<index-patterns, index patt
 to define the data to work with. The current index pattern and options for
 changing it are in the upper left.
 If you haven't yet created an index pattern, you can add a <<add-sample-data, sample data set>>,
-which has pre-built index patterns.
+which has a pre-built index pattern.
 
 [float]
 === Set a time filter
@@ -50,7 +50,7 @@ Lucene query syntax, you can switch to it from the KQL menu.
 [float]
 === Filter your search results
 
-Next, you'll want narrow your search results to a more manageable set of data.
+Next, you'll want narrow your search results to a more manageable data set.
 When you click on a name in the field list, you'll see
 the top five values for the field, the number of documents that contain the field,
 and the percentage of documents that contain each value. From this view, you can
@@ -67,9 +67,10 @@ image::images/filter-field.png[height=317]
 
 The sortable documents table
 lists the documents that match your search.
-By default, the table shows all fields and values in each document, which can be a bit overwhelming.
-To zero in on specific a field, click *add* next to the field name in the left sidebar,
-and a column for that field appears in the table.
+By default, the table includes a column for the time field and a second column that
+lists every field and its value, which can be overwhelming to go through.
+To zero in on specific a field, click *add* next to the field name in the left sidebar.
+The first field you add replaces the _source column.
 For example, if you add the `clientip`, `response`, and `request` fields,
 the document table will include columns for those three fields.
 
