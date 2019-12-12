@@ -7,14 +7,14 @@
 import React from 'react';
 
 import { ColumnarPage } from '../../../components/page';
-// import { LogEntryCategoriesPageContent } from './page_content';
+import { LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
 
 export const LogEntryCategoriesPage = () => {
   return (
     <LogEntryCategoriesPageProviders>
       <ColumnarPage data-test-subj="logsLogEntryCategoriesPage">
-        {/* <LogEntryCategoriesPageContent /> */}
+        <LogEntryCategoriesPageContent />
       </ColumnarPage>
     </LogEntryCategoriesPageProviders>
   );
