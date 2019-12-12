@@ -16,7 +16,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { i18n } from '@kbn/i18n';
 
-export * from './get_time_zone_from_settings';
-export * from './get_index_pattern_from_filter';
-export * from './get_display_value';
+/**
+ * An error message to be used when the user rejects a confirm overwrite.
+ * @type {string}
+ */
+export const OVERWRITE_REJECTED = i18n.translate(
+  'common.ui.savedObjects.overwriteRejectedDescription',
+  {
+    defaultMessage: 'Overwrite confirmation was rejected',
+  }
+);
+/**
+ * An error message to be used when the user rejects a confirm save with duplicate title.
+ * @type {string}
+ */
+export const SAVE_DUPLICATE_REJECTED = i18n.translate(
+  'common.ui.savedObjects.saveDuplicateRejectedDescription',
+  {
+    defaultMessage: 'Save with duplicate title confirmation was rejected',
+  }
+);
