@@ -25,14 +25,14 @@ import xmlBuilder from 'xmlbuilder';
 import { makeJunitReportPath } from '@kbn/test';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
-import { escapeCdata } from '../';
+import { escapeCdata } from '../xml';
 
 const dateNow = Date.now.bind(Date);
 
 export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
-    rootDirectory = dirname(require.resolve('../../../../package.json')),
+    rootDirectory = dirname(require.resolve('../../../package.json')),
     getTestMetadata = () => ({}),
   } = options;
 
