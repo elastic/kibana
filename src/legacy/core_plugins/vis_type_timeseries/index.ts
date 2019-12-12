@@ -36,18 +36,36 @@ const metricsPluginInitializer: LegacyPluginInitializer = ({ Plugin }: LegacyPlu
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: [resolve(__dirname, 'public/legacy')],
       injectDefaultVars: server => ({}),
+      mappings: {
+        'tsvb-validation-telemetry': {
+          properties: {
+            failedRequests: {
+              type: 'long',
+            },
+          },
+        },
+      },
+      savedObjectSchemas: {
+        'tsvb-validation-telemetry': {
+          isNamespaceAgnostic: true,
+        },
+      },
     },
-    init: (server: Legacy.Server) => {
+    init: async (server: Legacy.Server) => {
       const initializerContext = {} as PluginInitializerContext;
-      const core = { http: { server } } as CoreSetup & CustomCoreSetup;
+      const core = {
+        ...server.newPlatform.setup.core,
+        http: { ...server.newPlatform.setup.core.http, server },
+      } as CoreSetup & CustomCoreSetup;
 
-      plugin(initializerContext).setup(core);
+      plugin(initializerContext).setup(core, server.newPlatform.setup.plugins);
     },
     config(Joi: any) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         chartResolution: Joi.number().default(150),
         minimumBucketSize: Joi.number().default(10),
+        validateRequest: Joi.boolean().default(false),
       }).default();
     },
   } as Legacy.PluginSpecOptions);

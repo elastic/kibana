@@ -162,7 +162,7 @@ const seriesItems = Joi.object({
   var_name: stringOptionalNullable,
 });
 
-export const visPayload = {
+export const visPayloadSchema = Joi.object({
   filters: arrayNullable,
   panels: Joi.array().items(
     Joi.object({
@@ -243,4 +243,4 @@ export const visPayload = {
     min: stringRequired,
     max: stringRequired,
   }).required(),
-};
+});

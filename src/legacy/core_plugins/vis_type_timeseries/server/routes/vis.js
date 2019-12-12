@@ -18,21 +18,31 @@
  */
 
 import { getVisData } from '../lib/get_vis_data';
-import { visPayload } from './post_vis_schema';
+import { visPayloadSchema } from './post_vis_schema';
 import Boom from 'boom';
-import Joi from 'joi';
+import { i18n } from '@kbn/i18n';
 
-const requestPayloadSchema = {
-  payload: Joi.object({ ...visPayload })
-};
-export const visDataRoutes = server => {
+export const visDataRoutes = (server, { logFailedValidation }) => {
   server.route({
     path: '/api/metrics/vis/data',
     method: 'POST',
-    options: {
-      validate: requestPayloadSchema,
-    },
     handler: async req => {
+      const { error } = visPayloadSchema.validate(req.payload);
+      if (error && server.config().get('metrics.validateRequest')) {
+        logFailedValidation();
+        server.log(['tsvb', 'error'], `Request validation error: ${error}. To disable validation, set 'metrics.validateRequest' to false.`);
+        throw new Boom(
+          i18n.translate('visTypeTimeseries.validationError', {
+            defaultMessage:
+              // eslint-disable-next-line max-len
+              'Request validation failed. To disable request validation please contact your system administrator. Detailed error message: {error}',
+            values: {
+              error,
+            },
+          }),
+          { statusCode: 400 }
+        );
+      }
       try {
         return await getVisData(req);
       } catch (err) {

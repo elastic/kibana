@@ -28,6 +28,8 @@ import { visDataRoutes } from './routes/vis';
 import { SearchStrategiesRegister } from './lib/search_strategies/search_strategies_register';
 // @ts-ignore
 import { getVisData } from './lib/get_vis_data';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/server';
+import { ValidationTelemetryService } from './validation_telemetry/validation_telemetry_service';
 
 // TODO: Remove as CoreSetup is completed.
 export interface CustomCoreSetup {
@@ -38,16 +40,26 @@ export interface CustomCoreSetup {
 
 export class MetricsServerPlugin {
   public initializerContext: PluginInitializerContext;
+  private validationTelementryService: ValidationTelemetryService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
+    this.validationTelementryService = new ValidationTelemetryService();
   }
 
-  public setup(core: CoreSetup & CustomCoreSetup) {
+  public async setup(
+    core: CoreSetup & CustomCoreSetup,
+    deps: { usageCollection?: UsageCollectionSetup }
+  ) {
     const { http } = core;
 
+    const validationTelemetrySetup = await this.validationTelementryService.setup(core, {
+      ...deps,
+      kibanaIndex: http.server.config().get('kibana.index'),
+    });
+
     fieldsRoutes(http.server);
-    visDataRoutes(http.server);
+    visDataRoutes(http.server, validationTelemetrySetup);
 
     // Expose getVisData to allow plugins to use TSVB's backend for metrics
     http.server.expose('getVisData', getVisData);

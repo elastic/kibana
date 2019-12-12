@@ -59,6 +59,9 @@ export const metricsRequestHandler = async ({ uiState, timeRange, filters, query
         ...resp,
       };
     } catch (error) {
+      if (error.body && error.body.message) {
+        return Promise.reject(new Error(error.body.message));
+      }
       return Promise.reject(error);
     }
   }
