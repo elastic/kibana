@@ -48,6 +48,16 @@ const nullValueLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFie
 
 const mapIndexToValue = ['true', true, 'false', false];
 
+const indexOptionsConfig = {
+  label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
+    defaultMessage: 'Index options',
+  }),
+  type: FIELD_TYPES.SUPER_SELECT,
+  helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
+    defaultMessage: 'Information that should be stored in the index.',
+  }),
+};
+
 export const PARAMETERS_DEFINITION = {
   name: {
     fieldConfig: {
@@ -426,14 +436,20 @@ export const PARAMETERS_DEFINITION = {
   },
   index_options: {
     fieldConfig: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.indexOptionsLabel', {
-        defaultMessage: 'Index options',
-      }),
+      ...indexOptionsConfig,
       defaultValue: 'positions',
-      type: FIELD_TYPES.SUPER_SELECT,
-      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.indexOptionsHelpText', {
-        defaultMessage: 'Information that should be stored in the index.',
-      }),
+    },
+  },
+  index_options_keyword: {
+    fieldConfig: {
+      ...indexOptionsConfig,
+      defaultValue: 'docs',
+    },
+  },
+  index_options_flattened: {
+    fieldConfig: {
+      ...indexOptionsConfig,
+      defaultValue: 'docs',
     },
   },
   eager_global_ordinals: {
@@ -487,7 +503,7 @@ export const PARAMETERS_DEFINITION = {
         defaultMessage: 'Field path',
       }),
       helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.pathHelpText', {
-        defaultMessage: 'The path to the target field.',
+        defaultMessage: 'The absolute path from the root to the target field.',
       }),
       validations: [
         {
@@ -572,10 +588,12 @@ export const PARAMETERS_DEFINITION = {
   },
   ignore_above: {
     fieldConfig: {
-      defaultValue: 2147483647,
+      // Protects against Lucene’s term byte-length limit of 32766. UTF-8 characters may occupy at
+      // most 4 bytes, so 32766 / 4 = 8191 characters.
+      defaultValue: 8191,
       type: FIELD_TYPES.NUMBER,
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreAboveFieldLabel', {
-        defaultMessage: 'String length limit',
+        defaultMessage: 'Character length limit',
       }),
       formatters: [toInt],
       validations: [

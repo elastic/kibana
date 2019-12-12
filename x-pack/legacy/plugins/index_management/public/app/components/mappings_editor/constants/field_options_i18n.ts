@@ -91,7 +91,8 @@ export const FIELD_OPTIONS_TEXTS: { [key in FieldOption]: Optioni18n } = {
     description: i18n.translate(
       'xpack.idxMgmt.mappingsEditor.formSelect.indexOptions.docNumberDescription',
       {
-        defaultMessage: 'Only the doc number is indexed.',
+        defaultMessage:
+          'Index only the document ID. Used to verify the existence of a term in a field.',
       }
     ),
   },
