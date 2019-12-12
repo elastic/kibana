@@ -22,7 +22,7 @@ import {
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 import { PARAMETERS_DEFINITION } from '../../../../constants';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'boost':
     case 'ignore_malformed': {
@@ -87,7 +87,7 @@ export const NumericType = ({ field }: Props) => {
                   'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
               }
             )}
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
           >
             <UseField
               path="null_value"
@@ -97,10 +97,10 @@ export const NumericType = ({ field }: Props) => {
           </NullValueParameter>
 
           {/* copy_to */}
-          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
           {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

@@ -29,7 +29,7 @@ export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
       description={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldDescription', {
         defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
       })}
-      toggleDefaultValue={defaultToggleValue}
+      defaultToggleValue={defaultToggleValue}
     >
       <FormDataProvider pathsToWatch="term_vector">
         {formData => (

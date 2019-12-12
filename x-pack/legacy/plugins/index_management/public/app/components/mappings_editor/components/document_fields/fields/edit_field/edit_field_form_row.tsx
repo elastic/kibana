@@ -22,7 +22,7 @@ type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 interface Props {
   title: JSX.Element;
   description?: string | JSX.Element;
-  toggleDefaultValue?: boolean;
+  defaultToggleValue?: boolean;
   formFieldPath?: ParameterName;
   children?: React.ReactNode | ChildrenFunc;
   withToggle?: boolean;
@@ -32,7 +32,7 @@ export const EditFieldFormRow = React.memo(
   ({
     title,
     description,
-    toggleDefaultValue,
+    defaultToggleValue,
     formFieldPath,
     children,
     withToggle = true,
@@ -42,8 +42,8 @@ export const EditFieldFormRow = React.memo(
     const initialVisibleState =
       withToggle === false
         ? true
-        : toggleDefaultValue !== undefined
-        ? toggleDefaultValue
+        : defaultToggleValue !== undefined
+        ? defaultToggleValue
         : formFieldPath !== undefined
         ? (getFieldConfig(formFieldPath).defaultValue! as boolean)
         : false;

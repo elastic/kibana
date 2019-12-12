@@ -16,7 +16,7 @@ import { CoerceParameter, IgnoreMalformedParameter } from '../../field_parameter
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
 
-const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
 
   switch (param) {
@@ -77,7 +77,7 @@ export const GeoShapeType = ({ field }: Props) => {
                 'Define how to interpret vertex order for polygons / multipolygons. This parameter defines one of two coordinate system rules (Right-hand or Left-hand).',
             }
           )}
-          toggleDefaultValue={getDefaultValueToggle('orientation', field.source)}
+          defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
         >
           <UseField
             path="orientation"

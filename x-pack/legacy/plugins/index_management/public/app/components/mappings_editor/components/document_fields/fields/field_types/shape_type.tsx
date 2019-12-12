@@ -12,7 +12,7 @@ import { getFieldConfig } from '../../../../lib';
 import { UseField, Field } from '../../../../shared_imports';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
-const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
 
   switch (param) {
@@ -53,7 +53,7 @@ export const ShapeType = ({ field }: Props) => {
               'Define how to interpret vertex order for polygons / multipolygons. This parameter defines one of two coordinate system rules (Right-hand or Left-hand).',
           }
         )}
-        toggleDefaultValue={getDefaultValueToggle('orientation', field.source)}
+        defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
       >
         <UseField
           path="orientation"
@@ -95,7 +95,7 @@ export const ShapeType = ({ field }: Props) => {
           }
         )}
         formFieldPath="ignore_z_value"
-        toggleDefaultValue={getDefaultValueToggle('ignore_z_value', field.source)}
+        defaultToggleValue={getDefaultToggleValue('ignore_z_value', field.source)}
       />
 
       {/* coerce */}
@@ -108,7 +108,7 @@ export const ShapeType = ({ field }: Props) => {
             'If enabled, unclosed linear rings in polygons will be automatically closed',
         })}
         formFieldPath="coerce"
-        toggleDefaultValue={getDefaultValueToggle('coerce', field.source)}
+        defaultToggleValue={getDefaultToggleValue('coerce', field.source)}
       />
     </EditFieldSection>
   );

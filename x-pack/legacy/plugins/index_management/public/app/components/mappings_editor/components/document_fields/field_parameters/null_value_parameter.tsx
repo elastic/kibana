@@ -31,7 +31,7 @@ export const NullValueParameter = ({ defaultToggleValue, description, children }
               'Accepts a string value which is substituted for any explicit null values.',
           })
     }
-    toggleDefaultValue={defaultToggleValue}
+    defaultToggleValue={defaultToggleValue}
   >
     {children ? (
       children

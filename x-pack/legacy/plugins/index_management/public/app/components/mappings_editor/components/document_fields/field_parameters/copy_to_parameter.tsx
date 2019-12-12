@@ -24,7 +24,7 @@ export const CopyToParameter = ({ defaultToggleValue }: Props) => (
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.copyToFieldDescription', {
       defaultMessage: 'Whether to copy the values of multiple fields into a group field.',
     })}
-    toggleDefaultValue={defaultToggleValue}
+    defaultToggleValue={defaultToggleValue}
   >
     <UseField path="copy_to" config={getFieldConfig('copy_to')} component={Field} />
   </EditFieldFormRow>

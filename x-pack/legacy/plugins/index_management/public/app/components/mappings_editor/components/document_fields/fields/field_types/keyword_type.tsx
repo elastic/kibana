@@ -24,7 +24,7 @@ import {
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'boost':
     case 'similarity':
@@ -65,7 +65,7 @@ export const KeywordType = ({ field }: Props) => {
           description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
             defaultMessage: 'How to pre-process the keyword prior to indexing.',
           })}
-          toggleDefaultValue={getDefaultValueToggle('normalizer', field.source)}
+          defaultToggleValue={getDefaultToggleValue('normalizer', field.source)}
         >
           {isOn =>
             isOn === false && (
@@ -79,7 +79,7 @@ export const KeywordType = ({ field }: Props) => {
         <EditFieldSection>
           {/* null_value */}
           <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
           />
 
           {/* eager_global_ordinals */}
@@ -96,7 +96,7 @@ export const KeywordType = ({ field }: Props) => {
                 defaultMessage: 'Do not index any string longer than this value.',
               }
             )}
-            toggleDefaultValue={getDefaultValueToggle('ignore_above', field.source)}
+            defaultToggleValue={getDefaultToggleValue('ignore_above', field.source)}
           >
             <UseField
               path="ignore_above"
@@ -112,7 +112,7 @@ export const KeywordType = ({ field }: Props) => {
         <EditFieldSection>
           {/* similarity */}
           <SimilarityParameter
-            defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
+            defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
           />
 
           {/* split_queries_on_whitespace */}
@@ -134,10 +134,10 @@ export const KeywordType = ({ field }: Props) => {
           />
 
           {/* copy_to */}
-          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
           {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

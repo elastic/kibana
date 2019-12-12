@@ -13,7 +13,7 @@ import { UseField, Field } from '../../../../shared_imports';
 import { AnalyzersParameter } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'max_input_length': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
@@ -47,7 +47,7 @@ export const CompletionType = ({ field }: Props) => {
             defaultMessage: 'Limits the length of a single input.',
           }
         )}
-        toggleDefaultValue={getDefaultValueToggle('max_input_length', field.source)}
+        defaultToggleValue={getDefaultToggleValue('max_input_length', field.source)}
       >
         <UseField
           path="max_input_length"

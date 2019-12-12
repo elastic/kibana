@@ -22,7 +22,7 @@ import {
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'locale':
     case 'format':
@@ -54,7 +54,7 @@ export const DateType = ({ field }: Props) => {
         <EditFieldSection>
           {/* null_value */}
           <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.date.nullValueFieldDescription',
               {
@@ -74,7 +74,7 @@ export const DateType = ({ field }: Props) => {
             description={i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldDescription', {
               defaultMessage: 'The locale to use when parsing dates.',
             })}
-            toggleDefaultValue={getDefaultValueToggle('locale', field.source)}
+            defaultToggleValue={getDefaultToggleValue('locale', field.source)}
           >
             <UseField path="locale" config={getFieldConfig('locale')} component={Field} />
           </EditFieldFormRow>
@@ -82,11 +82,11 @@ export const DateType = ({ field }: Props) => {
           {/* format */}
           <FormatParameter
             defaultValue={field.source.format}
-            defaultToggleValue={getDefaultValueToggle('format', field.source)}
+            defaultToggleValue={getDefaultToggleValue('format', field.source)}
           />
 
           {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

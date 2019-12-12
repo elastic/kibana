@@ -40,7 +40,7 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
       description={i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldDescription', {
         defaultMessage: 'The date format(s) that can be parsed.',
       })}
-      toggleDefaultValue={defaultToggleValue}
+      defaultToggleValue={defaultToggleValue}
     >
       <UseField path="format" config={getFieldConfig('format')}>
         {formatField => {

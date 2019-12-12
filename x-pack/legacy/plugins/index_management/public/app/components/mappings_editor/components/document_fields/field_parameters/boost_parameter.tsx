@@ -23,7 +23,7 @@ export const BoostParameter = ({ defaultToggleValue }: Props) => (
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.boostFieldDescription', {
       defaultMessage: 'Mapping field-level query time boosting.',
     })}
-    toggleDefaultValue={defaultToggleValue}
+    defaultToggleValue={defaultToggleValue}
   >
     {/* Boost level */}
     <UseField

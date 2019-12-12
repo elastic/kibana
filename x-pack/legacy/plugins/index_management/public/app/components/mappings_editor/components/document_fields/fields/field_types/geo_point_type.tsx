@@ -13,7 +13,7 @@ import { getFieldConfig } from '../../../../lib';
 import { IgnoreMalformedParameter, NullValueParameter } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'null_value': {
       return field.null_value !== undefined;
@@ -57,7 +57,7 @@ export const GeoPointType = ({ field }: Props) => {
 
       {/* null_value */}
       <NullValueParameter
-        defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+        defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.geoPoint.nullValueFieldDescription',
           {
