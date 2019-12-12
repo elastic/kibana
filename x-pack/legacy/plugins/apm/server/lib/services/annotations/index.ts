@@ -8,7 +8,8 @@ import { Annotation, AnnotationType } from '../../../../common/annotations';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import {
   SERVICE_NAME,
-  SERVICE_ENVIRONMENT
+  SERVICE_ENVIRONMENT,
+  PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
@@ -26,6 +27,7 @@ export async function getServiceAnnotations({
   const { start, end, client, indices } = setup;
 
   const filter: ESFilter[] = [
+    { term: { [PROCESSOR_EVENT]: 'transaction' } },
     { range: rangeFilter(start, end) },
     { term: { [SERVICE_NAME]: serviceName } }
   ];
@@ -40,6 +42,7 @@ export async function getServiceAnnotations({
         index: indices['apm_oss.transactionIndices'],
         body: {
           size: 0,
+          track_total_hits: false,
           query: {
             bool: {
               filter
@@ -65,13 +68,13 @@ export async function getServiceAnnotations({
             size: 0,
             query: {
               bool: {
-                filter: [
-                  {
+                filter: filter
+                  .filter(esFilter => !Object.keys(esFilter).includes('range'))
+                  .concat({
                     term: {
                       [SERVICE_VERSION]: version
                     }
-                  }
-                ]
+                  })
               }
             },
             aggs: {
@@ -80,7 +83,8 @@ export async function getServiceAnnotations({
                   field: '@timestamp'
                 }
               }
-            }
+            },
+            track_total_hits: false
           }
         });
 
