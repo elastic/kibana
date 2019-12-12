@@ -391,7 +391,6 @@ export class ESSearchSource extends AbstractESSource {
     try {
       const geoField = await this._getGeoField();
       featureCollection = hitsToGeoJson(hits, flattenHit, geoField.name, geoField.type);
-      console.log(featureCollection);
     } catch(error) {
       throw new Error(
         i18n.translate('xpack.maps.source.esSearch.convertToGeoJsonErrorMsg', {
