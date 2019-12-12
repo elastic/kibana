@@ -26,16 +26,17 @@ export function createCspCollector(server: Server) {
     type: 'csp',
     isReady: () => true,
     async fetch() {
-      const config = server.config();
-      const { header } = new CspConfig();
+      const { strict, warnLegacyBrowsers, header } = server.newPlatform.setup.core.http.csp;
+      // This is used to get the default CSP header string.
+      const { header: defaultCspHeader } = new CspConfig();
 
       return {
-        strict: config.get('csp.strict'),
-        warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
+        strict,
+        warnLegacyBrowsers,
         // It's important that we do not send the value of csp.header here as it
         // can be customized with values that can be identifiable to given
         // installs, such as URLs
-        rulesChangedFromDefault: header !== config.get('csp.header'),
+        rulesChangedFromDefault: header !== defaultCspHeader,
       };
     },
   };

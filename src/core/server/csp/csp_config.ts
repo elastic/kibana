@@ -29,25 +29,25 @@ export class CspConfig {
   /**
    * The CSP rules used for Kibana.
    */
-  public rules: string[];
+  public readonly rules: string[];
 
   /**
    * Specify whether browsers that do not support CSP should be
    * able to use Kibana. Use `true` to block and `false` to allow.
    */
-  public strict: boolean;
+  public readonly strict: boolean;
 
   /**
    * Specify whether users with legacy browsers should be warned
    * about their lack of Kibana security compliance.
    */
-  public warnLegacyBrowsers: boolean;
+  public readonly warnLegacyBrowsers: boolean;
 
   /**
    * The CSP rules in a formatted directives string for use
    * in a `Content-Security-Policy` header.
    */
-  public header!: string;
+  public readonly header: string;
 
   /**
    * Returns the default CSP configuration when passed with no config
@@ -58,9 +58,6 @@ export class CspConfig {
     this.rules = source.rules;
     this.strict = source.strict;
     this.warnLegacyBrowsers = source.warnLegacyBrowsers;
-    Object.defineProperty(this, 'header', {
-      enumerable: true,
-      get: () => this.rules.join('; '),
-    });
+    this.header = source.rules.join('; ');
   }
 }
