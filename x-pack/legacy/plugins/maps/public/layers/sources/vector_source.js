@@ -101,7 +101,10 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   async getFields() {
-    return [];
+    return [
+      ...await this.getDateFields(),
+      ...await this.getNumberFields()
+    ];
   }
 
   async getLeftJoinFields() {

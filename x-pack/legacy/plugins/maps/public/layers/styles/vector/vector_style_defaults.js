@@ -102,7 +102,7 @@ export function getDefaultStaticProperties(mapColors = []) {
     [VECTOR_STYLES.LABEL_SIZE]: {
       type: VectorStyle.STYLE_TYPE.STATIC,
       options: {
-        size: 8
+        size: 14
       }
     },
   };
