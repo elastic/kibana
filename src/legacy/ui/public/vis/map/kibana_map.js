@@ -22,7 +22,7 @@ import { createZoomWarningMsg } from './map_messages';
 import L from 'leaflet';
 import $ from 'jquery';
 import _ from 'lodash';
-import { zoomToPrecision } from '../../utils/zoom_to_precision';
+import { zoomToPrecision } from './zoom_to_precision';
 import { i18n } from '@kbn/i18n';
 import { ORIGIN } from '../../../../core_plugins/tile_map/common/origin';
 

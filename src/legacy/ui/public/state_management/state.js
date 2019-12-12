@@ -316,6 +316,27 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     return this._urlParam;
   };
 
+  /**
+   * Returns an object with each property name and value corresponding to the entries in this collection
+   * excluding fields started from '$', '_' and all methods
+   *
+   * @return {object}
+   */
+  State.prototype.toObject = function () {
+    return _.omit(this, (value, key) => {
+      return key.charAt(0) === '$' || key.charAt(0) === '_' || _.isFunction(value);
+    });
+  };
+
+  /** Alias for method 'toObject'
+   *
+   * @obsolete Please use 'toObject' method instead
+   * @return {object}
+   */
+  State.prototype.toJSON = function () {
+    return this.toObject();
+  };
+
   return State;
 
 }

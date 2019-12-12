@@ -4,25 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { render, wait } from '@testing-library/react';
 import React from 'react';
-import { render } from '@testing-library/react';
-import { delay, tick } from '../utils/testHelpers';
+import { delay, MockApmPluginContextWrapper } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
-import { KibanaCoreContext } from '../../../observability/public/context/kibana_core';
-import { LegacyCoreStart } from 'kibana/public';
 
-// Wrap the hook with a provider so it can useKibanaCore
-const wrapper = ({ children }: { children?: React.ReactNode }) => (
-  <KibanaCoreContext.Provider
-    value={
-      ({
-        notifications: { toasts: { addWarning: () => {} } }
-      } as unknown) as LegacyCoreStart
-    }
-  >
-    {children}
-  </KibanaCoreContext.Provider>
-);
+const wrapper = MockApmPluginContextWrapper;
 
 async function asyncFn(name: string, ms: number) {
   await delay(ms);
@@ -76,7 +63,8 @@ describe('when simulating race condition', () => {
 
   it('should render "Hello from Peter" after 200ms', async () => {
     jest.advanceTimersByTime(200);
-    await tick();
+
+    await wait();
 
     expect(renderSpy).lastCalledWith({
       data: 'Hello from Peter',
@@ -87,7 +75,7 @@ describe('when simulating race condition', () => {
 
   it('should render "Hello from Peter" after 600ms', async () => {
     jest.advanceTimersByTime(600);
-    await tick();
+    await wait();
 
     expect(renderSpy).lastCalledWith({
       data: 'Hello from Peter',
@@ -98,7 +86,7 @@ describe('when simulating race condition', () => {
 
   it('should should NOT have rendered "Hello from John" at any point', async () => {
     jest.advanceTimersByTime(600);
-    await tick();
+    await wait();
 
     expect(renderSpy).not.toHaveBeenCalledWith({
       data: 'Hello from John',
@@ -109,7 +97,7 @@ describe('when simulating race condition', () => {
 
   it('should send and receive calls in the right order', async () => {
     jest.advanceTimersByTime(600);
-    await tick();
+    await wait();
 
     expect(requestCallOrder).toEqual([
       ['request', 'John', 500],

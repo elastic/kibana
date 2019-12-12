@@ -41,7 +41,9 @@ export const NameConfigurationPanel = ({
     <EuiDescribedFormGroup
       idAria="name"
       title={
-        <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
+        <h4>
+          <FormattedMessage id="xpack.infra.sourceConfiguration.nameLabel" defaultMessage="Name" />
+        </h4>
       }
       description={
         <FormattedMessage

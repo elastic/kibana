@@ -53,7 +53,7 @@ export const useNextAndPrevious = ({
       const initialTimeKey = getUniqueLogEntryKey(entries[initialIndex]);
       setCurrentTimeKey(initialTimeKey);
     }
-  }, [currentTimeKey, entries, setCurrentTimeKey]);
+  }, [currentTimeKey, entries, setCurrentTimeKey, visibleMidpoint]);
 
   const indexOfCurrentTimeKey = useMemo(() => {
     if (currentTimeKey && entries.length > 0) {

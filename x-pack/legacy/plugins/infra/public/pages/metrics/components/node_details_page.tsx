@@ -41,7 +41,7 @@ interface Props {
   isAutoReloading: boolean;
   refreshInterval: number;
   sideNav: NavItem[];
-  metadata: InfraMetadata | null;
+  metadata: InfraMetadata;
   addNavItem(item: NavItem): void;
   setRefreshInterval(refreshInterval: number): void;
   setAutoReload(isAutoReloading: boolean): void;
@@ -49,10 +49,6 @@ interface Props {
   setTimeRange(timeRange: MetricsTimeInput): void;
 }
 export const NodeDetailsPage = (props: Props) => {
-  if (!props.metadata) {
-    return null;
-  }
-
   const { parsedTimeRange } = props;
   const { metrics, loading, makeRequest, error } = useNodeDetails(
     props.requiredMetrics,
@@ -65,11 +61,11 @@ export const NodeDetailsPage = (props: Props) => {
 
   const refetch = useCallback(() => {
     makeRequest();
-  }, []);
+  }, [makeRequest]);
 
   useEffect(() => {
     makeRequest();
-  }, [parsedTimeRange]);
+  }, [makeRequest, parsedTimeRange]);
 
   if (error) {
     return <PageError error={error} name={props.name} />;
