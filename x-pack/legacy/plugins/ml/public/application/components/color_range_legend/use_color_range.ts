@@ -9,19 +9,22 @@ import d3 from 'd3';
 import euiThemeLight from '@elastic/eui/dist/eui_theme_light.json';
 import euiThemeDark from '@elastic/eui/dist/eui_theme_dark.json';
 
+import { i18n } from '@kbn/i18n';
+
 import { useUiChromeContext } from '../../contexts/ui/use_ui_chrome_context';
 
 /**
  * Custom color scale factory that takes the amount of feature influencers
  * into account to adjust the contrast of the color range. This is used for
  * color coding for outlier detection where the amount of feature influencers
- * affects the threshold from which the influencers value can actually be considered
- * influental.
+ * affects the threshold from which the influencers value can actually be
+ * considered influential.
+ *
  * @param n number of influencers
  * @returns a function suitable as a preprocessor for d3.scale.linear()
  */
 export const influencerColorScaleFactory = (n: number) => (t: number) => {
-  // for 1 influencers or less we fall back to a plain linear scale.
+  // for 1 influencer or less we fall back to a plain linear scale.
   if (n <= 1) {
     return t;
   }
@@ -45,9 +48,24 @@ export enum COLOR_RANGE_SCALE {
  * Color range scale options in the format for EuiSelect's options prop.
  */
 export const colorRangeScaleOptions = [
-  { value: COLOR_RANGE_SCALE.LINEAR, text: 'Linear' },
-  { value: COLOR_RANGE_SCALE.INFLUENCER, text: 'Influencer custom scale' },
-  { value: COLOR_RANGE_SCALE.SQRT, text: 'Sqrt' },
+  {
+    value: COLOR_RANGE_SCALE.LINEAR,
+    text: i18n.translate('xpack.ml.components.colorRangeLegend.linearScaleLabel', {
+      defaultMessage: 'Linear',
+    }),
+  },
+  {
+    value: COLOR_RANGE_SCALE.INFLUENCER,
+    text: i18n.translate('xpack.ml.components.colorRangeLegend.influencerScaleLabel', {
+      defaultMessage: 'Influencer custom scale',
+    }),
+  },
+  {
+    value: COLOR_RANGE_SCALE.SQRT,
+    text: i18n.translate('xpack.ml.components.colorRangeLegend.sqrtScaleLabel', {
+      defaultMessage: 'Sqrt',
+    }),
+  },
 ];
 
 export enum COLOR_RANGE {
@@ -62,11 +80,36 @@ export enum COLOR_RANGE {
  * Color range options in the format for EuiSelect's options prop.
  */
 export const colorRangeOptions = [
-  { value: COLOR_RANGE.BLUE, text: 'Blue' },
-  { value: COLOR_RANGE.RED, text: 'Red' },
-  { value: COLOR_RANGE.RED_GREEN, text: 'Red - Green' },
-  { value: COLOR_RANGE.GREEN_RED, text: 'Green - Red' },
-  { value: COLOR_RANGE.YELLOW_GREEN_BLUE, text: 'Yellow - Green - Blue' },
+  {
+    value: COLOR_RANGE.BLUE,
+    text: i18n.translate('xpack.ml.components.colorRangeLegend.blueColorRangeLabel', {
+      defaultMessage: 'Blue',
+    }),
+  },
+  {
+    value: COLOR_RANGE.RED,
+    text: i18n.translate('xpack.ml.components.colorRangeLegend.redColorRangeLabel', {
+      defaultMessage: 'Red',
+    }),
+  },
+  {
+    value: COLOR_RANGE.RED_GREEN,
+    text: i18n.translate('xpack.ml.components.colorRangeLegend.redGreenColorRangeLabel', {
+      defaultMessage: 'Red - Green',
+    }),
+  },
+  {
+    value: COLOR_RANGE.GREEN_RED,
+    text: i18n.translate('xpack.ml.components.colorRangeLegend.greenRedColorRangeLabel', {
+      defaultMessage: 'Green - Red',
+    }),
+  },
+  {
+    value: COLOR_RANGE.YELLOW_GREEN_BLUE,
+    text: i18n.translate('xpack.ml.components.colorRangeLegend.yellowGreenBlueColorRangeLabel', {
+      defaultMessage: 'Yellow - Green - Blue',
+    }),
+  },
 ];
 
 /**

@@ -140,12 +140,12 @@ export const ColorRangeLegend: FC<ColorRangeLegendProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiText size="xs">
           <strong>{title}</strong>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <svg ref={d3Container} />
       </EuiFlexItem>
     </EuiFlexGroup>
