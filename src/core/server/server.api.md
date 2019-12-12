@@ -1748,6 +1748,13 @@ export interface SessionStorageFactory<T> {
     asScoped: (request: KibanaRequest) => SessionStorage<T>;
 }
 
+// @public (undocumented)
+export type SharedGlobalConfig = RecursiveReadonly_2<{
+    kibana: Pick<KibanaConfigType_2, typeof SharedGlobalConfigKeys.kibana[number]>;
+    elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
+    path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+}>;
+
 // @public
 export interface UiSettingsParams {
     category?: string[];
@@ -1785,6 +1792,9 @@ export const validBodyOutput: readonly ["data", "stream"];
 // 
 // src/core/server/http/router/response.ts:316:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
 // src/core/server/plugins/plugins_service.ts:43:5 - (ae-forgotten-export) The symbol "InternalPluginInfo" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:228:15 - (ae-forgotten-export) The symbol "SharedGlobalConfig" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:213:3 - (ae-forgotten-export) The symbol "KibanaConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:213:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:214:3 - (ae-forgotten-export) The symbol "ElasticsearchConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:215:3 - (ae-forgotten-export) The symbol "PathConfigType" needs to be exported by the entry point index.d.ts
 
 ```

@@ -5,10 +5,8 @@
  */
 
 import { first } from 'lodash';
-import {
-  InfraFrameworkRequest,
-  InfraBackendFrameworkAdapter,
-} from '../../../lib/adapters/framework';
+import { RequestHandlerContext } from 'src/core/server';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { InfraNodeType } from '../../../graphql/types';
 import { InfraMetadataInfo } from '../../../../common/http_api/metadata_api';
@@ -17,8 +15,8 @@ import { CLOUD_METRICS_MODULES } from '../../../lib/constants';
 import { getIdFieldName } from './get_id_field_name';
 
 export const getNodeInfo = async (
-  framework: InfraBackendFrameworkAdapter,
-  req: InfraFrameworkRequest,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: 'host' | 'pod' | 'container'
@@ -31,7 +29,7 @@ export const getNodeInfo = async (
   if (nodeType === InfraNodeType.pod) {
     const kubernetesNodeName = await getPodNodeName(
       framework,
-      req,
+      requestContext,
       sourceConfiguration,
       nodeId,
       nodeType
@@ -39,7 +37,7 @@ export const getNodeInfo = async (
     if (kubernetesNodeName) {
       return getNodeInfo(
         framework,
-        req,
+        requestContext,
         sourceConfiguration,
         kubernetesNodeName,
         InfraNodeType.host
@@ -64,7 +62,7 @@ export const getNodeInfo = async (
     },
   };
   const response = await framework.callWithRequest<{ _source: InfraMetadataInfo }, {}>(
-    req,
+    requestContext,
     'search',
     params
   );

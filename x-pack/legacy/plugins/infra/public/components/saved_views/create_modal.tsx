@@ -23,11 +23,12 @@ import {
 } from '@elastic/eui';
 
 interface Props {
+  isInvalid: boolean;
   close(): void;
   save(name: string, shouldIncludeTime: boolean): void;
 }
 
-export const SavedViewCreateModal = ({ close, save }: Props) => {
+export const SavedViewCreateModal = ({ close, save, isInvalid }: Props) => {
   const [viewName, setViewName] = useState('');
   const [includeTime, setIncludeTime] = useState(false);
   const onCheckChange = useCallback(e => setIncludeTime(e.target.checked), []);
@@ -35,7 +36,6 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
 
   const saveView = useCallback(() => {
     save(viewName, includeTime);
-    close();
   }, [viewName, includeTime]);
 
   return (
@@ -52,6 +52,7 @@ export const SavedViewCreateModal = ({ close, save }: Props) => {
 
         <EuiModalBody>
           <EuiFieldText
+            isInvalid={isInvalid}
             placeholder={i18n.translate('xpack.infra.waffle.savedViews.viewNamePlaceholder', {
               defaultMessage: 'Name',
             })}

@@ -28,7 +28,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './edit_index_pattern.html';
 import { fieldWildcardMatcher } from 'ui/field_wildcard';
-import { IndexPatternListFactory } from 'ui/management/index_pattern_list';
+import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { SourceFiltersTable } from './source_filters_table';
@@ -58,13 +58,17 @@ function updateSourceFiltersTable($scope, $state) {
             filterFilter={$scope.fieldFilter}
             fieldWildcardMatcher={$scope.fieldWildcardMatcher}
             onAddOrRemoveFilter={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
+              $scope.editSections = $scope.editSectionsProvider(
+                $scope.indexPattern,
+                $scope.fieldFilter,
+                $scope.indexPatternListProvider
+              );
               $scope.refreshFilters();
               $scope.$apply();
             }}
           />
         </I18nContext>,
-        node,
+        node
       );
     });
   } else {
@@ -76,7 +80,6 @@ function destroySourceFiltersTable() {
   const node = document.getElementById(REACT_SOURCE_FILTERS_DOM_ELEMENT_ID);
   node && unmountComponentAtNode(node);
 }
-
 
 function updateScriptedFieldsTable($scope, $state) {
   if ($state.tab === 'scriptedFields') {
@@ -100,13 +103,17 @@ function updateScriptedFieldsTable($scope, $state) {
               getRouteHref: (obj, route) => $scope.kbnUrl.getRouteHref(obj, route),
             }}
             onRemoveField={() => {
-              $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, $scope.indexPatternListProvider);
+              $scope.editSections = $scope.editSectionsProvider(
+                $scope.indexPattern,
+                $scope.fieldFilter,
+                $scope.indexPatternListProvider
+              );
               $scope.refreshFilters();
               $scope.$apply();
             }}
           />
         </I18nContext>,
-        node,
+        node
       );
     });
   } else {
@@ -144,7 +151,7 @@ function updateIndexedFieldsTable($scope, $state) {
             }}
           />
         </I18nContext>,
-        node,
+        node
       );
     });
   } else {
@@ -157,34 +164,36 @@ function destroyIndexedFieldsTable() {
   node && unmountComponentAtNode(node);
 }
 
-uiRoutes
-  .when('/management/kibana/index_patterns/:indexPatternId', {
-    template,
-    k7Breadcrumbs: getEditBreadcrumbs,
-    resolve: {
-      indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
-        return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId))
-          .catch(redirectWhenMissing('/management/kibana/index_patterns'));
-      }
+uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
+  template,
+  k7Breadcrumbs: getEditBreadcrumbs,
+  resolve: {
+    indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
+      return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
+        redirectWhenMissing('/management/kibana/index_patterns')
+      );
     },
-  });
+  },
+});
 
-uiModules.get('apps/management')
+uiModules
+  .get('apps/management')
   .controller('managementIndexPatternsEdit', function (
     $scope, $location, $route, Promise, config, indexPatterns, Private, AppState, confirmModal) {
     const $state = $scope.state = new AppState();
-    const indexPatternListProvider = Private(IndexPatternListFactory)();
 
     $scope.fieldWildcardMatcher = (...args) => fieldWildcardMatcher(...args, config.get('metaFields'));
     $scope.editSectionsProvider = Private(IndicesEditSectionsProvider);
     $scope.kbnUrl = Private(KbnUrlProvider);
     $scope.indexPattern = $route.current.locals.indexPattern;
-    $scope.indexPatternListProvider = indexPatternListProvider;
-    $scope.indexPattern.tags = indexPatternListProvider.getIndexPatternTags(
+    $scope.indexPatternListProvider = managementSetup.indexPattern.list;
+    $scope.indexPattern.tags = managementSetup.indexPattern.list.getIndexPatternTags(
       $scope.indexPattern,
       $scope.indexPattern.id === config.get('defaultIndex')
     );
-    $scope.getFieldInfo = indexPatternListProvider.getFieldInfo;
+    $scope.getFieldInfo = managementSetup.indexPattern.list.getFieldInfo.bind(
+      managementSetup.indexPattern.list
+    );
     docTitle.change($scope.indexPattern.title);
 
     const otherPatterns = _.filter($route.current.locals.indexPatterns, pattern => {
@@ -192,7 +201,11 @@ uiModules.get('apps/management')
     });
 
     $scope.$watch('indexPattern.fields', function () {
-      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, indexPatternListProvider);
+      $scope.editSections = $scope.editSectionsProvider(
+        $scope.indexPattern,
+        $scope.fieldFilter,
+        managementSetup.indexPattern.list
+      );
       $scope.refreshFilters();
       $scope.fields = $scope.indexPattern.getNonScriptedFields();
       updateIndexedFieldsTable($scope, $state);
@@ -243,26 +256,26 @@ uiModules.get('apps/management')
     });
 
     $scope.$watchCollection('indexPattern.fields', function () {
-      $scope.conflictFields = $scope.indexPattern.fields
-        .filter(field => field.type === 'conflict');
+      $scope.conflictFields = $scope.indexPattern.fields.filter(field => field.type === 'conflict');
     });
 
     $scope.refreshFields = function () {
       const confirmMessage = i18n.translate('kbn.management.editIndexPattern.refreshLabel', {
-        defaultMessage: 'This action resets the popularity counter of each field.'
+        defaultMessage: 'This action resets the popularity counter of each field.',
       });
       const confirmModalOptions = {
-        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.refreshButton', { defaultMessage: 'Refresh' }),
+        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.refreshButton', {
+          defaultMessage: 'Refresh',
+        }),
         onConfirm: async () => {
           await $scope.indexPattern.init(true);
           $scope.fields = $scope.indexPattern.getNonScriptedFields();
         },
-        title: i18n.translate('kbn.management.editIndexPattern.refreshHeader', { defaultMessage: 'Refresh field list?' })
+        title: i18n.translate('kbn.management.editIndexPattern.refreshHeader', {
+          defaultMessage: 'Refresh field list?',
+        }),
       };
-      confirmModal(
-        confirmMessage,
-        confirmModalOptions
-      );
+      confirmModal(confirmMessage, confirmModalOptions);
     };
 
     $scope.removePattern = function () {
@@ -283,9 +296,13 @@ uiModules.get('apps/management')
       }
 
       const confirmModalOptions = {
-        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.deleteButton', { defaultMessage: 'Delete' }),
+        confirmButtonText: i18n.translate('kbn.management.editIndexPattern.deleteButton', {
+          defaultMessage: 'Delete',
+        }),
         onConfirm: doRemove,
-        title: i18n.translate('kbn.management.editIndexPattern.deleteHeader', { defaultMessage: 'Delete index pattern?' })
+        title: i18n.translate('kbn.management.editIndexPattern.deleteHeader', {
+          defaultMessage: 'Delete index pattern?',
+        }),
       };
       confirmModal('', confirmModalOptions);
     };
@@ -297,7 +314,8 @@ uiModules.get('apps/management')
     $scope.setIndexPatternsTimeField = function (field) {
       if (field.type !== 'date') {
         const errorMessage = i18n.translate('kbn.management.editIndexPattern.notDateErrorMessage', {
-          defaultMessage: 'That field is a {fieldType} not a date.', values: { fieldType: field.type }
+          defaultMessage: 'That field is a {fieldType} not a date.',
+          values: { fieldType: field.type },
         });
         toastNotifications.addDanger(errorMessage);
         return;
@@ -307,12 +325,16 @@ uiModules.get('apps/management')
     };
 
     $scope.$watch('fieldFilter', () => {
-      $scope.editSections = $scope.editSectionsProvider($scope.indexPattern, $scope.fieldFilter, indexPatternListProvider);
+      $scope.editSections = $scope.editSectionsProvider(
+        $scope.indexPattern,
+        $scope.fieldFilter,
+        managementSetup.indexPattern.list
+      );
       if ($scope.fieldFilter === undefined) {
         return;
       }
 
-      switch($state.tab) {
+      switch ($state.tab) {
         case 'indexedFields':
           updateIndexedFieldsTable($scope, $state);
         case 'scriptedFields':

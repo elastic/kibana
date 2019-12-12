@@ -12,5 +12,5 @@ chrome
     $window.sessionStorage.clear();
 
     // Redirect user to the server logout endpoint to complete logout.
-    $window.location.href = chrome.addBasePath(`/api/security/v1/logout${$window.location.search}`);
+    $window.location.href = chrome.addBasePath(`/api/security/logout${$window.location.search}`);
   });

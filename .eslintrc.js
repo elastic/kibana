@@ -209,13 +209,6 @@ module.exports = {
         'react-hooks/rules-of-hooks': 'off',
       },
     },
-    {
-      files: ['x-pack/legacy/plugins/watcher/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'off',
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
 
     /**
      * Prettier

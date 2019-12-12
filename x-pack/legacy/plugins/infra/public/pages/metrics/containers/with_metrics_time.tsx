@@ -5,7 +5,7 @@
  */
 
 import createContainer from 'constate';
-import React, { useContext, useState, useMemo, useCallback } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import { isNumber } from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -32,34 +32,44 @@ interface MetricsTimeState {
   triggerRefresh: () => void;
 }
 
+const parseRange = (range: MetricsTimeInput) => {
+  const parsedFrom = dateMath.parse(range.from);
+  const parsedTo = dateMath.parse(range.to, { roundUp: true });
+  return {
+    ...range,
+    from:
+      (parsedFrom && parsedFrom.valueOf()) ||
+      moment()
+        .subtract(1, 'hour')
+        .valueOf(),
+    to: (parsedTo && parsedTo.valueOf()) || moment().valueOf(),
+  };
+};
+
 export const useMetricsTime = () => {
-  const [isAutoReloading, setAutoReload] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState(5000);
-  const [lastRefresh, setLastRefresh] = useState<number>(moment().valueOf());
-  const [timeRange, setTimeRange] = useState({
+  const defaultRange = {
     from: 'now-1h',
     to: 'now',
     interval: '>=1m',
-  });
+  };
+  const [isAutoReloading, setAutoReload] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState(5000);
+  const [lastRefresh, setLastRefresh] = useState<number>(moment().valueOf());
+  const [timeRange, setTimeRange] = useState(defaultRange);
 
-  const parsedFrom = dateMath.parse(timeRange.from);
-  const parsedTo = dateMath.parse(timeRange.to, { roundUp: true });
-  const parsedTimeRange = useMemo(
-    () => ({
-      ...timeRange,
-      from:
-        (parsedFrom && parsedFrom.valueOf()) ||
-        moment()
-          .subtract(1, 'hour')
-          .valueOf(),
-      to: (parsedTo && parsedTo.valueOf()) || moment().valueOf(),
-    }),
-    [parsedFrom, parsedTo, lastRefresh]
+  const [parsedTimeRange, setParsedTimeRange] = useState(parseRange(defaultRange));
+
+  const updateTimeRange = useCallback(
+    (range: MetricsTimeInput) => {
+      setTimeRange(range);
+      setParsedTimeRange(parseRange(range));
+    },
+    [setParsedTimeRange]
   );
 
   return {
     timeRange,
-    setTimeRange,
+    setTimeRange: updateTimeRange,
     parsedTimeRange,
     refreshInterval,
     setRefreshInterval,
@@ -129,7 +139,13 @@ export const WithMetricsTimeUrlState = () => (
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState && initialUrlState.time) {
-            setTimeRange(initialUrlState.time);
+            if (
+              timeRange.from !== initialUrlState.time.from ||
+              timeRange.to !== initialUrlState.time.to ||
+              timeRange.interval !== initialUrlState.time.interval
+            ) {
+              setTimeRange(initialUrlState.time);
+            }
           }
           if (initialUrlState && initialUrlState.autoReload) {
             setAutoReload(true);

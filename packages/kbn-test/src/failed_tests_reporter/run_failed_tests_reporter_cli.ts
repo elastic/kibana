@@ -25,7 +25,8 @@ import { GithubApi } from './github_api';
 import { updateFailureIssue, createFailureIssue } from './report_failure';
 import { getIssueMetadata } from './issue_metadata';
 import { readTestReport } from './test_report';
-import { addMessagesToReport, Message } from './add_messages_to_report';
+import { addMessagesToReport } from './add_messages_to_report';
+import { getReportMessages } from './report_metadata';
 
 export function runFailedTestsReporterCli() {
   run(
@@ -74,17 +75,22 @@ export function runFailedTestsReporterCli() {
 
       for (const reportPath of reportPaths) {
         const report = await readTestReport(reportPath);
-        const messages: Message[] = [];
+        const messages = getReportMessages(report);
 
         for (const failure of await getFailures(report)) {
-          if (failure.likelyIrrelevant) {
+          const pushMessage = (msg: string) => {
             messages.push({
               classname: failure.classname,
               name: failure.name,
-              message:
-                'Failure is likely irrelevant' +
-                (updateGithub ? ', so an issue was not created or updated' : ''),
+              message: msg,
             });
+          };
+
+          if (failure.likelyIrrelevant) {
+            pushMessage(
+              'Failure is likely irrelevant' +
+                (updateGithub ? ', so an issue was not created or updated' : '')
+            );
             continue;
           }
 
@@ -97,30 +103,18 @@ export function runFailedTestsReporterCli() {
           if (existingIssue) {
             const newFailureCount = await updateFailureIssue(buildUrl, existingIssue, githubApi);
             const url = existingIssue.html_url;
-            const message =
-              `Test has failed ${newFailureCount - 1} times on tracked branches: ${url}` +
-              (updateGithub
-                ? `. Updated existing issue: ${url} (fail count: ${newFailureCount})`
-                : '');
-
-            messages.push({
-              classname: failure.classname,
-              name: failure.name,
-              message,
-            });
+            pushMessage(`Test has failed ${newFailureCount - 1} times on tracked branches: ${url}`);
+            if (updateGithub) {
+              pushMessage(`Updated existing issue: ${url} (fail count: ${newFailureCount})`);
+            }
             continue;
           }
 
           const newIssueUrl = await createFailureIssue(buildUrl, failure, githubApi);
-          const message =
-            `Test has not failed recently on tracked branches` +
-            (updateGithub ? `Created new issue: ${newIssueUrl}` : '');
-
-          messages.push({
-            classname: failure.classname,
-            name: failure.name,
-            message,
-          });
+          pushMessage('Test has not failed recently on tracked branches');
+          if (updateGithub) {
+            pushMessage(`Created new issue: ${newIssueUrl}`);
+          }
         }
 
         // mutates report to include messages and writes updated report to disk

@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { resolve, dirname, relative } from 'path';
+import { dirname, relative } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { inspect } from 'util';
 
 import xmlBuilder from 'xmlbuilder';
+import { makeJunitReportPath } from '@kbn/test';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
 import { escapeCdata } from '../xml';
@@ -32,6 +33,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
     rootDirectory = dirname(require.resolve('../../../package.json')),
+    getTestMetadata = () => ({}),
   } = options;
 
   const stats = {};
@@ -118,6 +120,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
         name: getFullTitle(node),
         classname: `${reportName}.${getPath(node).replace(/\./g, '·')}`,
         time: getDuration(node),
+        'metadata-json': JSON.stringify(getTestMetadata(node) || {}),
       });
     }
 
@@ -135,13 +138,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       }
     });
 
-    const reportPath = resolve(
-      rootDirectory,
-      'target/junit',
-      process.env.JOB || '.',
-      `TEST-${process.env.JOB ? process.env.JOB + '-' : ''}${reportName}.xml`
-    );
-
+    const reportPath = makeJunitReportPath(rootDirectory, reportName);
     const reportXML = builder.end();
     mkdirSync(dirname(reportPath), { recursive: true });
     writeFileSync(reportPath, reportXML, 'utf8');

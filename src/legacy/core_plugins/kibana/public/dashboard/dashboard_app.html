@@ -48,24 +48,6 @@
   >
   </kbn-top-nav>
 
-  <div ng-show="getShouldShowEditHelp() || getShouldShowViewHelp()" class="dshStartScreen">
-    <div class="euiPanel euiPanel--paddingLarge euiPageContent euiPageContent--horizontalCenter">
-      <br><br>
-      <div ng-show="getShouldShowEditHelp()" class="euiText">
-        <dashboard-empty-screen on-link-click="showAddPanel"
-                                show-link-to-visualize="true"
-        />
-      </div>
-
-      <div ng-show="getShouldShowViewHelp()" class="euiText">
-        <dashboard-empty-screen show-link-to-visualize="false"
-                                on-link-click="enterEditMode"
-        />
-      </div>
-
-    </div>
-  </div>
-
   <h1 class="euiScreenReaderOnly">{{screenTitle}}</h1>
   <div id="dashboardViewport"></div>
 

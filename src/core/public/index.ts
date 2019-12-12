@@ -113,14 +113,13 @@ export {
   HttpErrorResponse,
   HttpErrorRequest,
   HttpInterceptor,
-  HttpResponse,
+  IHttpResponse,
   HttpHandler,
-  HttpBody,
   IBasePath,
   IAnonymousPaths,
   IHttpInterceptController,
   IHttpFetchError,
-  InterceptedHttpResponse,
+  IHttpResponseInterceptorOverrides,
 } from './http';
 
 export { OverlayStart, OverlayBannersStart, OverlayRef } from './overlays';

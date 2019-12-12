@@ -19,7 +19,6 @@ const introspectionQuery = gql`
 `;
 
 export default function({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
   const security = getService('security');
   const spaces = getService('spaces');
   const clientFactory = getService('infraOpsGraphQLClientFactory');
@@ -35,18 +34,6 @@ export default function({ getService }: FtrProviderContext) {
     expect(result.error).to.be(undefined);
     expect(result.response).to.have.property('data');
     expect(result.response.data).to.be.an('object');
-  };
-
-  const expectGraphIQL404 = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 404);
-  };
-
-  const expectGraphIQLResponse = (result: any) => {
-    expect(result.error).to.be(undefined);
-    expect(result.response).not.to.be(undefined);
-    expect(result.response).to.have.property('statusCode', 200);
   };
 
   const executeGraphQLQuery = async (username: string, password: string, spaceId?: string) => {
@@ -68,16 +55,6 @@ export default function({ getService }: FtrProviderContext) {
       error,
       response,
     };
-  };
-
-  const executeGraphIQLRequest = async (username: string, password: string, spaceId?: string) => {
-    const basePath = spaceId ? `/s/${spaceId}` : '';
-
-    return supertest
-      .get(`${basePath}/api/infra/graphql/graphiql`)
-      .auth(username, password)
-      .then((response: any) => ({ error: undefined, response }))
-      .catch((error: any) => ({ error, response: undefined }));
   };
 
   describe('feature controls', () => {
@@ -105,9 +82,6 @@ export default function({ getService }: FtrProviderContext) {
 
         const graphQLResult = await executeGraphQLQuery(username, password);
         expectGraphQL404(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQL404(graphQLIResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -144,9 +118,6 @@ export default function({ getService }: FtrProviderContext) {
 
         const graphQLResult = await executeGraphQLQuery(username, password);
         expectGraphQLResponse(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQLResponse(graphQLIResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -186,9 +157,6 @@ export default function({ getService }: FtrProviderContext) {
 
         const graphQLResult = await executeGraphQLQuery(username, password);
         expectGraphQL404(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password);
-        expectGraphIQL404(graphQLIResult);
       } finally {
         await security.role.delete(roleName);
         await security.user.delete(username);
@@ -268,25 +236,16 @@ export default function({ getService }: FtrProviderContext) {
       it('user_1 can access APIs in space_1', async () => {
         const graphQLResult = await executeGraphQLQuery(username, password, space1Id);
         expectGraphQLResponse(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password, space1Id);
-        expectGraphIQLResponse(graphQLIResult);
       });
 
       it(`user_1 can access APIs in space_2`, async () => {
         const graphQLResult = await executeGraphQLQuery(username, password, space2Id);
         expectGraphQLResponse(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password, space2Id);
-        expectGraphIQLResponse(graphQLIResult);
       });
 
       it(`user_1 can't access APIs in space_3`, async () => {
         const graphQLResult = await executeGraphQLQuery(username, password, space3Id);
         expectGraphQL404(graphQLResult);
-
-        const graphQLIResult = await executeGraphIQLRequest(username, password, space3Id);
-        expectGraphIQL404(graphQLIResult);
       });
     });
   });

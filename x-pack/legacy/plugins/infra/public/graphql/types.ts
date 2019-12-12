@@ -1,3 +1,5 @@
+import { SnapshotMetricType } from '../../common/inventory_models/types';
+
 /* tslint:disable */
 
 // ====================================================
@@ -291,7 +293,7 @@ export interface InfraSnapshotNodePath {
 }
 
 export interface InfraSnapshotNodeMetric {
-  name: InfraSnapshotMetricType;
+  name: SnapshotMetricType;
 
   value?: number | null;
 

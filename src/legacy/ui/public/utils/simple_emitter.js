@@ -18,8 +18,6 @@
  */
 
 import _ from 'lodash';
-import { BaseObject } from './base_object';
-import { createLegacyClass } from './legacy_class';
 
 /**
  * Simple event emitter class used in the vislib. Calls
@@ -27,7 +25,6 @@ import { createLegacyClass } from './legacy_class';
  *
  * @class
  */
-createLegacyClass(SimpleEmitter).inherits(BaseObject);
 export function SimpleEmitter() {
   this._listeners = {};
 }
@@ -134,4 +131,3 @@ SimpleEmitter.prototype.listenerCount = function (name) {
     return count + _.size(handlers);
   }, 0);
 };
-

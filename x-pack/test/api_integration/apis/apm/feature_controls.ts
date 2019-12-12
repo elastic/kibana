@@ -38,7 +38,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   }
   const endpoints: Endpoint[] = [
     {
-      req: { url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D` },
+      // this doubles as a smoke test for the _debug query parameter
+      req: {
+        url: `/api/apm/services/foo/errors?start=${start}&end=${end}&uiFilters=%7B%7D_debug=true`,
+      },
       expectForbidden: expect404,
       expectResponse: expect200,
     },

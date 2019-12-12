@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFindSavedObject } from './use_find_saved_object';
 import { useCreateSavedObject } from './use_create_saved_object';
@@ -16,18 +16,37 @@ export type SavedView<ViewState> = ViewState & {
   isDefault?: boolean;
 };
 
-export type SavedViewSavedObject<ViewState> = ViewState & {
+export type SavedViewSavedObject<ViewState = {}> = ViewState & {
   name: string;
 };
 
 export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: string) => {
-  const { data, loading, find, error: errorOnFind } = useFindSavedObject<
+  const { data, loading, find, error: errorOnFind, hasView } = useFindSavedObject<
     SavedViewSavedObject<ViewState>
   >(viewType);
-  const { create, error: errorOnCreate } = useCreateSavedObject(viewType);
+  const { create, error: errorOnCreate, createdId } = useCreateSavedObject(viewType);
   const { deleteObject, deletedId } = useDeleteSavedObject(viewType);
   const deleteView = useCallback((id: string) => deleteObject(id), []);
-  const saveView = useCallback((d: { [p: string]: any }) => create(d), []);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  useEffect(() => setCreateError(createError), [errorOnCreate, setCreateError]);
+
+  const saveView = useCallback((d: { [p: string]: any }) => {
+    const doSave = async () => {
+      const exists = await hasView(d.name);
+      if (exists) {
+        setCreateError(
+          i18n.translate('xpack.infra.savedView.errorOnCreate.duplicateViewName', {
+            defaultMessage: `A view with that name already exists.`,
+          })
+        );
+        return;
+      }
+      create(d);
+    };
+    setCreateError(null);
+    doSave();
+  }, []);
 
   const savedObjects = data ? data.savedObjects : [];
   const views = useMemo(() => {
@@ -61,8 +80,9 @@ export const useSavedView = <ViewState>(defaultViewState: ViewState, viewType: s
     saveView,
     loading,
     deletedId,
+    createdId,
     errorOnFind,
-    errorOnCreate,
+    errorOnCreate: createError,
     deleteView,
     find,
   };

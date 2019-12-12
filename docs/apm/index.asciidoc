@@ -1,3 +1,9 @@
+// APM Server does not build a `7.x` branch.
+// This check changes `7.x` links to `master` instaed
+ifeval::[{branch} == 7.x]
+:apm-server-ref:       https://www.elastic.co/guide/en/apm/server/master
+endif::[]
+
 [role="xpack"]
 [[xpack-apm]]
 = APM

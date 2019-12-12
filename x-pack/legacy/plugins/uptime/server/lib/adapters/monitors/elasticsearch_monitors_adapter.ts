@@ -16,7 +16,7 @@ import {
 import { getHistogramIntervalFormatted } from '../../helper';
 import { DatabaseAdapter } from '../database';
 import { UMMonitorsAdapter } from './adapter_types';
-import { MonitorDetails, Error } from '../../../../common/runtime_types';
+import { MonitorDetails, MonitorError } from '../../../../common/runtime_types';
 
 const formatStatusBuckets = (time: any, buckets: any, docCount: any) => {
   let up = null;
@@ -278,6 +278,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
         size: 1,
+        _source: ['error', '@timestamp'],
         query: {
           bool: {
             must: [
@@ -308,11 +309,15 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
 
     const result = await this.database.search(request, params);
 
-    const monitorError: Error | undefined = get(result, 'hits.hits[0]._source.error', undefined);
+    const data = result.hits.hits[0]?._source;
+
+    const monitorError: MonitorError | undefined = data?.error;
+    const errorTimeStamp: string | undefined = data?.['@timestamp'];
 
     return {
       monitorId,
       error: monitorError,
+      timestamp: errorTimeStamp,
     };
   }
 }

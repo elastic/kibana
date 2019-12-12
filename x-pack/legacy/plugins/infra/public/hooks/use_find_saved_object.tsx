@@ -37,7 +37,16 @@ export const useFindSavedObject = <SavedObjectType extends SavedObjectAttributes
     [type]
   );
 
+  const hasView = async (name: string) => {
+    const objects = await npStart.core.savedObjects.client.find<SavedObjectType>({
+      type,
+    });
+
+    return objects.savedObjects.filter(o => o.attributes.name === name).length > 0;
+  };
+
   return {
+    hasView,
     data,
     loading,
     error,

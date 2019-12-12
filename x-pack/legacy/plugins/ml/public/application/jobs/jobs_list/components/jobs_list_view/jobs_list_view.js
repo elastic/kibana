@@ -67,15 +67,6 @@ export class JobsListView extends Component {
     if (this.props.isManagementTable === true) {
       this.refreshJobSummaryList(true);
     } else {
-      // The advanced job wizard is still angularjs based and triggers
-      // broadcast events which it expects the jobs list to be subscribed to.
-      this.props.angularWrapperScope.$on('jobsUpdated', () => {
-        this.refreshJobSummaryList(true);
-      });
-      this.props.angularWrapperScope.$on('openCreateWatchWindow', (e, job) => { // eslint-disable-line no-unused-vars
-        this.showCreateWatchFlyout(job.job_id);
-      });
-
       timefilter.disableTimeRangeSelector();
       timefilter.enableAutoRefreshSelector();
 

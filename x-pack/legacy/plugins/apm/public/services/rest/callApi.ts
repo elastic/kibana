@@ -21,18 +21,11 @@ function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
     sessionStorage.getItem('apm_debug') === 'true' &&
     startsWith(fetchOptions.pathname, '/api/apm');
 
-  const isGet = !fetchOptions.method || fetchOptions.method === 'GET';
-
-  // Need an empty body to pass route validation
-  const body = isGet
-    ? {}
-    : {
-        body: JSON.stringify(fetchOptions.body || {})
-      };
+  const { body, ...rest } = fetchOptions;
 
   return {
-    ...fetchOptions,
-    ...body,
+    ...rest,
+    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
     query: {
       ...fetchOptions.query,
       ...(debugEnabled ? { _debug: true } : {})

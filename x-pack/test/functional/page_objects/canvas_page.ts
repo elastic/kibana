@@ -11,8 +11,22 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function CanvasPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const browser = getService('browser');
 
   return {
+    async enterFullscreen() {
+      const elem = await find.byCssSelector('[aria-label="View fullscreen"]', 20000);
+      await elem.click();
+    },
+
+    async exitFullscreen() {
+      await browser.pressKeys(browser.keys.ESCAPE);
+    },
+
+    async waitForWorkpadElements() {
+      await testSubjects.findAll('canvasWorkpadPage > canvasWorkpadPageElementContent');
+    },
+
     async expectCreateWorkpadButtonEnabled() {
       const button = await testSubjects.find('create-workpad-button', 20000);
       const disabledAttr = await button.getAttribute('disabled');

@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextArea,
+  EuiLink,
+  EuiText,
+  EuiListGroup,
+} from '@elastic/eui';
 import { isEmpty, chunk, get, pick } from 'lodash/fp';
 import React, { memo, ReactNode } from 'react';
 import styled from 'styled-components';
@@ -19,6 +28,9 @@ import {
 import { FilterLabel } from './filter_label';
 import { FormSchema } from '../shared_imports';
 import * as I18n from './translations';
+
+import { IMitreEnterpriseAttack } from '../../types';
+import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
 interface StepRuleDescriptionProps {
   data: unknown;
@@ -36,16 +48,34 @@ const EuiFlexItemWidth = styled(EuiFlexItem)`
   width: 50%;
 `;
 
+const MyEuiListGroup = styled(EuiListGroup)`
+  padding: 0px;
+  .euiListGroupItem__button {
+    padding: 0px;
+  }
+`;
+
+const ThreatsEuiFlexGroup = styled(EuiFlexGroup)`
+  .euiFlexItem {
+    margin-bottom: 0px;
+  }
+`;
+
 export const StepRuleDescription = memo<StepRuleDescriptionProps>(
   ({ data, indexPatterns, schema }) => {
     const keys = Object.keys(schema);
+    const listItems = keys.reduce(
+      (acc: ListItems[], key: string) => [
+        ...acc,
+        ...buildListItems(data, pick(key, schema), indexPatterns),
+      ],
+      []
+    );
     return (
       <EuiFlexGroup gutterSize="none" direction="row" justifyContent="spaceAround">
-        {chunk(keys.includes('queryBar') ? 3 : Math.ceil(keys.length / 2), keys).map(key => (
-          <EuiFlexItemWidth grow={false}>
-            <EuiDescriptionList
-              listItems={buildListItems(data, pick(key, schema), indexPatterns)}
-            />
+        {chunk(Math.ceil(listItems.length / 2), listItems).map((chunckListItems, index) => (
+          <EuiFlexItemWidth key={`description-step-rule-${index}`} grow={false}>
+            <EuiDescriptionList listItems={chunckListItems} />
           </EuiFlexItemWidth>
         ))}
       </EuiFlexGroup>
@@ -77,7 +107,9 @@ const getDescriptionItem = (
   value: unknown,
   indexPatterns?: IIndexPattern
 ): ListItems[] => {
-  if (field === 'queryBar' && indexPatterns != null) {
+  if (field === 'useIndicesConfig') {
+    return [];
+  } else if (field === 'queryBar' && indexPatterns != null) {
     const filters = get('queryBar.filters', value) as esFilters.Filter[];
     const query = get('queryBar.query', value) as Query;
     const savedId = get('queryBar.saved_id', value);
@@ -123,6 +155,50 @@ const getDescriptionItem = (
       ];
     }
     return items;
+  } else if (field === 'threats') {
+    const threats: IMitreEnterpriseAttack[] = get(field, value).filter(
+      (threat: IMitreEnterpriseAttack) => threat.tactic.name !== 'none'
+    );
+    if (threats.length > 0) {
+      return [
+        {
+          title: label,
+          description: (
+            <ThreatsEuiFlexGroup direction="column">
+              {threats.map((threat, index) => {
+                const tactic = tacticsOptions.find(t => t.name === threat.tactic.name);
+                return (
+                  <EuiFlexItem key={`${threat.tactic.name}-${index}`}>
+                    <EuiText grow={false} size="s">
+                      <h5>
+                        <EuiLink href={threat.tactic.reference} target="_blank">
+                          {tactic != null ? tactic.text : ''}
+                        </EuiLink>
+                      </h5>
+                      <MyEuiListGroup
+                        flush={false}
+                        bordered={false}
+                        listItems={threat.techniques.map(technique => {
+                          const myTechnique = techniquesOptions.find(
+                            t => t.name === technique.name
+                          );
+                          return {
+                            label: myTechnique != null ? myTechnique.label : '',
+                            href: technique.reference,
+                            target: '_blank',
+                          };
+                        })}
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                );
+              })}
+            </ThreatsEuiFlexGroup>
+          ),
+        },
+      ];
+    }
+    return [];
   } else if (field === 'description') {
     return [
       {
@@ -131,20 +207,26 @@ const getDescriptionItem = (
       },
     ];
   } else if (Array.isArray(get(field, value))) {
-    return [
-      {
-        title: label,
-        description: (
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            {get(field, value).map((val: string) => (
-              <EuiFlexItem grow={false} key={`${field}-${val}`}>
-                <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        ),
-      },
-    ];
+    const values: string[] = get(field, value);
+    if (!isEmpty(values) && values.filter(val => !isEmpty(val)).length > 0) {
+      return [
+        {
+          title: label,
+          description: (
+            <EuiFlexGroup responsive={false} gutterSize="xs">
+              {values.map((val: string) =>
+                isEmpty(val) ? null : (
+                  <EuiFlexItem grow={false} key={`${field}-${val}`}>
+                    <EuiBadgeWrap color="hollow">{val}</EuiBadgeWrap>
+                  </EuiFlexItem>
+                )
+              )}
+            </EuiFlexGroup>
+          ),
+        },
+      ];
+    }
+    return [];
   }
   return [
     {

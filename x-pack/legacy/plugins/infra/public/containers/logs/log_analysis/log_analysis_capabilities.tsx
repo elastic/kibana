@@ -15,7 +15,7 @@ import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import {
   getMlCapabilitiesResponsePayloadRT,
   GetMlCapabilitiesResponsePayload,
-} from './ml_api_types';
+} from './api/ml_api_types';
 import { throwErrors, createPlainError } from '../../../../common/runtime_types';
 
 export const useLogAnalysisCapabilities = () => {

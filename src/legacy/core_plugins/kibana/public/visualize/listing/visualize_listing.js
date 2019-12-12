@@ -24,36 +24,48 @@ import { VisualizeConstants } from '../visualize_constants';
 import { i18n } from '@kbn/i18n';
 
 import { getServices } from '../kibana_services';
+import { wrapInI18nContext } from '../legacy_imports';
 
-const {
-  addBasePath,
-  chrome,
-  chromeLegacy,
-  SavedObjectRegistryProvider,
-  SavedObjectsClientProvider,
-  timefilter,
-  toastNotifications,
-  uiModules,
-  wrapInI18nContext,
-  visualizations,
-} = getServices();
-
-const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
-app.directive('visualizeListingTable', reactDirective =>
-  reactDirective(wrapInI18nContext(VisualizeListingTable))
-);
-app.directive('newVisModal', reactDirective => reactDirective(wrapInI18nContext(NewVisModal)));
+export function initListingDirective(app) {
+  app.directive('visualizeListingTable', reactDirective => reactDirective(wrapInI18nContext(VisualizeListingTable)));
+  app.directive('newVisModal', reactDirective =>
+    reactDirective(wrapInI18nContext(NewVisModal), [
+      ['visTypesRegistry', { watchDepth: 'collection' }],
+      ['onClose', { watchDepth: 'reference' }],
+      ['addBasePath', { watchDepth: 'reference' }],
+      ['uiSettings', { watchDepth: 'reference' }],
+      ['savedObjects', { watchDepth: 'reference' }],
+      'isOpen',
+    ])
+  );
+}
 
 export function VisualizeListingController($injector, createNewVis) {
-  const Private = $injector.get('Private');
-  const config = $injector.get('config');
+  const {
+    addBasePath,
+    chrome,
+    legacyChrome,
+    savedObjectRegistry,
+    savedObjectsClient,
+    data: {
+      query: {
+        timefilter: { timefilter },
+      },
+    },
+    toastNotifications,
+    uiSettings,
+    visualizations,
+    core: { docLinks, savedObjects },
+  } = getServices();
   const kbnUrl = $injector.get('kbnUrl');
-  const savedObjectClient = Private(SavedObjectsClientProvider);
 
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
   this.showNewVisModal = false;
+  this.addBasePath = addBasePath;
+  this.uiSettings = uiSettings;
+  this.savedObjects = savedObjects;
 
   this.createNewVis = () => {
     this.showNewVisModal = true;
@@ -82,14 +94,14 @@ export function VisualizeListingController($injector, createNewVis) {
   }
 
   // TODO: Extract this into an external service.
-  const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
+  const services = savedObjectRegistry.byLoaderPropertiesName;
   const visualizationService = services.visualizations;
   this.visTypeRegistry = visualizations.types;
 
   this.fetchItems = filter => {
-    const isLabsEnabled = config.get('visualize:enableLabs');
+    const isLabsEnabled = uiSettings.get('visualize:enableLabs');
     return visualizationService
-      .findListItems(filter, config.get('savedObjects:listingLimit'))
+      .findListItems(filter, uiSettings.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
 
@@ -103,11 +115,11 @@ export function VisualizeListingController($injector, createNewVis) {
   this.deleteSelectedItems = function deleteSelectedItems(selectedItems) {
     return Promise.all(
       selectedItems.map(item => {
-        return savedObjectClient.delete(item.savedObjectType, item.id);
+        return savedObjectsClient.delete(item.savedObjectType, item.id);
       })
     )
       .then(() => {
-        chromeLegacy.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
+        legacyChrome.untrackNavLinksForDeletedSavedObjects(selectedItems.map(item => item.id));
       })
       .catch(error => {
         toastNotifications.addError(error, {
@@ -126,7 +138,7 @@ export function VisualizeListingController($injector, createNewVis) {
     },
   ]);
 
-  this.listingLimit = config.get('savedObjects:listingLimit');
+  this.listingLimit = uiSettings.get('savedObjects:listingLimit');
 
-  addHelpMenuToAppChrome(chrome);
+  addHelpMenuToAppChrome(chrome, docLinks);
 }

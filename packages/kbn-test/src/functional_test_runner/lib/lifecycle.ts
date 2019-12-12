@@ -17,64 +17,22 @@
  * under the License.
  */
 
-import * as Rx from 'rxjs';
+import { LifecyclePhase } from './lifecycle_phase';
 
-type Listener = (...args: any[]) => Promise<void> | void;
-export type Lifecycle = ReturnType<typeof createLifecycle>;
+// mocha's global types mean we can't import Mocha or it will override the global jest types..............
+type ItsASuite = any;
+type ItsATest = any;
 
-export function createLifecycle() {
-  const listeners = {
-    beforeLoadTests: [] as Listener[],
-    beforeTests: [] as Listener[],
-    beforeTestSuite: [] as Listener[],
-    beforeEachTest: [] as Listener[],
-    afterTestSuite: [] as Listener[],
-    testFailure: [] as Listener[],
-    testHookFailure: [] as Listener[],
-    cleanup: [] as Listener[],
-    phaseStart: [] as Listener[],
-    phaseEnd: [] as Listener[],
-  };
-
-  const cleanup$ = new Rx.ReplaySubject(1);
-
-  return {
-    cleanup$: cleanup$.asObservable(),
-
-    on(name: keyof typeof listeners, fn: Listener) {
-      if (!listeners[name]) {
-        throw new TypeError(`invalid lifecycle event "${name}"`);
-      }
-
-      listeners[name].push(fn);
-      return this;
-    },
-
-    async trigger(name: keyof typeof listeners, ...args: any[]) {
-      if (!listeners[name]) {
-        throw new TypeError(`invalid lifecycle event "${name}"`);
-      }
-
-      if (name === 'cleanup') {
-        if (cleanup$.closed) {
-          return;
-        }
-
-        cleanup$.next();
-        cleanup$.complete();
-      }
-
-      try {
-        if (name !== 'phaseStart' && name !== 'phaseEnd') {
-          await this.trigger('phaseStart', name);
-        }
-
-        await Promise.all(listeners[name].map(async fn => await fn(...args)));
-      } finally {
-        if (name !== 'phaseStart' && name !== 'phaseEnd') {
-          await this.trigger('phaseEnd', name);
-        }
-      }
-    },
-  };
+export class Lifecycle {
+  public readonly beforeTests = new LifecyclePhase<[]>({
+    singular: true,
+  });
+  public readonly beforeTestSuite = new LifecyclePhase<[ItsASuite]>();
+  public readonly beforeEachTest = new LifecyclePhase<[ItsATest]>();
+  public readonly afterTestSuite = new LifecyclePhase<[ItsASuite]>();
+  public readonly testFailure = new LifecyclePhase<[Error, ItsATest]>();
+  public readonly testHookFailure = new LifecyclePhase<[Error, ItsATest]>();
+  public readonly cleanup = new LifecyclePhase<[]>({
+    singular: true,
+  });
 }
