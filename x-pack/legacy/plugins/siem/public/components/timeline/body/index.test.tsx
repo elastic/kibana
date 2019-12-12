@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReactWrapper } from 'enzyme';
 import * as React from 'react';
 
 import { mockBrowserFields } from '../../../containers/source/mock';
@@ -208,10 +207,7 @@ describe('Body', () => {
     const dispatchAddNoteToEvent = jest.fn();
     const dispatchOnPinEvent = jest.fn();
 
-    const addaNoteToEvent = (
-      wrapper: ReactWrapper<unknown, unknown, React.Component<{}, {}, any>>, // eslint-disable-line
-      note: string
-    ) => {
+    const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper
         .find('[data-test-subj="add-note"]')
         .first()

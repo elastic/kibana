@@ -73,7 +73,7 @@ describe('Hosts Table', () => {
     });
 
     describe('Sorting on Table', () => {
-      let wrapper: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+      let wrapper: ReturnType<typeof mount>;
 
       beforeEach(() => {
         wrapper = mount(
