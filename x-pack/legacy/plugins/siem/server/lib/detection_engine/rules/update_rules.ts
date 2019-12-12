@@ -119,8 +119,10 @@ export const updateRules = async ({
       schedule: {
         interval: calculateInterval(
           interval,
-          // assume its an interval schedule, but obviously this is bad -
-          // we'll address this in Alerting before merging this change
+          // TODO: we assume the schedule is an interval schedule due to an problem
+          // in the Alerting api, which should be addressed by the following
+          // issue: https://github.com/elastic/kibana/issues/49703
+          // Once this issue is closed, the type should be correctly returned by alerting
           (rule.schedule as IntervalSchedule).interval
         ),
       },
