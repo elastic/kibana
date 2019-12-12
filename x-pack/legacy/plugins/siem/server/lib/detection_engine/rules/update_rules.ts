@@ -5,7 +5,7 @@
  */
 
 import { defaults } from 'lodash/fp';
-import { AlertAction } from '../../../../../alerting/server/types';
+import { AlertAction, IntervalSchedule } from '../../../../../alerting/server/types';
 import { readRules } from './read_rules';
 import { UpdateRuleParams } from './types';
 
@@ -116,7 +116,14 @@ export const updateRules = async ({
     data: {
       tags: tags != null ? tags : [],
       name: calculateName({ updatedName: name, originalName: rule.name }),
-      interval: calculateInterval(interval, rule.interval),
+      schedule: {
+        interval: calculateInterval(
+          interval,
+          // assume its an interval schedule, but obviously this is bad -
+          // we'll address this in Alerting before merging this change
+          (rule.schedule as IntervalSchedule).interval
+        ),
+      },
       actions,
       params: nextParams,
     },
