@@ -58,112 +58,150 @@ describe('<TemplateEdit />', () => {
     server.restore();
   });
 
-  const templateToEdit = fixtures.getTemplate({
-    name: TEMPLATE_NAME,
-    indexPatterns: ['indexPattern1'],
-    mappings: MAPPING,
-  });
-
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
-
-    testBed = await setup();
-
-    await act(async () => {
-      await nextTick();
-      testBed.component.update();
+  describe('without mappings', () => {
+    const templateToEdit = fixtures.getTemplate({
+      name: 'index_template_without_mappings',
+      indexPatterns: ['indexPattern1'],
     });
-  });
 
-  test('should set the correct page title', () => {
-    const { exists, find } = testBed;
-    const { name } = templateToEdit;
-
-    expect(exists('pageTitle')).toBe(true);
-    expect(find('pageTitle').text()).toEqual(`Edit template '${name}'`);
-  });
-
-  it('should set the nameField to readOnly', () => {
-    const { find } = testBed;
-
-    const nameInput = find('nameField.input');
-    expect(nameInput.props().disabled).toEqual(true);
-  });
-
-  describe('form payload', () => {
     beforeEach(async () => {
-      const { actions, component, find, form } = testBed;
+      httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
+
+      testBed = await setup();
+
+      await act(async () => {
+        await nextTick();
+        testBed.component.update();
+      });
+    });
+
+    it('allows you to add mappings', async () => {
+      const { actions, find } = testBed;
 
       await act(async () => {
         // Complete step 1 (logistics)
-        await actions.completeStepOne({
-          indexPatterns: UPDATED_INDEX_PATTERN,
-        });
+        await actions.completeStepOne();
 
         // Step 2 (index settings)
-        await actions.completeStepTwo(JSON.stringify(SETTINGS));
+        await actions.completeStepTwo();
 
         // Step 3 (mappings)
-        // Select the first field to edit
-        actions.clickEditButtonAtField(0);
-        await nextTick();
-        component.update();
-        // verify edit field flyout
-        expect(find('mappingsEditorFieldEdit').length).toEqual(1);
-        // change field name
-        form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
-        // Save changes
-        actions.clickEditFieldUpdateButton();
-        await nextTick();
-        component.update();
-        // Proceed to the next step
-        actions.clickNextButton();
-        await nextTick(50);
-        component.update();
+        await act(async () => {
+          await actions.addMappingField('field_1', 'text');
+        });
 
-        // Step 4 (aliases)
-        await actions.completeStepFour(JSON.stringify(ALIASES));
+        expect(find('fieldsListItem').length).toBe(1);
+      });
+    });
+  });
+
+  describe('with mappings', () => {
+    const templateToEdit = fixtures.getTemplate({
+      name: TEMPLATE_NAME,
+      indexPatterns: ['indexPattern1'],
+      mappings: MAPPING,
+    });
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadTemplateResponse(templateToEdit);
+
+      testBed = await setup();
+
+      await act(async () => {
+        await nextTick();
+        testBed.component.update();
       });
     });
 
-    it('should send the correct payload with changed values', async () => {
-      const { actions } = testBed;
+    test('should set the correct page title', () => {
+      const { exists, find } = testBed;
+      const { name } = templateToEdit;
 
-      await act(async () => {
-        actions.clickSubmitButton();
-        await nextTick();
+      expect(exists('pageTitle')).toBe(true);
+      expect(find('pageTitle').text()).toEqual(`Edit template '${name}'`);
+    });
+
+    it('should set the nameField to readOnly', () => {
+      const { find } = testBed;
+
+      const nameInput = find('nameField.input');
+      expect(nameInput.props().disabled).toEqual(true);
+    });
+
+    describe('form payload', () => {
+      beforeEach(async () => {
+        const { actions, component, find, form } = testBed;
+
+        await act(async () => {
+          // Complete step 1 (logistics)
+          await actions.completeStepOne({
+            indexPatterns: UPDATED_INDEX_PATTERN,
+          });
+
+          // Step 2 (index settings)
+          await actions.completeStepTwo(JSON.stringify(SETTINGS));
+
+          // Step 3 (mappings)
+          // Select the first field to edit
+          actions.clickEditButtonAtField(0);
+          await nextTick();
+          component.update();
+          // verify edit field flyout
+          expect(find('mappingsEditorFieldEdit').length).toEqual(1);
+          // change field name
+          form.setInputValue('nameParameterInput', UPDATED_MAPPING_TEXT_FIELD_NAME);
+          // Save changes
+          actions.clickEditFieldUpdateButton();
+          await nextTick();
+          component.update();
+          // Proceed to the next step
+          actions.clickNextButton();
+          await nextTick(50);
+          component.update();
+
+          // Step 4 (aliases)
+          await actions.completeStepFour(JSON.stringify(ALIASES));
+        });
       });
 
-      const latestRequest = server.requests[server.requests.length - 1];
+      it('should send the correct payload with changed values', async () => {
+        const { actions } = testBed;
 
-      const { version, order } = templateToEdit;
+        await act(async () => {
+          actions.clickSubmitButton();
+          await nextTick();
+        });
 
-      const expected = JSON.stringify({
-        name: TEMPLATE_NAME,
-        version,
-        order,
-        indexPatterns: UPDATED_INDEX_PATTERN,
-        mappings: {
-          ...MAPPING,
-          properties: {
-            [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
-              type: 'text',
-              store: false,
-              index: true,
-              fielddata: false,
-              eager_global_ordinals: false,
-              index_phrases: false,
-              norms: true,
-              index_options: 'positions',
+        const latestRequest = server.requests[server.requests.length - 1];
+
+        const { version, order } = templateToEdit;
+
+        const expected = {
+          name: TEMPLATE_NAME,
+          version,
+          order,
+          indexPatterns: UPDATED_INDEX_PATTERN,
+          mappings: {
+            ...MAPPING,
+            properties: {
+              [UPDATED_MAPPING_TEXT_FIELD_NAME]: {
+                type: 'text',
+                store: false,
+                index: true,
+                fielddata: false,
+                eager_global_ordinals: false,
+                index_phrases: false,
+                norms: true,
+                index_options: 'positions',
+              },
             },
           },
-        },
-        isManaged: false,
-        settings: SETTINGS,
-        aliases: ALIASES,
+          isManaged: false,
+          settings: SETTINGS,
+          aliases: ALIASES,
+        };
+        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
       });
-
-      expect(JSON.parse(latestRequest.requestBody).body).toEqual(expected);
     });
   });
 });

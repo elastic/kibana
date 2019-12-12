@@ -5,4 +5,4 @@
  */
 
 export { registerTestBed } from './testbed';
-export { TestBed, TestBedConfig, SetupFunc } from './types';
+export { TestBed, TestBedConfig, SetupFunc, UnwrapPromise } from './types';
