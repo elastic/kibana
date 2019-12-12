@@ -9,10 +9,10 @@ import { BehaviorSubject } from 'rxjs';
 import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
-import { licenseMock } from '../../../../../../plugins/licensing/server/licensing.mock';
+import { licensingMock } from '../../../../../../plugins/licensing/server/licensing.mock';
 
 function createLicense(license = {}, features = {}) {
-  return licenseMock.create({
+  return licensingMock.createLicense({
     license: {
       uid: 'custom-uid',
       type: 'gold',
