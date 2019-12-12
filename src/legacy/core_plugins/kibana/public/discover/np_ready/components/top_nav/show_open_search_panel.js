@@ -20,7 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OpenSearchPanel } from './open_search_panel';
-import { I18nProvider } from '@kbn/i18n/src/react';
+import { I18nProvider } from '@kbn/i18n/react';
 
 let isOpen = false;
 
