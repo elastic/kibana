@@ -23,8 +23,8 @@ import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { DataPublicPluginStart, esFilters } from '../..';
-import { SearchBarOwnProps, SearchBar } from '.';
 import { QueryStart } from '../../query';
+import { SearchBarOwnProps, SearchBar } from './search_bar';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
