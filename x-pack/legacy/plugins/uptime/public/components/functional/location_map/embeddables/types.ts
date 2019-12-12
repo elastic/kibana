@@ -24,4 +24,8 @@ export interface MapEmbeddableInput extends EmbeddableInput {
   timeRange?: TimeRange;
 }
 
-export type MapEmbeddable = IEmbeddable<MapEmbeddableInput, EmbeddableOutput>;
+export interface CustomProps {
+  setLayerList: Function;
+}
+
+export type MapEmbeddable = IEmbeddable<MapEmbeddableInput, EmbeddableOutput> & CustomProps;

@@ -47,21 +47,24 @@ const EmbeddedPanel = styled.div`
 export const EmbeddedMap = ({ upPoints, downPoints }: EmbeddedMapProps) => {
   const [embeddable, setEmbeddable] = useState<MapEmbeddable>();
 
-  async function setupEmbeddable() {
-    const mapState = {
-      layerList: getLayerList(upPoints, downPoints),
-      title: i18n.MAP_TITLE,
-    };
-    // @ts-ignore
-    const embeddableObject = await factory.createFromState(mapState, input, undefined);
-
-    setEmbeddable(embeddableObject);
-  }
   useEffect(() => {
-    if (embeddable?.destroy) {
-      embeddable.destroy();
+    async function setupEmbeddable() {
+      const mapState = {
+        layerList: getLayerList(upPoints, downPoints),
+        title: i18n.MAP_TITLE,
+      };
+      // @ts-ignore
+      const embeddableObject = await factory.createFromState(mapState, input, undefined);
+
+      setEmbeddable(embeddableObject);
     }
     setupEmbeddable();
+  }, []);
+
+  useEffect(() => {
+    if (embeddable) {
+      embeddable.setLayerList(getLayerList(upPoints, downPoints));
+    }
   }, [upPoints, downPoints]);
 
   useEffect(() => {
