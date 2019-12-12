@@ -25,7 +25,6 @@ import { Authentication, setupAuthentication } from './authentication';
 import { Authorization, setupAuthorization } from './authorization';
 import { createConfig$ } from './config';
 import { defineRoutes } from './routes';
-import { durationToMs } from './utils';
 import { SecurityLicenseService, SecurityLicense } from './licensing';
 import { setupSavedObjects } from './saved_objects';
 import { SecurityAuditLogger } from './audit';
@@ -73,10 +72,6 @@ export interface PluginSetupContract {
     registerPrivilegesWithCluster: () => void;
     license: SecurityLicense;
     config: RecursiveReadonly<{
-      session: {
-        idleTimeout: number | null;
-        lifespan: number | null;
-      };
       secureCookies: boolean;
       cookieName: string;
       loginAssistanceMessage: string;
@@ -210,10 +205,6 @@ export class Plugin {
         // exception may be `sessionTimeout` as other parts of the app may want to know it.
         config: {
           loginAssistanceMessage: config.loginAssistanceMessage,
-          session: {
-            idleTimeout: durationToMs(config.session.idleTimeout),
-            lifespan: durationToMs(config.session.lifespan),
-          },
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
         },

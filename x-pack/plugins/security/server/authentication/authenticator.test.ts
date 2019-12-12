@@ -440,7 +440,7 @@ describe('Authenticator', () => {
       // Create new authenticator with non-null session `idleTimeout`.
       mockOptions = getMockOptions({
         session: {
-          idleTimeout: 3600 * 24,
+          idleTimeout: duration(3600 * 24),
           lifespan: null,
         },
         authc: { providers: ['basic'], oidc: {}, saml: {} },
