@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('displays message acknowledging logout', async () => {
         await PageObjects.security.login();
-        await PageObjects.security.forceLogout();
+        await PageObjects.security.logout();
 
         const logoutMessage = await testSubjects.getVisibleText('loginInfoMessage');
         expect(logoutMessage).to.eql('You have logged out of Kibana.');
