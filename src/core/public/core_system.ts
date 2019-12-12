@@ -64,7 +64,7 @@ export interface CoreContext {
 }
 
 /** @internal */
-export interface InternalCoreSetup extends Omit<CoreSetup, 'application'> {
+export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
   application: InternalApplicationSetup;
   injectedMetadata: InjectedMetadataSetup;
 }
@@ -253,11 +253,11 @@ export class CoreSystem {
         docLinks,
         http,
         i18n,
+        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
         notifications,
         overlays,
         savedObjects,
         uiSettings,
-        injectedMetadata: pick(injectedMetadata, ['getInjectedVar']),
       }));
 
       const core: InternalCoreStart = {

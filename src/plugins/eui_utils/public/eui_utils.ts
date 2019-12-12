@@ -42,7 +42,7 @@ export class EuiUtils {
       useEffect(() => {
         const s = getChartsTheme$().subscribe(update);
         return () => s.unsubscribe();
-      }, [false]);
+      }, []);
 
       return value;
     };

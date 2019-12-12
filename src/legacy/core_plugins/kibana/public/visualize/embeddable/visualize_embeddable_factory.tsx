@@ -199,7 +199,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory<
           editorParams: ['addToDashboard'],
         },
         npStart.core.http.basePath.prepend,
-        npStart.core.uiSettings
+        npStart.core.uiSettings,
+        npStart.core.savedObjects
       );
     }
     return undefined;

@@ -45,7 +45,6 @@ export { PrivateProvider } from 'ui/private/private';
 
 export { SavedObjectRegistryProvider } from 'ui/saved_objects';
 export { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
-export { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 export { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 
 export { subscribeWithScope } from 'ui/utils/subscribe_with_scope';

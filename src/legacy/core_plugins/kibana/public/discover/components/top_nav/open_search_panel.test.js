@@ -23,7 +23,7 @@ import { shallow } from 'enzyme';
 jest.mock('../../kibana_services', () => {
   return {
     getServices: () => ({
-      SavedObjectFinder: jest.fn()
+      core: { uiSettings: {}, savedObjects: {} },
     }),
   };
 });

@@ -35,7 +35,7 @@ export const WithStreamItems: React.FunctionComponent<{
             createLogEntryStreamItem(logEntry, logEntryHighlightsById[logEntry.gid] || [])
           ),
 
-    [logEntries.entries, logEntryHighlightsById]
+    [isAutoReloading, logEntries.entries, logEntries.isReloading, logEntryHighlightsById]
   );
 
   return children({
