@@ -17,20 +17,29 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { DefaultEditorSize } from 'ui/vis/editor_size';
+import { VisOptionsProps } from 'ui/vis/editors/default';
+import { npStart } from 'ui/new_platform';
 import { getTimelionRequestHandler } from './timelion_request_handler';
 import visConfigTemplate from './timelion_vis.html';
-import editorConfigTemplate from './timelion_vis_params.html';
 import { TimelionVisualizationDependencies } from '../plugin';
 // @ts-ignore
 import { AngularVisController } from '../../../../ui/public/vis/vis_types/angular_vis_type';
+import { TimelionOptions } from './timelion_options';
+import { VisParams } from '../timelion_vis_fn';
+import { getArgValueSuggestions } from '../services/arg_value_suggestions';
 
 export const TIMELION_VIS_NAME = 'timelion';
 
 export function getTimelionVisualization(dependencies: TimelionVisualizationDependencies) {
   const timelionRequestHandler = getTimelionRequestHandler(dependencies);
+  const argValueSuggestions = getArgValueSuggestions(
+    npStart.plugins.data.indexPatterns,
+    npStart.core.savedObjects.client
+  );
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
@@ -50,7 +59,14 @@ export function getTimelionVisualization(dependencies: TimelionVisualizationDepe
       template: visConfigTemplate,
     },
     editorConfig: {
-      optionsTemplate: editorConfigTemplate,
+      optionsTemplate: (props: VisOptionsProps<VisParams>) => (
+        <TimelionOptions
+          {...props}
+          uiSettings={dependencies.uiSettings}
+          http={dependencies.http}
+          argValueSuggestions={argValueSuggestions}
+        />
+      ),
       defaultSize: DefaultEditorSize.MEDIUM,
     },
     requestHandler: timelionRequestHandler,

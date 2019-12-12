@@ -334,6 +334,7 @@
     "@types/mustache": "^0.8.31",
     "@types/node": "^10.12.27",
     "@types/opn": "^5.1.0",
+    "@types/pegjs": "^0.10.1",
     "@types/pngjs": "^3.3.2",
     "@types/podium": "^1.0.0",
     "@types/prop-types": "^15.5.3",

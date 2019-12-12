@@ -28,7 +28,7 @@ const name = 'timelion_vis';
 
 interface Arguments {
   expression: string;
-  interval: any;
+  interval: string;
 }
 
 interface RenderValue {
@@ -38,7 +38,7 @@ interface RenderValue {
 }
 
 type Context = KibanaContext | null;
-type VisParams = Arguments;
+export type VisParams = Arguments;
 type Return = Promise<Render<RenderValue>>;
 
 export const getTimelionVisualizationConfig = (
@@ -60,7 +60,7 @@ export const getTimelionVisualizationConfig = (
       help: '',
     },
     interval: {
-      types: ['string', 'null'],
+      types: ['string'],
       default: 'auto',
       help: '',
     },
