@@ -32,8 +32,10 @@ import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/publ
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
+import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
 
 export interface PluginsSetup {
+  bfetch: BfetchPublicSetup;
   data: ReturnType<DataPlugin['setup']>;
   embeddable: IEmbeddableSetup;
   expressions: ReturnType<ExpressionsPlugin['setup']>;
@@ -46,6 +48,7 @@ export interface PluginsSetup {
 }
 
 export interface PluginsStart {
+  bfetch: BfetchPublicStart;
   data: ReturnType<DataPlugin['start']>;
   embeddable: IEmbeddableStart;
   eui_utils: EuiUtilsStart;

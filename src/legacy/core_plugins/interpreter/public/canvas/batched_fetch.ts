@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+import { npStart } from 'ui/new_platform';
 import { FUNCTIONS_URL } from './consts';
 
 // TODO: Import this type from kibana_util.
@@ -130,6 +131,18 @@ function createFuture() {
  */
 async function processBatch(ajaxStream: AjaxStream, batch: Batch) {
   try {
+    const { stream, promise } = npStart.plugins.bfetch.fetchStreaming({
+      url: FUNCTIONS_URL,
+      body: JSON.stringify({
+        functions: Object.values(batch).map(({ request }) => request),
+      }),
+    });
+
+    stream.subscribe((message: string) => {
+      // eslint-disable-next-line
+      console.log('message', message);
+    });
+
     await ajaxStream({
       url: FUNCTIONS_URL,
       body: JSON.stringify({

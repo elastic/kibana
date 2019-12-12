@@ -71,7 +71,7 @@ export class BfetchPublicPlugin
   ): BfetchPublicSetup['fetchStreaming'] => params =>
     fetchStreamingStatic({
       ...params,
-      url: `${basePath}/bfetch/stream/${removeLeadingSlash(params.url)}`,
+      url: `${basePath}/${removeLeadingSlash(params.url)}`,
       headers: {
         'Content-Type': 'application/json',
         'kbn-version': version,
