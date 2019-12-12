@@ -22,6 +22,7 @@ import { npStart } from 'ui/new_platform';
 import { uiModules } from 'ui/modules';
 import { SavedObject } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
+// @ts-ignore
 import { extractReferences, injectReferences } from './saved_dashboard_references';
 import { createDashboardEditUrl } from '../dashboard_constants';
 
@@ -79,11 +80,6 @@ module.factory('SavedDashboard', function() {
         },
       },
     };
-
-    // Order these fields to the top, the rest are alphabetical
-    public static fieldOrder = ['title', 'description'];
-
-    public static searchSource = true;
     public showInRecentlyAccessed = true;
 
     constructor(id: string) {
@@ -115,9 +111,7 @@ module.factory('SavedDashboard', function() {
           refreshInterval: undefined,
         },
       });
-    }
-    getFullPath() {
-      return `/app/kibana#${createDashboardEditUrl(this.id)}`;
+      this.getFullPath = () => `/app/kibana#${createDashboardEditUrl(String(this.id))}`;
     }
 
     getQuery() {

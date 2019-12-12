@@ -473,8 +473,8 @@ export class DashboardStateManager {
    */
   public applyFilters(query: Query, filters: esFilters.Filter[]) {
     this.appState.query = query;
-    this.savedDashboard.searchSource.setField('query', query);
-    this.savedDashboard.searchSource.setField('filter', filters);
+    this.savedDashboard.searchSource!.setField('query', query);
+    this.savedDashboard.searchSource!.setField('filter', filters);
     this.saveState();
   }
 
@@ -490,6 +490,8 @@ export class DashboardStateManager {
     if (this.stateMonitor) {
       this.stateMonitor.destroy();
     }
-    this.savedDashboard.destroy();
+    if (typeof this.savedDashboard === 'object') {
+      this.savedDashboard.destroy();
+    }
   }
 }
