@@ -23,11 +23,8 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const a11y = getService('a11y');
 
-
   describe('Visualize', () => {
-
     before(async () => {
-
       await PageObjects.common.navigateToApp('visualize');
     });
 
@@ -40,10 +37,9 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    
     it.skip('create visualize button', async () => {
-     await PageObjects.visualize.clickNewVisualization();
-     await a11y.testAppSnapshot();
+      await PageObjects.visualize.clickNewVisualization();
+      await a11y.testAppSnapshot();
     });
   });
 }
