@@ -354,7 +354,7 @@ export class VectorStyle extends AbstractStyle {
     );
   }
 
-  _getFeatureStateParams() {
+  _getFeatureStyleParams() {
     return this.getDynamicPropertiesArray()
       .map(styleProperty => {
 
@@ -401,7 +401,7 @@ export class VectorStyle extends AbstractStyle {
       return;
     }
 
-    const featureStateParams  = this._getFeatureStateParams();
+    const featureStateParams  = this._getFeatureStyleParams();
     if (featureStateParams.length === 0) {
       return;
     }
