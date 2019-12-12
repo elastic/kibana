@@ -43,12 +43,9 @@ export function createSavedObjectClass(services: SavedObjectKibanaServices) {
    */
   class SavedObjectClass {
     constructor(config: SavedObjectConfig = {}) {
-      buildSavedObject(
-        // @ts-ignore
-        this,
-        config,
-        services
-      );
+      // @ts-ignore
+      const self: SavedObject = this;
+      buildSavedObject(self, config, services);
     }
   }
 
