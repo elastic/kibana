@@ -8,19 +8,16 @@ import { mount } from 'enzyme';
 import React from 'react';
 
 import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
-import { uiSettingsServiceMock } from '../../../../../../../src/core/public/ui_settings/ui_settings_service.mock';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { mockUseKibanaCore } from '../../mock/kibana_core';
+import { getKibanaCoreMock, mockKibanaCoreFactory } from '../../mock/kibana_core';
 import { QueryBar, QueryBarComponentProps } from '.';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
 
 jest.mock('ui/new_platform');
 
-jest.mock('../../lib/compose/kibana_core', () => ({
-  useKibanaCore: () => mockUseKibanaCore(),
-}));
+jest.mock('../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
 
-const mockUiSettingsForFilterManager = uiSettingsServiceMock.createSetupContract();
+const mockUiSettingsForFilterManager = getKibanaCoreMock().uiSettings;
 
 describe('QueryBar ', () => {
   // We are doing that because we need to wrapped this component with redux
@@ -59,7 +56,7 @@ describe('QueryBar ', () => {
           indexPattern={mockIndexPattern}
           isRefreshPaused={true}
           filterQuery={{ query: 'here: query', language: 'kuery' }}
-          filterManager={new FilterManager(mockUseKibanaCore().uiSettings)}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filters={[]}
           onChangedQuery={mockOnChangeQuery}
           onSubmitQuery={mockOnSubmitQuery}

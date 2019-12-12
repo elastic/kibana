@@ -6,4 +6,9 @@
 
 import { createUiNewPlatformMock } from 'ui/new_platform/__mocks__/helpers';
 
-export const mockUseKibanaCore = () => createUiNewPlatformMock().npStart.core;
+export const getKibanaCoreMock = () => createUiNewPlatformMock().npStart.core;
+
+export const mockKibanaCoreFactory = () => {
+  const coreMock = getKibanaCoreMock();
+  return { useKibanaCore: () => coreMock };
+};

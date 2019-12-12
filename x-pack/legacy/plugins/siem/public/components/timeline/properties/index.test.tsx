@@ -9,14 +9,12 @@ import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { mockGlobalState, apolloClientObservable } from '../../../mock';
-import { mockUseKibanaCore } from '../../../mock/kibana_core';
+import { mockKibanaCoreFactory } from '../../../mock/kibana_core';
 import { createStore, State } from '../../../store';
 
 import { Properties, showDescriptionThreshold, showNotesThreshold } from '.';
 
-jest.mock('../../../lib/compose/kibana_core', () => ({
-  useKibanaCore: () => mockUseKibanaCore(),
-}));
+jest.mock('../../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
 
 jest.mock('ui/vis/lib/timezone', () => ({
   timezoneProvider: () => () => 'America/New_York',

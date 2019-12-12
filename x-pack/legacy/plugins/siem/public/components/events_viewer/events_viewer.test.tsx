@@ -8,7 +8,7 @@ import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
 import { mockIndexPattern, TestProviders } from '../../mock';
-import { mockUseKibanaCore } from '../../mock/kibana_core';
+import { mockKibanaCoreFactory } from '../../mock/kibana_core';
 import { wait } from '../../lib/helpers';
 
 import { mockEventViewerResponse } from './mock';
@@ -21,9 +21,7 @@ import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
-jest.mock('../../lib/compose/kibana_core', () => ({
-  useKibanaCore: () => mockUseKibanaCore(),
-}));
+jest.mock('../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
 
 const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
 jest.mock('../../containers/detection_engine/rules/fetch_index_patterns');

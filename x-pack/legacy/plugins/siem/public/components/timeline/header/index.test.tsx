@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { Direction } from '../../../graphql/types';
-import { mockUseKibanaCore } from '../../../mock/kibana_core';
+import { mockKibanaCoreFactory } from '../../../mock/kibana_core';
 import { mockIndexPattern } from '../../../mock';
 import { TestProviders } from '../../../mock/test_providers';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
@@ -17,10 +17,7 @@ import { useMountAppended } from '../../../utils/use_mount_appended';
 
 import { TimelineHeaderComponent } from '.';
 
-jest.mock('../../../lib/compose/kibana_core', () => {
-  const useKibanaCore = mockUseKibanaCore();
-  return { useKibanaCore: () => useKibanaCore };
-});
+jest.mock('../../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;

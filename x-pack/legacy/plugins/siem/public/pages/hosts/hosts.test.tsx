@@ -12,7 +12,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { ActionCreator } from 'typescript-fsa';
 
 import '../../mock/match_media';
-import { mockUseKibanaCore } from '../../mock/kibana_core';
+import { mockKibanaCoreFactory } from '../../mock/kibana_core';
 import { SiemNavigation } from '../../components/navigation';
 import { mocksSource } from '../../containers/source/mock';
 import { wait } from '../../lib/helpers';
@@ -23,9 +23,7 @@ import { Hosts } from './hosts';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
-jest.mock('../../lib/compose/kibana_core', () => ({
-  useKibanaCore: () => mockUseKibanaCore(),
-}));
+jest.mock('../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

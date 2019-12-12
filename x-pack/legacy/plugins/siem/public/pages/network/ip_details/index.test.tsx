@@ -14,7 +14,7 @@ import { ActionCreator } from 'typescript-fsa';
 
 import '../../../mock/match_media';
 
-import { mockUseKibanaCore } from '../../../mock/kibana_core';
+import { mockKibanaCoreFactory } from '../../../mock/kibana_core';
 import { mocksSource } from '../../../containers/source/mock';
 import { FlowTarget } from '../../../graphql/types';
 import { apolloClientObservable, mockGlobalState, TestProviders } from '../../../mock';
@@ -29,9 +29,7 @@ const pop: Action = 'POP';
 
 type GlobalWithFetch = NodeJS.Global & { fetch: jest.Mock };
 
-jest.mock('../../../lib/compose/kibana_core', () => ({
-  useKibanaCore: () => mockUseKibanaCore(),
-}));
+jest.mock('../../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar

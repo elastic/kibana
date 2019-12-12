@@ -10,16 +10,12 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 
+import { TestProviders } from '../../mock';
+import { mockKibanaCoreFactory } from '../../mock/kibana_core';
+import { mocksSource } from '../../containers/source/mock';
 import { Overview } from './index';
 
-import '../../mock/ui_settings';
-import { mockUseKibanaCore } from '../../mock/kibana_core';
-import { mocksSource } from '../../containers/source/mock';
-import { TestProviders } from '../../mock';
-
-jest.mock('../../lib/compose/kibana_core', () => ({
-  useKibanaCore: () => mockUseKibanaCore(),
-}));
+jest.mock('../../lib/compose/kibana_core', () => mockKibanaCoreFactory());
 
 let localSource: Array<{
   request: {};
