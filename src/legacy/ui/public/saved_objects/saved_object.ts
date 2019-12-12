@@ -42,12 +42,6 @@ export function createSavedObjectClass(services: SavedObjectKibanaServices) {
    * @param {*} config
    */
   class SavedObjectClass {
-    public static fieldOrder = ['title', 'description'];
-    public static searchSource = true;
-    public id?: string;
-    public title: string = '';
-    public getFullPath?: () => string;
-
     constructor(config: SavedObjectConfig = {}) {
       // @ts-ignore
       const self: SavedObject = this;
@@ -55,7 +49,7 @@ export function createSavedObjectClass(services: SavedObjectKibanaServices) {
     }
   }
 
-  return SavedObjectClass;
+  return SavedObjectClass as new (config: SavedObjectConfig) => SavedObject;
 }
 // the old angular way, should be removed once no longer used
 export function SavedObjectProvider() {
