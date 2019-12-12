@@ -490,8 +490,6 @@ export class DashboardStateManager {
     if (this.stateMonitor) {
       this.stateMonitor.destroy();
     }
-    if (typeof this.savedDashboard === 'object') {
-      this.savedDashboard.destroy();
-    }
+    this.savedDashboard.destroy();
   }
 }

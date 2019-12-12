@@ -18,6 +18,7 @@
  */
 import angular from 'angular';
 import { npStart } from 'ui/new_platform';
+import { SearchSourceContract } from 'ui/courier';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import { SavedObject } from 'ui/saved_objects/types';
@@ -40,6 +41,7 @@ export interface SavedObjectDashboard extends SavedObject {
   uiStateJSON?: string;
   lastSavedTitle: string;
   refreshInterval?: RefreshInterval;
+  searchSource: SearchSourceContract;
   getQuery(): Query;
   getFilters(): esFilters.Filter[];
 }
