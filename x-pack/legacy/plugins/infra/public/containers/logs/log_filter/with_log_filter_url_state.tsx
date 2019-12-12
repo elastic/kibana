@@ -5,8 +5,8 @@
  */
 
 import React, { useContext } from 'react';
-import { LogFilterState, LogFilterStateParams } from './log_filter';
-import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
+import { LogFilterState, LogFilterStateParams } from './log_filter_state';
+import { replaceStateKeyInQueryString, UrlStateContainer } from '../../../utils/url_state';
 
 type LogFilterUrlState = LogFilterStateParams['filterQueryAsKuery'];
 
