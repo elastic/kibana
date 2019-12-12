@@ -17,9 +17,16 @@
  * under the License.
  */
 
-export { Lifecycle } from './lifecycle';
-export { LifecyclePhase } from './lifecycle_phase';
-export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Provider } from './providers';
-export { runTests, setupMocha } from './mocha';
-export { FailureMetadata } from './failure_metadata';
+import { resolve } from 'path';
+
+const job = process.env.JOB ? `job-${process.env.JOB}-` : '';
+const num = process.env.CI_WORKER_NUMBER ? `worker-${process.env.CI_WORKER_NUMBER}-` : '';
+
+export function makeJunitReportPath(rootDirectory: string, reportName: string) {
+  return resolve(
+    rootDirectory,
+    'target/junit',
+    process.env.JOB || '.',
+    `TEST-${job}${num}${reportName}.xml`
+  );
+}
