@@ -17,32 +17,25 @@
  * under the License.
  */
 
-import { BehaviorSubject, throwError } from 'rxjs';
-
 jest.mock('../../../legacy/server/kbn_server');
 jest.mock('../../../cli/cluster/cluster_manager');
-jest.mock('./plugins/find_legacy_plugin_specs.ts', () => ({
-  findLegacyPluginSpecs: (settings: Record<string, any>) => ({
-    pluginSpecs: [],
-    pluginExtendedConfig: settings,
-    disabledPluginSpecs: [],
-    uiExports: [],
-  }),
-}));
+
+import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
+
+import { BehaviorSubject, throwError } from 'rxjs';
 
 import { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from '.';
 // @ts-ignore: implicit any for JS file
 import MockClusterManager from '../../../cli/cluster/cluster_manager';
 import KbnServer from '../../../legacy/server/kbn_server';
 import { Config, Env, ObjectToConfigAdapter } from '../config';
-import { contextServiceMock } from '../context/context_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
-import { configServiceMock } from '../config/config_service.mock';
-
 import { BasePathProxyServer } from '../http';
-import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin } from '../plugins';
 
+import { configServiceMock } from '../config/config_service.mock';
+import { loggingServiceMock } from '../logging/logging_service.mock';
+import { contextServiceMock } from '../context/context_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
@@ -61,13 +54,17 @@ let startDeps: LegacyServiceStartDeps;
 
 const logger = loggingServiceMock.create();
 let configService: ReturnType<typeof configServiceMock.create>;
+let uuidSetup: ReturnType<typeof uuidServiceMock.createSetupContract>;
 
 beforeEach(() => {
   coreId = Symbol();
   env = Env.createDefault(getEnvOptions());
   configService = configServiceMock.create();
+  uuidSetup = uuidServiceMock.createSetupContract();
 
+  findLegacyPluginSpecsMock.mockClear();
   MockKbnServer.prototype.ready = jest.fn().mockReturnValue(Promise.resolve());
+  MockKbnServer.prototype.listen = jest.fn();
 
   setupDeps = {
     core: {
@@ -90,7 +87,7 @@ beforeEach(() => {
           browserConfigs: new Map(),
         },
       },
-      uuid: uuidServiceMock.createSetupContract(),
+      uuid: uuidSetup,
     },
     plugins: { 'plugin-id': 'plugin-value' },
   };
@@ -135,11 +132,15 @@ describe('once LegacyService is set up with connection info', () => {
 
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
-      { path: { autoListen: true }, server: { autoListen: true } },
       { path: { autoListen: true }, server: { autoListen: true } }, // Because of the mock, path also gets the value
+      expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
+    expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
+      path: { autoListen: true },
+      server: { autoListen: true },
+    });
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.listen).toHaveBeenCalledTimes(1);
@@ -162,10 +163,14 @@ describe('once LegacyService is set up with connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { path: { autoListen: false }, server: { autoListen: true } },
-      { path: { autoListen: false }, server: { autoListen: true } },
+      expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
+    expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
+      path: { autoListen: false },
+      server: { autoListen: true },
+    });
 
     const [mockKbnServer] = MockKbnServer.mock.instances;
     expect(mockKbnServer.ready).toHaveBeenCalledTimes(1);
@@ -299,10 +304,14 @@ describe('once LegacyService is set up without connection info', () => {
     expect(MockKbnServer).toHaveBeenCalledTimes(1);
     expect(MockKbnServer).toHaveBeenCalledWith(
       { path: {}, server: { autoListen: true } },
-      { path: {}, server: { autoListen: true } },
+      expect.objectContaining({ get: expect.any(Function) }),
       expect.any(Object),
       { disabledPluginSpecs: [], pluginSpecs: [], uiExports: [] }
     );
+    expect(MockKbnServer.mock.calls[0][1].get()).toEqual({
+      path: {},
+      server: { autoListen: true },
+    });
   });
 
   test('reconfigures logging configuration if new config is received.', async () => {
@@ -383,4 +392,35 @@ test('Cannot start without setup phase', async () => {
   await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Legacy service is not setup yet."`
   );
+});
+
+test('Sets the server.uuid property on the legacy configuration', async () => {
+  configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
+  const legacyService = new LegacyService({
+    coreId,
+    env,
+    logger,
+    configService: configService as any,
+  });
+
+  uuidSetup.getInstanceUuid.mockImplementation(() => 'UUID_FROM_SERVICE');
+
+  const configSetMock = jest.fn();
+
+  findLegacyPluginSpecsMock.mockImplementation((settings: Record<string, any>) => ({
+    pluginSpecs: [],
+    pluginExtendedConfig: {
+      has: jest.fn(),
+      get: jest.fn(() => settings),
+      set: configSetMock,
+    },
+    disabledPluginSpecs: [],
+    uiExports: [],
+  }));
+
+  await legacyService.discoverPlugins();
+  await legacyService.setup(setupDeps);
+
+  expect(configSetMock).toHaveBeenCalledTimes(1);
+  expect(configSetMock).toHaveBeenCalledWith('server.uuid', 'UUID_FROM_SERVICE');
 });

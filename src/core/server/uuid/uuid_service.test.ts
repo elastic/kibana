@@ -23,7 +23,6 @@ import { CoreContext } from '../core_context';
 
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { mockCoreContext } from '../core_context.mock';
-import { legacyServiceMock } from '../legacy/legacy_service.mock';
 
 jest.mock('./resolve_uuid', () => ({
   resolveInstanceUuid: jest.fn().mockResolvedValue('SOME_UUID'),
@@ -31,7 +30,6 @@ jest.mock('./resolve_uuid', () => ({
 
 describe('UuidService', () => {
   let logger: ReturnType<typeof loggingServiceMock.create>;
-  let legacyDiscover: ReturnType<typeof legacyServiceMock.createDiscover>;
   let coreContext: CoreContext;
   let service: UuidService;
 
@@ -39,19 +37,18 @@ describe('UuidService', () => {
     jest.clearAllMocks();
     logger = loggingServiceMock.create();
     coreContext = mockCoreContext.create({ logger });
-    legacyDiscover = legacyServiceMock.createDiscover();
     service = new UuidService(coreContext);
   });
 
   describe('#setup()', () => {
     it('calls manageInstanceUuid with core configuration service', async () => {
-      await service.setup({ legacyPlugins: legacyDiscover });
+      await service.setup();
       expect(resolveInstanceUuid).toHaveBeenCalledTimes(1);
       expect(resolveInstanceUuid).toHaveBeenCalledWith(coreContext.configService);
     });
 
     it('logs a message containing the UUID', async () => {
-      await service.setup({ legacyPlugins: legacyDiscover });
+      await service.setup();
       expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
         Array [
           Array [
@@ -62,16 +59,8 @@ describe('UuidService', () => {
     });
 
     it('returns the uuid resolved from manageInstanceUuid', async () => {
-      const setup = await service.setup({ legacyPlugins: legacyDiscover });
+      const setup = await service.setup();
       expect(setup.getInstanceUuid()).toEqual('SOME_UUID');
-    });
-
-    it('sets the uuid value in the legacy config', async () => {
-      await service.setup({ legacyPlugins: legacyDiscover });
-      expect(legacyDiscover.pluginExtendedConfig.set).toHaveBeenCalledWith(
-        'server.uuid',
-        'SOME_UUID'
-      );
     });
   });
 });
