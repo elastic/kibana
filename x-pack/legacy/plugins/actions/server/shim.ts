@@ -110,6 +110,7 @@ export function shim(
         return Rx.of({
           enabled: server.config().get('xpack.actions.enabled') as boolean,
           whitelistedHosts: server.config().get('xpack.actions.whitelistedHosts') as string[],
+          enabledTypes: server.config().get('xpack.actions.enabledTypes') as string[],
         }) as Rx.Observable<ActionsConfigType>;
       },
     },

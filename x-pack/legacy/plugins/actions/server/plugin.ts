@@ -109,9 +109,11 @@ export class Plugin {
 
     const actionExecutor = new ActionExecutor();
     const taskRunnerFactory = new TaskRunnerFactory(actionExecutor);
+    const actionsConfigUtils = getActionsConfigurationUtilities(config as ActionsConfigType);
     const actionTypeRegistry = new ActionTypeRegistry({
       taskRunnerFactory,
       taskManager: plugins.task_manager,
+      actionsConfigUtils,
     });
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -121,7 +123,7 @@ export class Plugin {
     registerBuiltInActionTypes({
       logger: this.logger,
       actionTypeRegistry,
-      actionsConfigUtils: getActionsConfigurationUtilities(config as ActionsConfigType),
+      actionsConfigUtils,
     });
 
     // Routes

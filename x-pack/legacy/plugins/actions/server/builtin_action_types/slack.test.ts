@@ -6,6 +6,7 @@
 
 import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
 import { ActionTypeRegistry } from '../action_type_registry';
+import { getMockActionConfig } from '../actions_config.mock';
 import { savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
 import { ActionExecutor, validateParams, validateSecrets, TaskRunnerFactory } from '../lib';
 import { getActionType } from './slack';
@@ -41,6 +42,7 @@ beforeAll(() => {
   actionTypeRegistry = new ActionTypeRegistry({
     taskManager: taskManagerMock.create(),
     taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+    actionsConfigUtils: getMockActionConfig(),
   });
   actionTypeRegistry.register(getActionType({ executor: mockSlackExecutor }));
   actionType = actionTypeRegistry.get(ACTION_TYPE_ID);

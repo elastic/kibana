@@ -42,6 +42,10 @@ export function actions(kibana: any) {
             )
             .sparse(false)
             .default([]),
+          enabledTypes: Joi.array()
+            .items(Joi.string())
+            .sparse(false)
+            .default(['*']),
         })
         .default();
     },

@@ -6,18 +6,13 @@
 
 import { getActionType } from './webhook';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { getMockActionConfig } from '../actions_config.mock';
 import { ActionType } from '../types';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../../src/core/server';
 
 const ACTION_TYPE_ID = '.webhook';
-const configUtilsMock: ActionsConfigurationUtilities = {
-  isWhitelistedHostname: _ => true,
-  isWhitelistedUri: _ => true,
-  ensureWhitelistedHostname: _ => {},
-  ensureWhitelistedUri: _ => {},
-};
+const configUtilsMock = getMockActionConfig();
 
 let actionType: ActionType;
 let mockedLogger: jest.Mocked<Logger>;

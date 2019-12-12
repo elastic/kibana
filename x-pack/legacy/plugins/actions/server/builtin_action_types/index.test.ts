@@ -5,7 +5,7 @@
  */
 
 import { ActionExecutor, TaskRunnerFactory } from '../lib';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import { getMockActionConfig } from '../actions_config.mock';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { taskManagerMock } from '../../../task_manager/task_manager.mock';
 import { registerBuiltInActionTypes } from './index';
@@ -13,12 +13,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { loggingServiceMock } from '../../../../../../src/core/server/mocks';
 
 const ACTION_TYPE_IDS = ['.index', '.email', '.pagerduty', '.server-log', '.slack', '.webhook'];
-const MOCK_KIBANA_CONFIG_UTILS: ActionsConfigurationUtilities = {
-  isWhitelistedHostname: _ => true,
-  isWhitelistedUri: _ => true,
-  ensureWhitelistedHostname: _ => {},
-  ensureWhitelistedUri: _ => {},
-};
+const MockConfigUtils = getMockActionConfig();
 
 export function createActionTypeRegistry(): {
   logger: jest.Mocked<Logger>;
@@ -28,11 +23,12 @@ export function createActionTypeRegistry(): {
   const actionTypeRegistry = new ActionTypeRegistry({
     taskManager: taskManagerMock.create(),
     taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+    actionsConfigUtils: MockConfigUtils,
   });
   registerBuiltInActionTypes({
     logger,
     actionTypeRegistry,
-    actionsConfigUtils: MOCK_KIBANA_CONFIG_UTILS,
+    actionsConfigUtils: MockConfigUtils,
   });
   return { logger, actionTypeRegistry };
 }

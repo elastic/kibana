@@ -11,6 +11,7 @@ import { ActionsClient } from './actions_client';
 import { ExecutorType } from './types';
 import { ActionExecutor, TaskRunnerFactory } from './lib';
 import { taskManagerMock } from '../../task_manager/task_manager.mock';
+import { getMockActionConfig } from './actions_config.mock';
 import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
@@ -25,6 +26,7 @@ const mockTaskManager = taskManagerMock.create();
 const actionTypeRegistryParams = {
   taskManager: mockTaskManager,
   taskRunnerFactory: new TaskRunnerFactory(new ActionExecutor()),
+  actionsConfigUtils: getMockActionConfig(),
 };
 
 let actionsClient: ActionsClient;
