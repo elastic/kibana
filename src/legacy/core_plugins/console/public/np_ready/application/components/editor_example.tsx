@@ -39,5 +39,16 @@ export function EditorExample(props: EditorExampleProps) {
     };
   }, [elemId]);
 
-  return <div id={elemId} className="conHelp__example" />;
+  return (
+    <>
+      {/* Axe complains about Ace's textarea element missing a label, which interferes with our
+      automated a11y tests per #52136. This wrapper does nothing to address a11y but it does
+      satisfy Axe. */}
+
+      {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+      <label>
+        <div id={elemId} className="conHelp__example" />
+      </label>
+    </>
+  );
 }
