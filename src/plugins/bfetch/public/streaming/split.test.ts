@@ -24,7 +24,7 @@ test('splits a single IP address', () => {
   const ip = '127.0.0.1';
   const list: string[] = [];
   const subject = new Subject<string>();
-  const splitted = split(subject, '.');
+  const splitted = split('.')(subject);
 
   splitted.subscribe(value => list.push(value));
 
@@ -53,7 +53,7 @@ for (const stream of streams) {
     for (let j = 0; j < 100; j++) {
       const list: string[] = [];
       const subject = new Subject<string>();
-      const splitted = split(subject, '.');
+      const splitted = split('.')(subject);
       splitted.subscribe(value => list.push(value));
       let i = 0;
       while (i < stream.length) {
