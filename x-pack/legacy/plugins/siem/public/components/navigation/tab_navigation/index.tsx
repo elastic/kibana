@@ -79,7 +79,7 @@ export const TabNavigationComponent = (props: TabNavigationProps) => {
           />
         );
       }),
-    [navTabs]
+    [navTabs, selectedTabId]
   );
 
   return <EuiTabs display={display}>{renderTabs}</EuiTabs>;
