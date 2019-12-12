@@ -18,9 +18,7 @@
  */
 
 import { defer } from 'src/plugins/kibana_utils/common';
-import { filter, map } from 'rxjs/operators';
 import { fromStreamingXhr } from './from_streaming_xhr';
-import { split } from './split';
 
 export interface FetchStreamingParams {
   url: string;
@@ -31,7 +29,7 @@ export interface FetchStreamingParams {
 
 /**
  * Sends an AJAX request to the server, and processes the result as a
- * streaming HTTP/1 response.
+ * streaming HTTP/1 response. Streams data as text through observable.
  */
 export function fetchStreaming<T>({
   url,
@@ -39,7 +37,7 @@ export function fetchStreaming<T>({
   method = 'POST',
   body = '',
 }: FetchStreamingParams) {
-  const xhr = new XMLHttpRequest();
+  const xhr = new window.XMLHttpRequest();
   const { promise, resolve, reject } = defer<void>();
 
   // Begin the request
@@ -49,13 +47,9 @@ export function fetchStreaming<T>({
   // Set the HTTP headers
   Object.entries(headers).forEach(([k, v]) => xhr.setRequestHeader(k, v));
 
-  const responses = fromStreamingXhr(xhr).pipe(
-    split('\n'),
-    filter<string>(Boolean),
-    map<string, T>((str: string) => JSON.parse(str))
-  );
+  const stream = fromStreamingXhr(xhr);
 
-  responses.subscribe({
+  stream.subscribe({
     complete: () => resolve(),
     error: error => reject(error),
   });
@@ -66,6 +60,6 @@ export function fetchStreaming<T>({
   return {
     xhr,
     promise,
-    responses,
+    stream,
   };
 }
