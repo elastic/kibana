@@ -8,7 +8,7 @@ import { format as formatUrl } from 'url';
 
 import * as legacyElasticsearch from 'elasticsearch';
 
-import shieldPlugin from '../../../legacy/server/lib/esjs_shield_plugin';
+import { elasticsearchClientPlugin } from '../../../plugins/security/server/elasticsearch_client_plugin';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { DEFAULT_API_VERSION } from '../../../../src/core/server/elasticsearch/elasticsearch_config';
 
@@ -19,6 +19,6 @@ export function LegacyEsProvider({ getService }) {
     apiVersion: DEFAULT_API_VERSION,
     host: formatUrl(config.get('servers.elasticsearch')),
     requestTimeout: config.get('timeouts.esRequestTimeout'),
-    plugins: [shieldPlugin],
+    plugins: [elasticsearchClientPlugin],
   });
 }

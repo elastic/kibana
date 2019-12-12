@@ -10,6 +10,7 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['monitoring']);
+  const find = getService('find');
 
   const SUBJ_LISTING_PAGE = 'logstashPipelinesListing';
 
@@ -32,6 +33,12 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
 
     getRows() {
       return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_CONTAINER);
+    }
+
+    async waitForTableToFinishLoading() {
+      await retry.try(async () => {
+        await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 5000);
+      });
     }
 
     async getPipelinesAll() {
@@ -57,21 +64,25 @@ export function MonitoringLogstashPipelinesProvider({ getService, getPageObjects
     async clickIdCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_ID_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      await button.click();
+      await this.waitForTableToFinishLoading();
     }
 
     async clickEventsEmittedRateCol() {
       const headerCell = await testSubjects.find(SUBJ_TABLE_SORT_EVENTS_EMITTED_RATE_COL);
       const button = await headerCell.findByTagName('button');
-      return button.click();
+      await button.click();
+      await this.waitForTableToFinishLoading();
     }
 
-    setFilter(text) {
-      return PageObjects.monitoring.tableSetFilter(SUBJ_SEARCH_BAR, text);
+    async setFilter(text) {
+      await PageObjects.monitoring.tableSetFilter(SUBJ_SEARCH_BAR, text);
+      await this.waitForTableToFinishLoading();
     }
 
-    clearFilter() {
-      return PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
+    async clearFilter() {
+      await PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
+      await this.waitForTableToFinishLoading();
     }
 
     assertNoData() {

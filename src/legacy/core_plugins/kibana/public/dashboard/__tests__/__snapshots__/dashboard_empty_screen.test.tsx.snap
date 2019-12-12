@@ -306,40 +306,56 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                           className="euiSpacer euiSpacer--m"
                         />
                       </EuiSpacer>
-                      <EuiText
+                      <p
                         data-test-subj="linkToVisualizeParagraph"
                       >
-                        <div
-                          className="euiText euiText--medium"
-                          data-test-subj="linkToVisualizeParagraph"
+                        <EuiButton
+                          data-test-subj="addVisualizationButton"
+                          fill={true}
+                          iconSide="right"
+                          iconType="arrowDown"
                         >
-                          <p>
-                            <FormattedMessage
-                              defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
-                              id="kbn.dashboard.addVisualizationDescription3"
-                              values={
-                                Object {
-                                  "visualizeAppLink": <a
-                                    className="euiLink"
-                                    href="#/visualize"
-                                  >
-                                    visit the Visualize app
-                                  </a>,
-                                }
-                              }
+                          <button
+                            className="euiButton euiButton--primary euiButton--iconRight euiButton--fill"
+                            data-test-subj="addVisualizationButton"
+                            type="button"
+                          >
+                            <span
+                              className="euiButton__content"
                             >
-                              If you haven't set up any visualizations yet, 
-                              <a
-                                className="euiLink"
-                                href="#/visualize"
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiButton__icon"
+                                size="m"
+                                type="arrowDown"
                               >
-                                visit the Visualize app
-                              </a>
-                               to create your first visualization
-                            </FormattedMessage>
-                          </p>
-                        </div>
-                      </EuiText>
+                                <EuiIconEmpty
+                                  aria-hidden="true"
+                                  className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                  focusable="false"
+                                  style={null}
+                                >
+                                  <svg
+                                    aria-hidden="true"
+                                    className="euiIcon euiIcon--medium euiIcon-isLoading euiButton__icon"
+                                    focusable="false"
+                                    height={16}
+                                    style={null}
+                                    viewBox="0 0 16 16"
+                                    width={16}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  />
+                                </EuiIconEmpty>
+                              </EuiIcon>
+                              <span
+                                className="euiButton__text"
+                              >
+                                Create new
+                              </span>
+                            </span>
+                          </button>
+                        </EuiButton>
+                      </p>
                     </div>
                   </EuiPanel>
                 </EuiPageContent>
