@@ -376,7 +376,7 @@
     "xregexp": "4.2.4"
   },
   "engines": {
-    "yarn": "^1.10.1"
+    "yarn": "^1.21.1"
   },
   "workspaces": {
     "nohoist": [
