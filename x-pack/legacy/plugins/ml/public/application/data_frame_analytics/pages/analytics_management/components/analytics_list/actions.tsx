@@ -17,6 +17,7 @@ import {
   getAnalysisType,
   isRegressionAnalysis,
   isOutlierAnalysis,
+  isClassificationAnalysis,
 } from '../../../../common/analytics';
 
 import { getResultsUrl, isDataFrameAnalyticsRunning, DataFrameAnalyticsListRow } from './common';
@@ -31,7 +32,9 @@ export const AnalyticsViewAction = {
     const analysisType = getAnalysisType(item.config.analysis);
     const jobStatus = item.stats.state;
     const isDisabled =
-      !isRegressionAnalysis(item.config.analysis) && !isOutlierAnalysis(item.config.analysis);
+      !isRegressionAnalysis(item.config.analysis) &&
+      !isOutlierAnalysis(item.config.analysis) &&
+      !isClassificationAnalysis(item.config.analysis);
 
     const url = getResultsUrl(item.id, analysisType, jobStatus);
     return (

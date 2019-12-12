@@ -7957,7 +7957,6 @@
     "xpack.ml.dataframe.analytics.regressionExploration.evaluateError": "加载数据时出错。",
     "xpack.ml.dataframe.analytics.regressionExploration.generalError": "加载数据时出错。",
     "xpack.ml.dataframe.analytics.regressionExploration.generalizationErrorTitle": "泛化误差",
-    "xpack.ml.dataframe.analytics.regressionExploration.jobIdTitle": "作业 ID {jobId}",
     "xpack.ml.dataframe.analytics.regressionExploration.meanSquaredErrorText": "均方误差",
     "xpack.ml.dataframe.analytics.regressionExploration.noDataCalloutBody": "该索引的查询未返回结果。请确保作业已完成且索引包含文档。",
     "xpack.ml.dataframe.analytics.regressionExploration.noDataCalloutTitle": "空的索引查询结果。",

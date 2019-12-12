@@ -3,6 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import React, { useEffect, useState } from 'react';
 
@@ -15,7 +20,7 @@ import { getNestedProperty } from '../../../../../util/object_utils';
 import { SavedSearchQuery } from '../../../../../contexts/kibana';
 
 import {
-  getDefaultRegressionFields,
+  getDefaultClassificationFields,
   getFlattenedFields,
   DataFrameAnalyticsConfig,
   EsFieldName,
@@ -92,7 +97,7 @@ export const useExploreData = (
         }
 
         if (selectedFields.length === 0) {
-          const newSelectedFields = getDefaultRegressionFields(docs, jobConfig);
+          const newSelectedFields = getDefaultClassificationFields(docs, jobConfig);
           setSelectedFields(newSelectedFields);
         }
 

@@ -23,8 +23,8 @@ interface GetDataFrameAnalyticsResponse {
 export const ExplorationTitle: React.FC<{ jobId: string }> = ({ jobId }) => (
   <EuiTitle size="xs">
     <span>
-      {i18n.translate('xpack.ml.dataframe.analytics.regressionExploration.tableJobIdTitle', {
-        defaultMessage: 'Destination index for regression job ID {jobId}',
+      {i18n.translate('xpack.ml.dataframe.analytics.classificationExploration.tableJobIdTitle', {
+        defaultMessage: 'Destination index for classification job ID {jobId}',
         values: { jobId },
       })}
     </span>
@@ -36,7 +36,7 @@ interface Props {
   jobStatus: DATA_FRAME_TASK_STATE;
 }
 
-export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
+export const ClassificationExploration: FC<Props> = ({ jobId, jobStatus }) => {
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
@@ -54,6 +54,15 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
       ) {
         setJobConfig(analyticsConfigs.data_frame_analytics[0]);
         setIsLoadingJobConfig(false);
+      } else {
+        setJobConfigErrorMessage(
+          i18n.translate(
+            'xpack.ml.dataframe.analytics.classificationExploration.jobConfigurationNoResultsMessage',
+            {
+              defaultMessage: 'No results found.',
+            }
+          )
+        );
       }
     } catch (e) {
       if (e.message !== undefined) {
@@ -76,7 +85,7 @@ export const RegressionExploration: FC<Props> = ({ jobId, jobStatus }) => {
         <EuiSpacer />
         <EuiCallOut
           title={i18n.translate(
-            'xpack.ml.dataframe.analytics.regressionExploration.jobConfigurationFetchError',
+            'xpack.ml.dataframe.analytics.classificationExploration.jobConfigurationFetchError',
             {
               defaultMessage:
                 'Unable to fetch results. An error occurred loading the job configuration data.',
