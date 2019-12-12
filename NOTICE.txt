@@ -1,3 +1,16 @@
+All files under the /resources directory
+Copyright 2019 LogRhythm, Inc
+Licensed under the LogRhythm Global End User License Agreement,
+which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+
+---
+package.json, tsconfig.json, yarn.lock
+THESE FILES HAVE BEEN MODIFIED FROM THE ORIGINAL SOURCE COMMIT OF e633644c43a0a0271e0b6c32c382ce1db6b413c3
+Copyright 2019 LogRhythm, Inc
+Licensed under the LogRhythm Global End User License Agreement,
+which can be found through this page: https://logrhythm.com/about/logrhythm-terms-and-conditions/
+
+---
 Kibana source code with Kibana X-Pack source code
 Copyright 2012-2020 Elasticsearch B.V.
 
