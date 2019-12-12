@@ -13,10 +13,8 @@ import {
   ValidationFuncArg,
   fieldFormatters,
 } from '../shared_imports';
-import { INDEX_DEFAULT } from '../constants';
-import { AliasOption, DataType } from '../types';
-
-import { ComboBoxOption } from '../types';
+import { INDEX_DEFAULT, TYPE_DEFINITION } from '../constants';
+import { AliasOption, DataType, ComboBoxOption } from '../types';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -61,7 +59,9 @@ const indexOptionsConfig = {
 export const PARAMETERS_DEFINITION = {
   name: {
     fieldConfig: {
-      label: 'Field name',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.nameFieldLabel', {
+        defaultMessage: 'Field name',
+      }),
       defaultValue: '',
       validations: [
         {
@@ -96,9 +96,35 @@ export const PARAMETERS_DEFINITION = {
   },
   type: {
     fieldConfig: {
-      label: 'Field type',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.typeFieldLabel', {
+        defaultMessage: 'Field type',
+      }),
       defaultValue: 'text',
-      type: FIELD_TYPES.SELECT,
+      deserializer: (fieldType: DataType | undefined) => {
+        if (typeof fieldType === 'string' && Boolean(fieldType)) {
+          return [
+            {
+              label: TYPE_DEFINITION[fieldType] ? TYPE_DEFINITION[fieldType].label : fieldType,
+              value: fieldType,
+            },
+          ];
+        }
+        return [];
+      },
+      serializer: (fieldType: ComboBoxOption[] | undefined) =>
+        fieldType && fieldType.length ? fieldType[0].value : fieldType,
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.typeIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a field type.',
+              }
+            )
+          ),
+        },
+      ],
     },
   },
   store: {

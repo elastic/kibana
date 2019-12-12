@@ -5,14 +5,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 
-import { SelectField, UseField, useFormContext } from '../../../../shared_imports';
-import { MainType, SubType, Field } from '../../../../types';
+import { UseField, useFormContext } from '../../../../shared_imports';
+import { MainType, SubType, Field, ComboBoxOption } from '../../../../types';
 import { getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS } from '../../../../constants';
+import { TYPE_DEFINITION } from '../../../../constants';
 
-import { NameParameter } from '../../field_parameters';
+import { NameParameter, TypeParameter } from '../../field_parameters';
 
 interface Props {
   type: MainType;
@@ -28,7 +29,7 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
   const subTypeOptions = hasSubType
     ? typeDefinition
         .subTypes!.types.map(_subType => TYPE_DEFINITION[_subType])
-        .map(_subType => ({ value: _subType.value, text: _subType.label }))
+        .map(_subType => ({ value: _subType.value, label: _subType.label }))
     : undefined;
 
   const defaultValueSubType = hasSubType
@@ -37,16 +38,21 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
       : typeDefinition.subTypes!.types[0] // we set the first item from the subType array
     : undefined;
 
-  const onTypeChange = (value: unknown) => {
-    const nextTypeDefinition = TYPE_DEFINITION[value as MainType];
+  const onTypeChange = (value: ComboBoxOption[]) => {
+    if (value.length) {
+      form.setFieldValue('type', value);
 
-    if (nextTypeDefinition.subTypes !== undefined) {
-      /**
-       * We need to manually set the subType field value because if we edit a field type that already has a subtype
-       * (e.g. "numeric" with subType "float"), and we change the type to another one that also has subTypes (e.g. "range"),
-       * the old value would be kept on the subType.
-       */
-      form.setFieldValue('subType', nextTypeDefinition.subTypes!.types[0]);
+      const nextTypeDefinition = TYPE_DEFINITION[value[0].value as MainType];
+
+      if (nextTypeDefinition.subTypes !== undefined) {
+        /**
+         * We need to manually set the subType field value because if we edit a field type that already has a subtype
+         * (e.g. "numeric" with subType "float"), and we change the type to another one that also has subTypes (e.g. "range"),
+         * the old value would be kept on the subType.
+         */
+        const subTypeValue = nextTypeDefinition.subTypes!.types[0];
+        form.setFieldValue('subType', [TYPE_DEFINITION[subTypeValue]]);
+      }
     }
   };
 
@@ -59,40 +65,42 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
 
       {/* Field type */}
       <EuiFlexItem>
-        <UseField
-          path="type"
-          config={getFieldConfig('type')}
-          component={SelectField}
-          componentProps={{
-            euiFieldProps: {
-              options: isMultiField
-                ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
-                : FIELD_TYPES_OPTIONS,
-              hasNoInitialSelection: true,
-            },
-          }}
-          onChange={onTypeChange}
-        />
+        <TypeParameter isMultiField={isMultiField} onTypeChange={onTypeChange} />
       </EuiFlexItem>
 
       {/* Field sub type (if any) */}
       {hasSubType && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <UseField
             path="subType"
             config={{
               ...getFieldConfig('type'),
               label: typeDefinition.subTypes!.label,
+              defaultValue: defaultValueSubType,
             }}
-            defaultValue={defaultValueSubType}
-            component={SelectField}
-            componentProps={{
-              euiFieldProps: {
-                options: isMultiField ? filterTypesForMultiField(subTypeOptions!) : subTypeOptions,
-                hasNoInitialSelection: false,
-              },
+          >
+            {subTypeField => {
+              return (
+                <EuiFormRow label={subTypeField.label}>
+                  <EuiComboBox
+                    placeholder={i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.subTypeField.placeholderLabel',
+                      {
+                        defaultMessage: 'Select a type',
+                      }
+                    )}
+                    singleSelection={{ asPlainText: true }}
+                    options={
+                      isMultiField ? filterTypesForMultiField(subTypeOptions!) : subTypeOptions
+                    }
+                    selectedOptions={subTypeField.value as ComboBoxOption[]}
+                    onChange={subType => subTypeField.setValue(subType)}
+                    isClearable={false}
+                  />
+                </EuiFormRow>
+              );
             }}
-          />
+          </UseField>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -15,16 +15,19 @@ import {
   EuiFlexItem,
   EuiOutsideClickDetector,
   EuiIcon,
+  EuiComboBox,
+  EuiFormRow,
 } from '@elastic/eui';
 
-import { useForm, Form, FormDataProvider, SelectField, UseField } from '../../../../shared_imports';
+import { documentationService } from '../../../../../../services/documentation';
+import { useForm, Form, FormDataProvider, UseField } from '../../../../shared_imports';
 
-import { TYPE_DEFINITION, FIELD_TYPES_OPTIONS, EUI_SIZE } from '../../../../constants';
+import { TYPE_DEFINITION, EUI_SIZE } from '../../../../constants';
 
 import { useDispatch } from '../../../../mappings_state';
 import { fieldSerializer, getFieldConfig, filterTypesForMultiField } from '../../../../lib';
-import { Field, MainType, SubType, NormalizedFields, SelectOption } from '../../../../types';
-import { NameParameter } from '../../field_parameters';
+import { Field, MainType, SubType, NormalizedFields, ComboBoxOption } from '../../../../types';
+import { NameParameter, TypeParameter } from '../../field_parameters';
 import { getParametersFormForType } from './required_parameters_forms';
 
 const formWrapper = (props: any) => <form {...props} />;
@@ -36,8 +39,6 @@ interface Props {
   isCancelable?: boolean;
   maxNestedDepth?: number;
 }
-
-const typeFieldConfig = getFieldConfig('type');
 
 export const CreateField = React.memo(function CreateFieldComponent({
   allFields,
@@ -100,7 +101,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
    */
   const getSubTypeMeta = (
     type: MainType
-  ): { subTypeLabel?: string; subTypeOptions?: Array<SelectOption<SubType>> } => {
+  ): { subTypeLabel?: string; subTypeOptions?: ComboBoxOption[] } => {
     const typeDefinition = TYPE_DEFINITION[type];
     const hasSubTypes = typeDefinition !== undefined && typeDefinition.subTypes;
 
@@ -108,8 +109,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       ? typeDefinition
           .subTypes!.types.map(subType => TYPE_DEFINITION[subType])
           .map(
-            subType =>
-              ({ value: subType.value as SubType, text: subType.label } as SelectOption<SubType>)
+            subType => ({ value: subType.value as SubType, label: subType.label } as ComboBoxOption)
           )
       : undefined;
 
@@ -124,59 +124,70 @@ export const CreateField = React.memo(function CreateFieldComponent({
     };
   };
 
-  const onTypeChange = (nextType: unknown) => {
-    const { subTypeOptions } = getSubTypeMeta(nextType as MainType);
-    form.setFieldValue('subType', subTypeOptions ? subTypeOptions[0].value : undefined);
+  const onTypeChange = (nextType: ComboBoxOption[]) => {
+    form.setFieldValue('type', nextType);
+
+    if (nextType.length) {
+      const { subTypeOptions } = getSubTypeMeta(nextType[0].value as MainType);
+      form.setFieldValue('subType', subTypeOptions ? [subTypeOptions[0]] : undefined);
+    }
   };
 
   const renderFormFields = useCallback(
     ({ type }) => {
       const { subTypeOptions, subTypeLabel } = getSubTypeMeta(type);
 
+      const docLink = documentationService.getTypeDocLink(type) as string;
+
       return (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             {/* Field name */}
             <EuiFlexItem>
               <NameParameter />
             </EuiFlexItem>
-
             {/* Field type */}
             <EuiFlexItem>
-              <UseField
-                path="type"
-                config={typeFieldConfig}
-                onChange={onTypeChange}
-                component={SelectField}
-                componentProps={{
-                  euiFieldProps: {
-                    options: isMultiField
-                      ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
-                      : FIELD_TYPES_OPTIONS,
-                    'data-test-subj': 'fieldTypeSelect',
-                  },
-                }}
+              <TypeParameter
+                isMultiField={isMultiField}
+                onTypeChange={onTypeChange}
+                docLink={docLink}
               />
             </EuiFlexItem>
-
             {/* Field sub type (if any) */}
             {subTypeOptions && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem>
                 <UseField
                   path="subType"
-                  defaultValue={subTypeOptions[0].value}
                   config={{
-                    ...typeFieldConfig,
+                    ...getFieldConfig('type'),
                     label: subTypeLabel,
+                    defaultValue: subTypeOptions[0].value,
                   }}
-                  component={SelectField}
-                  componentProps={{
-                    euiFieldProps: {
-                      options: subTypeOptions,
-                      hasNoInitialSelection: false,
-                    },
+                >
+                  {subTypeField => {
+                    const error = subTypeField.getErrorsMessages();
+                    const isInvalid = error ? Boolean(error.length) : false;
+
+                    return (
+                      <EuiFormRow label={subTypeField.label} error={error} isInvalid={isInvalid}>
+                        <EuiComboBox
+                          placeholder={i18n.translate(
+                            'xpack.idxMgmt.mappingsEditor.createField.typePlaceholderLabel',
+                            {
+                              defaultMessage: 'Select a type',
+                            }
+                          )}
+                          singleSelection={{ asPlainText: true }}
+                          options={subTypeOptions}
+                          selectedOptions={subTypeField.value as ComboBoxOption[]}
+                          onChange={newSubType => subTypeField.setValue(newSubType)}
+                          isClearable={false}
+                        />
+                      </EuiFormRow>
+                    );
                   }}
-                />
+                </UseField>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -191,7 +202,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       {isCancelable !== false && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={cancel} data-test-subj="cancelButton">
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.createFieldCancelButtonLabel', {
+            {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.cancelButtonLabel', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>
@@ -205,7 +216,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
           type="submit"
           data-test-subj="addButton"
         >
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.createFieldAddButtonLabel', {
+          {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addButtonLabel', {
             defaultMessage: 'Add',
           })}
         </EuiButton>

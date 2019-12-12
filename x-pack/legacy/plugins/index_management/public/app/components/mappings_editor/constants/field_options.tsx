@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 
-import { DataType, ParameterName, SelectOption, SuperSelectOption } from '../types';
+import { DataType, ParameterName, SelectOption, SuperSelectOption, ComboBoxOption } from '../types';
 import { FIELD_OPTIONS_TEXTS, LANGUAGE_OPTIONS_TEXT, FieldOption } from './field_options_i18n';
 import { INDEX_DEFAULT, STANDARD } from './default_values';
 import { MAIN_DATA_TYPE_DEFINITION } from './data_types_definition';
@@ -22,9 +22,9 @@ export const DYNAMIC_SETTING_OPTIONS = [
 export const FIELD_TYPES_OPTIONS = Object.entries(MAIN_DATA_TYPE_DEFINITION).map(
   ([dataType, { label }]) => ({
     value: dataType,
-    text: label,
+    label,
   })
-);
+) as ComboBoxOption[];
 
 interface SuperSelectOptionConfig {
   inputDisplay: string;

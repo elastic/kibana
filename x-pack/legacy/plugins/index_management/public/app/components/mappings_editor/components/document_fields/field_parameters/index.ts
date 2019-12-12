@@ -37,3 +37,5 @@ export * from './ignore_malformed';
 export * from './copy_to_parameter';
 
 export * from './term_vector_parameter';
+
+export * from './type_parameter';

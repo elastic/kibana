@@ -119,7 +119,12 @@ export const PathParameter = ({ field, allFields }: Props) => {
                 fullWidth
               >
                 <EuiComboBox
-                  placeholder="Select a field"
+                  placeholder={i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.aliasType.pathPlaceholderLabel',
+                    {
+                      defaultMessage: 'Select a field',
+                    }
+                  )}
                   singleSelection={{ asPlainText: true }}
                   options={suggestedFields}
                   selectedOptions={pathField.value as AliasOption[]}

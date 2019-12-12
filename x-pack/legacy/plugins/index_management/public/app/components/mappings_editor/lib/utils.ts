@@ -16,7 +16,7 @@ import {
   SubType,
   ChildFieldName,
   ParameterName,
-  SelectOption,
+  ComboBoxOption,
 } from '../types';
 
 import {
@@ -418,8 +418,8 @@ export const getAllDescendantAliases = (
 };
 
 export const filterTypesForMultiField = <T extends string = string>(
-  options: Array<SelectOption<T>>
-): Array<SelectOption<T>> =>
+  options: ComboBoxOption[]
+): ComboBoxOption[] =>
   options.filter(
     option => TYPE_NOT_ALLOWED_MULTIFIELD.includes(option.value as MainType) === false
   );
