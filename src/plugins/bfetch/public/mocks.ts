@@ -25,12 +25,16 @@ export type Setup = jest.Mocked<BfetchPublicSetup>;
 export type Start = jest.Mocked<BfetchPublicStart>;
 
 const createSetupContract = (): Setup => {
-  const setupContract: Setup = {};
+  const setupContract: Setup = {
+    fetchStreaming: jest.fn(),
+  };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
-  const startContract: Start = {};
+  const startContract: Start = {
+    fetchStreaming: jest.fn(),
+  };
 
   return startContract;
 };

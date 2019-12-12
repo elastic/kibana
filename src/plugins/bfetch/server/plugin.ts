@@ -18,7 +18,6 @@
  */
 
 import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
-import { ReplaySubject } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { StreamingResponseHandler, removeLeadingSlash } from '../common';
 import { createStreamingResponseStream } from './streaming';

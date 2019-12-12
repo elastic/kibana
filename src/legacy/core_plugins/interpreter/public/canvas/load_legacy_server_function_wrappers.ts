@@ -30,7 +30,7 @@
 
 import { get, identity } from 'lodash';
 // @ts-ignore
-import { npSetup } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import { FUNCTIONS_URL } from './consts';
 import { batchedFetch } from './batched_fetch';
 
@@ -67,7 +67,10 @@ export const loadLegacyServerFunctionWrappers = async () => {
       const serverFunctionList = await npSetup.core.http.get(FUNCTIONS_URL);
       const types = npSetup.plugins.expressions.__LEGACY.types.toJS();
       const { serialize } = serializeProvider(types);
-      const batch = batchedFetch({ serialize });
+      const batch = batchedFetch({
+        fetchStreaming: npStart.plugins.bfetch.fetchStreaming,
+        serialize,
+      });
 
       // For every sever-side function, register a client-side
       // function that matches its definition, but which simply

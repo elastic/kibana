@@ -18,14 +18,15 @@
  */
 
 import _ from 'lodash';
-import { npStart } from 'ui/new_platform';
 import { filter, map } from 'rxjs/operators';
 // eslint-disable-next-line
 import { split } from '../../../../../plugins/bfetch/public/streaming';
+import { BfetchPublicApi } from '../../../../../plugins/bfetch/public';
 import { defer } from '../../../../../plugins/kibana_utils/public';
 import { FUNCTIONS_URL } from './consts';
 
 export interface Options {
+  fetchStreaming: BfetchPublicApi['fetchStreaming'];
   serialize: any;
   ms?: number;
 }
@@ -48,7 +49,7 @@ export interface Request {
  * Create a function which executes an Expression function on the
  * server as part of a larger batch of executions.
  */
-export function batchedFetch({ serialize, ms = 10 }: Options) {
+export function batchedFetch({ fetchStreaming, serialize, ms = 10 }: Options) {
   // Uniquely identifies each function call in a batch operation
   // so that the appropriate promise can be resolved / rejected later.
   let id = 0;
@@ -67,7 +68,7 @@ export function batchedFetch({ serialize, ms = 10 }: Options) {
   };
 
   const runBatch = () => {
-    processBatch(batch);
+    processBatch(fetchStreaming, batch);
     reset();
   };
 
@@ -110,8 +111,8 @@ export function batchedFetch({ serialize, ms = 10 }: Options) {
  * Runs the specified batch of functions on the server, then resolves
  * the related promises.
  */
-async function processBatch(batch: Batch) {
-  const { stream, promise } = npStart.plugins.bfetch.fetchStreaming({
+async function processBatch(fetchStreaming: BfetchPublicApi['fetchStreaming'], batch: Batch) {
+  const { stream, promise } = fetchStreaming({
     url: FUNCTIONS_URL,
     body: JSON.stringify({
       functions: Object.values(batch).map(({ request }) => request),
@@ -135,9 +136,11 @@ async function processBatch(batch: Batch) {
       }
     });
 
-  promise.catch(error => {
+  try {
+    await promise;
+  } catch (error) {
     Object.values(batch).forEach(({ future }) => {
       future.reject(error);
     });
-  });
+  }
 }
