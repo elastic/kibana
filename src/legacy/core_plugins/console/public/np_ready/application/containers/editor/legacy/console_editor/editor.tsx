@@ -92,25 +92,21 @@ function EditorUI() {
       return qs.parse(queryString || '');
     };
 
-    // Support for loading a console snippet from a remote source, like support docs.
-    const onHashChange = debounce(() => {
-      const { load_from: sourceLocation } = readQueryParams();
-      if (!sourceLocation) {
-        return;
-      }
-      if (/^https?:\/\//.test(sourceLocation)) {
+    const loadBufferFromRemote = (url: string) => {
+      if (/^https?:\/\//.test(url)) {
         const loadFrom: Record<string, any> = {
-          url: sourceLocation,
+          url,
           // Having dataType here is required as it doesn't allow jQuery to `eval` content
           // coming from the external source thereby preventing XSS attack.
           dataType: 'text',
           kbnXsrfToken: false,
         };
 
-        if (/https?:\/\/api\.github\.com/.test(sourceLocation)) {
+        if (/https?:\/\/api\.github\.com/.test(url)) {
           loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
         }
 
+        // Fire and forget.
         $.ajax(loadFrom).done(async data => {
           const coreEditor = editor.getCoreEditor();
           await editor.update(data, true);
@@ -120,12 +116,21 @@ function EditorUI() {
           coreEditor.getContainer().focus();
         });
       }
+    };
+
+    // Support for loading a console snippet from a remote source, like support docs.
+    const onHashChange = debounce(() => {
+      const { load_from: url } = readQueryParams();
+      if (!url) {
+        return;
+      }
+      loadBufferFromRemote(url);
     }, 200);
     window.addEventListener('hashchange', onHashChange);
 
-    if (readQueryParams().load_from) {
-      // Do an initial check against the current hash value.
-      onHashChange();
+    const initialQueryParams = readQueryParams();
+    if (initialQueryParams.load_from) {
+      loadBufferFromRemote(initialQueryParams.load_from);
     } else {
       const { content: text } = history.getSavedEditorState() || {
         content: DEFAULT_INPUT_VALUE,
