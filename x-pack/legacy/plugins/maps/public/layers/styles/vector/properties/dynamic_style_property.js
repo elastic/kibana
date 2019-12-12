@@ -92,7 +92,7 @@ export class DynamicStyleProperty extends AbstractStyleProperty {
         return null;
       }
 
-      const sigma = _.get(this.getFieldMetaOptions(), 'sigma', 3);
+      const sigma = _.get(this.getFieldMetaOptions(), 'sigma', DEFAULT_SIGMA);
       const stdLowerBounds = stats.avg - (stats.std_deviation * sigma);
       const stdUpperBounds = stats.avg + (stats.std_deviation * sigma);
       const min = Math.max(stats.min, stdLowerBounds);

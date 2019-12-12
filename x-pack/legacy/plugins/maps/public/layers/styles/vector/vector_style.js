@@ -221,8 +221,8 @@ export class VectorStyle extends AbstractStyle {
 
     dynamicProperties.forEach(dynamicProperty => {
       const styleMeta = dynamicProperty.pluckStyleMetaFromFeatures(features);
-      const name = dynamicProperty.getField().getName();
       if (styleMeta) {
+        const name = dynamicProperty.getField().getName();
         featuresMeta[name] = styleMeta;
       }
     });
@@ -361,7 +361,7 @@ export class VectorStyle extends AbstractStyle {
         return {
           label: await style.getField().getLabel(),
           fieldFormatter: await this._source.getFieldFormatter(style.getField().getName()),
-          range: this._getFieldMeta(style.getField().getName()),
+          meta: this._getFieldMeta(style.getField().getName()),
           style,
         };
       });
@@ -393,7 +393,7 @@ export class VectorStyle extends AbstractStyle {
           supportsFeatureState,
           isScaled,
           name: field.getName(),
-          range: this._getFieldMeta(field.getName()),
+          meta: this._getFieldMeta(field.getName()),
           computedName: getComputedFieldName(styleProperty.getStyleName(), field.getName()),
         };
       });
@@ -434,7 +434,7 @@ export class VectorStyle extends AbstractStyle {
       const feature = featureCollection.features[i];
 
       for (let j = 0; j < featureStateParams.length; j++) {
-        const { supportsFeatureState, isScaled, name, range, computedName } = featureStateParams[j];
+        const { supportsFeatureState, isScaled, name, meta: range, computedName } = featureStateParams[j];
         const value = parseFloat(feature.properties[name]);
         let styleValue;
         if (isScaled) {
