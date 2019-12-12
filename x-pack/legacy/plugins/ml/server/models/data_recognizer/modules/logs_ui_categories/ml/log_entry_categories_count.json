@@ -17,7 +17,7 @@
     "influencers": ["event.dataset", "mlcategory"]
   },
   "analysis_limits": {
-    "model_memory_limit": "10mb",
+    "model_memory_limit": "100mb",
     "categorization_examples_limit": 1
   },
   "data_description": {
