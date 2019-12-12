@@ -23,7 +23,7 @@ export {
   HomePublicPluginSetup,
   HomePublicPluginStart,
 } from './plugin';
-export { FeatureCatalogueEntry, FeatureCatalogueCategory } from './services';
+export { FeatureCatalogueEntry, FeatureCatalogueCategory, Environment } from './services';
 import { HomePublicPlugin } from './plugin';
 
 export const plugin = () => new HomePublicPlugin();

@@ -17,13 +17,15 @@
  * under the License.
  */
 
-import { registryMock } from './plugin.test.mocks';
+import { registryMock, environmentMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
 
 describe('HomePublicPlugin', () => {
   beforeEach(() => {
     registryMock.setup.mockClear();
     registryMock.start.mockClear();
+    environmentMock.setup.mockClear();
+    environmentMock.start.mockClear();
   });
 
   describe('setup', () => {
@@ -31,6 +33,12 @@ describe('HomePublicPlugin', () => {
       const setup = await new HomePublicPlugin().setup();
       expect(setup).toHaveProperty('featureCatalogue');
       expect(setup.featureCatalogue).toHaveProperty('register');
+    });
+
+    test('wires up and returns environment service', async () => {
+      const setup = await new HomePublicPlugin().setup();
+      expect(setup).toHaveProperty('environment');
+      expect(setup.environment).toHaveProperty('update');
     });
   });
 
@@ -44,6 +52,16 @@ describe('HomePublicPlugin', () => {
         capabilities: core.application.capabilities,
       });
       expect(start.featureCatalogue.get).toBeDefined();
+    });
+
+    test('wires up and returns environment service', async () => {
+      const service = new HomePublicPlugin();
+      await service.setup();
+      const start = await service.start({
+        application: { capabilities: { catalogue: {} } },
+      } as any);
+      expect(environmentMock.start).toHaveBeenCalled();
+      expect(start.environment.get).toBeDefined();
     });
   });
 });
