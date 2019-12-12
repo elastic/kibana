@@ -16,7 +16,7 @@ interface LensAutoDateProps {
   aggConfigs: string;
 }
 
-export function toConcreteDates(dateRange?: DateRange) {
+export function toAbsoluteDates(dateRange?: DateRange) {
   if (!dateRange) {
     return;
   }
