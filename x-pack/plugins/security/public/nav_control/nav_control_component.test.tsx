@@ -5,10 +5,11 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SecurityNavControl } from './nav_control_component';
 import { AuthenticatedUser } from '../../common/model';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiAvatar } from '@elastic/eui';
+import { findTestSubject } from 'test_utils/find_test_subject';
 
 describe('SecurityNavControl', () => {
   it(`renders a loading spinner when the user promise hasn't resolved yet.`, async () => {
@@ -44,7 +45,7 @@ describe('SecurityNavControl', () => {
     };
 
     const wrapper = shallowWithIntl(<SecurityNavControl {...props} />);
-    await Promise.resolve();
+    await nextTick();
     wrapper.update();
     const { button } = wrapper.find(EuiPopover).props();
     expect(button).toMatchInlineSnapshot(`
@@ -62,5 +63,27 @@ describe('SecurityNavControl', () => {
         />
       </EuiHeaderSectionItemButton>
     `);
+  });
+
+  it('renders a popover when the avatar is clicked.', async () => {
+    const props = {
+      user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
+      editProfileUrl: '',
+      logoutUrl: '',
+    };
+
+    const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
+    await nextTick();
+    wrapper.update();
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
+
+    wrapper.find(EuiAvatar).simulate('click');
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
   });
 });
