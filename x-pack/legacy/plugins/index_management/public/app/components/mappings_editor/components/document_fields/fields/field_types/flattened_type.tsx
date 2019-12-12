@@ -64,13 +64,9 @@ export const FlattenedType = React.memo(({ field }: Props) => {
 
           {/* depth_limit */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
-                  defaultMessage: 'Customize depth limit',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitTitle', {
+              defaultMessage: 'Customize depth limit',
+            })}
             description={i18n.translate('xpack.idxMgmt.mappingsEditor.depthLimitDescription', {
               defaultMessage:
                 'The maximum allowed depth of the flattened object field, in terms of nested inner objects. Defaults to 20.',
@@ -81,13 +77,9 @@ export const FlattenedType = React.memo(({ field }: Props) => {
 
           {/* ignore_above */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldTitle', {
-                  defaultMessage: 'Set length limit',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldTitle', {
+              defaultMessage: 'Set length limit',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.leafLengthLimitFieldDescription',
               {
@@ -106,13 +98,12 @@ export const FlattenedType = React.memo(({ field }: Props) => {
 
           {/* split_queries_on_whitespace */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle', {
-                  defaultMessage: 'Split queries on whitespace',
-                })}
-              </h3>
-            }
+            title={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle',
+              {
+                defaultMessage: 'Split queries on whitespace',
+              }
+            )}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceDescription',
               {

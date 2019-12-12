@@ -77,16 +77,12 @@ export const TokenCountType = ({ field }: Props) => {
 
           {/* enable_position_increments */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldTitle',
-                  {
-                    defaultMessage: 'Enable position increments',
-                  }
-                )}
-              </h3>
-            }
+            title={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldTitle',
+              {
+                defaultMessage: 'Enable position increments',
+              }
+            )}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldDescription',
               {

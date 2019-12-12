@@ -68,13 +68,9 @@ export const DateType = ({ field }: Props) => {
 
           {/* locale */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
-                  defaultMessage: 'Set locale',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.date.localeFieldTitle', {
+              defaultMessage: 'Set locale',
+            })}
             description={i18n.translate('xpack.idxMgmt.mappingsEditor.localeFieldDescription', {
               defaultMessage: 'The locale to use when parsing dates.',
             })}

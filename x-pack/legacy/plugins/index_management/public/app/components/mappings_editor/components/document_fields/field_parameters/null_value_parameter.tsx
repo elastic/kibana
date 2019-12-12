@@ -20,13 +20,9 @@ interface Props {
 
 export const NullValueParameter = ({ defaultToggleValue, description, children }: Props) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldTitle', {
-          defaultMessage: 'Set null value',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldTitle', {
+      defaultMessage: 'Set null value',
+    })}
     description={
       description
         ? description

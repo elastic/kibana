@@ -76,13 +76,9 @@ export const PathParameter = ({ field, allFields }: Props) => {
 
         return (
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldTitle', {
-                  defaultMessage: 'Alias target',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldTitle', {
+              defaultMessage: 'Alias target',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldDescription',
               {

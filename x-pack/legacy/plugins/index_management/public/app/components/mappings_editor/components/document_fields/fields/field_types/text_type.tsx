@@ -111,13 +111,9 @@ export const TextType = React.memo(({ field }: Props) => {
         <EditFieldSection>
           {/* fielddata */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
-                  defaultMessage: 'Fielddata',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
+              defaultMessage: 'Fielddata',
+            })}
             description={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataDescription', {
               defaultMessage:
                 'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
@@ -166,13 +162,9 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* index_phrases */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesFieldTitle', {
-                  defaultMessage: 'Index phrases',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesFieldTitle', {
+              defaultMessage: 'Index phrases',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.indexPhrasesFieldDescription',
               {
@@ -185,13 +177,9 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* index_prefixes */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesFieldTitle', {
-                  defaultMessage: 'Set index prefixes',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesFieldTitle', {
+              defaultMessage: 'Set index prefixes',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.indexPrefixesFieldDescription',
               {
@@ -233,13 +221,9 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* position_increment_gap */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldTitle', {
-                  defaultMessage: 'Set position increment gap',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldTitle', {
+              defaultMessage: 'Set position increment gap',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldDescription',
               {

@@ -67,13 +67,9 @@ export const GeoShapeType = ({ field }: Props) => {
       <EditFieldSection>
         {/* orientation */}
         <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldTitle', {
-                defaultMessage: 'Set orientation',
-              })}
-            </h3>
-          }
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldTitle', {
+            defaultMessage: 'Set orientation',
+          })}
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldDescription',
             {
@@ -98,13 +94,9 @@ export const GeoShapeType = ({ field }: Props) => {
 
         {/* points_only */}
         <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldTitle', {
-                defaultMessage: 'Points only',
-              })}
-            </h3>
-          }
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldTitle', {
+            defaultMessage: 'Points only',
+          })}
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldDescription',
             {
@@ -116,13 +108,9 @@ export const GeoShapeType = ({ field }: Props) => {
 
         {/* ignore_z_value */}
         <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldTitle', {
-                defaultMessage: 'Ignore Z value',
-              })}
-            </h3>
-          }
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldTitle', {
+            defaultMessage: 'Ignore Z value',
+          })}
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldDescription',
             {

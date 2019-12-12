@@ -25,13 +25,9 @@ export const IndexParameter = ({
   config = getFieldConfig('index_options'),
 }: Props) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.searchableFieldTitle', {
-          defaultMessage: 'Searchable',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.searchableFieldTitle', {
+      defaultMessage: 'Searchable',
+    })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.searchableFieldDescription', {
       defaultMessage: 'Allow the field to be searchable.',
     })}

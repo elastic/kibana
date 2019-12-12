@@ -38,7 +38,6 @@ export const EditFieldFormRow = React.memo(
     withToggle = true,
   }: Props) => {
     const form = useFormContext();
-    const switchLabel = title.props.children;
 
     const initialVisibleState =
       withToggle === false
@@ -67,7 +66,7 @@ export const EditFieldFormRow = React.memo(
     const renderToggleInput = () =>
       formFieldPath === undefined ? (
         <EuiSwitch
-          label={switchLabel}
+          label={title}
           checked={isContentVisible}
           onChange={onToggle}
           data-test-subj="input"
@@ -79,9 +78,7 @@ export const EditFieldFormRow = React.memo(
           config={{ ...getFieldConfig(formFieldPath), defaultValue: initialVisibleState }}
         >
           {field => {
-            return (
-              <ToggleField field={field} euiFieldProps={{ label: switchLabel, showLabel: false }} />
-            );
+            return <ToggleField field={field} euiFieldProps={{ label: title, showLabel: false }} />;
           }}
         </UseField>
       );
@@ -95,7 +92,7 @@ export const EditFieldFormRow = React.memo(
 
       const controlsTitle = (
         <EuiTitle size="xs" className="mappingsEditor__editField__formRow__title">
-          {title}
+          <h3>{title}</h3>
         </EuiTitle>
       );
 

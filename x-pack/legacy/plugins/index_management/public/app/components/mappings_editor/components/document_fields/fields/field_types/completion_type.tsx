@@ -38,13 +38,9 @@ export const CompletionType = ({ field }: Props) => {
 
       {/* max_input_length */}
       <EditFieldFormRow
-        title={
-          <h3>
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldTitle', {
-              defaultMessage: 'Set max input length',
-            })}
-          </h3>
-        }
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldTitle', {
+          defaultMessage: 'Set max input length',
+        })}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.completion.maxInputLengthFieldDescription',
           {
@@ -62,16 +58,12 @@ export const CompletionType = ({ field }: Props) => {
 
       {/* preserve_separators */}
       <EditFieldFormRow
-        title={
-          <h3>
-            {i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldTitle',
-              {
-                defaultMessage: 'Preserve separators',
-              }
-            )}
-          </h3>
-        }
+        title={i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldTitle',
+          {
+            defaultMessage: 'Preserve separators',
+          }
+        )}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.completion.preserveSeparatorsFieldDescription',
           {
@@ -83,16 +75,12 @@ export const CompletionType = ({ field }: Props) => {
 
       {/* preserve_position_increments */}
       <EditFieldFormRow
-        title={
-          <h3>
-            {i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldTitle',
-              {
-                defaultMessage: 'Preserve position increments',
-              }
-            )}
-          </h3>
-        }
+        title={i18n.translate(
+          'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldTitle',
+          {
+            defaultMessage: 'Preserve position increments',
+          }
+        )}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.completion.preservePositionIncrementsFieldDescription',
           {

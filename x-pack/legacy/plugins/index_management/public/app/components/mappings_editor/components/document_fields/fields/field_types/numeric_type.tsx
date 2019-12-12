@@ -50,7 +50,7 @@ export const NumericType = ({ field }: Props) => {
           formData.subType === 'scaled_float' ? (
             <EditFieldSection>
               <EditFieldFormRow
-                title={<h3>{PARAMETERS_DEFINITION.scaling_factor.title}</h3>}
+                title={PARAMETERS_DEFINITION.scaling_factor.title}
                 description={PARAMETERS_DEFINITION.scaling_factor.description}
                 withToggle={false}
               >

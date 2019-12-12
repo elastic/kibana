@@ -59,13 +59,9 @@ export const KeywordType = ({ field }: Props) => {
         <DocValuesParameter />
         {/* normalizer */}
         <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldTitle', {
-                defaultMessage: 'Use index default normalizer',
-              })}
-            </h3>
-          }
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldTitle', {
+            defaultMessage: 'Use index default normalizer',
+          })}
           description={i18n.translate('xpack.idxMgmt.mappingsEditor.normalizerFieldDescription', {
             defaultMessage: 'How to pre-process the keyword prior to indexing.',
           })}
@@ -91,13 +87,9 @@ export const KeywordType = ({ field }: Props) => {
 
           {/* ignore_above */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.lengthLimitFieldTitle', {
-                  defaultMessage: 'Set length limit',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.lengthLimitFieldTitle', {
+              defaultMessage: 'Set length limit',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.lengthLimitFieldDescription',
               {
@@ -125,13 +117,12 @@ export const KeywordType = ({ field }: Props) => {
 
           {/* split_queries_on_whitespace */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle', {
-                  defaultMessage: 'Split queries on whitespace',
-                })}
-              </h3>
-            }
+            title={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldTitle',
+              {
+                defaultMessage: 'Split queries on whitespace',
+              }
+            )}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.splitQueriesOnWhitespaceFieldDescription',
               {

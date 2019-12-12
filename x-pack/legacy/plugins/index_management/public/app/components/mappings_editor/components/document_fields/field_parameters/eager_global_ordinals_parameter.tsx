@@ -12,13 +12,9 @@ import { EditFieldFormRow } from '../fields/edit_field';
 
 export const EagerGlobalOrdinalsParameter = () => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldTitle', {
-          defaultMessage: 'Use eager global ordinals',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldTitle', {
+      defaultMessage: 'Use eager global ordinals',
+    })}
     description={i18n.translate(
       'xpack.idxMgmt.mappingsEditor.eagerGlobalOrdinalsFieldDescription',
       {

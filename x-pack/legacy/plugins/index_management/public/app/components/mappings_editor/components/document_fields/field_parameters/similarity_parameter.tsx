@@ -18,13 +18,9 @@ interface Props {
 
 export const SimilarityParameter = ({ defaultToggleValue }: Props) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldTitle', {
-          defaultMessage: 'Set similarity',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldTitle', {
+      defaultMessage: 'Set similarity',
+    })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.setSimilarityFieldDescription', {
       defaultMessage: 'Which scoring algorithm or similarity should be used.',
     })}

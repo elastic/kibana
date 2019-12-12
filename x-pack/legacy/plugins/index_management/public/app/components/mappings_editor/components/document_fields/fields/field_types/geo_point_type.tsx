@@ -42,13 +42,9 @@ export const GeoPointType = ({ field }: Props) => {
 
       {/* ignore_z_value */}
       <EditFieldFormRow
-        title={
-          <h3>
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.geoPoint.ignoreZValueFieldTitle', {
-              defaultMessage: 'Ignore Z value',
-            })}
-          </h3>
-        }
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoPoint.ignoreZValueFieldTitle', {
+          defaultMessage: 'Ignore Z value',
+        })}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.geoPoint.ignoreZValueFieldDescription',
           {
