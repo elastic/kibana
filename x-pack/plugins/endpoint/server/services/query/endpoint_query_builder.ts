@@ -5,12 +5,44 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { schema } from '@kbn/config-schema';
 import { EndpointAppContext } from '../../types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { RouteSchemas } from '../../../../../../src/core/server/http/router/route';
+
+type filterType = 'term' | 'match';
+
+interface FilterInfo {
+  documentValue: string;
+  filterType: filterType;
+}
+
+export const endpointFilterMapping: Record<string, FilterInfo> = {
+  os: { documentValue: 'host.os.full', filterType: 'match' },
+  ip: { documentValue: 'host.ip', filterType: 'term' },
+  host: { documentValue: 'host.name', filterType: 'match' },
+};
+
+export const endpointFilters = schema.oneOf([
+  schema.object({ ip: schema.string() }),
+  schema.object({ os: schema.string() }),
+  schema.object({ host: schema.string() }),
+]);
+export const endpointRequestSchema: RouteSchemas<any, any, any> = {
+  query: schema.object({
+    pageSize: schema.number({ defaultValue: 10 }),
+    pageIndex: schema.number({ defaultValue: 0 }),
+  }),
+  body: schema.nullable(
+    schema.object({
+      filters: schema.arrayOf(endpointFilters),
+    })
+  ),
+};
 
 export class EndpointQueryBuilder {
   private readonly request: KibanaRequest<any, any, any>;
   private readonly endpointAppContext: EndpointAppContext;
-
   constructor(request: KibanaRequest<any, any, any>, endpointAppContext: EndpointAppContext) {
     this.request = request;
     this.endpointAppContext = endpointAppContext;
@@ -59,11 +91,27 @@ export class EndpointQueryBuilder {
   }
 
   private queryBody(): Record<string, any> {
-    if (!this.request.body.filters) {
+    if (this.request?.body?.filters) {
+      const requestFilters = this.request.body.filters;
+      const queryFilters: Array<Record<string, any>> = [];
+
+      for (const filter of requestFilters) {
+        queryFilters.push(
+          ...Object.keys(filter).map(k => ({
+            [endpointFilterMapping[k].filterType]: {
+              [endpointFilterMapping[k].documentValue]: filter[k],
+            },
+          }))
+        );
+      }
       return {
-        match_all: {},
+        bool: {
+          filter: queryFilters,
+        },
       };
     }
-    return {};
+    return {
+      match_all: {},
+    };
   }
 }

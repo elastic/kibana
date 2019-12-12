@@ -49,7 +49,7 @@ export class EndpointHandler implements EndpointRequestContext {
   }
 
   async findLatestOfAllEndpoints(
-    request: KibanaRequest<infer P, infer Q, infer B>
+    request: KibanaRequest<any, any, any>
   ): Promise<SearchResponse<EndpointData>> {
     return await this.search(
       await new EndpointQueryBuilder(request, this.endpointAppContext).toQuery(),
