@@ -19,7 +19,7 @@ import {
 } from '../../../../../../../common/types/fields';
 import { mlJobService } from '../../../../../services/job_service';
 import { JobCreatorType, isMultiMetricJobCreator, isPopulationJobCreator } from '../index';
-import { CREATED_BY_LABEL, JOB_TYPE } from './constants';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (scriptFields: Field[]) => (id: string) => {
   let field = newJobCapsService.getFieldById(id);

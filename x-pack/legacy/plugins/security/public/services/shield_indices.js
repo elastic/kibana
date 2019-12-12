@@ -10,7 +10,7 @@ const module = uiModules.get('security', []);
 module.service('shieldIndices', ($http, chrome) => {
   return {
     getFields: (query) => {
-      return $http.get(chrome.addBasePath(`/api/security/v1/fields/${query}`))
+      return $http.get(chrome.addBasePath(`/internal/security/fields/${query}`))
         .then(response => response.data);
     }
   };

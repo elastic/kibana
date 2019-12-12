@@ -142,7 +142,7 @@ const TimeSeriesExplorerPage = ({ children, jobSelectorProps, loading, resizeRef
         If we'd just show no progress bar when not loading it would result in a flickering height effect. */}
     {!loading && (<EuiProgress className="mlTimeSeriesExplorerProgress" value={0} max={100} color="primary" size="xs" />)}
     <JobSelector {...jobSelectorProps} />
-    <div className="ml-time-series-explorer" ref={resizeRef} >
+    <div className="ml-time-series-explorer" ref={resizeRef} data-test-subj="mlPageSingleMetricViewer">
       {children}
     </div>
   </Fragment>

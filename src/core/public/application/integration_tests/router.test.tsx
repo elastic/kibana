@@ -24,7 +24,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { AppMounter, LegacyApp, AppMountParameters } from '../types';
+import { AppMount, LegacyApp, AppMountParameters } from '../types';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { AppRouter, AppNotFound } from '../ui';
 
@@ -35,7 +35,7 @@ const createMountHandler = (htmlString: string) =>
   });
 
 describe('AppContainer', () => {
-  let apps: Map<string, jest.Mock<ReturnType<AppMounter>, Parameters<AppMounter>>>;
+  let apps: Map<string, jest.Mock<ReturnType<AppMount>, Parameters<AppMount>>>;
   let legacyApps: Map<string, LegacyApp>;
   let history: History;
   let router: ReactWrapper;

@@ -13,8 +13,9 @@ import {
   TestBedConfig,
   nextTick,
 } from '../../../../../../test_utils';
-import { WatchList } from '../../../public/sections/watch_list/components/watch_list';
+import { WatchList } from '../../../public/np_ready/application/sections/watch_list/components/watch_list';
 import { ROUTES } from '../../../common/constants';
+import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
@@ -23,7 +24,7 @@ const testBedConfig: TestBedConfig = {
   doMountAsync: true,
 };
 
-const initTestBed = registerTestBed(WatchList, testBedConfig);
+const initTestBed = registerTestBed(withAppContext(WatchList), testBedConfig);
 
 export interface WatchListTestBed extends TestBed<WatchListTestSubjects> {
   actions: {

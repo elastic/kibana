@@ -912,7 +912,7 @@ function createResultsUrl(jobIds, start, end, resultsPage) {
   let path = '';
 
   if (resultsPage !== undefined) {
-    path += 'ml#/';
+    path += '#/';
     path += resultsPage;
   }
 
