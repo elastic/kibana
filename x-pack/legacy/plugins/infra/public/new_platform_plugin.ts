@@ -4,13 +4,66 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { CoreStart, PluginInitializerContext } from 'kibana/public';
-
-import { compose } from './lib/compose/kibana_compose';
+import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
+import { ApolloLink } from 'apollo-link';
+import { HttpLink } from 'apollo-link-http';
+import { withClientState } from 'apollo-link-state';
 import { startApp } from './apps/start_app';
+import { InfraFrontendLibs } from './lib/lib';
+import introspectionQueryResultData from './graphql/introspection.json';
+import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapter';
+import { InfraKibanaObservableApiAdapter } from './lib/adapters/observable_api/kibana_observable_api';
+
+type ClientPlugins = any;
+type LegacyDeps = any;
 
 export class Plugin {
   constructor(context: PluginInitializerContext) {}
-  start(core: CoreStart, plugins: any, __LEGACY: any) {
-    startApp(compose());
+  start(core: CoreStart, plugins: ClientPlugins, __LEGACY: LegacyDeps) {
+    startApp(this.composeLibs(core, plugins, __LEGACY));
+  }
+
+  composeLibs(core: CoreStart, plugins: ClientPlugins, legacy: LegacyDeps) {
+    const cache = new InMemoryCache({
+      addTypename: false,
+      fragmentMatcher: new IntrospectionFragmentMatcher({
+        introspectionQueryResultData,
+      }),
+    });
+
+    const observableApi = new InfraKibanaObservableApiAdapter({
+      basePath: core.http.basePath.get(),
+    });
+
+    const graphQLOptions = {
+      cache,
+      link: ApolloLink.from([
+        withClientState({
+          cache,
+          resolvers: {},
+        }),
+        new HttpLink({
+          credentials: 'same-origin',
+          headers: {
+            'kbn-xsrf': true,
+          },
+          uri: `${core.http.basePath.get()}/api/infra/graphql`,
+        }),
+      ]),
+    };
+
+    const apolloClient = new ApolloClient(graphQLOptions);
+
+    const infraModule = legacy.uiModules.get('app/infa');
+
+    const framework = new KibanaFramework(infraModule, legacy.uiRoutes, legacy.timezoneProvider);
+
+    const libs: InfraFrontendLibs = {
+      apolloClient,
+      framework,
+      observableApi,
+    };
+    return libs;
   }
 }
