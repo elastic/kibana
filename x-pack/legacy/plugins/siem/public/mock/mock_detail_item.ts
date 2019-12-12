@@ -20,11 +20,6 @@ export const mockDetailItemData: DetailItem[] = [
     values: ['filebeat-8.0.0-2019.02.19-000001'],
   },
   {
-    field: '_type',
-    originalValue: '_doc',
-    values: ['_doc'],
-  },
-  {
     field: '_score',
     originalValue: 1,
     values: ['1'],
