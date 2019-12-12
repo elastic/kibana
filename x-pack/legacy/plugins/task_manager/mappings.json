@@ -19,7 +19,7 @@
       "schedule": {
         "properties": {
           "interval": {
-            "type": "text"
+            "type": "keyword"
           }
         }
       },
