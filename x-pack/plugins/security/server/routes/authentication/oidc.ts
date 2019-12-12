@@ -17,43 +17,33 @@ import { RouteDefinitionParams } from '..';
 /**
  * Defines routes required for SAML authentication.
  */
-export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: RouteDefinitionParams) {
-  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/api/security/oidc/implicit', '/api/security/v1/oidc/implicit']) {
-    /**
-     * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
-     * is used, so that we can extract authentication response from URL fragment and send it to
-     * the `/api/security/oidc/callback` route.
-     */
-    router.get(
-      {
-        path,
-        validate: false,
-        options: { authRequired: false },
-      },
-      (context, request, response) => {
-        const serverBasePath = basePath.serverBasePath;
-        if (path === '/api/security/v1/oidc/implicit') {
-          logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/implicit" URL instead.`,
-            { tags: ['deprecation'] }
-          );
-        }
-        return response.custom(
-          createCustomResourceResponse(
-            `
+export function defineOIDCRoutes({ router, authc, csp, basePath }: RouteDefinitionParams) {
+  /**
+   * The route should be configured as a redirect URI in OP when OpenID Connect implicit flow
+   * is used, so that we can extract authentication response from URL fragment and send it to
+   * the `/api/security/oidc/callback` route.
+   */
+  router.get(
+    {
+      path: '/api/security/oidc/implicit',
+      validate: false,
+      options: { authRequired: false },
+    },
+    (context, request, response) => {
+      return response.custom(
+        createCustomResourceResponse(
+          `
           <!DOCTYPE html>
           <title>Kibana OpenID Connect Login</title>
           <link rel="icon" href="data:,">
-          <script src="${serverBasePath}/internal/security/oidc/implicit.js"></script>
+          <script src="${basePath.serverBasePath}/internal/security/oidc/implicit.js"></script>
         `,
-            'text/html',
-            csp.header
-          )
-        );
-      }
-    );
-  }
+          'text/html',
+          csp.header
+        )
+      );
+    }
+  );
 
   /**
    * The route that accompanies `/api/security/oidc/implicit` and renders a JavaScript snippet
@@ -82,146 +72,93 @@ export function defineOIDCRoutes({ router, logger, authc, csp, basePath }: Route
     }
   );
 
-  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/api/security/oidc/callback', '/api/security/v1/oidc']) {
-    router.get(
-      {
-        path,
-        validate: {
-          query: schema.object(
-            {
-              authenticationResponseURI: schema.maybe(schema.uri()),
-              code: schema.maybe(schema.string()),
-              error: schema.maybe(schema.string()),
-              error_description: schema.maybe(schema.string()),
-              error_uri: schema.maybe(schema.uri()),
-              iss: schema.maybe(schema.uri({ scheme: ['https'] })),
-              login_hint: schema.maybe(schema.string()),
-              target_link_uri: schema.maybe(schema.uri()),
-              state: schema.maybe(schema.string()),
-            },
-            // The client MUST ignore unrecognized response parameters according to
-            // https://openid.net/specs/openid-connect-core-1_0.html#AuthResponseValidation and
-            // https://tools.ietf.org/html/rfc6749#section-4.1.2.
-            { allowUnknowns: true }
-          ),
-        },
-        options: { authRequired: false },
+  router.get(
+    {
+      path: '/api/security/oidc/callback',
+      validate: {
+        query: schema.object(
+          {
+            authenticationResponseURI: schema.maybe(schema.uri()),
+            code: schema.maybe(schema.string()),
+            error: schema.maybe(schema.string()),
+            error_description: schema.maybe(schema.string()),
+            error_uri: schema.maybe(schema.uri()),
+            state: schema.maybe(schema.string()),
+          },
+          // The client MUST ignore unrecognized response parameters according to
+          // https://openid.net/specs/openid-connect-core-1_0.html#AuthResponseValidation and
+          // https://tools.ietf.org/html/rfc6749#section-4.1.2.
+          { allowUnknowns: true }
+        ),
       },
-      createLicensedRouteHandler(async (context, request, response) => {
-        const serverBasePath = basePath.serverBasePath;
+      options: { authRequired: false },
+    },
+    createLicensedRouteHandler(async (context, request, response) => {
+      // An HTTP GET request with a query parameter named `authenticationResponseURI` that includes URL fragment OpenID
+      // Connect Provider sent during implicit authentication flow to the Kibana own proxy page that extracted that URL
+      // fragment and put it into `authenticationResponseURI` query string parameter for this endpoint. See more details
+      // at https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth
+      let loginAttempt: ProviderLoginAttempt | undefined;
+      if (request.query.authenticationResponseURI) {
+        loginAttempt = {
+          flow: OIDCAuthenticationFlow.Implicit,
+          authenticationResponseURI: request.query.authenticationResponseURI,
+        };
+      } else if (request.query.code || request.query.error) {
+        // An HTTP GET request with a query parameter named `code` (or `error`) as the response to a successful (or
+        // failed) authentication from an OpenID Connect Provider during authorization code authentication flow.
+        // See more details at https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth.
+        loginAttempt = {
+          flow: OIDCAuthenticationFlow.AuthorizationCode,
+          //  We pass the path only as we can't be sure of the full URL and Elasticsearch doesn't need it anyway.
+          authenticationResponseURI: request.url.path!,
+        };
+      }
 
-        // An HTTP GET request with a query parameter named `authenticationResponseURI` that includes URL fragment OpenID
-        // Connect Provider sent during implicit authentication flow to the Kibana own proxy page that extracted that URL
-        // fragment and put it into `authenticationResponseURI` query string parameter for this endpoint. See more details
-        // at https://openid.net/specs/openid-connect-core-1_0.html#ImplicitFlowAuth
-        let loginAttempt: ProviderLoginAttempt | undefined;
-        if (request.query.authenticationResponseURI) {
-          loginAttempt = {
-            flow: OIDCAuthenticationFlow.Implicit,
-            authenticationResponseURI: request.query.authenticationResponseURI,
-          };
-        } else if (request.query.code || request.query.error) {
-          if (path === '/api/security/v1/oidc') {
-            logger.warn(
-              `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/callback" URL instead.`,
-              { tags: ['deprecation'] }
-            );
-          }
+      if (!loginAttempt) {
+        return response.badRequest({ body: 'Unrecognized login attempt.' });
+      }
 
-          // An HTTP GET request with a query parameter named `code` (or `error`) as the response to a successful (or
-          // failed) authentication from an OpenID Connect Provider during authorization code authentication flow.
-          // See more details at https://openid.net/specs/openid-connect-core-1_0.html#CodeFlowAuth.
-          loginAttempt = {
-            flow: OIDCAuthenticationFlow.AuthorizationCode,
-            //  We pass the path only as we can't be sure of the full URL and Elasticsearch doesn't need it anyway.
-            authenticationResponseURI: request.url.path!,
-          };
-        } else if (request.query.iss) {
-          logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/initiate_login" URL for Third-Party Initiated login instead.`,
-            { tags: ['deprecation'] }
-          );
-          // An HTTP GET request with a query parameter named `iss` as part of a 3rd party initiated authentication.
-          // See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
-          loginAttempt = {
-            flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
-            iss: request.query.iss,
-            loginHint: request.query.login_hint,
-          };
-        }
+      return performOIDCLogin(request, response, loginAttempt);
+    })
+  );
 
-        if (!loginAttempt) {
-          return response.badRequest({ body: 'Unrecognized login attempt.' });
-        }
-
-        return performOIDCLogin(request, response, loginAttempt);
-      })
-    );
-  }
-
-  // Generate two identical routes with new and deprecated URL and issue a warning if route with deprecated URL is ever used.
-  for (const path of ['/api/security/oidc/initiate_login', '/api/security/v1/oidc']) {
-    /**
-     * An HTTP POST request with the payload parameter named `iss` as part of a 3rd party initiated authentication.
-     * See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
-     */
-    router.post(
+  const initiateLoginRouteParameters = {
+    path: '/api/security/oidc/initiate_login',
+    validate: schema.object(
       {
-        path,
-        validate: {
-          body: schema.object(
-            {
-              iss: schema.uri({ scheme: ['https'] }),
-              login_hint: schema.maybe(schema.string()),
-              target_link_uri: schema.maybe(schema.uri()),
-            },
-            // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
-            // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
-            { allowUnknowns: true }
-          ),
-        },
-        options: { authRequired: false },
+        iss: schema.uri({ scheme: ['https'] }),
+        login_hint: schema.maybe(schema.string()),
+        target_link_uri: schema.maybe(schema.uri()),
       },
-      createLicensedRouteHandler(async (context, request, response) => {
-        const serverBasePath = basePath.serverBasePath;
-        if (path === '/api/security/v1/oidc') {
-          logger.warn(
-            `The "${serverBasePath}${path}" URL is deprecated and will stop working in the next major version, please use "${serverBasePath}/api/security/oidc/initiate_login" URL for Third-Party Initiated login instead.`,
-            { tags: ['deprecation'] }
-          );
-        }
+      // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
+      // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
+      { allowUnknowns: true }
+    ),
+    options: { authRequired: false },
+  };
 
-        return performOIDCLogin(request, response, {
-          flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
-          iss: request.body.iss,
-          loginHint: request.body.login_hint,
-        });
-      })
-    );
-  }
+  /**
+   * An HTTP POST request with the payload parameter named `iss` as part of a 3rd party initiated authentication.
+   * See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
+   */
+  router.post(
+    { ...initiateLoginRouteParameters, validate: { body: initiateLoginRouteParameters.validate } },
+    createLicensedRouteHandler(async (context, request, response) => {
+      return performOIDCLogin(request, response, {
+        flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
+        iss: request.body.iss,
+        loginHint: request.body.login_hint,
+      });
+    })
+  );
 
   /**
    * An HTTP GET request with the query string parameter named `iss` as part of a 3rd party initiated authentication.
    * See more details at https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin
    */
   router.get(
-    {
-      path: '/api/security/oidc/initiate_login',
-      validate: {
-        query: schema.object(
-          {
-            iss: schema.uri({ scheme: ['https'] }),
-            login_hint: schema.maybe(schema.string()),
-            target_link_uri: schema.maybe(schema.uri()),
-          },
-          // Other parameters MAY be sent, if defined by extensions. Any parameters used that are not understood MUST
-          // be ignored by the Client according to https://openid.net/specs/openid-connect-core-1_0.html#ThirdPartyInitiatedLogin.
-          { allowUnknowns: true }
-        ),
-      },
-      options: { authRequired: false },
-    },
+    { ...initiateLoginRouteParameters, validate: { query: initiateLoginRouteParameters.validate } },
     createLicensedRouteHandler(async (context, request, response) => {
       return performOIDCLogin(request, response, {
         flow: OIDCAuthenticationFlow.InitiatedBy3rdParty,
