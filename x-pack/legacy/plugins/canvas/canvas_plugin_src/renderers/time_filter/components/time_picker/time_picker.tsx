@@ -50,7 +50,7 @@ export class TimePicker extends Component<Props, State> {
   componentDidUpdate(prevProps: Props) {
     const { to, from } = this.props;
 
-    if (prevProps.from !== from || to !== to) {
+    if (prevProps.from !== from || prevProps.to !== to) {
       this.setState({
         range: { from, to },
         isDirty: false,
