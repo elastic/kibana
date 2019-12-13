@@ -176,7 +176,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           fullWidth
           name="from"
           value={from || ''}
-          data-test-subj="fromInput"
+          data-test-subj="emailFromInput"
           onChange={e => {
             editActionConfig('from', e.target.value);
           }}

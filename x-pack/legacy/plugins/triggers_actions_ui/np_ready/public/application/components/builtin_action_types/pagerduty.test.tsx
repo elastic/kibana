@@ -9,7 +9,7 @@ import { ActionTypeRegistry } from '../../action_type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionConnector } from '../../../types';
 
-const ACTION_TYPE_ID = '.email';
+const ACTION_TYPE_ID = '.pagerduty';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
@@ -24,117 +24,82 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('email');
+    expect(actionTypeModel.iconClass).toEqual('apps');
   });
 });
 
-describe('connector validation', () => {
+describe('pagerduty connector validation', () => {
   test('connector validation succeeds when connector config is valid', () => {
     const actionConnector = {
       secrets: {
-        user: 'user',
-        password: 'pass',
+        routingKey: 'test',
       },
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
       config: {
-        from: 'test@test.com',
-        port: '2323',
-        host: 'localhost',
-        test: 'test',
+        apiUrl: 'http:\\test',
       },
     } as ActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
+        routingKey: [],
+        apiUrl: [],
       },
     });
 
     delete actionConnector.config.test;
-    actionConnector.config.host = 'elastic.co';
-    actionConnector.config.port = 8080;
+    actionConnector.secrets.routingKey = 'test1';
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
+        routingKey: [],
+        apiUrl: [],
       },
     });
   });
 
   test('connector validation fails when connector config is not valid', () => {
     const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
+      secrets: {},
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
       config: {
-        from: 'test@test.com',
+        apiUrl: 'http:\\test',
       },
     } as ActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        from: [],
-        port: ['Port is required.'],
-        host: ['Host is required.'],
-        user: [],
-        password: [],
+        routingKey: ['Routing Key is required.'],
+        apiUrl: [],
       },
     });
   });
 });
 
-describe('action params validation', () => {
+describe('pagerduty action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      to: 'test@test.com',
-      cc: 'test1@test.com',
-      message: 'message {test}',
-      subject: 'test',
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: '234654564654',
+      component: 'test',
+      group: 'group',
+      class: 'test class',
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        to: [],
-        cc: [],
-        bcc: [],
-        message: [],
-        subject: [],
-      },
-    });
-  });
-
-  test('action params validation fails when action params is not valid', () => {
-    const actionParams = {
-      to: 'test@test.com',
-      subject: 'test',
-    };
-
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        to: [],
-        cc: [],
-        bcc: [],
-        message: ['Message is required.'],
-        subject: [],
-      },
+      errors: {},
     });
   });
 });
 
-describe('EmailActionConnectorFields renders', () => {
+describe('PagerDutyActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
@@ -143,14 +108,13 @@ describe('EmailActionConnectorFields renders', () => {
     const ConnectorFields = actionTypeModel.actionConnectorFields;
     const actionConnector = {
       secrets: {
-        user: 'user',
-        password: 'pass',
+        routingKey: 'test',
       },
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
       config: {
-        from: 'test@test.com',
+        apiUrl: 'http:\\test',
       },
     } as ActionConnector;
     const wrapper = mountWithIntl(
@@ -162,21 +126,18 @@ describe('EmailActionConnectorFields renders', () => {
         hasErrors={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="pagerdutyApiUrlInput"]').length > 0).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="emailFromInput"]')
+        .find('[data-test-subj="pagerdutyApiUrlInput"]')
         .first()
         .prop('value')
-    ).toBe('test@test.com');
-    expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeTruthy();
+    ).toBe('http:\\test');
+    expect(wrapper.find('[data-test-subj="pagerdutyRoutingKeyInput"]').length > 0).toBeTruthy();
   });
 });
 
-describe('EmailParamsFields renders', () => {
+describe('PagerDutyParamsFields renders', () => {
   test('all params fields is rendered', () => {
     expect(actionTypeModel.actionParamsFields).not.toBeNull();
     if (!actionTypeModel.actionParamsFields) {
@@ -184,9 +145,15 @@ describe('EmailParamsFields renders', () => {
     }
     const ParamsFields = actionTypeModel.actionParamsFields;
     const actionParams = {
-      to: ['test@test.com'],
-      subject: 'test',
-      message: 'test message',
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: '234654564654',
+      component: 'test',
+      group: 'group',
+      class: 'test class',
     };
     const wrapper = mountWithIntl(
       <ParamsFields
@@ -197,16 +164,19 @@ describe('EmailParamsFields renders', () => {
         hasErrors={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="severitySelect"]').length > 0).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="toEmailAddressInput"]')
+        .find('[data-test-subj="severitySelect"]')
         .first()
-        .prop('selectedOptions')
-    ).toStrictEqual([{ label: 'test@test.com' }]);
-    expect(wrapper.find('[data-test-subj="ccEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bccEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailSubjectInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailMessageInput"]').length > 0).toBeTruthy();
+        .prop('value')
+    ).toStrictEqual('critical');
+    expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="componentInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="groupInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="pagerdutyDescriptionInput"]').length > 0).toBeTruthy();
   });
 });

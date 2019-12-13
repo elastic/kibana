@@ -9,7 +9,7 @@ import { ActionTypeRegistry } from '../../action_type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionConnector } from '../../../types';
 
-const ACTION_TYPE_ID = '.email';
+const ACTION_TYPE_ID = '.slack';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
@@ -24,117 +24,67 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('email');
+    expect(actionTypeModel.iconClass).toEqual('logoSlack');
   });
 });
 
-describe('connector validation', () => {
+describe('slack connector validation', () => {
   test('connector validation succeeds when connector config is valid', () => {
     const actionConnector = {
       secrets: {
-        user: 'user',
-        password: 'pass',
+        webhookUrl: 'http:\\test',
       },
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
-      config: {
-        from: 'test@test.com',
-        port: '2323',
-        host: 'localhost',
-        test: 'test',
-      },
+      config: {},
     } as ActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
-      },
-    });
-
-    delete actionConnector.config.test;
-    actionConnector.config.host = 'elastic.co';
-    actionConnector.config.port = 8080;
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
+        webhookUrl: [],
       },
     });
   });
 
   test('connector validation fails when connector config is not valid', () => {
     const actionConnector = {
-      secrets: {
-        user: 'user',
-        password: 'pass',
-      },
+      secrets: {},
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
-      config: {
-        from: 'test@test.com',
-      },
+      config: {},
     } as ActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        from: [],
-        port: ['Port is required.'],
-        host: ['Host is required.'],
-        user: [],
-        password: [],
+        webhookUrl: ['WebhookUrl is required.'],
       },
     });
   });
 });
 
-describe('action params validation', () => {
-  test('action params validation succeeds when action params is valid', () => {
+describe('slack action params validation', () => {
+  test('if action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      to: 'test@test.com',
-      cc: 'test1@test.com',
       message: 'message {test}',
-      subject: 'test',
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        to: [],
-        cc: [],
-        bcc: [],
-        message: [],
-        subject: [],
-      },
+      errors: {},
     });
   });
 
-  test('action params validation fails when action params is not valid', () => {
-    const actionParams = {
-      to: 'test@test.com',
-      subject: 'test',
-    };
+  test('if action params validation not fails when action params is empty', () => {
+    const actionParams = {};
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        to: [],
-        cc: [],
-        bcc: [],
-        message: ['Message is required.'],
-        subject: [],
-      },
+      errors: {},
     });
   });
 });
 
-describe('EmailActionConnectorFields renders', () => {
+describe('SlackActionFields renders', () => {
   test('all connector fields is rendered', () => {
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
@@ -143,15 +93,12 @@ describe('EmailActionConnectorFields renders', () => {
     const ConnectorFields = actionTypeModel.actionConnectorFields;
     const actionConnector = {
       secrets: {
-        user: 'user',
-        password: 'pass',
+        webhookUrl: 'http:\\test',
       },
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
-      config: {
-        from: 'test@test.com',
-      },
+      config: {},
     } as ActionConnector;
     const wrapper = mountWithIntl(
       <ConnectorFields
@@ -162,21 +109,17 @@ describe('EmailActionConnectorFields renders', () => {
         hasErrors={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').length > 0).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="emailFromInput"]')
+        .find('[data-test-subj="slackWebhookUrlInput"]')
         .first()
         .prop('value')
-    ).toBe('test@test.com');
-    expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeTruthy();
+    ).toBe('http:\\test');
   });
 });
 
-describe('EmailParamsFields renders', () => {
+describe('SlackParamsFields renders', () => {
   test('all params fields is rendered', () => {
     expect(actionTypeModel.actionParamsFields).not.toBeNull();
     if (!actionTypeModel.actionParamsFields) {
@@ -184,8 +127,6 @@ describe('EmailParamsFields renders', () => {
     }
     const ParamsFields = actionTypeModel.actionParamsFields;
     const actionParams = {
-      to: ['test@test.com'],
-      subject: 'test',
       message: 'test message',
     };
     const wrapper = mountWithIntl(
@@ -197,16 +138,12 @@ describe('EmailParamsFields renders', () => {
         hasErrors={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="slackMessageTextarea"]').length > 0).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="toEmailAddressInput"]')
+        .find('[data-test-subj="slackMessageTextarea"]')
         .first()
-        .prop('selectedOptions')
-    ).toStrictEqual([{ label: 'test@test.com' }]);
-    expect(wrapper.find('[data-test-subj="ccEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bccEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailSubjectInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailMessageInput"]').length > 0).toBeTruthy();
+        .prop('value')
+    ).toStrictEqual('test message');
   });
 });

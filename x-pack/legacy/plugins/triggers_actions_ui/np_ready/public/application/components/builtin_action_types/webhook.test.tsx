@@ -9,7 +9,7 @@ import { ActionTypeRegistry } from '../../action_type_registry';
 import { registerBuiltInActionTypes } from './index';
 import { ActionTypeModel, ActionConnector } from '../../../types';
 
-const ACTION_TYPE_ID = '.email';
+const ACTION_TYPE_ID = '.webhook';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
@@ -24,11 +24,11 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('email');
+    expect(actionTypeModel.iconClass).toEqual('logoWebhook');
   });
 });
 
-describe('connector validation', () => {
+describe('webhook connector validation', () => {
   test('connector validation succeeds when connector config is valid', () => {
     const actionConnector = {
       secrets: {
@@ -39,31 +39,16 @@ describe('connector validation', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {
-        from: 'test@test.com',
-        port: '2323',
-        host: 'localhost',
-        test: 'test',
+        method: 'PUT',
+        url: 'http:\\test',
+        headers: ['content-type: text'],
       },
     } as ActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        from: [],
-        port: [],
-        host: [],
-        user: [],
-        password: [],
-      },
-    });
-
-    delete actionConnector.config.test;
-    actionConnector.config.host = 'elastic.co';
-    actionConnector.config.port = 8080;
-    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
-      errors: {
-        from: [],
-        port: [],
-        host: [],
+        url: [],
+        method: [],
         user: [],
         password: [],
       },
@@ -74,67 +59,39 @@ describe('connector validation', () => {
     const actionConnector = {
       secrets: {
         user: 'user',
-        password: 'pass',
       },
       id: 'test',
       actionTypeId: '.email',
       name: 'email',
       config: {
-        from: 'test@test.com',
+        method: 'PUT',
       },
     } as ActionConnector;
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        from: [],
-        port: ['Port is required.'],
-        host: ['Host is required.'],
+        url: ['Url is required.'],
+        method: [],
         user: [],
-        password: [],
+        password: ['Password is required.'],
       },
     });
   });
 });
 
-describe('action params validation', () => {
+describe('webhook action params validation', () => {
   test('action params validation succeeds when action params is valid', () => {
     const actionParams = {
-      to: 'test@test.com',
-      cc: 'test1@test.com',
-      message: 'message {test}',
-      subject: 'test',
+      body: 'message {test}',
     };
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        to: [],
-        cc: [],
-        bcc: [],
-        message: [],
-        subject: [],
-      },
-    });
-  });
-
-  test('action params validation fails when action params is not valid', () => {
-    const actionParams = {
-      to: 'test@test.com',
-      subject: 'test',
-    };
-
-    expect(actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: {
-        to: [],
-        cc: [],
-        bcc: [],
-        message: ['Message is required.'],
-        subject: [],
-      },
+      errors: {},
     });
   });
 });
 
-describe('EmailActionConnectorFields renders', () => {
+describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', () => {
     expect(actionTypeModel.actionConnectorFields).not.toBeNull();
     if (!actionTypeModel.actionConnectorFields) {
@@ -150,7 +107,9 @@ describe('EmailActionConnectorFields renders', () => {
       actionTypeId: '.email',
       name: 'email',
       config: {
-        from: 'test@test.com',
+        method: 'PUT',
+        url: 'http:\\test',
+        headers: ['content-type: text'],
       },
     } as ActionConnector;
     const wrapper = mountWithIntl(
@@ -162,21 +121,22 @@ describe('EmailActionConnectorFields renders', () => {
         hasErrors={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="emailFromInput"]').length > 0).toBeTruthy();
-    expect(
-      wrapper
-        .find('[data-test-subj="emailFromInput"]')
-        .first()
-        .prop('value')
-    ).toBe('test@test.com');
-    expect(wrapper.find('[data-test-subj="emailHostInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPortInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailUserInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookAddHeaderButton"]').length > 0).toBeTruthy();
+    wrapper
+      .find('[data-test-subj="webhookAddHeaderButton"]')
+      .first()
+      .simulate('click');
+    expect(wrapper.find('[data-test-subj="webhookHeadersKeyInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookHeaderText"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookHeadersValueInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookUserInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookPasswordInput"]').length > 0).toBeTruthy();
   });
 });
 
-describe('EmailParamsFields renders', () => {
+describe('WebhookParamsFields renders', () => {
   test('all params fields is rendered', () => {
     expect(actionTypeModel.actionParamsFields).not.toBeNull();
     if (!actionTypeModel.actionParamsFields) {
@@ -184,9 +144,7 @@ describe('EmailParamsFields renders', () => {
     }
     const ParamsFields = actionTypeModel.actionParamsFields;
     const actionParams = {
-      to: ['test@test.com'],
-      subject: 'test',
-      message: 'test message',
+      body: 'test message',
     };
     const wrapper = mountWithIntl(
       <ParamsFields
@@ -197,16 +155,12 @@ describe('EmailParamsFields renders', () => {
         hasErrors={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="webhookBodyEditor"]').length > 0).toBeTruthy();
     expect(
       wrapper
-        .find('[data-test-subj="toEmailAddressInput"]')
+        .find('[data-test-subj="webhookBodyEditor"]')
         .first()
-        .prop('selectedOptions')
-    ).toStrictEqual([{ label: 'test@test.com' }]);
-    expect(wrapper.find('[data-test-subj="ccEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bccEmailAddressInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailSubjectInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="emailMessageInput"]').length > 0).toBeTruthy();
+        .prop('value')
+    ).toStrictEqual('test message');
   });
 });
