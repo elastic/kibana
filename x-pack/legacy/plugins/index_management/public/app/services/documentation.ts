@@ -7,7 +7,6 @@
 import { DocLinksStart } from '../../../../../../../src/core/public';
 import { DataType, ConfigType } from '../components/mappings_editor/types';
 import { TYPE_DEFINITION } from '../components/mappings_editor/constants';
-import { schema as CONFIG_DEFINITION } from '../components/mappings_editor/components/configuration_form/form.schema';
 
 class DocumentationService {
   private esDocsBase: string = '';
@@ -38,7 +37,7 @@ class DocumentationService {
   }
 
   public getTypeDocLink = (type: DataType | ConfigType, uri = 'main'): string | undefined => {
-    const TYPES = { ...CONFIG_DEFINITION, ...TYPE_DEFINITION } as {
+    const TYPES = { ...TYPE_DEFINITION } as {
       [key: string]: any;
       documentation?: {
         [key: string]: string;
@@ -54,6 +53,10 @@ class DocumentationService {
 
   public getMappingTypesLink() {
     return `${this.esDocsBase}/mapping-types.html`;
+  }
+
+  public getDynamicMappingLink() {
+    return `${this.esDocsBase}/dynamic-field-mapping.html`;
   }
 
   public getNullValueLink() {

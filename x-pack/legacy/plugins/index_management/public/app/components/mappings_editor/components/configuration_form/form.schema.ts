@@ -20,9 +20,6 @@ export const schema: FormSchema<MappingsConfiguration> = {
     }),
     type: FIELD_TYPES.SELECT,
     defaultValue: true,
-    documentation: {
-      main: '/dynamic-field-mapping.html',
-    },
   },
   date_detection: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dateDetectionFieldLabel', {
