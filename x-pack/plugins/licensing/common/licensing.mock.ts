@@ -19,6 +19,7 @@ function createLicense({
     uid: 'uid-000000001234',
     status: 'active',
     type: 'basic',
+    mode: 'basic',
     expiryDateInMillis: 5000,
   };
 
