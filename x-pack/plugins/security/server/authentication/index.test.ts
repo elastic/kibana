@@ -60,6 +60,10 @@ describe('setupAuthentication()', () => {
       coreMock.createPluginInitializerContext({
         encryptionKey: 'ab'.repeat(16),
         secureCookies: true,
+        session: {
+          idleTimeout: null,
+          lifespan: null,
+        },
         cookieName: 'my-sid-cookie',
         authc: { providers: ['basic'] },
       }),
@@ -87,7 +91,6 @@ describe('setupAuthentication()', () => {
       encryptionKey: 'ab'.repeat(16),
       secureCookies: true,
       cookieName: 'my-sid-cookie',
-      authc: { providers: ['basic'] },
     };
 
     await setupAuthentication(mockSetupAuthenticationParams);

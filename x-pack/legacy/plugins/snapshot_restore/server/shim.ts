@@ -6,10 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
-import { createRouter, Router } from '../../server/lib/create_router';
-import { registerLicenseChecker } from '../../server/lib/register_license_checker';
-import { elasticsearchJsPlugin } from './server/client/elasticsearch_slm';
-import { CloudSetup } from '../../../plugins/cloud/server';
+import { createRouter, Router } from '../../../server/lib/create_router';
+import { registerLicenseChecker } from '../../../server/lib/register_license_checker';
+import { elasticsearchJsPlugin } from './client/elasticsearch_slm';
+import { CloudSetup } from '../../../../plugins/cloud/server';
 export interface Core {
   http: {
     createRouter(basePath: string): Router;
