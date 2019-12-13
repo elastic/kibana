@@ -110,11 +110,11 @@ export default function ({ getService, getPageObjects }) {
       });
 
       after('logout', async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
       });
 
       it('shows only the dashboard app link', async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login('dashuser', '123456');
 
         const appLinks = await appsMenu.readLinks();
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('is loaded for a user who is assigned a non-dashboard mode role', async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login('mixeduser', '123456');
 
         if (await appsMenu.linkExists('Management')) {
@@ -203,7 +203,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('is not loaded for a user who is assigned a superuser role', async () => {
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login('mysuperuser', '123456');
 
         if (!await appsMenu.linkExists('Management')) {
