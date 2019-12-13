@@ -5,16 +5,13 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../services';
-import { LicensingPluginSetup } from '../../../plugins/licensing/public';
 import { createScenario } from '../scenario';
 import '../../../../test/plugin_functional/plugins/core_provider_plugin/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function(ftrContext: FtrProviderContext) {
   const { getService } = ftrContext;
-  const supertest = getService('supertest');
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
 
   const scenario = createScenario(ftrContext);
 
