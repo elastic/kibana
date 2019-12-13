@@ -42,7 +42,7 @@ describe('CspConfig', () => {
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
-        "strict": true,
+        "strict": false,
         "warnLegacyBrowsers": true,
       }
     `);
@@ -57,14 +57,14 @@ describe('CspConfig', () => {
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
-        "strict": true,
+        "strict": false,
         "warnLegacyBrowsers": true,
       }
     `);
   });
 
   test('creates from partial config', () => {
-    expect(new CspConfig({ strict: false, warnLegacyBrowsers: false })).toMatchInlineSnapshot(`
+    expect(new CspConfig({ strict: true, warnLegacyBrowsers: false })).toMatchInlineSnapshot(`
       CspConfig {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "rules": Array [
@@ -72,7 +72,7 @@ describe('CspConfig', () => {
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
-        "strict": false,
+        "strict": true,
         "warnLegacyBrowsers": false,
       }
     `);
@@ -89,7 +89,7 @@ describe('CspConfig', () => {
           "beta",
           "gamma",
         ],
-        "strict": true,
+        "strict": false,
         "warnLegacyBrowsers": true,
       }
     `);

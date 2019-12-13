@@ -46,10 +46,10 @@ describe('csp collector', () => {
   test('fetches whether strict mode is enabled', async () => {
     const collector = createCspCollector(kbnServer as any);
 
-    expect((await collector.fetch()).strict).toEqual(true);
-
-    updateCsp({ strict: false });
     expect((await collector.fetch()).strict).toEqual(false);
+
+    updateCsp({ strict: true });
+    expect((await collector.fetch()).strict).toEqual(true);
   });
 
   test('fetches whether the legacy browser warning is enabled', async () => {
@@ -82,7 +82,7 @@ describe('csp collector', () => {
     expect(await collector.fetch()).toMatchInlineSnapshot(`
       Object {
         "rulesChangedFromDefault": false,
-        "strict": true,
+        "strict": false,
         "warnLegacyBrowsers": true,
       }
     `);
