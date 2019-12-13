@@ -46,6 +46,7 @@ jest.mock('fs', () => {
 const DEFAULT_FILE_UUID = 'FILE_UUID';
 const DEFAULT_CONFIG_UUID = 'CONFIG_UUID';
 const fileNotFoundError = { code: 'ENOENT' };
+const permissionError = { code: 'EACCES' };
 
 const mockReadFile = ({
   uuid = DEFAULT_FILE_UUID,
@@ -59,6 +60,16 @@ const mockReadFile = ({
       return Promise.reject(error);
     } else {
       return Promise.resolve(uuid);
+    }
+  });
+};
+
+const mockWriteFile = (error?: object) => {
+  ((writeFile as unknown) as jest.Mock).mockImplementation((path, callback) => {
+    if (error) {
+      return Promise.reject(error);
+    } else {
+      return Promise.resolve();
     }
   });
 };
@@ -88,6 +99,7 @@ describe('resolveInstanceUuid', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockReadFile({ uuid: DEFAULT_FILE_UUID });
+    mockWriteFile();
     configService = getConfigService(DEFAULT_CONFIG_UUID);
     logger = loggingServiceMock.create().get() as any;
   });
@@ -173,6 +185,25 @@ describe('resolveInstanceUuid', () => {
           "Setting new Kibana instance UUID: NEW_UUID",
         ]
       `);
+    });
+  });
+
+  describe('when file access error occurs', () => {
+    it('throws an explicit error for file read errors', async () => {
+      mockReadFile({ error: permissionError });
+      await expect(
+        resolveInstanceUuid(configService, logger)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to read Kibana UUID file, please check the uuid.server configurationvalue in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: EACCES"`
+      );
+    });
+    it('throws an explicit error for file write errors', async () => {
+      mockWriteFile({ error: permissionError });
+      await expect(
+        resolveInstanceUuid(configService, logger)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to write Kibana UUID file, please check the uuid.server configurationvalue in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. Error was: undefined"`
+      );
     });
   });
 });

@@ -88,10 +88,22 @@ async function readUuidFromFile(filepath: string): Promise<string | undefined> {
       // non-existent uuid file is ok, we will create it.
       return undefined;
     }
-    throw e;
+    throw new Error(
+      'Unable to read Kibana UUID file, please check the uuid.server configuration' +
+        'value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. ' +
+        `Error was: ${e.code}`
+    );
   }
 }
 
 async function writeUuidToFile(filepath: string, uuidValue: string) {
-  return await writeFile(filepath, uuidValue, { encoding: FILE_ENCODING });
+  try {
+    return await writeFile(filepath, uuidValue, { encoding: FILE_ENCODING });
+  } catch (e) {
+    throw new Error(
+      'Unable to write Kibana UUID file, please check the uuid.server configuration' +
+        'value in kibana.yml and ensure Kibana has sufficient permissions to read / write to this file. ' +
+        `Error was: ${e.code}`
+    );
+  }
 }
