@@ -12,6 +12,7 @@ export const initServerWithKibana = (hapiServer: any) => {
   libs.framework.log('Ingest is composed -- debug message');
 
   libs.framework.expose('policy', libs.policy);
+  libs.framework.expose('datasources', libs.datasources);
   libs.framework.expose('outputs', libs.outputs);
 
   initRestApi(hapiServer, libs);

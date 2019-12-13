@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import fetch from 'node-fetch';
 import { SavedObjectsClientContract } from 'src/core/server/';
+import { HapiFrameworkAdapter } from '../../../ingest/server/libs/adapters/framework/hapi_framework_adapter';
 import { Asset, Datasource, InputType } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
 import { AssetReference, InstallationStatus, RegistryPackage } from '../../common/types';
@@ -78,12 +78,12 @@ async function saveDatasourceReferences(options: {
   };
 
   const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
+
+  // Works, but would still like to improve the DX here
   const datasource: Datasource = createFakeDatasource(pkg, toInstall);
-  // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
-  // or something similar, but it's a class not an object so many pieces are missing
-  // we'd still need `user` from the request object, but that's not terrible
-  // lacking that we make another http request to Ingest
-  await ingestDatasourceCreate({ request, datasource });
+  const ingestPlugin = request.server.plugins.ingest;
+  const user = HapiFrameworkAdapter.getUserFromRequest(request);
+  await ingestPlugin.datasources.create(user, datasource);
 
   return toInstall;
 }
@@ -130,35 +130,4 @@ function createFakeDatasource(pkg: RegistryPackage, assets: Asset[] = []): Datas
       },
     ],
   };
-}
-
-async function ingestDatasourceCreate({
-  request,
-  datasource,
-}: {
-  request: Request;
-  datasource: Datasource;
-}) {
-  // OMG, so gross! Will not keep
-  // if we end up keeping the "make another HTTP request" method,
-  // we'll clean this up via proxy or something else which prevents these functions from needing to know this.
-  // The key here is to show the Saved Object we create being stored/retrieved by Ingest
-
-  // node-fetch requires absolute urls because there isn't an origin on Node
-  const origin = request.server.info.uri; // e.g. http://localhost:5601
-  const basePath = request.getBasePath(); // e.g. /abc
-  const apiPath = '/api/ingest/datasources';
-  const url = `${origin}${basePath}${apiPath}`;
-  const body = { datasource };
-
-  return fetch(url, {
-    method: 'post',
-    body: JSON.stringify(body),
-    headers: {
-      'kbn-xsrf': 'some value, any value',
-      'Content-Type': 'application/json',
-      // the main (only?) one we want is `authorization`
-      ...request.headers,
-    },
-  }).then(response => response.json());
 }

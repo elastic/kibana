@@ -27,9 +27,6 @@ export async function handleRequestInstallDatasource(
   request: CreateDatasourceRequest,
   extra: Extra
 ) {
-  const user = await request.server.plugins.security?.getUser(request);
-  if (!user) return Boom.unauthorized('Must be logged in to perform this operation');
-
   const { pkgkey } = request.params;
   const savedObjectsClient = getClient(request);
   const callCluster = getClusterAccessor(extra.context.esClient, request);
