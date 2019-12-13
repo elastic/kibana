@@ -97,71 +97,13 @@ export const TextType = React.memo(({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        {/* store */}
-        <StoreParameter />
-
-        {/* index */}
         <IndexParameter />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
-        {/* Analyzers */}
         <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
 
         <EditFieldSection>
-          {/* fielddata */}
-          <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
-                  defaultMessage: 'Fielddata',
-                })}
-              </h3>
-            }
-            description={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataDescription', {
-              defaultMessage:
-                'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
-            })}
-            formFieldPath="fielddata"
-          >
-            {/* fielddata_frequency_filter */}
-            <EuiFormRow label={i18nTexts.rangeFieldLabel} fullWidth>
-              <UseMultiFields
-                fields={{
-                  min: {
-                    path: 'fielddata_frequency_filter.min',
-                    config: getFieldConfig('fielddata_frequency_filter', 'min'),
-                  },
-                  max: {
-                    path: 'fielddata_frequency_filter.max',
-                    config: getFieldConfig('fielddata_frequency_filter', 'max'),
-                  },
-                }}
-              >
-                {({ min, max }) => {
-                  return (
-                    <EuiDualRange
-                      min={0}
-                      max={100}
-                      value={[min.value as number, max.value as number]}
-                      onChange={onFrequencyFilterChange(min, max)}
-                      showInput
-                      fullWidth
-                    />
-                  );
-                }}
-              </UseMultiFields>
-            </EuiFormRow>
-
-            <EuiSpacer />
-
-            <UseField
-              path="fielddata_frequency_filter.min_segment_size"
-              config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
-              component={Field}
-            />
-          </EditFieldFormRow>
-          {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
 
           {/* index_phrases */}
@@ -228,7 +170,6 @@ export const TextType = React.memo(({ field }: Props) => {
             </EuiFormRow>
           </EditFieldFormRow>
 
-          {/* norms */}
           <NormsParameter />
 
           {/* position_increment_gap */}
@@ -300,21 +241,72 @@ export const TextType = React.memo(({ field }: Props) => {
         </EditFieldSection>
 
         <EditFieldSection>
-          {/* similarity */}
           <SimilarityParameter
             defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
           />
 
-          {/* term vector */}
           <TermVectorParameter
             field={field}
             defaultToggleValue={getDefaultValueToggle('term_vector', field.source)}
           />
 
-          {/* copy_to */}
+          {/* fielddata */}
+          <EditFieldFormRow
+            title={
+              <h3>
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
+                  defaultMessage: 'Fielddata',
+                })}
+              </h3>
+            }
+            description={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataDescription', {
+              defaultMessage:
+                'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
+            })}
+            formFieldPath="fielddata"
+          >
+            {/* fielddata_frequency_filter */}
+            <EuiFormRow label={i18nTexts.rangeFieldLabel} fullWidth>
+              <UseMultiFields
+                fields={{
+                  min: {
+                    path: 'fielddata_frequency_filter.min',
+                    config: getFieldConfig('fielddata_frequency_filter', 'min'),
+                  },
+                  max: {
+                    path: 'fielddata_frequency_filter.max',
+                    config: getFieldConfig('fielddata_frequency_filter', 'max'),
+                  },
+                }}
+              >
+                {({ min, max }) => {
+                  return (
+                    <EuiDualRange
+                      min={0}
+                      max={100}
+                      value={[min.value as number, max.value as number]}
+                      onChange={onFrequencyFilterChange(min, max)}
+                      showInput
+                      fullWidth
+                    />
+                  );
+                }}
+              </UseMultiFields>
+            </EuiFormRow>
+
+            <EuiSpacer />
+
+            <UseField
+              path="fielddata_frequency_filter.min_segment_size"
+              config={getFieldConfig('fielddata_frequency_filter', 'min_segment_size')}
+              component={Field}
+            />
+          </EditFieldFormRow>
+
           <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
 
-          {/* boost */}
+          <StoreParameter />
+
           <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

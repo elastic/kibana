@@ -51,12 +51,11 @@ export const KeywordType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <StoreParameter />
         <IndexParameter
           config={{ ...getFieldConfig('index_options_keyword') }}
           indexOptions={PARAMETERS_OPTIONS.index_options_keyword}
         />
-        <DocValuesParameter />
+
         {/* normalizer */}
         <EditFieldFormRow
           title={
@@ -81,12 +80,6 @@ export const KeywordType = ({ field }: Props) => {
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* null_value */}
-          <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
-          />
-
-          {/* eager_global_ordinals */}
           <EagerGlobalOrdinalsParameter />
 
           {/* ignore_above */}
@@ -113,12 +106,10 @@ export const KeywordType = ({ field }: Props) => {
             />
           </EditFieldFormRow>
 
-          {/* norms */}
           <NormsParameter />
         </EditFieldSection>
 
         <EditFieldSection>
-          {/* similarity */}
           <SimilarityParameter
             defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
           />
@@ -142,10 +133,16 @@ export const KeywordType = ({ field }: Props) => {
             formFieldPath="split_queries_on_whitespace"
           />
 
-          {/* copy_to */}
+          <DocValuesParameter />
+
           <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
 
-          {/* boost */}
+          <NullValueParameter
+            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+          />
+
+          <StoreParameter />
+
           <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

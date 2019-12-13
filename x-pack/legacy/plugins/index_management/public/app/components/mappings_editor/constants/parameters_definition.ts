@@ -161,6 +161,16 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: true,
     },
   },
+  coerce_geo_shape: {
+    fieldConfig: {
+      defaultValue: false,
+    },
+  },
+  coerce_shape: {
+    fieldConfig: {
+      defaultValue: false,
+    },
+  },
   ignore_malformed: {
     fieldConfig: {
       defaultValue: false,

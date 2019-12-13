@@ -27,16 +27,15 @@ export const RangeType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* coerce */}
           <CoerceParameter />
 
-          {/* boost */}
+          <StoreParameter />
+
           <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

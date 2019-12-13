@@ -39,33 +39,27 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        {/* store */}
-        <StoreParameter />
-
-        {/* index */}
         <IndexParameter
           config={{ ...getFieldConfig('index_options'), defaultValue: 'positions' }}
         />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
-        {/* Analyzers */}
         <AnalyzersParameter field={field} withSearchQuoteAnalyzer={true} />
 
         <EditFieldSection>
-          {/* norms */}
           <NormsParameter />
 
-          {/* similarity */}
           <SimilarityParameter
             defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
           />
 
-          {/* term vector */}
           <TermVectorParameter
             field={field}
             defaultToggleValue={getDefaultValueToggle('term_vector', field.source)}
           />
+
+          <StoreParameter />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

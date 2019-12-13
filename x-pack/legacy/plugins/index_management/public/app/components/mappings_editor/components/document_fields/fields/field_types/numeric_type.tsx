@@ -24,11 +24,12 @@ import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../
 
 const getDefaultValueToggle = (param: string, field: FieldType) => {
   switch (param) {
+    case 'copy_to':
+    case 'coerce':
     case 'boost':
     case 'ignore_malformed': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
-    case 'copy_to':
     case 'null_value': {
       return field.null_value !== undefined && field.null_value !== '';
     }
@@ -45,18 +46,14 @@ export const NumericType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
-        <DocValuesParameter />
+
+        <IgnoreMalformedParameter />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* coerce */}
           <CoerceParameter />
-
-          {/* ignore_malformed */}
-          <IgnoreMalformedParameter />
 
           {/* scaling_factor */}
           <FormDataProvider pathsToWatch="subType">
@@ -78,7 +75,6 @@ export const NumericType = ({ field }: Props) => {
                   )}
                   toggleDefaultValue={true}
                 >
-                  {/* Boost level */}
                   <UseField path="scaling_factor" config={getFieldConfig('scaling_factor')}>
                     {scalingFactorField => (
                       <EuiRange
@@ -95,7 +91,10 @@ export const NumericType = ({ field }: Props) => {
             }
           </FormDataProvider>
 
-          {/* null_value */}
+          <DocValuesParameter />
+
+          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+
           <NullValueParameter
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.numeric.nullValueFieldDescription',
@@ -113,10 +112,8 @@ export const NumericType = ({ field }: Props) => {
             />
           </NullValueParameter>
 
-          {/* copy_to */}
-          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+          <StoreParameter />
 
-          {/* boost */}
           <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

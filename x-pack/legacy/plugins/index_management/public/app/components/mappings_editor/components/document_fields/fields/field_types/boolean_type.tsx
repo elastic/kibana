@@ -59,14 +59,13 @@ export const BooleanType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
-        <DocValuesParameter />
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
         <EditFieldSection>
-          {/* null_value */}
+          <DocValuesParameter />
+
           <NullValueParameter
             defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
             description={i18n.translate(
@@ -89,7 +88,8 @@ export const BooleanType = ({ field }: Props) => {
             />
           </NullValueParameter>
 
-          {/* boost */}
+          <StoreParameter />
+
           <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>

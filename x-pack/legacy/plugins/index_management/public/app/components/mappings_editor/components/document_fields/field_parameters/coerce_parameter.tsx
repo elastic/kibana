@@ -10,7 +10,13 @@ import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 
-export const CoerceParameter = () => (
+type CoerceParameterNames = 'coerce' | 'coerce_geo_shape' | 'coerce_shape';
+
+export const CoerceParameter = ({
+  formFieldPath = 'coerce',
+}: {
+  formFieldPath?: CoerceParameterNames;
+}) => (
   <EditFieldFormRow
     title={
       <h3>
@@ -23,6 +29,6 @@ export const CoerceParameter = () => (
       defaultMessage:
         'Whether to try to convert strings to numbers and truncate fractions for integers.',
     })}
-    formFieldPath="coerce"
+    formFieldPath={formFieldPath}
   />
 );

@@ -86,6 +86,8 @@ export type ParameterName =
   | 'fielddata_frequency_filter'
   | 'doc_values'
   | 'coerce'
+  | 'coerce_geo_shape'
+  | 'coerce_shape'
   | 'ignore_malformed'
   | 'null_value'
   | 'null_value_numeric'
