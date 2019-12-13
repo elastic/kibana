@@ -5,15 +5,17 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../mock';
 
 import { FileDraggable } from './file_draggable';
+import { useMountAppended } from '../../../../utils/use_mount_appended';
 
 describe('FileDraggable', () => {
+  const mount = useMountAppended();
+
   test('it prefers fileName and filePath over endgameFileName and endgameFilePath when all of them are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -29,7 +31,7 @@ describe('FileDraggable', () => {
   });
 
   test('it returns an empty string when none of the files or paths are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -45,7 +47,7 @@ describe('FileDraggable', () => {
   });
 
   test('it renders just the endgameFileName if only endgameFileName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -61,7 +63,7 @@ describe('FileDraggable', () => {
   });
 
   test('it renders "in endgameFilePath" if only endgameFilePath is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -77,7 +79,7 @@ describe('FileDraggable', () => {
   });
 
   test('it renders just the filename if only fileName is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"
@@ -93,7 +95,7 @@ describe('FileDraggable', () => {
   });
 
   test('it renders "in filePath" if only filePath is provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <FileDraggable
           contextId="test"

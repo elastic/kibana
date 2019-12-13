@@ -30,7 +30,7 @@ export async function ensureValidConfiguration(
     coreHandledConfigPaths: await configService.getUsedPaths(),
     pluginSpecs,
     disabledPluginSpecs,
-    inputSettings: settings,
+    settings,
     legacyConfig: pluginExtendedConfig,
   });
 
