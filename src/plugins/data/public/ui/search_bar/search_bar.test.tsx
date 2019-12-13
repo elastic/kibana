@@ -19,15 +19,15 @@
 
 import React from 'react';
 import { SearchBar } from './search_bar';
-import { IndexPattern } from '../../../index_patterns';
 
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 
 import { mount } from 'enzyme';
+import { IIndexPattern } from '../..';
 
 const mockTimeHistory = {
   get: () => {
@@ -35,9 +35,14 @@ const mockTimeHistory = {
   },
 };
 
-jest.mock('../../../../../../../plugins/data/public', () => {
+jest.mock('../..', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
+  };
+});
+
+jest.mock('../query_string_input/query_bar_top_row', () => {
+  return {
     QueryBarTopRow: () => <div className="queryBar" />,
   };
 });
@@ -74,7 +79,7 @@ const mockIndexPattern = {
       searchable: true,
     },
   ],
-} as IndexPattern;
+} as IIndexPattern;
 
 const kqlQuery = {
   query: 'response:200',
