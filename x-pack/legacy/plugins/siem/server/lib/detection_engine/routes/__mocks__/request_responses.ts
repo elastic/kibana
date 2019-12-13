@@ -10,7 +10,9 @@ import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/t
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_PRIVILEGES_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  INTERNAL_RULE_ID_KEY,
 } from '../../../../../common/constants';
 import { RuleAlertType } from '../../rules/types';
 import { RuleAlertParamsRest } from '../../types';
@@ -79,6 +81,11 @@ export const getReadRequest = (): ServerInjectOptions => ({
 export const getFindRequest = (): ServerInjectOptions => ({
   method: 'GET',
   url: `${DETECTION_ENGINE_RULES_URL}/_find`,
+});
+
+export const getPrivilegeRequest = (): ServerInjectOptions => ({
+  method: 'GET',
+  url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
 });
 
 interface FindHit {
@@ -165,7 +172,7 @@ export const createActionResult = (): ActionResult => ({
 export const getResult = (): RuleAlertType => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
-  tags: [],
+  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`],
   alertTypeId: 'siem.signals',
   params: {
     description: 'Detecting root and admin users',
@@ -224,4 +231,57 @@ export const updateActionResult = (): ActionResult => ({
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+});
+
+export const getMockPrivileges = () => ({
+  username: 'test-space',
+  has_all_requested: false,
+  cluster: {
+    monitor_ml: true,
+    manage_ccr: false,
+    manage_index_templates: true,
+    monitor_watcher: true,
+    monitor_transform: true,
+    read_ilm: true,
+    manage_api_key: false,
+    manage_security: false,
+    manage_own_api_key: false,
+    manage_saml: false,
+    all: false,
+    manage_ilm: true,
+    manage_ingest_pipelines: true,
+    read_ccr: false,
+    manage_rollup: true,
+    monitor: true,
+    manage_watcher: true,
+    manage: true,
+    manage_transform: true,
+    manage_token: false,
+    manage_ml: true,
+    manage_pipeline: true,
+    monitor_rollup: true,
+    transport_client: true,
+    create_snapshot: true,
+  },
+  index: {
+    '.siem-signals-frank-hassanabad-test-space': {
+      all: false,
+      manage_ilm: true,
+      read: false,
+      create_index: true,
+      read_cross_cluster: false,
+      index: false,
+      monitor: true,
+      delete: false,
+      manage: true,
+      delete_index: true,
+      create_doc: false,
+      view_index_metadata: true,
+      create: false,
+      manage_follow_index: true,
+      manage_leader_index: true,
+      write: false,
+    },
+  },
+  application: {},
 });

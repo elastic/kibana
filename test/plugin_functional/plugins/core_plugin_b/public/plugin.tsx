@@ -24,6 +24,7 @@ declare global {
   interface Window {
     corePluginB?: string;
     hasAccessToInjectedMetadata?: boolean;
+    receivedStartServices?: boolean;
     env?: PluginInitializerContext['env'];
   }
 }
@@ -40,6 +41,9 @@ export class CorePluginBPlugin
   public setup(core: CoreSetup, deps: CorePluginBDeps) {
     window.corePluginB = `Plugin A said: ${deps.core_plugin_a.getGreeting()}`;
     window.hasAccessToInjectedMetadata = 'getInjectedVar' in core.injectedMetadata;
+    core.getStartServices().then(([coreStart, plugins]) => {
+      window.receivedStartServices = 'overlays' in coreStart;
+    });
 
     core.application.register({
       id: 'bar',

@@ -6,7 +6,7 @@
 
 import { IndicesExistsTemplateParams } from 'elasticsearch';
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-import { CallWithRequest } from './types';
+import { CallWithRequest } from '../types';
 
 export const getTemplateExists = async (
   callWithRequest: CallWithRequest<IndicesExistsTemplateParams, CallClusterOptions, boolean>,

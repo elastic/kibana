@@ -69,6 +69,7 @@ export interface LegacyPluginOptions {
     noParse: string[];
     home: string[];
     mappings: any;
+    migrations: any;
     savedObjectSchemas: SavedObjectsSchemaDefinition;
     savedObjectsManagement: SavedObjectsManagementDefinition;
     visTypes: string[];

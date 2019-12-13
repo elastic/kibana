@@ -7,14 +7,16 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { AuditdGenericDetails, AuditdGenericLine } from './generic_details';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('GenericDetails', () => {
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('it renders the default AuditAcquiredCredsDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
@@ -32,7 +34,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns auditd if the data does contain auditd data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericDetails
             contextId="contextid-123"
@@ -64,7 +66,7 @@ describe('GenericDetails', () => {
 
   describe('#AuditdConnectedToLine', () => {
     test('it returns pretty output if you send in all your happy path data', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -91,7 +93,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns a session with username if username, primary, and secondary all equal each other ', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -118,7 +120,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns a session with username if primary and secondary equal unset', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -145,7 +147,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns a session with username if primary and secondary equal unset with different casing', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -172,7 +174,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns a session with username if primary and secondary are undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -199,7 +201,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns a session with "as" wording if username, primary, and secondary are all different', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -226,7 +228,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns a session with "as" wording if username and primary are the same but secondary is different', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -253,7 +255,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns a session with primary if username and secondary are unset with different casing', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -280,7 +282,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns a session with primary if username and secondary are undefined', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -307,7 +309,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns just a session if only given an id', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -332,7 +334,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns only session and hostName if only hostname and an id is given', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -357,7 +359,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns only a session and user name if only a user name and id is given', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -382,7 +384,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns only a process name if only given a process name and id', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -407,7 +409,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns session, user name, and process title if process title with id is given', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -432,7 +434,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns only a working directory if that is all that is given with a id', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"
@@ -457,7 +459,7 @@ describe('GenericDetails', () => {
     });
 
     test('it returns only the session and args with id if that is all that is given (very unlikely situation)', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <AuditdGenericLine
             id="hello-i-am-an-id"

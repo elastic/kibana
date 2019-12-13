@@ -580,6 +580,10 @@ export enum InfraNodeType {
   pod = 'pod',
   container = 'container',
   host = 'host',
+  awsEC2 = 'awsEC2',
+  awsS3 = 'awsS3',
+  awsRDS = 'awsRDS',
+  awsSQS = 'awsSQS'
 }
 
 export enum InfraSnapshotMetricType {
@@ -590,6 +594,22 @@ export enum InfraSnapshotMetricType {
   tx = 'tx',
   rx = 'rx',
   logRate = 'logRate',
+  diskIOReadBytes = 'diskIOReadBytes',
+  diskIOWriteBytes = 'diskIOWriteBytes',
+  s3TotalRequests = 's3TotalRequests',
+  s3NumberOfObjects = 's3NumberOfObjects',
+  s3BucketSize = 's3BucketSize',
+  s3DownloadBytes = 's3DownloadBytes',
+  s3UploadBytes = 's3UploadBytes',
+  rdsConnections = 'rdsConnections',
+  rdsQueriesExecuted = 'rdsQueriesExecuted',
+  rdsActiveTransactions = 'rdsActiveTransactions',
+  rdsLatency = 'rdsLatency',
+  sqsMessagesVisible = 'sqsOldestMessage',
+  sqsMessagesDelayed = 'sqsMessagesDelayed',
+  sqsMessagesSent = 'sqsMessagesSent',
+  sqsMessagesEmpty = 'sqsMessagesEmpty',
+  sqsOldestMessage = 'sqsOldestMessage',
 }
 
 export enum InfraMetric {
@@ -630,6 +650,24 @@ export enum InfraMetric {
   awsNetworkPackets = 'awsNetworkPackets',
   awsDiskioBytes = 'awsDiskioBytes',
   awsDiskioOps = 'awsDiskioOps',
+  awsEC2CpuUtilization = 'awsEC2CpuUtilization',
+  awsEC2DiskIOBytes = 'awsEC2DiskIOBytes',
+  awsEC2NetworkTraffic = 'awsEC2NetworkTraffic',
+  awsS3TotalRequests = 'awsS3TotalRequests',
+  awsS3NumberOfObjects = 'awsS3NumberOfObjects',
+  awsS3BucketSize = 'awsS3BucketSize',
+  awsS3DownloadBytes = 'awsS3DownloadBytes',
+  awsS3UploadBytes = 'awsS3UploadBytes',
+  awsRDSCpuTotal = 'awsRDSCpuTotal',
+  awsRDSConnections = 'awsRDSConnections',
+  awsRDSQueriesExecuted = 'awsRDSQueriesExecuted',
+  awsRDSActiveTransactions = 'awsRDSActiveTransactions',
+  awsRDSLatency = 'awsRDSLatency',
+  awsSQSMessagesVisible = 'awsSQSMessagesVisible',
+  awsSQSMessagesDelayed = 'awsSQSMessagesDelayed',
+  awsSQSMessagesSent = 'awsSQSMessagesSent',
+  awsSQSMessagesEmpty = 'awsSQSMessagesEmpty',
+  awsSQSOldestMessage = 'awsSQSOldestMessage',
   custom = 'custom',
 }
 
