@@ -40,14 +40,66 @@ export class PulsePocPlugin {
 
     router.post(
       {
-        path: '/api/pulse_poc/intake',
+        path: '/api/pulse_poc/intake/{deploymentId}',
         validate: {
           params: schema.object({
-            channels: schema.arrayOf(schema.object({})),
+            deploymentId: schema.string(),
+          }),
+          body: schema.object({
+            channels: schema.arrayOf(
+              schema.object({
+                channel_id: schema.string({
+                  validate: value => {
+                    if (!this.channels.some(channel => channel.id === value)) {
+                      return `'${value}' is not a known channel`;
+                    }
+                  },
+                }),
+                records: schema.arrayOf(schema.object({}, { allowUnknowns: true })),
+              })
+            ),
           }),
         },
       },
       async (context, request, response) => {
+        const { deploymentId } = request.params;
+        const { channels } = request.body;
+        const es = context.core.elasticsearch.adminClient;
+
+        for (const channel of channels) {
+          const index = `pulse-poc-raw-${channel.channel_id}`;
+          const exists = await es.callAsInternalUser('indices.exists', { index });
+          if (!exists) {
+            const indexBody = {
+              settings: {
+                number_of_shards: 1,
+              },
+              mappings: {
+                properties: {
+                  channel_id: { type: 'keyword' },
+                  deployment_id: { type: 'keyword' },
+                },
+              },
+            };
+
+            await es.callAsInternalUser('indices.create', {
+              index,
+              body: indexBody,
+            });
+          }
+
+          for (const record of channel.records) {
+            await es.callAsInternalUser('index', {
+              index,
+              body: {
+                ...record,
+                channel_id: channel.channel_id,
+                deployment_id: deploymentId,
+              },
+            });
+          }
+        }
+
         return response.ok();
       }
     );
