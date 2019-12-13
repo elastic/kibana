@@ -16,6 +16,10 @@ export enum WhitelistedHosts {
   Any = '*',
 }
 
+export enum EnabledActionTypes {
+  Any = '*',
+}
+
 enum WhitelistingField {
   url = 'url',
   hostname = 'hostname',
@@ -42,7 +46,7 @@ function whitelistingErrorMessage(field: WhitelistingField, value: string) {
 }
 
 function disabledActionTypeErrorMessage(actionType: string) {
-  return i18n.translate('xpack.actions.urlWhitelistConfigurationError', {
+  return i18n.translate('xpack.actions.disabledActionTypeError', {
     defaultMessage:
       'action type "{actionType}" is not enabled in the Kibana config xpack.actions.enabledTypes',
     values: {

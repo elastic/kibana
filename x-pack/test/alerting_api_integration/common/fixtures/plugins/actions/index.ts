@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Hapi from 'hapi';
+import { ActionType } from '../../../../../../legacy/plugins/actions';
+
 import { initPlugin as initSlack } from './slack_simulation';
 import { initPlugin as initWebhook } from './webhook_simulation';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
@@ -32,6 +34,16 @@ export default function(kibana: any) {
     require: ['actions'],
     name: NAME,
     init: (server: Hapi.Server) => {
+      // this action is specifically NOT enabled in ../../config.ts
+      const notEnabledActionType: ActionType = {
+        id: 'test.not-enabled',
+        name: 'Test: Not Enabled',
+        async executor() {
+          return { status: 'ok', actionId: '' };
+        },
+      };
+      server.plugins.actions!.setup.registerType(notEnabledActionType);
+
       initSlack(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
       initWebhook(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK));
       initPagerduty(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));

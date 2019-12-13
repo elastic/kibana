@@ -16,6 +16,21 @@ interface CreateTestConfigOptions {
   ssl?: boolean;
 }
 
+// test.not-enabled is specifically not enabled
+const enabledActionTypes = [
+  '.server-log',
+  '.slack',
+  '.email',
+  '.index',
+  '.pagerduty',
+  '.webhook',
+  'test.noop',
+  'test.index-record',
+  'test.failing',
+  'test.rate-limit',
+  'test.authorization',
+];
+
 // eslint-disable-next-line import/no-default-export
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
   const { license = 'trial', disabledPlugins = [], ssl = false } = options;
@@ -58,7 +73,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'localhost',
             'some.non.existent.com',
           ])}`,
-          `--xpack.actions.enabledTypes=${JSON.stringify(['*'])}`,
+          `--xpack.actions.enabledTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.alerting.enabled=true',
           ...disabledPlugins.map(key => `--xpack.${key}.enabled=false`),
           `--plugin-path=${path.join(__dirname, 'fixtures', 'plugins', 'alerts')}`,

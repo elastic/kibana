@@ -378,6 +378,10 @@ Rollup user interface.
 
 `i18n.locale`:: *Default: en* Set this value to change the Kibana interface language. Valid locales are: `en`, `zh-CN`, `ja-JP`.
 
+`xpack.actions.enabledTypes:`:: *Default: +[ {asterisk} ]+* Set this value
+to an array of action types that are enabled.  An element of `*` indicates all
+action types registered are enabled.  The action types provided by Kibana are:
+`.server-log`, `.slack`, `.email`, `.index`, `.pagerduty`, `.webhook`.
 
 include::{docdir}/settings/apm-settings.asciidoc[]
 include::{docdir}/settings/dev-settings.asciidoc[]
