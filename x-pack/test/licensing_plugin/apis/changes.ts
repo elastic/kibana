@@ -73,7 +73,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     },
 
     async getLicense(): Promise<PublicLicenseJSON> {
-      // > --xpack.licensing.pollingFrequency set in test config
+      // > --xpack.licensing.api_polling_frequency set in test config
       // to wait for Kibana server to re-fetch the license from Elasticsearch
       await delay(1000);
 
@@ -97,9 +97,29 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
         isEnabled: true,
       });
 
+      const {
+        body: legacyInitialLicense,
+        headers: legacyInitialLicenseHeaders,
+      } = await supertest.get('/api/xpack/v1/info').expect(200);
+
+      expect(legacyInitialLicense.license?.type).to.be('basic');
+      expect(legacyInitialLicense.features).to.have.property('security');
+      expect(legacyInitialLicenseHeaders['kbn-xpack-sig']).to.be.a('string');
+
+      // license hasn't changed
       const refetchedLicense = await scenario.getLicense();
       expect(refetchedLicense.license?.type).to.be('basic');
       expect(refetchedLicense.signature).to.be(initialLicense.signature);
+
+      const {
+        body: legacyRefetchedLicense,
+        headers: legacyRefetchedLicenseHeaders,
+      } = await supertest.get('/api/xpack/v1/info').expect(200);
+
+      expect(legacyRefetchedLicense.license?.type).to.be('basic');
+      expect(legacyRefetchedLicenseHeaders['kbn-xpack-sig']).to.be(
+        legacyInitialLicenseHeaders['kbn-xpack-sig']
+      );
 
       // server allows to request trial only once.
       // other attempts will throw 403
@@ -107,19 +127,40 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       const trialLicense = await scenario.getLicense();
       expect(trialLicense.license?.type).to.be('trial');
       expect(trialLicense.signature).to.not.be(initialLicense.signature);
+
       expect(trialLicense.features?.security).to.eql({
         isAvailable: true,
         isEnabled: true,
       });
 
+      const { body: legacyTrialLicense, headers: legacyTrialLicenseHeaders } = await supertest
+        .get('/api/xpack/v1/info')
+        .expect(200);
+
+      expect(legacyTrialLicense.license?.type).to.be('trial');
+      expect(legacyTrialLicense.features).to.have.property('security');
+      expect(legacyTrialLicenseHeaders['kbn-xpack-sig']).to.not.be(
+        legacyInitialLicenseHeaders['kbn-xpack-sig']
+      );
+
       await scenario.startBasic();
       const basicLicense = await scenario.getLicense();
       expect(basicLicense.license?.type).to.be('basic');
       expect(basicLicense.signature).not.to.be(initialLicense.signature);
-      expect(trialLicense.features?.security).to.eql({
+
+      expect(basicLicense.features?.security).to.eql({
         isAvailable: true,
         isEnabled: true,
       });
+
+      const { body: legacyBasicLicense, headers: legacyBasicLicenseHeaders } = await supertest
+        .get('/api/xpack/v1/info')
+        .expect(200);
+      expect(legacyBasicLicense.license?.type).to.be('basic');
+      expect(legacyBasicLicense.features).to.have.property('security');
+      expect(legacyBasicLicenseHeaders['kbn-xpack-sig']).to.not.be(
+        legacyInitialLicenseHeaders['kbn-xpack-sig']
+      );
 
       await scenario.deleteLicense();
       const inactiveLicense = await scenario.getLicense();
