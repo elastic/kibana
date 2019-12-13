@@ -20,7 +20,7 @@
 import { get, isUndefined } from 'lodash';
 import { getPhraseScript } from '../../filters';
 import { getFields } from './utils/get_fields';
-import { getTimeZoneFromSettings } from '../../utils/get_time_zone_from_settings';
+import { getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
 
 import * as ast from '../ast';
