@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import { Reporter } from '@kbn/analytics';
+import { Reporter, Storage } from '@kbn/analytics';
+import { HttpServiceBase } from 'kibana/public';
 
 interface AnalyicsReporterConfig {
-  localStorage: any;
+  localStorage: Storage;
   debug: boolean;
-  fetch: any;
+  fetch: HttpServiceBase;
 }
 
 export function createReporter(config: AnalyicsReporterConfig): Reporter {

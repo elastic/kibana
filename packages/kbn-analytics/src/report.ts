@@ -23,7 +23,7 @@ const REPORT_VERSION = 1;
 
 export interface Report {
   reportVersion: typeof REPORT_VERSION;
-  uiStatsMetrics: Record<
+  uiStatsMetrics?: Record<
     string,
     {
       key: string;
@@ -51,14 +51,15 @@ export class ReportManager {
     this.report = report || ReportManager.createReport();
   }
   static createReport(): Report {
-    return { reportVersion: REPORT_VERSION, uiStatsMetrics: {} };
+    return { reportVersion: REPORT_VERSION };
   }
   public clearReport() {
     this.report = ReportManager.createReport();
   }
   public isReportEmpty(): boolean {
-    const noUiStats = Object.keys(this.report.uiStatsMetrics).length === 0;
-    const noUserAgent = !this.report.userAgent || Object.keys(this.report.userAgent).length === 0;
+    const { uiStatsMetrics, userAgent } = this.report;
+    const noUiStats = !uiStatsMetrics || Object.keys(uiStatsMetrics).length === 0;
+    const noUserAgent = !userAgent || Object.keys(userAgent).length === 0;
     return noUiStats && noUserAgent;
   }
   private incrementStats(count: number, stats?: Stats): Stats {
@@ -115,14 +116,17 @@ export class ReportManager {
       case METRIC_TYPE.LOADED:
       case METRIC_TYPE.COUNT: {
         const { appName, type, eventName, count } = metric;
-        const existingStats = (report.uiStatsMetrics[key] || {}).stats;
-        this.report.uiStatsMetrics[key] = {
-          key,
-          appName,
-          eventName,
-          type,
-          stats: this.incrementStats(count, existingStats),
-        };
+        if (report.uiStatsMetrics) {
+          const existingStats = (report.uiStatsMetrics[key] || {}).stats;
+          this.report.uiStatsMetrics = this.report.uiStatsMetrics || {};
+          this.report.uiStatsMetrics[key] = {
+            key,
+            appName,
+            eventName,
+            type,
+            stats: this.incrementStats(count, existingStats),
+          };
+        }
         return;
       }
       default:

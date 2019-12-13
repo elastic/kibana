@@ -19,13 +19,16 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from 'kibana/server';
+import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
 
 export const configSchema = schema.object({
   uiMetric: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     debug: schema.boolean({ defaultValue: schema.contextRef('dev') }),
   }),
-  maximumWaitTimeForAllCollectorsInS: schema.number({ defaultValue: 60 }),
+  maximumWaitTimeForAllCollectorsInS: schema.number({
+    defaultValue: DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
+  }),
 });
 
 export type ConfigType = TypeOf<typeof configSchema>;

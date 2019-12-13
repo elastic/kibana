@@ -24,12 +24,12 @@ import { CollectorSet } from './collector';
 import { setupRoutes } from './routes';
 
 export type UsageCollectionSetup = CollectorSet & {
-  registerLegacySavedObjects: (legcaySavedObjects: any) => void;
+  registerLegacySavedObjects: (legacySavedObjects: any) => void;
 };
 
 export class UsageCollectionPlugin {
   logger: Logger;
-  private legcaySavedObjects: any;
+  private legacySavedObjects: any;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
@@ -46,13 +46,13 @@ export class UsageCollectionPlugin {
     });
 
     const router = core.http.createRouter();
-    const getLegacySavedObjects = () => this.legcaySavedObjects;
+    const getLegacySavedObjects = () => this.legacySavedObjects;
     setupRoutes(router, getLegacySavedObjects);
 
     return {
       ...collectorSet,
-      registerLegacySavedObjects: (legcaySavedObjects: any) => {
-        this.legcaySavedObjects = legcaySavedObjects;
+      registerLegacySavedObjects: (legacySavedObjects: any) => {
+        this.legacySavedObjects = legacySavedObjects;
       },
     };
   }
