@@ -81,7 +81,7 @@ const getMockObject = (
   pageName,
   pathName,
   search: '',
-  tabName: mockDefaultTab(pageName),
+  tabName: mockDefaultTab(pageName) as HostsTableType,
   query: { query: '', language: 'kuery' },
   filters: [],
   timeline: {
