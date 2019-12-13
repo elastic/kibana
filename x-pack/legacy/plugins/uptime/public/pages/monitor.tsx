@@ -4,27 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore No typings for EuiSpacer
-  EuiSpacer,
-  EuiComboBoxOptionProps,
-} from '@elastic/eui';
+import { EuiSpacer, EuiComboBoxOptionProps } from '@elastic/eui';
 import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
 import gql from 'graphql-tag';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
-import {
-  MonitorCharts,
-  MonitorPageTitle,
-  MonitorStatusBar,
-  PingList,
-} from '../components/functional';
+import { MonitorCharts, MonitorPageTitle, PingList } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
 import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 import { BaseLocationOptions } from '../components/functional/ping_list';
 import { useTrackPageview } from '../../../infra/public';
+import { getTitle } from '../lib/helper/get_title';
+import { MonitorStatusDetails } from '../components/functional/monitor_status_details';
 
 interface MonitorPageProps {
   logMonitorPageLoad: () => void;
@@ -96,7 +89,12 @@ export const MonitorPage = ({
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
       <EuiSpacer size="s" />
-      <MonitorStatusBar monitorId={monitorId} variables={sharedVariables} />
+      <MonitorStatusDetails
+        monitorId={monitorId}
+        variables={sharedVariables}
+        dateStart={absoluteDateRangeStart}
+        dateEnd={absoluteDateRangeEnd}
+      />
       <EuiSpacer size="s" />
       <MonitorCharts
         {...colors}
