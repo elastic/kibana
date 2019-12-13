@@ -43,13 +43,18 @@ export const TokenCountType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <AnalyzerParameter
-          path="analyzer"
-          defaultValue={field.source.analyzer}
-          allowsIndexDefaultOption={false}
-        />
-      </EditFieldSection>
-      <EditFieldSection>
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerSectionTitle', {
+            defaultMessage: 'Analyzer',
+          })}
+          withToggle={false}
+        >
+          <AnalyzerParameter
+            path="analyzer"
+            defaultValue={field.source.analyzer}
+            allowsIndexDefaultOption={false}
+          />
+        </EditFieldFormRow>
         <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
         <DocValuesParameter />

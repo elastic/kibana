@@ -44,11 +44,11 @@ interface Props {
 export const NumericType = ({ field }: Props) => {
   return (
     <>
-      {/* scaling_factor only applies to scaled_float numeric type*/}
-      <FormDataProvider pathsToWatch="subType">
-        {formData =>
-          formData.subType === 'scaled_float' ? (
-            <EditFieldSection>
+      <EditFieldSection>
+        {/* scaling_factor only applies to scaled_float numeric type*/}
+        <FormDataProvider pathsToWatch="subType">
+          {formData =>
+            formData.subType === 'scaled_float' ? (
               <EditFieldFormRow
                 title={PARAMETERS_DEFINITION.scaling_factor.title}
                 description={PARAMETERS_DEFINITION.scaling_factor.description}
@@ -60,11 +60,9 @@ export const NumericType = ({ field }: Props) => {
                   component={Field}
                 />
               </EditFieldFormRow>
-            </EditFieldSection>
-          ) : null
-        }
-      </FormDataProvider>
-      <EditFieldSection>
+            ) : null
+          }
+        </FormDataProvider>
         <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
         <DocValuesParameter />
