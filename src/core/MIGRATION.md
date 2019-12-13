@@ -47,6 +47,7 @@
       - [UI Exports](#ui-exports)
   - [How to](#how-to)
     - [Configure plugin](#configure-plugin)
+      - [Handle plugin configuration deprecations](#handle-plugin-config-deprecations)
     - [Mock new platform services in tests](#mock-new-platform-services-in-tests)
       - [Writing mocks for your plugin](#writing-mocks-for-your-plugin)
       - [Using mocks in your tests](#using-mocks-in-your-tests)
@@ -1220,13 +1221,20 @@ import { setup, start } from '../core_plugins/visualizations/public/legacy';
 
 In server code, `core` can be accessed from either `server.newPlatform` or `kbnServer.newPlatform`. There are not currently very many services available on the server-side:
 
-| Legacy Platform                                    | New Platform                                                                                                                      | Notes                                                                       |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `server.config()`                                  | [`initializerContext.config.create()`](/docs/development/core/server/kibana-plugin-server.plugininitializercontext.config.md)     | Must also define schema. See _[how to configure plugin](#configure-plugin)_ |
-| `server.route`                                     | [`core.http.createRouter`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.createrouter.md)                   | [Examples](./MIGRATION_EXAMPLES.md#route-registration)                      |
-| `request.getBasePath()`                            | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.basepath.md)                       |                                                                             |
-| `server.plugins.elasticsearch.getCluster('data')`  | [`core.elasticsearch.dataClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.dataclient_.md)   | Handlers will also include a pre-configured client                          |
-| `server.plugins.elasticsearch.getCluster('admin')` | [`core.elasticsearch.adminClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.adminclient_.md) | Handlers will also include a pre-configured client                          |
+| Legacy Platform                                                               | New Platform                                                                                                                                                                                                                                                                                                | Notes                                                                       |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `server.config()`                                                             | [`initializerContext.config.create()`](/docs/development/core/server/kibana-plugin-server.plugininitializercontext.config.md)                                                                                                                                                                               | Must also define schema. See _[how to configure plugin](#configure-plugin)_ |
+| `server.route`                                                                | [`core.http.createRouter`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.createrouter.md)                                                                                                                                                                                             | [Examples](./MIGRATION_EXAMPLES.md#route-registration)                      |
+| `request.getBasePath()`                                                       | [`core.http.basePath.get`](/docs/development/core/server/kibana-plugin-server.httpservicesetup.basepath.md)                                                                                                                                                                                                 |                                                                             |
+| `server.plugins.elasticsearch.getCluster('data')`                             | [`core.elasticsearch.dataClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.dataclient_.md)                                                                                                                                                                             | Handlers will also include a pre-configured client                          |
+| `server.plugins.elasticsearch.getCluster('admin')`                            | [`core.elasticsearch.adminClient$`](/docs/development/core/server/kibana-plugin-server.elasticsearchservicesetup.adminclient_.md)                                                                                                                                                                           | Handlers will also include a pre-configured client                          |
+| `xpackMainPlugin.info.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md)                                                                                                                                                                                                                                            |                                                                             |
+| `server.savedObjects.setScopedSavedObjectsClientFactory`                      | [`core.savedObjects.setClientFactory`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.setclientfactory.md)                                                                                                                                                                     |                                                                             |
+| `server.savedObjects.addScopedSavedObjectsClientWrapperFactory`               | [`core.savedObjects.addClientWrapper`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.addclientwrapper.md)                                                                                                                                                                     |                                                                             |
+| `server.savedObjects.getSavedObjectsRepository`                               | [`core.savedObjects.createInternalRepository`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.createinternalrepository.md) [`core.savedObjects.createScopedRepository`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicesetup.createscopedrepository.md) |                                                                             |
+| `server.savedObjects.getScopedSavedObjectsClient`                             | [`core.savedObjects.getScopedClient`](/docs/development/core/server/kibana-plugin-server.savedobjectsservicestart.getscopedclient.md)                                                                                                                                                                       |                                                                             |
+| `request.getSavedObjectsClient`                                               | [`context.core.savedObjects.client`](/docs/development/core/server/kibana-plugin-server.requesthandlercontext.core.md)                                                                                                                                                                                      |                                                                             |
+| `kibana.Plugin.deprecations`                                                  | [Handle plugin configuration deprecations](#handle-plugin-config-deprecations) and [`PluginConfigDescriptor.deprecations`](docs/development/core/server/kibana-plugin-server.pluginconfigdescriptor.md)                                                                                                     | Deprecations from New Platform are not applied to legacy configuration      |
 | `xpackMainPlugin.info.feature(pluginID).registerLicenseCheckResultsGenerator` | [`x-pack licensing plugin`](/x-pack/plugins/licensing/README.md) | |
 
 _See also: [Server's CoreSetup API Docs](/docs/development/core/server/kibana-plugin-server.coresetup.md)_
@@ -1398,6 +1406,52 @@ export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
 };
 ```
+
+#### Handle plugin configuration deprecations
+
+If your plugin have deprecated properties, you can describe them using the  `deprecations` config descriptor field.
+
+The system is quite similar to the legacy plugin's deprecation management. The most important difference
+is that deprecations are managed on a per-plugin basis, meaning that you don't need to specify the whole
+property path, but use the relative path from your plugin's configuration root.
+
+```typescript
+// my_plugin/server/index.ts
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from 'kibana/server';
+
+const configSchema = schema.object({
+  newProperty: schema.string({ defaultValue: 'Some string' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ rename, unused }) => [
+    rename('oldProperty', 'newProperty'),
+    unused('someUnusedProperty'),
+  ]   
+};
+```
+
+In some cases, accessing the whole configuration for deprecations is necessary. For these edge cases,
+`renameFromRoot` and `unusedFromRoot` are also accessible when declaring deprecations.
+
+```typescript
+// my_plugin/server/index.ts
+export const config: PluginConfigDescriptor<ConfigType> = {
+  schema: configSchema,
+  deprecations: ({ renameFromRoot, unusedFromRoot }) => [
+    renameFromRoot('oldplugin.property', 'myplugin.property'),
+    unusedFromRoot('oldplugin.deprecated'),
+  ]   
+};
+```
+
+Note that deprecations registered in new platform's plugins are not applied to the legacy configuration.
+During migration, if you still need the deprecations to be effective in the legacy plugin, you need to declare them in
+both plugin definitions.
 
 ### Mock new platform services in tests
 

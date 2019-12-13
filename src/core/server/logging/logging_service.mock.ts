@@ -45,7 +45,7 @@ const createLoggingServiceMock = () => {
     context,
     ...mockLog,
   }));
-  mocked.asLoggerFactory.mockImplementation(() => createLoggingServiceMock());
+  mocked.asLoggerFactory.mockImplementation(() => mocked);
   mocked.stop.mockResolvedValue();
   return mocked;
 };

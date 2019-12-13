@@ -36,6 +36,7 @@ import { IndexedFieldsTable } from './indexed_fields_table';
 import { ScriptedFieldsTable } from './scripted_fields_table';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
+import { npStart } from 'ui/new_platform';
 
 import { getEditBreadcrumbs } from '../breadcrumbs';
 
@@ -168,7 +169,8 @@ uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
   template,
   k7Breadcrumbs: getEditBreadcrumbs,
   resolve: {
-    indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
+    indexPattern: function ($route, Promise, redirectWhenMissing) {
+      const { indexPatterns } = npStart.plugins.data;
       return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId)).catch(
         redirectWhenMissing('/management/kibana/index_patterns')
       );
@@ -179,7 +181,7 @@ uiRoutes.when('/management/kibana/index_patterns/:indexPatternId', {
 uiModules
   .get('apps/management')
   .controller('managementIndexPatternsEdit', function (
-    $scope, $location, $route, Promise, config, indexPatterns, Private, AppState, confirmModal) {
+    $scope, $location, $route, Promise, config, Private, AppState, confirmModal) {
     const $state = $scope.state = new AppState();
 
     $scope.fieldWildcardMatcher = (...args) => fieldWildcardMatcher(...args, config.get('metaFields'));

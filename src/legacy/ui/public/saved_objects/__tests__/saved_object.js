@@ -24,7 +24,7 @@ import Bluebird from 'bluebird';
 
 import { createSavedObjectClass } from '../saved_object';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
-import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
+import { npStart } from 'ui/new_platform';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
 import { mockUiSettings } from '../../new_platform/new_platform.karma_mock';
 
@@ -82,6 +82,10 @@ describe('Saved Object', function () {
     return savedObject.init();
   }
 
+  function restoreIfWrapped(obj, fName) {
+    obj[fName].restore && obj[fName].restore();
+  }
+
   const mock409FetchError = {
     res: { status: 409 }
   };
@@ -96,11 +100,19 @@ describe('Saved Object', function () {
     })
   );
 
-  beforeEach(ngMock.inject(function (es, Private, $window) {
-    savedObjectsClientStub = Private(SavedObjectsClientProvider);
+  beforeEach(ngMock.inject(function (es, $window) {
+    savedObjectsClientStub = npStart.core.savedObjects.client;
     SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
     esDataStub = es;
     window = $window;
+  }));
+
+  afterEach(ngMock.inject(function () {
+    restoreIfWrapped(savedObjectsClientStub, 'create');
+    restoreIfWrapped(savedObjectsClientStub, 'get');
+    restoreIfWrapped(savedObjectsClientStub, 'update');
+    restoreIfWrapped(savedObjectsClientStub, 'find');
+    restoreIfWrapped(savedObjectsClientStub, 'bulkGet');
   }));
 
   describe('save', function () {
