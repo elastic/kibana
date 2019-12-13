@@ -17,14 +17,11 @@
  * under the License.
  */
 
-import { Legacy } from 'kibana';
 import { get, map } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import { APICaller, IRouter, IUiSettingsClient, KibanaRequest } from 'kibana/server';
 
-import {
-  IFieldType,
-  indexPatternsUtils,
-  esFilters,
-} from '../../../../../../../plugins/data/server';
+import { IFieldType, indexPatternsUtils, esFilters } from '../index';
 
 interface ISuggestionsValuesPayload {
   field: string;
@@ -32,41 +29,54 @@ interface ISuggestionsValuesPayload {
   boolFilter: esFilters.Filter[];
 }
 
-// @ts-ignore
-import { abortableRequestHandler } from '../../../../../elasticsearch/lib/abortable_request_handler';
+export function registerValueSuggestionsRoute(
+  router: IRouter,
+  apiCaller: (request: KibanaRequest) => Promise<APICaller>
+) {
+  router.post(
+    {
+      path: '/api/kibana/suggestions/values/{index}',
+      validate: {
+        query: schema.object(
+          {
+            index: schema.string(),
+          },
+          { allowUnknowns: true }
+        ),
+        body: schema.object({}, { allowUnknowns: true }),
+      },
+    },
+    async (context, request, response) => {
+      const { client: uiSettings } = context.core.uiSettings;
+      const { index } = request.query;
+      const { field: fieldName, query, boolFilter } = request.body as ISuggestionsValuesPayload;
 
-const PATH = '/api/kibana/suggestions/values/{index}';
+      const indexPattern = await indexPatternsUtils.findIndexPatternById(
+        context.core.savedObjects.client,
+        index
+      );
 
-export function registerValueSuggestions(server: Legacy.Server) {
-  server.route({
-    path: PATH,
-    method: ['POST'],
-    handler: abortableRequestHandler(async (signal: AbortSignal, req: Legacy.Request) => {
-      const { index } = req.params;
-      const { field: fieldName, query, boolFilter } = req.payload as ISuggestionsValuesPayload;
-      const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const savedObjectsClient = req.getSavedObjectsClient();
-
-      const indexPattern = await indexPatternsUtils.findIndexPatternById(savedObjectsClient, index);
       const field = indexPatternsUtils.getFieldByName(fieldName, indexPattern);
-      const body = getBody(server, field || fieldName, query, boolFilter);
+      const body = getBody(uiSettings, field || fieldName, query, boolFilter);
 
       try {
-        const response = await callWithRequest(req, 'search', { index, body }, { signal });
-        const buckets: any[] =
-          get(response, 'aggregations.suggestions.buckets') ||
-          get(response, 'aggregations.nestedSuggestions.suggestions.buckets');
+        const callCluster = await apiCaller(request);
+        const result = await callCluster('search', { index, body });
 
-        return map(buckets || [], 'key');
+        const buckets: any[] =
+          get(result, 'aggregations.suggestions.buckets') ||
+          get(result, 'aggregations.nestedSuggestions.suggestions.buckets');
+
+        return response.ok({ body: map(buckets || [], 'key') });
       } catch (error) {
-        throw server.plugins.elasticsearch.handleESError(error);
+        return response.internalError({ body: error });
       }
-    }),
-  });
+    }
+  );
 }
 
 function getBody(
-  server: Legacy.Server,
+  uiSettings: IUiSettingsClient,
   field: IFieldType | string,
   query: string,
   boolFilter: esFilters.Filter[]
@@ -78,7 +88,7 @@ function getBody(
   // the amount of information that needs to be transmitted to the coordinating node
   const shardSize = 10;
 
-  const { timeout, terminate_after } = getAutocompleteOptions(server);
+  const { timeout, terminate_after } = getAutocompleteOptions(uiSettings);
 
   const body = {
     size: 0,
@@ -118,12 +128,10 @@ function getBody(
   return body;
 }
 
-function getAutocompleteOptions(server: Legacy.Server) {
-  const serverConfig = server.config();
-
+function getAutocompleteOptions(uiSettings: IUiSettingsClient) {
   return {
-    terminate_after: serverConfig.get<number>('kibana.autocompleteTerminateAfter'),
-    timeout: `${serverConfig.get<number>('kibana.autocompleteTimeout')}ms`,
+    terminate_after: uiSettings.get<number>('kibana.autocompleteTerminateAfter'),
+    timeout: `${uiSettings.get<number>('kibana.autocompleteTimeout')}ms`,
   };
 }
 
