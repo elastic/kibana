@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fetch from 'node-fetch';
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { Asset, Datasource, InputType } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
@@ -11,16 +12,18 @@ import { AssetReference, InstallationStatus, RegistryPackage } from '../../commo
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
-import { installTemplates } from '../lib/elasticsearch/template/install';
+// import { installTemplates } from '../lib/elasticsearch/template/install';
 import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
+import { Request } from '../types';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
+  request: Request;
 }) {
-  const { savedObjectsClient, pkgkey, callCluster } = options;
+  const { savedObjectsClient, pkgkey, callCluster, request } = options;
   const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
 
   if (packageInfo.status !== InstallationStatus.installed) {
@@ -28,20 +31,18 @@ export async function createDatasource(options: {
   }
 
   const toSave = await installPipelines({ pkgkey, callCluster });
-  // TODO: Clean up
-  const info = await Registry.fetchInfo(pkgkey);
 
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
-  await installTemplates(info, callCluster);
   const pkg = await Registry.fetchInfo(pkgkey);
 
   await Promise.all([
-    installTemplates(pkg, callCluster),
+    // installTemplates(pkg, callCluster),
     saveDatasourceReferences({
       savedObjectsClient,
       pkg,
       toSave,
+      request,
     }),
   ]);
 
@@ -65,8 +66,9 @@ async function saveDatasourceReferences(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkg: RegistryPackage;
   toSave: AssetReference[];
+  request: Request;
 }) {
-  const { savedObjectsClient, pkg, toSave } = options;
+  const { savedObjectsClient, pkg, toSave, request } = options;
   const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
   const savedAssets = savedDatasource?.package.assets;
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
@@ -77,10 +79,11 @@ async function saveDatasourceReferences(options: {
 
   const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
   const datasource: Datasource = createFakeDatasource(pkg, toInstall);
-  await savedObjectsClient.create<Datasource>(SAVED_OBJECT_TYPE_DATASOURCES, datasource, {
-    id: Registry.pkgToPkgKey(pkg),
-    overwrite: true,
-  });
+  // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
+  // or something similar, but it's a class not an object so many pieces are missing
+  // we'd still need `user` from the request object, but that's not terrible
+  // lacking that we make another http request to Ingest
+  await ingestDatasourceCreate({ request, datasource });
 
   return toInstall;
 }
@@ -127,4 +130,35 @@ function createFakeDatasource(pkg: RegistryPackage, assets: Asset[] = []): Datas
       },
     ],
   };
+}
+
+async function ingestDatasourceCreate({
+  request,
+  datasource,
+}: {
+  request: Request;
+  datasource: Datasource;
+}) {
+  // OMG, so gross! Will not keep
+  // if we end up keeping the "make another HTTP request" method,
+  // we'll clean this up via proxy or something else which prevents these functions from needing to know this.
+  // The key here is to show the Saved Object we create being stored/retrieved by Ingest
+
+  // node-fetch requires absolute urls because there isn't an origin on Node
+  const origin = request.server.info.uri; // e.g. http://localhost:5601
+  const basePath = request.getBasePath(); // e.g. /abc
+  const apiPath = '/api/ingest/datasources';
+  const url = `${origin}${basePath}${apiPath}`;
+  const body = { datasource };
+
+  return fetch(url, {
+    method: 'post',
+    body: JSON.stringify(body),
+    headers: {
+      'kbn-xsrf': 'some value, any value',
+      'Content-Type': 'application/json',
+      // the main (only?) one we want is `authorization`
+      ...request.headers,
+    },
+  }).then(response => response.json());
 }
