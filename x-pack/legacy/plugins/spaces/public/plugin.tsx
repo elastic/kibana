@@ -23,12 +23,9 @@ export class SpacesPlugin implements Plugin<void, SpacesPluginStart, PluginsSetu
 
   public async start(core: CoreStart) {
     const serverBasePath = core.injectedMetadata.getInjectedVar('serverBasePath') as string;
-    const spacesEnabled = core.injectedMetadata.getInjectedVar('spacesEnabled') as boolean;
 
-    if (spacesEnabled) {
-      this.spacesManager = new SpacesManager(serverBasePath, core.http);
-      initSpacesNavControl(this.spacesManager, core);
-    }
+    this.spacesManager = new SpacesManager(serverBasePath, core.http);
+    initSpacesNavControl(this.spacesManager, core);
 
     return {
       spacesManager: this.spacesManager,
