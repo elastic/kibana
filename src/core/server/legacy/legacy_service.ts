@@ -21,11 +21,17 @@ import { combineLatest, ConnectableObservable, EMPTY, Observable, Subscription }
 import { first, map, publishReplay, tap } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
-import { Config } from '../config';
+import { Config, ConfigDeprecationProvider } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
-import { BasePathProxyServer, HttpConfig, HttpConfigType, LegacyRequest, config as httpConfig } from '../http';
+import {
+  BasePathProxyServer,
+  HttpConfig,
+  HttpConfigType,
+  LegacyRequest,
+  config as httpConfig,
+} from '../http';
 import { Logger } from '../logging';
 import { PathConfigType } from '../path';
 import { findLegacyPluginSpecs } from './plugins';
