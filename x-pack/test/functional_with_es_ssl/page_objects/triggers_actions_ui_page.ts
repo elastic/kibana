@@ -17,7 +17,10 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.getVisibleText('appTitle');
     },
     async clickCreateConnectorButton() {
-      await testSubjects.click('createActionButton');
+      const createBtn = await find.byCssSelector(
+        '[data-test-subj="createActionButton"],[data-test-subj="createFirstActionButton"]'
+      );
+      await createBtn.click();
     },
     async searchConnectors(searchText: string) {
       const searchBox = await find.byCssSelector('[data-test-subj="actionsList"] .euiFieldSearch');
@@ -25,6 +28,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await searchBox.clearValue();
       await searchBox.type(searchText);
       await searchBox.pressKeys(ENTER_KEY);
+      await find.byCssSelector('[data-test-subj="actionsList"]:not(.euiBasicTable-loading)');
     },
     async searchAlerts(searchText: string) {
       const searchBox = await find.byCssSelector('[data-test-subj="alertsList"] .euiFieldSearch');
@@ -32,6 +36,7 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await searchBox.clearValue();
       await searchBox.type(searchText);
       await searchBox.pressKeys(ENTER_KEY);
+      await find.byCssSelector('[data-test-subj="alertsList"]:not(.euiBasicTable-loading)');
     },
     async getConnectorsList() {
       const table = await find.byCssSelector('[data-test-subj="actionsList"] table');

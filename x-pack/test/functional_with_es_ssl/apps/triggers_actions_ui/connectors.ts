@@ -20,6 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Connectors', function() {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
+      const alertsTab = await testSubjects.find('connectorsTab');
+      await alertsTab.click();
     });
 
     it('should create a connector', async () => {

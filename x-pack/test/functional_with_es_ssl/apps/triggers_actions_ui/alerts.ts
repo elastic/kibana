@@ -26,7 +26,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         enabled: true,
         name: generateUniqueKey(),
         tags: ['foo', 'bar'],
-        alertTypeId: 'test',
+        alertTypeId: 'test.noop',
         interval: '1m',
         throttle: '1m',
         actions: [],
@@ -53,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'Test',
+          alertType: 'Test: Noop',
           interval: '1m',
         },
       ]);
@@ -69,7 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           name: createdAlert.name,
           tagsText: 'foo, bar',
-          alertType: 'Test',
+          alertType: 'Test: Noop',
           interval: '1m',
         },
       ]);

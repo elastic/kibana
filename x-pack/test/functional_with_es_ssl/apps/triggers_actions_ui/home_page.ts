@@ -23,8 +23,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
       expect(headingText).to.be('Alerts and actions');
+    });
 
-      await testSubjects.existOrFail('createActionButton');
+    describe('Connectors tab', () => {
+      it('renders the connectors tab', async () => {
+        // Navigate to the connectors tab
+        pageObjects.triggersActionsUI.changeTabs('connectorsTab');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // Verify url
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain(`/connectors`);
+
+        // Verify content
+        await testSubjects.existOrFail('actionsList');
+      });
     });
 
     describe('Alerts tab', () => {
