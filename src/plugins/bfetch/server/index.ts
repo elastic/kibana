@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from '../../../core/server';
 import { BfetchServerPlugin } from './plugin';
 
-export * from './plugin';
+export { BfetchServerSetup, BfetchServerStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchServerPlugin(initializerContext);

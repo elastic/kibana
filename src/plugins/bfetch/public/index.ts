@@ -20,7 +20,7 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { BfetchPublicPlugin } from './plugin';
 
-export * from './plugin';
+export { BfetchPublicSetup, BfetchPublicStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchPublicPlugin(initializerContext);

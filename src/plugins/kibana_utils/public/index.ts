@@ -17,9 +17,8 @@
  * under the License.
  */
 
-export * from '../common';
+export { defer } from '../common';
 export * from './core';
-export * from './errors';
 export * from './errors';
 export * from './field_mapping';
 export * from './parse';
