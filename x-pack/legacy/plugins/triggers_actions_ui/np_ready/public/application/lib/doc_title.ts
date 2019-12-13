@@ -16,9 +16,9 @@ class DocTitleService {
     let updatedTitle: string;
 
     switch (page) {
-      case 'actions':
-        updatedTitle = i18n.translate('xpack.triggersActionsUI.actions.breadcrumbTitle', {
-          defaultMessage: 'Actions',
+      case 'connectors':
+        updatedTitle = i18n.translate('xpack.triggersActionsUI.connectors.breadcrumbTitle', {
+          defaultMessage: 'Connectors',
         });
         break;
       case 'alerts':

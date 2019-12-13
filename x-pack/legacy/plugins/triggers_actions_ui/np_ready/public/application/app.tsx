@@ -6,8 +6,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { BASE_PATH, Section, DEFAULT_SECTION } from './constants';
+import { BASE_PATH, Section } from './constants';
 import { TriggersActionsUIHome } from './home';
+import { useAppDependencies } from './app_dependencies';
 
 class ShareRouter extends Component {
   static contextTypes = {
@@ -39,13 +40,20 @@ export const App = () => {
   );
 };
 
-export const AppWithoutRouter = ({ sectionsRegex }: any) => (
-  <Switch>
-    <Route
-      exact
-      path={`${BASE_PATH}/:section(${sectionsRegex})`}
-      component={TriggersActionsUIHome}
-    />
-    <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
-  </Switch>
-);
+export const AppWithoutRouter = ({ sectionsRegex }: any) => {
+  const {
+    plugins: { capabilities },
+  } = useAppDependencies();
+  const canShowAlerts = capabilities.get().alerting.show;
+  const DEFAULT_SECTION = canShowAlerts ? 'alerts' : 'connectors';
+  return (
+    <Switch>
+      <Route
+        exact
+        path={`${BASE_PATH}/:section(${sectionsRegex})`}
+        component={TriggersActionsUIHome}
+      />
+      <Redirect from={`${BASE_PATH}`} to={`${BASE_PATH}/${DEFAULT_SECTION}`} />
+    </Switch>
+  );
+};

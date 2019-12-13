@@ -269,7 +269,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               name="url"
               fullWidth
               value={url || ''}
-              data-test-subj="slackUrlText"
+              data-test-subj="webhookUrlText"
               onChange={e => {
                 editActionConfig('url', e.target.value);
               }}
@@ -349,6 +349,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       <EuiButton
         isDisabled={hasHeaders && (hasHeaderErrors || !headerKey || !headerValue)}
         fill
+        data-test-subj="webhookAddHeaderButton"
         onClick={() => addHeader()}
       >
         <FormattedMessage
@@ -373,7 +374,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
         ) : null}
         {Object.keys(headers || {}).map((key: string) => {
           return (
-            <EuiFlexGroup key={key}>
+            <EuiFlexGroup key={key} data-test-subj="webhookHeaderText">
               <EuiFlexItem grow={false}>
                 <EuiText size="m">{key}:</EuiText>
               </EuiFlexItem>

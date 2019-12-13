@@ -20,15 +20,16 @@ import { ActionsConnectorsContext } from '../../context/actions_connectors_conte
 import { useAppDependencies } from '../../app_dependencies';
 
 interface Props {
-  setActionType: React.Dispatch<React.SetStateAction<ActionType | undefined>>;
+  onActionTypeChange: (actionType: ActionType) => void;
 }
 
-export const ActionTypeMenu = ({ setActionType }: Props) => {
+export const ActionTypeMenu = ({ onActionTypeChange }: Props) => {
   const { actionTypeRegistry } = useAppDependencies();
   const { actionTypesIndex, setAddFlyoutVisibility } = useContext(ActionsConnectorsContext);
   if (!actionTypesIndex) {
     return null;
   }
+
   const actionTypes = Object.entries(actionTypesIndex)
     .filter(([index]) => actionTypeRegistry.has(index))
     .map(([index, actionType]) => {
@@ -50,7 +51,7 @@ export const ActionTypeMenu = ({ setActionType }: Props) => {
           icon={<EuiIcon size="xl" type={item.iconClass} />}
           title={item.name}
           description={item.selectMessage}
-          onClick={() => setActionType(item.actionType)}
+          onClick={() => onActionTypeChange(item.actionType)}
         />
       </EuiFlexItem>
     );

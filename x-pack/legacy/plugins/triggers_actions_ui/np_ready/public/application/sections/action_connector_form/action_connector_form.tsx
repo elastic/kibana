@@ -28,29 +28,34 @@ import { ActionsConnectorsContext } from '../../context/actions_connectors_conte
 import { ActionConnector, IErrorObject } from '../../../types';
 
 interface ActionConnectorProps {
-  initialAction: any;
+  initialConnector: any;
   actionTypeName: string;
   setFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const ActionConnectorForm = ({
-  initialAction,
+  initialConnector,
   actionTypeName,
   setFlyoutVisibility,
 }: ActionConnectorProps) => {
   const {
     core: { http },
-    plugins: { toastNotifications },
+    plugins: { capabilities, toastNotifications },
     actionTypeRegistry,
   } = useAppDependencies();
 
   const { reloadConnectors } = useContext(ActionsConnectorsContext);
+  const canSave = capabilities.get().actions.save;
 
   // hooks
-  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialAction });
+  const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });
 
   const setActionProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
+  };
+
+  const setConnector = (key: string, value: any) => {
+    dispatch({ command: { type: 'setConnector' }, payload: { key, value } });
   };
 
   const setActionConfigProperty = (key: string, value: any) => {
@@ -62,16 +67,17 @@ export const ActionConnectorForm = ({
   };
 
   useEffect(() => {
+    setConnector('connector', initialConnector);
     setServerError(null);
-  }, []);
+  }, [initialConnector]);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [serverError, setServerError] = useState<{
     body: { message: string; error: string };
   } | null>(null);
 
-  const actionTypeRegisterd = actionTypeRegistry.get(initialAction.actionTypeId);
-  if (actionTypeRegisterd === null) return null;
+  const actionTypeRegisterd = actionTypeRegistry.get(initialConnector.actionTypeId);
+  if (!actionTypeRegisterd) return null;
 
   function validateBaseProperties(actionObject: ActionConnector) {
     const validationResult = { errors: {} };
@@ -190,7 +196,7 @@ export const ActionConnectorForm = ({
               editActionSecrets={setActionSecretsProperty}
               hasErrors={hasErrors}
             >
-              {initialAction.actionTypeId === null ? (
+              {initialConnector.actionTypeId === null ? (
                 <Fragment>
                   <EuiCallOut
                     title={i18n.translate(
@@ -241,32 +247,34 @@ export const ActionConnectorForm = ({
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color="secondary"
-              data-test-subj="saveActionButton"
-              type="submit"
-              iconType="check"
-              isDisabled={hasErrors}
-              isLoading={isSaving}
-              onClick={async () => {
-                setIsSaving(true);
-                const savedAction = await onActionConnectorSave();
-                setIsSaving(false);
-                if (savedAction && savedAction.error) {
-                  return setServerError(savedAction.error);
-                }
-                setFlyoutVisibility(false);
-                reloadConnectors();
-              }}
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.actionConnectorForm.saveButtonLabel"
-                defaultMessage="Save"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {canSave ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="secondary"
+                data-test-subj="saveActionButton"
+                type="submit"
+                iconType="check"
+                isDisabled={hasErrors}
+                isLoading={isSaving}
+                onClick={async () => {
+                  setIsSaving(true);
+                  const savedAction = await onActionConnectorSave();
+                  setIsSaving(false);
+                  if (savedAction && savedAction.error) {
+                    return setServerError(savedAction.error);
+                  }
+                  setFlyoutVisibility(false);
+                  reloadConnectors();
+                }}
+              >
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.actionConnectorForm.saveButtonLabel"
+                  defaultMessage="Save"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </Fragment>

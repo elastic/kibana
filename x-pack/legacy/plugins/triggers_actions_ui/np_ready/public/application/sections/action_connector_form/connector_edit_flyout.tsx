@@ -55,7 +55,7 @@ export const ConnectorEditFlyout = ({ connector }: ConnectorEditProps) => {
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <ActionConnectorForm
-        initialAction={{
+        initialConnector={{
           ...connector,
           secrets: {},
         }}

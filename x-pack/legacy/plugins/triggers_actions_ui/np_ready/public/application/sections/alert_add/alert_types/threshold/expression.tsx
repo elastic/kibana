@@ -50,7 +50,6 @@ const DEFAULT_VALUES = {
 const expressionFieldsWithValidation = [
   'index',
   'timeField',
-  'triggerIntervalSize',
   'aggField',
   'termSize',
   'termField',
@@ -63,7 +62,6 @@ const validateAlertType = (alert: Alert): ValidationResult => {
   const {
     index,
     timeField,
-    triggerIntervalSize,
     aggType,
     aggField,
     groupBy,
@@ -82,7 +80,6 @@ const validateAlertType = (alert: Alert): ValidationResult => {
     threshold1: new Array<string>(),
     index: new Array<string>(),
     timeField: new Array<string>(),
-    triggerIntervalSize: new Array<string>(),
   };
   validationResult.errors = errors;
   if (!index) {
@@ -97,16 +94,6 @@ const validateAlertType = (alert: Alert): ValidationResult => {
       i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredTimeFieldText', {
         defaultMessage: 'Time field is required.',
       })
-    );
-  }
-  if (!triggerIntervalSize) {
-    errors.triggerIntervalSize.push(
-      i18n.translate(
-        'xpack.triggersActionsUI.sections.addAlert.error.requiredTriggerIntervalSizeText',
-        {
-          defaultMessage: 'Trigger interval size is required.',
-        }
-      )
     );
   }
   if (aggType && aggregationTypes[aggType].fieldRequired && !aggField) {
@@ -297,8 +284,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
   const {
     index,
     timeField,
-    triggerIntervalSize,
-    triggerIntervalUnit,
     aggType,
     aggField,
     groupBy,
@@ -363,7 +348,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
       thresholdComparator: DEFAULT_VALUES.THRESHOLD_COMPARATOR,
       timeWindowSize: DEFAULT_VALUES.TIME_WINDOW_SIZE,
       timeWindowUnit: DEFAULT_VALUES.TIME_WINDOW_UNIT,
-      triggerIntervalSize: DEFAULT_VALUES.TRIGGER_INTERVAL_SIZE,
       triggerIntervalUnit: DEFAULT_VALUES.TRIGGER_INTERVAL_UNIT,
       groupBy: DEFAULT_VALUES.GROUP_BY,
       threshold: DEFAULT_VALUES.THRESHOLD,
@@ -540,58 +524,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             />
           </ErrableFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <ErrableFormRow
-            id="alertInterval"
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertAdd.threshold.watchIntervalLabel"
-                defaultMessage="Run alert every"
-              />
-            }
-            errorKey="triggerIntervalSize"
-            isShowingErrors={hasErrors && triggerIntervalSize !== undefined}
-            errors={errors}
-          >
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFieldNumber
-                  fullWidth
-                  min={1}
-                  value={triggerIntervalSize || 1}
-                  data-test-subj="triggerIntervalSizeInput"
-                  onChange={e => {
-                    const { value } = e.target;
-                    const triggerIntervalSizeVal = value !== '' ? parseInt(value, 10) : value;
-                    setAlertParams('triggerIntervalSize', triggerIntervalSizeVal);
-                  }}
-                  onBlur={e => {
-                    if (triggerIntervalSize === undefined) {
-                      setAlertParams('triggerIntervalSize', '');
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSelect
-                  fullWidth
-                  value={triggerIntervalUnit}
-                  aria-label={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertAdd.threshold.durationAriaLabel',
-                    {
-                      defaultMessage: 'Duration time unit',
-                    }
-                  )}
-                  onChange={e => {
-                    setAlertParams('triggerIntervalUnit', e.target.value);
-                  }}
-                  options={getTimeOptions(triggerIntervalSize)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </ErrableFormRow>
-        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
     </Fragment>
@@ -609,13 +541,13 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
       <EuiFlexGroup gutterSize="s" wrap>
         <EuiFlexItem grow={false}>
           <EuiPopover
-            id="insidePopover"
+            id="indexPopover"
             button={
               <EuiExpression
                 description={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.insideLabel',
+                  'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
                   {
-                    defaultMessage: 'inside',
+                    defaultMessage: 'index',
                   }
                 )}
                 value={index || firstFieldOption.text}
@@ -635,12 +567,12 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
             anchorPosition="downLeft"
             zIndex={8000}
           >
-            <div>
+            <div style={{ width: '450px' }}>
               <EuiPopoverTitle>
                 {i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.insideButtonLabel',
+                  'xpack.triggersActionsUI.sections.alertAdd.threshold.indexButtonLabel',
                   {
-                    defaultMessage: 'inside',
+                    defaultMessage: 'index',
                   }
                 )}
               </EuiPopoverTitle>
@@ -689,6 +621,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
               </EuiPopoverTitle>
               <EuiSelect
                 value={aggType || ''}
+                fullWidth
                 onChange={e => {
                   setAlertParams('aggType', e.target.value);
                   setAggTypePopoverOpen(false);
@@ -854,7 +787,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<Props> =
                         <EuiFieldNumber
                           value={termSize || 0}
                           onChange={e => {
-                            setAlertParams('termSize', e.target.value);
+                            const { value } = e.target;
+                            const termSizeVal = value !== '' ? parseFloat(value) : value;
+                            setAlertParams('termSize', termSizeVal);
                           }}
                           min={1}
                         />

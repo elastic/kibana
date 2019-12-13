@@ -36,18 +36,22 @@ export const ConnectorAddFlyout = () => {
     return null;
   }
 
+  function onActionTypeChange(newActionType: ActionType) {
+    setActionType(newActionType);
+  }
+
   let currentForm;
   let actionTypeModel;
   if (!actionType) {
-    currentForm = <ActionTypeMenu setActionType={setActionType} />;
+    currentForm = <ActionTypeMenu onActionTypeChange={onActionTypeChange} />;
   } else {
     actionTypeModel = actionTypeRegistry.get(actionType.id);
-    const initialAction = { actionTypeId: actionType.id, config: {}, secrets: {} };
+    const initialConnector = { actionTypeId: actionType.id, config: {}, secrets: {} };
 
     currentForm = (
       <ActionConnectorForm
         actionTypeName={actionType.name}
-        initialAction={initialAction}
+        initialConnector={initialConnector}
         setFlyoutVisibility={setAddFlyoutVisibility}
       />
     );

@@ -79,7 +79,7 @@ const SlackActionFields: React.FunctionComponent<ActionConnectorFieldsProps> = (
           fullWidth
           name="webhookUrl"
           value={webhookUrl || ''}
-          data-test-subj="slackWebhookUrlTextarea"
+          data-test-subj="slackWebhookUrlInput"
           onChange={e => {
             editActionSecrets('webhookUrl', e.target.value);
           }}

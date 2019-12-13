@@ -256,11 +256,13 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               data-test-subj="actionsTable"
               pagination={true}
               selection={
-                canDelete && {
-                  onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
-                    setSelectedItems(updatedSelectedItemsList);
-                  },
-                }
+                canDelete
+                  ? {
+                      onSelectionChange(updatedSelectedItemsList: ActionConnectorTableItem[]) {
+                        setSelectedItems(updatedSelectedItemsList);
+                      },
+                    }
+                  : null
               }
               search={{
                 filters: [
@@ -320,7 +322,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                 ],
               }}
             />
-          ) : (
+          ) : canSave ? (
             <EuiEmptyPrompt
               title={
                 <Fragment>
@@ -348,7 +350,7 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
               }
               actions={
                 <EuiButton
-                  data-test-subj="createActionButton"
+                  data-test-subj="createFirstActionButton"
                   key="create-action"
                   fill
                   iconType="plusInCircle"
@@ -362,6 +364,13 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
                 </EuiButton>
               }
             />
+          ) : (
+            <h2>
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.actionsConnectorsList.noPermissionToCreateTitle"
+                defaultMessage="No permissions to create connector"
+              />
+            </h2>
           )}
           <ConnectorAddFlyout />
           {editedConnectorItem ? <ConnectorEditFlyout connector={editedConnectorItem} /> : null}

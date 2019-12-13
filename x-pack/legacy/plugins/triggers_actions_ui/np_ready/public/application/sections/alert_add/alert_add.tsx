@@ -23,8 +23,6 @@ import {
   EuiFlexGrid,
   EuiFormRow,
   EuiComboBox,
-  EuiCard,
-  EuiKeyPadMenu,
   EuiKeyPadMenuItem,
   EuiTabs,
   EuiTab,

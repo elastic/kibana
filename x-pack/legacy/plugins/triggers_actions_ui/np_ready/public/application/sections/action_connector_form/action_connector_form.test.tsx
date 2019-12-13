@@ -9,14 +9,14 @@ import { setAppDependencies } from '../../app_dependencies';
 import { coreMock } from '../../../../../../../../../src/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { ConnectorAddFlyout } from './connector_add_flyout';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
+import { ActionConnectorForm } from './action_connector_form';
 jest.mock('../../context/actions_connectors_context');
 const actionTypeRegistry = actionTypeRegistryMock.create();
 
-describe('connector_add_flyout', () => {
+describe('action_connector_form', () => {
   let wrapper: ReactWrapper<any>;
 
   beforeAll(async () => {
@@ -40,31 +40,6 @@ describe('connector_add_flyout', () => {
     };
     const AppDependenciesProvider = setAppDependencies(deps);
 
-    await act(async () => {
-      wrapper = mountWithIntl(
-        <AppDependenciesProvider value={deps}>
-          <ActionsConnectorsContext.Provider
-            value={{
-              addFlyoutVisible: true,
-              setAddFlyoutVisibility: state => {},
-              editFlyoutVisible: false,
-              setEditFlyoutVisibility: state => {},
-              actionTypesIndex: { 'my-action-type': { id: 'my-action-type', name: 'test' } },
-              reloadConnectors: () => {
-                return new Promise<void>(() => {});
-              },
-            }}
-          >
-            <ConnectorAddFlyout />
-          </ActionsConnectorsContext.Provider>
-        </AppDependenciesProvider>
-      );
-    });
-
-    await waitForRender(wrapper);
-  });
-
-  it('renders action type menu on flyout open', () => {
     const actionType = {
       id: 'my-action-type',
       iconClass: 'test',
@@ -79,11 +54,45 @@ describe('connector_add_flyout', () => {
       actionConnectorFields: null,
       actionParamsFields: null,
     };
-    actionTypeRegistry.get.mockReturnValueOnce(actionType);
+    actionTypeRegistry.get.mockReturnValue(actionType);
     actionTypeRegistry.has.mockReturnValue(true);
 
-    expect(wrapper.find('ActionTypeMenu')).toHaveLength(1);
-    expect(wrapper.find('[data-test-subj="my-action-type-card"]').exists()).toBeTruthy();
+    const initialConnector = { actionTypeId: actionType.id, config: {}, secrets: {} };
+
+    await act(async () => {
+      wrapper = mountWithIntl(
+        <AppDependenciesProvider value={deps}>
+          <ActionsConnectorsContext.Provider
+            value={{
+              addFlyoutVisible: true,
+              setAddFlyoutVisibility: () => {},
+              editFlyoutVisible: false,
+              setEditFlyoutVisibility: () => {},
+              actionTypesIndex: {
+                'my-action-type': { id: 'my-action-type', name: 'my-action-type-name' },
+              },
+              reloadConnectors: () => {
+                return new Promise<void>(() => {});
+              },
+            }}
+          >
+            <ActionConnectorForm
+              actionTypeName={'my-action-type-name'}
+              initialConnector={initialConnector}
+              setFlyoutVisibility={() => {}}
+            />
+          </ActionsConnectorsContext.Provider>
+        </AppDependenciesProvider>
+      );
+    });
+
+    await waitForRender(wrapper);
+  });
+
+  it('renders action_connector_form', () => {
+    const connectorNameField = wrapper.find('[data-test-subj="nameInput"]');
+    expect(connectorNameField.exists()).toBeTruthy();
+    expect(connectorNameField.first().prop('value')).toBe('');
   });
 });
 

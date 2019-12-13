@@ -81,7 +81,6 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
   return (
     <Fragment>
       <ErrableFormRow
-        id="indexName"
         errorKey="index"
         fullWidth
         errors={errors}
@@ -109,7 +108,7 @@ const IndexParamsFields: React.FunctionComponent<ActionParamsProps> = ({
         />
       </ErrableFormRow>
       <EuiSwitch
-        data-test-subj="saveAsNewCheckbox"
+        data-test-subj="indexRefreshCheckbox"
         checked={refresh}
         onChange={(e: any) => {
           editAction('refresh', e.target.checked, index);

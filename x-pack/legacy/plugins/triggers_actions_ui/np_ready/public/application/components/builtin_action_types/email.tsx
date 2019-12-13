@@ -106,10 +106,9 @@ export function getActionType(): ActionTypeModel {
       };
       validationResult.errors = errors;
       if (
-        ((!actionParams.to || actionParams.to.length === 0) &&
-          (!actionParams.cc || actionParams.cc.length === 0)) ||
-        !actionParams.bcc ||
-        actionParams.bcc.length === 0
+        (!actionParams.to || actionParams.to.length === 0) &&
+        (!actionParams.cc || actionParams.cc.length === 0) &&
+        (!actionParams.bcc || actionParams.bcc.length === 0)
       ) {
         const errorText = i18n.translate(
           'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredEntryText',
@@ -177,7 +176,7 @@ const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           fullWidth
           name="from"
           value={from || ''}
-          data-test-subj="fromInput"
+          data-test-subj="emailFromInput"
           onChange={e => {
             editActionConfig('from', e.target.value);
           }}

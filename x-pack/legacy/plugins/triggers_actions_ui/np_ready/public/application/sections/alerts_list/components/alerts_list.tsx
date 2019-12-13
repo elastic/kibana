@@ -27,6 +27,7 @@ export const AlertsList: React.FunctionComponent = () => {
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
   const canDelete = capabilities.get().alerting.delete;
+  const canSave = capabilities.get().alerting.save;
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
@@ -181,6 +182,41 @@ export const AlertsList: React.FunctionComponent = () => {
     },
   ];
 
+  const toolsRight = [
+    <TypeFilter
+      key="type-filter"
+      onChange={(types: string[]) => setTypesFilter(types)}
+      options={Object.values(alertTypesIndex || {})
+        .map(alertType => ({
+          value: alertType.id,
+          name: alertType.name,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name))}
+    />,
+    <ActionTypeFilter
+      actionTypes={actionTypes}
+      onChange={(ids: string[]) => setActionTypesFilter(ids)}
+    />,
+  ];
+
+  if (canSave) {
+    toolsRight.push(
+      <EuiButton
+        key="create-alert"
+        data-test-subj="createAlertButton"
+        fill
+        iconType="plusInCircle"
+        iconSide="left"
+        onClick={() => setAlertFlyoutVisibility(true)}
+      >
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
+          defaultMessage="Create"
+        />
+      </EuiButton>
+    );
+  }
+
   return (
     <section data-test-subj="alertsList">
       <Fragment>
@@ -202,35 +238,7 @@ export const AlertsList: React.FunctionComponent = () => {
                     />,
                   ]
             }
-            toolsRight={[
-              <TypeFilter
-                key="type-filter"
-                onChange={(types: string[]) => setTypesFilter(types)}
-                options={Object.values(alertTypesIndex || {})
-                  .map(alertType => ({
-                    value: alertType.id,
-                    name: alertType.name,
-                  }))
-                  .sort((a, b) => a.name.localeCompare(b.name))}
-              />,
-              <ActionTypeFilter
-                actionTypes={actionTypes}
-                onChange={(ids: string[]) => setActionTypesFilter(ids)}
-              />,
-              <EuiButton
-                key="create-alert"
-                data-test-subj="createAlertButton"
-                fill
-                iconType="plusInCircle"
-                iconSide="left"
-                onClick={() => setAlertFlyoutVisibility(true)}
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertsList.addActionButtonLabel"
-                  defaultMessage="Create"
-                />
-              </EuiButton>,
-            ]}
+            toolsRight={toolsRight}
           />
 
           {/* Large to remain consistent with ActionsList table spacing */}
@@ -254,11 +262,13 @@ export const AlertsList: React.FunctionComponent = () => {
               totalItemCount,
             }}
             selection={
-              canDelete && {
-                onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
-                  setSelectedIds(updatedSelectedItemsList.map(item => item.id));
-                },
-              }
+              canDelete
+                ? {
+                    onSelectionChange(updatedSelectedItemsList: AlertTableItem[]) {
+                      setSelectedIds(updatedSelectedItemsList.map(item => item.id));
+                    },
+                  }
+                : null
             }
             onChange={({ page: changedPage }: { page: Pagination }) => {
               setPage(changedPage);
