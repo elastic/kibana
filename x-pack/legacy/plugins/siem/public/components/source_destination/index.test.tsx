@@ -5,7 +5,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { get } from 'lodash/fp';
 import * as React from 'react';
@@ -14,6 +14,7 @@ import { asArrayIfExists } from '../../lib/helpers';
 import { getMockNetflowData } from '../../mock';
 import { TestProviders } from '../../mock/test_providers';
 import { ID_FIELD_NAME } from '../event_details/event_id';
+import { useMountAppended } from '../../utils/use_mount_appended';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
 import { DESTINATION_PORT_FIELD_NAME, SOURCE_PORT_FIELD_NAME } from '../port';
 import {
@@ -98,6 +99,8 @@ const getSourceDestinationInstance = () => (
 );
 
 describe('SourceDestination', () => {
+  const mount = useMountAppended();
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(<div>{getSourceDestinationInstance()}</div>);
     expect(toJson(wrapper)).toMatchSnapshot();
