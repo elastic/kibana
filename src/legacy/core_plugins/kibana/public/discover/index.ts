@@ -22,10 +22,8 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects';
 import { DiscoverPlugin, DiscoverSetup, DiscoverStart } from './plugin';
 
 // Core will be looking for this when loading our plugin in the new platform
-export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = (
-  initializerContext: PluginInitializerContext
-) => {
-  return new DiscoverPlugin(initializerContext);
+export const plugin: PluginInitializer<DiscoverSetup, DiscoverStart> = () => {
+  return new DiscoverPlugin();
 };
 
 // Legacy compatiblity part - to be removed at cutover, replaced by a kibana.json file
