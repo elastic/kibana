@@ -11,7 +11,11 @@
 
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { Setup } from '../../../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../../common/projections/metrics';
@@ -32,7 +36,7 @@ export async function fetchAndTransformGcMetrics({
   chartBase,
   fieldName
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;

@@ -10,3 +10,5 @@ export const toastNotifications = {
   addWarning: () => {},
   addError: () => {},
 };
+
+export function fatalError() {}

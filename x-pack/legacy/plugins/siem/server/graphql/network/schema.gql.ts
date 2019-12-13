@@ -145,11 +145,18 @@ export const networkSchema = gql`
     cursor: CursorType!
   }
 
+  type MatrixOverOrdinalHistogramData {
+    x: String!
+    y: Float!
+    g: String!
+  }
+
   type NetworkDnsData {
     edges: [NetworkDnsEdges!]!
     totalCount: Float!
     pageInfo: PageInfoPaginated!
     inspect: Inspect
+    histogram: [MatrixOverOrdinalHistogramData!]
   }
 
   enum NetworkHttpFields {

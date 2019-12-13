@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isString } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { Bytes, BYTES_FORMAT } from '../../../bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
@@ -24,7 +23,7 @@ import {
   MESSAGE_FIELD_NAME,
 } from './constants';
 
-export const FormattedFieldValue = pure<{
+export const FormattedFieldValue = React.memo<{
   contextId: string;
   eventId: string;
   fieldFormat?: string;

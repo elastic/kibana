@@ -5,7 +5,7 @@
  */
 
 import { countBy } from 'lodash';
-import React, { StatelessComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -36,7 +36,7 @@ interface DeprecationHealthProps {
   single?: boolean;
 }
 
-const SingleHealth: StatelessComponent<{ level: DeprecationInfo['level']; label: string }> = ({
+const SingleHealth: FunctionComponent<{ level: DeprecationInfo['level']; label: string }> = ({
   level,
   label,
 }) => (
@@ -52,7 +52,7 @@ const SingleHealth: StatelessComponent<{ level: DeprecationInfo['level']; label:
  * Displays a summary health for a list of deprecations that shows the number and level of severity
  * deprecations in the list.
  */
-export const DeprecationHealth: StatelessComponent<DeprecationHealthProps> = ({
+export const DeprecationHealth: FunctionComponent<DeprecationHealthProps> = ({
   deprecations,
   single = false,
 }) => {

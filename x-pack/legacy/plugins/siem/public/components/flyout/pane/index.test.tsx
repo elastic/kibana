@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
 import * as React from 'react';
 
 import { flyoutHeaderHeight } from '../';
@@ -45,7 +44,7 @@ describe('Pane', () => {
         </Pane>
       </TestProviders>
     );
-    expect(toJson(EmptyComponent)).toMatchSnapshot();
+    expect(toJson(EmptyComponent.find('Pane'))).toMatchSnapshot();
   });
 
   test('it should NOT let the flyout expand to take up the full width of the element that contains it', () => {

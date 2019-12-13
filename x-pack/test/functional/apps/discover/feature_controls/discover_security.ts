@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SecurityService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const globalNav = getService('globalNav');
   const PageObjects = getPageObjects([
     'common',
@@ -25,9 +24,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
   async function setDiscoverTimeRange() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
-    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
   describe('security', () => {

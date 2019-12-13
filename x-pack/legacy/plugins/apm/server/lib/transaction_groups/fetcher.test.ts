@@ -5,6 +5,7 @@
  */
 
 import { transactionGroupsFetcher } from './fetcher';
+import { APMConfig } from '../../../../../../plugins/apm/server';
 
 function getSetup() {
   return {
@@ -17,14 +18,8 @@ function getSetup() {
       search: jest.fn()
     } as any,
     config: {
-      get: jest.fn<any, string[]>((key: string) => {
-        switch (key) {
-          case 'xpack.apm.ui.transactionGroupBucketSize':
-            return 100;
-        }
-      }),
-      has: () => true
-    },
+      'xpack.apm.ui.transactionGroupBucketSize': 100
+    } as APMConfig,
     uiFiltersES: [{ term: { 'service.environment': 'test' } }],
     indices: {
       'apm_oss.sourcemapIndices': 'myIndex',
@@ -33,7 +28,7 @@ function getSetup() {
       'apm_oss.spanIndices': 'myIndex',
       'apm_oss.transactionIndices': 'myIndex',
       'apm_oss.metricsIndices': 'myIndex',
-      'apm_oss.apmAgentConfigurationIndex': 'myIndex'
+      apmAgentConfigurationIndex: 'myIndex'
     },
     dynamicIndexPattern: null as any
   };

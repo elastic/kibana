@@ -10,10 +10,10 @@ import { EuiCodeEditor } from '@elastic/eui';
 import 'brace/theme/textmate';
 
 export class ShowJson extends React.PureComponent {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.loadIndexData(this.props);
   }
-  componentWillUpdate(newProps) {
+  UNSAFE_componentWillUpdate(newProps) {
     const { data, loadIndexData } = newProps;
     if (!data) {
       loadIndexData(newProps);

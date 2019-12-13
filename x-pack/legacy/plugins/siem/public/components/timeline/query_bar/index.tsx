@@ -6,12 +6,16 @@
 
 import { isEqual, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Subscription } from 'rxjs';
 
-import { SavedQueryTimeFilter } from '../../../../../../../../src/legacy/core_plugins/data/public/search';
-import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
-import { Query, esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import {
+  IIndexPattern,
+  Query,
+  esFilters,
+  FilterManager,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
@@ -34,7 +38,7 @@ export interface QueryBarTimelineComponentProps {
   from: number;
   fromStr: string;
   kqlMode: KqlMode;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   refreshInterval: number;
   savedQueryId: string | null;

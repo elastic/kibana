@@ -102,7 +102,7 @@ export default function ({ getPageObjects, getService }) {
       const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
       const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
-        return feature.properties.__kbn__isvisible__;
+        return feature.properties.__kbn_isvisibleduetojoin__;
       });
 
       expect(visibilitiesOfFeatures).to.eql([false, true, true, true]);
@@ -166,7 +166,7 @@ export default function ({ getPageObjects, getService }) {
         const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
         const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
-          return feature.properties.__kbn__isvisible__;
+          return feature.properties.__kbn_isvisibleduetojoin__;
         });
 
         expect(visibilitiesOfFeatures).to.eql([false, true, false, false]);

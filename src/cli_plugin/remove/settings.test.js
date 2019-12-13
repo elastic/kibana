@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import { parse } from './settings';
 
 describe('kibana cli', function () {

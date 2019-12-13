@@ -56,7 +56,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 interval: '1m',
                 enabled: true,
                 actions: [],
-                alertTypeParams: {},
+                params: {},
                 createdBy: 'elastic',
                 scheduledTaskId: response.body.scheduledTaskId,
                 throttle: '1m',

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { SavedObjectNotFound } from '../../../../../../../../plugins/kibana_utils/public';
 import { i18n } from '@kbn/i18n';
 
 async function getSavedObject(doc, services) {
@@ -255,7 +254,8 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
         importedObjectCount++;
       }
     } catch (error) {
-      if (error instanceof SavedObjectNotFound) {
+
+      if (error.constructor.name === 'SavedObjectNotFound') {
         if (error.savedObjectType === 'index-pattern') {
           conflictedIndexPatterns.push({ obj, doc: searchDoc });
         } else {
@@ -275,7 +275,7 @@ export async function resolveSavedObjects(savedObjects, overwriteAll, services, 
         importedObjectCount++;
       }
     } catch (error) {
-      const isIndexPatternNotFound = error instanceof SavedObjectNotFound &&
+      const isIndexPatternNotFound = error.constructor.name === 'SavedObjectNotFound' &&
         error.savedObjectType === 'index-pattern';
       if (isIndexPatternNotFound && obj.savedSearchId) {
         conflictedSavedObjectsLinkedToSavedSearches.push(obj);

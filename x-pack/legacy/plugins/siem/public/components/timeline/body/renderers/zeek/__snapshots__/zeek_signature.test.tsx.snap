@@ -1,97 +1,91 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
-<Component
-  data={
-    Object {
-      "_id": "14",
-      "destination": Object {
-        "ip": Array [
-          "207.154.238.205",
-        ],
-        "port": Array [
-          11568,
-        ],
-      },
-      "event": Object {
-        "action": null,
-        "category": null,
-        "dataset": Array [
-          "zeek.connection",
-        ],
-        "id": null,
-        "module": Array [
-          "zeek",
-        ],
-        "severity": null,
-      },
-      "geo": Object {
-        "country_iso_code": Array [
-          "US",
-        ],
-        "region_name": Array [
-          "New York",
-        ],
-      },
-      "host": Object {
-        "id": Array [
-          "37c81253e0fc4c46839c19b981be5177",
-        ],
-        "ip": Array [
-          "207.154.238.205",
-          "10.19.0.5",
-          "fe80::d82b:9aff:fe0d:1e12",
-        ],
-        "name": Array [
-          "zeek-franfurt",
-        ],
-      },
-      "http": null,
-      "network": Object {
-        "transport": Array [
-          "tcp",
-        ],
-      },
-      "source": Object {
-        "ip": Array [
-          "185.176.26.101",
-        ],
-        "port": Array [
-          44059,
-        ],
-      },
-      "suricata": null,
-      "timestamp": "2019-03-07T05:06:51.000Z",
-      "url": null,
-      "zeek": Object {
-        "connection": Object {
-          "history": Array [
-            "Sr",
-          ],
-          "local_orig": Array [
-            false,
-          ],
-          "local_resp": Array [
-            false,
-          ],
-          "missed_bytes": Array [
-            0,
-          ],
-          "state": Array [
-            "REJ",
-          ],
-        },
-        "dns": null,
-        "files": null,
-        "http": null,
-        "notice": null,
-        "session_id": Array [
-          "C8DRTq362Fios6hw16",
-        ],
-        "ssl": null,
-      },
-    }
-  }
-  timelineId="test"
-/>
+<Fragment>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="center"
+    wrap={true}
+  >
+    <DraggableZeekElement
+      field="zeek.session_id"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      value="C8DRTq362Fios6hw16"
+    />
+    <DraggableZeekElement
+      field="event.dataset"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      stringRenderer={[Function]}
+      value="zeek.connection"
+    />
+    <DraggableZeekElement
+      field="zeek.files.sha1"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      stringRenderer={[Function]}
+    />
+    <DraggableZeekElement
+      field="zeek.files.md5"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      stringRenderer={[Function]}
+    />
+    <DraggableZeekElement
+      field="zeek.notice.dropped"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      stringRenderer={[Function]}
+      value={null}
+    />
+    <DraggableZeekElement
+      field="zeek.ssl.version"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.ssl.cipher"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.connection.state"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      value="REJ"
+    />
+    <DraggableZeekElement
+      field="http.request.method"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.connection.history"
+      id="zeek-signature-draggable-zeek-element-test-14"
+      value="Sr"
+    />
+    <DraggableZeekElement
+      field="zeek.notice.note"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.dns.query"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="zeek.dns.qclass_name"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+    <DraggableZeekElement
+      field="http.response.status_code"
+      id="zeek-signature-draggable-zeek-element-test-14"
+    />
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="none"
+    justifyContent="center"
+  >
+    <Link
+      link="REJ Connection attempt rejected"
+      value="Connection attempt rejected"
+    />
+    <Link />
+    <Link />
+    <Link />
+    <Link />
+    <TotalVirusLinkSha />
+  </EuiFlexGroup>
+</Fragment>
 `;

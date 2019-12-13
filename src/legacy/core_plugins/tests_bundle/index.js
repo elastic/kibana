@@ -23,7 +23,8 @@ import globby from 'globby';
 import MultiStream from 'multistream';
 import webpackMerge from 'webpack-merge';
 
-import { fromRoot } from '../../../legacy/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import { replacePlaceholder } from '../../../optimize/public_path_placeholder';
 import findSourceFiles from './find_source_files';
 import { createTestEntryTemplate } from './tests_entry_template';

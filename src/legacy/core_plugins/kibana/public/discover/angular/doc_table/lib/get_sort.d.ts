@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import { StaticIndexPattern } from '../../../kibana_services';
+import { IIndexPattern } from '../../../../../../../../plugins/data/public';
 import { SortOrder } from '../components/table_header/helpers';
 
 export function getSort(
   sort?: SortOrder[],
-  indexPattern?: StaticIndexPattern,
+  indexPattern?: IIndexPattern,
   defaultSortOrder?: SortOrder
 ): any;

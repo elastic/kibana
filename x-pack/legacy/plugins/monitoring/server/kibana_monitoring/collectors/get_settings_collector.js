@@ -46,8 +46,8 @@ export async function checkForEmailValue(
   }
 }
 
-export function getSettingsCollector({ config, collectorSet }) {
-  return collectorSet.makeStatsCollector({
+export function getSettingsCollector(usageCollection, config) {
+  return usageCollection.makeStatsCollector({
     type: KIBANA_SETTINGS_TYPE,
     isReady: () => true,
     async fetch(callCluster) {

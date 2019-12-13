@@ -36,6 +36,8 @@ import { NavControlsService, ChromeNavControls } from './nav_controls';
 import { DocTitleService, ChromeDocTitle } from './doc_title';
 import { LoadingIndicator, HeaderWrapper as Header } from './ui';
 import { DocLinksStart } from '../doc_links';
+import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
+import { KIBANA_ASK_ELASTIC_LINK } from './constants';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -58,7 +60,20 @@ export interface ChromeBrand {
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
 /** @public */
-export type ChromeHelpExtension = (element: HTMLDivElement) => () => void;
+export interface ChromeHelpExtension {
+  /**
+   * Provide your plugin's name to create a header for separation
+   */
+  appName: string;
+  /**
+   * Creates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button
+   */
+  links?: ChromeHelpExtensionMenuLink[];
+  /**
+   * Custom content to occur below the list of links
+   */
+  content?: (element: HTMLDivElement) => () => void;
+}
 
 interface ConstructorParams {
   browserSupportsCsp: boolean;
@@ -133,6 +148,7 @@ export class ChromeService {
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
+    const helpSupportUrl$ = new BehaviorSubject<string>(KIBANA_ASK_ELASTIC_LINK);
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -158,7 +174,6 @@ export class ChromeService {
           <LoadingIndicator loadingCount$={http.getLoadingCount$()} />
 
           <Header
-            isCloudEnabled={injectedMetadata.getInjectedVar('isCloudEnabled') as boolean}
             application={application}
             appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
             badge$={badge$.pipe(takeUntil(this.stop$))}
@@ -167,6 +182,7 @@ export class ChromeService {
             kibanaDocLink={docLinks.links.kibana}
             forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
             helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+            helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
             homeHref={http.basePath.prepend('/app/kibana#/home')}
             isVisible$={this.isVisible$}
             kibanaVersion={injectedMetadata.getKibanaVersion()}
@@ -242,6 +258,8 @@ export class ChromeService {
       setHelpExtension: (helpExtension?: ChromeHelpExtension) => {
         helpExtension$.next(helpExtension);
       },
+
+      setHelpSupportUrl: (url: string) => helpSupportUrl$.next(url),
     };
   }
 
@@ -387,6 +405,12 @@ export interface ChromeStart {
    * Override the current set of custom help content
    */
   setHelpExtension(helpExtension?: ChromeHelpExtension): void;
+
+  /**
+   * Override the default support URL shown in the help menu
+   * @param url The updated support URL
+   */
+  setHelpSupportUrl(url: string): void;
 }
 
 /** @internal */

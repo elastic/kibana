@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectAttributes } from 'src/core/server/types';
-import { Datafeed, Job } from '../../public/jobs/new_job/common/job_creator/configs';
+import { Datafeed, Job } from '../../public/application/jobs/new_job/common/job_creator/configs';
 
 export interface ModuleJob {
   id: string;

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
 import { ESFilter } from '../../../../typings/elasticsearch';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getEnvironmentUiFilterES } from './get_environment_ui_filter_es';
@@ -12,14 +11,16 @@ import {
   localUIFilters,
   localUIFilterNames
 } from '../../ui_filters/local_ui_filters/config';
-import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
+import {
+  esKuery,
+  IIndexPattern
+} from '../../../../../../../../src/plugins/data/server';
 
 export function getUiFiltersES(
-  indexPattern: StaticIndexPattern | undefined,
+  indexPattern: IIndexPattern | undefined,
   uiFilters: UIFilters
 ) {
   const { kuery, environment, ...localFilterValues } = uiFilters;
-
   const mappedFilters = localUIFilterNames
     .filter(name => name in localFilterValues)
     .map(filterName => {
@@ -44,13 +45,13 @@ export function getUiFiltersES(
 }
 
 function getKueryUiFilterES(
-  indexPattern: StaticIndexPattern | undefined,
+  indexPattern: IIndexPattern | undefined,
   kuery?: string
 ) {
   if (!kuery || !indexPattern) {
     return;
   }
 
-  const ast = fromKueryExpression(kuery);
-  return toElasticsearchQuery(ast, indexPattern) as ESFilter;
+  const ast = esKuery.fromKueryExpression(kuery);
+  return esKuery.toElasticsearchQuery(ast, indexPattern) as ESFilter;
 }

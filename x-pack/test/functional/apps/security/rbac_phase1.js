@@ -85,8 +85,6 @@ export default function ({ getService, getPageObjects }) {
 
     //   this is to acertain that all role assigned to the user can perform actions like creating a Visualization
     it('rbac all role can save a visualization', async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
       const vizName1 = 'Visualization VerticalBarChart';
 
       log.debug('log in as kibanauser with rbac_all role');
@@ -96,8 +94,10 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      log.debug('Set absolute time range from \"' +
+      PageObjects.timePicker.defaultStartTime + '\" to \"' +
+      PageObjects.timePicker.defaultEndTime + '\"');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.waitForVisualization();
       await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       await PageObjects.security.logout();

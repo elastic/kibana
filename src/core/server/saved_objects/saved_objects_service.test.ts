@@ -27,7 +27,6 @@ import { of } from 'rxjs';
 import * as legacyElasticsearch from 'elasticsearch';
 import { Env } from '../config';
 import { configServiceMock } from '../mocks';
-import { SavedObjectsClientProvider } from '.';
 
 afterEach(() => {
   jest.clearAllMocks();
@@ -51,26 +50,14 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of(clusterClient) },
-        legacy: { uiExports: { savedObjectMappings: [] }, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: { savedObjectMappings: [] }, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
-      await soService.setup(coreSetup);
+      await soService.setup(coreSetup, 1);
 
       return expect((KibanaMigrator as jest.Mock).mock.calls[0][0].callCluster()).resolves.toMatch(
         'success'
       );
-    });
-
-    it('resolves with clientProvider', async () => {
-      const coreContext = mockCoreContext.create();
-      const soService = new SavedObjectsService(coreContext);
-      const coreSetup = ({
-        elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
-      } as unknown) as SavedObjectsSetupDeps;
-
-      const savedObjectsSetup = await soService.setup(coreSetup);
-      expect(savedObjectsSetup.clientProvider).toBeInstanceOf(SavedObjectsClientProvider);
     });
   });
 
@@ -82,7 +69,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: {}, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
@@ -96,7 +83,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: {}, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);
@@ -110,7 +97,7 @@ describe('SavedObjectsService', () => {
       const soService = new SavedObjectsService(coreContext);
       const coreSetup = ({
         elasticsearch: { adminClient$: of({ callAsInternalUser: jest.fn() }) },
-        legacy: { uiExports: {}, pluginExtendedConfig: {} },
+        legacyPlugins: { uiExports: {}, pluginExtendedConfig: {} },
       } as unknown) as SavedObjectsSetupDeps;
 
       await soService.setup(coreSetup);

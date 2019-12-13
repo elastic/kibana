@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { FieldFormatRegisty } from './field_formats';
 
 import {
@@ -43,7 +43,7 @@ import {
  * @internal
  */
 interface FieldFormatsServiceDependencies {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 export class FieldFormatsService {

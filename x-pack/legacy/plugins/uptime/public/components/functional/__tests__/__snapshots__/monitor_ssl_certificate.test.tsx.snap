@@ -5,8 +5,12 @@ Array [
   <div
     class="euiSpacer euiSpacer--s"
   />,
-  <div
-    class="sc-bdVaJa bYKQkq"
+  .c0 {
+  margin-left: 20px;
+}
+
+<div
+    class="c0"
   >
     <div
       aria-label="SSL certificate expires"

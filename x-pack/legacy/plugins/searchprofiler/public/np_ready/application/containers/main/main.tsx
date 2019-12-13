@@ -93,7 +93,7 @@ export const Main = () => {
 
   return (
     <>
-      <EuiPage className="prfDevTool__page">
+      <EuiPage className="prfDevTool__page appRoot">
         <EuiPageBody className="prfDevTool__page__pageBody">
           {renderLicenseWarning()}
           <EuiPageContent className="prfDevTool__page__pageBodyContent">

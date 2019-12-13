@@ -3,10 +3,13 @@
 library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
-// Looks like 'oss:ciGroup:1' or 'oss:firefoxSmoke'
-def JOB_PARTS = params.CI_GROUP.split(':')
+def CI_GROUP_PARAM = params.CI_GROUP
+
+// Looks like 'oss:ciGroup:1', 'oss:firefoxSmoke', or 'all:serverMocha'
+def JOB_PARTS = CI_GROUP_PARAM.split(':')
 def IS_XPACK = JOB_PARTS[0] == 'xpack'
 def JOB = JOB_PARTS[1]
+def NEED_BUILD = JOB != 'serverMocha'
 def CI_GROUP = JOB_PARTS.size() > 2 ? JOB_PARTS[2] : ''
 def EXECUTIONS = params.NUMBER_EXECUTIONS.toInteger()
 def AGENT_COUNT = getAgentCount(EXECUTIONS)
@@ -31,13 +34,15 @@ stage("Kibana Pipeline") {
               print "Agent ${agentNumberInside} - ${agentExecutions} executions"
 
               kibanaPipeline.withWorkers('flaky-test-runner', {
-                if (!IS_XPACK) {
-                  kibanaPipeline.buildOss()
-                  if (CI_GROUP == '1') {
-                    runbld("./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
+                if (NEED_BUILD) {
+                  if (!IS_XPACK) {
+                    kibanaPipeline.buildOss()
+                    if (CI_GROUP == '1') {
+                      runbld("./test/scripts/jenkins_build_kbn_tp_sample_panel_action.sh", "Build kbn tp sample panel action for ciGroup1")
+                    }
+                  } else {
+                    kibanaPipeline.buildXpack()
                   }
-                } else {
-                  kibanaPipeline.buildXpack()
                 }
               }, getWorkerMap(agentNumberInside, agentExecutions, worker, workerFailures))()
             }
@@ -61,7 +66,17 @@ stage("Kibana Pipeline") {
 
 def getWorkerFromParams(isXpack, job, ciGroup) {
   if (!isXpack) {
-    if (job == 'firefoxSmoke') {
+    if (job == 'serverMocha') {
+      return kibanaPipeline.getPostBuildWorker('serverMocha', {
+        kibanaPipeline.bash(
+          """
+            source src/dev/ci_setup/setup_env.sh
+            node scripts/mocha
+          """,
+          "run `node scripts/mocha`"
+        )
+      })
+    } else if (job == 'firefoxSmoke') {
       return kibanaPipeline.getPostBuildWorker('firefoxSmoke', { runbld('./test/scripts/jenkins_firefox_smoke.sh', 'Execute kibana-firefoxSmoke') })
     } else if(job == 'visualRegression') {
       return kibanaPipeline.getPostBuildWorker('visualRegression', { runbld('./test/scripts/jenkins_visual_regression.sh', 'Execute kibana-visualRegression') })

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { npSetup, npStart } from 'ui/new_platform';
 
-npSetup.plugins.devTools.register({
+npSetup.plugins.dev_tools.register({
   order: 6,
   title: i18n.translate('xpack.grokDebugger.displayName', {
     defaultMessage: 'Grok Debugger',

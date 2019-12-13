@@ -21,9 +21,11 @@
 import chrome from '../chrome';
 
 import { parse as parseUrl } from 'url';
+import { Subject } from 'rxjs';
 import sinon from 'sinon';
 import { metadata } from '../metadata';
-import { UiSettingsClient } from '../../../../core/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { UiSettingsClient } from '../../../../core/public/ui_settings';
 
 import './test_harness.css';
 import 'ng_mock';
@@ -46,10 +48,12 @@ before(() => {
 });
 
 let stubUiSettings;
+let done$;
 function createStubUiSettings() {
   if (stubUiSettings) {
-    stubUiSettings.stop();
+    done$.complete();
   }
+  done$ = new Subject();
 
   stubUiSettings = new UiSettingsClient({
     api: {
@@ -60,6 +64,7 @@ function createStubUiSettings() {
     onUpdateError: () => {},
     defaults: metadata.uiSettings.defaults,
     initialSettings: {},
+    done$,
   });
 }
 

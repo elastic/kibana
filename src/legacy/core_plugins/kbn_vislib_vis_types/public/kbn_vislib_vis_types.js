@@ -19,20 +19,20 @@
 
 import { setup as visualizations } from '../../visualizations/public/np_ready/public/legacy';
 
-import histogramVisTypeProvider from './histogram';
-import lineVisTypeProvider from './line';
-import pieVisTypeProvider from './pie';
-import areaVisTypeProvider from './area';
-import heatmapVisTypeProvider from './heatmap';
-import horizontalBarVisTypeProvider from './horizontal_bar';
-import gaugeVisTypeProvider from './gauge';
-import goalVisTypeProvider from './goal';
+import { histogramDefinition } from './histogram';
+import { lineDefinition } from './line';
+import { pieDefinition } from './pie';
+import { areaDefinition } from './area';
+import { heatmapDefinition } from './heatmap';
+import { horizontalBarDefinition } from './horizontal_bar';
+import { gaugeDefinition } from './gauge';
+import { goalDefinition } from './goal';
 
-visualizations.types.registerVisualization(histogramVisTypeProvider);
-visualizations.types.registerVisualization(lineVisTypeProvider);
-visualizations.types.registerVisualization(pieVisTypeProvider);
-visualizations.types.registerVisualization(areaVisTypeProvider);
-visualizations.types.registerVisualization(heatmapVisTypeProvider);
-visualizations.types.registerVisualization(horizontalBarVisTypeProvider);
-visualizations.types.registerVisualization(gaugeVisTypeProvider);
-visualizations.types.registerVisualization(goalVisTypeProvider);
+visualizations.types.createBaseVisualization(histogramDefinition);
+visualizations.types.createBaseVisualization(lineDefinition);
+visualizations.types.createBaseVisualization(pieDefinition);
+visualizations.types.createBaseVisualization(areaDefinition);
+visualizations.types.createBaseVisualization(heatmapDefinition);
+visualizations.types.createBaseVisualization(horizontalBarDefinition);
+visualizations.types.createBaseVisualization(gaugeDefinition);
+visualizations.types.createBaseVisualization(goalDefinition);

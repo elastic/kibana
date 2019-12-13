@@ -19,6 +19,7 @@
 
 
 import _ from 'lodash';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import ngMock from 'ng_mock';
 import { fieldCalculator } from '../../components/field_chooser/lib/field_calculator';
 import expect from '@kbn/expect';
@@ -29,7 +30,8 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 let indexPattern;
 
 describe('fieldCalculator', function () {
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(ngMock.module('app/discover'));
   beforeEach(ngMock.inject(function (Private) {
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Legacy } from 'kibana';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { APICaller } from 'src/core/server';
 import LRU from 'lru-cache';
 import {
@@ -14,6 +12,7 @@ import {
 } from '../../../../../../../src/plugins/data/server';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 import { ProcessorEvent } from '../../../common/processor_event';
+import { APMRequestHandlerContext } from '../../routes/typings';
 
 const cache = new LRU<string, IIndexPattern | undefined>({
   max: 100,
@@ -22,11 +21,11 @@ const cache = new LRU<string, IIndexPattern | undefined>({
 
 // TODO: this is currently cached globally. In the future we might want to cache this per user
 export const getDynamicIndexPattern = async ({
-  request,
+  context,
   indices,
   processorEvent
 }: {
-  request: Legacy.Request;
+  context: APMRequestHandlerContext;
   indices: ApmIndicesConfig;
   processorEvent?: ProcessorEvent;
 }) => {
@@ -39,9 +38,7 @@ export const getDynamicIndexPattern = async ({
 
   const indexPatternsFetcher = new IndexPatternsFetcher(
     (...rest: Parameters<APICaller>) =>
-      request.server.plugins.elasticsearch
-        .getCluster('data')
-        .callWithRequest(request, ...rest)
+      context.core.elasticsearch.adminClient.callAsCurrentUser(...rest)
   );
 
   // Since `getDynamicIndexPattern` is called in setup_request (and thus by every endpoint)
@@ -53,7 +50,7 @@ export const getDynamicIndexPattern = async ({
       pattern: patternIndices
     });
 
-    const indexPattern: StaticIndexPattern = {
+    const indexPattern: IIndexPattern = {
       fields,
       title: indexPatternTitle
     };

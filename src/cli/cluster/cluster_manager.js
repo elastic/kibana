@@ -29,7 +29,6 @@ import { REPO_ROOT } from '@kbn/dev-utils';
 import Log from '../log';
 import Worker from './worker';
 import { Config } from '../../legacy/server/config/config';
-import { transformDeprecations } from '../../legacy/server/config/transform_deprecations';
 
 process.env.kbnWorkerType = 'managr';
 
@@ -37,7 +36,7 @@ export default class ClusterManager {
   static create(opts, settings = {}, basePathProxy) {
     return new ClusterManager(
       opts,
-      Config.withDefaultSchema(transformDeprecations(settings)),
+      Config.withDefaultSchema(settings),
       basePathProxy
     );
   }
@@ -87,6 +86,18 @@ export default class ClusterManager {
             to.fork.send(msg);
           }
         });
+      });
+    });
+
+    // When receive that event from server worker
+    // forward a reloadLoggingConfig message to master
+    // and all workers. This is only used by LogRotator service
+    // when the cluster mode is enabled
+    this.server.on('reloadLoggingConfigFromServerWorker', () => {
+      process.emit('message', { reloadLoggingConfig: true });
+
+      this.workers.forEach(worker => {
+        worker.fork.send({ reloadLoggingConfig: true });
       });
     });
 
@@ -167,7 +178,7 @@ export default class ClusterManager {
 
   setupWatching(extraPaths, pluginInternalDirsIgnore) {
     const chokidar = require('chokidar');
-    const { fromRoot } = require('../../legacy/utils');
+    const { fromRoot } = require('../../core/server/utils');
 
     const watchPaths = [
       fromRoot('src/core'),
@@ -187,6 +198,7 @@ export default class ClusterManager {
       fromRoot('x-pack/legacy/plugins/reporting/.chromium'),
       fromRoot('x-pack/legacy/plugins/siem/cypress'),
       fromRoot('x-pack/legacy/plugins/apm/cypress'),
+      fromRoot('x-pack/legacy/plugins/apm/scripts'),
       fromRoot('x-pack/legacy/plugins/canvas/canvas_plugin_src') // prevents server from restarting twice for Canvas plugin changes
     ];
 

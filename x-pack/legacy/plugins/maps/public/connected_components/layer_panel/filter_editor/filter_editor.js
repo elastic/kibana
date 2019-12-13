@@ -16,16 +16,17 @@ import {
   EuiTextColor,
   EuiTextAlign,
   EuiButtonEmpty,
+  EuiFormRow,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../kibana_services';
-
-import { start as data } from '../../../../../../../../src/legacy/core_plugins/data/public/legacy';
-const { SearchBar } = data.ui;
+import { GlobalFilterCheckbox } from '../../../components/global_filter_checkbox';
 
 import { npStart } from 'ui/new_platform';
+const { SearchBar } = npStart.plugins.data.ui;
 
 export class FilterEditor extends Component {
   state = {
@@ -79,6 +80,14 @@ export class FilterEditor extends Component {
     this._close();
   };
 
+  _onFilterByMapBoundsChange = event => {
+    this.props.updateSourceProp(this.props.layer.getId(), 'filterByMapBounds', event.target.checked);
+  };
+
+  _onApplyGlobalQueryChange = applyGlobalQuery => {
+    this.props.updateSourceProp(this.props.layer.getId(), 'applyGlobalQuery', applyGlobalQuery);
+  };
+
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
     const { uiSettings } = npStart.core;
@@ -90,6 +99,7 @@ export class FilterEditor extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._close}
         anchorPosition="leftCenter"
+        ownFocus
       >
         <div className="mapFilterEditor" data-test-subj="mapFilterEditor">
           <SearchBar
@@ -168,13 +178,29 @@ export class FilterEditor extends Component {
   }
 
   render() {
+    let filterByBoundsSwitch;
+    if (this.props.layer.getSource().isFilterByMapBoundsConfigurable()) {
+      filterByBoundsSwitch = (
+        <EuiFormRow display="rowCompressed">
+          <EuiSwitch
+            label={i18n.translate('xpack.maps.filterEditor.extentFilterLabel', {
+              defaultMessage: 'Dynamically filter for data in the visible map area',
+            })}
+            checked={this.props.layer.getSource().isFilterByMapBounds()}
+            onChange={this._onFilterByMapBoundsChange}
+            compressed
+          />
+        </EuiFormRow>
+      );
+    }
+
     return (
       <Fragment>
         <EuiTitle size="xs">
           <h5>
             <FormattedMessage
               id="xpack.maps.layerPanel.filterEditor.title"
-              defaultMessage="Filter"
+              defaultMessage="Filtering"
             />
           </h5>
         </EuiTitle>
@@ -184,6 +210,18 @@ export class FilterEditor extends Component {
         {this._renderQuery()}
 
         <EuiTextAlign textAlign="center">{this._renderQueryPopover()}</EuiTextAlign>
+
+        <EuiSpacer size="m" />
+
+        {filterByBoundsSwitch}
+
+        <GlobalFilterCheckbox
+          label={i18n.translate('xpack.maps.filterEditor.applyGlobalQueryCheckboxLabel', {
+            defaultMessage: `Apply global filter to layer data`,
+          })}
+          applyGlobalQuery={this.props.layer.getSource().getApplyGlobalQuery()}
+          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+        />
       </Fragment>
     );
   }

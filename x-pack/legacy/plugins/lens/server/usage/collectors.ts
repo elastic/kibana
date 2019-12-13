@@ -6,29 +6,17 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
-import { CoreSetup, SavedObjectsLegacyService } from 'src/core/server';
+import { Server } from 'src/legacy/server/kbn_server';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+
 import { LensUsage, LensTelemetryState } from './types';
 
-export function registerLensUsageCollector(
-  core: CoreSetup,
-  plugins: {
-    savedObjects: SavedObjectsLegacyService;
-    usage: {
-      collectorSet: {
-        makeUsageCollector: (options: unknown) => unknown;
-        register: (options: unknown) => unknown;
-      };
-    };
-    config: KibanaConfig;
-    server: Server;
-  }
-) {
+export function registerLensUsageCollector(usageCollection: UsageCollectionSetup, server: Server) {
   let isCollectorReady = false;
   async function determineIfTaskManagerIsReady() {
     let isReady = false;
     try {
-      isReady = await isTaskManagerReady(plugins.server);
+      isReady = await isTaskManagerReady(server);
     } catch (err) {} // eslint-disable-line
 
     if (isReady) {
@@ -39,11 +27,11 @@ export function registerLensUsageCollector(
   }
   determineIfTaskManagerIsReady();
 
-  const lensUsageCollector = plugins.usage.collectorSet.makeUsageCollector({
+  const lensUsageCollector = usageCollection.makeUsageCollector({
     type: 'lens',
     fetch: async (): Promise<LensUsage> => {
       try {
-        const docs = await getLatestTaskState(plugins.server);
+        const docs = await getLatestTaskState(server);
         // get the accumulated state from the recurring task
         const state: LensTelemetryState = get(docs, '[0].state');
 
@@ -75,7 +63,8 @@ export function registerLensUsageCollector(
     },
     isReady: () => isCollectorReady,
   });
-  plugins.usage.collectorSet.register(lensUsageCollector);
+
+  usageCollection.registerCollector(lensUsageCollector);
 }
 
 function addEvents(prevEvents: Record<string, number>, newEvents: Record<string, number>) {

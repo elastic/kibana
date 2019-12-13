@@ -17,16 +17,16 @@
  * under the License.
  */
 
-export interface IStorageWrapper {
-  get: (key: string) => any;
-  set: (key: string, value: any) => void;
-  remove: (key: string) => any;
+export interface IStorageWrapper<T = any, S = void> {
+  get: (key: string) => T | null;
+  set: (key: string, value: T) => S;
+  remove: (key: string) => T | null;
   clear: () => void;
 }
 
-export interface IStorage {
-  getItem: (key: string) => any;
-  setItem: (key: string, value: any) => void;
-  removeItem: (key: string) => any;
+export interface IStorage<T = any, S = void> {
+  getItem: (key: string) => T | null;
+  setItem: (key: string, value: T) => S;
+  removeItem: (key: string) => T | null;
   clear: () => void;
 }

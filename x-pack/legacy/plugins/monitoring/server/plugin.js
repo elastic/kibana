@@ -9,35 +9,27 @@ import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../common/constants'
 import { requireUIRoutes } from './routes';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initMonitoringXpackInfo } from './init_monitoring_xpack_info';
-import { initBulkUploader } from './kibana_monitoring';
+import { initBulkUploader, registerCollectors } from './kibana_monitoring';
 import { registerMonitoringCollection } from './telemetry_collection';
-
-import {
-  getKibanaUsageCollector,
-  getOpsStatsCollector,
-  getSettingsCollector,
-} from './kibana_monitoring/collectors';
 
 export class Plugin {
   setup(core, plugins) {
     const kbnServer = core._kbnServer;
     const config = core.config();
-    const { collectorSet } = core.usage;
+    const usageCollection = plugins.usageCollection;
+    registerMonitoringCollection();
     /*
     * Register collector objects for stats to show up in the APIs
     */
-    collectorSet.register(getOpsStatsCollector({
+    registerCollectors(usageCollection, {
       elasticsearchPlugin: plugins.elasticsearch,
       kbnServerConfig: kbnServer.config,
       log: core.log,
       config,
       getOSInfo: core.getOSInfo,
       hapiServer: core._hapi,
-      collectorSet: core.usage.collectorSet,
-    }));
-    collectorSet.register(getKibanaUsageCollector({ collectorSet, config }));
-    collectorSet.register(getSettingsCollector({ collectorSet, config }));
-    registerMonitoringCollection();
+    });
+
 
     /*
     * Instantiate and start the internal background task that calls collector
@@ -110,7 +102,7 @@ export class Plugin {
         const mainMonitoring = xpackMainInfo.feature('monitoring');
         const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
         if (monitoringBulkEnabled) {
-          bulkUploader.start(collectorSet);
+          bulkUploader.start(usageCollection);
         } else {
           bulkUploader.handleNotEnabled();
         }

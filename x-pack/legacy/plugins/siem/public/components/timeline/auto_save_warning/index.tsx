@@ -11,7 +11,6 @@ import {
   EuiGlobalToastListToast as Toast,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import { pure } from 'recompose';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -47,7 +46,7 @@ interface DispatchProps {
 
 type OwnProps = ReduxProps & DispatchProps;
 
-const AutoSaveWarningMsgComponent = pure<OwnProps>(
+const AutoSaveWarningMsgComponent = React.memo<OwnProps>(
   ({
     newTimelineModel,
     setTimelineRangeDatePicker,

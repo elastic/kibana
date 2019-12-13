@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }) {
   describe('heatmap chart', function indexPatternCreation() {
     this.tags('smoke');
     const vizName1 = 'Visualization HeatmapChart';
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     before(async function () {
       log.debug('navigateToApp visualize');
@@ -36,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickHeatmapChart');
       await PageObjects.visualize.clickHeatmapChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = X-Axis');
       await PageObjects.visualize.clickBucket('X-axis');
       log.debug('Aggregation = Date Histogram');
@@ -49,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });

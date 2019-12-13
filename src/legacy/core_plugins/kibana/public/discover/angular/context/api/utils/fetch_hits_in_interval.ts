@@ -16,12 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchSource } from '../../../../kibana_services';
+import {
+  EsQuerySortValue,
+  SortDirection,
+  SearchSourceContract,
+} from '../../../../../../../../ui/public/courier';
 import { convertTimeValueToIso } from './date_conversion';
-import { SortDirection } from './sorting';
 import { EsHitRecordList } from '../context';
 import { IntervalValue } from './generate_intervals';
-import { EsQuerySort } from './get_es_query_sort';
 import { EsQuerySearchAfter } from './get_es_query_search_after';
 
 interface RangeQuery {
@@ -38,9 +40,9 @@ interface RangeQuery {
  * and filters set.
  */
 export async function fetchHitsInInterval(
-  searchSource: SearchSource,
+  searchSource: SearchSourceContract,
   timeField: string,
-  sort: EsQuerySort,
+  sort: [EsQuerySortValue, EsQuerySortValue],
   sortDir: SortDirection,
   interval: IntervalValue[],
   searchAfter: EsQuerySearchAfter,

@@ -11,4 +11,4 @@ they are available in the side bar if we uncheck "Hide missing fields".
 
 To view field data statistics, click the name of a field in the Fields list.
 
-image:images/filter-field.jpg[Field Statistics]
+image:images/filter-field.png[Field Statistics,height=317]

@@ -37,7 +37,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack action',
+          name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {
             webhookUrl: 'http://example.com',
@@ -47,7 +47,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A slack action',
+        name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
       });
@@ -60,7 +60,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A slack action',
+        name: 'A slack action',
         actionTypeId: '.slack',
         config: {},
       });
@@ -71,7 +71,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack action',
+          name: 'A slack action',
           actionTypeId: '.slack',
           secrets: {},
         })
@@ -91,7 +91,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A slack simulator',
+          name: 'A slack simulator',
           actionTypeId: '.slack',
           secrets: {
             webhookUrl: slackSimulatorURL,
@@ -126,7 +126,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
+      expect(result.message).to.match(/unexpected http response from slack: /);
     });
 
     it('should handle a 429 slack error', async () => {
@@ -142,8 +142,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
-      expect(result.message).to.match(/retry at/);
+      expect(result.message).to.match(/error posting a slack message, retry at \d\d\d\d-/);
 
       const dateRetry = new Date(result.retry).getTime();
       expect(dateRetry).to.greaterThan(dateStart);
@@ -161,7 +160,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(/an error occurred in action .+ posting a slack message/);
+      expect(result.message).to.match(/error posting a slack message, retry later/);
       expect(result.retry).to.equal(true);
     });
   });

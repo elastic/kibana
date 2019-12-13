@@ -25,11 +25,11 @@ export function cloudwatchLogsSpecProvider(context) {
   return {
     id: 'cloudwatchLogs',
     name: i18n.translate('kbn.server.tutorials.cloudwatchLogs.nameTitle', {
-      defaultMessage: 'Cloudwatch Logs',
+      defaultMessage: 'AWS Cloudwatch logs',
     }),
     category: TUTORIAL_CATEGORY.LOGGING,
     shortDescription: i18n.translate('kbn.server.tutorials.cloudwatchLogs.shortDescription', {
-      defaultMessage: 'Collect Cloudwatch logs with Functionbeat',
+      defaultMessage: 'Collect Cloudwatch logs with Functionbeat.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.cloudwatchLogs.longDescription', {
       defaultMessage: 'Collect Cloudwatch logs by deploying Functionbeat to run as \
@@ -39,7 +39,7 @@ export function cloudwatchLogsSpecProvider(context) {
         learnMoreLink: '{config.docs.beats.functionbeat}/functionbeat-getting-started.html',
       },
     }),
-    //euiIconType: 'functionbeatApp',
+    euiIconType: 'logoAWS',
     artifacts: {
       dashboards: [
         // TODO

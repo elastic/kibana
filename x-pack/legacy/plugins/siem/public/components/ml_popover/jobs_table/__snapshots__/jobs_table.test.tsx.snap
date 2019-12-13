@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`JobsTable renders correctly against snapshot 1`] = `
+exports[`JobsTableComponent renders correctly against snapshot 1`] = `
 <EuiBasicTable
   columns={
     Array [

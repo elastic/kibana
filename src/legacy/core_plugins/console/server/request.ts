@@ -89,7 +89,7 @@ export const sendRequest = ({
     }
   });
 
-  const onError = () => reject();
+  const onError = (e: Error) => reject(e);
   req.once('error', onError);
 
   const timeoutPromise = new Promise<any>((timeoutResolve, timeoutReject) => {
@@ -103,5 +103,5 @@ export const sendRequest = ({
     }, timeout);
   });
 
-  return Promise.race<http.ServerResponse>([reqPromise, timeoutPromise]);
+  return Promise.race<http.IncomingMessage>([reqPromise, timeoutPromise]);
 };

@@ -27,10 +27,9 @@ import {
 } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RenderDeps } from './application';
-import { LocalApplicationService } from '../local_application_service';
 import { DataStart } from '../../../data/public';
 import { DataPublicPluginStart as NpDataStart } from '../../../../../plugins/data/public';
-import { EmbeddablePublicPlugin } from '../../../../../plugins/embeddable/public';
+import { IEmbeddableStart } from '../../../../../plugins/embeddable/public';
 import { Storage } from '../../../../../plugins/kibana_utils/public';
 import { NavigationStart } from '../../../navigation/public';
 import { DashboardConstants } from './dashboard_constants';
@@ -39,6 +38,7 @@ import {
   HomePublicPluginSetup,
 } from '../../../../../plugins/home/public';
 import { SharePluginStart } from '../../../../../plugins/share/public';
+import { KibanaLegacySetup } from '../../../../../plugins/kibana_legacy/public';
 
 export interface LegacyAngularInjectedDependencies {
   dashboardConfig: any;
@@ -49,7 +49,7 @@ export interface LegacyAngularInjectedDependencies {
 export interface DashboardPluginStartDependencies {
   data: DataStart;
   npData: NpDataStart;
-  embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+  embeddables: IEmbeddableStart;
   navigation: NavigationStart;
   share: SharePluginStart;
 }
@@ -57,27 +57,23 @@ export interface DashboardPluginStartDependencies {
 export interface DashboardPluginSetupDependencies {
   __LEGACY: {
     getAngularDependencies: () => Promise<LegacyAngularInjectedDependencies>;
-    localApplicationService: LocalApplicationService;
   };
   home: HomePublicPluginSetup;
+  kibana_legacy: KibanaLegacySetup;
 }
 
 export class DashboardPlugin implements Plugin {
   private startDependencies: {
-    dataStart: DataStart;
     npDataStart: NpDataStart;
     savedObjectsClient: SavedObjectsClientContract;
-    embeddables: ReturnType<EmbeddablePublicPlugin['start']>;
+    embeddables: IEmbeddableStart;
     navigation: NavigationStart;
     share: SharePluginStart;
   } | null = null;
 
   public setup(
     core: CoreSetup,
-    {
-      __LEGACY: { localApplicationService, getAngularDependencies, ...legacyServices },
-      home,
-    }: DashboardPluginSetupDependencies
+    { __LEGACY: { getAngularDependencies }, home, kibana_legacy }: DashboardPluginSetupDependencies
   ) {
     const app: App = {
       id: '',
@@ -87,7 +83,6 @@ export class DashboardPlugin implements Plugin {
           throw new Error('not started yet');
         }
         const {
-          dataStart,
           savedObjectsClient,
           embeddables,
           navigation,
@@ -97,18 +92,15 @@ export class DashboardPlugin implements Plugin {
         const angularDependencies = await getAngularDependencies();
         const deps: RenderDeps = {
           core: contextCore as LegacyCoreStart,
-          ...legacyServices,
           ...angularDependencies,
           navigation,
-          dataStart,
           share,
           npDataStart,
-          indexPatterns: dataStart.indexPatterns.indexPatterns,
           savedObjectsClient,
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
           uiSettings: contextCore.uiSettings,
-          savedQueryService: dataStart.search.services.savedQueryService,
+          savedQueryService: npDataStart.query.savedQueries,
           embeddables,
           dashboardCapabilities: contextCore.application.capabilities.dashboard,
           localStorage: new Storage(localStorage),
@@ -117,8 +109,8 @@ export class DashboardPlugin implements Plugin {
         return renderApp(params.element, params.appBasePath, deps);
       },
     };
-    localApplicationService.register({ ...app, id: 'dashboard' });
-    localApplicationService.register({ ...app, id: 'dashboards' });
+    kibana_legacy.registerLegacyApp({ ...app, id: 'dashboard' });
+    kibana_legacy.registerLegacyApp({ ...app, id: 'dashboards' });
 
     home.featureCatalogue.register({
       id: 'dashboard',
@@ -140,7 +132,6 @@ export class DashboardPlugin implements Plugin {
     { data: dataStart, embeddables, navigation, npData, share }: DashboardPluginStartDependencies
   ) {
     this.startDependencies = {
-      dataStart,
       npDataStart: npData,
       savedObjectsClient,
       embeddables,

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, Subject, Subscription, merge, timer } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
-import moment from 'moment';
+import { Observable, Subject, Subscription, timer } from 'rxjs';
+import { take } from 'rxjs/operators';
+import moment, { Duration } from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
@@ -24,8 +24,11 @@ import { License } from '../common/license';
 import { createLicenseUpdate } from '../common/license_update';
 
 import { ElasticsearchError, RawLicense, RawFeatures } from './types';
+import { registerRoutes } from './routes';
+
 import { LicenseConfigType } from './licensing_config';
 import { createRouteHandlerContext } from './licensing_route_handler_context';
+import { createOnPreResponseHandler } from './on_pre_response_handler';
 
 function normalizeServerLicense(license: RawLicense): PublicLicense {
   return {
@@ -76,7 +79,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   private stop$ = new Subject();
   private readonly logger: Logger;
   private readonly config$: Observable<LicenseConfigType>;
-  private licenseFetchSubscription?: Subscription;
   private loggingSubscription?: Subscription;
 
   constructor(private readonly context: PluginInitializerContext) {
@@ -93,23 +95,23 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
+    registerRoutes(core.http.createRouter());
+    core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
+
     return {
       refresh,
       license$,
     };
   }
 
-  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: number) {
-    const manualRefresh$ = new Subject();
-    const intervalRefresh$ = timer(0, pollingFrequency);
-    const refresh$ = merge(intervalRefresh$, manualRefresh$).pipe(takeUntil(this.stop$));
+  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: Duration) {
+    const intervalRefresh$ = timer(0, pollingFrequency.asMilliseconds());
 
-    const { update$, fetchSubscription } = createLicenseUpdate(refresh$, () =>
+    const { license$, refreshManually } = createLicenseUpdate(intervalRefresh$, this.stop$, () =>
       this.fetchLicense(clusterClient)
     );
 
-    this.licenseFetchSubscription = fetchSubscription;
-    this.loggingSubscription = update$.subscribe(license =>
+    this.loggingSubscription = license$.subscribe(license =>
       this.logger.debug(
         'Imported license information from Elasticsearch:' +
           [
@@ -121,11 +123,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     );
 
     return {
-      refresh: () => {
+      refresh: async () => {
         this.logger.debug('Requesting Elasticsearch licensing API');
-        manualRefresh$.next();
+        return await refreshManually();
       },
-      license$: update$,
+      license$,
     };
   }
 
@@ -136,8 +138,13 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
         path: '/_xpack',
       });
 
-      const normalizedLicense = normalizeServerLicense(response.license);
-      const normalizedFeatures = normalizeFeatures(response.features);
+      const normalizedLicense = response.license
+        ? normalizeServerLicense(response.license)
+        : undefined;
+      const normalizedFeatures = response.features
+        ? normalizeFeatures(response.features)
+        : undefined;
+
       const signature = sign({
         license: normalizedLicense,
         features: normalizedFeatures,
@@ -175,11 +182,6 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   public stop() {
     this.stop$.next();
     this.stop$.complete();
-
-    if (this.licenseFetchSubscription !== undefined) {
-      this.licenseFetchSubscription.unsubscribe();
-      this.licenseFetchSubscription = undefined;
-    }
 
     if (this.loggingSubscription !== undefined) {
       this.loggingSubscription.unsubscribe();

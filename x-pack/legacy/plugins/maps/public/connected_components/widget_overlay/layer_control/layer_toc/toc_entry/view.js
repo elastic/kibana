@@ -21,12 +21,14 @@ export class TOCEntry extends React.Component {
 
   state = {
     displayName: null,
+    hasLegendDetails: false,
     shouldShowModal: false
   };
 
   componentDidMount() {
     this._isMounted = true;
     this._updateDisplayName();
+    this._loadHasLegendDetails();
   }
 
   componentWillUnmount() {
@@ -35,6 +37,7 @@ export class TOCEntry extends React.Component {
 
   componentDidUpdate() {
     this._updateDisplayName();
+    this._loadHasLegendDetails();
   }
 
   _toggleLayerDetailsVisibility = () => {
@@ -42,6 +45,13 @@ export class TOCEntry extends React.Component {
       this.props.hideTOCDetails(this.props.layer.getId());
     } else {
       this.props.showTOCDetails(this.props.layer.getId());
+    }
+  }
+
+  async _loadHasLegendDetails() {
+    const hasLegendDetails = await this.props.layer.hasLegendDetails();
+    if (this._isMounted && hasLegendDetails !== this.state.hasLegendDetails) {
+      this.setState({ hasLegendDetails });
     }
   }
 
@@ -143,7 +153,7 @@ export class TOCEntry extends React.Component {
   }
 
   _renderDetailsToggle() {
-    if (!this.props.layer.hasLegendDetails()) {
+    if (!this.state.hasLegendDetails) {
       return null;
     }
 
@@ -223,11 +233,11 @@ export class TOCEntry extends React.Component {
   }
 
   _renderLegendDetails = () => {
-    if (!this.props.isLegendDetailsOpen || !this.props.layer.hasLegendDetails()) {
+    if (!this.props.isLegendDetailsOpen || !this.state.hasLegendDetails) {
       return null;
     }
 
-    const tocDetails = this.props.layer.getLegendDetails();
+    const tocDetails = this.props.layer.renderLegendDetails();
     if (!tocDetails) {
       return null;
     }

@@ -18,7 +18,7 @@
  */
 
 import { forOwn, isFunction, memoize } from 'lodash';
-import { UiSettingsClientContract } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 import {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
@@ -31,7 +31,7 @@ import { FieldType } from './types';
 
 export class FieldFormatRegisty {
   private fieldFormats: Map<IFieldFormatId, IFieldFormatType>;
-  private uiSettings!: UiSettingsClientContract;
+  private uiSettings!: IUiSettingsClient;
   private defaultMap: Record<string, FieldType>;
 
   constructor() {
@@ -41,7 +41,7 @@ export class FieldFormatRegisty {
 
   getConfig = (key: string, override?: any) => this.uiSettings.get(key, override);
 
-  init(uiSettings: UiSettingsClientContract) {
+  init(uiSettings: IUiSettingsClient) {
     this.uiSettings = uiSettings;
 
     this.parseDefaultTypeMap(this.uiSettings.get('format:defaultTypeMap'));

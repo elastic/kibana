@@ -101,7 +101,7 @@ export class TimeseriesVisualization extends React.Component {
   }
 
 
-  componentWillReceiveProps(props) {
+  UNSAFE_componentWillReceiveProps(props) {
     const values = this.getLastValues(props);
     const currentKeys = _.keys(this.state.values);
     const keys = _.keys(values);

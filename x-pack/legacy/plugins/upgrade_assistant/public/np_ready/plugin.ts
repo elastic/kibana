@@ -9,11 +9,10 @@ import { RootComponent } from './application/app';
 import { LegacyPlugins } from '../legacy';
 
 export class UpgradeAssistantUIPlugin implements Plugin {
-  async setup(
-    { http }: CoreSetup,
-    { management, __LEGACY: { XSRF, isCloudEnabled } }: LegacyPlugins
-  ) {
+  async setup({ http }: CoreSetup, { cloud, management, __LEGACY: { XSRF } }: LegacyPlugins) {
     const appRegistrar = management.sections.get('kibana');
+    const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
+
     return appRegistrar.registerApp({
       mount(__, { __LEGACY: { renderToElement } }) {
         return renderToElement(() => RootComponent({ http, XSRF, isCloudEnabled }));

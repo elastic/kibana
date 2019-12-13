@@ -22,10 +22,8 @@ import { Schemas } from 'ui/vis/editors/default/schemas';
 import { colorSchemas } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { createRegionMapVisualization } from './region_map_visualization';
-import { Status } from 'ui/vis/update_status';
+import { Status } from '../../visualizations/public';
 import { RegionMapOptions } from './components/region_map_options';
-
-import { visFactory } from '../../visualizations/public';
 
 // TODO: reference to TILE_MAP plugin should be removed
 import { ORIGIN } from '../../tile_map/common/origin';
@@ -34,7 +32,7 @@ export function createRegionMapTypeDefinition(dependencies) {
   const { uiSettings, regionmapsConfig, serviceSettings } = dependencies;
   const visualization = createRegionMapVisualization(dependencies);
 
-  return visFactory.createBaseVisualization({
+  return {
     name: 'region_map',
     title: i18n.translate('regionMap.mapVis.regionMapTitle', { defaultMessage: 'Region Map' }),
     description: i18n.translate('regionMap.mapVis.regionMapDescription', {
@@ -155,5 +153,5 @@ provided base maps, or add your own. Darker colors represent higher values.',
 
       return savedVis;
     },
-  });
+  };
 }

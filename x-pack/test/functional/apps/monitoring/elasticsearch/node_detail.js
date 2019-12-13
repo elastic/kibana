@@ -19,8 +19,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-          from: '2017-10-05 20:31:48.354',
-          to: '2017-10-05 20:35:12.176'
+          from: 'Oct 5, 2017 @ 20:31:48.354',
+          to: 'Oct 5, 2017 @ 20:35:12.176'
         });
 
         // go to nodes listing
@@ -74,8 +74,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-red-platinum', {
-          from: '2017-10-06 19:53:06.748',
-          to: '2017-10-06 20:15:30.212'
+          from: 'Oct 6, 2017 @ 19:53:06.748',
+          to: 'Oct 6, 2017 @ 20:15:30.212'
         });
 
         // go to nodes listing

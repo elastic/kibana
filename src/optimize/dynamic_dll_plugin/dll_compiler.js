@@ -19,7 +19,7 @@
 
 import { configModel } from './dll_config_model';
 import { notInNodeModulesOrWebpackShims, notInNodeModules, inDllPluginPublic } from './dll_allowed_modules';
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from '../public_path_placeholder';
 import fs from 'fs';
 import webpack from 'webpack';
@@ -29,7 +29,7 @@ import del from 'del';
 
 const readFileAsync = promisify(fs.readFile);
 const mkdirAsync = promisify(fs.mkdir);
-const existsAsync = promisify(fs.exists);
+const accessAsync = promisify(fs.access);
 const writeFileAsync = promisify(fs.writeFile);
 
 export class DllCompiler {
@@ -127,13 +127,14 @@ export class DllCompiler {
   }
 
   async ensurePathExists(filePath) {
-    const exists = await existsAsync(filePath);
-
-    if (!exists) {
+    try {
+      await accessAsync(filePath);
+    } catch (e) {
       await mkdirAsync(path.dirname(filePath), { recursive: true });
+      return false;
     }
 
-    return exists;
+    return true;
   }
 
   async ensureOutputPathExists() {

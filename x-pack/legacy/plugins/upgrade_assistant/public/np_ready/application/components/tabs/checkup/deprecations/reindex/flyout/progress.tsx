@@ -21,7 +21,7 @@ import { LoadingState } from '../../../../../types';
 import { ReindexState } from '../polling_service';
 import { StepProgress, StepProgressStep } from './step_progress';
 
-const ErrorCallout: React.StatelessComponent<{ errorMessage: string | null }> = ({
+const ErrorCallout: React.FunctionComponent<{ errorMessage: string | null }> = ({
   errorMessage,
 }) => (
   <EuiCallOut color="danger" title="There was an error">
@@ -38,7 +38,7 @@ const PausedCallout = () => (
   />
 );
 
-const ReindexProgressBar: React.StatelessComponent<{
+const ReindexProgressBar: React.FunctionComponent<{
   reindexState: ReindexState;
   cancelReindex: () => void;
 }> = ({
@@ -113,7 +113,7 @@ const orderedSteps = Object.values(ReindexStep).sort() as number[];
  * Displays a list of steps in the reindex operation, the current status, a progress bar,
  * and any error messages that are encountered.
  */
-export const ReindexProgress: React.StatelessComponent<{
+export const ReindexProgress: React.FunctionComponent<{
   reindexState: ReindexState;
   cancelReindex: () => void;
 }> = props => {

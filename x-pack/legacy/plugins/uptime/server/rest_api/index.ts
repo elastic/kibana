@@ -4,18 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createIsValidRoute } from './auth';
 import { createGetAllRoute } from './pings';
 import { createGetIndexPatternRoute } from './index_pattern';
 import { createLogMonitorPageRoute, createLogOverviewPageRoute } from './telemetry';
+import { createGetSnapshotCount } from './snapshot';
 import { UMRestApiRouteCreator } from './types';
+import { createGetMonitorDetailsRoute, createGetMonitorLocationsRoute } from './monitors';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
 export const restApiRoutes: UMRestApiRouteCreator[] = [
-  createIsValidRoute,
   createGetAllRoute,
+  createGetIndexPatternRoute,
+  createGetMonitorDetailsRoute,
+  createGetMonitorLocationsRoute,
+  createGetSnapshotCount,
   createLogMonitorPageRoute,
   createLogOverviewPageRoute,
-  createGetIndexPatternRoute,
 ];

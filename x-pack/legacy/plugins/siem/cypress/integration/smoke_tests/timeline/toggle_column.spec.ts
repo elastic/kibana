@@ -23,7 +23,7 @@ describe('toggle column in timeline', () => {
   const timestampField = '@timestamp';
   const idField = '_id';
 
-  it.skip('displays a checked Toggle field checkbox for `@timestamp`, a default timeline column', () => {
+  it('displays a checked Toggle field checkbox for `@timestamp`, a default timeline column', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();
@@ -39,7 +39,7 @@ describe('toggle column in timeline', () => {
     );
   });
 
-  it.skip('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
+  it('removes the @timestamp field from the timeline when the user un-checks the toggle', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();
@@ -50,14 +50,14 @@ describe('toggle column in timeline', () => {
 
     cy.get(
       `[data-test-subj="timeline"] [data-test-subj="toggle-field-${timestampField}"]`
-    ).uncheck();
+    ).uncheck({ force: true });
 
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${timestampField}"]`).should(
       'not.exist'
     );
   });
 
-  it.skip('adds the _id field to the timeline when the user checks the field', () => {
+  it('adds the _id field to the timeline when the user checks the field', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();
@@ -66,12 +66,14 @@ describe('toggle column in timeline', () => {
       'not.exist'
     );
 
-    cy.get(`[data-test-subj="timeline"] [data-test-subj="toggle-field-${idField}"]`).check();
+    cy.get(`[data-test-subj="timeline"] [data-test-subj="toggle-field-${idField}"]`).check({
+      force: true,
+    });
 
     cy.get(`[data-test-subj="timeline"] [data-test-subj="header-text-${idField}"]`).should('exist');
   });
 
-  it.skip('adds the _id field to the timeline via drag and drop', () => {
+  it('adds the _id field to the timeline via drag and drop', () => {
     populateTimeline();
 
     toggleFirstTimelineEventDetails();

@@ -52,7 +52,7 @@ class BeatDetailPageUi extends React.PureComponent<PageProps, PageState> {
     };
   }
 
-  public async componentWillMount() {
+  public async UNSAFE_componentWillMount() {
     const tags = await this.props.libs.tags.getTagsWithIds(this.props.beat.tags);
     const blocksResult = await this.props.libs.configBlocks.getForTags(
       this.props.beat.tags,

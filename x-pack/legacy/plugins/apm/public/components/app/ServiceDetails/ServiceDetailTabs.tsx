@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiTabs, EuiSpacer } from '@elastic/eui';
-import { npStart } from 'ui/new_platform';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { TransactionOverview } from '../TransactionOverview';
 import { ServiceMetrics } from '../ServiceMetrics';
@@ -22,6 +21,7 @@ import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 interface Props {
   tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
@@ -31,6 +31,7 @@ export function ServiceDetailTabs({ tab }: Props) {
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
   const { agentName } = useAgentName();
+  const { serviceMapEnabled } = useApmPluginContext().config;
 
   if (!serviceName) {
     // this never happens, urlParams type is not accurate enough
@@ -105,7 +106,7 @@ export function ServiceDetailTabs({ tab }: Props) {
     name: 'service-map'
   };
 
-  if (npStart.core.injectedMetadata.getInjectedVar('apmServiceMapEnabled')) {
+  if (serviceMapEnabled) {
     tabs.push(serviceMapTab);
   }
 

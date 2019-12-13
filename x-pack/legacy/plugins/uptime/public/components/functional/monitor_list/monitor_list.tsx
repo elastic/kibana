@@ -30,11 +30,10 @@ import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { formatUptimeGraphQLErrorList } from '../../../lib/helper/format_error_list';
 import { ExpandedRowMap } from './types';
 import { MonitorListDrawer } from './monitor_list_drawer';
-import { CLIENT_DEFAULTS } from '../../../../common/constants';
 import { MonitorBarSeries } from '../charts';
-import { MonitorPageLink } from '../monitor_page_link';
+import { MonitorPageLink } from './monitor_page_link';
 import { MonitorListActionsPopover } from './monitor_list_actions_popover';
-import { OverviewPageLink } from '../overview_page_link';
+import { OverviewPageLink } from './overview_page_link';
 
 interface MonitorListQueryResult {
   monitorStates?: MonitorSummaryResult;
@@ -56,7 +55,6 @@ export const MonitorListComponent = (props: Props) => {
     absoluteStartDate,
     absoluteEndDate,
     dangerColor,
-    successColor,
     data,
     errors,
     hasActiveFilters,
@@ -68,6 +66,19 @@ export const MonitorListComponent = (props: Props) => {
 
   const nextPagePagination = get<string>(data, 'monitorStates.nextPagePagination');
   const prevPagePagination = get<string>(data, 'monitorStates.prevPagePagination');
+
+  const getExpandedRowMap = () => {
+    return drawerIds.reduce((map: ExpandedRowMap, id: string) => {
+      return {
+        ...map,
+        [id]: (
+          <MonitorListDrawer
+            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+          />
+        ),
+      };
+    }, {});
+  };
 
   return (
     <Fragment>
@@ -95,21 +106,7 @@ export const MonitorListComponent = (props: Props) => {
           isExpandable={true}
           hasActions={true}
           itemId="monitor_id"
-          itemIdToExpandedRowMap={drawerIds.reduce((map: ExpandedRowMap, id: string) => {
-            return {
-              ...map,
-              [id]: (
-                <MonitorListDrawer
-                  condensedCheckLimit={CLIENT_DEFAULTS.CONDENSED_CHECK_LIMIT}
-                  summary={
-                    items ? items.find(({ monitor_id: monitorId }) => monitorId === id) : undefined
-                  }
-                  successColor={successColor}
-                  dangerColor={dangerColor}
-                />
-              ),
-            };
-          }, {})}
+          itemIdToExpandedRowMap={getExpandedRowMap()}
           items={items}
           // TODO: not needed without sorting and pagination
           // onChange={onChange}
@@ -148,11 +145,7 @@ export const MonitorListComponent = (props: Props) => {
                 defaultMessage: 'Name',
               }),
               render: (name: string, summary: MonitorSummary) => (
-                <MonitorPageLink
-                  id={summary.monitor_id}
-                  linkParameters={linkParameters}
-                  location={undefined}
-                >
+                <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
                   {name ? name : `Unnamed - ${summary.monitor_id}`}
                 </MonitorPageLink>
               ),
@@ -215,7 +208,7 @@ export const MonitorListComponent = (props: Props) => {
               field: 'monitor_id',
               name: '',
               sortable: true,
-              width: '40px',
+              width: '24px',
               isExpander: true,
               render: (id: string) => {
                 return (
@@ -231,9 +224,9 @@ export const MonitorListComponent = (props: Props) => {
                         },
                       }
                     )}
-                    iconType={drawerIds.find(item => item === id) ? 'arrowUp' : 'arrowDown'}
+                    iconType={drawerIds.includes(id) ? 'arrowUp' : 'arrowDown'}
                     onClick={() => {
-                      if (drawerIds.find(i => id === i)) {
+                      if (drawerIds.includes(id)) {
                         updateDrawerIds(drawerIds.filter(p => p !== id));
                       } else {
                         updateDrawerIds([...drawerIds, id]);
@@ -245,8 +238,8 @@ export const MonitorListComponent = (props: Props) => {
             },
           ]}
         />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
             <OverviewPageLink
               dataTestSubj="xpack.uptime.monitorList.prevButton"

@@ -6,13 +6,14 @@
 
 import React from 'react';
 
-import {
-  SavedObjectFinder,
-  SavedObjectMetaData,
-} from 'ui/saved_objects/components/saved_object_finder';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
+import {
+  SavedObjectFinderUi,
+  SavedObjectMetaData,
+} from '../../../../../../../src/plugins/kibana_react/public/saved_objects'; // eslint-disable-line
 import { start } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public/legacy';
 import { ComponentStrings } from '../../../i18n';
+import { CoreStart } from '../../../../../../../src/core/public';
 
 const { AddEmbeddableFlyout: strings } = ComponentStrings;
 
@@ -20,6 +21,8 @@ export interface Props {
   onClose: () => void;
   onSelect: (id: string, embeddableType: string) => void;
   availableEmbeddables: string[];
+  savedObjects: CoreStart['savedObjects'];
+  uiSettings: CoreStart['uiSettings'];
 }
 
 export class AddEmbeddableFlyout extends React.Component<Props> {
@@ -61,11 +64,13 @@ export class AddEmbeddableFlyout extends React.Component<Props> {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <SavedObjectFinder
+          <SavedObjectFinderUi
             onChoose={this.onAddPanel}
             savedObjectMetaData={availableSavedObjects}
             showFilter={true}
             noItemsMessage={strings.getNoItemsText()}
+            savedObjects={this.props.savedObjects}
+            uiSettings={this.props.uiSettings}
           />
         </EuiFlyoutBody>
       </EuiFlyout>

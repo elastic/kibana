@@ -20,7 +20,7 @@
 import BaseOptimizer from '../base_optimizer';
 import { createBundlesRoute } from '../bundles_route';
 import { DllCompiler } from '../dynamic_dll_plugin';
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
 

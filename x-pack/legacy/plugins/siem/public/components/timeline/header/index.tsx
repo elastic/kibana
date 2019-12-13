@@ -7,7 +7,7 @@
 import { EuiCallOut } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { Sort } from '../body/sort';
 import { DataProviders } from '../data_providers';
@@ -29,7 +29,7 @@ interface Props {
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
   id: string;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   onChangeDataProviderKqlQuery: OnChangeDataProviderKqlQuery;
   onChangeDroppableAndProvider: OnChangeDroppableAndProvider;
   onDataProviderEdited: OnDataProviderEdited;
@@ -47,50 +47,52 @@ const TimelineHeaderContainer = styled.div`
 
 TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
 
-export const TimelineHeader = React.memo<Props>(
-  ({
-    browserFields,
-    id,
-    indexPattern,
-    dataProviders,
-    onChangeDataProviderKqlQuery,
-    onChangeDroppableAndProvider,
-    onDataProviderEdited,
-    onDataProviderRemoved,
-    onToggleDataProviderEnabled,
-    onToggleDataProviderExcluded,
-    show,
-    showCallOutUnauthorizedMsg,
-  }) => (
-    <TimelineHeaderContainer data-test-subj="timelineHeader">
-      {showCallOutUnauthorizedMsg && (
-        <EuiCallOut
-          data-test-subj="timelineCallOutUnauthorized"
-          title={i18n.CALL_OUT_UNAUTHORIZED_MSG}
-          color="warning"
-          iconType="alert"
-          size="s"
-        />
-      )}
-      <DataProviders
-        browserFields={browserFields}
-        id={id}
-        dataProviders={dataProviders}
-        onChangeDroppableAndProvider={onChangeDroppableAndProvider}
-        onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
-        onDataProviderEdited={onDataProviderEdited}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
-        show={show}
+export const TimelineHeaderComponent = ({
+  browserFields,
+  id,
+  indexPattern,
+  dataProviders,
+  onChangeDataProviderKqlQuery,
+  onChangeDroppableAndProvider,
+  onDataProviderEdited,
+  onDataProviderRemoved,
+  onToggleDataProviderEnabled,
+  onToggleDataProviderExcluded,
+  show,
+  showCallOutUnauthorizedMsg,
+}: Props) => (
+  <TimelineHeaderContainer data-test-subj="timelineHeader">
+    {showCallOutUnauthorizedMsg && (
+      <EuiCallOut
+        data-test-subj="timelineCallOutUnauthorized"
+        title={i18n.CALL_OUT_UNAUTHORIZED_MSG}
+        color="warning"
+        iconType="alert"
+        size="s"
       />
-      <StatefulSearchOrFilter
-        browserFields={browserFields}
-        indexPattern={indexPattern}
-        timelineId={id}
-      />
-    </TimelineHeaderContainer>
-  )
+    )}
+    <DataProviders
+      browserFields={browserFields}
+      id={id}
+      dataProviders={dataProviders}
+      onChangeDroppableAndProvider={onChangeDroppableAndProvider}
+      onChangeDataProviderKqlQuery={onChangeDataProviderKqlQuery}
+      onDataProviderEdited={onDataProviderEdited}
+      onDataProviderRemoved={onDataProviderRemoved}
+      onToggleDataProviderEnabled={onToggleDataProviderEnabled}
+      onToggleDataProviderExcluded={onToggleDataProviderExcluded}
+      show={show}
+    />
+    <StatefulSearchOrFilter
+      browserFields={browserFields}
+      indexPattern={indexPattern}
+      timelineId={id}
+    />
+  </TimelineHeaderContainer>
 );
+
+TimelineHeaderComponent.displayName = 'TimelineHeaderComponent';
+
+export const TimelineHeader = React.memo(TimelineHeaderComponent);
 
 TimelineHeader.displayName = 'TimelineHeader';

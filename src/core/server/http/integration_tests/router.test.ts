@@ -18,48 +18,28 @@
  */
 import { Stream } from 'stream';
 import Boom from 'boom';
-
 import supertest from 'supertest';
-import { BehaviorSubject } from 'rxjs';
-import { ByteSizeValue, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { HttpService } from '../http_service';
 
-import { CoreContext } from '../../core_context';
-import { Env } from '../../config';
-import { getEnvOptions } from '../../config/__mocks__/env';
-import { configServiceMock } from '../../config/config_service.mock';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
+import { createHttpServer } from '../test_utils';
 
 let server: HttpService;
 
 let logger: ReturnType<typeof loggingServiceMock.create>;
-let env: Env;
-let coreContext: CoreContext;
-const configService = configServiceMock.create();
 const contextSetup = contextServiceMock.createSetupContract();
 
 const setupDeps = {
   context: contextSetup,
 };
-configService.atPath.mockReturnValue(
-  new BehaviorSubject({
-    hosts: ['localhost'],
-    maxPayload: new ByteSizeValue(1024),
-    autoListen: true,
-    ssl: {
-      enabled: false,
-    },
-  } as any)
-);
 
 beforeEach(() => {
   logger = loggingServiceMock.create();
-  env = Env.createDefault(getEnvOptions());
 
-  coreContext = { coreId: Symbol('core'), env, logger, configService: configService as any };
-  server = new HttpService(coreContext);
+  server = createHttpServer({ logger });
 });
 
 afterEach(async () => {
@@ -160,6 +140,53 @@ describe('Handler', () => {
       error: 'Bad Request',
       message: '[request query.page]: expected value of type [number] but got [string]',
       statusCode: 400,
+    });
+  });
+});
+
+describe('handleLegacyErrors', () => {
+  it('properly convert Boom errors', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get(
+      { path: '/', validate: false },
+      router.handleLegacyErrors((context, req, res) => {
+        throw Boom.notFound();
+      })
+    );
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(404);
+
+    expect(result.body.message).toBe('Not Found');
+  });
+
+  it('returns default error when non-Boom errors are thrown', async () => {
+    const { server: innerServer, createRouter } = await server.setup(setupDeps);
+    const router = createRouter('/');
+
+    router.get(
+      {
+        path: '/',
+        validate: false,
+      },
+      router.handleLegacyErrors((context, req, res) => {
+        throw new Error('Unexpected');
+      })
+    );
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
+
+    expect(result.body).toEqual({
+      error: 'Internal Server Error',
+      message: 'An internal server error occurred.',
+      statusCode: 500,
     });
   });
 });
@@ -302,7 +329,7 @@ describe('Response factory', () => {
       const router = createRouter('/');
 
       router.get({ path: '/', validate: false }, (context, req, res) => {
-        const buffer = new Buffer('abc');
+        const buffer = Buffer.from('abc');
 
         return res.ok({
           body: buffer,

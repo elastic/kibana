@@ -14,10 +14,10 @@ The `apps` folder contains the entry point for the UI code, such as for use in K
 - All components, please use Styled-Components. This also applies to small tweaks to EUI, just use `styled(Component)` and the `attrs` method for always used props. For example:
 
 ```jsx
-export const Toolbar = styled(EuiPanel).attrs({
+export const Toolbar = styled(EuiPanel).attrs(() => ({
   paddingSize: 'none',
   grow: false,
-})`
+}))`
   margin: -2px;
 `;
 ```

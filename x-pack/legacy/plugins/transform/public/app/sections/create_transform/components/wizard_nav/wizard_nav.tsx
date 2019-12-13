@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC } from 'react';
+import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +17,7 @@ interface StepsNavProps {
   next?(): void;
 }
 
-export const WizardNav: SFC<StepsNavProps> = ({
+export const WizardNav: FC<StepsNavProps> = ({
   previous,
   previousActive = true,
   next,

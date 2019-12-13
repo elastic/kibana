@@ -54,7 +54,7 @@ class TagEditPageComponent extends React.PureComponent<
     };
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     this.loadTag();
     this.loadAttachedBeats();
     this.loadConfigBlocks();

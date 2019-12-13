@@ -352,6 +352,13 @@ const rules = {
       },
       missing: '',
     },
+    cumulative_cardinality: {
+      __template: {
+        buckets_path: '',
+      },
+      buckets_path: '',
+      format: '',
+    },
     scripted_metric: {
       __template: {
         init_script: '',

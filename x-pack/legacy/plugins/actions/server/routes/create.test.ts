@@ -19,7 +19,7 @@ it('creates an action with proper parameters', async () => {
     method: 'POST',
     url: '/api/action',
     payload: {
-      description: 'My description',
+      name: 'My name',
       actionTypeId: 'abc',
       config: { foo: true },
       secrets: {},
@@ -27,7 +27,7 @@ it('creates an action with proper parameters', async () => {
   };
   const createResult = {
     id: '1',
-    description: 'My description',
+    name: 'My name',
     actionTypeId: 'abc',
     config: { foo: true },
   };
@@ -38,7 +38,7 @@ it('creates an action with proper parameters', async () => {
   const response = JSON.parse(payload);
   expect(response).toEqual({
     id: '1',
-    description: 'My description',
+    name: 'My name',
     actionTypeId: 'abc',
     config: { foo: true },
   });
@@ -51,7 +51,7 @@ it('creates an action with proper parameters', async () => {
           "config": Object {
             "foo": true,
           },
-          "description": "My description",
+          "name": "My name",
           "secrets": Object {},
         },
       },

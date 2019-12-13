@@ -19,7 +19,7 @@
 
 import { set } from 'lodash';
 // @ts-ignore
-import { createFilter } from '../vis/vis_filters';
+import { createFilter } from '../../../core_plugins/visualizations/public';
 import { FormattedData } from './adapters';
 
 interface Column {

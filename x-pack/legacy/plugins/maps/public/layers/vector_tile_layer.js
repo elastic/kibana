@@ -25,10 +25,6 @@ export class VectorTileLayer extends TileLayer {
 
   static type = LAYER_TYPE.VECTOR_TILE;
 
-  constructor({ layerDescriptor, source, style }) {
-    super({ layerDescriptor, source, style });
-  }
-
   static createDescriptor(options) {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = VectorTileLayer.type;

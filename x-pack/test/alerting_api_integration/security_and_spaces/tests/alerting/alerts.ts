@@ -53,7 +53,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -151,7 +151,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'Test rate limit',
+              name: 'Test rate limit',
               actionTypeId: 'test.rate-limit',
               config: {},
             })
@@ -166,7 +166,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.always-firing',
-                alertTypeParams: {
+                params: {
                   index: ES_TEST_INDEX_NAME,
                   reference: 'create-test-2',
                 },
@@ -258,7 +258,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.authorization',
-                alertTypeParams: {
+                params: {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
                   savedObjectsClientId: '1',
@@ -344,7 +344,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.authorization',
             })
             .expect(200);
@@ -356,7 +356,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.always-firing',
-                alertTypeParams: {
+                params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
                 },
@@ -491,7 +491,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               interval: '1s',
-              alertTypeParams: {
+              params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
                 groupsToScheduleActionsInSeries: ['default', 'other'],
@@ -532,6 +532,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(200);
               // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
               await alertUtils.disable(response.body.id);
@@ -560,7 +561,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             reference,
             overwrites: {
               interval: '1s',
-              alertTypeParams: {
+              params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
                 groupsToScheduleActionsInSeries: ['default', null, 'default'],

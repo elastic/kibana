@@ -4,9 +4,7 @@ exports[`byte metric 1`] = `
 <EuiCard
   description="Heap Total"
   layout="horizontal"
-  textAlign="center"
   title="1.50 GB"
-  titleElement="span"
 />
 `;
 
@@ -14,9 +12,7 @@ exports[`float metric 1`] = `
 <EuiCard
   description="Load"
   layout="horizontal"
-  textAlign="center"
   title="4.05, 3.37, 3.12"
-  titleElement="span"
 />
 `;
 
@@ -24,9 +20,7 @@ exports[`general metric 1`] = `
 <EuiCard
   description="A metric"
   layout="horizontal"
-  textAlign="center"
   title="1.80"
-  titleElement="span"
 />
 `;
 
@@ -34,8 +28,6 @@ exports[`millisecond metric 1`] = `
 <EuiCard
   description="Response Time Max"
   layout="horizontal"
-  textAlign="center"
   title="1234.00 ms"
-  titleElement="span"
 />
 `;

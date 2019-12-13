@@ -17,9 +17,9 @@
  * under the License.
  */
 
-export class StubBrowserStorage {
-  private readonly keys: string[] = [];
-  private readonly values: string[] = [];
+export class StubBrowserStorage implements Storage {
+  private keys: string[] = [];
+  private values: string[] = [];
   private size = 0;
   private sizeLimit = 5000000; // 5mb, minimum browser storage size;
 
@@ -71,6 +71,12 @@ export class StubBrowserStorage {
     }
     this.keys.splice(i, 1);
     this.values.splice(i, 1);
+  }
+
+  public clear() {
+    this.size = 0;
+    this.keys = [];
+    this.values = [];
   }
 
   // -----------------------------------------------------------------------------------------------

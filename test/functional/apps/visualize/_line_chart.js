@@ -30,15 +30,13 @@ export default function ({ getService, getPageObjects }) {
     const vizName1 = 'Visualization LineChart';
 
     const initLineChart = async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
 
       log.debug('navigateToApp visualize');
       await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split chart');
       await PageObjects.visualize.clickBucket('Split chart');
       log.debug('Aggregation = Terms');
@@ -142,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });

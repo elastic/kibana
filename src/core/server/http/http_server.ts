@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { Request, Server } from 'hapi';
+import { Server } from 'hapi';
+import url from 'url';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -25,8 +25,9 @@ import { createServer, getListenerOptions, getServerOptions } from './http_tools
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnPostAuthFormat, OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { adoptToHapiOnPreAuthFormat, OnPreAuthHandler } from './lifecycle/on_pre_auth';
+import { adoptToHapiOnPreResponseFormat, OnPreResponseHandler } from './lifecycle/on_pre_response';
 
-import { ResponseHeaders, IRouter } from './router';
+import { IRouter } from './router';
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -49,6 +50,7 @@ export interface HttpServerSetup {
   registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
+  registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
   isTlsEnabled: HttpServiceSetup['isTlsEnabled'];
   auth: {
     get: GetAuthState;
@@ -96,11 +98,13 @@ export class HttpServer {
 
     const basePathService = new BasePath(config.basePath);
     this.setupBasePathRewrite(config, basePathService);
+    this.setupConditionalCompression(config);
 
     return {
       registerRouter: this.registerRouter.bind(this),
       registerOnPreAuth: this.registerOnPreAuth.bind(this),
       registerOnPostAuth: this.registerOnPostAuth.bind(this),
+      registerOnPreResponse: this.registerOnPreResponse.bind(this),
       createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) =>
         this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
       registerAuth: this.registerAuth.bind(this),
@@ -127,21 +131,26 @@ export class HttpServer {
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
         this.log.debug(`registering route handler for [${route.path}]`);
-        const { authRequired = true, tags } = route.options;
         // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
         const validate = ['head', 'get'].includes(route.method) ? undefined : { payload: true };
+        const { authRequired = true, tags, body = {} } = route.options;
+        const { accepts: allow, maxBytes, output, parse } = body;
         this.server.route({
           handler: route.handler,
           method: route.method,
           path: route.path,
           options: {
-            auth: authRequired ? undefined : false,
+            // Enforcing the comparison with true because plugins could overwrite the auth strategy by doing `options: { authRequired: authStrategy as any }`
+            auth: authRequired === true ? undefined : false,
             tags: tags ? Array.from(tags) : undefined,
             // TODO: This 'validate' section can be removed once the legacy platform is completely removed.
             // We are telling Hapi that NP routes can accept any payload, so that it can bypass the default
             // validation applied in ./http_tools#getServerOptions
             // (All NP routes are already required to specify their own validation in order to access the payload)
             validate,
+            payload: [allow, maxBytes, output, parse].some(v => typeof v !== 'undefined')
+              ? { allow, maxBytes, output, parse }
+              : undefined,
           },
         });
       }
@@ -182,6 +191,33 @@ export class HttpServer {
     });
   }
 
+  private setupConditionalCompression(config: HttpConfig) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    const { enabled, referrerWhitelist: list } = config.compression;
+    if (!enabled) {
+      this.log.debug('HTTP compression is disabled');
+      this.server.ext('onRequest', (request, h) => {
+        request.info.acceptEncoding = '';
+        return h.continue;
+      });
+    } else if (list) {
+      this.log.debug(`HTTP compression is only enabled for any referrer in the following: ${list}`);
+      this.server.ext('onRequest', (request, h) => {
+        const { referrer } = request.info;
+        if (referrer !== '') {
+          const { hostname } = url.parse(referrer);
+          if (!hostname || !list.includes(hostname)) {
+            request.info.acceptEncoding = '';
+          }
+        }
+        return h.continue;
+      });
+    }
+  }
+
   private registerOnPostAuth(fn: OnPostAuthHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
@@ -196,6 +232,14 @@ export class HttpServer {
     }
 
     this.server.ext('onRequest', adoptToHapiOnPreAuthFormat(fn, this.log));
+  }
+
+  private registerOnPreResponse(fn: OnPreResponseHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    this.server.ext('onPreResponse', adoptToHapiOnPreResponseFormat(fn, this.log));
   }
 
   private async createCookieSessionStorageFactory<T>(
@@ -255,39 +299,9 @@ export class HttpServer {
     // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
     this.server.auth.default('session');
 
-    this.server.ext('onPreResponse', (request, t) => {
+    this.registerOnPreResponse((request, preResponseInfo, t) => {
       const authResponseHeaders = this.authResponseHeaders.get(request);
-      this.extendResponseWithHeaders(request, authResponseHeaders);
-      return t.continue;
-    });
-  }
-
-  private extendResponseWithHeaders(request: Request, headers?: ResponseHeaders) {
-    const response = request.response;
-    if (!headers || !response) return;
-
-    if (response instanceof Error) {
-      this.findHeadersIntersection(response.output.headers, headers);
-      // hapi wraps all error response in Boom object internally
-      response.output.headers = {
-        ...response.output.headers,
-        ...(headers as any), // hapi types don't specify string[] as valid value
-      };
-    } else {
-      for (const [headerName, headerValue] of Object.entries(headers)) {
-        this.findHeadersIntersection(response.headers, headers);
-        response.header(headerName, headerValue as any); // hapi types don't specify string[] as valid value
-      }
-    }
-  }
-
-  // NOTE: responseHeaders contains not a full list of response headers, but only explicitly set on a response object.
-  // any headers added by hapi internally, like `content-type`, `content-length`, etc. do not present here.
-  private findHeadersIntersection(responseHeaders: ResponseHeaders, headers: ResponseHeaders) {
-    Object.keys(headers).forEach(headerName => {
-      if (responseHeaders[headerName] !== undefined) {
-        this.log.warn(`Server rewrites a response header [${headerName}].`);
-      }
+      return t.next({ headers: authResponseHeaders });
     });
   }
 }

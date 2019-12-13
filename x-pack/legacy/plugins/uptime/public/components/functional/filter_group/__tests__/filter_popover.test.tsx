@@ -13,7 +13,7 @@ import { EuiFilterSelectItem } from '@elastic/eui';
 describe('FilterPopover component', () => {
   let props: FilterPopoverProps;
   let setState: jest.Mock<any, any>;
-  let useStateSpy: jest.SpyInstance<[unknown, React.Dispatch<unknown>], [unknown]>;
+  let useStateSpy: jest.SpyInstance<[unknown, React.Dispatch<unknown>], unknown[]>;
 
   beforeEach(() => {
     props = {

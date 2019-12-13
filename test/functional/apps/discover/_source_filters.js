@@ -27,8 +27,6 @@ export default function ({ getService, getPageObjects }) {
 
   describe('source filters', function describeIndexTests() {
     before(async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
 
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
@@ -44,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
 
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       //After hiding the time picker, we need to wait for
       //the refresh button to hide before clicking the share button

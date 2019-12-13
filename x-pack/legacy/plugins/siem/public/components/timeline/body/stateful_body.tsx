@@ -30,7 +30,9 @@ import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { timelineActions, appActions } from '../../../store/actions';
-import { TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults, TimelineModel } from '../../../store/timeline/model';
+import { plainRowRenderer } from './renderers/plain_row_renderer';
+import { useTimelineTypeContext } from '../timeline_context';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -107,6 +109,8 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     updateNote,
     updateSort,
   }) => {
+    const timelineTypeContext = useTimelineTypeContext();
+
     const getNotesByIds = useCallback(
       (noteIds: string[]): Note[] => appSelectors.getNotes(notesById, noteIds),
       [notesById]
@@ -167,7 +171,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onUpdateColumns={onUpdateColumns}
         pinnedEventIds={pinnedEventIds}
         range={range!}
-        rowRenderers={rowRenderers}
+        rowRenderers={timelineTypeContext.showRowRenderers ? rowRenderers : [plainRowRenderer]}
         sort={sort}
         toggleColumn={toggleColumn}
         updateNote={onUpdateNote}
@@ -202,7 +206,7 @@ const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();
   const mapStateToProps = (state: State, { browserFields, id }: OwnProps) => {
-    const timeline: TimelineModel = getTimeline(state, id);
+    const timeline: TimelineModel = getTimeline(state, id) ?? timelineDefaults;
     const { columns, eventIdToNoteIds, pinnedEventIds } = timeline;
 
     return {

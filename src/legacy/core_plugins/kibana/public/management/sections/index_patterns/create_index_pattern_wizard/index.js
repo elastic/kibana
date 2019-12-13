@@ -20,8 +20,8 @@
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import uiRoutes from 'ui/routes';
 import angularTemplate from './angular_template.html';
-import 'ui/index_patterns';
-import { IndexPatternCreationFactory } from 'ui/management/index_pattern_creation';
+import { npStart } from 'ui/new_platform';
+import { setup as managementSetup } from '../../../../../../management/public/legacy';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 
 import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from './render';
@@ -35,12 +35,13 @@ uiRoutes.when('/management/kibana/index_pattern', {
     const Private = $injector.get('Private');
     $scope.$$postDigest(() => {
       const $routeParams = $injector.get('$routeParams');
-      const indexPatternCreationProvider = Private(IndexPatternCreationFactory)($routeParams.type);
-      const indexPatternCreationType = indexPatternCreationProvider.getType();
+      const indexPatternCreationType = managementSetup.indexPattern.creation.getType(
+        $routeParams.type
+      );
       const services = {
         config: $injector.get('config'),
         es: $injector.get('es'),
-        indexPatterns: $injector.get('indexPatterns'),
+        indexPatterns: npStart.plugins.data.indexPatterns,
         $http: $injector.get('$http'),
         savedObjectsClient: Private(SavedObjectsClientProvider),
         indexPatternCreationType,
@@ -52,12 +53,9 @@ uiRoutes.when('/management/kibana/index_pattern', {
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;
 
-      renderCreateIndexPatternWizard(
-        initialQuery,
-        services
-      );
+      renderCreateIndexPatternWizard(initialQuery, services);
     });
 
     $scope.$on('$destroy', destroyCreateIndexPatternWizard);
-  }
+  },
 });

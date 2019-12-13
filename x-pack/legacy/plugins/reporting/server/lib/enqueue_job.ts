@@ -7,11 +7,15 @@
 import { get } from 'lodash';
 // @ts-ignore
 import { events as esqueueEvents } from './esqueue';
-import { oncePerServer } from './once_per_server';
 import {
+  EnqueueJobFn,
+  ESQueueCreateJobFn,
+  ImmediateCreateJobFn,
+  Job,
   ServerFacade,
   RequestFacade,
   Logger,
+  ExportTypesRegistry,
   CaptureConfig,
   QueueConfig,
   ConditionalHeaders,
@@ -24,25 +28,40 @@ interface ConfirmedJob {
   _primary_term: number;
 }
 
-function enqueueJobFn(server: ServerFacade) {
+interface EnqueueJobFactoryOpts {
+  exportTypesRegistry: ExportTypesRegistry;
+  esqueue: any;
+}
+
+export function enqueueJobFactory(
+  server: ServerFacade,
+  { exportTypesRegistry, esqueue }: EnqueueJobFactoryOpts
+): EnqueueJobFn {
   const config = server.config();
   const captureConfig: CaptureConfig = config.get('xpack.reporting.capture');
   const browserType = captureConfig.browser.type;
   const maxAttempts = captureConfig.maxAttempts;
   const queueConfig: QueueConfig = config.get('xpack.reporting.queue');
-  const { exportTypesRegistry, queue: jobQueue } = server.plugins.reporting!;
 
-  return async function enqueueJob(
+  return async function enqueueJob<JobParamsType>(
     parentLogger: Logger,
     exportTypeId: string,
-    jobParams: object,
+    jobParams: JobParamsType,
     user: string,
-    headers: ConditionalHeaders,
+    headers: ConditionalHeaders['headers'],
     request: RequestFacade
-  ) {
+  ): Promise<Job> {
+    type CreateJobFn = ESQueueCreateJobFn<JobParamsType> | ImmediateCreateJobFn<JobParamsType>;
+
     const logger = parentLogger.clone(['queue-job']);
     const exportType = exportTypesRegistry.getById(exportTypeId);
-    const createJob = exportType.createJobFactory(server);
+
+    if (exportType == null) {
+      throw new Error(`Export type ${exportTypeId} does not exist in the registry!`);
+    }
+
+    // TODO: the createJobFn should be unwrapped in the register method of the export types registry
+    const createJob = exportType.createJobFactory(server) as CreateJobFn;
     const payload = await createJob(jobParams, headers, request);
 
     const options = {
@@ -53,7 +72,7 @@ function enqueueJobFn(server: ServerFacade) {
     };
 
     return new Promise((resolve, reject) => {
-      const job = jobQueue.addJob(exportType.jobType, payload, options);
+      const job = esqueue.addJob(exportType.jobType, payload, options);
 
       job.on(esqueueEvents.EVENT_JOB_CREATED, (createdJob: ConfirmedJob) => {
         if (createdJob.id === job.id) {
@@ -65,5 +84,3 @@ function enqueueJobFn(server: ServerFacade) {
     });
   };
 }
-
-export const enqueueJobFactory = oncePerServer(enqueueJobFn);

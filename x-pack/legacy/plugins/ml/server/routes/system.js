@@ -21,10 +21,10 @@ import { isSecurityDisabled } from '../lib/security_utils';
 export function systemRoutes({
   commonRouteConfig,
   elasticsearchPlugin,
-  config,
   route,
   xpackMainPlugin,
-  spacesPlugin
+  spacesPlugin,
+  cloud,
 }) {
   const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
 
@@ -174,8 +174,7 @@ export function systemRoutes({
 
       try {
         const info = await callWithRequest('ml.info');
-        const cloudIdKey = 'xpack.cloud.id';
-        const cloudId = config.has(cloudIdKey) && config.get(cloudIdKey);
+        const cloudId = cloud && cloud.cloudId;
         return { ...info, cloudId };
       } catch (error) {
         return wrapError(error);

@@ -48,12 +48,10 @@ export function createMockDatasource(): DatasourceMock {
     getOperationForColumnId: jest.fn(),
     renderDimensionPanel: jest.fn(),
     renderLayerPanel: jest.fn(),
-    removeColumnInTableSpec: jest.fn(),
-    moveColumnTo: jest.fn(),
-    duplicateColumn: jest.fn(),
   };
 
   return {
+    id: 'mockindexpattern',
     getDatasourceSuggestionsForField: jest.fn((_state, item) => []),
     getDatasourceSuggestionsFromCurrentState: jest.fn(_state => []),
     getPersistableState: jest.fn(),

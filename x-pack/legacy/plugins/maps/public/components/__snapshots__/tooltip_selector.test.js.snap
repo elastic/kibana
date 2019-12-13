@@ -2,20 +2,6 @@
 
 exports[`TooltipSelector should render component 1`] = `
 <div>
-  <EuiTitle
-    size="xxs"
-  >
-    <h6>
-      <FormattedMessage
-        defaultMessage="Fields to display in tooltip"
-        id="xpack.maps.tooltipSelectorLabel"
-        values={Object {}}
-      />
-    </h6>
-  </EuiTitle>
-  <EuiSpacer
-    size="xs"
-  />
   <EuiDragDropContext
     onDragEnd={[Function]}
   >
@@ -41,6 +27,7 @@ exports[`TooltipSelector should render component 1`] = `
             "type": "string",
           },
           Object {
+            "label": "foobar_label",
             "name": "iso3",
             "type": "string",
           },
@@ -50,7 +37,9 @@ exports[`TooltipSelector should render component 1`] = `
       selectedFields={
         Array [
           Object {
+            "label": "foobar_label",
             "name": "iso2",
+            "type": "foobar_type",
           },
         ]
       }

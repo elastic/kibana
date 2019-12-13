@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { uniq } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { DraggableBadge } from '../../draggables';
 
@@ -19,7 +18,7 @@ export const USER_NAME_FIELD_NAME = 'user.name';
  * - `user.name`
  * - `process.name`
  */
-export const UserProcess = pure<{
+export const UserProcess = React.memo<{
   contextId: string;
   eventId: string;
   processName?: string[] | null;

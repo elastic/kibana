@@ -8,5 +8,4 @@ import * as logPositionActions from './actions';
 import * as logPositionSelectors from './selectors';
 
 export { logPositionActions, logPositionSelectors };
-export * from './epic';
 export * from './reducer';

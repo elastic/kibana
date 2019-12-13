@@ -6,6 +6,7 @@
 import { IResolvers, makeExecutableSchema } from 'graphql-tools';
 
 import { schemas } from './graphql';
+import { createAnomaliesResolvers } from './graphql/anomalies';
 import { createAuthenticationsResolvers } from './graphql/authentications';
 import { createScalarToStringArrayValueResolvers } from './graphql/ecs';
 import { createEsValueResolvers, createEventsResolvers } from './graphql/events';
@@ -32,6 +33,7 @@ import { createTlsResolvers } from './graphql/tls';
 export const initServer = (libs: AppBackendLibs) => {
   const schema = makeExecutableSchema({
     resolvers: [
+      createAnomaliesResolvers(libs) as IResolvers,
       createAuthenticationsResolvers(libs) as IResolvers,
       createEsValueResolvers() as IResolvers,
       createEventsResolvers(libs) as IResolvers,

@@ -45,3 +45,15 @@ This page was deleted. See <<xpack-graph>> and <<xpack-ml>>.
 
 Using the `kibana_dashboard_only_user` role is deprecated. 
 Use <<kibana-feature-privileges,feature privileges>> instead.
+
+[role="exclude",id="pdf-layout-modes"]
+== PDF layout modes
+
+This page has moved. Please see <<reporting-getting-started>>.
+
+[role="exclude",id="xpack-reporting"]
+== Reporting from Kibana
+
+This page has moved. Please see <<reporting-getting-started>>.
+
+

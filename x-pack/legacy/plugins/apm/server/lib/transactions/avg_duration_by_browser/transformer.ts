@@ -14,8 +14,6 @@ export function transformer({
   response: ESResponse;
 }): AvgDurationByBrowserAPIResponse {
   const allUserAgentKeys = new Set<string>(
-    // TODO(TS-3.7-ESLINT)
-    // eslint-disable-next-line @typescript-eslint/camelcase
     (response.aggregations?.user_agent_keys?.buckets ?? []).map(({ key }) =>
       key.toString()
     )

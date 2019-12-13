@@ -20,22 +20,22 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { toastNotifications } from '../../../kibana_services';
+import { getServices, SearchSource } from '../../../kibana_services';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';
-import { QueryParameterActionsProvider } from '../query_parameters';
+import { getQueryParameterActions } from '../query_parameters';
 import { FAILURE_REASONS, LOADING_STATUS } from './constants';
 import { MarkdownSimple } from '../../../../../../kibana_react/public';
 
-export function QueryActionsProvider(Private, Promise) {
-  const fetchAnchor = Private(fetchAnchorProvider);
-  const { fetchSurroundingDocs } = Private(fetchContextProvider);
+export function QueryActionsProvider(Promise) {
+  const fetchAnchor = fetchAnchorProvider(getServices().indexPatterns, new SearchSource());
+  const { fetchSurroundingDocs } = fetchContextProvider(getServices().indexPatterns);
   const {
     setPredecessorCount,
     setQueryParameters,
     setSuccessorCount,
-  } = Private(QueryParameterActionsProvider);
+  } = getQueryParameterActions();
 
   const setFailedStatus = (state) => (subject, details = {}) => (
     state.loadingStatus[subject] = {
@@ -79,7 +79,7 @@ export function QueryActionsProvider(Private, Promise) {
         },
         (error) => {
           setFailedStatus(state)('anchor', { error });
-          toastNotifications.addDanger({
+          getServices().toastNotifications.addDanger({
             title: i18n.translate('kbn.context.unableToLoadAnchorDocumentDescription', {
               defaultMessage: 'Unable to load the anchor document'
             }),
@@ -128,7 +128,7 @@ export function QueryActionsProvider(Private, Promise) {
         },
         (error) => {
           setFailedStatus(state)(type, { error });
-          toastNotifications.addDanger({
+          getServices().toastNotifications.addDanger({
             title: i18n.translate('kbn.context.unableToLoadDocumentDescription', {
               defaultMessage: 'Unable to load documents'
             }),

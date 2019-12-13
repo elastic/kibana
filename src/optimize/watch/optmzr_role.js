@@ -30,7 +30,7 @@ export default async (kbnServer, kibanaHapiServer, config) => {
   const watchOptimizer = new WatchOptimizer({
     logWithMetadata,
     uiBundles: kbnServer.uiBundles,
-    discoveredPlugins: kbnServer.newPlatform.__internals.uiPlugins.internal,
+    newPlatformPluginInfo: kbnServer.newPlatform.__internals.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
     workers: config.get('optimize.workers'),

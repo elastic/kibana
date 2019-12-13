@@ -39,12 +39,12 @@ type ClusterDeleteType = (
   options?: CallClusterOptions
 ) => Promise<DeleteDocumentByQueryResponse>;
 
-export function initializeLensTelemetry(core: CoreSetup, { server }: { server: Server }) {
-  registerLensTelemetryTask(core, { server });
+export function initializeLensTelemetry(core: CoreSetup, server: Server) {
+  registerLensTelemetryTask(core, server);
   scheduleTasks(server);
 }
 
-function registerLensTelemetryTask(core: CoreSetup, { server }: { server: Server }) {
+function registerLensTelemetryTask(core: CoreSetup, server: Server) {
   const taskManager = server.plugins.task_manager;
 
   if (!taskManager) {

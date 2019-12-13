@@ -756,19 +756,23 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         await testSubjects.click('saveAsNewCheckbox');
       }
       log.debug('Click Save Visualization button');
+
       await testSubjects.click('confirmSaveSavedObjectButton');
 
-      // if we wait for this, the success toast message could be gone :-()
-      // wait for save to complete before completion
-      // await PageObjects.header.waitUntilLoadingHasFinished();
+      // Confirm that the Visualization has actually been saved
+      await testSubjects.existOrFail('saveVisualizationSuccess');
+      const message =  await PageObjects.common.closeToast();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.common.waitForSaveModalToClose();
+
+      return message;
     }
 
     async saveVisualizationExpectSuccess(vizName, { saveAsNew = false } = {}) {
-      await this.saveVisualization(vizName, { saveAsNew });
-      const successToast = await testSubjects.exists('saveVisualizationSuccess', {
-        timeout: 2 * defaultFindTimeout
-      });
-      expect(successToast).to.be(true);
+      const saveMessage = await this.saveVisualization(vizName, { saveAsNew });
+      if (!saveMessage) {
+        throw new Error(`Expected saveVisualization to respond with the saveMessage from the toast, got ${saveMessage}`);
+      }
     }
 
     async saveVisualizationExpectSuccessAndBreadcrumb(vizName, { saveAsNew = false } = {}) {
@@ -1186,8 +1190,13 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getLegendEntries() {
-      const legendEntries = await find.allByCssSelector('.visLegend__valueTitle', defaultFindTimeout * 2);
-      return await Promise.all(legendEntries.map(async chart => await chart.getAttribute('data-label')));
+      const legendEntries = await find.allByCssSelector(
+        '.visLegend__button',
+        defaultFindTimeout * 2
+      );
+      return await Promise.all(
+        legendEntries.map(async chart => await chart.getAttribute('data-label'))
+      );
     }
 
     async openLegendOptionColors(name) {
@@ -1217,7 +1226,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async toggleLegend(show = true) {
       await retry.try(async () => {
-        const isVisible = find.byCssSelector('vislib-legend');
+        const isVisible = find.byCssSelector('.visLegend');
         if ((show && !isVisible) || (!show && isVisible)) {
           await testSubjects.click('vislibToggleLegend');
         }
@@ -1227,7 +1236,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async filterLegend(name) {
       await this.toggleLegend();
       await testSubjects.click(`legend-${name}`);
-      await testSubjects.click(`legend-${name}-filterIn`);
+      const filters = await testSubjects.find(`legend-${name}-filters`);
+      const [filterIn] = await filters.findAllByCssSelector(`input`);
+      await filterIn.click();
       await this.waitForVisualizationRenderingStabilized();
     }
 

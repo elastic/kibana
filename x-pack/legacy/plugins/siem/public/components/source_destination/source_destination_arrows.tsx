@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { ArrowBody, ArrowHead } from '../arrows';
@@ -49,7 +48,7 @@ Data.displayName = 'Data';
 /**
  * Visualizes the communication from a source as an arrow with draggable badges
  */
-const SourceArrow = pure<{
+const SourceArrow = React.memo<{
   contextId: string;
   eventId: string;
   sourceBytes: string | undefined;
@@ -123,7 +122,7 @@ SourceArrow.displayName = 'SourceArrow';
  * Visualizes the communication from a destination as an arrow with draggable
  * badges
  */
-const DestinationArrow = pure<{
+const DestinationArrow = React.memo<{
   contextId: string;
   eventId: string;
   destinationBytes: string | undefined;
@@ -199,7 +198,7 @@ DestinationArrow.displayName = 'DestinationArrow';
  * Visualizes the communication between a source and a destination using arrows
  * that grow in thickness based on the percentage of bytes transferred, and stats badges
  */
-export const SourceDestinationArrows = pure<{
+export const SourceDestinationArrows = React.memo<{
   contextId: string;
   destinationBytes?: string[] | null;
   destinationPackets?: string[] | null;

@@ -3,15 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Subject, Subscription } from 'rxjs';
 
-import { Subject, Subscription, merge } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
-
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 
 import { ILicense, LicensingPluginSetup } from '../common/types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
+import { mountExpiredBanner } from './expired_banner';
 
 export const licensingSessionStorageKey = 'xpack.licensing';
 
@@ -30,9 +29,11 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
    * A function to execute once the plugin's HTTP interceptor needs to stop listening.
    */
   private removeInterceptor?: () => void;
-  private licenseFetchSubscription?: Subscription;
+  private internalSubscription?: Subscription;
+  private isLicenseExpirationBannerShown? = false;
 
-  private infoEndpoint = '/api/xpack/v1/info';
+  private readonly infoEndpoint = '/api/licensing/info';
+  private coreStart?: CoreStart;
   private prevSignature?: string;
 
   constructor(
@@ -64,35 +65,37 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   }
 
   public setup(core: CoreSetup) {
-    const manualRefresh$ = new Subject();
     const signatureUpdated$ = new Subject();
-    const refresh$ = merge(signatureUpdated$, manualRefresh$).pipe(takeUntil(this.stop$));
 
-    const savedLicense = this.getSaved();
-    const { update$, fetchSubscription } = createLicenseUpdate(
-      refresh$,
+    const { license$, refreshManually } = createLicenseUpdate(
+      signatureUpdated$,
+      this.stop$,
       () => this.fetchLicense(core),
-      savedLicense
+      this.getSaved()
     );
-    this.licenseFetchSubscription = fetchSubscription;
 
-    const license$ = update$.pipe(
-      tap(license => {
-        if (license.error) {
-          this.prevSignature = undefined;
-          // Prevent reusing stale license if the fetch operation fails
-          this.removeSaved();
-        } else {
-          this.prevSignature = license.signature;
-          this.save(license);
-        }
-      })
-    );
+    this.internalSubscription = license$.subscribe(license => {
+      if (license.isAvailable) {
+        this.prevSignature = license.signature;
+        this.save(license);
+      } else {
+        this.prevSignature = undefined;
+        // Prevent reusing stale license if the fetch operation fails
+        this.removeSaved();
+      }
+
+      if (license.status === 'expired' && !this.isLicenseExpirationBannerShown && this.coreStart) {
+        this.isLicenseExpirationBannerShown = true;
+        this.showExpiredBanner(license);
+      }
+    });
 
     this.removeInterceptor = core.http.intercept({
       response: async httpResponse => {
+        // we don't track license as anon users do not have one.
+        if (core.http.anonymousPaths.isAnonymous(window.location.pathname)) return httpResponse;
         if (httpResponse.response) {
-          const signatureHeader = httpResponse.response.headers.get('kbn-xpack-sig');
+          const signatureHeader = httpResponse.response.headers.get('kbn-license-sig');
           if (this.prevSignature !== signatureHeader) {
             if (!httpResponse.request!.url.includes(this.infoEndpoint)) {
               signatureUpdated$.next();
@@ -104,14 +107,14 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     });
 
     return {
-      refresh: () => {
-        manualRefresh$.next();
-      },
+      refresh: refreshManually,
       license$,
     };
   }
 
-  public async start() {}
+  public async start(core: CoreStart) {
+    this.coreStart = core;
+  }
 
   public stop() {
     this.stop$.next();
@@ -120,15 +123,19 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
     if (this.removeInterceptor !== undefined) {
       this.removeInterceptor();
     }
-    if (this.licenseFetchSubscription !== undefined) {
-      this.licenseFetchSubscription.unsubscribe();
-      this.licenseFetchSubscription = undefined;
+    if (this.internalSubscription !== undefined) {
+      this.internalSubscription.unsubscribe();
+      this.internalSubscription = undefined;
     }
   }
 
   private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
     try {
-      const response = await core.http.get(this.infoEndpoint);
+      const response = await core.http.get(this.infoEndpoint, {
+        headers: {
+          'kbn-system-api': 'true',
+        },
+      });
       return new License({
         license: response.license,
         features: response.features,
@@ -138,4 +145,16 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
       return new License({ error: error.message, signature: '' });
     }
   };
+
+  private showExpiredBanner(license: ILicense) {
+    const uploadUrl = this.coreStart!.http.basePath.prepend(
+      '/app/kibana#/management/elasticsearch/license_management/upload_license'
+    );
+    this.coreStart!.overlays.banners.add(
+      mountExpiredBanner({
+        type: license.type!,
+        uploadUrl,
+      })
+    );
+  }
 }

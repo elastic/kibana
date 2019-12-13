@@ -21,7 +21,7 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from '../../../../core/public';
 import { LegacyDependenciesPlugin, LegacyDependenciesPluginSetup } from './shim';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
@@ -32,7 +32,7 @@ import { createVegaTypeDefinition } from './vega_type';
 
 /** @internal */
 export interface VegaVisualizationDependencies extends LegacyDependenciesPluginSetup {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 /** @internal */
@@ -61,7 +61,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
 
-    visualizations.types.registerVisualization(() =>
+    visualizations.types.createBaseVisualization(
       createVegaTypeDefinition(visualizationDependencies)
     );
   }

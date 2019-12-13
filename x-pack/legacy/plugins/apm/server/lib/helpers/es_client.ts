@@ -11,14 +11,17 @@ import {
   IndicesDeleteParams,
   IndicesCreateParams
 } from 'elasticsearch';
-import { Legacy } from 'kibana';
-import { cloneDeep, has, isString, set, pick } from 'lodash';
+import { merge } from 'lodash';
+import { cloneDeep, isString } from 'lodash';
+import { KibanaRequest } from 'src/core/server';
 import { OBSERVER_VERSION_MAJOR } from '../../../common/elasticsearch_fieldnames';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import {
   ESSearchResponse,
   ESSearchRequest
 } from '../../../typings/elasticsearch';
+import { APMRequestHandlerContext } from '../../routes/typings';
+import { pickKeys } from '../../../public/utils/pickKeys';
+import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 
 // `type` was deprecated in 7.0
 export type APMIndexDocumentParams<T> = Omit<IndexDocumentParams<T>, 'type'>;
@@ -38,7 +41,7 @@ export function isApmIndex(
 
 function addFilterForLegacyData(
   apmIndices: string[],
-  params: SearchParams,
+  params: ESSearchRequest,
   { includeLegacyData = false } = {}
 ): SearchParams {
   // search across all data (including data)
@@ -46,10 +49,18 @@ function addFilterForLegacyData(
     return params;
   }
 
-  const nextParams = cloneDeep(params);
-  if (!has(nextParams, 'body.query.bool.filter')) {
-    set(nextParams, 'body.query.bool.filter', []);
-  }
+  const nextParams = merge(
+    {
+      body: {
+        query: {
+          bool: {
+            filter: []
+          }
+        }
+      }
+    },
+    cloneDeep(params)
+  );
 
   // add filter for omitting pre-7.x data
   nextParams.body.query.bool.filter.push({
@@ -61,30 +72,30 @@ function addFilterForLegacyData(
 
 // add additional params for search (aka: read) requests
 async function getParamsForSearchRequest(
-  req: Legacy.Request,
-  params: SearchParams,
+  context: APMRequestHandlerContext,
+  params: ESSearchRequest,
   apmOptions?: APMOptions
 ) {
-  const uiSettings = req.getUiSettingsService();
-  const { server } = req;
+  const { uiSettings } = context.core;
   const [indices, includeFrozen] = await Promise.all([
     getApmIndices({
-      config: server.config(),
-      savedObjectsClient: server.savedObjects.getScopedSavedObjectsClient(req)
+      savedObjectsClient: context.core.savedObjects.client,
+      config: context.config
     }),
-    uiSettings.get('search:includeFrozen')
+    uiSettings.client.get('search:includeFrozen')
   ]);
 
   // Get indices for legacy data filter (only those which apply)
-  const apmIndices: string[] = Object.values(
-    pick(indices, [
+  const apmIndices = Object.values(
+    pickKeys(
+      indices,
       'apm_oss.sourcemapIndices',
       'apm_oss.errorIndices',
       'apm_oss.onboardingIndices',
       'apm_oss.spanIndices',
       'apm_oss.transactionIndices',
       'apm_oss.metricsIndices'
-    ])
+    )
   );
   return {
     ...addFilterForLegacyData(apmIndices, params, apmOptions), // filter out pre-7.0 data
@@ -103,15 +114,18 @@ interface ClientCreateOptions {
 export type ESClient = ReturnType<typeof getESClient>;
 
 export function getESClient(
-  req: Legacy.Request,
+  context: APMRequestHandlerContext,
+  request: KibanaRequest,
   { clientAsInternalUser = false }: ClientCreateOptions = {}
 ) {
-  const cluster = req.server.plugins.elasticsearch.getCluster('data');
-  const query = req.query as Record<string, unknown>;
+  const {
+    callAsCurrentUser,
+    callAsInternalUser
+  } = context.core.elasticsearch.dataClient;
 
   const callMethod = clientAsInternalUser
-    ? cluster.callWithInternalUser.bind(cluster)
-    : cluster.callWithRequest.bind(cluster, req);
+    ? callAsInternalUser
+    : callAsCurrentUser;
 
   return {
     search: async <
@@ -122,17 +136,15 @@ export function getESClient(
       apmOptions?: APMOptions
     ): Promise<ESSearchResponse<TDocument, TSearchRequest>> => {
       const nextParams = await getParamsForSearchRequest(
-        req,
+        context,
         params,
         apmOptions
       );
 
-      if (query._debug) {
+      if (context.params.query._debug) {
         console.log(`--DEBUG ES QUERY--`);
         console.log(
-          `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
-            query
-          )}`
+          `${request.url.pathname} ${JSON.stringify(context.params.query)}`
         );
         console.log(`GET ${nextParams.index}/_search`);
         console.log(JSON.stringify(nextParams.body, null, 4));

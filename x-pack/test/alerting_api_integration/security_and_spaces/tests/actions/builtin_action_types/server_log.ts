@@ -23,7 +23,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         .post('/api/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'A server.log action',
+          name: 'A server.log action',
           actionTypeId: '.server-log',
         })
         .expect(200);
@@ -31,7 +31,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
       serverLogActionId = createdAction.id;
       expect(createdAction).to.eql({
         id: createdAction.id,
-        description: 'A server.log action',
+        name: 'A server.log action',
         actionTypeId: '.server-log',
         config: {},
       });
@@ -44,7 +44,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
 
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
-        description: 'A server.log action',
+        name: 'A server.log action',
         actionTypeId: '.server-log',
         config: {},
       });

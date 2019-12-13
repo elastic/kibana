@@ -27,7 +27,7 @@
 
 import { Vis } from 'ui/vis';
 import { uiModules } from 'ui/modules';
-import { updateOldState } from 'ui/vis/vis_update_state';
+import { updateOldState } from '../../../../visualizations/public';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
@@ -38,7 +38,7 @@ import {
 
 uiModules
   .get('app/visualize')
-  .factory('SavedVis', function (Promise, savedSearches, Private) {
+  .factory('SavedVis', function (savedSearches, Private) {
     const SavedObject = Private(SavedObjectProvider);
     createLegacyClass(SavedVis).inherits(SavedObject);
     function SavedVis(opts) {
@@ -95,18 +95,15 @@ uiModules
       return `/app/kibana#${VisualizeConstants.EDIT_PATH}/${this.id}`;
     };
 
-    SavedVis.prototype._afterEsResp = function () {
+    SavedVis.prototype._afterEsResp = async function () {
       const self = this;
 
-      return self._getLinkedSavedSearch()
-        .then(function () {
-          self.searchSource.setField('size', 0);
-
-          return self.vis ? self._updateVis() : self._createVis();
-        });
+      await self._getLinkedSavedSearch();
+      self.searchSource.setField('size', 0);
+      return self.vis ? self._updateVis() : self._createVis();
     };
 
-    SavedVis.prototype._getLinkedSavedSearch = Promise.method(function () {
+    SavedVis.prototype._getLinkedSavedSearch = async function () {
       const self = this;
       const linkedSearch = !!self.savedSearchId;
       const current = self.savedSearch;
@@ -122,13 +119,10 @@ uiModules
       }
 
       if (linkedSearch) {
-        return savedSearches.get(self.savedSearchId)
-          .then(function (savedSearch) {
-            self.savedSearch = savedSearch;
-            self.searchSource.setParent(self.savedSearch.searchSource);
-          });
+        self.savedSearch = await savedSearches.get(self.savedSearchId);
+        self.searchSource.setParent(self.savedSearch.searchSource);
       }
-    });
+    };
 
     SavedVis.prototype._createVis = function () {
       const self = this;

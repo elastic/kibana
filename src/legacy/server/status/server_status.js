@@ -21,7 +21,8 @@ import _ from 'lodash';
 
 import * as states from './states';
 import Status from './status';
-import { pkg } from '../../utils/package_json';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { pkg } from '../../../core/server/utils';
 
 export default class ServerStatus {
   constructor(server) {

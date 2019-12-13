@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HapiServer } from '../../../';
 import { registerVisualizationsCollector } from './visualizations/register_usage_collector';
+import { OssTelemetrySetupDependencies } from '../../plugin';
 
-export function registerCollectors(server: HapiServer) {
-  registerVisualizationsCollector(server);
+export function registerCollectors(deps: OssTelemetrySetupDependencies) {
+  registerVisualizationsCollector(deps.usageCollection, deps.taskManager);
 }

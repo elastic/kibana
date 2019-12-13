@@ -37,7 +37,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -110,7 +110,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'Test rate limit',
+          name: 'Test rate limit',
           actionTypeId: 'test.rate-limit',
           config: {},
         })
@@ -125,7 +125,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
           getTestAlertData({
             interval: '1m',
             alertTypeId: 'test.always-firing',
-            alertTypeParams: {
+            params: {
               index: ES_TEST_INDEX_NAME,
               reference: 'create-test-2',
             },
@@ -193,7 +193,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .send(
           getTestAlertData({
             alertTypeId: 'test.authorization',
-            alertTypeParams: {
+            params: {
               callClusterAuthorizationIndex: authorizationIndex,
               savedObjectsClientType: 'dashboard',
               savedObjectsClientId: '1',
@@ -227,7 +227,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.authorization',
         })
         .expect(200);
@@ -238,7 +238,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         .send(
           getTestAlertData({
             alertTypeId: 'test.always-firing',
-            alertTypeParams: {
+            params: {
               index: ES_TEST_INDEX_NAME,
               reference,
             },

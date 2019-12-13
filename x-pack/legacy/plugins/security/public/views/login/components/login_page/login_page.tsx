@@ -31,6 +31,7 @@ interface Props {
   loginState: LoginState;
   isSecureConnection: boolean;
   requiresSecureConnection: boolean;
+  loginAssistanceMessage: string;
 }
 
 export class LoginPage extends Component<Props, {}> {

@@ -28,7 +28,7 @@ describe('ml conditional links', () => {
     return logout();
   });
 
-  it.skip('sets the KQL from a single IP with a value for the query', () => {
+  it('sets the KQL from a single IP with a value for the query', () => {
     loginAndWaitForPage(mlNetworkSingleIpKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
       'have.attr',
@@ -37,7 +37,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('sets the KQL from a multiple IPs with a null for the query', () => {
+  it('sets the KQL from a multiple IPs with a null for the query', () => {
     loginAndWaitForPage(mlNetworkMultipleIpNullKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
       'have.attr',
@@ -46,7 +46,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('sets the KQL from a multiple IPs with a value for the query', () => {
+  it('sets the KQL from a multiple IPs with a value for the query', () => {
     loginAndWaitForPage(mlNetworkMultipleIpKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
       'have.attr',
@@ -55,7 +55,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('sets the KQL from a $ip$ with a value for the query', () => {
+  it('sets the KQL from a $ip$ with a value for the query', () => {
     loginAndWaitForPage(mlNetworkKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
       'have.attr',
@@ -64,7 +64,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('sets the KQL from a single host name with a value for query', () => {
+  it('sets the KQL from a single host name with a value for query', () => {
     loginAndWaitForPage(mlHostSingleHostKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
       'have.attr',
@@ -73,7 +73,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('sets the KQL from a multiple host names with null for query', () => {
+  it('sets the KQL from a multiple host names with null for query', () => {
     loginAndWaitForPage(mlHostMultiHostNullKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
       'have.attr',
@@ -82,7 +82,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('sets the KQL from a multiple host names with a value for query', () => {
+  it('sets the KQL from a multiple host names with a value for query', () => {
     loginAndWaitForPage(mlHostMultiHostKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
       'have.attr',
@@ -91,7 +91,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('sets the KQL from a undefined/null host name but with a value for query', () => {
+  it('sets the KQL from a undefined/null host name but with a value for query', () => {
     loginAndWaitForPage(mlHostVariableHostKqlQuery);
     cy.get(KQL_INPUT, { timeout: 5000 }).should(
       'have.attr',
@@ -100,7 +100,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('redirects from a single IP with a null for the query', () => {
+  it('redirects from a single IP with a null for the query', () => {
     loginAndWaitForPage(mlNetworkSingleIpNullKqlQuery);
     cy.url().should(
       'include',
@@ -108,7 +108,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('redirects from a single IP with a value for the query', () => {
+  it('redirects from a single IP with a value for the query', () => {
     loginAndWaitForPage(mlNetworkSingleIpKqlQuery);
     cy.url().should(
       'include',
@@ -116,7 +116,7 @@ describe('ml conditional links', () => {
     );
   });
 
-  it.skip('redirects from a multiple IPs with a null for the query', () => {
+  it('redirects from a multiple IPs with a null for the query', () => {
     loginAndWaitForPage(mlNetworkMultipleIpNullKqlQuery);
     cy.url().should(
       'include',

@@ -44,7 +44,7 @@ import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 class TableSeriesConfigUI extends Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (!model.color_rules || (model.color_rules && model.color_rules.length === 0)) {
       this.props.onChange({

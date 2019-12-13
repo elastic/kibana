@@ -32,7 +32,7 @@ import {
 import { DataTableFormat } from './data_table';
 import { InspectorViewProps, Adapters } from '../../../types';
 import { TabularLoaderOptions, TabularData, TabularCallback } from '../../../adapters/data/types';
-import { UiSettingsClientContract } from '../../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../../core/public';
 
 interface DataViewComponentState {
   tabularData: TabularData | null;
@@ -42,7 +42,7 @@ interface DataViewComponentState {
 }
 
 interface DataViewComponentProps extends InspectorViewProps {
-  uiSettings: UiSettingsClientContract;
+  uiSettings: IUiSettingsClient;
 }
 
 export class DataViewComponent extends Component<DataViewComponentProps, DataViewComponentState> {

@@ -28,7 +28,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -54,7 +54,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.eql({
                 id: response.body.id,
-                description: 'My action',
+                name: 'My action',
                 actionTypeId: 'test.index-record',
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
@@ -74,7 +74,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.unregistered-action-type',
               config: {},
             });
@@ -129,10 +129,10 @@ export default function createActionTests({ getService }: FtrProviderContext) {
                 statusCode: 400,
                 error: 'Bad Request',
                 message:
-                  'child "description" fails because ["description" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
+                  'child "name" fails because ["name" is required]. child "actionTypeId" fails because ["actionTypeId" is required]',
                 validation: {
                   source: 'payload',
-                  keys: ['description', 'actionTypeId'],
+                  keys: ['name', 'actionTypeId'],
                 },
               });
               break;
@@ -147,7 +147,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              description: 'my description',
+              name: 'my name',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: 'my unencrypted text',

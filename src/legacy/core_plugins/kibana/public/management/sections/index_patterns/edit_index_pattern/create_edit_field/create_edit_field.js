@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import { setup as data } from '../../../../../../../data/public/legacy';
-const { FieldImpl: Field } = data.indexPatterns.__LEGACY;
-
+import { Field } from '../../../../../../../../../plugins/data/public';
 import { RegistryFieldFormatEditorsProvider } from 'ui/registry/field_format_editors';
 import { docTitle } from 'ui/doc_title';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
+import { npStart } from 'ui/new_platform';
 
 import template from './create_edit_field.html';
 import { getEditFieldBreadcrumbs, getCreateFieldBreadcrumbs } from '../../breadcrumbs';
@@ -98,7 +97,8 @@ uiRoutes
       });
     },
     resolve: {
-      indexPattern: function ($route, Promise, redirectWhenMissing, indexPatterns) {
+      indexPattern: function ($route, Promise, redirectWhenMissing) {
+        const { indexPatterns } = npStart.plugins.data;
         return Promise.resolve(indexPatterns.get($route.current.params.indexPatternId))
           .catch(redirectWhenMissing('/management/kibana/index_patterns'));
       }

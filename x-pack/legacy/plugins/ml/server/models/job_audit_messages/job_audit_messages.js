@@ -90,7 +90,7 @@ export function jobAuditMessagesProvider(callWithRequest) {
         body:
         {
           sort: [
-            { timestamp: { order: 'asc' } },
+            { timestamp: { order: 'desc' } },
             { job_id: { order: 'asc' } }
           ],
           query

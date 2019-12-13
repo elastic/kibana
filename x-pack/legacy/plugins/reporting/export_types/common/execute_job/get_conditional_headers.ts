@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ConditionalHeaders, JobDocPayload, ServerFacade } from '../../../types';
+import { ConditionalHeaders, ServerFacade } from '../../../types';
 
-export const getConditionalHeaders = ({
+export const getConditionalHeaders = <JobDocPayloadType>({
   job,
   filteredHeaders,
   server,
 }: {
-  job: JobDocPayload;
+  job: JobDocPayloadType;
   filteredHeaders: Record<string, string>;
   server: ServerFacade;
 }) => {

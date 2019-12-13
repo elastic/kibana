@@ -3,23 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Server } from 'hapi';
-import apmIndexPattern from 'src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { SavedObjectsErrorHelpers } from 'src/core/server/saved_objects';
 import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
 import { APM_STATIC_INDEX_PATTERN_ID } from '../../../common/index_pattern_constants';
 import { hasHistoricalAgentData } from '../services/get_services/has_historical_agent_data';
 import { Setup } from '../helpers/setup_request';
+import { APMRequestHandlerContext } from '../../routes/typings';
 
 export async function createStaticIndexPattern(
   setup: Setup,
-  server: Server
+  context: APMRequestHandlerContext
 ): Promise<void> {
-  const config = server.config();
+  const { config } = context;
 
   // don't autocreate APM index pattern if it's been disabled via the config
-  if (!config.get('xpack.apm.autocreateApmIndexPattern')) {
+  if (!config['xpack.apm.autocreateApmIndexPattern']) {
     return;
   }
 
@@ -31,8 +28,10 @@ export async function createStaticIndexPattern(
   }
 
   try {
-    const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
-    const internalSavedObjectsClient = getInternalSavedObjectsClient(server);
+    const apmIndexPatternTitle = config['apm_oss.indexPattern'];
+    const internalSavedObjectsClient = getInternalSavedObjectsClient(
+      context.__LEGACY.server
+    );
     await internalSavedObjectsClient.create(
       'index-pattern',
       {

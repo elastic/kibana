@@ -25,8 +25,6 @@ export default function ({ getService, getPageObjects }) {
   const pieChart = getService('pieChart');
   const inspector = getService('inspector');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings', 'timePicker']);
-  const fromTime = '2015-09-19 06:31:44.000';
-  const toTime = '2015-09-23 18:31:44.000';
 
   describe('pie chart', function () {
     const vizName1 = 'Visualization PieChart';
@@ -36,7 +34,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickPieChart');
       await PageObjects.visualize.clickPieChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('select bucket Split slices');
       await PageObjects.visualize.clickBucket('Split slices');
       log.debug('Click aggregation Histogram');
@@ -53,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
@@ -85,7 +83,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split slices');
         await PageObjects.visualize.clickBucket('Split slices');
         log.debug('Click aggregation Terms');
@@ -158,7 +156,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should correctly save disabled agg', async () => {
         await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-        await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.visualize.waitForRenderingCount();
 
@@ -187,7 +185,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split slices');
         await PageObjects.visualize.clickBucket('Split slices');
         log.debug('Click aggregation Filters');
@@ -199,8 +197,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug('Set the 2nd filter value');
         await PageObjects.visualize.setFilterAggregationValue('geo.dest:"CN"', 1);
         await PageObjects.visualize.clickGo();
-        const emptyFromTime = '2016-09-19 06:31:44.000';
-        const emptyToTime = '2016-09-23 18:31:44.000';
+        const emptyFromTime = 'Sep 19, 2016 @ 06:31:44.000';
+        const emptyToTime = 'Sep 23, 2016 @ 18:31:44.000';
         log.debug('Switch to a different time range from \"' + emptyFromTime + '\" to \"' + emptyToTime + '\"');
         await PageObjects.timePicker.setAbsoluteRange(emptyFromTime, emptyToTime);
         await PageObjects.visualize.waitForVisualization();
@@ -214,8 +212,10 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('Set absolute time range from \"'
+        + PageObjects.timePicker.defaultStartTime + '\" to \"'
+        + PageObjects.timePicker.defaultEndTime + '\"');
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split slices');
         await PageObjects.visualize.clickBucket('Split slices');
         log.debug('Click aggregation Histogram');
@@ -275,7 +275,7 @@ export default function ({ getService, getPageObjects }) {
         log.debug('clickPieChart');
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split slices');
         await PageObjects.visualize.clickBucket('Split slices');
         log.debug('Click aggregation Filters');
@@ -302,7 +302,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickPieChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         log.debug('select bucket Split chart');
         await PageObjects.visualize.clickBucket('Split chart');
         await PageObjects.visualize.selectAggregation('Terms');

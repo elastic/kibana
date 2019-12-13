@@ -67,6 +67,9 @@ export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
 export const UPDATE_DRAW_STATE = 'UPDATE_DRAW_STATE';
 export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
+export const SET_INTERACTIVE = 'SET_INTERACTIVE';
+export const DISABLE_TOOLTIP_CONTROL = 'DISABLE_TOOLTIP_CONTROL';
+export const HIDE_TOOLBAR_OVERLAY = 'HIDE_TOOLBAR_OVERLAY';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -732,9 +735,7 @@ export function clearMissingStyleProperties(layerId) {
       return;
     }
 
-    const dateFields = await targetLayer.getDateFields();
-    const numberFields = await targetLayer.getNumberFields();
-    const ordinalFields = [...dateFields, ...numberFields];
+    const ordinalFields = await targetLayer.getOrdinalFields();
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
     if (hasChanges) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
@@ -815,4 +816,16 @@ export function updateDrawState(drawState) {
       drawState: drawState
     });
   };
+}
+
+export function disableInteractive() {
+  return { type: SET_INTERACTIVE, disableInteractive: true };
+}
+
+export function disableTooltipControl() {
+  return { type: DISABLE_TOOLTIP_CONTROL, disableTooltipControl: true };
+}
+
+export function hideToolbarOverlay() {
+  return { type: HIDE_TOOLBAR_OVERLAY, hideToolbarOverlay: true };
 }

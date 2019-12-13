@@ -7,8 +7,13 @@
 import { notFound, notImplemented } from 'boom';
 import { get } from 'lodash';
 import { PLUGIN_ID, CSV_FROM_SAVEDOBJECT_JOB_TYPE } from '../../../../common/constants';
-import { cryptoFactory, LevelLogger, oncePerServer } from '../../../../server/lib';
-import { ServerFacade, RequestFacade } from '../../../../types';
+import { cryptoFactory, LevelLogger } from '../../../../server/lib';
+import {
+  CreateJobFactory,
+  ImmediateCreateJobFn,
+  ServerFacade,
+  RequestFacade,
+} from '../../../../types';
 import {
   SavedObject,
   SavedObjectServiceError,
@@ -27,13 +32,9 @@ interface VisData {
   panel: SearchPanel;
 }
 
-type CreateJobFn = (
-  jobParams: JobParamsPanelCsv,
-  headers: any,
-  req: RequestFacade
-) => Promise<JobDocPayloadPanelCsv>;
-
-function createJobFn(server: ServerFacade): CreateJobFn {
+export const createJobFactory: CreateJobFactory<ImmediateCreateJobFn<
+  JobParamsPanelCsv
+>> = function createJobFactoryFn(server: ServerFacade) {
   const crypto = cryptoFactory(server);
   const logger = LevelLogger.createForServer(server, [
     PLUGIN_ID,
@@ -94,11 +95,8 @@ function createJobFn(server: ServerFacade): CreateJobFn {
     return {
       headers: serializedEncryptedHeaders,
       jobParams: { ...jobParams, panel, visType },
-      type: null, // resolved in executeJob
-      objects: null, // resolved in executeJob
+      type: null,
       title,
     };
   };
-}
-
-export const createJobFactory = oncePerServer(createJobFn);
+};

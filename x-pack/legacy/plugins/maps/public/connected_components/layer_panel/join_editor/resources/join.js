@@ -111,7 +111,14 @@ export class Join extends Component {
   async _loadLeftFields() {
     let leftFields;
     try {
-      leftFields = await this.props.layer.getLeftJoinFields();
+      const leftFieldsInstances = await this.props.layer.getLeftJoinFields();
+      const leftFieldPromises = leftFieldsInstances.map(async (field) => {
+        return {
+          name: field.getName(),
+          label: await field.getLabel()
+        };
+      });
+      leftFields = await Promise.all(leftFieldPromises);
     } catch (error) {
       leftFields = [];
     }
@@ -210,7 +217,7 @@ export class Join extends Component {
         <GlobalFilterCheckbox
           applyGlobalQuery={right.applyGlobalQuery}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
-          customLabel={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
+          label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
             defaultMessage: `Apply global filter to join`,
           })}
         />

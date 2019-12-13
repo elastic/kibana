@@ -22,9 +22,9 @@ import expect from '@kbn/expect';
 import sinon from 'sinon';
 import Bluebird from 'bluebird';
 
-import { SavedObjectProvider } from '../saved_object';
+import { createSavedObjectClass } from '../saved_object';
 import StubIndexPattern from 'test_utils/stub_index_pattern';
-import { SavedObjectsClientProvider } from '../saved_objects_client_provider';
+import { npStart } from 'ui/new_platform';
 import { InvalidJSONProperty } from '../../../../../plugins/kibana_utils/public';
 import { mockUiSettings } from '../../new_platform/new_platform.karma_mock';
 
@@ -82,6 +82,10 @@ describe('Saved Object', function () {
     return savedObject.init();
   }
 
+  function restoreIfWrapped(obj, fName) {
+    obj[fName].restore && obj[fName].restore();
+  }
+
   const mock409FetchError = {
     res: { status: 409 }
   };
@@ -96,11 +100,19 @@ describe('Saved Object', function () {
     })
   );
 
-  beforeEach(ngMock.inject(function (es, Private, $window) {
-    SavedObject = Private(SavedObjectProvider);
+  beforeEach(ngMock.inject(function (es, $window) {
+    savedObjectsClientStub = npStart.core.savedObjects.client;
+    SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
     esDataStub = es;
-    savedObjectsClientStub = Private(SavedObjectsClientProvider);
     window = $window;
+  }));
+
+  afterEach(ngMock.inject(function () {
+    restoreIfWrapped(savedObjectsClientStub, 'create');
+    restoreIfWrapped(savedObjectsClientStub, 'get');
+    restoreIfWrapped(savedObjectsClientStub, 'update');
+    restoreIfWrapped(savedObjectsClientStub, 'find');
+    restoreIfWrapped(savedObjectsClientStub, 'bulkGet');
   }));
 
   describe('save', function () {
@@ -109,66 +121,6 @@ describe('Saved Object', function () {
         window.confirm = sinon.stub().returns(true);
         sinon.stub(esDataStub, 'create').returns(Bluebird.reject(mock409FetchError));
       }
-
-      describe('when true', function () {
-        it('requests confirmation and updates on yes response', function () {
-          stubESResponse(getMockedDocResponse('myId'));
-          return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-            const createStub = sinon.stub(savedObjectsClientStub, 'create');
-            createStub.onFirstCall().returns(Bluebird.reject(mock409FetchError));
-            createStub.onSecondCall().returns(Bluebird.resolve({ id: 'myId' }));
-
-            stubConfirmOverwrite();
-
-            savedObject.lastSavedTitle = 'original title';
-            savedObject.title = 'new title';
-            return savedObject.save({ confirmOverwrite: true })
-              .then(() => {
-                expect(window.confirm.called).to.be(true);
-                expect(savedObject.id).to.be('myId');
-                expect(savedObject.isSaving).to.be(false);
-                expect(savedObject.lastSavedTitle).to.be('new title');
-                expect(savedObject.title).to.be('new title');
-              });
-          });
-        });
-
-        it('does not update on no response', function () {
-          stubESResponse(getMockedDocResponse('HI'));
-          return createInitializedSavedObject({ type: 'dashboard', id: 'HI' }).then(savedObject => {
-            window.confirm = sinon.stub().returns(false);
-
-            sinon.stub(savedObjectsClientStub, 'create').returns(Bluebird.reject(mock409FetchError));
-
-            savedObject.lastSavedTitle = 'original title';
-            savedObject.title = 'new title';
-            return savedObject.save({ confirmOverwrite: true })
-              .then(() => {
-                expect(savedObject.id).to.be('HI');
-                expect(savedObject.isSaving).to.be(false);
-                expect(savedObject.lastSavedTitle).to.be('original title');
-                expect(savedObject.title).to.be('new title');
-              });
-          });
-        });
-
-        it('handles create failures', function () {
-          stubESResponse(getMockedDocResponse('myId'));
-          return createInitializedSavedObject({ type: 'dashboard', id: 'myId' }).then(savedObject => {
-            stubConfirmOverwrite();
-
-            sinon.stub(savedObjectsClientStub, 'create').returns(Bluebird.reject(mock409FetchError));
-
-            return savedObject.save({ confirmOverwrite: true })
-              .then(() => {
-                expect(true).to.be(false); // Force failure, the save should not succeed.
-              })
-              .catch(() => {
-                expect(window.confirm.called).to.be(true);
-              });
-          });
-        });
-      });
 
       it('when false does not request overwrite', function () {
         const mockDocResponse = getMockedDocResponse('myId');
@@ -688,18 +640,6 @@ describe('Saved Object', function () {
 
       return createInitializedSavedObject(config).then(() => {
         expect(afterESRespCallback.called).to.be(true);
-      });
-    });
-
-    it('init is called', function () {
-      const initCallback = sinon.spy();
-      const config = {
-        type: 'dashboard',
-        init: initCallback
-      };
-
-      return createInitializedSavedObject(config).then(() => {
-        expect(initCallback.called).to.be(true);
       });
     });
 

@@ -5,14 +5,12 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 export const ConditionalFlexGroup = styled(EuiFlexGroup)`
-  ${() => css`
-    @media only screen and (min-width: 1441px) {
-      flex-direction: row;
-    }
-  `}
+  @media only screen and (min-width: 1441px) {
+    flex-direction: row;
+  }
 `;
 
 ConditionalFlexGroup.displayName = 'ConditionalFlexGroup';

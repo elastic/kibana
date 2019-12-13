@@ -17,8 +17,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/singlecluster-three-nodes-shard-relocation', {
-        from: '2017-10-05 20:31:48.354',
-        to: '2017-10-05 20:35:12.176'
+        from: 'Oct 5, 2017 @ 20:31:48.354',
+        to: 'Oct 5, 2017 @ 20:35:12.176'
       });
 
       // go to overview

@@ -17,19 +17,30 @@
  * under the License.
  */
 
-jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        ui: {
+          IndexPatternSelect: () => {
+            return <div/>;
+          }
+        }
+      }
+    },
+  },
+}));
+
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';
 
-import {
-  RangeControlEditor,
-} from './range_control_editor';
+import { RangeControlEditor } from './range_control_editor';
 
 const controlParams = {
   id: '1',

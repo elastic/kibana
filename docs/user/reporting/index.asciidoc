@@ -1,70 +1,91 @@
 [role="xpack"]
-[[xpack-reporting]]
+[[reporting-getting-started]]
 = Reporting from Kibana
 
 [partintro]
 
 --
 
-You can generate reports that contain {kib} dashboards,
-visualizations, and saved searches. Dashboards and visualizations are
-exported as PDF documents, while saved searches in Discover
-are exported to CSV.
+You can generate a report that contains a {kib} dashboard, visualization, 
+saved search, or Canvas workpad. Depending on the object type, you can export the data as 
+a PDF, PNG, or CSV document, which you can keep for yourself, or share with others.
 
-Reporting is located in the share menu from the {kib} toolbar:
+Reporting is available from the *Share* menu 
+in *Discover*, *Visualize*, *Dashboard*, and *Canvas*.
 
 [role="screenshot"]
 image::user/reporting/images/share-button.png["Share"]
 
 [float]
-== System setup
+== Setup
 
 {reporting} is automatically enabled in {kib}. The first time {kib} runs, it extracts a custom build for the Chromium web browser, which
 runs on the server in headless mode to load {kib} and capture the rendered {kib} charts as images.
 
 Chromium is an open-source project not related to Elastic, but the Chromium binary for {kib} has been custom-built by Elastic to ensure it
 works with minimal setup. However, the {kib} server OS might still require additional dependencies for Chromium. See the
-<<reporting-troubleshooting-system-dependencies, Reporting Troubleshooting>> section for more information about the system dependencies
+<<reporting-troubleshooting-system-dependencies, Reporting troubleshooting>> section for more information about the system dependencies
 for different operating systems.
 
 [float]
-== Manually generate reports
+[[reporting-required-privileges]]
+== Roles and privileges
 
-. Open {kib} in your web browser and log in. If you are running {kib}
-locally, go to `http://localhost:5601`. To access {kib} and generate
-reports, you need the `reporting_user` role, and an additional role with succifient <<kibana-privileges, Kibana privileges>>, such as the `kibana_user` role.
-For more information, see <<secure-reporting>>.
-
-. Open the dashboard, visualization, or saved search you want to include
-in the report.
-
-. Click *Share* in the {kib} toolbar:
-+
-[role="screenshot"]
-image:user/reporting/images/share-button.png["Reporting Button",link="share-button.png"]
-
-. Depending on the {kib} application, choose the appropriate options:
-
-. If you're on Discover, select *CSV Reports*, then click *Generate CSV*.
-
-. If you're on Visualize or Dashboard:
-
-.. Select *PDF Reports*
-
-.. Dashboard only: Choose to enable *Optimize for printing* layout mode. For an explanation of the different layout modes, see <<pdf-layout-modes, PDF Layout Modes>>.
-
-.. Click *Generate PDF*.
+To generate a report, you must have the `reporting_user` role. You also need
+the appropriate {kib} privileges to access the objects that you
+want to report on and the {es} indices.  See <<secure-reporting, Reporting and security>>
+for an example.
 
 [float]
-== Automatically generate reports
+[[manually-generate-reports]]
+== Generate a report manually
 
-If you want to automatically generate reports from a script or with
-{watcher}, see <<automating-report-generation, Automating Report Generation>>
+. Open the dashboard, visualization, Canvas workpad, or saved search that you want to include in the report. 
+
+. In the {kib} toolbar, click *Share*.  If you are working in Canvas, 
+click the share icon image:user/reporting/images/canvas-share-button.png["Canvas Share button"].
+
+. Select the option appropriate for your object. You can export:
++
+** A dashboard or visualization as either a PNG or PDF document
+** A Canvas workpad as a PDF document
+** A saved search as a CSV document
+
+. Generate the report.
++
+A notification appears when the report is complete.
+
+[float]
+[[optimize-pdf]]
+== Optimize PDF for print&mdash;dashboard only
+
+By default, {kib} creates a PDF  
+using the existing layout and size of the dashboard. To create a 
+printer-friendly PDF with multiple A4 portrait pages and two visualizations 
+per page, turn on *Optimize for printing*.
+
+[role="screenshot"]
+image::user/reporting/images/preserve-layout-switch.png["Share"]
+
+
+[float]
+[[manage-report-history]]
+== View and manage report history
+
+For a list of your reports, go to *Management > Reporting*.  
+From this view, you can monitor the generation of a report and 
+download reports that you previously generated.
+
+[float]
+[[automatically-generate-reports]]
+== Automatically generate a report
+
+To automatically generate a report from a script or with
+{watcher}, see <<automating-report-generation, Automating report generation>>.
 
 --
 
 include::automating-report-generation.asciidoc[]
-include::pdf-layout-modes.asciidoc[]
 include::configuring-reporting.asciidoc[]
 include::chromium-sandbox.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]

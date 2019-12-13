@@ -22,7 +22,7 @@ export class DataRequest {
   }
 
   getMeta() {
-    return _.get(this._descriptor, 'dataMeta', {});
+    return this.hasData() ? _.get(this._descriptor, 'dataMeta', {}) : _.get(this._descriptor, 'dataMetaAtStart', {});
   }
 
   hasData() {

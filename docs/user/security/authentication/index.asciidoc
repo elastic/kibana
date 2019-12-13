@@ -14,16 +14,17 @@
 - <<oidc>>
 
 [[basic-authentication]]
-==== Basic Authentication
+==== Basic authentication
 
 Basic authentication requires a username and password to successfully log in to {kib}. It is enabled by default and based on the Native security realm provided by {es}. The basic authentication provider uses a Kibana provided login form, and supports authentication using the `Authorization` request header's `Basic` scheme.
 
 The session cookies that are issued by the basic authentication provider are stateless. Therefore, logging out of Kibana when using the basic authentication provider clears the session cookies from the browser but does not invalidate the session cookie for reuse.
 
-For more information about basic authentication and built-in users, see {xpack-ref}/setting-up-authentication.html[Setting Up User Authentication].
+For more information about basic authentication and built-in users, see
+{ref}/setting-up-authentication.html[User authentication].
 
 [[token-authentication]]
-==== Token Authentication
+==== Token authentication
 
 Token authentication allows users to login using the same Kibana provided login form as basic authentication. The token authentication provider is built on {es}'s token APIs. The bearer tokens returned by {es}'s {ref}/security-api-get-token.html[get token API] can be used directly with Kibana using the `Authorization` request header with the `Bearer` scheme.
 
@@ -46,7 +47,7 @@ xpack.security.authc.providers: [token, basic]
 --------------------------------------------------------------------------------
 
 [[pki-authentication]]
-==== Public Key Infrastructure (PKI) Authentication
+==== Public key infrastructure (PKI) authentication
 
 [IMPORTANT]
 ============================================================================
@@ -76,9 +77,9 @@ xpack.security.authc.providers: [pki, basic]
 Note that with `server.ssl.clientAuthentication` set to `required`, users are asked to provide a valid client certificate, even if they want to authenticate with username and password. Depending on the security policies, it may or may not be desired. If not, `server.ssl.clientAuthentication` can be set to `optional`. In this case, {kib} still requests a client certificate, but the client won't be required to present one. The `optional` client authentication mode might also be needed in other cases, for example, when PKI authentication is used in conjunction with Reporting.
 
 [[saml]]
-==== SAML Single Sign-On
+==== SAML single sign-on
 
-SAML authentication allows users to log in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting it up in {kib}. See {xpack-ref}/saml-guide.html[Configuring SAML Single-Sign-On on the Elastic Stack].
+SAML authentication allows users to log in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting it up in {kib}. See {ref}/saml-guide.html[Configuring SAML single sign-on on the Elastic Stack].
 
 Set the configuration values in `kibana.yml` as follows:
 
@@ -106,7 +107,7 @@ server.xsrf.whitelist: [/api/security/saml/callback]
 Users will be able to log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. Users who aren't authenticated are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session—users who logged in to a different application using the same Identity Provider in the same browser are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force user to re-authenticate. This login scenario is called _Service Provider initiated login_.
 
 [float]
-===== SAML and Basic Authentication
+===== SAML and basic authentication
 
 SAML support in {kib} is designed to be the primary (or sole) authentication method for users of that {kib} instance. However, you can configure both SAML and Basic authentication for the same {kib} instance:
 
@@ -135,7 +136,7 @@ xpack.security.authc.saml.maxRedirectURLSize: 1kb
 --------------------------------------------------------------------------------
 
 [[oidc]]
-==== OpenID Connect Single Sign-On
+==== OpenID Connect single sign-on
 
 Similar to SAML, authentication with OpenID Connect allows users to log in to {kib} using an OpenID Connect Provider such as Google, or Okta. OpenID Connect
 should also be configured in {es}. For more details, see {ref}/oidc-guide.html[Configuring single sign-on to the {stack} using OpenID Connect].
@@ -162,11 +163,11 @@ required by {kib}. If you want to use Third Party initiated SSO , then you must 
 +
 [source,yaml]
 --------------------------------------------------------------------------------
-server.xsrf.whitelist: [/api/security/v1/oidc]
+server.xsrf.whitelist: [/api/security/oidc/initiate_login]
 --------------------------------------------------------------------------------
 
 [float]
-===== OpenID Connect and Basic Authentication
+===== OpenID Connect and basic authentication
 
 Similar to SAML, OpenID Connect support in {kib} is designed to be the primary (or sole) authentication method for users
 of that {kib} instance. However, you can configure both OpenID Connect and Basic authentication for the same {kib} instance:
@@ -179,18 +180,19 @@ xpack.security.authc.providers: [oidc, basic]
 Users will be able to access the login page and use Basic authentication by navigating to the `/login` URL.
 
 [float]
-==== Single Sign-On provider details
+==== Single sign-on provider details
 
 The following sections apply both to <<saml>> and <<oidc>> 
 
 [float]
-===== Access and Refresh Tokens
+===== Access and refresh tokens
 
 Once the user logs in to {kib} Single Sign-On, either using SAML or OpenID Connect, {es} issues access and refresh tokens
 that {kib} encrypts and stores them in its own session cookie. This way, the user isn't redirected to the Identity Provider
-for every request that requires authentication. It also means that the {kib} session depends on the `xpack.security.sessionTimeout` 
-setting and the user is automatically logged out if the session expires. An access token that is stored in the session cookie 
-can expire, in  which case {kib} will automatically renew it with a one-time-use refresh token and store it in the same cookie.
+for every request that requires authentication. It also means that the {kib} session depends on the <<security-ui-settings,
+`xpack.security.session.idleTimeout` and `xpack.security.session.lifespan`>> settings, and the user is automatically logged
+out if the session expires. An access token that is stored in the session cookie can expire, in which case {kib} will
+automatically renew it with a one-time-use refresh token and store it in the same cookie.
 
 {kib} can only determine if an access token has expired if it receives a request that requires authentication. If both access
 and refresh tokens have already expired (for example, after 24 hours of inactivity), {kib} initiates a new "handshake" and
@@ -201,7 +203,7 @@ If {kib} can't redirect the user to the external authentication provider (for ex
 indicates that both access and refresh tokens are expired. Reloading the current {kib} page fixes the error.
 
 [float]
-===== Local and Global Logout
+===== Local and global logout
 
 During logout, both the {kib} session cookie and access/refresh token pair are invalidated. Even if the cookie has been
 leaked, it can't be re-used after logout. This is known as "local" logout.

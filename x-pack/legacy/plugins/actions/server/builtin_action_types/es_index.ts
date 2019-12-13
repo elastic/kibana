@@ -24,7 +24,7 @@ const ConfigSchema = schema.object({
 
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 
-// see: https://www.elastic.co/guide/en/elastic-stack-overview/current/actions-index.html
+// see: https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-index.html
 // - timeout not added here, as this seems to be a generic thing we want to do
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
 const ParamsSchema = schema.object({
@@ -60,13 +60,11 @@ async function executor(
 
   if (config.index == null && params.index == null) {
     const message = i18n.translate('xpack.actions.builtin.esIndex.indexParamRequiredErrorMessage', {
-      defaultMessage: 'index param needs to be set because not set in config for action {actionId}',
-      values: {
-        actionId,
-      },
+      defaultMessage: 'index param needs to be set because not set in config for action',
     });
     return {
       status: 'error',
+      actionId,
       message,
     };
   }
@@ -101,17 +99,15 @@ async function executor(
     result = await services.callCluster('bulk', bulkParams);
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.esIndex.errorIndexingErrorMessage', {
-      defaultMessage: 'error in action "{actionId}" indexing data: {errorMessage}',
-      values: {
-        actionId,
-        errorMessage: err.message,
-      },
+      defaultMessage: 'error indexing documents',
     });
     return {
       status: 'error',
+      actionId,
       message,
+      serviceMessage: err.message,
     };
   }
 
-  return { status: 'ok', data: result };
+  return { status: 'ok', data: result, actionId };
 }

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { AbstractLayer } from './layer';
 import { VectorLayer } from './vector_layer';
 import { HeatmapStyle } from './styles/heatmap/heatmap_style';
@@ -23,17 +22,19 @@ export class HeatmapLayer extends VectorLayer {
     return heatmapLayerDescriptor;
   }
 
-  constructor({ layerDescriptor, source, style }) {
-    super({ layerDescriptor, source, style });
-    if (!style) {
+  constructor({ layerDescriptor, source }) {
+    super({ layerDescriptor, source });
+    if (!layerDescriptor.style) {
       const defaultStyle = HeatmapStyle.createDescriptor();
       this._style = new HeatmapStyle(defaultStyle);
+    } else {
+      this._style = new HeatmapStyle(layerDescriptor.style);
     }
   }
 
   _getPropKeyOfSelectedMetric() {
     const metricfields = this._source.getMetricFields();
-    return metricfields[0].propertyKey;
+    return metricfields[0].getName();
   }
 
   _getHeatmapLayerId() {
@@ -97,12 +98,12 @@ export class HeatmapLayer extends VectorLayer {
     return 'heatmap';
   }
 
-  hasLegendDetails() {
+  async hasLegendDetails() {
     return true;
   }
 
-  getLegendDetails() {
-    const label = _.get(this._source.getMetricFields(), '[0].propertyLabel', '');
-    return this._style.getLegendDetails(label);
+  renderLegendDetails() {
+    const metricFields = this._source.getMetricFields();
+    return this._style.renderLegendDetails(metricFields[0]);
   }
 }

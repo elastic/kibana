@@ -5,7 +5,7 @@
  */
 
 import { npSetup } from 'ui/new_platform';
-import { CoreSetup, UiSettingsClientContract } from 'src/core/public';
+import { CoreSetup, IUiSettingsClient } from 'src/core/public';
 import chrome, { Chrome } from 'ui/chrome';
 import moment from 'moment-timezone';
 import { getFormat, FormatFactory } from 'ui/visualize/loader/pipeline_helpers/utilities';
@@ -24,7 +24,7 @@ export interface XyVisualizationPluginSetupPlugins {
   };
 }
 
-function getTimeZone(uiSettings: UiSettingsClientContract) {
+function getTimeZone(uiSettings: IUiSettingsClient) {
   const configuredTimeZone = uiSettings.get('dateFormat:tz');
   if (configuredTimeZone === 'Browser') {
     return moment.tz.guess();

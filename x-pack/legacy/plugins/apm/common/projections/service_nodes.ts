@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Setup } from '../../server/lib/helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../server/lib/helpers/setup_request';
 import { SERVICE_NODE_NAME } from '../elasticsearch_fieldnames';
 import { mergeProjection } from './util/merge_projection';
 import { getMetricsProjection } from './metrics';
@@ -14,7 +18,7 @@ export function getServiceNodesProjection({
   serviceName,
   serviceNodeName
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   serviceNodeName?: string;
 }) {

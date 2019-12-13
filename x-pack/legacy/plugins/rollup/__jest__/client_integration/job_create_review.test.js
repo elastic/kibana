@@ -9,7 +9,6 @@ import { first } from 'lodash';
 import { JOBS } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 

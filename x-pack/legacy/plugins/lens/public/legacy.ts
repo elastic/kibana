@@ -9,15 +9,11 @@ import { start as dataShimStart } from '../../../../../src/legacy/core_plugins/d
 
 export * from './types';
 
-import { localApplicationService } from '../../../../../src/legacy/core_plugins/kibana/public/local_application_service';
 import { AppPlugin } from './app_plugin';
 
 const app = new AppPlugin();
-app.setup(npSetup.core, {});
+app.setup(npSetup.core, npSetup.plugins);
 app.start(npStart.core, {
+  ...npStart.plugins,
   dataShim: dataShimStart,
-  data: npStart.plugins.data,
-  __LEGACY: {
-    localApplicationService,
-  },
 });

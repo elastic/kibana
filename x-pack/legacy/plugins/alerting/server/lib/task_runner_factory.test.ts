@@ -76,7 +76,7 @@ const mockedAlertTypeSavedObject = {
     alertTypeId: '123',
     interval: '10s',
     mutedInstanceIds: [],
-    alertTypeParams: {
+    params: {
       bar: true,
     },
     actions: [
@@ -253,7 +253,7 @@ test('validates params before executing the alert type', async () => {
     references: [],
   });
   await expect(taskRunner.run()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
+    `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
   );
 });
 

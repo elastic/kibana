@@ -33,7 +33,7 @@ export function actions(kibana: any) {
     config(Joi: Root) {
       return Joi.object()
         .keys({
-          enabled: Joi.boolean().default(false),
+          enabled: Joi.boolean().default(true),
           whitelistedHosts: Joi.array()
             .items(
               Joi.string()

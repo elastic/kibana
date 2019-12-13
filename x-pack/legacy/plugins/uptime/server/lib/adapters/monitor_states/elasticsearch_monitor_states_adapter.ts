@@ -9,6 +9,9 @@ import { UMMonitorStatesAdapter, GetMonitorStatesResult, CursorPagination } from
 import { StatesIndexStatus } from '../../../../common/graphql/types';
 import { INDEX_NAMES, CONTEXT_DEFAULTS } from '../../../../common/constants';
 import { fetchPage } from './search';
+import { MonitorGroupIterator } from './search/monitor_group_iterator';
+import { Snapshot } from '../../../../common/runtime_types';
+import { getSnapshotCountHelper } from './get_snapshot_helper';
 
 export interface QueryContext {
   database: any;
@@ -55,6 +58,26 @@ export class ElasticsearchMonitorStatesAdapter implements UMMonitorStatesAdapter
       nextPagePagination: jsonifyPagination(page.nextPagePagination),
       prevPagePagination: jsonifyPagination(page.prevPagePagination),
     };
+  }
+
+  public async getSnapshotCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string,
+    statusFilter?: string
+  ): Promise<Snapshot> {
+    const context: QueryContext = {
+      database: this.database,
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      pagination: CONTEXT_DEFAULTS.CURSOR_PAGINATION,
+      filterClause: filters && filters !== '' ? JSON.parse(filters) : null,
+      size: CONTEXT_DEFAULTS.MAX_MONITORS_FOR_SNAPSHOT_COUNT,
+      statusFilter,
+    };
+    return getSnapshotCountHelper(new MonitorGroupIterator(context));
   }
 
   public async statesIndexExists(request: any): Promise<StatesIndexStatus> {

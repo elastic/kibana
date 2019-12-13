@@ -26,7 +26,6 @@ import {
 } from './legacy_imports';
 import { DashboardPlugin, LegacyAngularInjectedDependencies } from './plugin';
 import { start as data } from '../../../data/public/legacy';
-import { localApplicationService } from '../local_application_service';
 import { start as embeddables } from '../../../embeddable_api/public/np_ready/public/legacy';
 import { start as navigation } from '../../../navigation/public/legacy';
 import './saved_dashboard/saved_dashboards';
@@ -55,7 +54,6 @@ async function getAngularDependencies(): Promise<LegacyAngularInjectedDependenci
   instance.setup(npSetup.core, {
     ...npSetup.plugins,
     __LEGACY: {
-      localApplicationService,
       getAngularDependencies,
     },
   });

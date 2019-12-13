@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
-  const filterBar = getService('filterBar');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const defaultSettings = {
@@ -33,8 +32,6 @@ export default function ({ getService, getPageObjects }) {
   };
 
   describe('discover test', function describeIndexTests() {
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     before(async function () {
       log.debug('load kibana index with default index pattern');
@@ -45,7 +42,7 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     describe('query', function () {
@@ -54,8 +51,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct time range string by timepicker', async function () {
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
-        expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
+        expect(time.start).to.be(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
         expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
@@ -88,12 +85,12 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-        const expectedTimeString = `Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000`;
+        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
       it('should modify the time range when a bar is clicked', async function () {
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.clickHistogramBar();
         const time = await PageObjects.timePicker.getTimeConfig();
         expect(time.start).to.be('Sep 21, 2015 @ 09:00:00.000');
@@ -103,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should modify the time range when the histogram is brushed', async function () {
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.brushHistogram();
 
         const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
@@ -113,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct initial chart interval of Auto', async function () {
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const actualInterval = await PageObjects.discover.getChartInterval();
 
@@ -135,8 +132,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('query #2, which has an empty time range', () => {
-      const fromTime = '1999-06-11 09:22:11.000';
-      const toTime = '1999-06-12 11:21:04.000';
+      const fromTime = 'Jun 11, 1999 @ 09:22:11.000';
+      const toTime = 'Jun 12, 1999 @ 11:21:04.000';
 
       before(async () => {
         log.debug('setAbsoluteRangeForAnotherQuery');
@@ -159,7 +156,7 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         log.debug('setAbsoluteRangeForAnotherQuery');
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
@@ -173,20 +170,6 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-    });
-
-    describe('filter editor', function () {
-      it('should add a phrases filter', async function () {
-        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
-        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
-      });
-
-      it('should show the phrases if you re-open a phrases filter', async function () {
-        await filterBar.clickEditFilter('extension.raw', 'jpg');
-        const phrases = await filterBar.getFilterEditorSelectedPhrases();
-        expect(phrases.length).to.be(1);
-        expect(phrases[0]).to.be('jpg');
-      });
     });
 
     describe('data-shared-item', function () {
@@ -213,7 +196,7 @@ export default function ({ getService, getPageObjects }) {
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
         await browser.refresh();
         await PageObjects.header.awaitKibanaChrome();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
 
         log.debug('check that the newest doc timestamp is now -7 hours from the UTC time in the first test');
         const rowData = await PageObjects.discover.getDocTableIndex(1);

@@ -9,7 +9,6 @@ import { setupEnvironment, pageHelpers, nextTick, findTestSubject, getRandomStri
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/cross_cluster_replication',

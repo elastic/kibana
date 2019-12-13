@@ -20,15 +20,33 @@
 import { map, mergeMap } from 'rxjs/operators';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { CoreSetup, CoreStart, Logger, PluginInitializerContext, PluginName } from 'kibana/server';
+import {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  PluginInitializerContext,
+  PluginConfigDescriptor,
+  PluginName,
+} from 'kibana/server';
 
-export const config = {
-  schema: schema.object({
-    secret: schema.string({ defaultValue: 'Not really a secret :/' }),
-  }),
+const configSchema = schema.object({
+  secret: schema.string({ defaultValue: 'Not really a secret :/' }),
+  uiProp: schema.string({ defaultValue: 'Accessible from client' }),
+});
+
+type ConfigType = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor = {
+  exposeToBrowser: {
+    uiProp: true,
+  },
+  schema: configSchema,
+  deprecations: ({ rename, unused, renameFromRoot }) => [
+    rename('securityKey', 'secret'),
+    renameFromRoot('oldtestbed.uiProp', 'testbed.uiProp'),
+    unused('deprecatedProperty'),
+  ],
 };
-
-type ConfigType = TypeOf<typeof config.schema>;
 
 class Plugin {
   private readonly log: Logger;

@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { resolve } from 'path';
 import { Server } from 'hapi';
+import { Root } from 'joi';
 
 import { PluginInitializerContext } from 'src/core/server';
 import { plugin } from './server';
@@ -23,8 +24,12 @@ import {
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_FROM,
   DEFAULT_TO,
+  DEFAULT_SIGNALS_INDEX,
+  SIGNALS_INDEX_KEY,
+  DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
+import { initServerWithKibana } from './server/kibana.index';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -32,12 +37,7 @@ export const siem = (kibana: any) => {
     id: APP_ID,
     configPrefix: 'xpack.siem',
     publicDir: resolve(__dirname, 'public'),
-    require: ['kibana', 'elasticsearch'],
-    // Uncomment these lines to turn on alerting and action for detection engine and comment the other
-    // require statement out. These are hidden behind feature flags at the moment so if you turn
-    // these on without the feature flags turned on then Kibana will crash since we are a legacy plugin
-    // and legacy plugins cannot have optional requirements.
-    // require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
+    require: ['kibana', 'elasticsearch', 'alerting', 'actions'],
     uiExports: {
       app: {
         description: i18n.translate('xpack.siem.securityDescription', {
@@ -106,6 +106,20 @@ export const siem = (kibana: any) => {
           category: ['siem'],
           requiresPageReload: true,
         },
+        // DEPRECATED: This should be removed once the front end is no longer using any parts of it.
+        // TODO: Remove this as soon as no code is left that is pulling data from it.
+        [DEFAULT_SIGNALS_INDEX_KEY]: {
+          name: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexLabel', {
+            defaultMessage: 'Elasticsearch signals index',
+          }),
+          value: DEFAULT_SIGNALS_INDEX,
+          description: i18n.translate('xpack.siem.uiSettings.defaultSignalsIndexDescription', {
+            defaultMessage:
+              '<p>Elasticsearch signals index from which outputted signals will appear by default</p>',
+          }),
+          category: ['siem'],
+          requiresPageReload: true,
+        },
         [DEFAULT_ANOMALY_SCORE]: {
           name: i18n.translate('xpack.siem.uiSettings.defaultAnomalyScoreLabel', {
             defaultMessage: 'Anomaly threshold',
@@ -123,39 +137,35 @@ export const siem = (kibana: any) => {
       mappings: savedObjectMappings,
     },
     init(server: Server) {
-      const {
-        config,
-        getInjectedUiAppVars,
-        indexPatternsServiceFactory,
-        injectUiAppVars,
-        newPlatform,
-        plugins,
-        route,
-        savedObjects,
-      } = server;
-
-      const {
-        env,
-        coreContext: { logger },
-        setup,
-      } = newPlatform;
-      const initializerContext = { logger, env };
+      const { config, newPlatform, plugins, route } = server;
+      const { coreContext, env, setup } = newPlatform;
+      const initializerContext = { ...coreContext, env } as PluginInitializerContext;
 
       const serverFacade = {
         config,
-        getInjectedUiAppVars,
-        indexPatternsServiceFactory,
-        injectUiAppVars,
-        plugins: { alerting: plugins.alerting, xpack_main: plugins.xpack_main },
+        plugins: {
+          alerting: plugins.alerting,
+          elasticsearch: plugins.elasticsearch,
+          spaces: plugins.spaces,
+        },
         route: route.bind(server),
-        savedObjects,
       };
+      // @ts-ignore-next-line: setup.plugins is too loosely typed
+      plugin(initializerContext).setup(setup.core, setup.plugins);
 
-      plugin(initializerContext as PluginInitializerContext).setup(
-        setup.core,
-        setup.plugins,
-        serverFacade
-      );
+      initServerWithKibana(initializerContext, serverFacade);
+    },
+    config(Joi: Root) {
+      // See x-pack/plugins/siem/server/config.ts if you're adding another
+      // value where the configuration has to be duplicated at the moment.
+      // When we move over to the new platform completely this will be
+      // removed and only server/config.ts should be used.
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+          [SIGNALS_INDEX_KEY]: Joi.string().default(DEFAULT_SIGNALS_INDEX),
+        })
+        .default();
     },
   });
 };

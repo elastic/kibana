@@ -10,7 +10,6 @@ import { RemoteClustersFormField } from '../../public/app/components';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.followerIndexAdd;
 const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;

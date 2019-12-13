@@ -22,7 +22,7 @@ interface Props {
   onChange(item: PivotAggsConfig): void;
 }
 
-export const AggLabelForm: React.SFC<Props> = ({
+export const AggLabelForm: React.FC<Props> = ({
   deleteHandler,
   item,
   otherAggNames,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -15,12 +15,12 @@ import { ArrowBody, ArrowHead } from '.';
 describe('arrows', () => {
   describe('ArrowBody', () => {
     test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
+      const wrapper = mount(
         <TestProviders>
           <ArrowBody height={3} />
         </TestProviders>
       );
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('ArrowBody'))).toMatchSnapshot();
     });
   });
 

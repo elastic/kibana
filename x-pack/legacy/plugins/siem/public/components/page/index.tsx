@@ -13,17 +13,26 @@ import {
   EuiIcon,
   EuiPage,
 } from '@elastic/eui';
-import styled, { injectGlobal } from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 
-// SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
-// eslint-disable-next-line no-unused-expressions
-injectGlobal`
+/*
+  SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
+  and `EuiPopover`, `EuiToolTip` global styles
+*/
+export const AppGlobalStyle = createGlobalStyle`
   div.app-wrapper {
     background-color: rgba(0,0,0,0);
   }
 
   div.application {
     background-color: rgba(0,0,0,0);
+  }
+
+  .euiPopover__panel.euiPopover__panel-isOpen {
+    z-index: 9900 !important;
+  }
+  .euiToolTip {
+    z-index: 9950 !important;
   }
 `;
 

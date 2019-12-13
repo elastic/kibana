@@ -14,18 +14,17 @@ import {
 } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
-import { pure } from 'recompose';
 import styled, { css } from 'styled-components';
 
 const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
-  ${({ overlay, overlayBackground, theme }) => css`
-    padding: ${theme.eui.paddingSizes.m};
+  padding: ${({ theme }) => theme.eui.paddingSizes.m};
 
-    ${overlay &&
-      `
-      background: ${
-        overlayBackground ? rgba(overlayBackground, 0.9) : rgba(theme.eui.euiColorEmptyShade, 0.9)
-      };
+  ${({ overlay, overlayBackground, theme }) =>
+    overlay &&
+    css`
+      background: ${overlayBackground
+        ? rgba(overlayBackground, 0.9)
+        : rgba(theme.eui.euiColorEmptyShade, 0.9)};
       bottom: 0;
       left: 0;
       position: absolute;
@@ -33,22 +32,21 @@ const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
       top: 0;
       z-index: ${theme.eui.euiZLevel1};
     `}
-  `}
 `;
 
 Aside.displayName = 'Aside';
 
-const FlexGroup = styled(EuiFlexGroup).attrs({
+const FlexGroup = styled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',
   direction: 'column',
   gutterSize: 's',
   justifyContent: 'center',
-})<{ overlay: { overlay?: boolean } }>`
+}))<{ overlay: { overlay?: boolean } }>`
   ${({ overlay }) =>
     overlay &&
-    `
-    height: 100%;
-  `}
+    css`
+      height: 100%;
+    `}
 `;
 
 FlexGroup.displayName = 'FlexGroup';
@@ -57,9 +55,10 @@ export interface LoaderProps {
   overlay?: boolean;
   overlayBackground?: string;
   size?: EuiLoadingSpinnerSize;
+  children?: React.ReactChild;
 }
 
-export const Loader = pure<LoaderProps>(({ children, overlay, overlayBackground, size }) => (
+export const Loader = React.memo<LoaderProps>(({ children, overlay, overlayBackground, size }) => (
   <Aside overlay={overlay} overlayBackground={overlayBackground}>
     <FlexGroup overlay={{ overlay }}>
       <EuiFlexItem grow={false}>

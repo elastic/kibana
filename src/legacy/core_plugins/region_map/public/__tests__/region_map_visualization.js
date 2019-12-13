@@ -109,7 +109,7 @@ describe('RegionMapsVisualizationTests', function () {
 
       if(!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.registerVisualization(() => createRegionMapTypeDefinition(dependencies));
+        visualizationsSetup.types.createBaseVisualization(createRegionMapTypeDefinition(dependencies));
       }
 
       RegionMapsVisualization = createRegionMapVisualization(dependencies);

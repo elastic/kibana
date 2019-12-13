@@ -29,8 +29,6 @@ export default function ({ getService, getPageObjects }) {
   // FLAKY: https://github.com/elastic/kibana/issues/45089
   describe('gauge chart', function indexPatternCreation() {
     this.tags('smoke');
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
 
     async function initGaugeVis() {
       log.debug('navigateToApp visualize');
@@ -38,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickGauge');
       await PageObjects.visualize.clickGauge();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     }
 
     before(initGaugeVis);

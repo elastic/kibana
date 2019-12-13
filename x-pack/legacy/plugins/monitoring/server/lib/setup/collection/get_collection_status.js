@@ -273,13 +273,15 @@ function shouldSkipBucket(product, bucket) {
   return false;
 }
 
-async function getLiveKibanaInstance(req) {
-  const { collectorSet } = req.server.usage;
-  const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
+async function getLiveKibanaInstance(usageCollection) {
+  if (!usageCollection) {
+    return null;
+  }
+  const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE);
   if (!await kibanaStatsCollector.isReady()) {
     return null;
   }
-  return collectorSet.toApiFieldNames(await kibanaStatsCollector.fetch());
+  return usageCollection.toApiFieldNames(await kibanaStatsCollector.fetch());
 }
 
 async function getLiveElasticsearchClusterUuid(req) {
@@ -341,9 +343,11 @@ async function getLiveElasticsearchCollectionEnabled(req) {
  * @param {*} skipLiveData Optional and will not make any live api calls if set to true
  */
 export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeUuid, skipLiveData) => {
+
   const config = req.server.config();
   const kibanaUuid = config.get('server.uuid');
   const hasPermissions = await hasNecessaryPermissions(req);
+
   if (!hasPermissions) {
     return {
       _meta: {
@@ -351,6 +355,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
       }
     };
   }
+  console.log('OKOKOKOK');
   const liveClusterUuid = skipLiveData ? null : await getLiveElasticsearchClusterUuid(req);
   const isLiveCluster = !clusterUuid || liveClusterUuid === clusterUuid;
 
@@ -372,7 +377,8 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid, nodeU
 
 
   const liveEsNodes = skipLiveData || !isLiveCluster ? [] : await getLivesNodes(req);
-  const liveKibanaInstance = skipLiveData || !isLiveCluster ? {} : await getLiveKibanaInstance(req);
+  const { usageCollection } = req.server.newPlatform.setup.plugins;
+  const liveKibanaInstance = skipLiveData || !isLiveCluster ? {} : await getLiveKibanaInstance(usageCollection);
   const indicesBuckets = get(recentDocuments, 'aggregations.indices.buckets', []);
   const liveClusterInternalCollectionEnabled = await getLiveElasticsearchCollectionEnabled(req);
 

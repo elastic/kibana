@@ -57,12 +57,13 @@ export function rollup(kibana) {
       ],
     },
     init: function (server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       registerLicenseChecker(server);
       registerIndicesRoute(server);
       registerFieldsForWildcardRoute(server);
       registerSearchRoute(server);
       registerJobsRoute(server);
-      registerRollupUsageCollector(server);
+      registerRollupUsageCollector(usageCollection, server);
       if (
         server.plugins.index_management &&
         server.plugins.index_management.addIndexManagementDataEnricher

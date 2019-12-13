@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { IndexPatternSelect } from 'ui/index_patterns';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { indexPatternService } from '../../../kibana_services';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
+import { npStart } from 'ui/new_platform';
+const { IndexPatternSelect } = npStart.plugins.data.ui;
 const GEO_FIELD_TYPES = [ES_GEO_FIELD_TYPE.GEO_POINT];
 
 function filterGeoField({ type }) {

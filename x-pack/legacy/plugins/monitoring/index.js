@@ -56,9 +56,6 @@ export const monitoring = (kibana) => new kibana.Plugin({
           throw `Unknown key '${key}'`;
         }
       }),
-      usage: {
-        collectorSet: server.usage.collectorSet
-      },
       injectUiAppVars: server.injectUiAppVars,
       log: (...args) => server.log(...args),
       getOSInfo: server.getOSInfo,
@@ -70,11 +67,12 @@ export const monitoring = (kibana) => new kibana.Plugin({
       _hapi: server,
       _kbnServer: this.kbnServer
     };
-
+    const { usageCollection } = server.newPlatform.setup.plugins;
     const plugins = {
       xpack_main: server.plugins.xpack_main,
       elasticsearch: server.plugins.elasticsearch,
       infra: server.plugins.infra,
+      usageCollection,
     };
 
     new Plugin().setup(serverFacade, plugins);

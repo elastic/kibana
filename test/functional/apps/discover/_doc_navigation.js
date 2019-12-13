@@ -19,8 +19,6 @@
 
 import expect from '@kbn/expect';
 
-const TEST_DOC_START_TIME = '2015-09-19 06:31:44.000';
-const TEST_DOC_END_TIME = '2015-09-23 18:31:44.000';
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [['extension', 'jpg'], ['geo.src', 'IN']];
 
@@ -35,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setAbsoluteRange(TEST_DOC_START_TIME, TEST_DOC_END_TIME);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await Promise.all(TEST_COLUMN_NAMES.map((columnName) => (
         PageObjects.discover.clickFieldListItemAdd(columnName)
       )));

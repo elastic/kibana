@@ -71,10 +71,16 @@ module.exports = {
           },
         },
         {
+          disallow: {
+            name: '@kbn/elastic-idx',
+            error: `Don't use idx(), use optional chaining syntax instead https://ela.st/optchain`
+          }
+        },
+        {
           relativeToNamed: {
             name: 'x-pack',
             directory: Path.resolve(REPO_ROOT, 'x-pack'),
-          },
+          }
         },
         {
           rename: {

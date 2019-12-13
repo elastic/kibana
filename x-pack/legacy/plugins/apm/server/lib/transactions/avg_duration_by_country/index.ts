@@ -12,7 +12,11 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 
@@ -21,7 +25,7 @@ export async function getTransactionAvgDurationByCountry({
   serviceName,
   transactionName
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   transactionName?: string;
 }) {

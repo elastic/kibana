@@ -260,10 +260,10 @@ interface API {
   PAGE_TITLE_COMPONENT: string; // actually related to advanced settings?
   PAGE_SUBTITLE_COMPONENT: string; // actually related to advanced settings?
   PAGE_FOOTER_COMPONENT: string; // actually related to advanced settings?
-  SidebarNav: React.SFC<any>;
+  SidebarNav: React.FC<any>;
   registerSettingsComponent: (
     id: string,
-    component: string | React.SFC<any>,
+    component: string | React.FC<any>,
     allowOverride: boolean
   ) => void;
   management: new ManagementSection();

@@ -9,12 +9,11 @@ import {
   createDashboardEditUrl,
   DashboardConstants,
 } from '../../../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
-import { SecurityService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const security: SecurityService = getService('security');
+  const security = getService('security');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'spaceSelector', 'share']);
   const appsMenu = getService('appsMenu');
   const panelActions = getService('dashboardPanelActions');

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uiModules } from 'ui/modules';
-
-// disable the kibana state management
-const app = uiModules.get('apps/canvas');
-app.config(stateManagementConfigProvider => {
-  stateManagementConfigProvider.disable();
-});
+export function initStateManagement(coreStart, plugins) {
+  // disable the kibana state management
+  const app = plugins.__LEGACY.uiModules.get('apps/canvas');
+  app.config(stateManagementConfigProvider => {
+    stateManagementConfigProvider.disable();
+  });
+}

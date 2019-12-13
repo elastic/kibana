@@ -15,26 +15,54 @@ import {
   HEATMAP_COLOR_RAMP_LABEL
 } from '../heatmap_constants';
 
-export function HeatmapLegend({ colorRampName, label }) {
-  const header = colorRampName === DEFAULT_HEATMAP_COLOR_RAMP_NAME
-    ? <ColorGradient colorRamp={DEFAULT_RGB_HEATMAP_COLOR_RAMP}/>
-    : <ColorGradient colorRampName={colorRampName}/>;
+export class HeatmapLegend extends React.Component {
 
-  return (
-    <StyleLegendRow
-      header={header}
-      minLabel={
-        i18n.translate('xpack.maps.heatmapLegend.coldLabel', {
-          defaultMessage: 'cold'
-        })
-      }
-      maxLabel={
-        i18n.translate('xpack.maps.heatmapLegend.hotLabel', {
-          defaultMessage: 'hot'
-        })
-      }
-      propertyLabel={HEATMAP_COLOR_RAMP_LABEL}
-      fieldLabel={label}
-    />
-  );
+  constructor() {
+    super();
+    this.state = { label: '' };
+  }
+
+  componentDidUpdate() {
+    this._loadLabel();
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    this._loadLabel();
+  }
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async _loadLabel() {
+    const label = await this.props.field.getLabel();
+    if (this._isMounted && this.state.label !== label) {
+      this.setState({ label });
+    }
+  }
+
+  render() {
+    const colorRampName = this.props.colorRampName;
+    const header = colorRampName === DEFAULT_HEATMAP_COLOR_RAMP_NAME
+      ? <ColorGradient colorRamp={DEFAULT_RGB_HEATMAP_COLOR_RAMP}/>
+      : <ColorGradient colorRampName={colorRampName}/>;
+
+    return (
+      <StyleLegendRow
+        header={header}
+        minLabel={
+          i18n.translate('xpack.maps.heatmapLegend.coldLabel', {
+            defaultMessage: 'cold'
+          })
+        }
+        maxLabel={
+          i18n.translate('xpack.maps.heatmapLegend.hotLabel', {
+            defaultMessage: 'hot'
+          })
+        }
+        propertyLabel={HEATMAP_COLOR_RAMP_LABEL}
+        fieldLabel={this.state.label}
+      />
+    );
+  }
 }

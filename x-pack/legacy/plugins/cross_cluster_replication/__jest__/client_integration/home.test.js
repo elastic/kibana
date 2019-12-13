@@ -8,7 +8,6 @@
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.home;
 

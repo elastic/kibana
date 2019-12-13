@@ -17,14 +17,15 @@
  * under the License.
  */
 
+import _ from 'lodash';
 import { join } from 'path';
 
-import { pkg } from '../legacy/utils';
+import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
-import { getData } from '../legacy/server/path';
+import { getDataPath } from '../core/server/path';
 import { Keystore } from '../legacy/server/keystore';
 
-const path = join(getData(), 'kibana.keystore');
+const path = join(getDataPath(), 'kibana.keystore');
 const keystore = new Keystore(path);
 
 import { createCli } from './create';
@@ -32,6 +33,7 @@ import { listCli } from './list';
 import { addCli } from './add';
 import { removeCli } from './remove';
 
+const argv = process.env.kbnWorkerArgv ? JSON.parse(process.env.kbnWorkerArgv) : process.argv.slice();
 const program = new Command('bin/kibana-keystore');
 
 program
@@ -43,8 +45,25 @@ listCli(program, keystore);
 addCli(program, keystore);
 removeCli(program, keystore);
 
-program.parse(process.argv);
+program
+  .command('help <command>')
+  .description('get the help for a specific command')
+  .action(function (cmdName) {
+    const cmd = _.find(program.commands, { _name: cmdName });
+    if (!cmd) return program.error(`unknown command ${cmdName}`);
+    cmd.help();
+  });
 
-if (!program.args.length) {
-  program.help();
+program
+  .command('*', null, { noHelp: true })
+  .action(function (cmd) {
+    program.error(`unknown command ${cmd}`);
+  });
+
+// check for no command name
+const subCommand = argv[2] && !String(argv[2][0]).match(/^-|^\.|\//);
+if (!subCommand) {
+  program.defaultHelp();
 }
+
+program.parse(process.argv);

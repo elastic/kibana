@@ -5,13 +5,17 @@
  */
 
 import { Coordinate } from '../../../../typings/timeseries';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { fetcher } from './fetcher';
 import { transformer } from './transformer';
 
 export interface Options {
   serviceName: string;
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
 }
 
 export type AvgDurationByBrowserAPIResponse = Array<{

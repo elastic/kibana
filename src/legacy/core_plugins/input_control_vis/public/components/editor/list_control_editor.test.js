@@ -17,12 +17,24 @@
  * under the License.
  */
 
-jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
+jest.mock('ui/new_platform', () => ({
+  npStart: {
+    plugins: {
+      data: {
+        ui: {
+          IndexPatternSelect: () => {
+            return <div/>;
+          }
+        }
+      }
+    },
+  },
+}));
 
 import React from 'react';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
+
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getIndexPatternMock } from './__tests__/get_index_pattern_mock';

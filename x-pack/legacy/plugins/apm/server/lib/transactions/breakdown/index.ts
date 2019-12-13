@@ -15,7 +15,11 @@ import {
   TRANSACTION_BREAKDOWN_COUNT,
   PROCESSOR_EVENT
 } from '../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../helpers/setup_request';
+import {
+  Setup,
+  SetupTimeRange,
+  SetupUIFilters
+} from '../../helpers/setup_request';
 import { rangeFilter } from '../../helpers/range_filter';
 import { getMetricsDateHistogramParams } from '../../helpers/metrics';
 import { MAX_KPIS } from './constants';
@@ -27,7 +31,7 @@ export async function getTransactionBreakdown({
   transactionName,
   transactionType
 }: {
-  setup: Setup;
+  setup: Setup & SetupTimeRange & SetupUIFilters;
   serviceName: string;
   transactionName?: string;
   transactionType: string;

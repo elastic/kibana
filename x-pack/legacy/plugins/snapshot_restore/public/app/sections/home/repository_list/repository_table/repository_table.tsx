@@ -6,12 +6,12 @@
 
 import React, { useState, Fragment } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
@@ -67,12 +67,15 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
             </EuiLink>
             &nbsp;&nbsp;
             {managedRepository === name ? (
-              <EuiBadge color="primary">
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
-                  defaultMessage="Managed"
-                />
-              </EuiBadge>
+              <EuiIconTip
+                content={
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
+                    defaultMessage="This is a managed repository"
+                  />
+                }
+                position="right"
+              />
             ) : null}
           </Fragment>
         );

@@ -23,8 +23,8 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
-  const fromTime = '2019-01-01 00:00:00.000';
-  const toTime = '2019-01-01 23:59:59.999';
+  const fromTime = 'Jan 1, 2019 @ 00:00:00.000';
+  const toTime = 'Jan 1, 2019 @ 23:59:59.999';
 
   describe('date_nanos_mixed', function () {
 

@@ -74,6 +74,7 @@ describe('#get', () => {
         port: 1234,
         rewriteBasePath: false,
         ssl: { enabled: true, keyPassphrase: 'some-phrase', someNewValue: 'new' },
+        compression: { enabled: true },
         someNotSupportedValue: 'val',
       },
     });
@@ -90,6 +91,7 @@ describe('#get', () => {
         port: 1234,
         rewriteBasePath: false,
         ssl: { enabled: false, certificate: 'cert', key: 'key' },
+        compression: { enabled: true },
         someNotSupportedValue: 'val',
       },
     });

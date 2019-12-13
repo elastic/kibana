@@ -21,10 +21,10 @@ import { i18n } from '@kbn/i18n';
 
 import { DataViewComponent } from './components/data_view';
 import { Adapters, InspectorViewDescription, InspectorViewProps } from '../../types';
-import { UiSettingsClientContract } from '../../../../../core/public';
+import { IUiSettingsClient } from '../../../../../core/public';
 
 export const getDataViewDescription = (
-  uiSettings: UiSettingsClientContract
+  uiSettings: IUiSettingsClient
 ): InspectorViewDescription => ({
   title: i18n.translate('inspector.data.dataTitle', {
     defaultMessage: 'Data',

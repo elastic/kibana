@@ -30,8 +30,6 @@ export default function ({ getService, getPageObjects }) {
 
   describe('tag cloud chart', function () {
     const vizName1 = 'Visualization tagCloud';
-    const fromTime = '2015-09-19 06:31:44.000';
-    const toTime = '2015-09-23 18:31:44.000';
     const termsField = 'machine.ram';
 
     before(async function () {
@@ -40,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('clickTagCloud');
       await PageObjects.visualize.clickTagCloud();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('select Tags');
       await PageObjects.visualize.clickBucket('Tags');
       log.debug('Click aggregation Terms');
@@ -98,7 +96,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
@@ -140,7 +138,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToApp('visualize');
         await PageObjects.visualize.loadSavedVisualization(vizName1, { navigateToVisualize: false });
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visualize.waitForVisualization();
       });
 

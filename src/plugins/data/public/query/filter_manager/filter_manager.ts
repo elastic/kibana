@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 
 import { compareFilters } from './lib/compare_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
@@ -33,9 +33,9 @@ export class FilterManager {
   private filters: esFilters.Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
-  private uiSettings: UiSettingsClientContract;
+  private uiSettings: IUiSettingsClient;
 
-  constructor(uiSettings: UiSettingsClientContract) {
+  constructor(uiSettings: IUiSettingsClient) {
     this.uiSettings = uiSettings;
   }
 
