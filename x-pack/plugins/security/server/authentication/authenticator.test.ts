@@ -7,6 +7,7 @@
 jest.mock('./providers/basic', () => ({ BasicAuthenticationProvider: jest.fn() }));
 
 import Boom from 'boom';
+import { duration, Duration } from 'moment';
 import { SessionStorage } from '../../../../../src/core/server';
 
 import {
@@ -440,7 +441,7 @@ describe('Authenticator', () => {
       // Create new authenticator with non-null session `idleTimeout`.
       mockOptions = getMockOptions({
         session: {
-          idleTimeout: 3600 * 24,
+          idleTimeout: duration(3600 * 24),
           lifespan: null,
         },
         authc: { providers: ['basic'], oidc: {}, saml: {} },
@@ -479,8 +480,8 @@ describe('Authenticator', () => {
       // Create new authenticator with non-null session `idleTimeout` and `lifespan`.
       mockOptions = getMockOptions({
         session: {
-          idleTimeout: hr * 2,
-          lifespan: hr * 8,
+          idleTimeout: duration(hr * 2),
+          lifespan: duration(hr * 8),
         },
         authc: { providers: ['basic'], oidc: {}, saml: {} },
       });
@@ -521,7 +522,7 @@ describe('Authenticator', () => {
       const currentDate = new Date(Date.UTC(2019, 10, 10)).valueOf();
 
       async function createAndUpdateSession(
-        lifespan: number | null,
+        lifespan: Duration | null,
         oldExpiration: number | null,
         newExpiration: number | null
       ) {
@@ -565,7 +566,7 @@ describe('Authenticator', () => {
       }
 
       it('does not change a non-null lifespan expiration when configured to non-null value.', async () => {
-        await createAndUpdateSession(hr * 8, 1234, 1234);
+        await createAndUpdateSession(duration(hr * 8), 1234, 1234);
       });
       it('does not change a null lifespan expiration when configured to null value.', async () => {
         await createAndUpdateSession(null, null, null);
@@ -574,7 +575,7 @@ describe('Authenticator', () => {
         await createAndUpdateSession(null, 1234, null);
       });
       it('does change a null lifespan expiration when configured to non-null value', async () => {
-        await createAndUpdateSession(hr * 8, null, currentDate + hr * 8);
+        await createAndUpdateSession(duration(hr * 8), null, currentDate + hr * 8);
       });
     });
 
