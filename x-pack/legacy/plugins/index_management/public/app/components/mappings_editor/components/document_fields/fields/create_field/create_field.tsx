@@ -219,9 +219,13 @@ export const CreateField = React.memo(function CreateFieldComponent({
           type="submit"
           data-test-subj="addButton"
         >
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addButtonLabel', {
-            defaultMessage: 'Add',
-          })}
+          {isMultiField
+            ? i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addMultiFieldButtonLabel', {
+                defaultMessage: 'Add multi-field',
+              })
+            : i18n.translate('xpack.idxMgmt.mappingsEditor.createField.addFieldButtonLabel', {
+                defaultMessage: 'Add field',
+              })}
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -259,11 +263,6 @@ export const CreateField = React.memo(function CreateFieldComponent({
         >
           <div className="mappingsEditor__createFieldContent">
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              {isMultiField && (
-                <EuiFlexItem grow={false} className="mappingsEditor__createFieldContent__icon">
-                  <EuiIcon type="link" />
-                </EuiFlexItem>
-              )}
               <FormDataProvider pathsToWatch="type">{renderFormFields}</FormDataProvider>
               <EuiFlexItem>{renderFormActions()}</EuiFlexItem>
             </EuiFlexGroup>

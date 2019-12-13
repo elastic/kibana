@@ -185,26 +185,17 @@ export const FieldsListItem = React.memo(function FieldListItemComponent({
                 />
               </EuiFlexItem>
             )}
-            {isMultiField && (
-              <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__icon">
-                <EuiIcon color="subdued" type="link" />
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false} className="mappingsEditor__fieldsListItem__name">
               {source.name}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow">{TYPE_DEFINITION[source.type].label}</EuiBadge>
+              <EuiBadge color="hollow">
+                {TYPE_DEFINITION[source.type].label}
+                {isMultiField ? ' multi-field' : ''} {/* e.g., "Text multi-field" */}
+              </EuiBadge>
             </EuiFlexItem>
             {canHaveMultiFields && (
               <>
-                {hasMultiFields && (
-                  <EuiFlexItem grow={false}>
-                    <EuiNotificationBadge onClick={toggleExpand}>
-                      {childFields!.length}
-                    </EuiNotificationBadge>
-                  </EuiFlexItem>
-                )}
                 {areActionButtonsVisible && (
                   <EuiFlexItem
                     grow={false}

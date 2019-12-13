@@ -6,7 +6,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiComboBox, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiComboBox,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { UseField, useFormContext } from '../../../../shared_imports';
 import { MainType, SubType, Field, ComboBoxOption } from '../../../../types';
@@ -107,6 +114,19 @@ export const EditFieldHeaderForm = React.memo(({ type, defaultValue, isMultiFiel
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+
+        {isMultiField ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldsDescription', {
+                defaultMessage:
+                  'Multi-fields are useful to index the same field in different ways.',
+              })}
+            </EuiText>
+          </>
+        ) : null}
+
         <EuiSpacer size="m" />
       </>
     </EditFieldSection>
