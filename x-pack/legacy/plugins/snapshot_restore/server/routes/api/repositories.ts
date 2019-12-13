@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { cleanup } from '@testing-library/react';
 import { Router, RouterRouteHandler } from '../../../../../server/lib/create_router';
 import {
   wrapCustomError,
@@ -15,6 +16,7 @@ import {
   RepositoryType,
   RepositoryVerification,
   SlmPolicyEs,
+  RepositoryCleanup,
 } from '../../../common/types';
 
 import { Plugins } from '../../../shim';
@@ -34,6 +36,7 @@ export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
   router.get('repositories', getAllHandler);
   router.get('repositories/{name}', getOneHandler);
   router.get('repositories/{name}/verify', getVerificationHandler);
+  router.post('repositories/{name}/cleanup', getCleanupHandler);
   router.put('repositories', createHandler);
   router.put('repositories/{name}', updateHandler);
   router.delete('repositories/{names}', deleteHandler);
@@ -168,6 +171,29 @@ export const getVerificationHandler: RouterRouteHandler = async (
       : {
           valid: true,
           response: verificationResults,
+        },
+  };
+};
+
+export const getCleanupHandler: RouterRouteHandler = async (
+  req,
+  callWithRequest
+): Promise<{
+  cleanup: RepositoryCleanup | {};
+}> => {
+  const { name } = req.params;
+  const cleanupResults = await callWithRequest('snapshot.cleanupRepository', {
+    repository: name,
+  }).catch(e => ({
+    cleaned: false,
+    error: e.response ? JSON.parse(e.response) : e,
+  }));
+  return {
+    cleanup: cleanupResults.errorgi
+      ? cleanupResults
+      : {
+          cleaned: true,
+          response: cleanupResults,
         },
   };
 };

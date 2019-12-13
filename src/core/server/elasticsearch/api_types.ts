@@ -143,6 +143,7 @@ import {
   TasksCancelParams,
   TasksGetParams,
   TasksListParams,
+  SnapshotCleanupRepositoryParams,
 } from 'elasticsearch';
 
 /**
@@ -298,6 +299,7 @@ export interface APICaller {
   (endpoint: 'snapshot.restore', params: SnapshotRestoreParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['restore']>;
   (endpoint: 'snapshot.status', params: SnapshotStatusParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['status']>;
   (endpoint: 'snapshot.verifyRepository', params: SnapshotVerifyRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['verifyRepository']>;
+  (endpoint: 'snapshot.cleanupRepository', params: SnapshotCleanupRepositoryParams, options?: CallAPIOptions): ReturnType<Client['snapshot']['cleanupRepository']>;
 
   // tasks namespace
   (endpoint: 'tasks.cancel', params: TasksCancelParams, options?: CallAPIOptions): ReturnType<Client['tasks']['cancel']>;

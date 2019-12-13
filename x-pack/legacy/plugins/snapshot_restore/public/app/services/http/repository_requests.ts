@@ -47,8 +47,11 @@ export const verifyRepository = async (name: Repository['name']) => {
 
 export const cleanupRepository = async (name: Repository['name']) => {
   const result = await sendRequest({
-    path: httpService.addBasePath(`_snapshot/${encodeURIComponent(name)}/_cleanup`),
+    path: httpService.addBasePath(
+      `${API_BASE_PATH}repositories/${encodeURIComponent(name)}/cleanup`
+    ),
     method: 'post',
+    body: undefined,
   });
 
   const { trackUiMetric } = uiMetricService;

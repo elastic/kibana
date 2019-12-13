@@ -80,7 +80,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   const cleanupRepository = async () => {
     setIsLoadingCleanup(true);
     const { data } = await cleanupRepositoryRequest(repositoryName);
-    setCleanup(data);
+    setCleanup(data.cleanup);
     setIsLoadingCleanup(false);
   };
 
