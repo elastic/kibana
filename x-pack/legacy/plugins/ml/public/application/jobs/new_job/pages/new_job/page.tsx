@@ -19,8 +19,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
-import { jobCreatorFactory, isAdvancedJobCreator } from '../../common/job_creator';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
+import {
+  jobCreatorFactory,
+  isAdvancedJobCreator,
+  isCategorizationJobCreator,
+} from '../../common/job_creator';
 import {
   JOB_TYPE,
   DEFAULT_MODEL_MEMORY_LIMIT,
@@ -34,6 +38,8 @@ import { getTimeFilterRange } from '../../../../components/full_time_range_selec
 import { TimeBuckets } from '../../../../util/time_buckets';
 import { ExistingJobsAndGroups, mlJobService } from '../../../../services/job_service';
 import { expandCombinedJobConfig } from '../../common/job_creator/configs';
+import { newJobCapsService } from '../../../../services/new_job_capabilities_service';
+import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -116,6 +122,15 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       // Jobs created from saved searches cannot be cloned in the wizard as the
       // ML job config holds no reference to the saved search ID.
       jobCreator.createdBy = null;
+    }
+
+    if (isCategorizationJobCreator(jobCreator)) {
+      // categorization job will always use a count agg, so give it
+      // to the job creator now
+      const count = newJobCapsService.getAggById('count');
+      const eventRate = newJobCapsService.getFieldById(EVENT_RATE_FIELD_ID);
+      jobCreator.setDefaultDetectorProperties(count, eventRate);
+      jobCreator.modelPlot = true;
     }
 
     // auto set the time range if creating a new advanced job

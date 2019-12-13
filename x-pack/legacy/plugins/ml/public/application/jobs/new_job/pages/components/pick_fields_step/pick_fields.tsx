@@ -15,6 +15,7 @@ import { SingleMetricView } from './components/single_metric_view';
 import { MultiMetricView } from './components/multi_metric_view';
 import { PopulationView } from './components/population_view';
 import { AdvancedView } from './components/advanced_view';
+import { CategorizationView } from './components/categorization_view';
 import { JsonEditorFlyout, EDITOR_MODE } from '../common/json_editor_flyout';
 import { DatafeedPreviewFlyout } from '../common/datafeed_preview_flyout';
 
@@ -49,6 +50,9 @@ export const PickFieldsStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep })
           )}
           {jobType === JOB_TYPE.ADVANCED && (
             <AdvancedView isActive={isCurrentStep} setCanProceed={setNextActive} />
+          )}
+          {jobType === JOB_TYPE.CATEGORIZATION && (
+            <CategorizationView isActive={isCurrentStep} setCanProceed={setNextActive} />
           )}
           <WizardNav
             previous={() =>

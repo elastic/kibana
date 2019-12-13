@@ -107,7 +107,7 @@ declare interface Ml {
   checkManageMLPrivileges(): Promise<PrivilegesResponse>;
   getJobStats(obj: object): Promise<any>;
   getDatafeedStats(obj: object): Promise<any>;
-  esSearch(obj: object): any;
+  esSearch(obj: object): Promise<any>;
   esSearch$(obj: object): Observable<any>;
   getIndices(): Promise<EsIndex[]>;
   dataRecognizerModuleJobsExist(obj: { moduleId: string }): Promise<any>;
@@ -171,6 +171,15 @@ declare interface Ml {
       start: number,
       end: number
     ): Promise<{ progress: number; isRunning: boolean; isJobClosed: boolean }>;
+    categorizationFieldExamples(
+      indexPatternTitle: string,
+      query: object,
+      size: number,
+      field: string,
+      start: number,
+      end: number
+    ): Promise<any[]>;
+    topCategories(jobId: string, count: number): Promise<{ total: number; categories: any[] }>;
   };
 
   estimateBucketSpan(data: BucketSpanEstimatorData): Promise<BucketSpanEstimatorResponse>;

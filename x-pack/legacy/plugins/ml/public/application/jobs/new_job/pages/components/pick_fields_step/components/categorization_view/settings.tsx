@@ -8,25 +8,15 @@ import React, { Fragment, FC } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { BucketSpan } from '../bucket_span';
-import { SplitFieldSelector } from '../split_field';
-import { Influencers } from '../influencers';
 import { SparseDataSwitch } from '../sparse_data';
 
 interface Props {
   setIsValid: (proceed: boolean) => void;
 }
 
-export const MultiMetricSettings: FC<Props> = ({ setIsValid }) => {
+export const CategorizationSettings: FC<Props> = ({ setIsValid }) => {
   return (
     <Fragment>
-      <EuiFlexGroup gutterSize="xl">
-        <EuiFlexItem>
-          <SplitFieldSelector />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <Influencers />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
           <BucketSpan setIsValid={setIsValid} />

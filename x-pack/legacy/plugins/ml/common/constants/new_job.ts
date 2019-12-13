@@ -9,12 +9,14 @@ export enum JOB_TYPE {
   MULTI_METRIC = 'multi_metric',
   POPULATION = 'population',
   ADVANCED = 'advanced',
+  CATEGORIZATION = 'categorization',
 }
 
 export enum CREATED_BY_LABEL {
   SINGLE_METRIC = 'single-metric-wizard',
   MULTI_METRIC = 'multi-metric-wizard',
   POPULATION = 'population-wizard',
+  CATEGORIZATION = 'categorization-wizard',
 }
 
 export const DEFAULT_MODEL_MEMORY_LIMIT = '10MB';

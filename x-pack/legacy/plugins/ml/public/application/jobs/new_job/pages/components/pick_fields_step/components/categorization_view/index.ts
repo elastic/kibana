@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { newJobChartsProvider } from './charts';
-export { categorizationExamplesProvider } from './categorization';
+export { CategorizationView } from './categorization_view';
