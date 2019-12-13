@@ -30,6 +30,7 @@ import { OverlayStart } from '../overlays';
 import { PluginOpaqueId } from '../plugins';
 import { IUiSettingsClient } from '../ui_settings';
 import { RecursiveReadonly } from '../../utils';
+import { SavedObjectsStart } from '../saved_objects';
 
 /** @public */
 export interface AppBase {
@@ -118,6 +119,8 @@ export interface AppMountContext {
     notifications: NotificationsStart;
     /** {@link OverlayStart} */
     overlays: OverlayStart;
+    /** {@link SavedObjectsStart} */
+    savedObjects: SavedObjectsStart;
     /** {@link IUiSettingsClient} */
     uiSettings: IUiSettingsClient;
     /**

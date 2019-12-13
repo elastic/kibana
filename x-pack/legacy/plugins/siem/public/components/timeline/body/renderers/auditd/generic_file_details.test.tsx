@@ -20,16 +20,14 @@ describe('GenericFileDetails', () => {
       // I cannot and do not want to use BrowserFields for the mocks for the snapshot tests as they are too heavy
       const browserFields: BrowserFields = {};
       const wrapper = shallow(
-        <TestProviders>
-          <AuditdGenericFileDetails
-            contextId="contextid-123"
-            text="generic-text-123"
-            browserFields={browserFields}
-            data={mockTimelineData[27].ecs}
-            fileIcon="document"
-            timelineId="test"
-          />
-        </TestProviders>
+        <AuditdGenericFileDetails
+          contextId="contextid-123"
+          text="generic-text-123"
+          browserFields={browserFields}
+          data={mockTimelineData[27].ecs}
+          fileIcon="document"
+          timelineId="test"
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -53,17 +51,15 @@ describe('GenericFileDetails', () => {
     });
 
     test('it returns null for text if the data contains no auditd data', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <AuditdGenericFileDetails
-            contextId="contextid-123"
-            text="generic-text-123"
-            browserFields={mockBrowserFields}
-            data={mockTimelineData[0].ecs}
-            fileIcon="document"
-            timelineId="test"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <AuditdGenericFileDetails
+          contextId="contextid-123"
+          text="generic-text-123"
+          browserFields={mockBrowserFields}
+          data={mockTimelineData[0].ecs}
+          fileIcon="document"
+          timelineId="test"
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });

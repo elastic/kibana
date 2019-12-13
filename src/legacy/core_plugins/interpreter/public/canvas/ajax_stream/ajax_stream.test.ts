@@ -26,7 +26,7 @@ describe('ajaxStream', () => {
   it('pulls items from the stream and calls the handler', async () => {
     const handler = jest.fn(() => ({}));
     const { req, sendText, done } = mockRequest();
-    const messages = ['{ "hello": "world" }\n', '{ "tis": "fate" }\n'].map(m => `${m.length}:${m}`);
+    const messages = ['{ "hello": "world" }\n', '{ "tis": "fate" }\n'];
 
     const promise = ajaxStream('', {}, req, {
       url: '/test/endpoint',
@@ -43,12 +43,34 @@ describe('ajaxStream', () => {
     expect(handler).toHaveBeenCalledWith({ tis: 'fate' });
   });
 
+  it('handles newlines in values', async () => {
+    const handler = jest.fn(() => ({}));
+    const { req, sendText, done } = mockRequest();
+    const messages = [
+      JSON.stringify({ hello: 'wo\nrld' }),
+      '\n',
+      JSON.stringify({ tis: 'fa\nte' }),
+      '\n',
+    ];
+
+    const promise = ajaxStream('', {}, req, {
+      url: '/test/endpoint',
+      onResponse: handler,
+    });
+
+    messages.forEach(sendText);
+    done();
+
+    await promise;
+    expect(handler).toHaveBeenCalledTimes(2);
+    expect(handler).toHaveBeenCalledWith({ hello: 'wo\nrld' });
+    expect(handler).toHaveBeenCalledWith({ tis: 'fa\nte' });
+  });
+
   it('handles partial messages', async () => {
     const handler = jest.fn(() => ({}));
     const { req, sendText, done } = mockRequest();
-    const messages = ['{ "hello": "world" }\n', '{ "tis": "fate" }\n']
-      .map(m => `${m.length}:${m}`)
-      .join('');
+    const messages = ['{ "hello": "world" }\n', '{ "tis": "fate" }\n'].join('');
 
     const promise = ajaxStream('', {}, req, {
       url: '/test/endpoint',
@@ -117,7 +139,7 @@ describe('ajaxStream', () => {
   it('rejects if the payload contains invalid JSON', async () => {
     const handler = jest.fn(() => ({}));
     const { req, sendText, done } = mockRequest();
-    const messages = ['{ waut? }\n'].map(m => `${m.length}:${m}`).join('');
+    const messages = ['{ waut? }\n'].join('');
 
     const promise = ajaxStream('', {}, req, {
       url: '/test/endpoint',
@@ -130,32 +152,12 @@ describe('ajaxStream', () => {
     expect(await promise.then(() => true).catch(() => false)).toBeFalsy();
   });
 
-  it('rejects if the delim is invalid', async () => {
-    const handler = jest.fn(() => ({}));
-    const { req, sendText, done } = mockRequest();
-    const messages = '{ "hi": "there" }';
-
-    const promise = ajaxStream('', {}, req, {
-      url: '/test/endpoint',
-      onResponse: handler,
-    });
-
-    sendText(messages);
-    done();
-
-    expect(await promise.then(() => true).catch(({ message }) => message)).toMatch(
-      /invalid stream response/i
-    );
-  });
-
   it('rejects if the handler throws', async () => {
     const handler = jest.fn(() => {
       throw new Error('DOH!');
     });
     const { req, sendText, done } = mockRequest();
-    const messages = ['{ "hello": "world" }\n', '{ "tis": "fate" }\n']
-      .map(m => `${m.length}:${m}`)
-      .join('');
+    const messages = ['{ "hello": "world" }\n', '{ "tis": "fate" }\n'].join('');
 
     const promise = ajaxStream('', {}, req, {
       url: '/test/endpoint',

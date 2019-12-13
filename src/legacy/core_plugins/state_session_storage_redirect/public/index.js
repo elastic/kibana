@@ -18,7 +18,7 @@
  */
 
 import chrome from 'ui/chrome';
-import { hashUrl } from 'ui/state_management/state_hashing';
+import { hashUrl } from '../../../../plugins/kibana_utils/public';
 import uiRoutes from 'ui/routes';
 import { fatalError } from 'ui/notify';
 

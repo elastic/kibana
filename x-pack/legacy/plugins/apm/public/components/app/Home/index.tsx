@@ -25,7 +25,7 @@ import { EuiTabLink } from '../../shared/EuiTabLink';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceMap } from '../ServiceMap';
-import { usePlugins } from '../../../new-platform/plugin';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 function getHomeTabs({
   serviceMapEnabled = false
@@ -82,9 +82,8 @@ interface Props {
 }
 
 export function Home({ tab }: Props) {
-  const { apm } = usePlugins();
-  const { serviceMapEnabled } = apm.config;
-  const homeTabs = getHomeTabs({ serviceMapEnabled });
+  const { config } = useApmPluginContext();
+  const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
     homeTab => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;

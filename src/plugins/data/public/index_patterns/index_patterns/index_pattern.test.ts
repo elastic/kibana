@@ -26,7 +26,7 @@ import mockLogStashFields from '../../../../../fixtures/logstash_fields';
 // @ts-ignore
 import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_saved_object_index_pattern';
 import { Field } from '../fields';
-import { setNotifications, setFieldFormats } from '../services';
+import { setNotifications, setFieldFormats } from '../../services';
 
 // Temporary disable eslint, will be removed after moving to new platform folder
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths

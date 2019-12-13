@@ -23,7 +23,7 @@ import { ControlEditor } from './control_editor';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
-import { start as data } from '../../../../../core_plugins/data/public/legacy';
+import { npStart } from 'ui/new_platform';
 
 import {
   EuiButton,
@@ -41,7 +41,7 @@ class ControlsTabUi extends Component {
   }
 
   getIndexPattern = async (indexPatternId) => {
-    return await data.indexPatterns.indexPatterns.get(indexPatternId);
+    return await npStart.plugins.data.indexPatterns.get(indexPatternId);
   }
 
   onChange = value => this.props.setValue('controls', value)

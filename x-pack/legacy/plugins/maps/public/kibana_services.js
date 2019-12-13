@@ -6,12 +6,12 @@
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../../../../src/legacy/ui/public/courier';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { esFilters } from '../../../../../src/plugins/data/public';
+import { npStart } from 'ui/new_platform';
 
 export const SPATIAL_FILTER_TYPE = esFilters.FILTERS.SPATIAL_FILTER;
 export { SearchSource } from '../../../../../src/legacy/ui/public/courier';
-export const indexPatternService = data.indexPatterns.indexPatterns;
+export const indexPatternService = npStart.plugins.data.indexPatterns;
 
 export async function fetchSearchSourceAndRecordWithInspector({
   searchSource,

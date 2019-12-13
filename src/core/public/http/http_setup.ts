@@ -27,21 +27,16 @@ import {
   takeUntil,
   tap,
 } from 'rxjs/operators';
-import { merge } from 'lodash';
-import { format } from 'url';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
-import { HttpFetchOptions, HttpServiceBase, HttpInterceptor, HttpResponse } from './types';
+import { HttpFetchOptions, HttpServiceBase } from './types';
 import { HttpInterceptController } from './http_intercept_controller';
-import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptHaltError } from './http_intercept_halt_error';
 import { BasePath } from './base_path_service';
 import { AnonymousPaths } from './anonymous_paths';
+import { FetchService } from './fetch';
 
-const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
-const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
-
-function checkHalt(controller: HttpInterceptController, error?: Error) {
+export function checkHalt(controller: HttpInterceptController, error?: Error) {
   if (error instanceof HttpInterceptHaltError) {
     throw error;
   } else if (controller.halted) {
@@ -55,224 +50,15 @@ export const setup = (
 ): HttpServiceBase => {
   const loadingCount$ = new BehaviorSubject(0);
   const stop$ = new Subject();
-  const interceptors = new Set<HttpInterceptor>();
   const kibanaVersion = injectedMetadata.getKibanaVersion();
   const basePath = new BasePath(injectedMetadata.getBasePath());
   const anonymousPaths = new AnonymousPaths(basePath);
 
-  function intercept(interceptor: HttpInterceptor) {
-    interceptors.add(interceptor);
-
-    return () => interceptors.delete(interceptor);
-  }
-
-  function removeAllInterceptors() {
-    interceptors.clear();
-  }
-
-  function createRequest(path: string, options?: HttpFetchOptions) {
-    const { query, prependBasePath: shouldPrependBasePath, ...fetchOptions } = merge(
-      {
-        method: 'GET',
-        credentials: 'same-origin',
-        prependBasePath: true,
-        headers: {
-          'kbn-version': kibanaVersion,
-          'Content-Type': 'application/json',
-        },
-      },
-      options || {}
-    );
-    const url = format({
-      pathname: shouldPrependBasePath ? basePath.prepend(path) : path,
-      query,
-    });
-
-    if (
-      options &&
-      options.headers &&
-      'Content-Type' in options.headers &&
-      options.headers['Content-Type'] === undefined
-    ) {
-      delete fetchOptions.headers['Content-Type'];
-    }
-
-    return new Request(url, fetchOptions);
-  }
-
-  // Request/response interceptors are called in opposite orders.
-  // Request hooks start from the newest interceptor and end with the oldest.
-  function interceptRequest(
-    request: Request,
-    controller: HttpInterceptController
-  ): Promise<Request> {
-    let next = request;
-
-    return [...interceptors].reduceRight(
-      (promise, interceptor) =>
-        promise.then(
-          async (current: Request) => {
-            next = current;
-            checkHalt(controller);
-
-            if (!interceptor.request) {
-              return current;
-            }
-
-            return (await interceptor.request(current, controller)) || current;
-          },
-          async error => {
-            checkHalt(controller, error);
-
-            if (!interceptor.requestError) {
-              throw error;
-            }
-
-            const nextRequest = await interceptor.requestError(
-              { error, request: next },
-              controller
-            );
-
-            if (!nextRequest) {
-              throw error;
-            }
-
-            next = nextRequest;
-            return next;
-          }
-        ),
-      Promise.resolve(request)
-    );
-  }
-
-  // Response hooks start from the oldest interceptor and end with the newest.
-  async function interceptResponse(
-    responsePromise: Promise<HttpResponse>,
-    controller: HttpInterceptController
-  ) {
-    let current: HttpResponse | undefined;
-
-    const finalHttpResponse = await [...interceptors].reduce(
-      (promise, interceptor) =>
-        promise.then(
-          async httpResponse => {
-            current = httpResponse;
-            checkHalt(controller);
-
-            if (!interceptor.response) {
-              return httpResponse;
-            }
-
-            return {
-              ...httpResponse,
-              ...((await interceptor.response(httpResponse, controller)) || {}),
-            };
-          },
-          async error => {
-            const request = error.request || (current && current.request);
-
-            checkHalt(controller, error);
-
-            if (!interceptor.responseError) {
-              throw error;
-            }
-
-            try {
-              const next = await interceptor.responseError(
-                {
-                  error,
-                  request,
-                  response: error.response || (current && current.response),
-                  body: error.body || (current && current.body),
-                },
-                controller
-              );
-
-              checkHalt(controller, error);
-
-              if (!next) {
-                throw error;
-              }
-
-              return { ...next, request };
-            } catch (err) {
-              checkHalt(controller, err);
-              throw err;
-            }
-          }
-        ),
-      responsePromise
-    );
-
-    return finalHttpResponse.body;
-  }
-
-  async function fetcher(request: Request): Promise<HttpResponse> {
-    let response;
-    let body = null;
-
-    try {
-      response = await window.fetch(request);
-    } catch (err) {
-      throw new HttpFetchError(err.message, request);
-    }
-
-    const contentType = response.headers.get('Content-Type') || '';
-
-    try {
-      if (NDJSON_CONTENT.test(contentType)) {
-        body = await response.blob();
-      } else if (JSON_CONTENT.test(contentType)) {
-        body = await response.json();
-      } else {
-        const text = await response.text();
-
-        try {
-          body = JSON.parse(text);
-        } catch (err) {
-          body = text;
-        }
-      }
-    } catch (err) {
-      throw new HttpFetchError(err.message, request, response, body);
-    }
-
-    if (!response.ok) {
-      throw new HttpFetchError(response.statusText, request, response, body);
-    }
-
-    return { response, body, request };
-  }
-
-  async function fetch(path: string, options: HttpFetchOptions = {}) {
-    const controller = new HttpInterceptController();
-    const initialRequest = createRequest(path, options);
-
-    // We wrap the interception in a separate promise to ensure that when
-    // a halt is called we do not resolve or reject, halting handling of the promise.
-    return new Promise(async (resolve, reject) => {
-      function rejectIfNotHalted(err: any) {
-        if (!(err instanceof HttpInterceptHaltError)) {
-          reject(err);
-        }
-      }
-
-      try {
-        const request = await interceptRequest(initialRequest, controller);
-
-        try {
-          resolve(await interceptResponse(fetcher(request), controller));
-        } catch (err) {
-          rejectIfNotHalted(err);
-        }
-      } catch (err) {
-        rejectIfNotHalted(err);
-      }
-    });
-  }
+  const fetchService = new FetchService({ basePath, kibanaVersion });
 
   function shorthand(method: string) {
-    return (path: string, options: HttpFetchOptions = {}) => fetch(path, { ...options, method });
+    return (path: string, options: HttpFetchOptions = {}) =>
+      fetchService.fetch(path, { ...options, method });
   }
 
   function stop() {
@@ -321,9 +107,9 @@ export const setup = (
     stop,
     basePath,
     anonymousPaths,
-    intercept,
-    removeAllInterceptors,
-    fetch,
+    intercept: fetchService.intercept.bind(fetchService),
+    removeAllInterceptors: fetchService.removeAllInterceptors.bind(fetchService),
+    fetch: fetchService.fetch.bind(fetchService),
     delete: shorthand('DELETE'),
     get: shorthand('GET'),
     head: shorthand('HEAD'),

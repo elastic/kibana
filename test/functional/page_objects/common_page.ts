@@ -288,7 +288,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     async getSharedItemContainers() {
-      const cssSelector = '[data-shared-item-container]';
+      const cssSelector = '[data-shared-items-container]';
       return find.allByCssSelector(cssSelector);
     }
 

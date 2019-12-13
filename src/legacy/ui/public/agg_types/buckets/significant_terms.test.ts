@@ -20,6 +20,7 @@
 import { AggConfigs } from '../index';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { significantTermsBucketAgg } from './significant_terms';
+import { IBucketAggConfig } from './_bucket_agg_type';
 
 jest.mock('ui/new_platform');
 
@@ -71,7 +72,7 @@ describe('Significant Terms Agg', () => {
             name: 'FIELD',
           },
         });
-        const label = significantTermsBucketAgg.makeLabel(aggConfigs.aggs[0]);
+        const label = significantTermsBucketAgg.makeLabel(aggConfigs.aggs[0] as IBucketAggConfig);
 
         expect(label).toBe('Top SIZE unusual terms in FIELD');
       });

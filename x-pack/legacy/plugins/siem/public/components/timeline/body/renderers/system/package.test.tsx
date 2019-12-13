@@ -28,31 +28,27 @@ describe('Package', () => {
     });
 
     test('it returns null if all of the package information is null ', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <Package
-            contextId="[context-123]"
-            eventId="[event-123]"
-            packageName={null}
-            packageSummary={null}
-            packageVersion={null}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <Package
+          contextId="[context-123]"
+          eventId="[event-123]"
+          packageName={null}
+          packageSummary={null}
+          packageVersion={null}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });
 
     test('it returns null if all of the package information is undefined ', () => {
-      const wrapper = mountWithIntl(
-        <TestProviders>
-          <Package
-            contextId="[context-123]"
-            eventId="[event-123]"
-            packageName={undefined}
-            packageSummary={undefined}
-            packageVersion={undefined}
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <Package
+          contextId="[context-123]"
+          eventId="[event-123]"
+          packageName={undefined}
+          packageSummary={undefined}
+          packageVersion={undefined}
+        />
       );
       expect(wrapper.isEmptyRender()).toBeTruthy();
     });

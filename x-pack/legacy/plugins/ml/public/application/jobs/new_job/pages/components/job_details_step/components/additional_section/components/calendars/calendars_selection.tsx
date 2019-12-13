@@ -67,7 +67,7 @@ export const CalendarsSelection: FC = () => {
     <Description>
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
-          <EuiComboBox {...comboBoxProps} />
+          <EuiComboBox {...comboBoxProps} data-test-subj="mlJobWizardComboBoxCalendars" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip

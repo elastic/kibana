@@ -123,16 +123,14 @@ async function executor(
     response = await postPagerduty({ apiUrl, data, headers, services });
   } catch (err) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingErrorMessage', {
-      defaultMessage: 'error in pagerduty action "{actionId}" posting event: {errorMessage}',
-      values: {
-        actionId,
-        errorMessage: err.message,
-      },
+      defaultMessage: 'error posting pagerduty event',
     });
     logger.warn(`error thrown posting pagerduty event: ${err.message}`);
     return {
       status: 'error',
+      actionId,
       message,
+      serviceMessage: err.message,
     };
   }
 
@@ -141,38 +139,37 @@ async function executor(
   if (response.status === 202) {
     return {
       status: 'ok',
+      actionId,
       data: response.data,
     };
   }
 
   if (response.status === 429 || response.status >= 500) {
     const message = i18n.translate('xpack.actions.builtin.pagerduty.postingRetryErrorMessage', {
-      defaultMessage:
-        'error in pagerduty action "{actionId}" posting event: status {status}, retry later',
+      defaultMessage: 'error posting pagerduty event: http status {status}, retry later',
       values: {
-        actionId,
         status: response.status,
       },
     });
 
     return {
       status: 'error',
+      actionId,
       message,
       retry: true,
     };
   }
 
   const message = i18n.translate('xpack.actions.builtin.pagerduty.postingUnexpectedErrorMessage', {
-    defaultMessage:
-      'error in pagerduty action "{actionId}" posting event: unexpected status {status}',
+    defaultMessage: 'error posting pagerduty event: unexpected status {status}',
     values: {
-      actionId,
       status: response.status,
     },
   });
 
   return {
     status: 'error',
+    actionId,
     message,
   };
 }

@@ -7,7 +7,6 @@
 import { rgba } from 'polished';
 import * as React from 'react';
 import { Droppable } from 'react-beautiful-dnd';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 interface Props {
@@ -87,7 +86,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
 `;
 ReactDndDropTarget.displayName = 'ReactDndDropTarget';
 
-export const DroppableWrapper = pure<Props>(
+export const DroppableWrapper = React.memo<Props>(
   ({
     children = null,
     droppableId,

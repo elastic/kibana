@@ -24,6 +24,7 @@ const mockedResponse = {
     {
       group: 'default',
       id: '2',
+      actionTypeId: 'test',
       params: {
         baz: true,
       },

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { ConfigType as Configuration } from '../../../../../plugins/siem/server';
 import { Anomalies } from './anomalies';
 import { Authentications } from './authentications';
-import { ConfigurationAdapter } from './configuration';
 import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
@@ -17,13 +17,12 @@ import { KpiNetwork } from './kpi_network';
 import { Network } from './network';
 import { Overview } from './overview';
 import { SourceStatus } from './source_status';
-import { Sources, SourceConfiguration } from './sources';
+import { Sources } from './sources';
 import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
 import { TLS } from './tls';
-import { SearchTypes, OutputRuleAlertRest } from './detection_engine/alerts/types';
 
 export * from './hosts';
 
@@ -43,7 +42,6 @@ export interface AppDomainLibs {
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
-  configuration: ConfigurationAdapter<Configuration>;
   framework: FrameworkAdapter;
   sources: Sources;
   sourceStatus: SourceStatus;
@@ -52,36 +50,8 @@ export interface AppBackendLibs extends AppDomainLibs {
   pinnedEvent: PinnedEvent;
 }
 
-export interface Configuration {
-  enabled: boolean;
-  query: {
-    partitionSize: number;
-    partitionFactor: number;
-  };
-  sources: Record<string, SourceConfiguration>;
-}
-
 export interface SiemContext {
   req: FrameworkRequest;
-}
-
-export interface Signal {
-  rule: Partial<OutputRuleAlertRest>;
-  parent: {
-    id: string;
-    type: string;
-    index: string;
-    depth: number;
-  };
-  original_time: string;
-  original_event?: SearchTypes;
-  status: 'open' | 'closed';
-}
-
-export interface SignalHit {
-  '@timestamp': string;
-  event: object;
-  signal: Partial<Signal>;
 }
 
 export interface TotalValue {

@@ -275,6 +275,8 @@ export const DraggableWrapper = connect(null, {
   unRegisterProvider: dragAndDropActions.unRegisterProvider,
 })(DraggableWrapperComponent);
 
+DraggableWrapper.displayName = 'DraggableWrapper';
+
 /**
  * Conditionally wraps children in an EuiPortal to ensure drag offsets are correct when dragging
  * from containers that have css transforms

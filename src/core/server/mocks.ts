@@ -90,6 +90,7 @@ function createCoreSetupMock() {
     registerOnPreAuth: httpService.registerOnPreAuth,
     registerAuth: httpService.registerAuth,
     registerOnPostAuth: httpService.registerOnPostAuth,
+    registerOnPreResponse: httpService.registerOnPreResponse,
     basePath: httpService.basePath,
     isTlsEnabled: httpService.isTlsEnabled,
     createRouter: jest.fn(),

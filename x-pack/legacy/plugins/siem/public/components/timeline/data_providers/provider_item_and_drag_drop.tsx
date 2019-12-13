@@ -7,7 +7,6 @@
 import { EuiBadge, EuiBadgeProps, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { AndOrBadge } from '../../and_or_badge';
@@ -78,7 +77,7 @@ interface ProviderItemDropProps {
   timelineId: string;
 }
 
-export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
+export const ProviderItemAndDragDrop = React.memo<ProviderItemDropProps>(
   ({
     browserFields,
     dataProvider,

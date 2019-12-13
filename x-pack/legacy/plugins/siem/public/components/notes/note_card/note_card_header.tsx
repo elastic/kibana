@@ -6,7 +6,6 @@
 
 import { EuiAvatar, EuiPanel } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
@@ -38,7 +37,7 @@ const User = styled.span`
   margin: 5px;
 `;
 
-export const NoteCardHeader = pure<{ created: Date; user: string }>(({ created, user }) => (
+export const NoteCardHeader = React.memo<{ created: Date; user: string }>(({ created, user }) => (
   <EuiPanel data-test-subj="note-card-header" hasShadow={false} paddingSize="s">
     <HeaderContainer>
       <Avatar data-test-subj="avatar" size="s" name={user} />

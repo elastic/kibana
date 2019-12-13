@@ -313,7 +313,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
 
     div.setAttribute('data-test-subj', 'visualizationLoader');
     div.setAttribute('data-shared-item', '');
-    div.setAttribute('data-shared-item-container', '');
     div.setAttribute('data-rendering-count', '0');
     div.setAttribute('data-render-complete', 'false');
 
@@ -376,6 +375,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.handler) {
       this.handler.update(this.expression, expressionParams);
     }
+
+    this.vis.emit('apply');
   }
 
   private handleVisUpdate = async () => {

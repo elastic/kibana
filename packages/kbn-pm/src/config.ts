@@ -44,6 +44,7 @@ export function getProjectPaths(rootPath: string, options: IProjectPathOptions =
   // correct and the expect behavior.
   projectPaths.push(resolve(rootPath, 'test/plugin_functional/plugins/*'));
   projectPaths.push(resolve(rootPath, 'test/interpreter_functional/plugins/*'));
+  projectPaths.push(resolve(rootPath, 'examples/*'));
 
   if (!ossOnly) {
     projectPaths.push(resolve(rootPath, 'x-pack'));

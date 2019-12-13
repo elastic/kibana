@@ -39,7 +39,7 @@ import { setup as visualizationsSetup } from '../../visualizations/public/np_rea
 // eslint-disable-next-line
 import { stubFields } from '../../../../plugins/data/public/stubs';
 // eslint-disable-next-line
-import { setFieldFormats } from '../../../../plugins/data/public/index_patterns/services';
+import { setFieldFormats } from '../../../../plugins/data/public/services';
 
 interface TableVisScope extends IScope {
   [key: string]: any;

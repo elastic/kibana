@@ -463,7 +463,7 @@ describe('AggConfig', function () {
     });
 
     it('returns the field\'s formatter', function () {
-      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(vis.aggs.aggs[0].getField().format.getConverterFor());
+      expect(vis.aggs.aggs[0].fieldFormatter().toString()).to.be(vis.aggs.aggs[0].getField().format.getConverterFor().toString());
     });
 
     it('returns the string format if the field does not have a format', function () {
@@ -484,7 +484,7 @@ describe('AggConfig', function () {
 
     it('returns the html converter if "html" is passed in', function () {
       const field = indexPattern.fields.getByName('bytes');
-      expect(vis.aggs.aggs[0].fieldFormatter('html')).to.be(field.format.getConverterFor('html'));
+      expect(vis.aggs.aggs[0].fieldFormatter('html').toString()).to.be(field.format.getConverterFor('html').toString());
     });
   });
 });

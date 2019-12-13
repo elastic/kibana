@@ -26,11 +26,11 @@ import { toastNotifications } from '../../notify';
 import * as FatalErrorNS from '../../notify/fatal_error';
 import { StateProvider } from '../state';
 import {
+  unhashQuery,
   createStateHash,
   isStateHash,
-  unhashQuery
-} from '../state_hashing';
-import { HashedItemStore } from '../../../../../plugins/kibana_utils/public';
+  HashedItemStore
+} from '../../../../../plugins/kibana_utils/public';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { EventsProvider } from '../../events';
 

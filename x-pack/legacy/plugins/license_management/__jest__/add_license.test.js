@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AddLicense } from '../public/sections/license_dashboard/add_license';
+import { AddLicense } from '../public/np_ready/application/sections/license_dashboard/add_license';
 import { createMockLicense, getComponent } from './util';
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 

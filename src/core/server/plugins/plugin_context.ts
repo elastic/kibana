@@ -159,6 +159,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPreAuth: deps.http.registerOnPreAuth,
       registerAuth: deps.http.registerAuth,
       registerOnPostAuth: deps.http.registerOnPostAuth,
+      registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
       isTlsEnabled: deps.http.isTlsEnabled,
     },

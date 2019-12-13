@@ -42,4 +42,12 @@ export class AbstractField {
   getOrigin() {
     return this._origin;
   }
+
+  supportsFieldMeta() {
+    return false;
+  }
+
+  async getFieldMetaRequest(/* config */) {
+    return null;
+  }
 }

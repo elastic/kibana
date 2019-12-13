@@ -161,7 +161,7 @@ describe('OnPreAuth', () => {
     expect(result.header['www-authenticate']).toBe('challenge');
   });
 
-  it("doesn't expose error details if interceptor throws", async () => {
+  it('does not expose error details if interceptor throws', async () => {
     const { registerOnPreAuth, server: innerServer, createRouter } = await server.setup(setupDeps);
     const router = createRouter('/');
 
@@ -734,7 +734,7 @@ describe('Auth', () => {
     expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Server rewrites a response header [www-authenticate].",
+          "onPreResponseHandler rewrote a response header [www-authenticate].",
         ],
       ]
     `);
@@ -769,7 +769,7 @@ describe('Auth', () => {
     expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [
         Array [
-          "Server rewrites a response header [www-authenticate].",
+          "onPreResponseHandler rewrote a response header [www-authenticate].",
         ],
       ]
     `);
@@ -891,5 +891,166 @@ describe('Auth', () => {
     await supertest(innerServer.listener)
       .get('/')
       .expect(200, { customField: 'undefined' });
+  });
+});
+
+describe('OnPreResponse', () => {
+  it('supports registering response inceptors', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+
+    const callingOrder: string[] = [];
+    registerOnPreResponse((req, res, t) => {
+      callingOrder.push('first');
+      return t.next();
+    });
+
+    registerOnPreResponse((req, res, t) => {
+      callingOrder.push('second');
+      return t.next();
+    });
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(200, 'ok');
+
+    expect(callingOrder).toEqual(['first', 'second']);
+  });
+
+  it('supports additional headers attachments', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({
+        headers: {
+          'x-my-header': 'foo',
+        },
+      })
+    );
+
+    registerOnPreResponse((req, res, t) =>
+      t.next({
+        headers: {
+          'x-kibana-header': 'value',
+        },
+      })
+    );
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(200);
+
+    expect(result.header['x-kibana-header']).toBe('value');
+    expect(result.header['x-my-header']).toBe('foo');
+  });
+
+  it('logs a warning if interceptor rewrites response header', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) =>
+      res.ok({
+        headers: { 'x-kibana-header': 'value' },
+      })
+    );
+    registerOnPreResponse((req, res, t) =>
+      t.next({
+        headers: { 'x-kibana-header': 'value' },
+      })
+    );
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(200);
+
+    expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "onPreResponseHandler rewrote a response header [x-kibana-header].",
+        ],
+      ]
+    `);
+  });
+
+  it("doesn't expose error details if interceptor throws", async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok(undefined));
+    registerOnPreResponse((req, res, t) => {
+      throw new Error('reason');
+    });
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
+
+    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          [Error: reason],
+        ],
+      ]
+    `);
+  });
+
+  it('returns internal error if interceptor returns unexpected result', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
+    registerOnPreResponse((req, res, t) => ({} as any));
+    await server.start();
+
+    const result = await supertest(innerServer.listener)
+      .get('/')
+      .expect(500);
+
+    expect(result.body.message).toBe('An internal server error occurred.');
+    expect(loggingServiceMock.collect(logger).error).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          [Error: Unexpected result from OnPreResponse. Expected OnPreResponseResult, but given: [object Object].],
+        ],
+      ]
+    `);
+  });
+
+  it('cannot change response statusCode', async () => {
+    const { registerOnPreResponse, server: innerServer, createRouter } = await server.setup(
+      setupDeps
+    );
+    const router = createRouter('/');
+
+    registerOnPreResponse((req, res, t) => {
+      res.statusCode = 500;
+      return t.next();
+    });
+
+    router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
+
+    await server.start();
+
+    await supertest(innerServer.listener)
+      .get('/')
+      .expect(200);
   });
 });

@@ -284,10 +284,7 @@ function fromSavedObject(
     type,
     title: attributes.title,
     fields: (JSON.parse(attributes.fields) as IndexPatternField[])
-      .filter(
-        ({ type: fieldType, esTypes }) =>
-          fieldType !== 'string' || (esTypes && esTypes.includes('keyword'))
-      )
+      .filter(({ aggregatable }) => !!aggregatable)
       .concat(documentField),
     typeMeta: attributes.typeMeta
       ? (JSON.parse(attributes.typeMeta) as SavedRestrictionsInfo)

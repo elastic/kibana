@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { AbstractField } from './field';
 import { COUNT_AGG_TYPE } from '../../../common/constants';
+import { isMetricCountable } from '../util/is_metric_countable';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
 
 export class ESAggMetricField extends AbstractField {
@@ -36,6 +36,11 @@ export class ESAggMetricField extends AbstractField {
     return (this.getAggType() === COUNT_AGG_TYPE) ? true : !!this._esDocField;
   }
 
+  async getDataType() {
+    // aggregations only provide numerical data
+    return 'number';
+  }
+
   getESDocFieldName() {
     return this._esDocField ? this._esDocField.getName() : '';
   }
@@ -55,7 +60,6 @@ export class ESAggMetricField extends AbstractField {
     );
   }
 
-
   makeMetricAggConfig() {
     const metricAggConfig = {
       id: this.getName(),
@@ -68,5 +72,14 @@ export class ESAggMetricField extends AbstractField {
       metricAggConfig.params = { field: this.getESDocFieldName() };
     }
     return metricAggConfig;
+  }
+
+  supportsFieldMeta() {
+    // count and sum aggregations are not within field bounds so they do not support field meta.
+    return !isMetricCountable(this.getAggType());
+  }
+
+  async getFieldMetaRequest(config) {
+    return this._esDocField.getFieldMetaRequest(config);
   }
 }

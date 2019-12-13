@@ -21,7 +21,6 @@ import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 import { confirmModalFactory } from 'ui/modals/confirm_modal';
 
 // type imports
-import { DataStart } from 'src/legacy/core_plugins/data/public';
 import {
   AppMountContext,
   ChromeStart,
@@ -32,7 +31,10 @@ import {
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
-import { Plugin as DataPlugin } from '../../../../../src/plugins/data/public';
+import {
+  Plugin as DataPlugin,
+  IndexPatternsContract,
+} from '../../../../../src/plugins/data/public';
 import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
 
 /**
@@ -50,7 +52,7 @@ export interface GraphDependencies extends LegacyAngularInjectedDependencies {
   chrome: ChromeStart;
   config: IUiSettingsClient;
   toastNotifications: ToastsStart;
-  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
+  indexPatterns: IndexPatternsContract;
   npData: ReturnType<DataPlugin['start']>;
   savedObjectsClient: SavedObjectsClientContract;
   xpackInfo: { get(path: string): unknown };

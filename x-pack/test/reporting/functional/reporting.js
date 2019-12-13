@@ -21,7 +21,9 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'header', 'discover', 'visualize']);
   const log = getService('log');
 
-  describe('Reporting', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/45499
+  // FLAKY: https://github.com/elastic/kibana/issues/48721
+  describe.skip('Reporting', () => {
 
     before('initialize tests', async () => {
       await PageObjects.reporting.initTests();
@@ -73,8 +75,7 @@ export default function ({ getService, getPageObjects }) {
           await expectDisabledGenerateReportButton();
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/45499
-        it.skip('becomes available when saved', async () => {
+        it('becomes available when saved', async () => {
           await PageObjects.dashboard.saveDashboard('mypdfdash');
           await PageObjects.reporting.openPdfReportingPanel();
           await expectEnabledGenerateReportButton();

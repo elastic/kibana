@@ -85,14 +85,12 @@ export class ESSearchSource extends AbstractESSource {
         source={this}
         indexPatternId={this._descriptor.indexPatternId}
         onChange={onChange}
-        filterByMapBounds={this._descriptor.filterByMapBounds}
         tooltipFields={this._tooltipFields}
         sortField={this._descriptor.sortField}
         sortOrder={this._descriptor.sortOrder}
         useTopHits={this._descriptor.useTopHits}
         topHitsSplitField={this._descriptor.topHitsSplitField}
         topHitsSize={this._descriptor.topHitsSize}
-        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -261,7 +259,13 @@ export class ESSearchSource extends AbstractESSource {
       }
     });
 
-    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document top hits request');
+    const resp = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: 'Elasticsearch document top hits request',
+    });
 
     const allHits = [];
     const entityBuckets = _.get(resp, 'aggregations.entitySplit.buckets', []);
@@ -322,7 +326,13 @@ export class ESSearchSource extends AbstractESSource {
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const resp = await this._runEsQuery(layerName, searchSource, registerCancelCallback, 'Elasticsearch document request');
+    const resp = await this._runEsQuery({
+      requestId: this.getId(),
+      requestName: layerName,
+      searchSource,
+      registerCancelCallback,
+      requestDescription: 'Elasticsearch document request',
+    });
 
     return {
       hits: resp.hits.hits.reverse(), // Reverse hits so top documents by sort are drawn on top
@@ -393,7 +403,7 @@ export class ESSearchSource extends AbstractESSource {
     searchSource.setField('size', 1);
     const query = {
       language: 'kuery',
-      query: `_id:"${docId}" and _index:${index}`
+      query: `_id:"${docId}" and _index:"${index}"`
     };
     searchSource.setField('query', query);
     searchSource.setField('fields', this._getTooltipPropertyNames());
@@ -431,6 +441,10 @@ export class ESSearchSource extends AbstractESSource {
 
   isFilterByMapBounds() {
     return _.get(this._descriptor, 'filterByMapBounds', false);
+  }
+
+  isFilterByMapBoundsConfigurable() {
+    return true;
   }
 
   async getLeftJoinFields() {

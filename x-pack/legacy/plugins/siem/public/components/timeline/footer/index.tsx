@@ -78,24 +78,6 @@ ServerSideEventCount.displayName = 'ServerSideEventCount';
 /** The height of the footer, exported for use in height calculations */
 export const footerHeight = 40; // px
 
-interface FooterProps {
-  compact: boolean;
-  getUpdatedAt: () => number;
-  hasNextPage: boolean;
-  height: number;
-  isEventViewer?: boolean;
-  isLive: boolean;
-  isLoading: boolean;
-  itemsCount: number;
-  itemsPerPage: number;
-  itemsPerPageOptions: number[];
-  nextCursor: string;
-  onChangeItemsPerPage: OnChangeItemsPerPage;
-  onLoadMore: OnLoadMore;
-  serverSideEventCount: number;
-  tieBreaker: string;
-}
-
 /** Displays the server-side count of events */
 export const EventsCountComponent = ({
   closePopover,
@@ -189,6 +171,24 @@ PagingControlComponent.displayName = 'PagingControlComponent';
 export const PagingControl = React.memo(PagingControlComponent);
 
 PagingControl.displayName = 'PagingControl';
+
+interface FooterProps {
+  compact: boolean;
+  getUpdatedAt: () => number;
+  hasNextPage: boolean;
+  height: number;
+  isEventViewer?: boolean;
+  isLive: boolean;
+  isLoading: boolean;
+  itemsCount: number;
+  itemsPerPage: number;
+  itemsPerPageOptions: number[];
+  nextCursor: string;
+  onChangeItemsPerPage: OnChangeItemsPerPage;
+  onLoadMore: OnLoadMore;
+  serverSideEventCount: number;
+  tieBreaker: string;
+}
 
 /** Renders a loading indicator and paging controls */
 export const FooterComponent = ({

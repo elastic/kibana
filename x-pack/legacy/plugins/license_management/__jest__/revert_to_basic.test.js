@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RevertToBasic } from '../public/sections/license_dashboard/revert_to_basic';
+import { RevertToBasic } from '../public/np_ready/application/sections/license_dashboard/revert_to_basic';
 import { createMockLicense, getComponent } from './util';
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 

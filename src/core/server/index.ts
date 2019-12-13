@@ -105,6 +105,10 @@ export {
   OnPreAuthToolkit,
   OnPostAuthHandler,
   OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
   RedirectResponseOptions,
   RequestHandler,
   RequestHandlerContextContainer,
@@ -139,6 +143,7 @@ export {
   PluginInitializerContext,
   PluginManifest,
   PluginName,
+  SharedGlobalConfig,
 } from './plugins';
 
 export {

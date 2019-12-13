@@ -83,6 +83,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
     createTimeline,
     columns,
     dataProviders,
+    defaultFilters = [],
     defaultModel,
     defaultIndices,
     deleteEventQuery,
@@ -158,7 +159,7 @@ const StatefulEventsViewerComponent = React.memo<Props>(
           id={id}
           dataProviders={dataProviders!}
           end={end}
-          filters={filters}
+          filters={[...filters, ...defaultFilters]}
           headerFilterGroup={headerFilterGroup}
           indexPattern={indexPatterns ?? { fields: [], title: '' }}
           isLive={isLive}
@@ -201,7 +202,7 @@ const makeMapStateToProps = () => {
   const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getEvents = timelineSelectors.getEventsByIdSelector();
-  const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
+  const mapStateToProps = (state: State, { id, defaultFilters = [], defaultModel }: OwnProps) => {
     const input: inputsModel.InputsRange = getInputsTimeline(state);
     const events: TimelineModel = getEvents(state, id) ?? defaultModel;
     const { columns, dataProviders, itemsPerPage, itemsPerPageOptions, kqlMode, sort } = events;
@@ -209,7 +210,7 @@ const makeMapStateToProps = () => {
     return {
       columns,
       dataProviders,
-      filters: getGlobalFiltersQuerySelector(state),
+      filters: [...getGlobalFiltersQuerySelector(state), ...defaultFilters],
       id,
       isLive: input.policy.kind === 'interval',
       itemsPerPage,

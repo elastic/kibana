@@ -5,7 +5,6 @@
  */
 
 import * as rt from 'io-ts';
-import { InfraWrappableRequest } from '../../server/lib/adapters/framework';
 import { SnapshotMetricTypeRT, ItemTypeRT } from '../inventory_models/types';
 
 export const SnapshotNodePathRT = rt.intersection([
@@ -64,6 +63,5 @@ export const SnapshotRequestRT = rt.intersection([
 ]);
 
 export type SnapshotRequest = rt.TypeOf<typeof SnapshotRequestRT>;
-export type SnapshotWrappedRequest = InfraWrappableRequest<SnapshotRequest>;
 export type SnapshotNode = rt.TypeOf<typeof SnapshotNodeRT>;
 export type SnapshotNodeResponse = rt.TypeOf<typeof SnapshotNodeResponseRT>;
