@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedSearch } from 'src/legacy/core_plugins/kibana/public/discover/types';
 import { IndexPattern } from 'ui/index_patterns';
+import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { JobCreator } from './job_creator';
 import {
   Field,
@@ -15,7 +15,11 @@ import {
 } from '../../../../../../common/types/fields';
 import { Job, Datafeed, Detector } from './configs';
 import { createBasicDetector } from './util/default_configs';
-import { JOB_TYPE, CREATED_BY_LABEL, DEFAULT_MODEL_MEMORY_LIMIT } from './util/constants';
+import {
+  JOB_TYPE,
+  CREATED_BY_LABEL,
+  DEFAULT_MODEL_MEMORY_LIMIT,
+} from '../../../../../../common/constants/new_job';
 import { ml } from '../../../../services/ml_api_service';
 import { getRichDetectors } from './util/general';
 
@@ -26,7 +30,11 @@ export class MultiMetricJobCreator extends JobCreator {
   private _lastEstimatedModelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
   protected _type: JOB_TYPE = JOB_TYPE.MULTI_METRIC;
 
-  constructor(indexPattern: IndexPattern, savedSearch: SavedSearch, query: object) {
+  constructor(
+    indexPattern: IndexPattern,
+    savedSearch: SavedSearchSavedObject | null,
+    query: object
+  ) {
     super(indexPattern, savedSearch, query);
     this.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   }

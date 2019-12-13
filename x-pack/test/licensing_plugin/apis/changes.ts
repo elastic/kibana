@@ -37,7 +37,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // ensure we're logged out so we can login as the appropriate users
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await PageObjects.security.login('license_manager_user', 'license_manager_user-password');
     },
 

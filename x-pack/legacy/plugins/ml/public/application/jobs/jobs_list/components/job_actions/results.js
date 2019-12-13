@@ -7,20 +7,20 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import chrome from 'ui/chrome';
 
 import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
 
 import { mlJobService } from '../../../../services/job_service';
 import { injectI18n } from '@kbn/i18n/react';
 
 export function getLink(location, jobs) {
   const resultsPageUrl = mlJobService.createResultsUrlForJobs(jobs, location);
-  return `${chrome.getBasePath()}/app/${resultsPageUrl}`;
+  return `${chrome.getBasePath()}/app/ml${resultsPageUrl}`;
 }
 
 function ResultLinksUI({ jobs, intl }) {
@@ -39,6 +39,7 @@ function ResultLinksUI({ jobs, intl }) {
   const singleMetricVisible = (jobs.length < 2);
   const singleMetricEnabled = (jobs.length === 1 && jobs[0].isSingleMetricViewerJob);
   const jobActionsDisabled = (jobs.length === 1 && jobs[0].deleting === true);
+
   return (
     <React.Fragment>
       {(singleMetricVisible) &&
