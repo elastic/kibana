@@ -111,6 +111,8 @@
 /x-pack/legacy/plugins/actions @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/triggers_actions_ui @elastic/kibana-alerting-services
+/x-pack/test/functional_with_es_ssl/apps/triggers_actions_ui @elastic/kibana-alerting-services
+/x-pack/test/functional_with_es_ssl/fixtures/plugins/alerts @elastic/kibana-alerting-services
 
 # Design
 **/*.scss  @elastic/kibana-design
