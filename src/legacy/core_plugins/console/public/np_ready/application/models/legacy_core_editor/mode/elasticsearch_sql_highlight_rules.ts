@@ -51,10 +51,7 @@ export const ElasticsearchSqlHighlightRules = function(this: any) {
 
   const keywordMapper = this.createKeywordMapper(
     {
-      'support.function': builtinFunctions,
-      keyword: keywords,
-      'constant.language': builtinConstants,
-      'storage.type': dataTypes,
+      keyword: [keywords, builtinFunctions, builtinConstants, dataTypes].join('|'),
     },
     'identifier',
     true
@@ -76,7 +73,7 @@ export const ElasticsearchSqlHighlightRules = function(this: any) {
         regex: '".*?"',
       },
       {
-        token: 'string', // ' string
+        token: 'constant', // ' string
         regex: "'.*?'",
       },
       {
@@ -84,7 +81,7 @@ export const ElasticsearchSqlHighlightRules = function(this: any) {
         regex: '`.*?`',
       },
       {
-        token: 'constant.numeric', // float
+        token: 'entity.name.function', // float
         regex: '[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b',
       },
       {
