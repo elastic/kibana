@@ -33,7 +33,7 @@ const MonitorListActionsPopoverComponent = ({
     dateRangeStart,
     dateRangeEnd,
     isApmAvailable,
-    isInfraAvailable,
+    isMetricsAvailable,
     isLogsAvailable,
   } = useContext(UptimeSettingsContext);
 
@@ -67,7 +67,7 @@ const MonitorListActionsPopoverComponent = ({
         dateRangeStart={dateRangeStart}
         dateRangeEnd={dateRangeEnd}
         isApmAvailable={isApmAvailable}
-        isInfraAvailable={isInfraAvailable}
+        isMetricsAvailable={isMetricsAvailable}
         isLogsAvailable={isLogsAvailable}
         summary={summary}
       />

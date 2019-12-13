@@ -5,7 +5,11 @@
  */
 
 export { getApmHref } from './get_apm_href';
-export { getInfraContainerHref, getInfraIpHref, getInfraKubernetesHref } from './get_infra_href';
+export {
+  getMetricsContainerHref,
+  getMetricsIpHref,
+  getMetricsKubernetesHref,
+} from './get_metrics_href';
 export {
   getLoggingContainerHref,
   getLoggingIpHref,

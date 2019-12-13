@@ -41,7 +41,7 @@ export interface UptimeAppProps {
   autocomplete: Pick<AutocompleteProviderRegister, 'getProvider'>;
   i18n: I18nStart;
   isApmAvailable: boolean;
-  isInfraAvailable: boolean;
+  isMetricsAvailable: boolean;
   isLogsAvailable: boolean;
   kibanaBreadcrumbs: ChromeBreadcrumb[];
   logMonitorPageLoad: () => void;
@@ -61,7 +61,7 @@ const Application = (props: UptimeAppProps) => {
     darkMode,
     i18n: i18nCore,
     isApmAvailable,
-    isInfraAvailable,
+    isMetricsAvailable,
     isLogsAvailable,
     logMonitorPageLoad,
     logOverviewPageLoad,
@@ -142,7 +142,7 @@ const Application = (props: UptimeAppProps) => {
       dateRangeStart,
       dateRangeEnd,
       isApmAvailable,
-      isInfraAvailable,
+      isMetricsAvailable,
       isLogsAvailable,
       refreshApp,
       setHeadingText,

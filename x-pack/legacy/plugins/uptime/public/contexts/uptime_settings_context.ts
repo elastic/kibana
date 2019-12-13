@@ -20,7 +20,7 @@ export interface UMSettingsContextValues {
   dateRangeStart: string;
   dateRangeEnd: string;
   isApmAvailable: boolean;
-  isInfraAvailable: boolean;
+  isMetricsAvailable: boolean;
   isLogsAvailable: boolean;
   refreshApp: () => void;
   setHeadingText: (text: string) => void;
@@ -59,7 +59,7 @@ const defaultContext: UMSettingsContextValues = {
   dateRangeStart: DATE_RANGE_START,
   dateRangeEnd: DATE_RANGE_END,
   isApmAvailable: true,
-  isInfraAvailable: true,
+  isMetricsAvailable: true,
   isLogsAvailable: true,
   refreshApp: () => {
     throw new Error('App refresh was not initialized, set it when you invoke the context');

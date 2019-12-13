@@ -8,7 +8,7 @@ import { MonitorSummary } from '../../../../common/graphql/types';
 import { addBasePath } from './add_base_path';
 import { buildHref } from './build_href';
 
-export const getInfraContainerHref = (
+export const getMetricsContainerHref = (
   summary: MonitorSummary,
   basePath: string
 ): string | undefined => {
@@ -22,7 +22,7 @@ export const getInfraContainerHref = (
   return buildHref(summary.state.checks || [], 'container.id', getHref);
 };
 
-export const getInfraKubernetesHref = (
+export const getMetricsKubernetesHref = (
   summary: MonitorSummary,
   basePath: string
 ): string | undefined => {
@@ -37,7 +37,7 @@ export const getInfraKubernetesHref = (
   return buildHref(summary.state.checks || [], 'kubernetes.pod.uid', getHref);
 };
 
-export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
+export const getMetricsIpHref = (summary: MonitorSummary, basePath: string) => {
   const getHref = (value: string | string[] | undefined) => {
     if (!value) {
       return undefined;
@@ -46,7 +46,7 @@ export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
       const expression = encodeURIComponent(`host.ip : ${value}`);
       return addBasePath(
         basePath,
-        `/app/infra#/infrastructure/inventory?waffleFilter=(expression:'${expression}',kind:kuery)`
+        `/app/infra#/metrics/inventory?waffleFilter=(expression:'${expression}',kind:kuery)`
       );
     }
     const ips = value.reduce(
@@ -57,7 +57,7 @@ export const getInfraIpHref = (summary: MonitorSummary, basePath: string) => {
       ? undefined
       : addBasePath(
           basePath,
-          `/app/infra#/infrastructure/inventory?waffleFilter=(expression:'${encodeURIComponent(
+          `/app/infra#/metrics/inventory?waffleFilter=(expression:'${encodeURIComponent(
             ips
           )}',kind:kuery)`
         );

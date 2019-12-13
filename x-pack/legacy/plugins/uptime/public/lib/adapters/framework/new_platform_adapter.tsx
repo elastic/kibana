@@ -33,10 +33,7 @@ export const getKibanaFrameworkAdapter = (
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
     breadcrumbs = nextBreadcrumbs || [];
   });
-  const { apm, infrastructure, logs } = getIntegratedAppAvailability(
-    capabilities,
-    INTEGRATED_SOLUTIONS
-  );
+  const { apm, metrics, logs } = getIntegratedAppAvailability(capabilities, INTEGRATED_SOLUTIONS);
   const canSave = get(capabilities, 'uptime.save', false);
   const props: UptimeAppProps = {
     autocomplete,
@@ -46,7 +43,7 @@ export const getKibanaFrameworkAdapter = (
     darkMode: core.uiSettings.get('theme:darkMode'),
     i18n,
     isApmAvailable: apm,
-    isInfraAvailable: infrastructure,
+    isMetricsAvailable: metrics,
     isLogsAvailable: logs,
     kibanaBreadcrumbs: breadcrumbs,
     logMonitorPageLoad: getTelemetryMonitorPageLogger('true', basePath.get()),

@@ -4,10 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getInfraContainerHref, getInfraKubernetesHref, getInfraIpHref } from '../get_infra_href';
+import {
+  getMetricsContainerHref,
+  getMetricsKubernetesHref,
+  getMetricsIpHref,
+} from '../get_metrics_href';
 import { MonitorSummary } from '../../../../../common/graphql/types';
 
-describe('getInfraHref', () => {
+describe('getMetricsHref', () => {
   let summary: MonitorSummary;
   beforeEach(() => {
     summary = {
@@ -36,21 +40,21 @@ describe('getInfraHref', () => {
     };
   });
 
-  it('getInfraContainerHref creates a link for valid parameters', () => {
-    const result = getInfraContainerHref(summary, 'foo');
+  it('getMetricsContainerHref creates a link for valid parameters', () => {
+    const result = getMetricsContainerHref(summary, 'foo');
     expect(result).toMatchSnapshot();
   });
 
-  it('getInfraContainerHref does not specify a base path when none is available', () => {
-    expect(getInfraContainerHref(summary, '')).toMatchSnapshot();
+  it('getMetricsContainerHref does not specify a base path when none is available', () => {
+    expect(getMetricsContainerHref(summary, '')).toMatchSnapshot();
   });
 
-  it('getInfraContainerHref returns undefined when no container id is present', () => {
+  it('getMetricsContainerHref returns undefined when no container id is present', () => {
     summary.state.checks = [];
-    expect(getInfraContainerHref(summary, 'foo')).toBeUndefined();
+    expect(getMetricsContainerHref(summary, 'foo')).toBeUndefined();
   });
 
-  it('getInfraContainerHref returns the first item when multiple container ids are supplied', () => {
+  it('getMetricsContainerHref returns the first item when multiple container ids are supplied', () => {
     summary.state.checks = [
       {
         monitor: {
@@ -83,30 +87,30 @@ describe('getInfraHref', () => {
         timestamp: '123',
       },
     ];
-    expect(getInfraContainerHref(summary, 'bar')).toMatchSnapshot();
+    expect(getMetricsContainerHref(summary, 'bar')).toMatchSnapshot();
   });
 
-  it('getInfraContainerHref returns undefined when checks are undefined', () => {
+  it('getMetricsContainerHref returns undefined when checks are undefined', () => {
     delete summary.state.checks;
-    expect(getInfraContainerHref(summary, '')).toBeUndefined();
+    expect(getMetricsContainerHref(summary, '')).toBeUndefined();
   });
 
-  it('getInfraKubernetesHref creates a link for valid parameters', () => {
-    const result = getInfraKubernetesHref(summary, 'foo');
+  it('getMetricsKubernetesHref creates a link for valid parameters', () => {
+    const result = getMetricsKubernetesHref(summary, 'foo');
     expect(result).not.toBeUndefined();
     expect(result).toMatchSnapshot();
   });
 
-  it('getInfraKubernetesHref does not specify a base path when none is available', () => {
-    expect(getInfraKubernetesHref(summary, '')).toMatchSnapshot();
+  it('getMetricsKubernetesHref does not specify a base path when none is available', () => {
+    expect(getMetricsKubernetesHref(summary, '')).toMatchSnapshot();
   });
 
-  it('getInfraKubernetesHref returns undefined when no pod data is present', () => {
+  it('getMetricsKubernetesHref returns undefined when no pod data is present', () => {
     summary.state.checks = [];
-    expect(getInfraKubernetesHref(summary, 'foo')).toBeUndefined();
+    expect(getMetricsKubernetesHref(summary, 'foo')).toBeUndefined();
   });
 
-  it('getInfraKubernetesHref selects the first pod uid when there are multiple', () => {
+  it('getMetricsKubernetesHref selects the first pod uid when there are multiple', () => {
     summary.state.checks = [
       {
         monitor: {
@@ -139,39 +143,39 @@ describe('getInfraHref', () => {
         timestamp: '123',
       },
     ];
-    expect(getInfraKubernetesHref(summary, '')).toMatchSnapshot();
+    expect(getMetricsKubernetesHref(summary, '')).toMatchSnapshot();
   });
 
-  it('getInfraKubernetesHref returns undefined when checks are undefined', () => {
+  it('getMetricsKubernetesHref returns undefined when checks are undefined', () => {
     delete summary.state.checks;
-    expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
+    expect(getMetricsKubernetesHref(summary, '')).toBeUndefined();
   });
 
-  it('getInfraKubernetesHref returns undefined when checks are null', () => {
+  it('getMetricsKubernetesHref returns undefined when checks are null', () => {
     summary.state.checks![0]!.kubernetes!.pod!.uid = null;
-    expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
+    expect(getMetricsKubernetesHref(summary, '')).toBeUndefined();
   });
 
-  it('getInfraIpHref creates a link for valid parameters', () => {
-    const result = getInfraIpHref(summary, 'bar');
+  it('getMetricsIpHref creates a link for valid parameters', () => {
+    const result = getMetricsIpHref(summary, 'bar');
     expect(result).toMatchSnapshot();
   });
 
-  it('getInfraIpHref does not specify a base path when none is available', () => {
-    expect(getInfraIpHref(summary, '')).toMatchSnapshot();
+  it('getMetricsIpHref does not specify a base path when none is available', () => {
+    expect(getMetricsIpHref(summary, '')).toMatchSnapshot();
   });
 
-  it('getInfraIpHref returns undefined when ip is undefined', () => {
+  it('getMetricsIpHref returns undefined when ip is undefined', () => {
     summary.state.checks = [];
-    expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
+    expect(getMetricsIpHref(summary, 'foo')).toBeUndefined();
   });
 
-  it('getInfraIpHref returns undefined when ip is null', () => {
+  it('getMetricsIpHref returns undefined when ip is null', () => {
     summary.state.checks![0].monitor.ip = null;
-    expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
+    expect(getMetricsIpHref(summary, 'foo')).toBeUndefined();
   });
 
-  it('getInfraIpHref returns a url for ors between multiple ips', () => {
+  it('getMetricsIpHref returns a url for ors between multiple ips', () => {
     summary.state.checks = [
       {
         timestamp: '123',
@@ -196,11 +200,11 @@ describe('getInfraHref', () => {
         timestamp: '123',
       },
     ];
-    expect(getInfraIpHref(summary, 'foo')).toMatchSnapshot();
+    expect(getMetricsIpHref(summary, 'foo')).toMatchSnapshot();
   });
 
-  it('getInfraIpHref returns undefined if checks are undefined', () => {
+  it('getMetricsIpHref returns undefined if checks are undefined', () => {
     delete summary.state.checks;
-    expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
+    expect(getMetricsIpHref(summary, 'foo')).toBeUndefined();
   });
 });

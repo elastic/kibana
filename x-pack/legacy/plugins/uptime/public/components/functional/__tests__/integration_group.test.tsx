@@ -30,7 +30,7 @@ describe('IntegrationGroup', () => {
         dateRangeStart="now-12m"
         dateRangeEnd="now-1m"
         isApmAvailable={false}
-        isInfraAvailable={true}
+        isMetricsAvailable={true}
         isLogsAvailable={true}
         summary={summary}
       />
@@ -45,7 +45,7 @@ describe('IntegrationGroup', () => {
         dateRangeStart="now-12m"
         dateRangeEnd="now-1m"
         isApmAvailable={true}
-        isInfraAvailable={false}
+        isMetricsAvailable={false}
         isLogsAvailable={true}
         summary={summary}
       />
@@ -60,7 +60,7 @@ describe('IntegrationGroup', () => {
         dateRangeStart="now-12m"
         dateRangeEnd="now-1m"
         isApmAvailable={true}
-        isInfraAvailable={true}
+        isMetricsAvailable={true}
         isLogsAvailable={false}
         summary={summary}
       />
