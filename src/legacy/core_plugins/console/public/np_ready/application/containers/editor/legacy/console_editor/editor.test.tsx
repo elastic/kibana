@@ -68,9 +68,9 @@ describe('Legacy (Ace) Console Editor Component Smoke Test', () => {
         settings: {} as any,
         storage: {} as any,
         history: {
-          getSavedEditorState: () => null,
+          getSavedEditorState: () => ({} as any),
           updateCurrentState: jest.fn(),
-        },
+        } as any,
         notifications: notificationServiceMock.createSetupContract(),
       },
       docLinkVersion: 'NA',
