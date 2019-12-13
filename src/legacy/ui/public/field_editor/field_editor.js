@@ -689,7 +689,6 @@ export class FieldEditor extends PureComponent {
   }
 
   saveField = async () => {
-    const fieldFormat = this.state.field.format;
     const field = this.state.field.toActualField();
     const { indexPattern } = this.props;
     const { fieldFormatId } = this.state;
@@ -727,7 +726,7 @@ export class FieldEditor extends PureComponent {
     if (!fieldFormatId) {
       indexPattern.fieldFormatMap[field.name] = undefined;
     } else {
-      indexPattern.fieldFormatMap[field.name] = fieldFormat;
+      indexPattern.fieldFormatMap[field.name] = field.format;
     }
 
     return indexPattern.save()
