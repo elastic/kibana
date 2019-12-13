@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Report } from '@kbn/analytics';
+import { ReportSchemaType } from './schema';
 
-export async function storeReport(internalRepository: any, report: Partial<Report>) {
+export async function storeReport(internalRepository: any, report: ReportSchemaType) {
   const uiStatsMetrics = report.uiStatsMetrics ? Object.entries(report.uiStatsMetrics) : [];
   const userAgents = report.userAgent ? Object.entries(report.userAgent) : [];
   return Promise.all([
