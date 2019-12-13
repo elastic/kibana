@@ -100,10 +100,10 @@ describe('Saved Object', function () {
     })
   );
 
-  beforeEach(ngMock.inject(function (es, Private, $window) {
-    SavedObject = Private(SavedObjectProvider);
-    esDataStub = es;
+  beforeEach(ngMock.inject(function (es, $window) {
     savedObjectsClientStub = npStart.core.savedObjects.client;
+    SavedObject = createSavedObjectClass({ savedObjectsClient: savedObjectsClientStub });
+    esDataStub = es;
     window = $window;
   }));
 
