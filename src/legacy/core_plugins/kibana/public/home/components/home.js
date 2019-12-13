@@ -51,8 +51,8 @@ export class Home extends Component {
       getServices().getInjected('disableWelcomeScreen') ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
-    const showTelemetryDisclaimer = getServices().getInjected('telemetryNotifyUserAboutOptInDefault');
-
+    // const showTelemetryDisclaimer = getServices().getInjected('telemetryNotifyUserAboutOptInDefault'); // from src/legacy/core_plugins/telemetry/index.ts line 110, this is false by default
+    const currentOptInStatus = getServices().getInjected('telemetryOptedIn');
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering
@@ -61,7 +61,8 @@ export class Home extends Component {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
-      showTelemetryDisclaimer,
+      // showTelemetryDisclaimer,
+      currentOptInStatus
     };
   }
 
@@ -230,8 +231,9 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
-        showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
+        // showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
         onOptInSeen={this.props.onOptInSeen}
+        currentOptInStatus={this.state.currentOptInStatus}
       />
     );
   }
