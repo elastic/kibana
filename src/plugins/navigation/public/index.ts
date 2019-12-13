@@ -22,8 +22,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new NavigationPublicPlugin(initializerContext);
 }
 
-export * from './types';
-
 export { TopNavMenuData, TopNavMenu } from './top_nav_menu';
 
 // Export plugin after all other imports
