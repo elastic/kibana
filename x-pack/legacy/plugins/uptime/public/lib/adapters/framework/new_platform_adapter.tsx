@@ -33,7 +33,8 @@ export const getKibanaFrameworkAdapter = (
   core.chrome.getBreadcrumbs$().subscribe((nextBreadcrumbs?: ChromeBreadcrumb[]) => {
     breadcrumbs = nextBreadcrumbs || [];
   });
-  const { apm, metrics, logs } = getIntegratedAppAvailability(capabilities, INTEGRATED_SOLUTIONS);
+  const availability = getIntegratedAppAvailability(capabilities, INTEGRATED_SOLUTIONS);
+  const { apm, infrastructure: metrics, logs } = availability;
   const canSave = get(capabilities, 'uptime.save', false);
   const props: UptimeAppProps = {
     autocomplete,

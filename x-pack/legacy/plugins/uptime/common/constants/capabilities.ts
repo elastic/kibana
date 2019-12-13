@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const INTEGRATED_SOLUTIONS = ['apm', 'metrics', 'logs'];
+export const INTEGRATED_SOLUTIONS = ['apm', 'infrastructure', 'logs'];
