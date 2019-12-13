@@ -65,7 +65,7 @@ export interface Alert {
   name: string;
   tags: string[];
   alertTypeId: string;
-  consumer: string | null;
+  consumer: string;
   interval: string;
   actions: AlertAction[];
   params: Record<string, any>;
@@ -84,7 +84,7 @@ export interface RawAlert extends SavedObjectAttributes {
   name: string;
   tags: string[];
   alertTypeId: string;
-  consumer: string | null;
+  consumer: string;
   interval: string;
   actions: RawAlertAction[];
   params: SavedObjectAttributes;
