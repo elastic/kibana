@@ -359,7 +359,7 @@ export class ImportView extends Component {
   }
 
   async loadIndexPatternNames() {
-    await loadIndexPatterns();
+    await loadIndexPatterns(this.props.indexPatterns);
     const indexPatternNames = getIndexPatternNames();
     this.setState({ indexPatternNames });
   }

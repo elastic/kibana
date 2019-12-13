@@ -36,7 +36,7 @@ export const LogEntryRatePageContent = () => {
   useEffect(() => {
     fetchModuleDefinition();
     fetchJobStatus();
-  }, []);
+  }, [fetchJobStatus, fetchModuleDefinition]);
 
   if (!hasLogAnalysisCapabilites) {
     return <LogEntryRateUnavailableContent />;

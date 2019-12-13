@@ -31,7 +31,7 @@ import { FullTimeRangeSelector } from '../../components/full_time_range_selector
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { timeBasedIndexCheck } from '../../util/index_utils';
+import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
@@ -173,9 +173,8 @@ export const Page: FC = () => {
 
   useEffect(() => {
     // Check for a saved search being passed in.
-    const searchSource = currentSavedSearch.searchSource;
-    const query = searchSource.getField('query');
-    if (query !== undefined) {
+    if (currentSavedSearch !== null) {
+      const { query } = getQueryFromSavedSearch(currentSavedSearch);
       const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
       const qryString = query.query;
       let qry;

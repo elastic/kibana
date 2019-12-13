@@ -6,26 +6,22 @@
 
 import React, { FC, Fragment } from 'react';
 import { timefilter } from 'ui/timefilter';
-import { IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
 
 import { KibanaConfigTypeFix } from '../../contexts/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
+import { getIndexPatternsContract } from '../../util/index_utils';
 
 // @ts-ignore
 import { FileDataVisualizerView } from './components/file_datavisualizer_view/index';
 
 export interface FileDataVisualizerPageProps {
-  indexPatterns: IndexPatternsContract;
   kibanaConfig: KibanaConfigTypeFix;
 }
 
-export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({
-  indexPatterns,
-  kibanaConfig,
-}) => {
+export const FileDataVisualizerPage: FC<FileDataVisualizerPageProps> = ({ kibanaConfig }) => {
   timefilter.disableTimeRangeSelector();
   timefilter.disableAutoRefreshSelector();
-
+  const indexPatterns = getIndexPatternsContract();
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />

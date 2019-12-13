@@ -11,8 +11,8 @@ import 'plugins/security/services/auto_logout';
 
 function isUnauthorizedResponseAllowed(response) {
   const API_WHITELIST = [
-    '/api/security/v1/login',
-    '/api/security/v1/users/.*/password'
+    '/internal/security/login',
+    '/internal/security/users/.*/password'
   ];
 
   const url = response.config.url;

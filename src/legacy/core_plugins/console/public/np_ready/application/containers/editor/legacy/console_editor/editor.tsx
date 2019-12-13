@@ -20,6 +20,11 @@
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { debounce } from 'lodash';
+
+// Node v5 querystring for browser.
+// @ts-ignore
+import * as qs from 'querystring-browser';
 
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useServicesContext, useEditorReadContext } from '../../../../contexts';
@@ -80,17 +85,64 @@ function EditorUI() {
 
   useEffect(() => {
     editorInstanceRef.current = senseEditor.create(editorRef.current!);
+    const editor = editorInstanceRef.current;
 
-    const { content: text } = history.getSavedEditorState() || {
-      content: DEFAULT_INPUT_VALUE,
+    const readQueryParams = () => {
+      const [, queryString] = (window.location.hash || '').split('?');
+      return qs.parse(queryString || '');
     };
-    editorInstanceRef.current.update(text);
+
+    const loadBufferFromRemote = (url: string) => {
+      if (/^https?:\/\//.test(url)) {
+        const loadFrom: Record<string, any> = {
+          url,
+          // Having dataType here is required as it doesn't allow jQuery to `eval` content
+          // coming from the external source thereby preventing XSS attack.
+          dataType: 'text',
+          kbnXsrfToken: false,
+        };
+
+        if (/https?:\/\/api\.github\.com/.test(url)) {
+          loadFrom.headers = { Accept: 'application/vnd.github.v3.raw' };
+        }
+
+        // Fire and forget.
+        $.ajax(loadFrom).done(async data => {
+          const coreEditor = editor.getCoreEditor();
+          await editor.update(data, true);
+          editor.moveToNextRequestEdge(false);
+          coreEditor.clearSelection();
+          editor.highlightCurrentRequestsAndUpdateActionBar();
+          coreEditor.getContainer().focus();
+        });
+      }
+    };
+
+    // Support for loading a console snippet from a remote source, like support docs.
+    const onHashChange = debounce(() => {
+      const { load_from: url } = readQueryParams();
+      if (!url) {
+        return;
+      }
+      loadBufferFromRemote(url);
+    }, 200);
+    window.addEventListener('hashchange', onHashChange);
+
+    const initialQueryParams = readQueryParams();
+    if (initialQueryParams.load_from) {
+      loadBufferFromRemote(initialQueryParams.load_from);
+    } else {
+      const { content: text } = history.getSavedEditorState() || {
+        content: DEFAULT_INPUT_VALUE,
+      };
+      editor.update(text);
+    }
 
     function setupAutosave() {
       let timer: number;
       const saveDelay = 500;
 
-      editorInstanceRef.current!.getCoreEditor().on('change', () => {
+      editor.getCoreEditor().on('change', () => {
         if (timer) {
           clearTimeout(timer);
         }
@@ -100,35 +152,34 @@ function EditorUI() {
 
     function saveCurrentState() {
       try {
-        const content = editorInstanceRef.current!.getCoreEditor().getValue();
+        const content = editor.getCoreEditor().getValue();
         history.updateCurrentState(content);
       } catch (e) {
         // Ignoring saving error
       }
     }
 
-    setInputEditor(editorInstanceRef.current);
+    setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
     mappings.retrieveAutoCompleteInfo();
 
-    const unsubscribeResizer = subscribeResizeChecker(
-      editorRef.current!,
-      editorInstanceRef.current.getCoreEditor()
-    );
+    const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor.getCoreEditor());
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
       mappings.clearSubscriptions();
+      window.removeEventListener('hashchange', onHashChange);
     };
   }, [history, setInputEditor]);
 
   useEffect(() => {
-    applyCurrentSettings(editorInstanceRef.current!.getCoreEditor(), settings);
+    const { current: editor } = editorInstanceRef;
+    applyCurrentSettings(editor!.getCoreEditor(), settings);
     // Preserve legacy focus behavior after settings have updated.
-    editorInstanceRef
-      .current!.getCoreEditor()
+    editor!
+      .getCoreEditor()
       .getContainer()
       .focus();
   }, [settings]);
@@ -160,6 +211,9 @@ function EditorUI() {
               <button
                 onClick={sendCurrentRequestToES}
                 data-test-subj="sendRequestButton"
+                aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+                  defaultMessage: 'click to send request',
+                })}
                 className="conApp__editorActionButton conApp__editorActionButton--success"
               >
                 <EuiIcon type="play" />

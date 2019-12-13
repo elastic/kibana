@@ -51,7 +51,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
         />
       </EuiContextMenuItem>,
     ],
-    [uptimeLink]
+    [apmLink, uptimeLink]
   );
 
   const hasMenuItems = useMemo(() => menuItems.length > 0, [menuItems]);
