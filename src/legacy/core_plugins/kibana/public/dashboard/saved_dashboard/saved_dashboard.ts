@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import angular from 'angular';
 import { SearchSourceContract } from 'ui/courier';
 import { SavedObject, SavedObjectKibanaServices } from 'ui/saved_objects/types';
 import { createSavedObjectClass } from 'ui/saved_objects/saved_object';
@@ -91,7 +90,7 @@ export function createSavedDashboardClass(services: SavedObjectKibanaServices) {
           hits: 0,
           description: '',
           panelsJSON: '[]',
-          optionsJSON: angular.toJson({
+          optionsJSON: JSON.stringify({
             // for BWC reasons we can't default dashboards that already exist without this setting to true.
             useMargins: !id,
             hidePanelTitles: false,

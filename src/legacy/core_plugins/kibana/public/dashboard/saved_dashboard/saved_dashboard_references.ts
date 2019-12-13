@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
+import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
 import { SavedObjectDashboard } from './saved_dashboard';
 
 export function extractReferences({
