@@ -14,8 +14,10 @@ import {
   EuiPageBody,
   EuiPanel,
   EuiPageContent,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { Status } from '../instances/status';
+import { FormattedMessage   } from '@kbn/i18n/react';
 
 export function ApmOverview({ stats, metrics, ...props }) {
   const seriesToShow = [
@@ -45,6 +47,14 @@ export function ApmOverview({ stats, metrics, ...props }) {
   return (
     <EuiPage>
       <EuiPageBody>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.apm.overview.heading"
+              defaultMessage="APM Overview"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageContent>
           <Status stats={stats} />
           <EuiSpacer size="s" />
