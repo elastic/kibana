@@ -42,6 +42,8 @@ import { transform } from './legacy/plugins/transform';
 import { actions } from './legacy/plugins/actions';
 import { alerting } from './legacy/plugins/alerting';
 import { lens } from './legacy/plugins/lens';
+import { advancedData } from './legacy/plugins/advanced_data';
+import { backgroundSearchViewer } from './legacy/plugins/background_search_viewer';
 
 module.exports = function(kibana) {
   return [
@@ -83,5 +85,7 @@ module.exports = function(kibana) {
     snapshotRestore(kibana),
     actions(kibana),
     alerting(kibana),
+    advancedData(kibana),
+    backgroundSearchViewer(kibana),
   ];
 };

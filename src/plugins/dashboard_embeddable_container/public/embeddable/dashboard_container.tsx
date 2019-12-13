@@ -20,6 +20,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n/react';
+import { EmbeddableHandlers } from 'src/plugins/embeddable/public';
 import { RefreshInterval, TimeRange, Query, esFilters } from '../../../data/public';
 import { CoreStart } from '../../../../core/public';
 import { IUiActionsStart } from '../ui_actions_plugin';
@@ -95,7 +96,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   constructor(
     initialInput: DashboardContainerInput,
     private readonly options: DashboardContainerOptions,
-    parent?: Container
+    handlers: EmbeddableHandlers
   ) {
     super(
       {
@@ -107,7 +108,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       },
       { embeddableLoaded: {} },
       options.embeddable.getEmbeddableFactory,
-      parent
+      handlers
     );
   }
 

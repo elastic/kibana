@@ -20,6 +20,7 @@ import { IScope } from 'angular';
 
 import { IUiActionsStart, IUiActionsSetup } from 'src/plugins/ui_actions/public';
 import { IEmbeddableStart, IEmbeddableSetup } from 'src/plugins/embeddable/public';
+import { DashboardEmbeddableContainerPublicPlugin } from '../../../../plugins/dashboard_embeddable_container/public/plugin';
 import { LegacyCoreSetup, LegacyCoreStart, App, AppMountDeprecated } from '../../../../core/public';
 import { Plugin as DataPlugin } from '../../../../plugins/data/public';
 import { Plugin as ExpressionsPlugin } from '../../../../plugins/expressions/public';
@@ -53,6 +54,7 @@ export interface PluginsSetup {
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
   usageCollection: UsageCollectionSetup;
+  dashboardEmbeddableContainer: DashboardEmbeddableContainerPublicPlugin['setup'];
 }
 
 export interface PluginsStart {

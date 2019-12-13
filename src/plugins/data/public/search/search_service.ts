@@ -37,6 +37,14 @@ import {
 import { TStrategyTypes } from './strategy_types';
 import { esSearchService } from './es_search';
 import { ISearchGeneric } from './i_search';
+import {
+  SearchCollector,
+  SearchCollections,
+  SearchCollectorFactory,
+  searchCollectorFactoryFn,
+  getSearchCollectorFactory,
+  SearchCollectorFactoryInner,
+} from './search_with_collector';
 
 /**
  * Extends the AppMountContext so other plugins have access
@@ -50,6 +58,7 @@ declare module 'kibana/public' {
 
 export interface ISearchStart {
   search: ISearchGeneric;
+  createSearchCollector: (id: string) => SearchCollector;
 }
 
 /**
@@ -75,6 +84,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private search?: ISearchGeneric;
 
+  private searchCollections: SearchCollections = {};
+
+  private searchCollectorFactory: SearchCollectorFactoryInner = searchCollectorFactoryFn;
+
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): ISearchSetup {
@@ -98,6 +111,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const api = {
       registerSearchStrategyContext: this.contextContainer!.registerContext,
       registerSearchStrategyProvider,
+      setSearchCollectorFactory: (factory: SearchCollectorFactoryInner) => {
+        this.searchCollectorFactory = factory;
+      },
     };
 
     api.registerSearchStrategyContext(this.initializerContext.opaqueId, 'core', () => core);
@@ -119,7 +135,14 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     if (!this.search) {
       throw new Error('Search should always be defined');
     }
-    return { search: this.search };
+    return {
+      search: this.search,
+      createSearchCollector: getSearchCollectorFactory(
+        this.searchCollections,
+        this.searchCollectorFactory,
+        this.search
+      ),
+    };
   }
 
   public stop() {}

@@ -18,11 +18,13 @@
  */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { SearchBatch } from 'src/plugins/data/public';
 import {
   Container,
   ContainerInput,
   GetEmbeddableFactory,
   EmbeddableInput,
+  EmbeddableHandlers,
 } from '../../../../src/plugins/embeddable/public';
 import { SearchableListContainerComponent } from './searchable_list_container_component';
 
@@ -40,8 +42,12 @@ export class SearchableListContainer extends Container<ChildInput, SearchableCon
   public readonly type = SEARCHABLE_LIST_CONTAINER;
   private node?: HTMLElement;
 
-  constructor(input: SearchableContainerInput, getEmbeddableFactory: GetEmbeddableFactory) {
-    super(input, { embeddableLoaded: {} }, getEmbeddableFactory);
+  constructor(
+    input: SearchableContainerInput,
+    getEmbeddableFactory: GetEmbeddableFactory,
+    handlers: EmbeddableHandlers
+  ) {
+    super(input, { embeddableLoaded: {} }, getEmbeddableFactory, handlers);
   }
 
   // TODO: add a more advanced example here where inherited child input is derived from container

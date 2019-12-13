@@ -31,6 +31,8 @@ export { ExpressionDataHandler } from './execute';
 
 export { ExpressionRenderHandler } from './render';
 
+export { ExpressionLoader } from './loader';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExpressionsPublicPlugin(initializerContext);
 }

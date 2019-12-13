@@ -16,6 +16,7 @@ import {
   EmbeddableOutput,
   IContainer,
   EmbeddableInput,
+  EmbeddableHandlers,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { Document, DOC_TYPE } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
@@ -56,7 +57,7 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
     expressionRenderer: ExpressionRenderer,
     { savedVis, editUrl, editable, indexPatterns }: LensEmbeddableConfiguration,
     initialInput: LensEmbeddableInput,
-    parent?: IContainer
+    handlers: EmbeddableHandlers
   ) {
     super(
       initialInput,
@@ -70,10 +71,12 @@ export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbe
         editUrl,
         indexPatterns,
       },
-      parent
+      handlers
     );
 
-    this.expressionRenderer = expressionRenderer;
+    this.expressionRenderer = expressionRenderer.bind({
+      extraHandlers: { search: this.searchCollector.search },
+    });
     this.savedVis = savedVis;
     this.subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
     this.onContainerStateChanged(initialInput);

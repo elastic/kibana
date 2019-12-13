@@ -120,10 +120,10 @@ export class ToastsApi implements IToasts {
    * @param toastOrTitle - a {@link ToastInput}
    * @returns a {@link Toast}
    */
-  public add(toastOrTitle: ToastInput) {
+  public add(toastOrTitle: ToastInput, lifetime?: number) {
     const toast: Toast = {
       id: String(this.idCounter++),
-      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:info'),
+      toastLifeTimeMs: lifetime || this.uiSettings.get('notifications:lifetime:info'),
       ...normalizeToast(toastOrTitle),
     };
 

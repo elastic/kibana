@@ -18,14 +18,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SearchCollectorFactory } from 'src/plugins/data/public';
+import { EmbeddableHandlers, IContainer } from 'src/plugins/embeddable/public';
 import { SavedObjectAttributes } from '../../../../core/public';
 import { SavedObjectMetaData } from '../types';
-import {
-  ContainerOutput,
-  EmbeddableFactory,
-  ErrorEmbeddable,
-  Container,
-} from '../embeddable_plugin';
+import { ContainerOutput, EmbeddableFactory, ErrorEmbeddable } from '../embeddable_plugin';
 import {
   DashboardContainer,
   DashboardContainerInput,
@@ -48,7 +45,9 @@ export class DashboardContainerFactory extends EmbeddableFactory<
   private readonly allowEditing: boolean;
 
   constructor(private readonly options: DashboardOptions) {
-    super({ savedObjectMetaData: options.savedObjectMetaData });
+    super({
+      savedObjectMetaData: options.savedObjectMetaData,
+    });
 
     const capabilities = (options.application.capabilities
       .dashboard as unknown) as DashboardCapabilities;
@@ -80,8 +79,11 @@ export class DashboardContainerFactory extends EmbeddableFactory<
 
   public async create(
     initialInput: DashboardContainerInput,
-    parent?: Container
+    parent?: IContainer
   ): Promise<DashboardContainer | ErrorEmbeddable> {
-    return new DashboardContainer(initialInput, this.options, parent);
+    return new DashboardContainer(initialInput, this.options, {
+      createSearchCollector: this.createSearchCollector!,
+      parent,
+    });
   }
 }

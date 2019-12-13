@@ -1,0 +1,10 @@
+{
+  "id": "makeItSlowExplorer",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["make_it_slow_explorer"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data", "demoSearch", "dashboard_embeddable_container", "embeddableExamples"],
+  "optionalPlugins": []
+}

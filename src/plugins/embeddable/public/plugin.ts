@@ -18,10 +18,12 @@
  */
 
 import { IUiActionsSetup } from 'src/plugins/ui_actions/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { EmbeddableFactoryRegistry } from './types';
 import { createApi, EmbeddableApi } from './api';
 import { bootstrap } from './bootstrap';
+import { getBoundGetEmbeddableFactory } from './lib/embeddables/embeddable_factory';
 
 export interface IEmbeddableSetupDependencies {
   uiActions: IUiActionsSetup;
@@ -32,6 +34,10 @@ export interface IEmbeddableSetup {
 }
 
 export type IEmbeddableStart = EmbeddableApi;
+
+interface StartDeps {
+  data: DataPublicPluginStart;
+}
 
 export class EmbeddablePublicPlugin implements Plugin<IEmbeddableSetup, IEmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
@@ -52,8 +58,14 @@ export class EmbeddablePublicPlugin implements Plugin<IEmbeddableSetup, IEmbedda
     };
   }
 
-  public start(core: CoreStart) {
-    return this.api;
+  public start(core: CoreStart, deps: StartDeps) {
+    return {
+      ...this.api,
+      getEmbeddableFactory: getBoundGetEmbeddableFactory({
+        createSearchCollector: deps.data.search.createSearchCollector,
+        embeddableFactories: this.embeddableFactories,
+      }),
+    };
   }
 
   public stop() {}

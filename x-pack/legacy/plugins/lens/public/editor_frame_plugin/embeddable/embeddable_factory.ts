@@ -16,6 +16,7 @@ import {
   ErrorEmbeddable,
   EmbeddableInput,
   IContainer,
+  EmbeddableHandlers,
 } from '../../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { Embeddable } from './embeddable';
 import { SavedObjectIndexStore, DOC_TYPE } from '../../persistence';
@@ -64,7 +65,7 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
   async createFromSavedObject(
     savedObjectId: string,
     input: Partial<EmbeddableInput> & { id: string },
-    parent?: IContainer
+    handlers: EmbeddableHandlers
   ) {
     const store = new SavedObjectIndexStore(this.chrome.getSavedObjectsClient());
     const savedVis = await store.load(savedObjectId);
@@ -96,7 +97,10 @@ export class EmbeddableFactory extends AbstractEmbeddableFactory {
         indexPatterns,
       },
       input,
-      parent
+      {
+        ...handlers,
+        createSearchCollector: this.createSearchCollector,
+      }
     );
   }
 

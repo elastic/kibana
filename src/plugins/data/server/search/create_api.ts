@@ -31,11 +31,17 @@ export function createApi({
 }) {
   const api: IRouteHandlerSearchContext = {
     search: async (request, options, strategyName) => {
+      console.log('createApi: searching..., strategys is ', searchStrategies);
       const name = strategyName ? strategyName : DEFAULT_SEARCH_STRATEGY;
+      console.log('createApi: name is ', name);
       const strategyProvider = searchStrategies[name];
       if (!strategyProvider) {
+        console.log('no provider found');
         throw new Error(`No strategy found for ${strategyName}`);
       }
+      console.log('createApi: searching with request ', request);
+      console.log('createApi: searching with startegy name ', strategyName);
+      console.log('createApi: searching with startegy provider ', strategyProvider);
       // Give providers access to other search strategies by injecting this function
       const strategy = await strategyProvider(caller, api.search);
       return strategy.search(request, options);

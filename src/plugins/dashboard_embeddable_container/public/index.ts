@@ -29,3 +29,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { DashboardEmbeddableContainerPublicPlugin as Plugin };
+
+export { DashboardContainerFactory, DashboardOptions } from './embeddable';

@@ -58,6 +58,7 @@ export {
   withEmbeddableSubscription,
   EmbeddableFactoryRenderer,
   EmbeddableRoot,
+  EmbeddableHandlers,
 } from './lib';
 
 export function plugin(initializerContext: PluginInitializerContext) {

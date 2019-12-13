@@ -35,8 +35,12 @@ export { TSearchStrategyProvider, ISearchStrategy } from './i_search_strategy';
 
 export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
 
-export { SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
+export { SYNC_SEARCH_STRATEGY, ISyncSearchRequest } from './sync_search_strategy';
 
 export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
 
 export { ISearchStart } from './search_service';
+
+export { TStrategyTypes } from './strategy_types';
+
+export * from './search_with_collector';

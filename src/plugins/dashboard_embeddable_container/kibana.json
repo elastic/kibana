@@ -1,10 +1,11 @@
 {
-  "id": "dashboard_embeddable_container",
+  "id": "dashboardEmbeddableContainer",
   "version": "kibana",
   "requiredPlugins": [
     "embeddable",
     "inspector",
-    "uiActions"
+    "uiActions",
+    "data"
   ],
   "server": false,
   "ui": true

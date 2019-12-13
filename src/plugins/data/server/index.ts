@@ -24,11 +24,13 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new DataServerPlugin(initializerContext);
 }
 
+export { DataPluginSetup } from './plugin';
+
 /**
  * Types to be shared externally
  * @public
  */
-export { IRequestTypesMap, IResponseTypesMap } from './search';
+export { IRequestTypesMap, IResponseTypesMap, ISearchStrategy } from './search';
 export {
   // field formats
   FIELD_FORMAT_IDS,
@@ -47,6 +49,9 @@ export {
   // timefilter
   RefreshInterval,
   TimeRange,
+  // search
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
 } from '../common';
 
 /**

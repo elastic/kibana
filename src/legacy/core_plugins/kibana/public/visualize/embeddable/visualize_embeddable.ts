@@ -368,6 +368,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
       extraHandlers: {
         vis: this.vis,
         uiState: this.uiState,
+        search: this.searchCollector?.search,
       },
     };
     this.expression = await buildPipeline(this.vis, {

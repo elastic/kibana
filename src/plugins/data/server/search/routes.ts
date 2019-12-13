@@ -36,6 +36,7 @@ export function registerSearchRoute(router: IRouter): void {
       const searchRequest = request.body;
       const strategy = request.params.strategy;
       try {
+        console.log('going to search in route...');
         const response = await context.search!.search(searchRequest, {}, strategy);
         return res.ok({ body: response });
       } catch (err) {

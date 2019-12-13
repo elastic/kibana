@@ -1,0 +1,32 @@
+{
+  "bgSearchCollection": {
+    "properties": {
+      "name": {
+        "type": "text"
+      },
+      "url": {
+        "type": "keyword"
+      },
+      "state": {
+        "type": "text"
+      },
+      "user": {
+        "type": "keyword"
+      },
+      "searches": {
+        "type": "nested",
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "type": {
+            "type": "keyword"
+          }, 
+          "request": {
+            "type": "text"
+          }
+        }
+      }
+    }
+  }
+}

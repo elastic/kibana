@@ -18,10 +18,10 @@
  */
 
 import { EmbeddableFactoryRegistry } from '../types';
-import { EmbeddableFactory, GetEmbeddableFactories } from '../lib';
+import { EmbeddableFactory, GetEmbeddableFactories, GetEmbeddableFactory } from '../lib';
 
 export interface EmbeddableApi {
-  getEmbeddableFactory: (embeddableFactoryId: string) => EmbeddableFactory;
+  getEmbeddableFactory: GetEmbeddableFactory;
   getEmbeddableFactories: GetEmbeddableFactories;
   // TODO: Make `registerEmbeddableFactory` receive only `factory` argument.
   registerEmbeddableFactory: (id: string, factory: EmbeddableFactory) => void;

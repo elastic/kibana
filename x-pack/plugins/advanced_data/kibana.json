@@ -1,0 +1,9 @@
+{
+  "id": "advancedData",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "expressions", "uiActions", "embeddable"],
+  "optionalPlugins": []
+}

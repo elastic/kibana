@@ -20,6 +20,7 @@
 import { IContextProvider } from 'kibana/public';
 import { ISearchContext } from './i_search_context';
 import { TRegisterSearchStrategyProvider, TSearchStrategyProvider } from './i_search_strategy';
+import { SearchCollectorFactoryInner } from './search_with_collector';
 
 /**
  * The setup contract exposed by the Search plugin exposes the search strategy extension
@@ -37,4 +38,6 @@ export interface ISearchSetup {
    * strategies.
    */
   registerSearchStrategyProvider: TRegisterSearchStrategyProvider;
+
+  setSearchCollectorFactory: (factory: SearchCollectorFactoryInner) => void;
 }

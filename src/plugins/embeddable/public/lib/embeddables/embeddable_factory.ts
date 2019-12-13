@@ -18,10 +18,13 @@
  */
 
 import { SavedObjectAttributes } from 'src/core/public';
-import { SavedObjectMetaData } from '../types';
+import { SearchCollectorFactory } from 'src/plugins/data/public';
+import { SavedObjectMetaData, GetEmbeddableFactory } from '../types';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
+import { EmbeddableHandlers } from './embeddable';
+import { EmbeddableFactoryRegistry } from '../../types';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;
@@ -43,6 +46,22 @@ export interface OutputSpec {
 export interface EmbeddableFactoryOptions<T> {
   savedObjectMetaData?: SavedObjectMetaData<T>;
 }
+
+export interface EmbeddableFactoryInput {
+  createSearchCollector: SearchCollectorFactory;
+  embeddableFactories: EmbeddableFactoryRegistry;
+}
+
+export const getBoundGetEmbeddableFactory = ({
+  createSearchCollector,
+  embeddableFactories,
+}: EmbeddableFactoryInput): GetEmbeddableFactory => (type: string) => {
+  const factory = embeddableFactories.get(type);
+  if (factory) {
+    factory.createSearchCollector = createSearchCollector;
+  }
+  return factory;
+};
 
 /**
  * The EmbeddableFactory creates and initializes an embeddable instance
@@ -69,6 +88,8 @@ export abstract class EmbeddableFactory<
    * rid of this interface.
    */
   public readonly isContainerType: boolean = false;
+
+  public createSearchCollector?: SearchCollectorFactory;
 
   constructor({ savedObjectMetaData }: EmbeddableFactoryOptions<TSavedObjectAttributes> = {}) {
     this.savedObjectMetaData = savedObjectMetaData;

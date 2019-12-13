@@ -19,6 +19,7 @@
 
 import uuid from 'uuid';
 import { merge, Subscription } from 'rxjs';
+import { SearchCollectorFactory } from 'src/plugins/data/public';
 import {
   Embeddable,
   EmbeddableInput,
@@ -30,6 +31,7 @@ import {
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { GetEmbeddableFactory } from '../types';
+import { EmbeddableHandlers } from '../embeddables/embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -50,9 +52,9 @@ export abstract class Container<
     input: TContainerInput,
     output: TContainerOutput,
     protected readonly getFactory: GetEmbeddableFactory,
-    parent?: Container
+    handlers: EmbeddableHandlers
   ) {
-    super(input, output, parent);
+    super(input, output, handlers);
     this.subscription = this.getInput$().subscribe(() => this.maybeUpdateChildren());
   }
 
@@ -161,6 +163,7 @@ export abstract class Container<
     super.destroy();
     Object.values(this.children).forEach(child => child.destroy());
     this.subscription.unsubscribe();
+    this.searchCollector.destroy();
   }
 
   public async untilEmbeddableLoaded<TEmbeddable extends IEmbeddable>(
@@ -309,7 +312,11 @@ export abstract class Container<
         ? await factory.createFromSavedObject(panel.savedObjectId, inputForChild, this)
         : await factory.create(inputForChild, this);
     } catch (e) {
-      embeddable = new ErrorEmbeddable(e, { id: panel.explicitInput.id }, this);
+      embeddable = new ErrorEmbeddable(
+        e,
+        { id: panel.explicitInput.id },
+        { parent: this, createSearchCollector: () => this.searchCollector }
+      );
     }
 
     // EmbeddableFactory.create can return undefined without throwing an error, which indicates that an embeddable

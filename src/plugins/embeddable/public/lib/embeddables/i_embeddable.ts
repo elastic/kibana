@@ -18,6 +18,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { SearchCollector } from 'src/plugins/data/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { ViewMode } from '../types';
@@ -52,6 +53,8 @@ export interface IEmbeddable<
    * nested embeddables?
    **/
   readonly isContainer: boolean;
+
+  readonly searchCollector?: SearchCollector;
 
   /**
    * If this embeddable is nested inside a container, this will contain

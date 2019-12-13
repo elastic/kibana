@@ -17,7 +17,6 @@
  * under the License.
  */
 export { EmbeddableOutput, EmbeddableInput, IEmbeddable } from './i_embeddable';
-export { Embeddable } from './embeddable';
 export {
   EmbeddableInstanceConfiguration,
   EmbeddableFactory,
@@ -27,3 +26,4 @@ export { ErrorEmbeddable, isErrorEmbeddable } from './error_embeddable';
 export { withEmbeddableSubscription } from './with_subscription';
 export { EmbeddableFactoryRenderer } from './embeddable_factory_renderer';
 export { EmbeddableRoot } from './embeddable_root';
+export * from './embeddable';

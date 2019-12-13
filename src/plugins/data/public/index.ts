@@ -26,7 +26,14 @@ export function plugin(initializerContext: PluginInitializerContext) {
  * Types to be shared externally
  * @public
  */
-export { IRequestTypesMap, IResponseTypesMap } from './search';
+export {
+  IRequestTypesMap,
+  IResponseTypesMap,
+  TStrategyTypes,
+  ISyncSearchRequest,
+  ISearchOptions,
+  TSearchStrategyProvider,
+} from './search';
 export * from './types';
 export {
   // field formats
@@ -95,3 +102,4 @@ export {
 // Export plugin after all other imports
 import { DataPublicPlugin } from './plugin';
 export { DataPublicPlugin as Plugin };
+export * from './search';

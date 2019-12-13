@@ -39,7 +39,12 @@ import {
   unhashUrl,
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
-import { Query, SavedQuery, IndexPatternsContract } from '../../../../../plugins/data/public';
+import {
+  Query,
+  SavedQuery,
+  IndexPatternsContract,
+  createSearchBatch,
+} from '../../../../../plugins/data/public';
 
 import {
   DashboardContainer,

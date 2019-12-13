@@ -5,6 +5,7 @@
   "ui": true,
   "requiredPlugins": [
     "inspector",
-    "uiActions"
+    "uiActions",
+    "data"
   ]
 }

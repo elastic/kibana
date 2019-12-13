@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export { DashboardContainerFactory } from './dashboard_container_factory';
+export { DashboardContainerFactory, DashboardOptions } from './dashboard_container_factory';
 export { DashboardContainer, DashboardContainerInput } from './dashboard_container';
 export { createPanelState } from './panel';
 

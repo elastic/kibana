@@ -20,7 +20,7 @@
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable } from './embeddable';
+import { Embeddable, EmbeddableHandlers } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
 
@@ -37,8 +37,8 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public error: Error | string;
   private dom?: HTMLElement;
 
-  constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
-    super(input, {}, parent);
+  constructor(error: Error | string, input: EmbeddableInput, handlers: EmbeddableHandlers) {
+    super(input, {}, handlers);
     this.error = error;
   }
 

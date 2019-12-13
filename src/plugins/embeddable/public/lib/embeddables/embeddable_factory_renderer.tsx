@@ -68,6 +68,12 @@ export class EmbeddableFactoryRenderer extends React.Component<Props, State> {
     });
   }
 
+  public componentWillUnmount() {
+    if (this.embeddable) {
+      this.embeddable.destroy();
+    }
+  }
+
   public render() {
     return (
       <EmbeddableRoot

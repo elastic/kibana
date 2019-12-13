@@ -1,0 +1,12 @@
+{
+  "id": "advancedEmbeddable",
+  "version": "kibana",
+  "requiredPlugins": [
+    "embeddable",
+    "advancedData",
+    "dashboardEmbeddableContainer",
+    "data"
+  ],
+  "server": false,
+  "ui": true
+}

@@ -182,6 +182,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
     }
+
     if (this.abortController) this.abortController.abort();
   }
 

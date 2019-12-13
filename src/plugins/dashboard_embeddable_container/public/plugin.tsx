@@ -21,6 +21,7 @@
 
 import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IUiActionsSetup, IUiActionsStart } from '../../../plugins/ui_actions/public';
 import { CONTEXT_MENU_TRIGGER, IEmbeddableSetup, IEmbeddableStart } from './embeddable_plugin';
 import { ExpandPanelAction, ReplacePanelAction } from '.';
@@ -42,19 +43,31 @@ interface StartDependencies {
   embeddable: IEmbeddableStart;
   inspector: InspectorStartContract;
   uiActions: IUiActionsStart;
+  data: DataPublicPluginStart;
 }
 
-export type Setup = void;
+export interface Setup {
+  setDashboardFactory: (factoryClass: typeof DashboardContainerFactory) => void;
+}
+
 export type Start = void;
 
 export class DashboardEmbeddableContainerPublicPlugin
   implements Plugin<Setup, Start, SetupDependencies, StartDependencies> {
+  private dashboardFactoryClass = DashboardContainerFactory;
+
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { embeddable, uiActions }: SetupDependencies): Setup {
     const expandPanelAction = new ExpandPanelAction();
     uiActions.registerAction(expandPanelAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
+
+    return {
+      setDashboardFactory: (factoryClass: typeof DashboardContainerFactory) => {
+        this.dashboardFactoryClass = factoryClass;
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: StartDependencies): Start {
@@ -93,16 +106,19 @@ export class DashboardEmbeddableContainerPublicPlugin
     uiActions.registerAction(changeViewAction);
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);
 
-    const factory = new DashboardContainerFactory({
-      application,
-      notifications,
-      overlays,
-      embeddable,
-      inspector,
-      SavedObjectFinder,
-      ExitFullScreenButton,
-      uiActions,
-    });
+    const factory = new this.dashboardFactoryClass(
+      {
+        application,
+        notifications,
+        overlays,
+        embeddable,
+        inspector,
+        SavedObjectFinder,
+        ExitFullScreenButton,
+        uiActions,
+      },
+      core.savedObjects.client
+    );
 
     embeddable.registerEmbeddableFactory(factory.type, factory);
   }

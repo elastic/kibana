@@ -18,6 +18,7 @@
  */
 import { isEqual, cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
+import { SearchCollectorFactory, SearchCollector } from 'src/plugins/data/public';
 import { Adapters } from '../types';
 import { IContainer } from '../containers';
 import { IEmbeddable, EmbeddableInput, EmbeddableOutput } from './i_embeddable';
@@ -25,6 +26,12 @@ import { ViewMode } from '../types';
 
 function getPanelTitle(input: EmbeddableInput, output: EmbeddableOutput) {
   return input.hidePanelTitles ? '' : input.title === undefined ? output.defaultTitle : input.title;
+}
+
+export interface EmbeddableHandlers {
+  parent?: IContainer;
+  createSearchCollector: SearchCollectorFactory;
+  searchCollector?: SearchCollector;
 }
 
 export abstract class Embeddable<
@@ -49,8 +56,16 @@ export abstract class Embeddable<
   // TODO: Rename to destroyed.
   private destoyed: boolean = false;
 
-  constructor(input: TEmbeddableInput, output: TEmbeddableOutput, parent?: IContainer) {
+  public searchCollector?: SearchCollector;
+
+  constructor(
+    input: TEmbeddableInput,
+    output: TEmbeddableOutput,
+    { createSearchCollector, parent, searchCollector }: EmbeddableHandlers
+  ) {
     this.id = input.id;
+    this.searchCollector =
+      parent && parent.searchCollector ? parent.searchCollector : searchCollector;
     this.output = {
       title: getPanelTitle(input, output),
       ...output,
@@ -118,6 +133,14 @@ export abstract class Embeddable<
   }
 
   public updateInput(changes: Partial<TEmbeddableInput>): void {
+    let changesFound = false;
+    Object.keys(changes).forEach(key => {
+      if (!_.isEqual(this.input[key], changes[key])) {
+        changesFound = true;
+      }
+    });
+    if (!changesFound) return;
+
     if (this.destoyed) {
       throw new Error('Embeddable has been destroyed');
     }

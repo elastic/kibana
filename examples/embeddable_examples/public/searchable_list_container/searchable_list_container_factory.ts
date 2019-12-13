@@ -38,7 +38,9 @@ export class SearchableListContainerFactory extends EmbeddableFactory {
   }
 
   public async create(initialInput: SearchableContainerInput) {
-    return new SearchableListContainer(initialInput, this.getEmbeddableFactory);
+    return new SearchableListContainer(initialInput, this.getEmbeddableFactory, {
+      searchBatch: new AdvancedSearchBatcher(),
+    });
   }
 
   public getDisplayName() {
