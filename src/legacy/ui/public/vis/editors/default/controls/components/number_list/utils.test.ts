@@ -27,12 +27,12 @@ import {
   getNextModel,
   getRange,
 } from './utils';
-import { Range } from '../../../../../../utils/range';
+import { NumberListRange } from './range';
 import { NumberRowModel } from './number_row';
 
 describe('NumberList utils', () => {
   let modelList: NumberRowModel[];
-  let range: Range;
+  let range: NumberListRange;
 
   beforeEach(() => {
     modelList = [

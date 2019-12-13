@@ -22,7 +22,6 @@ import {
   IIndexPattern,
   esFilters,
   Query,
-  utils,
 } from '../../../../../../../../../../src/plugins/data/public';
 
 import { FilterLabel } from './filter_label';
@@ -126,7 +125,7 @@ const getDescriptionItem = (
                   <EuiBadgeWrap color="hollow">
                     <FilterLabel
                       filter={filter}
-                      valueLabel={utils.getDisplayValueFromFilter(filter, [indexPatterns])}
+                      valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
                   </EuiBadgeWrap>
                 </EuiFlexItem>

@@ -20,10 +20,9 @@
 import { noop, map, omit, isNull } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
-import { BucketAggType, IBucketAggConfig } from './_bucket_agg_type';
+import { BucketAggType } from './_bucket_agg_type';
 import { IpRangeTypeParamEditor } from '../../vis/editors/default/controls/ip_range_type';
 import { IpRangesParamEditor } from '../../vis/editors/default/controls/ip_ranges';
-import { ipRange } from '../../utils/ip_range';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 // @ts-ignore
@@ -59,7 +58,7 @@ export const ipRangeBucketAgg = new BucketAggType({
       fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.IP)
     );
     const IpRangeFormat = FieldFormat.from(function(range: IpRangeKey) {
-      return ipRange.toString(range, formatter);
+      return convertIPRangeToString(range, formatter);
     });
     return new IpRangeFormat();
   },
@@ -93,7 +92,7 @@ export const ipRangeBucketAgg = new BucketAggType({
         mask: [{ mask: '0.0.0.0/1' }, { mask: '128.0.0.0/2' }],
       },
       editorComponent: IpRangesParamEditor,
-      write(aggConfig: IBucketAggConfig, output: Record<string, any>) {
+      write(aggConfig, output) {
         const ipRangeType = aggConfig.params.ipRangeType;
         let ranges = aggConfig.params.ranges[ipRangeType];
 
@@ -106,3 +105,13 @@ export const ipRangeBucketAgg = new BucketAggType({
     },
   ],
 });
+
+export const convertIPRangeToString = (range: IpRangeKey, format: (val: any) => string) => {
+  if (range.type === 'mask') {
+    return format(range.mask);
+  }
+  const from = range.from ? format(range.from) : '-Infinity';
+  const to = range.to ? format(range.to) : 'Infinity';
+
+  return `${from} to ${to}`;
+};

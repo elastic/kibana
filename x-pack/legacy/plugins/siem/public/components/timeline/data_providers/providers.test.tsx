@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -15,9 +15,12 @@ import { TimelineContext } from '../timeline_context';
 import { mockDataProviders } from './mock/mock_data_providers';
 import { getDraggableId, Providers } from './providers';
 import { DELETE_CLASS_NAME, ENABLE_CLASS_NAME, EXCLUDE_CLASS_NAME } from './provider_item_actions';
+import { useMountAppended } from '../../../utils/use_mount_appended';
 
 describe('Providers', () => {
   const mockTimelineContext: boolean = true;
+  const mount = useMountAppended();
+
   describe('rendering', () => {
     test('renders correctly against snapshot', () => {
       const wrapper = shallow(

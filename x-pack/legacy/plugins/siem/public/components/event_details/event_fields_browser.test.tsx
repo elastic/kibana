@@ -5,7 +5,6 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { mockDetailItemData, mockDetailItemDataId } from '../../mock/mock_detail_item';
 import { TestProviders } from '../../mock/test_providers';
@@ -13,14 +12,17 @@ import { TestProviders } from '../../mock/test_providers';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { defaultHeaders } from '../../mock/header';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 describe('EventFieldsBrowser', () => {
+  const mount = useMountAppended();
+
   describe('column headers', () => {
     ['Field', 'Value', 'Description'].forEach(header => {
       test(`it renders the ${header} column header`, () => {
-        const wrapper = mountWithIntl(
+        const wrapper = mount(
           <TestProviders>
             <EventFieldsBrowser
               browserFields={mockBrowserFields}
@@ -41,7 +43,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('filter input', () => {
     test('it renders a filter input with the expected placeholder', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -67,7 +69,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders an UNchecked checkbox for a field that is not a member of columnHeaders', () => {
       const field = 'agent.id';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -92,7 +94,7 @@ describe('EventFieldsBrowser', () => {
     test('it renders an checked checkbox for a field that is a member of columnHeaders', () => {
       const field = '@timestamp';
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -118,7 +120,7 @@ describe('EventFieldsBrowser', () => {
       const field = '@timestamp';
       const toggleColumn = jest.fn();
 
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -151,7 +153,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('field type icon', () => {
     test('it renders the expected icon type for the data provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -178,7 +180,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('field', () => {
     test('it renders the field name for the data provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -202,7 +204,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('value', () => {
     test('it renders the expected value for the data provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}
@@ -226,7 +228,7 @@ describe('EventFieldsBrowser', () => {
 
   describe('description', () => {
     test('it renders the expected field description the data provided', () => {
-      const wrapper = mountWithIntl(
+      const wrapper = mount(
         <TestProviders>
           <EventFieldsBrowser
             browserFields={mockBrowserFields}

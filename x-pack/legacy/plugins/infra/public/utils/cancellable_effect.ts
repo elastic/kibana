@@ -27,5 +27,8 @@ export const useCancellableEffect = (
     effect(() => cancellationSignal.isCancelled);
 
     return cancellationSignal.cancel;
+
+    // the dependencies are managed externally
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 };
