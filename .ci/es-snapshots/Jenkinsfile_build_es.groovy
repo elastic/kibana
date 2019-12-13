@@ -18,12 +18,13 @@ timeout(time: 120, unit: 'MINUTES') {
         def GIT_COMMIT = scmVars.GIT_COMMIT
         def GIT_COMMIT_SHORT = sh(script: "git rev-parse --short ${GIT_COMMIT}", returnStdout: true).trim()
 
+        sh 'rm -rf to-archive || true' // TODO remove
         buildArchives('to-archive')
 
         dir('to-archive') {
           def uuid = UUID.randomUUID().toString()
           def now = new Date()
-          def date = now.format("yyyyMMdd")
+          def date = now.format("yyyyMMdd-HHmmss")
 
           def version
           def destination
@@ -35,7 +36,7 @@ timeout(time: 120, unit: 'MINUTES') {
             def parts = filename.replace("elasticsearch-oss", "oss").split("-")
 
             version = version ?: parts[1]
-            destination = destination ?: "${version}/archives/${date}_${GIT_COMMIT_SHORT}_${uuid}"
+            destination = destination ?: "${version}/archives/${date}_${GIT_COMMIT_SHORT}"
 
             return [
               filename: filename,
