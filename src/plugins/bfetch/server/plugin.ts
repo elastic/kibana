@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { CoreStart, PluginInitializerContext, CoreSetup, Plugin } from 'src/core/server';
+import { CoreStart, PluginInitializerContext, CoreSetup, Plugin, Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { StreamingResponseHandler, removeLeadingSlash } from '../common';
-import { createStreamingResponseStream } from './streaming';
+import { createNDJSONStream } from './streaming';
 
 // eslint-disable-next-line
 export interface BfetchServerSetupDependencies {}
@@ -43,11 +43,12 @@ export class BfetchServerPlugin
       BfetchServerSetupDependencies,
       BfetchServerStartDependencies
     > {
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchServerSetupDependencies): BfetchServerSetup {
+    const logger = this.initializerContext.logger.get();
     const router = core.http.createRouter();
-    const addStreamingResponseRoute = this.addStreamingResponseRoute(router);
+    const addStreamingResponseRoute = this.addStreamingResponseRoute({ router, logger });
 
     return {
       addStreamingResponseRoute,
@@ -60,9 +61,13 @@ export class BfetchServerPlugin
 
   public stop() {}
 
-  private addStreamingResponseRoute = (
-    router: ReturnType<CoreSetup['http']['createRouter']>
-  ): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
+  private addStreamingResponseRoute = ({
+    router,
+    logger,
+  }: {
+    router: ReturnType<CoreSetup['http']['createRouter']>;
+    logger: Logger;
+  }): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
     router.post(
       {
         path: `/${removeLeadingSlash(path)}`,
@@ -79,7 +84,7 @@ export class BfetchServerPlugin
             'Transfer-Encoding': 'chunked',
             'Cache-Control': 'no-cache',
           },
-          body: createStreamingResponseStream(data, handler),
+          body: createNDJSONStream(data, handler, logger),
         });
       }
     );

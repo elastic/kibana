@@ -17,14 +17,16 @@
  * under the License.
  */
 
+import { Logger } from 'src/core/server';
 import { Stream, PassThrough } from 'stream';
 import { StreamingResponseHandler } from '../../common/types';
 
 const delimiter = '\n';
 
-export const createStreamingResponseStream = <Payload, Response>(
+export const createNDJSONStream = <Payload, Response>(
   payload: Payload,
-  handler: StreamingResponseHandler<Payload, Response>
+  handler: StreamingResponseHandler<Payload, Response>,
+  logger: Logger
 ): Stream => {
   const stream = new PassThrough();
   const results = handler.onRequest(payload);
@@ -35,16 +37,13 @@ export const createStreamingResponseStream = <Payload, Response>(
         const line = JSON.stringify(message);
         stream.write(`${line}${delimiter}`);
       } catch (error) {
-        // eslint-disable-next-line
-        console.error('Could not serialize or stream a message.')
-        // eslint-disable-next-line
-        console.error(error);
+        logger.error('Could not serialize or stream a message.');
+        logger.error(error);
       }
     },
     error: error => {
       stream.end();
-      // eslint-disable-next-line
-      console.error(error);
+      logger.error(error);
     },
     complete: () => stream.end(),
   });

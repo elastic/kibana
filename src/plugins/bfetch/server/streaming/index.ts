@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './create_streaming_response_stream';
+export * from './create_ndjson_stream';
