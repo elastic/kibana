@@ -59,6 +59,26 @@ describe('ui/new_platform', () => {
       const elementMock = [document.createElement('div')];
 
       controller(scopeMock, elementMock);
+      expect(mountMock).toHaveBeenCalledWith({
+        element: elementMock[0],
+        appBasePath: '/test/base/path/app/test',
+      });
+    });
+
+    test('controller calls deprecated context app.mount when invoked', () => {
+      const unmountMock = jest.fn();
+      // Two arguments changes how this is called.
+      const mountMock = jest.fn((context, params) => unmountMock);
+      legacyAppRegister({
+        id: 'test',
+        title: 'Test',
+        mount: mountMock,
+      });
+      const controller = setRootControllerMock.mock.calls[0][1];
+      const scopeMock = { $on: jest.fn() };
+      const elementMock = [document.createElement('div')];
+
+      controller(scopeMock, elementMock);
       expect(mountMock).toHaveBeenCalledWith(expect.any(Object), {
         element: elementMock[0],
         appBasePath: '/test/base/path/app/test',

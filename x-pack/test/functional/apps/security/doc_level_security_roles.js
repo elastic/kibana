@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('user East should only see EAST doc', async function () {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await PageObjects.security.login('userEast', 'changeme');
       await PageObjects.common.navigateToApp('discover');
       await retry.try(async () => {
@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       expect(rowData).to.be('name:ABC Company region:EAST _id:doc1 _type: - _index:dlstest _score:0');
     });
     after('logout', async () => {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
   });
 }
