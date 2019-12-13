@@ -10,7 +10,7 @@ import { wrapInI18nContext } from 'ui/i18n';
 // @ts-ignore
 import { MapListing } from './components/map_listing';
 // @ts-ignore
-import { setLicenseId } from './kibana_services';
+import { setLicenseId, initServicesAndConstants } from './kibana_services';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -30,5 +30,9 @@ export class MapsPlugin implements Plugin<MapsPluginSetup, MapsPluginStart> {
     plugins.np.licensing.license$.subscribe(({ uid }: { uid: string }) => setLicenseId(uid));
   }
 
-  public start(core: CoreStart, plugins: any) {}
+  public start(core: CoreStart, plugins: any) {
+    initServicesAndConstants({
+      indexPatterns: plugins.np.data.indexPatterns,
+    });
+  }
 }
