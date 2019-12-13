@@ -21,11 +21,15 @@ import { useEffect } from 'react';
 
 export const useEventListener = (target: any, type: any, listener: any) => {
   useEffect(() => {
-    const targetIsRef = target.hasOwnProperty('current');
-    const currentTarget = targetIsRef ? target.current : target;
-    if (currentTarget) {
-      currentTarget.addEventListener(type, listener);
+    let currentTarget: any;
+    if (target) {
+      const targetIsRef = target.hasOwnProperty('current');
+      currentTarget = targetIsRef ? target.current : target;
+      if (currentTarget) {
+        currentTarget.addEventListener(type, listener);
+      }
     }
+
     return () => {
       if (currentTarget) {
         currentTarget.removeEventListener(type, listener);

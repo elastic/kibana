@@ -28,15 +28,15 @@ interface ChartComponentProp {
   seriesList: any;
   search?(): void;
   interval: any;
-  rerenderTrigger: boolean;
+  renderComplete: boolean;
 }
 
-function ChartComponent({ seriesList, interval, search }: ChartComponentProp) {
+function ChartComponent({ seriesList, interval, search, renderComplete }: ChartComponentProp) {
   if (!seriesList) {
     return null;
   }
 
-  const panelScope = { seriesList, interval, search } as any;
+  const panelScope = { seriesList, interval, search, renderComplete } as any;
   panelScope.seriesList.render = seriesList.render || {
     type: 'timechart',
   };
