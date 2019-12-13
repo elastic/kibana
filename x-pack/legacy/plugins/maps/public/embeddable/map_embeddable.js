@@ -165,6 +165,11 @@ export class MapEmbeddable extends Embeddable {
     });
   }
 
+  async setLayerList(layerList) {
+    this._layerList = layerList;
+    return await this._store.dispatch(replaceLayerList(this._layerList));
+  }
+
   addFilters = filters => {
     npStart.plugins.uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
       embeddable: this,

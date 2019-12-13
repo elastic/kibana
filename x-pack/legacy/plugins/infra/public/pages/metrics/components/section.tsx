@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiTitle } from '@elastic/eui';
 import React, {
-  useContext,
   Children,
-  isValidElement,
   cloneElement,
   FunctionComponent,
-  useMemo,
+  isValidElement,
+  useContext,
 } from 'react';
-import { EuiTitle } from '@elastic/eui';
+
 import { SideNavContext, SubNavItem } from '../lib/side_nav_context';
 import { LayoutProps } from '../types';
 
@@ -31,35 +31,42 @@ export const Section: FunctionComponent<SectionProps> = ({
   stopLiveStreaming,
 }) => {
   const { addNavItem } = useContext(SideNavContext);
-  const subNavItems: SubNavItem[] = [];
 
-  const childrenWithProps = useMemo(
-    () =>
-      Children.map(children, child => {
-        if (isValidElement(child)) {
-          const metric = (metrics && metrics.find(m => m.id === child.props.id)) || null;
-          if (metric) {
-            subNavItems.push({
-              id: child.props.id,
-              name: child.props.label,
-              onClick: () => {
-                const el = document.getElementById(child.props.id);
-                if (el) {
-                  el.scrollIntoView();
-                }
-              },
-            });
-          }
-          return cloneElement(child, {
-            metrics,
-            onChangeRangeTime,
-            isLiveStreaming,
-            stopLiveStreaming,
-          });
-        }
-        return null;
-      }),
-    [children, metrics, onChangeRangeTime, isLiveStreaming, stopLiveStreaming]
+  const subNavItems = Children.toArray(children).reduce<SubNavItem[]>(
+    (accumulatedChildren, child) => {
+      if (!isValidElement(child)) {
+        return accumulatedChildren;
+      }
+      const metric = metrics?.find(m => m.id === child.props.id) ?? null;
+      if (metric === null) {
+        return accumulatedChildren;
+      }
+      return [
+        ...accumulatedChildren,
+        {
+          id: child.props.id,
+          name: child.props.label,
+          onClick: () => {
+            const el = document.getElementById(child.props.id);
+            if (el) {
+              el.scrollIntoView();
+            }
+          },
+        },
+      ];
+    },
+    []
+  );
+
+  const childrenWithProps = Children.map(children, child =>
+    isValidElement(child)
+      ? cloneElement(child, {
+          metrics,
+          onChangeRangeTime,
+          isLiveStreaming,
+          stopLiveStreaming,
+        })
+      : null
   );
 
   if (metrics && subNavItems.length) {

@@ -29,12 +29,12 @@ export interface InfraServerPluginDeps {
 export interface CallWithRequestParams extends GenericParams {
   max_concurrent_shard_requests?: number;
   name?: string;
-  index?: string;
+  index?: string | string[];
   ignore_unavailable?: boolean;
   allow_no_indices?: boolean;
   size?: number;
   terminate_after?: number;
-  fields?: string;
+  fields?: string | string[];
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;

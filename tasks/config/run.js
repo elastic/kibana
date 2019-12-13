@@ -269,7 +269,6 @@ module.exports = function (grunt) {
         '--config', 'test/plugin_functional/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     }),
 

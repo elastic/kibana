@@ -10,6 +10,7 @@ import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
 import { InventoryFormatterType } from '../../../common/inventory_models/types';
+import { formatHighPercision } from './high_precision';
 
 export const FORMATTERS = {
   number: formatNumber,
@@ -21,6 +22,7 @@ export const FORMATTERS = {
   // bytes in bits formatted string out
   bits: createBytesFormatter(InfraWaffleMapDataFormat.bitsDecimal),
   percent: formatPercent,
+  highPercision: formatHighPercision,
 };
 
 export const createFormatter = (format: InventoryFormatterType, template: string = '{{value}}') => (
