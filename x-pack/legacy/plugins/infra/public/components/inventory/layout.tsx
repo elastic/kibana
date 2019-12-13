@@ -35,7 +35,7 @@ export interface LayoutProps {
 }
 
 export const Layout = (props: LayoutProps) => {
-  const { loading, nodes, reload } = useSnapshot(
+  const { loading, nodes, reload, interval } = useSnapshot(
     props.filterQuery,
     props.metric,
     props.groupBy,
@@ -59,6 +59,7 @@ export const Layout = (props: LayoutProps) => {
           view={props.view}
           autoBounds={props.autoBounds}
           boundsOverride={props.boundsOverride}
+          interval={interval}
         />
       </PageContent>
     </>
