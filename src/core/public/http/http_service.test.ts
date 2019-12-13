@@ -19,24 +19,20 @@
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import { setup, SetupTap } from '../../../test_utils/public/http_test_setup';
+import { loadingServiceMock } from './http_service.test.mocks';
 
-const setupFakeBasePath: SetupTap = injectedMetadata => {
-  injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
-};
+import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { HttpService } from './http_service';
 
-describe('basePath.get()', () => {
-  it('returns an empty string if no basePath is injected', () => {
-    const { http } = setup(injectedMetadata => {
-      injectedMetadata.getBasePath.mockReturnValue(undefined as any);
-    });
-
-    expect(http.basePath.get()).toBe('');
-  });
-
-  it('returns the injected basePath', () => {
-    const { http } = setup(setupFakeBasePath);
-
-    expect(http.basePath.get()).toBe('/foo/bar');
+describe('#stop()', () => {
+  it('calls loadingCount.stop()', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+    const httpService = new HttpService();
+    httpService.setup({ fatalErrors, injectedMetadata });
+    httpService.start({ fatalErrors, injectedMetadata });
+    httpService.stop();
+    expect(loadingServiceMock.stop).toHaveBeenCalled();
   });
 });
