@@ -19,6 +19,7 @@
 
 const plugins = [
   require.resolve('babel-plugin-add-module-exports'),
+  require.resolve('./transforms/rewrite_absolute_imports'),
 
   // The class properties proposal was merged with the private fields proposal
   // into the "class fields" proposal. Babel doesn't support this combined

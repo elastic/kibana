@@ -3,6 +3,8 @@
     "baseUrl": ".",
     "paths": {
       // Allows for importing from `kibana` package for the exported types.
+      "src/*": ["src/*"],
+      "x-pack/*": ["x-pack/*"],
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],

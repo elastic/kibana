@@ -27,6 +27,8 @@ export const UI_EXPORT_DEFAULTS = {
   ],
 
   webpackAliases: {
+    src: resolve(ROOT, 'src'),
+    'x-pack': resolve(ROOT, 'x-pack'),
     ui: resolve(ROOT, 'src/legacy/ui/public'),
     __kibanaCore__$: resolve(ROOT, 'src/core/public'),
     test_harness: resolve(ROOT, 'src/test_harness/public'),

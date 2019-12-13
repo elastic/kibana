@@ -16,6 +16,7 @@
     "babel-plugin-filter-imports": "^4.0.0",
     "babel-plugin-styled-components": "^1.10.6",
     "babel-plugin-transform-define": "^2.0.0",
-    "babel-plugin-typescript-strip-namespaces": "^1.1.1"
+    "babel-plugin-typescript-strip-namespaces": "^1.1.1",
+    "babel-types": "^6.26.0"
   }
 }

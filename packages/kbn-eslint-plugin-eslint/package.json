@@ -8,6 +8,7 @@
     "babel-eslint": "^10.0.3"
   },
   "dependencies": {
+    "@kbn/dev-utils": "1.0.0",
     "micromatch": "3.1.10",
     "dedent": "^0.7.0",
     "eslint-module-utils": "2.5.0"
