@@ -98,8 +98,8 @@ export function createConfig$(context: PluginInitializerContext, isTLSEnabled: b
         encryptionKey,
         secureCookies,
         session: {
-          idleTimeout: config.session?.idleTimeout || deprecatedSessionTimeout,
-          lifespan: config.session?.lifespan || null,
+          ...config.session,
+          idleTimeout: config.session.idleTimeout || deprecatedSessionTimeout,
         },
       };
       delete val.sessionTimeout; // DEPRECATED
