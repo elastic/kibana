@@ -21,7 +21,7 @@ import { callGetMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml
 import { callSetupMlModuleAPI } from '../../../containers/logs/log_analysis/api/ml_setup_module_api';
 import { callValidateIndicesAPI } from '../../../containers/logs/log_analysis/api/validate_indices';
 
-const jobTypes = ['log-entry-categories-count'];
+const jobTypes = ['log-entry-categories-count' as const];
 const moduleId = 'logs_ui_categories';
 
 type JobType = typeof jobTypes[0];

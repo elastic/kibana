@@ -14,6 +14,7 @@ import {
   MlUnavailablePrompt,
 } from '../../../components/logging/log_analysis_setup';
 import { LogAnalysisCapabilities } from '../../../containers/logs/log_analysis';
+import { LogEntryCategoriesResultsContent } from './page_results_content';
 import { LogEntryCategoriesSetupContent } from './page_setup_content';
 import { useLogEntryCategoriesModuleContext } from './use_log_entry_categories_module';
 
@@ -44,8 +45,7 @@ export const LogEntryCategoriesPageContent = () => {
   } else if (setupStatus === 'unknown') {
     return <LogAnalysisSetupStatusUnknownPrompt retry={fetchJobStatus} />;
   } else if (isSetupStatusWithResults(setupStatus)) {
-    return null;
-    // return <LogEntryCategoriesResultsContent />;
+    return <LogEntryCategoriesResultsContent />;
   } else {
     return <LogEntryCategoriesSetupContent />;
   }

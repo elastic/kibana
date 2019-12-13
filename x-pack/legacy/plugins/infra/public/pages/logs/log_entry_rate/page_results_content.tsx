@@ -259,6 +259,8 @@ const getBucketDuration = (startTime: number, endTime: number) => {
 // This is needed due to the flex-basis: 100% !important; rule that
 // kicks in on small screens via media queries breaking when using direction="column"
 export const ResultsContentPage = euiStyled(EuiPage)`
+  flex: 1 0 0%;
+
   .euiFlexGroup--responsive > .euiFlexItem {
     flex-basis: auto !important;
   }
