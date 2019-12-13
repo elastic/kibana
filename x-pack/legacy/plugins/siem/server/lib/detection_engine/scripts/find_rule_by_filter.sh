@@ -13,6 +13,7 @@ FILTER=${1:-'alert.attributes.enabled:%20true'}
 
 # Example: ./find_rule_by_filter.sh "alert.attributes.enabled:%20true"
 # Example: ./find_rule_by_filter.sh "alert.attributes.name:%20Detect*"
+# Example: ./find_rule_by_filter.sh "alert.attributes.tags:tag_1"
 # The %20 is just an encoded space that is typical of URL's.
 # Table of them for testing if needed: https://www.w3schools.com/tags/ref_urlencode.asp
 curl -s -k \

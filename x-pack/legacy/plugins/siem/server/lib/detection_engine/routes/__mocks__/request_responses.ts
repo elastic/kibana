@@ -6,11 +6,16 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { RuleAlertParamsRest, RuleAlertType, SignalsRestParams } from '../../alerts/types';
+import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_PRIVILEGES_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  INTERNAL_RULE_ID_KEY,
 } from '../../../../../common/constants';
+import { RuleAlertType } from '../../rules/types';
+import { RuleAlertParamsRest } from '../../types';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
@@ -38,31 +43,25 @@ export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> =
   ],
 });
 
-export const typicalFilterPayload = (): Partial<RuleAlertParamsRest> => ({
-  rule_id: 'rule-1',
-  description: 'Detecting root and admin users',
-  index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-  interval: '5m',
-  name: 'Detect Root/Admin Users',
-  risk_score: 50,
-  type: 'filter',
-  from: 'now-6m',
-  to: 'now',
-  severity: 'high',
-  filter: {},
-});
-
-export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsRestParams> => ({
+export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
   status: 'closed',
 });
 
-export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsRestParams> => ({
+export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
   query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
   status: 'closed',
 });
 
-export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsRestParams> => ({
+export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+  query: { match_all: {} },
+});
+
+export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+});
+
+export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
   status: 'closed',
 });
 
@@ -82,6 +81,11 @@ export const getReadRequest = (): ServerInjectOptions => ({
 export const getFindRequest = (): ServerInjectOptions => ({
   method: 'GET',
   url: `${DETECTION_ENGINE_RULES_URL}/_find`,
+});
+
+export const getPrivilegeRequest = (): ServerInjectOptions => ({
+  method: 'GET',
+  url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
 });
 
 interface FindHit {
@@ -146,6 +150,18 @@ export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
   },
 });
 
+export const getSignalsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQuery() },
+});
+
+export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQueryAggs() },
+});
+
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
@@ -156,7 +172,7 @@ export const createActionResult = (): ActionResult => ({
 export const getResult = (): RuleAlertType => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
-  tags: [],
+  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`],
   alertTypeId: 'siem.signals',
   params: {
     description: 'Detecting root and admin users',
@@ -215,4 +231,57 @@ export const updateActionResult = (): ActionResult => ({
   actionTypeId: 'action-id-1',
   name: '',
   config: {},
+});
+
+export const getMockPrivileges = () => ({
+  username: 'test-space',
+  has_all_requested: false,
+  cluster: {
+    monitor_ml: true,
+    manage_ccr: false,
+    manage_index_templates: true,
+    monitor_watcher: true,
+    monitor_transform: true,
+    read_ilm: true,
+    manage_api_key: false,
+    manage_security: false,
+    manage_own_api_key: false,
+    manage_saml: false,
+    all: false,
+    manage_ilm: true,
+    manage_ingest_pipelines: true,
+    read_ccr: false,
+    manage_rollup: true,
+    monitor: true,
+    manage_watcher: true,
+    manage: true,
+    manage_transform: true,
+    manage_token: false,
+    manage_ml: true,
+    manage_pipeline: true,
+    monitor_rollup: true,
+    transport_client: true,
+    create_snapshot: true,
+  },
+  index: {
+    '.siem-signals-frank-hassanabad-test-space': {
+      all: false,
+      manage_ilm: true,
+      read: false,
+      create_index: true,
+      read_cross_cluster: false,
+      index: false,
+      monitor: true,
+      delete: false,
+      manage: true,
+      delete_index: true,
+      create_doc: false,
+      view_index_metadata: true,
+      create: false,
+      manage_follow_index: true,
+      manage_leader_index: true,
+      write: false,
+    },
+  },
+  application: {},
 });

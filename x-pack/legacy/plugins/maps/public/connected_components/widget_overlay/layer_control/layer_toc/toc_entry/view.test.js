@@ -13,6 +13,7 @@ const LAYER_ID = '1';
 
 const mockLayer = {
   getId: () => { return LAYER_ID; },
+  hasLegendDetails: async () => { return true; },
   renderLegendDetails: () => { return (<div>TOC details mock</div>); },
   getDisplayName: () => { return 'layer 1'; },
   isVisible: () => { return true; },

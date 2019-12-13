@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
-
 import { TransformId } from './transform';
 import { TransformListRow } from './transform_list';
 
@@ -78,8 +76,7 @@ export function getTransformProgress(item: TransformListRow) {
     return 100;
   }
 
-  const progress = idx(item, _ => _.stats.checkpointing.next.checkpoint_progress.percent_complete);
-
+  const progress = item?.stats?.checkpointing?.next?.checkpoint_progress?.percent_complete;
   return progress !== undefined ? Math.round(progress) : undefined;
 }
 

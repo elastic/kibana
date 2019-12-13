@@ -20,6 +20,7 @@
 import good from '@elastic/good';
 import loggingConfiguration from './configuration';
 import { logWithMetadata } from './log_with_metadata';
+import { setupLoggingRotate } from './rotate';
 
 export async function setupLogging(server, config) {
   return await server.register({
@@ -30,5 +31,7 @@ export async function setupLogging(server, config) {
 
 export async function loggingMixin(kbnServer, server, config) {
   logWithMetadata.decorateServer(server);
-  return await setupLogging(server, config);
+
+  await setupLogging(server, config);
+  await setupLoggingRotate(server, config);
 }

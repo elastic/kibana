@@ -112,26 +112,28 @@ export const MetricDetail = withMetricPageProviders(
                 })}
               />
               <DetailPageContent data-test-subj="infraMetricsPage">
-                <NodeDetailsPage
-                  name={name}
-                  requiredMetrics={filteredRequiredMetrics}
-                  sourceId={sourceId}
-                  timeRange={timeRange}
-                  parsedTimeRange={parsedTimeRange}
-                  nodeType={nodeType}
-                  nodeId={nodeId}
-                  cloudId={cloudId}
-                  metadataLoading={metadataLoading}
-                  isAutoReloading={isAutoReloading}
-                  refreshInterval={refreshInterval}
-                  sideNav={sideNav}
-                  metadata={metadata}
-                  addNavItem={addNavItem}
-                  setRefreshInterval={setRefreshInterval}
-                  setAutoReload={setAutoReload}
-                  triggerRefresh={triggerRefresh}
-                  setTimeRange={setTimeRange}
-                />
+                {metadata ? (
+                  <NodeDetailsPage
+                    name={name}
+                    requiredMetrics={filteredRequiredMetrics}
+                    sourceId={sourceId}
+                    timeRange={timeRange}
+                    parsedTimeRange={parsedTimeRange}
+                    nodeType={nodeType}
+                    nodeId={nodeId}
+                    cloudId={cloudId}
+                    metadataLoading={metadataLoading}
+                    isAutoReloading={isAutoReloading}
+                    refreshInterval={refreshInterval}
+                    sideNav={sideNav}
+                    metadata={metadata}
+                    addNavItem={addNavItem}
+                    setRefreshInterval={setRefreshInterval}
+                    setAutoReload={setAutoReload}
+                    triggerRefresh={triggerRefresh}
+                    setTimeRange={setTimeRange}
+                  />
+                ) : null}
               </DetailPageContent>
             </ColumnarPage>
           )}

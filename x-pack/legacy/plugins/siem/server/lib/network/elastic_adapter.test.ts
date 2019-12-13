@@ -37,9 +37,7 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({
@@ -65,10 +63,8 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
@@ -107,9 +103,7 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({
@@ -140,10 +134,8 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
     };
     jest.doMock('../framework', () => ({
       callWithRequest: mockCallWithRequest,
@@ -165,9 +157,7 @@ describe('Network Top N flow elasticsearch_adapter with FlowTarget=source', () =
     const mockFramework: FrameworkAdapter = {
       version: 'mock',
       callWithRequest: mockCallWithRequest,
-      exposeStaticDir: jest.fn(),
       getIndexPatternsService: jest.fn(),
-      getSavedObjectsService: jest.fn(),
       registerGraphQLEndpoint: jest.fn(),
     };
     jest.doMock('../framework', () => ({

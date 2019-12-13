@@ -74,7 +74,15 @@ export const useLogSummaryHighlights = (
     } else {
       setLogSummaryHighlights([]);
     }
-  }, [highlightTerms, start, end, bucketSize, filterQuery, sourceVersion]);
+  }, [
+    bucketSize,
+    debouncedLoadSummaryHighlights,
+    end,
+    filterQuery,
+    highlightTerms,
+    sourceVersion,
+    start,
+  ]);
 
   return {
     logSummaryHighlights,

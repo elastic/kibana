@@ -186,7 +186,7 @@ export class AbstractLayer {
     };
   }
 
-  hasLegendDetails() {
+  async hasLegendDetails() {
     return false;
   }
 

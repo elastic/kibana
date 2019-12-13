@@ -1,0 +1,25 @@
+{
+  "name": "Query with two filters",
+  "description": "A KQL Query with a two filters",
+  "rule_id": "query-with-two-filters",
+  "risk_score": 15,
+  "severity": "high",
+  "type": "query",
+  "from": "now-24h",
+  "to": "now",
+  "query": "user.name: root or user.name: admin",
+  "filters": [
+    {
+      "query": {
+        "match_phrase": {
+          "host.name": "siem-windows"
+        }
+      }
+    },
+    {
+      "exists": {
+        "field": "host.hostname"
+      }
+    }
+  ]
+}

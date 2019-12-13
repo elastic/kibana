@@ -18,8 +18,10 @@
  */
 
 import { NotificationsStart } from 'src/core/public';
+import { CoreStart } from 'kibana/public';
 import { FieldFormatsStart } from '.';
 import { createGetterSetter } from '../../kibana_utils/public';
+import { IndexPatternsContract } from './index_patterns';
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
@@ -27,4 +29,10 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
 
 export const [getFieldFormats, setFieldFormats] = createGetterSetter<FieldFormatsStart>(
   'FieldFormats'
+);
+
+export const [getOverlays, setOverlays] = createGetterSetter<CoreStart['overlays']>('Overlays');
+
+export const [getIndexPatterns, setIndexPatterns] = createGetterSetter<IndexPatternsContract>(
+  'IndexPatterns'
 );

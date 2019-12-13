@@ -135,7 +135,14 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-    timezone: Joi.string()
+    timezone: Joi.string(),
+    rotate: Joi.object().keys({
+      enabled: Joi.boolean().default(false),
+      everyBytes: Joi.number().greater(1024).default(10485760),
+      keepFiles: Joi.number().greater(2).less(1024).default(7),
+      pollingInterval: Joi.number().greater(5000).less(3600000).default(10000),
+      usePolling: Joi.boolean().default(false)
+    }).default()
   }).default(),
 
   ops: Joi.object({

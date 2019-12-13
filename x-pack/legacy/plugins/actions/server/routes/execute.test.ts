@@ -31,11 +31,11 @@ it('executes an action with proper parameters', async () => {
     callCluster: jest.fn(),
     savedObjectsClient: jest.fn(),
   });
-  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok' });
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '1' });
 
   const { payload, statusCode } = await server.inject(request);
   expect(statusCode).toBe(200);
-  expect(payload).toBe('{"status":"ok"}');
+  expect(JSON.parse(payload)).toEqual({ status: 'ok', actionId: '1' });
 
   expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
     actionId: '1',
