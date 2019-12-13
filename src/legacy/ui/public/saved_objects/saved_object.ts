@@ -28,7 +28,6 @@
  * service and the saved object api.
  */
 import { npStart } from 'ui/new_platform';
-import { SearchSourceContract } from 'ui/courier';
 import { SavedObject, SavedObjectConfig, SavedObjectKibanaServices } from './types';
 import { buildSavedObject } from './helpers/build_saved_object';
 

@@ -29,7 +29,6 @@ import { FilterManager, TimefilterContract, IndexPatternsContract } from 'src/pl
 // @ts-ignore
 import { createSavedSearchesService } from '../saved_searches/saved_searches';
 // @ts-ignore
-import { createSavedSearchFactory } from '../saved_searches/_saved_search';
 import { DiscoverStartPlugins } from '../plugin';
 import { DataStart } from '../../../../data/public';
 import { EuiUtilsStart } from '../../../../../../plugins/eui_utils/public';
