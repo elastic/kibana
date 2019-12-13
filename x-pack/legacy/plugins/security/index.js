@@ -12,7 +12,6 @@ import { initLoggedOutView } from './server/routes/views/logged_out';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { KibanaRequest } from '../../../../src/core/server';
-import { createCSPRuleString } from '../../../../src/legacy/server/csp';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -126,7 +125,6 @@ export const security = (kibana) => new kibana.Plugin({
       isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
         server.plugins.kibana.systemApi
       ),
-      cspRules: createCSPRuleString(config.get('csp.rules')),
     });
 
     // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
