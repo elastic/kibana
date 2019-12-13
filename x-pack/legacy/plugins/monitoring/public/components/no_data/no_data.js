@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiTextColor,
   EuiButtonEmpty,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toggleSetupMode } from '../../lib/setup_mode';
@@ -54,6 +55,14 @@ export function NoData(props) {
   if (useInternalCollection) {
     return (
       <EuiPage>
+        <EuiScreenReaderOnly>
+          <h1>
+            <FormattedMessage
+              id="xpack.monitoring.no_data.internal_collection.heading"
+              defaultMessage="No monitoring data found. (Internal collection)"
+            />
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
           <EuiPageContent
             verticalPosition="center"
@@ -88,6 +97,14 @@ export function NoData(props) {
 
   return (
     <EuiPage>
+      <EuiScreenReaderOnly>
+        <h1>
+          <FormattedMessage
+            id="xpack.monitoring.no_data.heading"
+            defaultMessage="No monitoring data found."
+          />
+        </h1>
+      </EuiScreenReaderOnly>
       <EuiPageBody restrictWidth={600}>
         <EuiPageContent
           verticalPosition="center"

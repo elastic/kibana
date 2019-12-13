@@ -91,12 +91,12 @@ export function AlertsPanel({ alerts, changeUrl }) {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
-            <h4>
+            <h2>
               <FormattedMessage
                 id="xpack.monitoring.cluster.overview.alertsPanel.topClusterTitle"
                 defaultMessage="Top cluster alerts"
               />
-            </h4>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

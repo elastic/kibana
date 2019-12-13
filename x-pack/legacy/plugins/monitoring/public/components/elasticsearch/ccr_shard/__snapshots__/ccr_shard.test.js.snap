@@ -145,9 +145,9 @@ exports[`CcrShard that it renders normally 1`] = `
       <EuiTitle
         size="s"
       >
-        <h4>
+        <h2>
           September 27, 2018 9:32:09 AM
-        </h4>
+        </h2>
       </EuiTitle>
       <EuiHorizontalRule />
       <EuiCodeBlock
