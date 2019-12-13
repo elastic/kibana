@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILicense } from '../../../../../plugins/licensing/server';
+import { get } from 'lodash';
 
 /**
  * "View" for XPack Info license information.
@@ -15,9 +15,9 @@ export class XPackInfoLicense {
    * @type {Function}
    * @private
    */
-  _getRawLicense: () => ILicense | undefined;
+  _getRawLicense = null;
 
-  constructor(getRawLicense: () => ILicense | undefined) {
+  constructor(getRawLicense) {
     this._getRawLicense = getRawLicense;
   }
 
@@ -26,7 +26,7 @@ export class XPackInfoLicense {
    * @returns {string|undefined}
    */
   getUid() {
-    return this._getRawLicense()?.uid;
+    return get(this._getRawLicense(), 'uid');
   }
 
   /**
@@ -34,7 +34,7 @@ export class XPackInfoLicense {
    * @returns {boolean}
    */
   isActive() {
-    return Boolean(this._getRawLicense()?.isActive);
+    return get(this._getRawLicense(), 'status') === 'active';
   }
 
   /**
@@ -45,7 +45,7 @@ export class XPackInfoLicense {
    * @returns {number|undefined}
    */
   getExpiryDateInMillis() {
-    return this._getRawLicense()?.expiryDateInMillis;
+    return get(this._getRawLicense(), 'expiry_date_in_millis');
   }
 
   /**
@@ -53,10 +53,12 @@ export class XPackInfoLicense {
    * @param {String} candidateLicenses List of the licenses to check against.
    * @returns {boolean}
    */
-  isOneOf(candidateLicenses: string | string[]) {
-    const candidates = Array.isArray(candidateLicenses) ? candidateLicenses : [candidateLicenses];
-    const mode = this._getRawLicense()?.mode;
-    return Boolean(mode && candidates.includes(mode));
+  isOneOf(candidateLicenses) {
+    if (!Array.isArray(candidateLicenses)) {
+      candidateLicenses = [candidateLicenses];
+    }
+
+    return candidateLicenses.includes(get(this._getRawLicense(), 'mode'));
   }
 
   /**
@@ -64,7 +66,7 @@ export class XPackInfoLicense {
    * @returns {string|undefined}
    */
   getType() {
-    return this._getRawLicense()?.type;
+    return get(this._getRawLicense(), 'type');
   }
 
   /**
@@ -72,7 +74,7 @@ export class XPackInfoLicense {
    * @returns {string|undefined}
    */
   getMode() {
-    return this._getRawLicense()?.mode;
+    return get(this._getRawLicense(), 'mode');
   }
 
   /**
@@ -81,10 +83,10 @@ export class XPackInfoLicense {
    * @param {Function} typeChecker The license type checker.
    * @returns {boolean}
    */
-  isActiveLicense(typeChecker: (mode: string) => boolean) {
+  isActiveLicense(typeChecker) {
     const license = this._getRawLicense();
 
-    return Boolean(license?.isActive && typeChecker(license.mode as any));
+    return get(license, 'status') === 'active' && typeChecker(get(license, 'mode'));
   }
 
   /**

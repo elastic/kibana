@@ -13,7 +13,6 @@ function license({ error, ...customLicense }: { error?: string; [key: string]: a
     uid: 'uid-000000001234',
     status: 'active',
     type: 'basic',
-    mode: 'basic',
     expiryDateInMillis: 1000,
   };
 
