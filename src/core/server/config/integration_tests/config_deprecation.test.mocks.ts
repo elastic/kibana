@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { transformDeprecations } from './transform_deprecations';
-
-export function configDeprecationWarningsMixin(kbnServer, server) {
-  transformDeprecations(kbnServer.settings, (message) => {
-    server.log(['warning', 'config', 'deprecation'], message);
-  });
-}
+import { loggingServiceMock } from '../../logging/logging_service.mock';
+export const mockLoggingService = loggingServiceMock.create();
+mockLoggingService.asLoggerFactory.mockImplementation(() => mockLoggingService);
+jest.doMock('../../logging/logging_service', () => ({
+  LoggingService: jest.fn(() => mockLoggingService),
+}));
