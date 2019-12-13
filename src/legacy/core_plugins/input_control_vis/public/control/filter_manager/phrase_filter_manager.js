@@ -19,9 +19,7 @@
 
 import _ from 'lodash';
 import { FilterManager } from './filter_manager.js';
-import {
-  esFilters,
-} from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../../../plugins/data/public';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(controlId, fieldName, indexPattern, queryFilter) {
@@ -42,12 +40,14 @@ export class PhraseFilterManager extends FilterManager {
       newFilter = esFilters.buildPhraseFilter(
         this.indexPattern.fields.getByName(this.fieldName),
         phrases[0],
-        this.indexPattern);
+        this.indexPattern
+      );
     } else {
       newFilter = esFilters.buildPhrasesFilter(
         this.indexPattern.fields.getByName(this.fieldName),
         phrases,
-        this.indexPattern);
+        this.indexPattern
+      );
     }
     newFilter.meta.key = this.fieldName;
     newFilter.meta.controlledBy = this.controlId;
@@ -61,7 +61,7 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     const values = kbnFilters
-      .map((kbnFilter) => {
+      .map(kbnFilter => {
         return this._getValueFromFilter(kbnFilter);
       })
       .filter(value => value != null);
@@ -70,10 +70,9 @@ export class PhraseFilterManager extends FilterManager {
       return;
     }
 
-    return values
-      .reduce((accumulator, currentValue) => {
-        return accumulator.concat(currentValue);
-      }, []);
+    return values.reduce((accumulator, currentValue) => {
+      return accumulator.concat(currentValue);
+    }, []);
   }
 
   /**
@@ -86,10 +85,10 @@ export class PhraseFilterManager extends FilterManager {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
       return _.get(kbnFilter, 'query.bool.should')
-        .map((kbnFilter) => {
+        .map(kbnFilter => {
           return this._getValueFromFilter(kbnFilter);
         })
-        .filter((value) => {
+        .filter(value => {
           if (value) {
             return true;
           }

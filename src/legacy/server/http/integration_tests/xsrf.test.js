@@ -34,8 +34,8 @@ describe('xsrf request filter', () => {
   beforeAll(async () => {
     root = kbnTestServer.createRoot({
       server: {
-        xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] }
-      }
+        xsrf: { disableProtection: false, whitelist: [whitelistedTestPath] },
+      },
     });
 
     await root.setup();
@@ -45,9 +45,9 @@ describe('xsrf request filter', () => {
     kbnServer.server.route({
       path: testPath,
       method: 'GET',
-      handler: async function () {
+      handler: async function() {
         return 'ok';
-      }
+      },
     });
 
     kbnServer.server.route({
@@ -56,13 +56,13 @@ describe('xsrf request filter', () => {
       config: {
         // Disable payload parsing to make HapiJS server accept any content-type header.
         payload: {
-          parse: false
+          parse: false,
         },
-        validate: { payload: null }
+        validate: { payload: null },
       },
-      handler: async function () {
+      handler: async function() {
         return 'ok';
-      }
+      },
     });
 
     kbnServer.server.route({
@@ -71,26 +71,24 @@ describe('xsrf request filter', () => {
       config: {
         // Disable payload parsing to make HapiJS server accept any content-type header.
         payload: {
-          parse: false
+          parse: false,
         },
-        validate: { payload: null }
+        validate: { payload: null },
       },
-      handler: async function () {
+      handler: async function() {
         return 'ok';
-      }
+      },
     });
   }, 30000);
 
   afterAll(async () => await root.shutdown());
 
-  describe(`nonDestructiveMethod: GET`, function () {
-    it('accepts requests without a token', async function () {
-      await kbnTestServer.request
-        .get(root, testPath)
-        .expect(200, 'ok');
+  describe(`nonDestructiveMethod: GET`, function() {
+    it('accepts requests without a token', async function() {
+      await kbnTestServer.request.get(root, testPath).expect(200, 'ok');
     });
 
-    it('accepts requests with the xsrf header', async function () {
+    it('accepts requests with the xsrf header', async function() {
       await kbnTestServer.request
         .get(root, testPath)
         .set(xsrfHeader, 'anything')
@@ -98,14 +96,12 @@ describe('xsrf request filter', () => {
     });
   });
 
-  describe(`nonDestructiveMethod: HEAD`, function () {
-    it('accepts requests without a token', async function () {
-      await kbnTestServer.request
-        .head(root, testPath)
-        .expect(200, undefined);
+  describe(`nonDestructiveMethod: HEAD`, function() {
+    it('accepts requests without a token', async function() {
+      await kbnTestServer.request.head(root, testPath).expect(200, undefined);
     });
 
-    it('accepts requests with the xsrf header', async function () {
+    it('accepts requests with the xsrf header', async function() {
       await kbnTestServer.request
         .head(root, testPath)
         .set(xsrfHeader, 'anything')
@@ -114,8 +110,9 @@ describe('xsrf request filter', () => {
   });
 
   for (const method of destructiveMethods) {
-    describe(`destructiveMethod: ${method}`, function () { // eslint-disable-line no-loop-func
-      it('accepts requests with the xsrf header', async function () {
+    describe(`destructiveMethod: ${method}`, function() {
+      // eslint-disable-line no-loop-func
+      it('accepts requests with the xsrf header', async function() {
         await kbnTestServer.request[method.toLowerCase()](root, testPath)
           .set(xsrfHeader, 'anything')
           .expect(200, 'ok');
@@ -123,24 +120,25 @@ describe('xsrf request filter', () => {
 
       // this is still valid for existing csrf protection support
       // it does not actually do any validation on the version value itself
-      it('accepts requests with the version header', async function () {
+      it('accepts requests with the version header', async function() {
         await kbnTestServer.request[method.toLowerCase()](root, testPath)
           .set(versionHeader, actualVersion)
           .expect(200, 'ok');
       });
 
-      it('rejects requests without either an xsrf or version header', async function () {
-        await kbnTestServer.request[method.toLowerCase()](root, testPath)
-          .expect(400, {
-            statusCode: 400,
-            error: 'Bad Request',
-            message: 'Request must contain a kbn-xsrf header.'
-          });
+      it('rejects requests without either an xsrf or version header', async function() {
+        await kbnTestServer.request[method.toLowerCase()](root, testPath).expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Request must contain a kbn-xsrf header.',
+        });
       });
 
-      it('accepts whitelisted requests without either an xsrf or version header', async function () {
-        await kbnTestServer.request[method.toLowerCase()](root, whitelistedTestPath)
-          .expect(200, 'ok');
+      it('accepts whitelisted requests without either an xsrf or version header', async function() {
+        await kbnTestServer.request[method.toLowerCase()](root, whitelistedTestPath).expect(
+          200,
+          'ok'
+        );
       });
     });
   }

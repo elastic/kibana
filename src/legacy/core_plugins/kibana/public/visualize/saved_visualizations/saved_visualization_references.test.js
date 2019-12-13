@@ -101,7 +101,7 @@ Object {
   ],
 }
 `);
-  /* eslint-enable max-len */
+    /* eslint-enable max-len */
   });
 });
 

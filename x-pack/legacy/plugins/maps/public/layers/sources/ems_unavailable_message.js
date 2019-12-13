@@ -11,12 +11,14 @@ export function getEmsUnavailableMessage() {
   const isEmsEnabled = chrome.getInjected('isEmsEnabled', true);
   if (isEmsEnabled) {
     return i18n.translate('xpack.maps.source.ems.noAccessDescription', {
-      defaultMessage: 'Kibana is unable to access Elastic Maps Service. Contact your system administrator'
+      defaultMessage:
+        'Kibana is unable to access Elastic Maps Service. Contact your system administrator',
     });
   }
 
   return i18n.translate('xpack.maps.source.ems.disabledDescription', {
     // eslint-disable-next-line max-len
-    defaultMessage: 'Access to Elastic Maps Service has been disabled. Ask your system administrator to set "map.includeElasticMapsService" in kibana.yml.'
+    defaultMessage:
+      'Access to Elastic Maps Service has been disabled. Ask your system administrator to set "map.includeElasticMapsService" in kibana.yml.',
   });
 }

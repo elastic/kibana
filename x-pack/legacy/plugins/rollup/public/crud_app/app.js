@@ -39,7 +39,8 @@ class ShareRouterComponent extends Component {
 
 const ShareRouter = withRouter(ShareRouterComponent);
 
-export class App extends Component { // eslint-disable-line react/no-multi-comp
+export class App extends Component {
+  // eslint-disable-line react/no-multi-comp
   componentDidMount() {
     trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }

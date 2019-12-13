@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -25,18 +25,16 @@ export default function ({ getService }) {
     before(() => esArchiver.load('elasticsearch'));
     after(() => esArchiver.unload('elasticsearch'));
 
-    it('allows search to specific index', async () => (
-      await supertest
-        .post('/elasticsearch/elasticsearch/_search')
-        .expect(200)
-    ));
+    it('allows search to specific index', async () =>
+      await supertest.post('/elasticsearch/elasticsearch/_search').expect(200));
 
-    it('allows msearch', async () => (
+    it('allows msearch', async () =>
       await supertest
         .post('/elasticsearch/_msearch')
         .set('content-type', 'application/x-ndjson')
-        .send('{"index":"logstash-2015.04.21","ignore_unavailable":true}\n{"size":500,"sort":{"@timestamp":"desc"},"query":{"bool":{"must":[{"query_string":{"analyze_wildcard":true,"query":"*"}},{"bool":{"must":[{"range":{"@timestamp":{"gte":1429577068175,"lte":1429577968175}}}],"must_not":[]}}],"must_not":[]}},"highlight":{"pre_tags":["@kibana-highlighted-field@"],"post_tags":["@/kibana-highlighted-field@"],"fields":{"*":{}}},"aggs":{"2":{"date_histogram":{"field":"@timestamp","interval":"30s","min_doc_count":0,"extended_bounds":{"min":1429577068175,"max":1429577968175}}}},"stored_fields":["*"],"_source": true,"script_fields":{},"docvalue_fields":["timestamp_offset","@timestamp","utc_time"]}\n') // eslint-disable-line max-len
-        .expect(200)
-    ));
+        .send(
+          '{"index":"logstash-2015.04.21","ignore_unavailable":true}\n{"size":500,"sort":{"@timestamp":"desc"},"query":{"bool":{"must":[{"query_string":{"analyze_wildcard":true,"query":"*"}},{"bool":{"must":[{"range":{"@timestamp":{"gte":1429577068175,"lte":1429577968175}}}],"must_not":[]}}],"must_not":[]}},"highlight":{"pre_tags":["@kibana-highlighted-field@"],"post_tags":["@/kibana-highlighted-field@"],"fields":{"*":{}}},"aggs":{"2":{"date_histogram":{"field":"@timestamp","interval":"30s","min_doc_count":0,"extended_bounds":{"min":1429577068175,"max":1429577968175}}}},"stored_fields":["*"],"_source": true,"script_fields":{},"docvalue_fields":["timestamp_offset","@timestamp","utc_time"]}\n'
+        ) // eslint-disable-line max-len
+        .expect(200));
   });
 }
