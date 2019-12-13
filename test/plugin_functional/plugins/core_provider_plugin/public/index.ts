@@ -16,22 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { npSetup, npStart } from 'ui/new_platform';
+import '../types';
 
-import { CoreSetup, Plugin } from 'kibana/public';
-
-declare global {
-  interface Window {
-    uiSettingsPlugin?: Record<string, any>;
-    uiSettingsPluginValue?: string;
-  }
-}
-
-export class UiSettingsPlugin implements Plugin {
-  public setup(core: CoreSetup) {
-    window.uiSettingsPlugin = core.uiSettings.getAll().ui_settings_plugin;
-    window.uiSettingsPluginValue = core.uiSettings.get('ui_settings_plugin');
-  }
-
-  public start() {}
-  public stop() {}
-}
+window.np = {
+  setup: npSetup,
+  start: npStart,
+  testUtils: {
+    delay: (ms: number) => new Promise(res => setTimeout(res, ms)),
+  },
+};
