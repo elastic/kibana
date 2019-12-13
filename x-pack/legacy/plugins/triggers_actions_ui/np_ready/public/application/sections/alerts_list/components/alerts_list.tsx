@@ -23,11 +23,12 @@ import { loadActionTypes } from '../../../lib/action_connector_api';
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
-    core: { http },
+    core: { http, injectedMetadata },
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
   const canDelete = capabilities.get().alerting.delete;
   const canSave = capabilities.get().alerting.save;
+  const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
@@ -199,7 +200,7 @@ export const AlertsList: React.FunctionComponent = () => {
     />,
   ];
 
-  if (canSave) {
+  if (canSave && createAlertUiEnabled) {
     toolsRight.push(
       <EuiButton
         key="create-alert"

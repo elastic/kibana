@@ -24,6 +24,7 @@ export function triggersActionsUI(kibana: any) {
       return Joi.object()
         .keys({
           enabled: Joi.boolean().default(true),
+          createAlertUiEnabled: Joi.boolean().default(false),
         })
         .default();
     },
@@ -31,6 +32,12 @@ export function triggersActionsUI(kibana: any) {
       hacks: ['plugins/triggers_actions_ui/hacks/register'],
       managementSections: ['plugins/triggers_actions_ui'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+      injectDefaultVars(server: Legacy.Server) {
+        const serverConfig = server.config();
+        return {
+          createAlertUiEnabled: serverConfig.get('xpack.triggers_actions_ui.createAlertUiEnabled'),
+        };
+      },
     },
   });
 }
