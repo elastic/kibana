@@ -32,7 +32,6 @@ import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/publ
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
-import { LicensingPluginSetup } from '../../../../../x-pack/plugins/licensing/common/types';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -44,7 +43,6 @@ export interface PluginsSetup {
   dev_tools: DevToolsSetup;
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
-  licensing: LicensingPluginSetup;
 }
 
 export interface PluginsStart {

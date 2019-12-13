@@ -9,7 +9,7 @@ import { take, toArray } from 'rxjs/operators';
 
 import { ILicense, LicenseType } from './types';
 import { createLicenseUpdate } from './license_update';
-import { licenseMock } from './license.mock';
+import { licenseMock } from './licensing.mock';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const stop$ = new Subject();
