@@ -5,9 +5,9 @@
  */
 
 import KbnServer from 'src/legacy/server/kbn_server';
-import { Feature, FeatureWithAllOrReadPrivileges } from '../../../plugins/features/server';
-import { XPackInfo, XPackInfoOptions } from './server/lib/xpack_info';
-export { XPackFeature } from './server/lib/xpack_info';
+import { Feature, FeatureWithAllOrReadPrivileges } from '../../../../plugins/features/server';
+import { XPackInfo, XPackInfoOptions } from './lib/xpack_info';
+export { XPackFeature } from './lib/xpack_info';
 
 export interface XPackMainPlugin {
   info: XPackInfo;

@@ -33,6 +33,7 @@ import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
 import { BfetchPublicSetup, BfetchPublicStart } from '../../../../plugins/bfetch/public';
+import { UsageCollectionSetup } from '../../../../plugins/usage_collection/public';
 
 export interface PluginsSetup {
   bfetch: BfetchPublicSetup;
@@ -45,6 +46,7 @@ export interface PluginsSetup {
   dev_tools: DevToolsSetup;
   kibana_legacy: KibanaLegacySetup;
   share: SharePluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface PluginsStart {
