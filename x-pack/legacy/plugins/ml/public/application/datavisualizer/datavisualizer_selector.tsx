@@ -32,13 +32,13 @@ function startTrialDescription() {
     <span>
       <FormattedMessage
         id="xpack.ml.datavisualizer.startTrial.fullMLFeaturesDescription"
-        defaultMessage="To experience the full Machine Learning features that a {platinumSubscriptionLink} offers, start a 30-day trial."
+        defaultMessage="To experience the full Machine Learning features that a {subscriptionsLink} offers, start a 30-day trial."
         values={{
-          platinumSubscriptionLink: (
+          subscriptionsLink: (
             <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
               <FormattedMessage
-                id="xpack.ml.datavisualizer.startTrial.platinumSubscriptionTitle"
-                defaultMessage="Platinum subscription"
+                id="xpack.ml.datavisualizer.startTrial.subscriptionsLinkText"
+                defaultMessage="Platinum or Enterprise subscription"
               />
             </EuiLink>
           ),
@@ -57,7 +57,7 @@ export const DatavisualizerSelector: FC = () => {
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      <EuiPage restrictWidth={1000}>
+      <EuiPage restrictWidth={1000} data-test-subj="mlPageDataVisualizerSelector">
         <EuiPageBody>
           <EuiFlexGroup gutterSize="xl">
             <EuiFlexItem grow={false}>
@@ -145,7 +145,7 @@ export const DatavisualizerSelector: FC = () => {
                 footer={
                   <EuiButton
                     target="_self"
-                    href="#datavisualizer_index_select"
+                    href="#/datavisualizer_index_select"
                     data-test-subj="mlDataVisualizerSelectIndexButton"
                   >
                     <FormattedMessage

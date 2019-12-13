@@ -84,19 +84,10 @@ export interface ReadRuleParams {
   ruleId?: string | undefined | null;
 }
 
-export interface ReadRuleByRuleId {
-  alertsClient: AlertsClient;
-  ruleId: string;
-}
-
 export const isAlertTypes = (obj: unknown[]): obj is RuleAlertType[] => {
   return obj.every(rule => isAlertType(rule));
 };
 
 export const isAlertType = (obj: unknown): obj is RuleAlertType => {
   return get('alertTypeId', obj) === SIGNALS_ID;
-};
-
-export const isAlertTypeArray = (objArray: unknown[]): objArray is RuleAlertType[] => {
-  return objArray.length === 0 || isAlertType(objArray[0]);
 };

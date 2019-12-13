@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './route';
-import './directive';
+export { OverviewPage } from './overview_page';

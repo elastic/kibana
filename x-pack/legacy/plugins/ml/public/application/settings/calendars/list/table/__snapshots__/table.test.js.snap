@@ -70,7 +70,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         "toolsRight": Array [
           <EuiButton
             data-test-subj="mlCalendarButtonCreate"
-            href="undefined/app/ml#/settings/calendars_list/new_calendar"
+            href="#/settings/calendars_list/new_calendar"
             isDisabled={false}
             size="s"
           >

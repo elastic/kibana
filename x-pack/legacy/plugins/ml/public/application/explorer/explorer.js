@@ -93,7 +93,7 @@ function mapSwimlaneOptionsToEuiOptions(options) {
 }
 
 const ExplorerPage = ({ children, jobSelectorProps, resizeRef }) => (
-  <div ref={resizeRef}>
+  <div ref={resizeRef} data-test-subj="mlPageAnomalyExplorer">
     <NavigationMenu tabId="explorer" />
     <JobSelector {...jobSelectorProps} />
     {children}
@@ -117,7 +117,6 @@ export const Explorer = injectI18n(injectObservablesAsProps(
     };
 
     _unsubscribeAll = new Subject();
-
     // make sure dragSelect is only available if the mouse pointer is actually over a swimlane
     disableDragSelectOnMouseLeave = true;
 

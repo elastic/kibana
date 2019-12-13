@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import expect from '@kbn/expect';
-import { findObjectByTitle } from '../find_object_by_title';
+import { findObjectByTitle } from '../helpers/find_object_by_title';
 import { SimpleSavedObject } from '../../../../../core/public';
 
 describe('findObjectByTitle', () => {

@@ -7,7 +7,7 @@ import React from 'react';
 import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
 import { loadLicense, LicenseApiResponse } from '../../services/rest/xpack';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
-import { useKibanaCore } from '../../../../observability/public';
+import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 
 const initialLicense: LicenseApiResponse = {
   features: {},
@@ -18,7 +18,7 @@ const initialLicense: LicenseApiResponse = {
 export const LicenseContext = React.createContext(initialLicense);
 
 export const LicenseProvider: React.FC = ({ children }) => {
-  const { http } = useKibanaCore();
+  const { http } = useApmPluginContext().core;
   const { data = initialLicense, status } = useFetcher(
     () => loadLicense(http),
     [http]
