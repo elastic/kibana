@@ -190,6 +190,10 @@ describe('Network redux store', () => {
             field: 'bytes_out',
           },
         },
+        [NetworkTableType.alerts]: {
+          activePage: 0,
+          limit: 10,
+        },
       });
     });
 

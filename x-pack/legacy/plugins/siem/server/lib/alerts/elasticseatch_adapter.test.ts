@@ -5,6 +5,7 @@
  */
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 
+import expect from '@kbn/expect';
 import { ElasticsearchAlertsAdapter } from './elasticsearch_adapter';
 import {
   mockRequest,
@@ -42,7 +43,14 @@ describe('alerts elasticsearch_adapter', () => {
         (mockOptions as unknown) as RequestBasicOptions
       );
 
-      expect(data).toEqual({});
+      expect(data).to.eql({
+        alertsOverTimeByModule: [],
+        inspect: {
+          dsl: ['"mockAlertsHistogramQueryDsl"'],
+          response: ['"mockAlertsHistogramDataResponse"'],
+        },
+        totalCount: 0,
+      });
     });
   });
 });

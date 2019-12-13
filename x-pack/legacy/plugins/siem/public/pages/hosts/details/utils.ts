@@ -32,6 +32,7 @@ export const getBreadcrumbs = (params: HostRouteSpyState, search: string[]): Bre
       href: `${getHostsUrl()}${search && search[0] ? search[0] : ''}`,
     },
   ];
+
   if (params.detailName != null) {
     breadcrumb = [
       ...breadcrumb,

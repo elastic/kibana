@@ -6,6 +6,7 @@
 
 import { Breadcrumb } from 'ui/chrome';
 
+import { get } from 'lodash/fp';
 import { decodeIpv6 } from '../../../lib/helpers';
 import { getNetworkUrl, getIPDetailsUrl } from '../../../components/link_to/redirect_to_network';
 import { networkModel } from '../../../store/network';
@@ -30,7 +31,6 @@ export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): 
       href: `${getNetworkUrl()}${search && search[0] ? search[0] : ''}`,
     },
   ];
-
   if (params.detailName != null) {
     breadcrumb = [
       ...breadcrumb,
@@ -41,6 +41,9 @@ export const getBreadcrumbs = (params: NetworkRouteSpyState, search: string[]): 
     ];
   }
   if (params.tabName != null) {
+    const tabName = get('tabName', params);
+    if (!tabName) return breadcrumb;
+
     breadcrumb = [
       ...breadcrumb,
       {

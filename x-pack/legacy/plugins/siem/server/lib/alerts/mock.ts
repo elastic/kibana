@@ -18,10 +18,3 @@ export const mockOptions = {
   defaultIndex: defaultIndexPattern,
   filterQuery: '',
 };
-
-// export const mockAlertsQueryDsl = {
-//   mockAlertsQueryDsl: 'mockAlertsQueryDsl',
-// };
-
-// const mockTimelineAlertsInspectResponse = cloneDeep(mockAlertsResponse);
-// delete mockTimelineAlertsInspectResponse.hits.hits[0]._source;

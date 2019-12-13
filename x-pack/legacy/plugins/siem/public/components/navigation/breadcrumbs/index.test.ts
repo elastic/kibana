@@ -9,8 +9,9 @@ import { encodeIpv6 } from '../../../lib/helpers';
 
 import { getBreadcrumbsForRoute, setBreadcrumbs } from '.';
 import { HostsTableType } from '../../../store/hosts/model';
-import { RouteSpyState } from '../../../utils/route/types';
+import { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
 import { TabNavigationProps } from '../tab_navigation/types';
+import { NetworkRouteType } from '../../../pages/network/navigation/types';
 
 jest.mock('ui/chrome', () => ({
   getBasePath: () => {
@@ -29,6 +30,17 @@ jest.mock('../../search_bar', () => ({
     addFilters: jest.fn(),
   },
 }));
+
+const mockDefaultTab = (pageName: string): SiemRouteType | undefined => {
+  switch (pageName) {
+    case 'hosts':
+      return HostsTableType.authentications;
+    case 'network':
+      return NetworkRouteType.flows;
+    default:
+      return undefined;
+  }
+};
 
 const getMockObject = (
   pageName: string,
@@ -69,7 +81,7 @@ const getMockObject = (
   pageName,
   pathName,
   search: '',
-  tabName: HostsTableType.authentications,
+  tabName: mockDefaultTab(pageName),
   query: { query: '', language: 'kuery' },
   filters: [],
   timeline: {
@@ -136,6 +148,10 @@ describe('Navigation Breadcrumbs', () => {
           href:
             '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
         },
+        {
+          text: 'Flows',
+          href: '',
+        },
       ]);
     });
 
@@ -176,7 +192,11 @@ describe('Navigation Breadcrumbs', () => {
           href:
             '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
         },
-        { text: '192.0.2.255', href: '' },
+        {
+          text: ipv4,
+          href: `#/link-to/network/ip/${ipv4}?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+        },
+        { text: 'Flows', href: '' },
       ]);
     });
 
@@ -189,7 +209,11 @@ describe('Navigation Breadcrumbs', () => {
           href:
             '#/link-to/network?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))',
         },
-        { text: '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff', href: '' },
+        {
+          text: ipv6,
+          href: `#/link-to/network/ip/${ipv6Encoded}?timerange=(global:(linkTo:!(timeline),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1558048243696,fromStr:now-24h,kind:relative,to:1558134643697,toStr:now)))`,
+        },
+        { text: 'Flows', href: '' },
       ]);
     });
   });
