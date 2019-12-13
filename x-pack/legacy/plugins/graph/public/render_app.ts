@@ -19,6 +19,8 @@ import { configureAppAngularModule } from 'ui/legacy_compat';
 import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_top_nav';
 // @ts-ignore
 import { confirmModalFactory } from 'ui/modals/confirm_modal';
+// @ts-ignore
+import { addAppRedirectMessageToUrl } from 'ui/notify';
 
 // type imports
 import {
@@ -36,6 +38,8 @@ import {
   IndexPatternsContract,
 } from '../../../../../src/plugins/data/public';
 import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/common/types';
+import { checkLicense } from '../../../../plugins/graph/common/check_license';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -49,13 +53,13 @@ export interface GraphDependencies extends LegacyAngularInjectedDependencies {
   capabilities: Record<string, boolean | Record<string, boolean>>;
   coreStart: AppMountContext['core'];
   navigation: NavigationStart;
+  licensing: LicensingPluginSetup;
   chrome: ChromeStart;
   config: IUiSettingsClient;
   toastNotifications: ToastsStart;
   indexPatterns: IndexPatternsContract;
   npData: ReturnType<DataPlugin['start']>;
   savedObjectsClient: SavedObjectsClientContract;
-  xpackInfo: { get(path: string): unknown };
   addBasePath: (url: string) => string;
   getBasePath: () => string;
   Storage: any;
@@ -82,9 +86,23 @@ export interface LegacyAngularInjectedDependencies {
 export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
   const graphAngularModule = createLocalAngularModule(deps.navigation);
   configureAppAngularModule(graphAngularModule, deps.coreStart as LegacyCoreStart, true);
+
+  const licenseSubscription = deps.licensing.license$.subscribe(license => {
+    const info = checkLicense(license);
+    const licenseAllowsToShowThisPage = info.showAppLink && info.enableAppLink;
+
+    if (!licenseAllowsToShowThisPage) {
+      const newUrl = addAppRedirectMessageToUrl(deps.addBasePath(deps.kbnBaseUrl), info.message);
+      window.location.href = newUrl;
+    }
+  });
+
   initGraphApp(graphAngularModule, deps);
   const $injector = mountGraphApp(appBasePath, element);
-  return () => $injector.get('$rootScope').$destroy();
+  return () => {
+    licenseSubscription.unsubscribe();
+    $injector.get('$rootScope').$destroy();
+  };
 };
 
 const mainTemplate = (basePath: string) => `<div style="height: 100%">

@@ -18,10 +18,10 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { TopNavMenuExtensionsRegistry, TopNavMenuExtensionsRegistrySetup } from './top_nav_menu';
 import { createTopNav } from './top_nav_menu/create_top_nav_menu';
 import { TopNavMenuProps } from './top_nav_menu/top_nav_menu';
-import { DataStart } from '../../data/public';
 
 /**
  * Interface for this plugin's returned `setup` contract.
@@ -44,7 +44,7 @@ export interface NavigationStart {
 }
 
 export interface NavigationPluginStartDependencies {
-  data: DataStart;
+  data: DataPublicPluginStart;
 }
 
 export class NavigationPlugin implements Plugin<NavigationSetup, NavigationStart> {

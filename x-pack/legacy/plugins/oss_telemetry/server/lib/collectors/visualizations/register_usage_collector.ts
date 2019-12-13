@@ -5,13 +5,13 @@
  */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { HapiServer } from '../../../../';
+import { PluginSetupContract as TaskManagerPluginSetupContract } from '../../../../../task_manager/plugin';
 import { getUsageCollector } from './get_usage_collector';
 
 export function registerVisualizationsCollector(
-  usageCollection: UsageCollectionSetup,
-  server: HapiServer
+  collectorSet: UsageCollectionSetup,
+  taskManager: TaskManagerPluginSetupContract | undefined
 ): void {
-  const collector = usageCollection.makeUsageCollector(getUsageCollector(server));
-  usageCollection.registerCollector(collector);
+  const collector = collectorSet.makeUsageCollector(getUsageCollector(taskManager));
+  collectorSet.registerCollector(collector);
 }

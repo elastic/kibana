@@ -131,7 +131,6 @@ function createLocalAngularModule(core: AppMountContext['core'], navigation: Nav
     'app/dashboard/State',
     'app/dashboard/ConfirmModal',
     'app/dashboard/icon',
-    'app/dashboard/emptyScreen',
   ]);
   return dashboardAngularModule;
 }

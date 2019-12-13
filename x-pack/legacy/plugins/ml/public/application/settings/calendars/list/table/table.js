@@ -15,8 +15,6 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
-
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 
@@ -55,7 +53,7 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
       truncateText: true,
       render: (id) => (
         <EuiLink
-          href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/edit_calendar/${id}`}
+          href={`#/settings/calendars_list/edit_calendar/${id}`}
         >
           {id}
         </EuiLink>
@@ -98,7 +96,7 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
           size="s"
           data-test-subj="mlCalendarButtonCreate"
           key="new_calendar_button"
-          href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list/new_calendar`}
+          href="#/settings/calendars_list/new_calendar"
           isDisabled={(canCreateCalendar === false || mlNodesAvailable === false)}
         >
           <FormattedMessage
