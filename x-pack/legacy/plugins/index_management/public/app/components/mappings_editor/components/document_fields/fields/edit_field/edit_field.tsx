@@ -34,7 +34,6 @@ import {
 import { getParametersFormForType } from '../field_types';
 import { UpdateFieldProvider, UpdateFieldFunc } from './update_field_provider';
 import { EditFieldHeaderForm } from './edit_field_header_form';
-import { EditFieldSection } from './edit_field_section';
 
 const limitStringLength = (text: string, limit = 18): string => {
   if (text.length <= limit) {
@@ -146,20 +145,11 @@ export const EditField = React.memo(({ form, field, allFields, exitEdit }: Props
                   </EuiFlyoutHeader>
 
                   <EuiFlyoutBody>
-                    <EditFieldSection
-                      title={i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.editFieldLyout.fieldDefinitionTitle',
-                        {
-                          defaultMessage: 'Field definition',
-                        }
-                      )}
-                    >
-                      <EditFieldHeaderForm
-                        type={type}
-                        defaultValue={field.source}
-                        isMultiField={isMultiField}
-                      />
-                    </EditFieldSection>
+                    <EditFieldHeaderForm
+                      type={type}
+                      defaultValue={field.source}
+                      isMultiField={isMultiField}
+                    />
 
                     {ParametersForm && <ParametersForm field={field} allFields={allFields} />}
                   </EuiFlyoutBody>

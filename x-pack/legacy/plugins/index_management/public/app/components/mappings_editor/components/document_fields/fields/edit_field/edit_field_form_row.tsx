@@ -107,13 +107,17 @@ export const EditFieldFormRow = React.memo(
       );
 
       const controlsTitle = (
-        <EuiTitle size="xs" className="mappingsEditor__editField__formRow__title">
+        <EuiTitle size="xs">
           <h3>{title}</h3>
         </EuiTitle>
       );
 
       const controlsDescription = description && (
-        <EuiText size="s" color="subdued">
+        <EuiText
+          size="s"
+          color="subdued"
+          className="mappingsEditor__editField__formRow__description"
+        >
           {description}
         </EuiText>
       );
@@ -124,7 +128,7 @@ export const EditFieldFormRow = React.memo(
             paddingLeft: withToggle === false ? '0' : undefined,
           }}
         >
-          <EuiFlexGroup>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>{controlsTitle}</EuiFlexItem>
 
             {docLink ? (
