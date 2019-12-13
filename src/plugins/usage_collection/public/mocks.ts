@@ -17,4 +17,20 @@
  * under the License.
  */
 
-export const API_BASE_PATH = '/api/ui_metric';
+import { UsageCollectionSetup, METRIC_TYPE } from '.';
+
+export type Setup = jest.Mocked<UsageCollectionSetup>;
+
+const createSetupContract = (): Setup => {
+  const setupContract: Setup = {
+    allowTrackUserAgent: jest.fn(),
+    reportUiStats: jest.fn(),
+    METRIC_TYPE,
+  };
+
+  return setupContract;
+};
+
+export const usageCollectionPluginMock = {
+  createSetupContract,
+};

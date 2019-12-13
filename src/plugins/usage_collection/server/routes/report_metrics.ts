@@ -16,9 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npSetup } from 'ui/new_platform';
 
-export const createUiStatsReporter = (appName: string) => {
-  const { usageCollection } = npSetup.plugins;
-  return usageCollection.reportUiStats.bind(usageCollection, appName);
-};
+import { schema } from '@kbn/config-schema';
+import { IRouter } from '../../../../../src/core/server';
+import { storeReport, reportSchema } from '../report';
+
+export function registerUiMetricRoute(router: IRouter, getLegacySavedObjects: () => any) {
+  router.post(
+    {
+      path: '/api/ui_metric/report',
+      validate: {
+        body: schema.object({
+          report: reportSchema,
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { report } = req.body;
+      try {
+        const internalRepository = getLegacySavedObjects();
+        await storeReport(internalRepository, report);
+        return res.ok({ body: { status: 'ok' } });
+      } catch (error) {
+        return res.ok({ body: { status: 'fail' } });
+      }
+    }
+  );
+}
