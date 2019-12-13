@@ -194,6 +194,10 @@ export abstract class FieldFormat {
       [HTML_CONTEXT_TYPE]: htmlContentTypeSetup(this, this.htmlConvert),
     };
   }
+
+  static isInstanceOfFieldFormat(fieldFormat: any): fieldFormat is FieldFormat {
+    return Boolean(fieldFormat && fieldFormat.convert);
+  }
 }
 
 export type IFieldFormat = PublicMethodsOf<FieldFormat>;

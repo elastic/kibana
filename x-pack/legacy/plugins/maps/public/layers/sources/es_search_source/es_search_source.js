@@ -85,14 +85,12 @@ export class ESSearchSource extends AbstractESSource {
         source={this}
         indexPatternId={this._descriptor.indexPatternId}
         onChange={onChange}
-        filterByMapBounds={this._descriptor.filterByMapBounds}
         tooltipFields={this._tooltipFields}
         sortField={this._descriptor.sortField}
         sortOrder={this._descriptor.sortOrder}
         useTopHits={this._descriptor.useTopHits}
         topHitsSplitField={this._descriptor.topHitsSplitField}
         topHitsSize={this._descriptor.topHitsSize}
-        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }
@@ -405,7 +403,7 @@ export class ESSearchSource extends AbstractESSource {
     searchSource.setField('size', 1);
     const query = {
       language: 'kuery',
-      query: `_id:"${docId}" and _index:${index}`
+      query: `_id:"${docId}" and _index:"${index}"`
     };
     searchSource.setField('query', query);
     searchSource.setField('fields', this._getTooltipPropertyNames());
@@ -443,6 +441,10 @@ export class ESSearchSource extends AbstractESSource {
 
   isFilterByMapBounds() {
     return _.get(this._descriptor, 'filterByMapBounds', false);
+  }
+
+  isFilterByMapBoundsConfigurable() {
+    return true;
   }
 
   async getLeftJoinFields() {

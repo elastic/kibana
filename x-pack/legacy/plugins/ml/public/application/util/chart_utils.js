@@ -12,7 +12,6 @@ import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impa
 import moment from 'moment';
 import rison from 'rison-node';
 
-import chrome from 'ui/chrome';
 import { timefilter } from 'ui/timefilter';
 
 import { CHART_TYPE } from '../explorer/explorer_constants';
@@ -229,7 +228,7 @@ export function getExploreSeriesLink(series) {
     }
   });
 
-  return `${chrome.getBasePath()}/app/ml#/timeseriesexplorer?_g=${_g}&_a=${encodeURIComponent(_a)}`;
+  return `#/timeseriesexplorer?_g=${_g}&_a=${encodeURIComponent(_a)}`;
 }
 
 export function showMultiBucketAnomalyMarker(point) {

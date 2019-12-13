@@ -56,7 +56,7 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, createIndexPattern } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -85,14 +85,25 @@ export const validateAdvancedEditor = (state: State): State => {
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
   const mml = jobConfig.model_memory_limit;
-  const modelMemoryLimitEmpty = mml === '';
+  const modelMemoryLimitEmpty = mml === '' || mml === undefined;
   if (!modelMemoryLimitEmpty && mml !== undefined) {
     const { valid } = validateModelMemoryLimitUnits(mml);
     state.form.modelMemoryLimitUnitValid = valid;
   }
 
   let dependentVariableEmpty = false;
-  if (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis)) {
+
+  if (
+    jobConfig.analysis === undefined &&
+    (jobType === JOB_TYPES.CLASSIFICATION || jobType === JOB_TYPES.REGRESSION)
+  ) {
+    dependentVariableEmpty = true;
+  }
+
+  if (
+    jobConfig.analysis !== undefined &&
+    (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis))
+  ) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
   }

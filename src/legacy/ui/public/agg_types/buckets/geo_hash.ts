@@ -28,8 +28,7 @@ import { PrecisionParamEditor } from '../../vis/editors/default/controls/precisi
 import { AggGroupNames } from '../../vis/editors/default/agg_groups';
 import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
-// @ts-ignore
-import { geoContains, scaleBounds } from '../../utils/geo_utils';
+import { geoContains, scaleBounds, GeoBoundingBox } from './lib/geo_utils';
 import { BUCKET_TYPES } from './bucket_agg_types';
 
 const config = chrome.getUiSettingsClient();
@@ -70,15 +69,15 @@ function getPrecision(val: string) {
   return precision;
 }
 
-const isOutsideCollar = (bounds: unknown, collar: MapCollar) =>
+const isOutsideCollar = (bounds: GeoBoundingBox, collar: MapCollar) =>
   bounds && collar && !geoContains(collar, bounds);
 
 const geohashGridTitle = i18n.translate('common.ui.aggTypes.buckets.geohashGridTitle', {
   defaultMessage: 'Geohash',
 });
 
-interface MapCollar {
-  zoom: unknown;
+interface MapCollar extends GeoBoundingBox {
+  zoom?: unknown;
 }
 
 export interface IBucketGeoHashGridAggConfig extends IBucketAggConfig {
@@ -142,17 +141,19 @@ export const geoHashBucketAgg = new BucketAggType<IBucketGeoHashGridAggConfig>({
     },
   ],
   getRequestAggs(agg) {
-    const aggs: IBucketAggConfig[] = [];
+    const aggs = [];
     const params = agg.params;
 
     if (params.isFilteredByCollar && agg.getField()) {
       const { mapBounds, mapZoom } = params;
       if (mapBounds) {
-        let mapCollar;
+        let mapCollar: MapCollar;
+
         if (
-          !agg.lastMapCollar ||
-          agg.lastMapCollar.zoom !== mapZoom ||
-          isOutsideCollar(mapBounds, agg.lastMapCollar)
+          mapBounds &&
+          (!agg.lastMapCollar ||
+            agg.lastMapCollar.zoom !== mapZoom ||
+            isOutsideCollar(mapBounds, agg.lastMapCollar))
         ) {
           mapCollar = scaleBounds(mapBounds);
           mapCollar.zoom = mapZoom;

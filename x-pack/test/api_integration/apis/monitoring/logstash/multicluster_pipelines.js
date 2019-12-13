@@ -11,7 +11,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('pipelines listing multicluster', () => {
+  describe.skip('pipelines listing multicluster', () => {
     const archive = 'monitoring/logstash_pipelines_multicluster';
     const timeRange = {
       min: '2019-11-11T15:13:45.266Z',

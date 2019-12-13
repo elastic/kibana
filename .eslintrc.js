@@ -132,12 +132,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/eui_utils/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/kibana_react/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
@@ -332,7 +326,7 @@ module.exports = {
                 allowSameFolder: true,
               },
               {
-                target: ['src/core/**/*'],
+                target: ['src/**/*'],
                 from: ['x-pack/**/*'],
                 errorMessage: 'OSS cannot import x-pack files.',
               },
