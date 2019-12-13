@@ -16,7 +16,15 @@ import { mapTo, filter, scan, concatMap, tap, catchError } from 'rxjs/operators'
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, none, map as mapOptional, getOrElse } from 'fp-ts/lib/Option';
 import { pullFromSet } from './lib/pull_from_set';
-import { Result, Err, map as mapResult, asOk, asErr, promiseResult } from './lib/result_type';
+import {
+  Result,
+  Err,
+  isErr,
+  map as mapResult,
+  asOk,
+  asErr,
+  promiseResult,
+} from './lib/result_type';
 
 type WorkFn<T, H> = (...params: T[]) => Promise<H>;
 
@@ -61,26 +69,19 @@ export function createTaskPoller<T, H>({
     // buffer all requests in a single set (to remove duplicates) as we don't want
     // work to take place in parallel (it could cause Task Manager to pull in the same
     // task twice)
-    scan<Option<T>, Set<T>>(
-      (queue, request) =>
-        mapResult(
-          pushOptionalIntoSet(queue, bufferCapacity, request),
-          // value has been successfully pushed into buffer
-          () => queue,
-          // value wasnt pushed into buffer, we must be at capacity
-          () => {
-            errors$.next(
-              asPollingError<T>(
-                `request capacity reached`,
-                PollingErrorType.RequestCapacityReached,
-                request
-              )
-            );
-            return queue;
-          }
-        ),
-      new Set<T>()
-    ),
+    scan<Option<T>, Set<T>>((queue, request) => {
+      if (isErr(pushOptionalIntoSet(queue, bufferCapacity, request))) {
+        // value wasnt pushed into buffer, we must be at capacity
+        errors$.next(
+          asPollingError<T>(
+            `request capacity reached`,
+            PollingErrorType.RequestCapacityReached,
+            request
+          )
+        );
+      }
+      return queue;
+    }, new Set<T>()),
     // only emit polling events when there's capacity to handle them
     filter(hasCapacity),
     // take as many argumented calls as we have capacity for and call `work` with
