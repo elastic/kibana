@@ -4,5 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { graphExploreRoute } from './graph_explore';
-export { searchProxyRoute } from './search_proxy';
+import { GraphPlugin } from './plugin';
+
+export const plugin = () => new GraphPlugin();

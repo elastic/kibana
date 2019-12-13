@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const getCallClusterPre = {
-  assign: 'callCluster',
-  method(request) {
-    const cluster = request.server.plugins.elasticsearch.getCluster('data');
-    return (...args) => cluster.callWithRequest(request, ...args);
-  }
-};
+import { GraphPlugin } from './plugin';
+
+export const plugin = () => new GraphPlugin();

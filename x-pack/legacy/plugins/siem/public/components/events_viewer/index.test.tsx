@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 
@@ -12,6 +11,7 @@ import { useKibanaCore } from '../../lib/compose/kibana_core';
 import { wait } from '../../lib/helpers';
 import { mockIndexPattern, TestProviders } from '../../mock';
 import { mockUiSettings } from '../../mock/ui_settings';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
@@ -40,6 +40,8 @@ const from = 1566943856794;
 const to = 1566857456791;
 
 describe('StatefulEventsViewer', () => {
+  const mount = useMountAppended();
+
   test('it renders the events viewer', async () => {
     const wrapper = mount(
       <TestProviders>
