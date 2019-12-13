@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { readFile, writeFile } from 'fs';
+import { promises } from 'fs';
 import { join } from 'path';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { configServiceMock } from '../config/config_service.mock';
@@ -25,15 +25,23 @@ import { loggingServiceMock } from '../logging/logging_service.mock';
 import { BehaviorSubject } from 'rxjs';
 import { Logger } from '../logging';
 
+const { readFile, writeFile } = promises;
+
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',
 }));
 
-jest.mock('fs', () => ({
-  ...jest.requireActual('fs'),
-  readFile: jest.fn((path, callback) => callback(null, Buffer.from(''))),
-  writeFile: jest.fn((path, value, options, callback) => callback(null, null)),
-}));
+jest.mock('fs', () => {
+  const actual = jest.requireActual('fs');
+  return {
+    ...actual,
+    promises: {
+      ...actual.promises,
+      readFile: jest.fn(() => Promise.resolve('')),
+      writeFile: jest.fn(() => Promise.resolve('')),
+    },
+  };
+});
 
 const DEFAULT_FILE_UUID = 'FILE_UUID';
 const DEFAULT_CONFIG_UUID = 'CONFIG_UUID';
@@ -48,9 +56,9 @@ const mockReadFile = ({
 }>) => {
   ((readFile as unknown) as jest.Mock).mockImplementation((path, callback) => {
     if (error) {
-      callback(error, null);
+      return Promise.reject(error);
     } else {
-      callback(null, Buffer.from(uuid));
+      return Promise.resolve(uuid);
     }
   });
 };
@@ -91,8 +99,7 @@ describe('resolveInstanceUuid', () => {
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
         DEFAULT_CONFIG_UUID,
-        expect.any(Object),
-        expect.any(Function)
+        expect.any(Object)
       );
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
@@ -123,8 +130,7 @@ describe('resolveInstanceUuid', () => {
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
         DEFAULT_CONFIG_UUID,
-        expect.any(Object),
-        expect.any(Function)
+        expect.any(Object)
       );
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`
@@ -159,8 +165,7 @@ describe('resolveInstanceUuid', () => {
       expect(writeFile).toHaveBeenCalledWith(
         join('data-folder', 'uuid'),
         'NEW_UUID',
-        expect.any(Object),
-        expect.any(Function)
+        expect.any(Object)
       );
       expect(logger.debug).toHaveBeenCalledTimes(1);
       expect(logger.debug.mock.calls[0]).toMatchInlineSnapshot(`

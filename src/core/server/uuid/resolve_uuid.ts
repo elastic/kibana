@@ -18,8 +18,7 @@
  */
 
 import uuid from 'uuid';
-import { promisify } from 'util';
-import * as fs from 'fs';
+import { promises } from 'fs';
 import { join } from 'path';
 import { take } from 'rxjs/operators';
 import { IConfigService } from '../config';
@@ -27,11 +26,10 @@ import { PathConfigType, config as pathConfigDef } from '../path';
 import { HttpConfigType, config as httpConfigDef } from '../http';
 import { Logger } from '../logging';
 
+const { readFile, writeFile } = promises;
+
 const FILE_ENCODING = 'utf8';
 const FILE_NAME = 'uuid';
-
-const readFile = promisify(fs.readFile);
-const writeFile = promisify(fs.writeFile);
 
 export async function resolveInstanceUuid(
   configService: IConfigService,
