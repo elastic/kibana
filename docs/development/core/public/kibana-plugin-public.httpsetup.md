@@ -33,5 +33,4 @@ export interface HttpSetup
 |  Method | Description |
 |  --- | --- |
 |  [intercept(interceptor)](./kibana-plugin-public.httpsetup.intercept.md) | Adds a new [HttpInterceptor](./kibana-plugin-public.httpinterceptor.md) to the global HTTP client. |
-|  [removeAllInterceptors()](./kibana-plugin-public.httpsetup.removeallinterceptors.md) | Removes all configured interceptors. |
 

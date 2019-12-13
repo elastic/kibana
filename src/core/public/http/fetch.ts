@@ -42,12 +42,22 @@ export class Fetch {
 
   public intercept(interceptor: HttpInterceptor) {
     this.interceptors.add(interceptor);
-    return () => this.interceptors.delete(interceptor);
+    return () => {
+      this.interceptors.delete(interceptor);
+    };
   }
 
   public removeAllInterceptors() {
     this.interceptors.clear();
   }
+
+  public readonly delete = this.shorthand('DELETE');
+  public readonly get = this.shorthand('GET');
+  public readonly head = this.shorthand('HEAD');
+  public readonly options = this.shorthand('options');
+  public readonly patch = this.shorthand('PATCH');
+  public readonly post = this.shorthand('POST');
+  public readonly put = this.shorthand('PUT');
 
   public fetch: HttpHandler = async <TResponseBody>(
     path: string,
@@ -151,5 +161,10 @@ export class Fetch {
     }
 
     return new HttpResponse({ request, response, body });
+  }
+
+  private shorthand(method: string) {
+    return (path: string, options: HttpFetchOptions = {}) =>
+      this.fetch(path, { ...options, method });
   }
 }

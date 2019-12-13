@@ -561,7 +561,6 @@ export interface HttpSetup {
     patch: HttpHandler;
     post: HttpHandler;
     put: HttpHandler;
-    removeAllInterceptors(): void;
 }
 
 // @public

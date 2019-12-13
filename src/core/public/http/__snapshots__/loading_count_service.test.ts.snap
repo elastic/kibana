@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingCountService addLoadingCount() adds a fatal error if source observable emits a negative number 1`] = `
+Array [
+  Array [
+    [Error: Observables passed to loadingCount.add() must only emit positive numbers],
+  ],
+]
+`;
+
+exports[`LoadingCountService addLoadingCount() adds a fatal error if source observables emit an error 1`] = `
+Array [
+  Array [
+    [Error: foo bar],
+  ],
+]
+`;
+
+exports[`LoadingCountService getLoadingCount$() emits 0 initially, the right count when sources emit their own count, and ends with zero 1`] = `
+Array [
+  0,
+  100,
+  110,
+  111,
+  11,
+  21,
+  20,
+  0,
+]
+`;
+
+exports[`LoadingCountService getLoadingCount$() only emits when loading count changes 1`] = `
+Array [
+  0,
+  1,
+  0,
+]
+`;

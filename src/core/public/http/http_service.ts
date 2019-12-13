@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpSetup, HttpStart, HttpFetchOptions } from './types';
+import { HttpSetup, HttpStart } from './types';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { BasePath } from './base_path';
@@ -42,24 +42,18 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
     const fetchService = new Fetch({ basePath, kibanaVersion });
     const loadingCount = this.loadingCount.setup({ fatalErrors });
 
-    function shorthand(method: string) {
-      return (path: string, options: HttpFetchOptions = {}) =>
-        fetchService.fetch(path, { ...options, method });
-    }
-
     return {
       basePath,
       anonymousPaths,
       intercept: fetchService.intercept.bind(fetchService),
-      removeAllInterceptors: fetchService.removeAllInterceptors.bind(fetchService),
       fetch: fetchService.fetch.bind(fetchService),
-      delete: shorthand('DELETE'),
-      get: shorthand('GET'),
-      head: shorthand('HEAD'),
-      options: shorthand('OPTIONS'),
-      patch: shorthand('PATCH'),
-      post: shorthand('POST'),
-      put: shorthand('PUT'),
+      delete: fetchService.delete.bind(fetchService),
+      get: fetchService.get.bind(fetchService),
+      head: fetchService.head.bind(fetchService),
+      options: fetchService.options.bind(fetchService),
+      patch: fetchService.patch.bind(fetchService),
+      post: fetchService.post.bind(fetchService),
+      put: fetchService.put.bind(fetchService),
       ...loadingCount,
     };
   }

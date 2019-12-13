@@ -38,11 +38,6 @@ export interface HttpSetup {
    */
   intercept(interceptor: HttpInterceptor): () => void;
 
-  /**
-   * Removes all configured interceptors.
-   */
-  removeAllInterceptors(): void;
-
   /** Makes an HTTP request. Defaults to a GET request unless overriden. See {@link HttpHandler} for options. */
   fetch: HttpHandler;
   /** Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options. */
