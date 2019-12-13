@@ -118,14 +118,6 @@ export class Plugin {
     core.http.route(muteAlertInstanceRoute);
     core.http.route(unmuteAlertInstanceRoute);
 
-    // TODO: Remove, this is only for dev purposes and should be removed before branch is merged
-    alertTypeRegistry.register({
-      id: 'test',
-      name: 'Test',
-      actionGroups: ['default'],
-      executor(): any {},
-    });
-
     return {
       registerType: alertTypeRegistry.register.bind(alertTypeRegistry),
     };
