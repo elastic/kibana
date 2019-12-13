@@ -56,6 +56,13 @@ export function defineRoleMappingGetRoutes(params: RouteDefinitionParams) {
     })
   );
 
+  /**
+   * While role templates are normally persisted as objects via the create API, they are stored internally as strings.
+   * As a result, the ES APIs to retrieve role mappings represent the templates as strings, so we have to attempt
+   * to parse them back out. ES allows for invalid JSON to be stored, so we have to account for that as well.
+   *
+   * @param roleTemplate the string-based template to parse
+   */
   function tryParseRoleTemplate(roleTemplate: string) {
     try {
       return JSON.parse(roleTemplate);

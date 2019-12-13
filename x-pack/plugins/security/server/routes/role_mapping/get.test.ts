@@ -38,6 +38,15 @@ const mockRoleMappingResponse = {
       ],
     },
   },
+  mapping3: {
+    enabled: true,
+    role_templates: [{ template: 'template with invalid json' }],
+    rules: {
+      field: {
+        dn: 'CN=bob,OU=example,O=com',
+      },
+    },
+  },
 };
 
 describe('GET role mappings', () => {
@@ -95,6 +104,16 @@ describe('GET role mappings', () => {
               },
             },
           ],
+        },
+      },
+      {
+        name: 'mapping3',
+        enabled: true,
+        role_templates: [{ template: 'template with invalid json' }],
+        rules: {
+          field: {
+            dn: 'CN=bob,OU=example,O=com',
+          },
         },
       },
     ]);

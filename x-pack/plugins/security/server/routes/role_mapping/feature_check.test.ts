@@ -11,12 +11,10 @@ import { LICENSE_CHECK_STATE, LicenseCheck } from '../../../../licensing/server'
 import { defineRoleMappingFeatureCheckRoute } from './feature_check';
 
 interface TestOptions {
-  name?: string;
   licenseCheckResult?: LicenseCheck;
   canManageRoleMappings?: boolean;
   nodeSettingsResponse?: Record<string, any>;
   xpackUsageResponse?: Record<string, any>;
-  apiResponse?: () => Promise<unknown>;
   asserts: { statusCode: number; result?: Record<string, any> };
 }
 
@@ -39,12 +37,10 @@ describe('GET role mappings feature check', () => {
   const getFeatureCheckTest = (
     description: string,
     {
-      name,
       licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
       canManageRoleMappings = true,
       nodeSettingsResponse = {},
       xpackUsageResponse = defaultXpackUsageResponse,
-      apiResponse,
       asserts,
     }: TestOptions
   ) => {
@@ -135,7 +131,7 @@ describe('GET role mappings feature check', () => {
     },
   });
 
-  getFeatureCheckTest('disallowed stored scripts when disabled', {
+  getFeatureCheckTest('disallowes stored scripts when disabled', {
     nodeSettingsResponse: {
       nodes: {
         someNodeId: {
@@ -158,7 +154,7 @@ describe('GET role mappings feature check', () => {
     },
   });
 
-  getFeatureCheckTest('disallowed inline scripts when disabled', {
+  getFeatureCheckTest('disallowes inline scripts when disabled', {
     nodeSettingsResponse: {
       nodes: {
         someNodeId: {

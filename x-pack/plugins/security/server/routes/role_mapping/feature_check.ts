@@ -5,37 +5,13 @@
  */
 
 import { createLicensedRouteHandler } from '../licensed_route_handler';
+import { getEnabledRoleMappingsFeatures } from '../../role_mappings';
 import { RouteDefinitionParams } from '..';
-
-interface NodeSettingsResponse {
-  nodes: {
-    [nodeId: string]: {
-      settings: {
-        script: {
-          allowed_types?: string[];
-          allowed_contexts?: string[];
-        };
-      };
-    };
-  };
-}
-
-interface XPackUsageResponse {
-  security: {
-    realms: {
-      [realmName: string]: {
-        available: boolean;
-        enabled: boolean;
-      };
-    };
-  };
-}
-
-const INCOMPATIBLE_REALMS = ['file', 'native'];
 
 export function defineRoleMappingFeatureCheckRoute({
   router,
   clusterClient,
+  logger,
 }: RouteDefinitionParams) {
   router.get(
     {
@@ -59,56 +35,17 @@ export function defineRoleMappingFeatureCheckRoute({
         });
       }
 
-      const nodeScriptSettings: NodeSettingsResponse | {} = await clusterClient.callAsInternalUser(
-        'transport.request',
-        {
-          method: 'GET',
-          path: '/_nodes/settings?filter_path=nodes.*.settings.script',
-        }
-      );
-
-      let canUseStoredScripts = true;
-      let canUseInlineScripts = true;
-      if (usesCustomScriptSettings(nodeScriptSettings)) {
-        canUseStoredScripts = Object.values(nodeScriptSettings.nodes).some(node => {
-          const allowedTypes = node.settings.script.allowed_types;
-          return !allowedTypes || allowedTypes.includes('stored');
-        });
-
-        canUseInlineScripts = Object.values(nodeScriptSettings.nodes).some(node => {
-          const allowedTypes = node.settings.script.allowed_types;
-          return !allowedTypes || allowedTypes.includes('inline');
-        });
-      }
-
-      const xpackUsage: XPackUsageResponse = await clusterClient.callAsInternalUser(
-        'transport.request',
-        {
-          method: 'GET',
-          path: '/_xpack/usage',
-        }
-      );
-
-      const hasCompatibleRealms = Object.entries(xpackUsage.security.realms).some(
-        ([realmName, realm]) => {
-          return !INCOMPATIBLE_REALMS.includes(realmName) && realm.available && realm.enabled;
-        }
-      );
+      const enabledFeatures = await getEnabledRoleMappingsFeatures({
+        clusterClient,
+        logger,
+      });
 
       return response.ok({
         body: {
+          ...enabledFeatures,
           canManageRoleMappings,
-          canUseInlineScripts,
-          canUseStoredScripts,
-          hasCompatibleRealms,
         },
       });
     })
   );
-}
-
-function usesCustomScriptSettings(
-  nodeResponse: NodeSettingsResponse | {}
-): nodeResponse is NodeSettingsResponse {
-  return nodeResponse.hasOwnProperty('nodes');
 }
