@@ -4,13 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const SET_INTEGRATION_POPOVER_STATE = 'SET_INTEGRATION_POPOVER_STATE';
 export const SET_BASE_PATH = 'SET_BASE_PATH';
+export const SET_ES_KUERY_STRING = 'SET_ES_KUERY_STRING';
+export const SET_INTEGRATION_POPOVER_STATE = 'SET_INTEGRATION_POPOVER_STATE';
 export const REFRESH_APP = 'REFRESH_APP';
 
 export interface PopoverState {
   id: string;
   open: boolean;
+}
+
+interface SetEsKueryStringAction {
+  type: typeof SET_ES_KUERY_STRING;
+  payload: string;
 }
 
 interface SetBasePathAction {
@@ -31,7 +37,8 @@ interface TriggerAppRefreshAction {
 export type UiActionTypes =
   | SetIntegrationPopoverAction
   | SetBasePathAction
-  | TriggerAppRefreshAction;
+  | TriggerAppRefreshAction
+  | SetEsKueryStringAction;
 
 export function toggleIntegrationsPopover(popoverState: PopoverState): SetIntegrationPopoverAction {
   return {
@@ -51,5 +58,12 @@ export function triggerAppRefresh(refreshTime: number): TriggerAppRefreshAction 
   return {
     type: REFRESH_APP,
     payload: refreshTime,
+  };
+}
+
+export function setEsKueryString(kuery: string): SetEsKueryStringAction {
+  return {
+    type: SET_ES_KUERY_STRING,
+    payload: kuery,
   };
 }

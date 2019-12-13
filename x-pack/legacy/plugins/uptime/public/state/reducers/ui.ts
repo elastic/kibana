@@ -5,22 +5,25 @@
  */
 
 import {
-  UiActionTypes,
   PopoverState,
+  UiActionTypes,
+  REFRESH_APP,
   SET_INTEGRATION_POPOVER_STATE,
   SET_BASE_PATH,
-  REFRESH_APP,
+  SET_ES_KUERY_STRING,
 } from '../actions/ui';
 
 export interface UiState {
   integrationsPopoverOpen: PopoverState | null;
   basePath: string;
+  esKuery: string;
   lastRefresh: number;
 }
 
 const initialState: UiState = {
   integrationsPopoverOpen: null,
   basePath: '',
+  esKuery: '',
   lastRefresh: Date.now(),
 };
 
@@ -45,6 +48,11 @@ export function uiReducer(state = initialState, action: UiActionTypes): UiState 
       return {
         ...state,
         basePath,
+      };
+    case SET_ES_KUERY_STRING:
+      return {
+        ...state,
+        esKuery: action.payload,
       };
     default:
       return state;
