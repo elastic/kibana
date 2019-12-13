@@ -19,13 +19,21 @@
 
 import { CspConfigType, config } from './config';
 
-const DEFAULT = Object.freeze(config.schema.validate({}));
+const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
 /**
  * CSP configuration for use in Kibana.
  * @public
  */
+export type ICspConfig = Pick<CspConfig, keyof CspConfig>;
+
+/**
+ * CSP configuration for use in Kibana.
+ * @internal
+ */
 export class CspConfig {
+  static readonly DEFAULT = new CspConfig();
+
   /**
    * The CSP rules used for Kibana.
    */
@@ -53,7 +61,7 @@ export class CspConfig {
    * Returns the default CSP configuration when passed with no config
    */
   constructor(rawCspConfig: Partial<CspConfigType> = {}) {
-    const source = { ...DEFAULT, ...rawCspConfig };
+    const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
 
     this.rules = source.rules;
     this.strict = source.strict;

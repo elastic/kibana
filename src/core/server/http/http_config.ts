@@ -19,7 +19,7 @@
 
 import { ByteSizeValue, schema, TypeOf } from '@kbn/config-schema';
 import { Env } from '../config';
-import { CspConfigType, CspConfig } from '../csp';
+import { CspConfigType, CspConfig, ICspConfig } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
@@ -133,7 +133,7 @@ export class HttpConfig {
   public defaultRoute?: string;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
-  public csp: CspConfig;
+  public csp: ICspConfig;
 
   /**
    * @internal

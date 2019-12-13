@@ -56,7 +56,7 @@ const createSetupContractMock = () => {
     registerOnPreResponse: jest.fn(),
     createRouter: jest.fn().mockImplementation(() => mockRouter.create({})),
     basePath: createBasePathMock(),
-    csp: new CspConfig(),
+    csp: CspConfig.DEFAULT,
     auth: {
       get: jest.fn(),
       isAuthenticated: jest.fn(),

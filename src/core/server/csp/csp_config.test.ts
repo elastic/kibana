@@ -33,6 +33,21 @@ import { CspConfig } from '.';
 // the nature of a change in defaults during a PR review.
 
 describe('CspConfig', () => {
+  test('DEFAULT', () => {
+    expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
+      CspConfig {
+        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "rules": Array [
+          "script-src 'unsafe-eval' 'self'",
+          "worker-src blob: 'self'",
+          "style-src 'unsafe-inline' 'self'",
+        ],
+        "strict": true,
+        "warnLegacyBrowsers": true,
+      }
+    `);
+  });
+
   test('defaults from config', () => {
     expect(new CspConfig()).toMatchInlineSnapshot(`
       CspConfig {

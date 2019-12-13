@@ -28,10 +28,10 @@ import { Logger } from '../logging';
 import { ContextSetup } from '../context';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
-import { CspConfigType } from '../csp';
+import { CspConfigType, config as cspConfig } from '../csp';
 
 import { Router } from './router';
-import { HttpConfig, HttpConfigType } from './http_config';
+import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
@@ -61,21 +61,16 @@ export class HttpService implements CoreService<InternalHttpServiceSetup, HttpSe
   private requestHandlerContext?: RequestHandlerContextContainer;
 
   constructor(private readonly coreContext: CoreContext) {
-    this.logger = coreContext.logger;
-    this.log = coreContext.logger.get('http');
+    const { logger, configService, env } = coreContext;
+
+    this.logger = logger;
+    this.log = logger.get('http');
     this.config$ = combineLatest(
-      coreContext.configService.atPath<HttpConfigType>('server'),
-      coreContext.configService.atPath<CspConfigType>('csp')
-    ).pipe(
-      map(
-        ([rawHttpConfig, rawCspConfig]) =>
-          new HttpConfig(rawHttpConfig, rawCspConfig, coreContext.env)
-      )
-    );
-    this.httpServer = new HttpServer(coreContext.logger, 'Kibana');
-    this.httpsRedirectServer = new HttpsRedirectServer(
-      coreContext.logger.get('http', 'redirect', 'server')
-    );
+      configService.atPath<HttpConfigType>(httpConfig.path),
+      configService.atPath<CspConfigType>(cspConfig.path)
+    ).pipe(map(([http, csp]) => new HttpConfig(http, csp, env)));
+    this.httpServer = new HttpServer(logger, 'Kibana');
+    this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
   public async setup(deps: SetupDeps) {
