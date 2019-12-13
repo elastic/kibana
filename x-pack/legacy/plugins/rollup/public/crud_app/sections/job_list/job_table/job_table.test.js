@@ -11,6 +11,7 @@ import { getJobs, jobCount } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 
+jest.mock('ui/new_platform');
 jest.mock('../../../services', () => {
   const services = require.requireActual('../../../services');
   return {

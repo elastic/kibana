@@ -16,6 +16,8 @@ import { CONSTANTS } from '../../url_state/constants';
 import { TabNavigationComponent } from './';
 import { TabNavigationProps } from './types';
 
+jest.mock('ui/new_platform');
+
 describe('Tab Navigation', () => {
   const pageName = SiemPageName.hosts;
   const hostName = 'siem-window';
