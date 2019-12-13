@@ -102,7 +102,6 @@ routes.defaults(/^\/management\/security(\/|$)/, {
           });
         }
 
-        console.log({ showRoleMappingManagementLink });
         if (showRoleMappingManagementLink && !security.hasItem('roleMappings')) {
           security.register('roleMappings', {
             name: 'securityRoleMappingLink',
