@@ -54,17 +54,19 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
           </div>
         );
       }),
-    [indices]
+    [handleCheckboxChange, indices]
   );
 
   return (
     <EuiDescribedFormGroup
       idAria="indices"
       title={
-        <FormattedMessage
-          id="xpack.infra.analysisSetup.indicesSelectionTitle"
-          defaultMessage="Choose indices"
-        />
+        <h3>
+          <FormattedMessage
+            id="xpack.infra.analysisSetup.indicesSelectionTitle"
+            defaultMessage="Choose indices"
+          />
+        </h3>
       }
       description={
         <FormattedMessage

@@ -7,13 +7,15 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../mock/test_providers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Port } from '.';
 
 describe('Port', () => {
+  const mount = useMountAppended();
+
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
       <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
@@ -22,7 +24,7 @@ describe('Port', () => {
   });
 
   test('it renders the port', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
       </TestProviders>
@@ -37,7 +39,7 @@ describe('Port', () => {
   });
 
   test('it hyperlinks links destination.port to an external service that describes the purpose of the port', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
       </TestProviders>
@@ -54,7 +56,7 @@ describe('Port', () => {
   });
 
   test('it renders an external link', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <Port contextId="test" eventId="abcd" fieldName="destination.port" value="443" />
       </TestProviders>

@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { NavigationMenu } from '../components/navigation_menu';
 
-export const AccessDeniedPage = () => (
+export const Page = () => (
   <Fragment>
     <NavigationMenu tabId="access-denied" />
     <EuiPage>
