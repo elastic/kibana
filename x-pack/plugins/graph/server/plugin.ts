@@ -5,7 +5,7 @@
  */
 
 import { Plugin, CoreSetup } from 'src/core/server';
-import { LicensingPluginSetup } from '../../licensing/common/types';
+import { LicensingPluginSetup } from '../../licensing/server';
 import { LicenseState } from './lib/license_state';
 import { registerSearchRoute } from './routes/search';
 import { registerExploreRoute } from './routes/explore';
