@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import {
   calculateDatafeedFrequencyDefaultSeconds,
@@ -26,7 +24,6 @@ import {
 
 describe('ML - job utils', () => {
   describe('calculateDatafeedFrequencyDefaultSeconds', () => {
-
     it('returns correct frequency for 119', () => {
       const result = calculateDatafeedFrequencyDefaultSeconds(119);
       expect(result).to.be(60);
@@ -51,18 +48,20 @@ describe('ML - job utils', () => {
       const result = calculateDatafeedFrequencyDefaultSeconds(43201);
       expect(result).to.be(3600);
     });
-
   });
 
   describe('isTimeSeriesViewJob', () => {
-
     it('returns true when job has a single detector with a metric function', () => {
       const job = {
         analysis_config: {
           detectors: [
-            { 'function': 'high_count', 'partition_field_name': 'status', 'detector_description': 'High count status code' }
-          ]
-        }
+            {
+              function: 'high_count',
+              partition_field_name: 'status',
+              detector_description: 'High count status code',
+            },
+          ],
+        },
       };
 
       expect(isTimeSeriesViewJob(job)).to.be(true);
@@ -72,10 +71,19 @@ describe('ML - job utils', () => {
       const job = {
         analysis_config: {
           detectors: [
-            { 'function': 'high_count', 'partition_field_name': 'status', 'detector_description': 'High count status code' },
-            { 'function': 'freq_rare', 'by_field_name': 'uri', 'over_field_name': 'clientip', 'detector_description': 'Freq rare URI' }
-          ]
-        }
+            {
+              function: 'high_count',
+              partition_field_name: 'status',
+              detector_description: 'High count status code',
+            },
+            {
+              function: 'freq_rare',
+              by_field_name: 'uri',
+              over_field_name: 'clientip',
+              detector_description: 'Freq rare URI',
+            },
+          ],
+        },
       };
 
       expect(isTimeSeriesViewJob(job)).to.be(true);
@@ -85,10 +93,19 @@ describe('ML - job utils', () => {
       const job = {
         analysis_config: {
           detectors: [
-            { 'function': 'varp', 'by_field_name': 'responsetime', 'detector_description': 'Varp responsetime' },
-            { 'function': 'freq_rare', 'by_field_name': 'uri', 'over_field_name': 'clientip', 'detector_description': 'Freq rare URI' }
-          ]
-        }
+            {
+              function: 'varp',
+              by_field_name: 'responsetime',
+              detector_description: 'Varp responsetime',
+            },
+            {
+              function: 'freq_rare',
+              by_field_name: 'uri',
+              over_field_name: 'clientip',
+              detector_description: 'Freq rare URI',
+            },
+          ],
+        },
       };
 
       expect(isTimeSeriesViewJob(job)).to.be(false);
@@ -98,44 +115,60 @@ describe('ML - job utils', () => {
       const job = {
         analysis_config: {
           detectors: [
-            { 'function': 'count', 'by_field_name': 'mlcategory', 'detector_description': 'Count by category' }
-          ]
-        }
+            {
+              function: 'count',
+              by_field_name: 'mlcategory',
+              detector_description: 'Count by category',
+            },
+          ],
+        },
       };
 
       expect(isTimeSeriesViewJob(job)).to.be(false);
     });
-
   });
 
   describe('isTimeSeriesViewDetector', () => {
-
     const job = {
       analysis_config: {
         detectors: [
-          { 'function': 'sum', 'field_name': 'bytes', 'partition_field_name': 'clientip', 'detector_description': 'High bytes client IP' }, // eslint-disable-line max-len
-          { 'function': 'freq_rare', 'by_field_name': 'uri', 'over_field_name': 'clientip', 'detector_description': 'Freq rare URI' },
-          { 'function': 'count', 'by_field_name': 'mlcategory', 'detector_description': 'Count by category' },
-          { 'function': 'count', 'by_field_name': 'hrd', 'detector_description': 'count by hrd' },
-          { 'function': 'mean', 'field_name': 'NetworkDiff', 'detector_description': 'avg NetworkDiff' }
-        ]
+          {
+            function: 'sum',
+            field_name: 'bytes',
+            partition_field_name: 'clientip',
+            detector_description: 'High bytes client IP',
+          }, // eslint-disable-line max-len
+          {
+            function: 'freq_rare',
+            by_field_name: 'uri',
+            over_field_name: 'clientip',
+            detector_description: 'Freq rare URI',
+          },
+          {
+            function: 'count',
+            by_field_name: 'mlcategory',
+            detector_description: 'Count by category',
+          },
+          { function: 'count', by_field_name: 'hrd', detector_description: 'count by hrd' },
+          { function: 'mean', field_name: 'NetworkDiff', detector_description: 'avg NetworkDiff' },
+        ],
       },
       datafeed_config: {
         script_fields: {
-          'hrd': {
-            'script': {
-              'inline': 'return domainSplit(doc["query"].value, params).get(1);',
-              'lang': 'painless'
-            }
+          hrd: {
+            script: {
+              inline: 'return domainSplit(doc["query"].value, params).get(1);',
+              lang: 'painless',
+            },
           },
-          'NetworkDiff': {
-            'script': {
-              'source': 'doc["NetworkOut"].value - doc["NetworkIn"].value',
-              'lang': 'painless'
-            }
-          }
-        }
-      }
+          NetworkDiff: {
+            script: {
+              source: 'doc["NetworkOut"].value - doc["NetworkIn"].value',
+              lang: 'painless',
+            },
+          },
+        },
+      },
     };
 
     it('returns true for a detector with a metric function', () => {
@@ -157,70 +190,68 @@ describe('ML - job utils', () => {
     it('returns false for a detector using a script field as a metric field_name', () => {
       expect(isTimeSeriesViewDetector(job, 4)).to.be(false);
     });
-
   });
 
   describe('isSourceDataChartableForDetector', () => {
-
     const job = {
       analysis_config: {
         detectors: [
-          { function: 'count' },  // 0
-          { function: 'low_count' },  // 1
-          { function: 'high_count' },  // 2
-          { function: 'non_zero_count' },  // 3
-          { function: 'low_non_zero_count' },  // 4
-          { function: 'high_non_zero_count' },  // 5
-          { function: 'distinct_count' },  // 6
-          { function: 'low_distinct_count' },  // 7
-          { function: 'high_distinct_count' },  // 8
-          { function: 'metric' },  // 9
-          { function: 'mean' },  // 10
-          { function: 'low_mean' },  // 11
-          { function: 'high_mean' },  // 12
-          { function: 'median' },  // 13
-          { function: 'low_median' },  // 14
-          { function: 'high_median' },  // 15
-          { function: 'min' },  // 16
-          { function: 'max' },  // 17
-          { function: 'sum' },  // 18
-          { function: 'low_sum' },  // 19
-          { function: 'high_sum' },  // 20
-          { function: 'non_null_sum' },  // 21
-          { function: 'low_non_null_sum' },  // 22
-          { function: 'high_non_null_sum' },  // 23
-          { function: 'rare' },  // 24
-          { function: 'count', 'by_field_name': 'mlcategory',  },  // 25
-          { function: 'count', 'by_field_name': 'hrd',  },   // 26
-          { function: 'freq_rare' },  // 27
-          { function: 'info_content' },  // 28
-          { function: 'low_info_content' },  // 29
-          { function: 'high_info_content' },  // 30
-          { function: 'varp' },  // 31
-          { function: 'low_varp' },  // 32
-          { function: 'high_varp' },  // 33
-          { function: 'time_of_day' },  // 34
-          { function: 'time_of_week' },  // 35
-          { function: 'lat_long' },  // 36
-          { function: 'mean', 'field_name': 'NetworkDiff' }, //37
-        ]
+          { function: 'count' }, // 0
+          { function: 'low_count' }, // 1
+          { function: 'high_count' }, // 2
+          { function: 'non_zero_count' }, // 3
+          { function: 'low_non_zero_count' }, // 4
+          { function: 'high_non_zero_count' }, // 5
+          { function: 'distinct_count' }, // 6
+          { function: 'low_distinct_count' }, // 7
+          { function: 'high_distinct_count' }, // 8
+          { function: 'metric' }, // 9
+          { function: 'mean' }, // 10
+          { function: 'low_mean' }, // 11
+          { function: 'high_mean' }, // 12
+          { function: 'median' }, // 13
+          { function: 'low_median' }, // 14
+          { function: 'high_median' }, // 15
+          { function: 'min' }, // 16
+          { function: 'max' }, // 17
+          { function: 'sum' }, // 18
+          { function: 'low_sum' }, // 19
+          { function: 'high_sum' }, // 20
+          { function: 'non_null_sum' }, // 21
+          { function: 'low_non_null_sum' }, // 22
+          { function: 'high_non_null_sum' }, // 23
+          { function: 'rare' }, // 24
+          { function: 'count', by_field_name: 'mlcategory' }, // 25
+          { function: 'count', by_field_name: 'hrd' }, // 26
+          { function: 'freq_rare' }, // 27
+          { function: 'info_content' }, // 28
+          { function: 'low_info_content' }, // 29
+          { function: 'high_info_content' }, // 30
+          { function: 'varp' }, // 31
+          { function: 'low_varp' }, // 32
+          { function: 'high_varp' }, // 33
+          { function: 'time_of_day' }, // 34
+          { function: 'time_of_week' }, // 35
+          { function: 'lat_long' }, // 36
+          { function: 'mean', field_name: 'NetworkDiff' }, //37
+        ],
       },
       datafeed_config: {
         script_fields: {
           hrd: {
             script: {
               inline: 'return domainSplit(doc["query"].value, params).get(1);',
-              lang: 'painless'
-            }
+              lang: 'painless',
+            },
           },
           NetworkDiff: {
             script: {
               source: 'doc["NetworkOut"].value - doc["NetworkIn"].value',
-              lang: 'painless'
-            }
-          }
-        }
-      }
+              lang: 'painless',
+            },
+          },
+        },
+      },
     };
 
     it('returns true for expected detectors', () => {
@@ -271,22 +302,17 @@ describe('ML - job utils', () => {
   describe('isModelPlotChartableForDetector', () => {
     const job1 = {
       analysis_config: {
-        detectors: [
-          { function: 'count' }
-        ]
-      }
+        detectors: [{ function: 'count' }],
+      },
     };
 
     const job2 = {
       analysis_config: {
-        detectors: [
-          { function: 'count' },
-          { function: 'info_content' }
-        ]
+        detectors: [{ function: 'count' }, { function: 'info_content' }],
       },
       model_plot_config: {
-        enabled: true
-      }
+        enabled: true,
+      },
     };
 
     it('returns false when model plot is not enabled', () => {
@@ -308,18 +334,18 @@ describe('ML - job utils', () => {
         detectors: [
           {
             function: 'count',
-            detector_description: 'count'
+            detector_description: 'count',
           },
           {
             function: 'count',
             partition_field_name: 'clientip',
-            detector_description: 'Count by clientip'
+            detector_description: 'Count by clientip',
           },
           {
             function: 'freq_rare',
             by_field_name: 'uri',
             over_field_name: 'clientip',
-            detector_description: 'Freq rare URI'
+            detector_description: 'Freq rare URI',
           },
           {
             function: 'sum',
@@ -327,10 +353,10 @@ describe('ML - job utils', () => {
             by_field_name: 'uri',
             over_field_name: 'clientip',
             partition_field_name: 'method',
-            detector_description: 'sum bytes'
+            detector_description: 'sum bytes',
           },
-        ]
-      }
+        ],
+      },
     };
 
     it('returns empty array for a detector with no partitioning fields', () => {
@@ -365,17 +391,20 @@ describe('ML - job utils', () => {
   });
 
   describe('isModelPlotEnabled', () => {
-
     it('returns true for a job in which model plot has been enabled', () => {
       const job = {
         analysis_config: {
           detectors: [
-            { 'function': 'high_count', 'partition_field_name': 'status', 'detector_description': 'High count status code' }
-          ]
+            {
+              function: 'high_count',
+              partition_field_name: 'status',
+              detector_description: 'High count status code',
+            },
+          ],
         },
         model_plot_config: {
-          enabled: true
-        }
+          enabled: true,
+        },
       };
 
       expect(isModelPlotEnabled(job, 0)).to.be(true);
@@ -385,58 +414,66 @@ describe('ML - job utils', () => {
       const job = {
         analysis_config: {
           detectors: [
-            { 'function': 'max',
-              'field_name': 'responsetime',
-              'partition_field_name': 'country',
-              'by_field_name': 'airline' }
-          ]
+            {
+              function: 'max',
+              field_name: 'responsetime',
+              partition_field_name: 'country',
+              by_field_name: 'airline',
+            },
+          ],
         },
         model_plot_config: {
           enabled: true,
-          terms: 'US,AAL'
-        }
+          terms: 'US,AAL',
+        },
       };
 
-      expect(isModelPlotEnabled(job, 0, [
-        { fieldName: 'country', fieldValue: 'US' },
-        { fieldName: 'airline', fieldValue: 'AAL' }
-      ])).to.be(true);
-      expect(isModelPlotEnabled(job, 0, [
-        { fieldName: 'country', fieldValue: 'US' }
-      ])).to.be(false);
-      expect(isModelPlotEnabled(job, 0, [
-        { fieldName: 'country', fieldValue: 'GB' },
-        { fieldName: 'airline', fieldValue: 'AAL' }
-      ])).to.be(false);
-      expect(isModelPlotEnabled(job, 0, [
-        { fieldName: 'country', fieldValue: 'JP' },
-        { fieldName: 'airline', fieldValue: 'JAL' }
-      ])).to.be(false);
+      expect(
+        isModelPlotEnabled(job, 0, [
+          { fieldName: 'country', fieldValue: 'US' },
+          { fieldName: 'airline', fieldValue: 'AAL' },
+        ])
+      ).to.be(true);
+      expect(isModelPlotEnabled(job, 0, [{ fieldName: 'country', fieldValue: 'US' }])).to.be(false);
+      expect(
+        isModelPlotEnabled(job, 0, [
+          { fieldName: 'country', fieldValue: 'GB' },
+          { fieldName: 'airline', fieldValue: 'AAL' },
+        ])
+      ).to.be(false);
+      expect(
+        isModelPlotEnabled(job, 0, [
+          { fieldName: 'country', fieldValue: 'JP' },
+          { fieldName: 'airline', fieldValue: 'JAL' },
+        ])
+      ).to.be(false);
     });
 
     it('returns true for jobs in which model plot has not been enabled', () => {
       const job1 = {
         analysis_config: {
           detectors: [
-            { 'function': 'high_count', 'partition_field_name': 'status', 'detector_description': 'High count status code' }
-          ]
+            {
+              function: 'high_count',
+              partition_field_name: 'status',
+              detector_description: 'High count status code',
+            },
+          ],
         },
         model_plot_config: {
-          enabled: false
-        }
+          enabled: false,
+        },
       };
       const job2 = {};
 
       expect(isModelPlotEnabled(job1, 0)).to.be(false);
       expect(isModelPlotEnabled(job2, 0)).to.be(false);
     });
-
   });
 
   describe('isJobVersionGte', () => {
-
     const job = {
-      job_version: '6.1.1'
+      job_version: '6.1.1',
     };
 
     it('returns true for later job version', () => {
@@ -491,7 +528,6 @@ describe('ML - job utils', () => {
   });
 
   describe('isJobIdValid', () => {
-
     it('returns true for job id: "good_job-name"', () => {
       expect(isJobIdValid('good_job-name')).to.be(true);
     });
@@ -513,14 +549,12 @@ describe('ML - job utils', () => {
   });
 
   describe('ML_MEDIAN_PERCENTS', () => {
-
-    it('is \'50.0\'', () => {
+    it("is '50.0'", () => {
       expect(ML_MEDIAN_PERCENTS).to.be('50.0');
     });
   });
 
   describe('prefixDatafeedId', () => {
-
     it('returns datafeed-prefix-job from datafeed-job"', () => {
       expect(prefixDatafeedId('datafeed-job', 'prefix-')).to.be('datafeed-prefix-job');
     });
@@ -540,7 +574,6 @@ describe('ML - job utils', () => {
     it('"foo&bar" should be "field_0"', () => {
       expect(getSafeAggregationName('foo&bar', 0)).to.be('field_0');
     });
-
   });
 
   describe('getLatestDataOrBucketTimestamp', () => {

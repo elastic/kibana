@@ -6,7 +6,7 @@
 
 const XPACK_INFO_SIG_KEY = 'xpackMain.infoSignature';
 
-export const xpackInfoSignature  = {
+export const xpackInfoSignature = {
   get() {
     return sessionStorage.getItem(XPACK_INFO_SIG_KEY);
   },
@@ -15,5 +15,5 @@ export const xpackInfoSignature  = {
   },
   clear() {
     sessionStorage.removeItem(XPACK_INFO_SIG_KEY);
-  }
+  },
 };

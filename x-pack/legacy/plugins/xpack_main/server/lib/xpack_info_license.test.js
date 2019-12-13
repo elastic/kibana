@@ -11,8 +11,7 @@ function getXPackInfoLicense(getRawLicense) {
 }
 
 describe('XPackInfoLicense', () => {
-
-  const xpackInfoLicenseUndefined = getXPackInfoLicense(() => { });
+  const xpackInfoLicenseUndefined = getXPackInfoLicense(() => {});
   let xpackInfoLicense;
   let getRawLicense;
 
@@ -63,18 +62,18 @@ describe('XPackInfoLicense', () => {
     expect(xpackInfoLicense.isOneOf('platinum')).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
 
-    expect(xpackInfoLicense.isOneOf([ 'platinum' ])).toBe(true);
+    expect(xpackInfoLicense.isOneOf(['platinum'])).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(2);
-    expect(xpackInfoLicense.isOneOf([ 'gold', 'platinum' ])).toBe(true);
+    expect(xpackInfoLicense.isOneOf(['gold', 'platinum'])).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(3);
-    expect(xpackInfoLicense.isOneOf([ 'platinum', 'gold' ])).toBe(true);
+    expect(xpackInfoLicense.isOneOf(['platinum', 'gold'])).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(4);
-    expect(xpackInfoLicense.isOneOf([ 'basic', 'gold' ])).toBe(false);
+    expect(xpackInfoLicense.isOneOf(['basic', 'gold'])).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(5);
-    expect(xpackInfoLicense.isOneOf([ 'basic' ])).toBe(false);
+    expect(xpackInfoLicense.isOneOf(['basic'])).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(6);
 
-    expect(xpackInfoLicenseUndefined.isOneOf([ 'platinum', 'gold' ])).toBe(false);
+    expect(xpackInfoLicenseUndefined.isOneOf(['platinum', 'gold'])).toBe(false);
   });
 
   test('getType returns the type', () => {
@@ -155,7 +154,6 @@ describe('XPackInfoLicense', () => {
     expect(xpackInfoLicenseUndefined.isBasic()).toBe(false);
   });
 
-
   test('isNotBasic returns the true if active and not basic', () => {
     getRawLicense.mockReturnValue({ status: 'active', mode: 'platinum' });
 
@@ -179,5 +177,4 @@ describe('XPackInfoLicense', () => {
 
     expect(xpackInfoLicenseUndefined.isNotBasic()).toBe(false);
   });
-
 });

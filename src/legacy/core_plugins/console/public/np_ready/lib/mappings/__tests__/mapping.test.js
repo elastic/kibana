@@ -41,7 +41,7 @@ describe('Mappings', () => {
     return { name: name, type: type || 'string' };
   }
 
-  test('Multi fields 1.0 style', function () {
+  test('Multi fields 1.0 style', function() {
     mappings.loadMappings({
       index: {
         properties: {
@@ -72,7 +72,7 @@ describe('Mappings', () => {
     ]);
   });
 
-  test('Simple fields', function () {
+  test('Simple fields', function() {
     mappings.loadMappings({
       index: {
         properties: {
@@ -86,13 +86,10 @@ describe('Mappings', () => {
       },
     });
 
-    expect(mappings.getFields('index').sort(fc)).toEqual([
-      f('number', 'int'),
-      f('str', 'string'),
-    ]);
+    expect(mappings.getFields('index').sort(fc)).toEqual([f('number', 'int'), f('str', 'string')]);
   });
 
-  test('Simple fields - 1.0 style', function () {
+  test('Simple fields - 1.0 style', function() {
     mappings.loadMappings({
       index: {
         mappings: {
@@ -108,13 +105,10 @@ describe('Mappings', () => {
       },
     });
 
-    expect(mappings.getFields('index').sort(fc)).toEqual([
-      f('number', 'int'),
-      f('str', 'string'),
-    ]);
+    expect(mappings.getFields('index').sort(fc)).toEqual([f('number', 'int'), f('str', 'string')]);
   });
 
-  test('Nested fields', function () {
+  test('Nested fields', function() {
     mappings.loadMappings({
       index: {
         properties: {
@@ -143,7 +137,7 @@ describe('Mappings', () => {
     ]);
   });
 
-  test('Enabled fields', function () {
+  test('Enabled fields', function() {
     mappings.loadMappings({
       index: {
         properties: {
@@ -162,13 +156,10 @@ describe('Mappings', () => {
       },
     });
 
-    expect(mappings.getFields('index', []).sort(fc)).toEqual([
-      f('message'),
-      f('person.sid'),
-    ]);
+    expect(mappings.getFields('index', []).sort(fc)).toEqual([f('message'), f('person.sid')]);
   });
 
-  test('Path tests', function () {
+  test('Path tests', function() {
     mappings.loadMappings({
       index: {
         properties: {
@@ -200,7 +191,7 @@ describe('Mappings', () => {
     ]);
   });
 
-  test('Use index_name tests', function () {
+  test('Use index_name tests', function() {
     mappings.loadMappings({
       index: {
         properties: {
@@ -212,7 +203,7 @@ describe('Mappings', () => {
     expect(mappings.getFields().sort(fc)).toEqual([f('i_last_1')]);
   });
 
-  test('Aliases', function () {
+  test('Aliases', function() {
     mappings.loadAliases({
       test_index1: {
         aliases: {
@@ -252,10 +243,7 @@ describe('Mappings', () => {
       'test_index1',
       'test_index2',
     ]);
-    expect(mappings.getIndices(false).sort()).toEqual([
-      'test_index1',
-      'test_index2',
-    ]);
+    expect(mappings.getIndices(false).sort()).toEqual(['test_index1', 'test_index2']);
     expect(mappings.expandAliases(['alias1', 'test_index2']).sort()).toEqual([
       'test_index1',
       'test_index2',

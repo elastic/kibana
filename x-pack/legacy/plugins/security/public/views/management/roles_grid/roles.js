@@ -22,7 +22,9 @@ routes.when(ROLES_PATH, {
       render(
         <I18nContext>
           <RolesGridPage />
-        </I18nContext>, domNode);
+        </I18nContext>,
+        domNode
+      );
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

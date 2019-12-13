@@ -26,7 +26,7 @@ export function initLoadingCountApi(chrome) {
   const manualCount$ = new Rx.BehaviorSubject(0);
   newPlatformHttp.addLoadingCount(manualCount$);
 
-  chrome.loadingCount = new class ChromeLoadingCountApi {
+  chrome.loadingCount = new (class ChromeLoadingCountApi {
     /**
      * Call to add a subscriber to for the loading count that
      * will be called every time the loading count changes.
@@ -38,7 +38,7 @@ export function initLoadingCountApi(chrome) {
       const subscription = newPlatformHttp.getLoadingCount$().subscribe({
         next(count) {
           handler(count);
-        }
+        },
       });
 
       return () => {
@@ -61,5 +61,5 @@ export function initLoadingCountApi(chrome) {
     decrement() {
       manualCount$.next(manualCount$.getValue() - 1);
     }
-  };
+  })();
 }
