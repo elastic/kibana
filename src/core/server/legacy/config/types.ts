@@ -26,3 +26,33 @@ export interface LegacyConfig {
   get<T>(key?: string): T;
   has(key: string): boolean;
 }
+
+/**
+ * Representation of a legacy configuration deprecation factory used for
+ * legacy plugin deprecations.
+ *
+ * @internal
+ */
+export interface LegacyConfigDeprecationFactory {
+  rename(oldKey: string, newKey: string): LegacyConfigDeprecation;
+  unused(unusedKey: string): LegacyConfigDeprecation;
+}
+
+/**
+ * Representation of a legacy configuration deprecation.
+ *
+ * @internal
+ */
+export type LegacyConfigDeprecation = (
+  settings: Record<string, any>,
+  log: (msg: string) => void
+) => void;
+
+/**
+ * Representation of a legacy configuration deprecation provider.
+ *
+ * @internal
+ */
+export type LegacyConfigDeprecationProvider = (
+  factory: LegacyConfigDeprecationFactory
+) => LegacyConfigDeprecation[] | Promise<LegacyConfigDeprecation[]>;
