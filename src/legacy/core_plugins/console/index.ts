@@ -24,6 +24,9 @@ import url from 'url';
 import { has, isEmpty, head, pick } from 'lodash';
 
 // @ts-ignore
+import mappings from './mappings.json';
+
+// @ts-ignore
 import { addProcessorDefinition } from './server/api_server/es_6_0/ingest';
 // @ts-ignore
 import { resolveApi } from './server/api_server/server';
@@ -182,6 +185,7 @@ export default function(kibana: any) {
       styleSheetPaths: resolve(npSrc, 'application/styles/index.scss'),
       injectDefaultVars: () => defaultVars,
       noParse: [join(npSrc, 'application/models/legacy_core_editor/mode/worker/worker.js')],
+      mappings,
     },
   } as any);
 }

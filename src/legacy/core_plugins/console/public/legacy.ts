@@ -28,7 +28,6 @@ export interface XPluginSet {
   dev_tools: DevToolsSetup;
   home: HomePublicPluginSetup;
   __LEGACY: {
-    savedObjects: SavedObjectsClientContract;
     I18nContext: any;
     elasticsearchUrl: string;
     category: FeatureCatalogueCategory;
@@ -45,7 +44,6 @@ const pluginInstance = plugin({} as any);
   await pluginInstance.setup(npSetup.core, {
     ...npSetup.plugins,
     __LEGACY: {
-      savedObjects: npStart.core.savedObjects.client,
       elasticsearchUrl: chrome.getInjected('elasticsearchUrl'),
       category: FeatureCatalogueCategory.ADMIN,
       I18nContext,

@@ -29,7 +29,7 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
 
   async setup({ notifications }: CoreSetup, pluginSet: XPluginSet) {
     const {
-      __LEGACY: { I18nContext, savedObjects, elasticsearchUrl, category },
+      __LEGACY: { I18nContext, elasticsearchUrl, category },
       dev_tools,
       home,
     } = pluginSet;
@@ -55,15 +55,15 @@ export class ConsoleUIPlugin implements Plugin<any, any> {
         defaultMessage: 'Console',
       }),
       enableRouting: false,
-      async mount(ctx, { element }) {
+      async mount({ core: { docLinks, savedObjects } }, { element }) {
         const { boot } = await import('./application');
         render(
           boot({
-            docLinkVersion: ctx.core.docLinks.DOC_LINK_VERSION,
+            docLinkVersion: docLinks.DOC_LINK_VERSION,
             I18nContext,
             notifications,
             elasticsearchUrl,
-            savedObjects,
+            savedObjects: savedObjects.client,
           }),
           element
         );
