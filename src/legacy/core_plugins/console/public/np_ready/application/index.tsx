@@ -41,10 +41,10 @@ export function boot(deps: {
     notifications,
     docLinkVersion,
     elasticsearchUrl,
-    metrics: { METRIC_TYPE, trackMetric },
+    metrics: { METRIC_TYPE, trackUiMetric },
   } = deps;
 
-  trackMetric(METRIC_TYPE.LOADED, 'opened_app');
+  trackUiMetric(METRIC_TYPE.LOADED, 'opened_app');
 
   const storage = createStorage({
     engine: window.localStorage,
@@ -65,7 +65,7 @@ export function boot(deps: {
             history,
             settings,
             notifications,
-            metrics: { trackMetric, METRIC_TYPE },
+            metrics: { trackUiMetric, METRIC_TYPE },
           },
         }}
       >

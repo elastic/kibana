@@ -31,7 +31,7 @@ export const useSendCurrentRequestToES = () => {
       history,
       settings,
       notifications,
-      metrics: { trackMetric, METRIC_TYPE },
+      metrics: { trackUiMetric, METRIC_TYPE },
     },
   } = useServicesContext();
 
@@ -50,13 +50,16 @@ export const useSendCurrentRequestToES = () => {
         return;
       }
 
+      // This `patterns` variable gets its value from the server-side generated JSON files which
+      // are a combination of JS, automatically generated JSON and manual overrides. That means
+      // the metrics reported from here will be tied to the definitions in those files.
       const { patterns } = getEndpointFromPosition(
         editor,
         editor.getCoreEditor().getCurrentPosition(),
         editor.parser
       );
 
-      trackMetric(METRIC_TYPE.COUNT, `${requests[0].method} ${patterns.join('|')}`);
+      trackUiMetric(METRIC_TYPE.COUNT, `${requests[0]?.method ?? ''} ${patterns.join('|')}`);
 
       const results = await sendRequestToES({ requests });
 
@@ -93,5 +96,5 @@ export const useSendCurrentRequestToES = () => {
         });
       }
     }
-  }, [dispatch, settings, history, notifications, trackMetric, METRIC_TYPE.COUNT]);
+  }, [dispatch, settings, history, notifications, trackUiMetric, METRIC_TYPE.COUNT]);
 };

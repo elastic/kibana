@@ -24,7 +24,7 @@ import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { createUiStatsReporter, METRIC_TYPE } from '../../ui_metric/public';
 
 export interface Metrics {
-  trackMetric: ReturnType<typeof createUiStatsReporter>;
+  trackUiMetric: ReturnType<typeof createUiStatsReporter>;
   METRIC_TYPE: typeof METRIC_TYPE;
 }
 
@@ -50,7 +50,7 @@ const pluginInstance = plugin({} as any);
     ...npSetup.plugins,
     __LEGACY: {
       metrics: {
-        trackMetric: createUiStatsReporter('console'),
+        trackUiMetric: createUiStatsReporter('console'),
         METRIC_TYPE,
       },
       elasticsearchUrl: chrome.getInjected('elasticsearchUrl'),
