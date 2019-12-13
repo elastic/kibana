@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
 import * as React from 'react';
 
 import { TestProviders } from '../../mock';
 import { ONE_MILLISECOND_AS_NANOSECONDS } from '../formatted_duration/helpers';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { Duration } from '.';
 
 describe('Duration', () => {
+  const mount = useMountAppended();
+
   test('it renders the expected formatted duration', () => {
     const wrapper = mount(
       <TestProviders>
