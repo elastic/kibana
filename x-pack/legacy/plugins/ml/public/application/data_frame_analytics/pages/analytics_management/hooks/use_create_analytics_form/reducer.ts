@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { i18n } from '@kbn/i18n';
 
 import { validateIndexPattern } from 'ui/index_patterns';
@@ -43,7 +42,7 @@ export const mmlUnitInvalidErrorMessage = i18n.translate(
 const getSourceIndexString = (state: State) => {
   const { jobConfig } = state;
 
-  const sourceIndex = idx(jobConfig, _ => _.source.index);
+  const sourceIndex = jobConfig?.source?.index;
 
   if (typeof sourceIndex === 'string') {
     return sourceIndex;
@@ -57,7 +56,7 @@ const getSourceIndexString = (state: State) => {
 };
 
 export const validateAdvancedEditor = (state: State): State => {
-  const { jobIdEmpty, jobIdValid, jobIdExists, createIndexPattern } = state.form;
+  const { jobIdEmpty, jobIdValid, jobIdExists, jobType, createIndexPattern } = state.form;
   const { jobConfig } = state;
 
   state.advancedEditorMessages = [];
@@ -70,30 +69,41 @@ export const validateAdvancedEditor = (state: State): State => {
   // `validateIndexPattern()` returns a map of messages, we're only interested here if it's valid or not.
   // If there are no messages, it means the index pattern is valid.
   let sourceIndexNameValid = Object.keys(validateIndexPattern(sourceIndexName)).length === 0;
-  const sourceIndex = idx(jobConfig, _ => _.source.index);
+  const sourceIndex = jobConfig?.source?.index;
   if (sourceIndexNameValid) {
     if (typeof sourceIndex === 'string') {
       sourceIndexNameValid = !sourceIndex.includes(',');
     }
     if (Array.isArray(sourceIndex)) {
-      sourceIndexNameValid = !sourceIndex.some(d => d.includes(','));
+      sourceIndexNameValid = !sourceIndex.some(d => d?.includes(','));
     }
   }
 
-  const destinationIndexName = idx(jobConfig, _ => _.dest.index) || '';
+  const destinationIndexName = jobConfig?.dest?.index ?? '';
   const destinationIndexNameEmpty = destinationIndexName === '';
   const destinationIndexNameValid = isValidIndexName(destinationIndexName);
   const destinationIndexPatternTitleExists =
     state.indexPatternsMap[destinationIndexName] !== undefined;
   const mml = jobConfig.model_memory_limit;
-  const modelMemoryLimitEmpty = mml === '';
+  const modelMemoryLimitEmpty = mml === '' || mml === undefined;
   if (!modelMemoryLimitEmpty && mml !== undefined) {
     const { valid } = validateModelMemoryLimitUnits(mml);
     state.form.modelMemoryLimitUnitValid = valid;
   }
 
   let dependentVariableEmpty = false;
-  if (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis)) {
+
+  if (
+    jobConfig.analysis === undefined &&
+    (jobType === JOB_TYPES.CLASSIFICATION || jobType === JOB_TYPES.REGRESSION)
+  ) {
+    dependentVariableEmpty = true;
+  }
+
+  if (
+    jobConfig.analysis !== undefined &&
+    (isRegressionAnalysis(jobConfig.analysis) || isClassificationAnalysis(jobConfig.analysis))
+  ) {
     const dependentVariableName = getDependentVar(jobConfig.analysis) || '';
     dependentVariableEmpty = dependentVariableName === '';
   }

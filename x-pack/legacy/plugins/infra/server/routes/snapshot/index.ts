@@ -9,12 +9,12 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { InfraBackendLibs } from '../../lib/infra_types';
-import { InfraSnapshotRequestOptions } from '../../lib/snapshot';
 import { UsageCollector } from '../../usage/usage_collector';
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { InfraNodeType, InfraSnapshotMetricInput } from '../../../public/graphql/types';
 import { SnapshotRequestRT, SnapshotNodeResponseRT } from '../../../common/http_api/snapshot_api';
 import { throwErrors } from '../../../common/runtime_types';
+import { InfraSnapshotRequestOptions } from '../../lib/snapshot/types';
 
 const escapeHatch = schema.object({}, { allowUnknowns: true });
 

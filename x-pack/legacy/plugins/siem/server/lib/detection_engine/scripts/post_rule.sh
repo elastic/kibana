@@ -10,11 +10,11 @@ set -e
 ./check_env_variables.sh
 
 # Uses a default if no argument is specified
-RULES=(${@:-./rules/root_or_admin_1.json})
+RULES=(${@:-./rules/queries/query_with_rule_id.json})
 
 # Example: ./post_rule.sh
-# Example: ./post_rule.sh ./rules/root_or_admin_1.json
-# Example glob: ./post_rule.sh ./rules/*
+# Example: ./post_rule.sh ./rules/queries/query_with_rule_id.json
+# Example glob: ./post_rule.sh ./rules/queries/*
 for RULE in "${RULES[@]}"
 do {
   [ -e "$RULE" ] || continue

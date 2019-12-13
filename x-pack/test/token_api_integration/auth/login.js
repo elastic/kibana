@@ -17,7 +17,7 @@ export default function ({ getService }) {
   describe('login', () => {
     it('accepts valid login credentials as 204 status', async () => {
       await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
         .send({ username: 'elastic', password: 'changeme' })
         .expect(204);
@@ -25,7 +25,7 @@ export default function ({ getService }) {
 
     it('sets HttpOnly cookie with valid login', async () => {
       const response = await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
         .send({ username: 'elastic', password: 'changeme' })
         .expect(204);
@@ -42,7 +42,7 @@ export default function ({ getService }) {
 
     it('rejects without kbn-xsrf header as 400 status even if credentials are valid', async () => {
       const response = await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .send({ username: 'elastic', password: 'changeme' })
         .expect(400);
 
@@ -53,7 +53,7 @@ export default function ({ getService }) {
 
     it('rejects without credentials as 400 status', async () => {
       const response = await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
         .expect(400);
 
@@ -64,7 +64,7 @@ export default function ({ getService }) {
 
     it('rejects without password as 400 status', async () => {
       const response = await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
         .send({ username: 'elastic' })
         .expect(400);
@@ -76,7 +76,7 @@ export default function ({ getService }) {
 
     it('rejects without username as 400 status', async () => {
       const response = await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
         .send({ password: 'changme' })
         .expect(400);
@@ -88,7 +88,7 @@ export default function ({ getService }) {
 
     it('rejects invalid credentials as 401 status', async () => {
       const response = await supertest
-        .post('/api/security/v1/login')
+        .post('/internal/security/login')
         .set('kbn-xsrf', 'true')
         .send({ username: 'elastic', password: 'notvalidpassword' })
         .expect(401);

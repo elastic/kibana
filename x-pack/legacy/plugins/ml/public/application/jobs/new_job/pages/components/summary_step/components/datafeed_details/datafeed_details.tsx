@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList, EuiFormRow } from '@elas
 import { JobCreatorContext } from '../../../job_creator_context';
 import { MLJobEditor } from '../../../../../../jobs_list/components/ml_job_editor';
 import { calculateDatafeedFrequencyDefaultSeconds } from '../../../../../../../../../common/util/job_utils';
-import { DEFAULT_QUERY_DELAY } from '../../../../../common/job_creator/util/constants';
+import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
 import { getNewJobDefaults } from '../../../../../../../services/ml_server_info';
 import { ListItems, defaultLabel, Italic } from '../common';
 

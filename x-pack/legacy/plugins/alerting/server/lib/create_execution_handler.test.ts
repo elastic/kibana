@@ -28,6 +28,7 @@ const createExecutionHandlerParams = {
     {
       id: '1',
       group: 'default',
+      actionTypeId: 'test',
       params: {
         foo: true,
         contextVal: 'My {{context.value}} goes here',

@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './edit';
-import './list';
+export { EditFilterList } from './edit';
+export { FilterLists } from './list';

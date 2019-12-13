@@ -15,8 +15,6 @@ export const selectIsAutoReloading = (state: LogPositionState) =>
 
 export const selectAutoReloadScrollLock = (state: LogPositionState) => state.autoReloadScrollLock;
 
-export const selectAutoReloadJustAborted = (state: LogPositionState) => state.autoReloadJustAborted;
-
 export const selectFirstVisiblePosition = (state: LogPositionState) =>
   state.visiblePositions.startKey ? state.visiblePositions.startKey : null;
 
@@ -26,6 +24,13 @@ export const selectMiddleVisiblePosition = (state: LogPositionState) =>
 export const selectLastVisiblePosition = (state: LogPositionState) =>
   state.visiblePositions.endKey ? state.visiblePositions.endKey : null;
 
+export const selectPagesBeforeAndAfter = (state: LogPositionState) =>
+  state.visiblePositions
+    ? {
+        pagesBeforeStart: state.visiblePositions.pagesBeforeStart,
+        pagesAfterEnd: state.visiblePositions.pagesAfterEnd,
+      }
+    : { pagesBeforeStart: null, pagesAfterEnd: null };
 export const selectControlsShouldDisplayTargetPosition = (state: LogPositionState) =>
   state.controlsShouldDisplayTargetPosition;
 

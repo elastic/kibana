@@ -121,6 +121,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .expect(200);
       expect(result).to.eql({
         status: 'ok',
+        actionId: simulatedActionId,
         data: {
           dedup_key: `action:${simulatedActionId}`,
           message: 'Event processed',
@@ -140,9 +141,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: unexpected status 418/
-      );
+      expect(result.message).to.match(/error posting pagerduty event: unexpected status 418/);
     });
 
     it('should handle a 429 pagerduty error', async () => {
@@ -158,7 +157,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
 
       expect(result.status).to.equal('error');
       expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: status 429, retry later/
+        /error posting pagerduty event: http status 429, retry later/
       );
       expect(result.retry).to.equal(true);
     });
@@ -175,9 +174,7 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.equal('error');
-      expect(result.message).to.match(
-        /error in pagerduty action .+ posting event: status 502, retry later/
-      );
+      expect(result.message).to.match(/error posting pagerduty event: http status 502/);
       expect(result.retry).to.equal(true);
     });
   });

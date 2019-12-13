@@ -29,7 +29,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { getConfigTelemetryDesc, PRIVACY_STATEMENT_URL } from '../../common/constants';
+import { PRIVACY_STATEMENT_URL } from '../../common/constants';
 import { OptInExampleFlyout } from './opt_in_details_component';
 import { Field } from 'ui/management';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -162,20 +162,28 @@ export class TelemetryForm extends Component {
 
   renderDescription = () => (
     <Fragment>
-      <p>{getConfigTelemetryDesc()}</p>
+      <p>
+        <FormattedMessage
+          id="telemetry.telemetryConfigAndLinkDescription"
+          defaultMessage="Enabling data usage collection helps us manage and improve our products and services.
+          See our {privacyStatementLink} for more details."
+          values={{
+            privacyStatementLink: (
+              <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                <FormattedMessage
+                  id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+                  defaultMessage="Privacy Statement"
+                />
+              </EuiLink>
+            )
+          }}
+        />
+      </p>
       <p>
         <EuiLink onClick={this.toggleExample}>
           <FormattedMessage
             id="telemetry.seeExampleOfWhatWeCollectLinkText"
             defaultMessage="See an example of what we collect"
-          />
-        </EuiLink>
-      </p>
-      <p>
-        <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
-          <FormattedMessage
-            id="telemetry.readOurUsageDataPrivacyStatementLinkText"
-            defaultMessage="Read our usage data privacy statement"
           />
         </EuiLink>
       </p>
