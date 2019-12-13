@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MostRecentError component renders properly with empty data 1`] = `
+exports[`MostRecentError component renders properly with mock data 1`] = `
 Array [
   <div
     class="euiText euiText--extraSmall"

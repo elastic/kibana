@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`license check returns result for a valid license 1`] = `
+Object {
+  "statusCode": 200,
+}
+`;
+
+exports[`license check throws for inactive license 1`] = `
+Object {
+  "message": "License not active",
+  "statusCode": 403,
+}
+`;
+
+exports[`license check throws for null license 1`] = `
+Object {
+  "message": "Missing license information",
+  "statusCode": 400,
+}
+`;
+
+exports[`license check throws for unsupported license type 1`] = `
+Object {
+  "message": "License not supported",
+  "statusCode": 401,
+}
+`;

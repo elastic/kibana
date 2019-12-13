@@ -19,7 +19,7 @@
 
 import Url from 'url';
 
-import Axios, { AxiosRequestConfig } from 'axios';
+import Axios, { AxiosRequestConfig, AxiosInstance } from 'axios';
 import parseLinkHeader from 'parse-link-header';
 import { ToolingLog, isAxiosResponseError, isAxiosRequestError } from '@kbn/dev-utils';
 
@@ -40,25 +40,34 @@ type RequestOptions = AxiosRequestConfig & {
 };
 
 export class GithubApi {
-  private readonly x = Axios.create({
-    headers: {
-      ...(this.token ? { Authorization: `token ${this.token}` } : {}),
-      'User-Agent': 'elastic/kibana#failed_test_reporter',
-    },
-  });
+  private readonly log: ToolingLog;
+  private readonly token: string | undefined;
+  private readonly dryRun: boolean;
+  private readonly x: AxiosInstance;
 
   /**
    * Create a GithubApi helper object, if token is undefined requests won't be
    * sent, but will instead be logged.
    */
-  constructor(
-    private readonly log: ToolingLog,
-    private readonly token: string | undefined,
-    private readonly dryRun: boolean
-  ) {
-    if (!token && !dryRun) {
+  constructor(options: {
+    log: GithubApi['log'];
+    token: GithubApi['token'];
+    dryRun: GithubApi['dryRun'];
+  }) {
+    this.log = options.log;
+    this.token = options.token;
+    this.dryRun = options.dryRun;
+
+    if (!this.token && !this.dryRun) {
       throw new TypeError('token parameter is required');
     }
+
+    this.x = Axios.create({
+      headers: {
+        ...(this.token ? { Authorization: `token ${this.token}` } : {}),
+        'User-Agent': 'elastic/kibana#failed_test_reporter',
+      },
+    });
   }
 
   private failedTestIssuesPageCache: {

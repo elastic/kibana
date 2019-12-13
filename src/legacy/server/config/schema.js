@@ -22,11 +22,6 @@ import os from 'os';
 import { join } from 'path';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { getDataPath } from '../../../core/server/path'; // Still used by optimize config schema
-import {
-  DEFAULT_CSP_RULES,
-  DEFAULT_CSP_STRICT,
-  DEFAULT_CSP_WARN_LEGACY_BROWSERS,
-} from '../csp';
 
 const HANDLED_IN_NEW_PLATFORM = Joi.any().description('This key is handled in the new platform ONLY');
 export default () => Joi.object({
@@ -52,11 +47,7 @@ export default () => Joi.object({
     exclusive: Joi.boolean().default(false)
   }).default(),
 
-  csp: Joi.object({
-    rules: Joi.array().items(Joi.string()).default(DEFAULT_CSP_RULES),
-    strict: Joi.boolean().default(DEFAULT_CSP_STRICT),
-    warnLegacyBrowsers: Joi.boolean().default(DEFAULT_CSP_WARN_LEGACY_BROWSERS),
-  }).default(),
+  csp: HANDLED_IN_NEW_PLATFORM,
 
   cpu: Joi.object({
     cgroup: Joi.object({
@@ -135,7 +126,14 @@ export default () => Joi.object({
         then: Joi.default(!process.stdout.isTTY),
         otherwise: Joi.default(true)
       }),
-    timezone: Joi.string()
+    timezone: Joi.string(),
+    rotate: Joi.object().keys({
+      enabled: Joi.boolean().default(false),
+      everyBytes: Joi.number().greater(1024).default(10485760),
+      keepFiles: Joi.number().greater(2).less(1024).default(7),
+      pollingInterval: Joi.number().greater(5000).less(3600000).default(10000),
+      usePolling: Joi.boolean().default(false)
+    }).default()
   }).default(),
 
   ops: Joi.object({

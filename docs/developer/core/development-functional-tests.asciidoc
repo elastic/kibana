@@ -282,7 +282,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 * Source: {blob}src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
-* Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`, `phaseStart`, `phaseEnd`
+* Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`
 
 [float]
 ===== Kibana Services

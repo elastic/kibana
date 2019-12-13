@@ -35,13 +35,6 @@ const plugins = [
   // Need this since we are using TypeScript 3.7+
   require.resolve('@babel/plugin-proposal-nullish-coalescing-operator'),
 ];
-const isTestEnv = process.env.BABEL_ENV === 'test' || process.env.NODE_ENV === 'test';
-
-// Only load the idx plugin in non-test environments, since it conflicts with
-// Jest's coverage mapping.
-if (!isTestEnv) {
-  plugins.push(require.resolve('@kbn/elastic-idx/babel'));
-}
 
 module.exports = {
   presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],

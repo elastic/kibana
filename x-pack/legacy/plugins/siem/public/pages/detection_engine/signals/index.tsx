@@ -12,7 +12,7 @@ import { GlobalTime } from '../../../containers/global_time';
 import { StatefulEventsViewer } from '../../../components/events_viewer';
 import * as i18n from './translations';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../common/constants';
-import { signalsDefaultModel } from './default_model';
+import { signalsClosedFilters, signalsDefaultModel, signalsOpenFilters } from './default_config';
 
 const SIGNALS_PAGE_TIMELINE_ID = 'signals-page';
 const FILTER_OPEN = 'open';
@@ -37,7 +37,10 @@ export const SignalsTableFilterGroup = React.memo(
 
         <EuiFilterButton
           hasActiveFilters={filterGroup === FILTER_CLOSED}
-          onClick={() => setFilterGroup(FILTER_CLOSED)}
+          onClick={() => {
+            setFilterGroup(FILTER_CLOSED);
+            onFilterGroupChanged(FILTER_CLOSED);
+          }}
         >
           {'Closed signals'}
         </EuiFilterButton>
@@ -61,7 +64,8 @@ export const SignalsTable = React.memo(() => {
       <GlobalTime>
         {({ to, from, setQuery, deleteQuery, isInitializing }) => (
           <StatefulEventsViewer
-            defaultIndices={[DEFAULT_SIGNALS_INDEX]}
+            defaultIndices={[`${DEFAULT_SIGNALS_INDEX}-default`]}
+            defaultFilters={filterGroup === FILTER_OPEN ? signalsOpenFilters : signalsClosedFilters}
             defaultModel={signalsDefaultModel}
             end={to}
             headerFilterGroup={

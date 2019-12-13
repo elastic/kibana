@@ -9,7 +9,7 @@ import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { getJobId } from '../../../common/log_analysis';
 import { throwErrors, createPlainError } from '../../../common/runtime_types';
-import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../adapters/framework';
+import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { NoLogRateResultsIndexError } from './errors';
 import {
   logRateModelPlotResponseRT,
@@ -17,37 +17,38 @@ import {
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
+import { RequestHandlerContext, KibanaRequest } from '../../../../../../../src/core/server';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
 
 export class InfraLogAnalysis {
   constructor(
     private readonly libs: {
-      framework: InfraBackendFrameworkAdapter;
+      framework: KibanaFramework;
     }
   ) {}
 
-  public getJobIds(request: InfraFrameworkRequest, sourceId: string) {
+  public getJobIds(request: KibanaRequest, sourceId: string) {
     return {
       logEntryRate: getJobId(this.libs.framework.getSpaceId(request), sourceId, 'log-entry-rate'),
     };
   }
 
   public async getLogEntryRateBuckets(
-    request: InfraFrameworkRequest,
+    requestContext: RequestHandlerContext,
     sourceId: string,
     startTime: number,
     endTime: number,
-    bucketDuration: number
+    bucketDuration: number,
+    request: KibanaRequest
   ) {
     const logRateJobId = this.getJobIds(request, sourceId).logEntryRate;
-
     let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
     let afterLatestBatchKey: CompositeTimestampPartitionKey | undefined;
 
     while (true) {
       const mlModelPlotResponse = await this.libs.framework.callWithRequest(
-        request,
+        requestContext,
         'search',
         createLogEntryRateQuery(
           logRateJobId,

@@ -8,7 +8,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -37,7 +36,7 @@ export interface KpiHostDetailsReducer {
   isInspected: boolean;
 }
 
-const KpiHostDetailsComponentQuery = pure<QueryKpiHostDetailsProps & KpiHostDetailsReducer>(
+const KpiHostDetailsComponentQuery = React.memo<QueryKpiHostDetailsProps & KpiHostDetailsReducer>(
   ({ id = ID, children, endDate, filterQuery, isInspected, skip, sourceId, startDate }) => (
     <Query<GetKpiHostDetailsQuery.Query, GetKpiHostDetailsQuery.Variables>
       query={kpiHostDetailsQuery}

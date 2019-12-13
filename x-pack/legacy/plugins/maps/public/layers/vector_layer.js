@@ -12,16 +12,19 @@ import { InnerJoin } from './joins/inner_join';
 import {
   FEATURE_ID_PROPERTY_NAME,
   SOURCE_DATA_ID_ORIGIN,
+  SOURCE_META_ID_ORIGIN,
   FEATURE_VISIBLE_PROPERTY_NAME,
   EMPTY_FEATURE_COLLECTION,
-  LAYER_TYPE
+  LAYER_TYPE,
+  FIELD_ORIGIN,
+  LAYER_STYLE_TYPE,
 } from '../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataRequestAbortError } from './util/data_request';
-import { canSkipSourceUpdate } from './util/can_skip_fetch';
+import { canSkipSourceUpdate, canSkipStyleMetaUpdate } from './util/can_skip_fetch';
 import { assignFeatureIds } from './util/assign_feature_ids';
 import {
   getFillFilterExpression,
@@ -88,7 +91,7 @@ export class VectorLayer extends AbstractLayer {
 
     const joins = this.getValidJoins();
     for (let i = 0; i < joins.length; i++) {
-      const joinDataRequest = this.getDataRequest(joins[i].getSourceId());
+      const joinDataRequest = this.getDataRequest(joins[i].getSourceDataRequestId());
       if (!joinDataRequest || !joinDataRequest.hasData()) {
         return false;
       }
@@ -142,8 +145,8 @@ export class VectorLayer extends AbstractLayer {
     return 'vector';
   }
 
-  hasLegendDetails() {
-    return this._style.getDynamicPropertiesArray().length > 0;
+  async hasLegendDetails() {
+    return this._style.hasLegendDetails();
   }
 
   renderLegendDetails() {
@@ -229,12 +232,10 @@ export class VectorLayer extends AbstractLayer {
     return this._dataRequests.find(dataRequest => dataRequest.getDataId() === sourceDataId);
   }
 
-
-
   async _syncJoin({ join, startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters }) {
 
     const joinSource = join.getRightJoinSource();
-    const sourceDataId = join.getSourceId();
+    const sourceDataId = join.getSourceDataRequestId();
     const requestToken = Symbol(`layer-join-refresh:${this.getId()} - ${sourceDataId}`);
     const searchFilters = {
       ...dataFilters,
@@ -287,6 +288,7 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncJoins(syncContext) {
     const joinSyncs = this.getValidJoins().map(async join => {
+      await this._syncJoinStyleMeta(syncContext, join);
       return this._syncJoin({ join, ...syncContext });
     });
 
@@ -350,7 +352,7 @@ export class VectorLayer extends AbstractLayer {
     startLoading, stopLoading, onLoadError, registerCancelCallback, dataFilters
   }) {
 
-    const requestToken = Symbol(`layer-source-refresh:${this.getId()} - source`);
+    const requestToken = Symbol(`layer-source-data:${this.getId()}`);
     const searchFilters = this._getSearchFilters(dataFilters);
     const prevDataRequest = this.getSourceDataRequest();
 
@@ -389,11 +391,89 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
+  async _syncSourceStyleMeta(syncContext) {
+    if (this._style.constructor.type !== LAYER_STYLE_TYPE.VECTOR) {
+      return;
+    }
+
+    return this._syncStyleMeta({
+      source: this._source,
+      sourceQuery: this.getQuery(),
+      dataRequestId: SOURCE_META_ID_ORIGIN,
+      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.SOURCE && dynamicStyleProp.isFieldMetaEnabled();
+      }),
+      ...syncContext
+    });
+  }
+
+  async _syncJoinStyleMeta(syncContext, join) {
+    const joinSource = join.getRightJoinSource();
+    return this._syncStyleMeta({
+      source: joinSource,
+      sourceQuery: joinSource.getWhereQuery(),
+      dataRequestId: join.getSourceMetaDataRequestId(),
+      dynamicStyleProps: this._style.getDynamicPropertiesArray().filter(dynamicStyleProp => {
+        const matchingField = joinSource.getMetricFieldForName(dynamicStyleProp.getField().getName());
+        return dynamicStyleProp.getFieldOrigin() === FIELD_ORIGIN.JOIN
+          && !!matchingField
+          && dynamicStyleProp.isFieldMetaEnabled();
+      }),
+      ...syncContext
+    });
+  }
+
+  async _syncStyleMeta({
+    source,
+    sourceQuery,
+    dataRequestId,
+    dynamicStyleProps,
+    dataFilters,
+    startLoading,
+    stopLoading,
+    onLoadError,
+    registerCancelCallback
+  }) {
+
+    if (!source.isESSource() || dynamicStyleProps.length === 0) {
+      return;
+    }
+
+    const dynamicStyleFields = dynamicStyleProps.map(dynamicStyleProp => {
+      return dynamicStyleProp.getField().getName();
+    });
+
+    const nextMeta = {
+      dynamicStyleFields: _.uniq(dynamicStyleFields).sort(),
+      sourceQuery,
+      isTimeAware: this._style.isTimeAware() && await source.isTimeAware(),
+      timeFilters: dataFilters.timeFilters,
+    };
+    const prevDataRequest = this._findDataRequestForSource(dataRequestId);
+    const canSkipFetch = canSkipStyleMetaUpdate({ prevDataRequest, nextMeta });
+    if (canSkipFetch) {
+      return;
+    }
+
+    const requestToken = Symbol(`layer-${this.getId()}-style-meta`);
+    try {
+      startLoading(dataRequestId, requestToken, nextMeta);
+      const layerName = await this.getDisplayName();
+      const styleMeta = await source.loadStylePropsMeta(layerName, this._style, dynamicStyleProps, registerCancelCallback, nextMeta);
+      stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
+    } catch (error) {
+      if (!(error instanceof DataRequestAbortError)) {
+        onLoadError(dataRequestId, requestToken, error.message);
+      }
+    }
+  }
+
   async syncData(syncContext) {
     if (!this.isVisible() || !this.showAtZoomLevel(syncContext.dataFilters.zoom)) {
       return;
     }
 
+    await this._syncSourceStyleMeta(syncContext);
     const sourceResult = await this._syncSource(syncContext);
     if (
       !sourceResult.featureCollection ||
@@ -429,7 +509,7 @@ export class VectorLayer extends AbstractLayer {
     // "feature-state" data expressions are not supported with layout properties.
     // To work around this limitation,
     // scaled layout properties (like icon-size) must fall back to geojson property values :(
-    const hasGeoJsonProperties = this._style.setFeatureState(featureCollection, mbMap, this.getId());
+    const hasGeoJsonProperties = this._style.setFeatureStateAndStyleProps(featureCollection, mbMap, this.getId());
     if (featureCollection !== featureCollectionOnMap || hasGeoJsonProperties) {
       mbGeoJSONSource.setData(featureCollection);
     }

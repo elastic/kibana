@@ -30,6 +30,7 @@ export const InventoryFormatterTypeRT = rt.keyof({
   bytes: null,
   number: null,
   percent: null,
+  highPercision: null,
 });
 export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
@@ -72,6 +73,24 @@ export const InventoryMetricRT = rt.keyof({
   awsNetworkPackets: null,
   awsDiskioBytes: null,
   awsDiskioOps: null,
+  awsEC2CpuUtilization: null,
+  awsEC2NetworkTraffic: null,
+  awsEC2DiskIOBytes: null,
+  awsS3TotalRequests: null,
+  awsS3NumberOfObjects: null,
+  awsS3BucketSize: null,
+  awsS3DownloadBytes: null,
+  awsS3UploadBytes: null,
+  awsRDSCpuTotal: null,
+  awsRDSConnections: null,
+  awsRDSQueriesExecuted: null,
+  awsRDSActiveTransactions: null,
+  awsRDSLatency: null,
+  awsSQSMessagesVisible: null,
+  awsSQSMessagesDelayed: null,
+  awsSQSMessagesSent: null,
+  awsSQSMessagesEmpty: null,
+  awsSQSOldestMessage: null,
   custom: null,
 });
 export type InventoryMetric = rt.TypeOf<typeof InventoryMetricRT>;
@@ -162,6 +181,8 @@ export const TSVBSeriesRT = rt.intersection([
   }),
 ]);
 
+export type TSVBSeries = rt.TypeOf<typeof TSVBSeriesRT>;
+
 export const TSVBMetricModelRT = rt.intersection([
   rt.type({
     id: InventoryMetricRT,
@@ -176,6 +197,7 @@ export const TSVBMetricModelRT = rt.intersection([
     filter: rt.string,
     map_field_to: rt.string,
     id_type: rt.keyof({ cloud: null, node: null }),
+    drop_last_bucket: rt.boolean,
   }),
 ]);
 
@@ -267,6 +289,22 @@ export const SnapshotMetricTypeRT = rt.keyof({
   tx: null,
   rx: null,
   logRate: null,
+  diskIOReadBytes: null,
+  diskIOWriteBytes: null,
+  s3TotalRequests: null,
+  s3NumberOfObjects: null,
+  s3BucketSize: null,
+  s3DownloadBytes: null,
+  s3UploadBytes: null,
+  rdsConnections: null,
+  rdsQueriesExecuted: null,
+  rdsActiveTransactions: null,
+  rdsLatency: null,
+  sqsMessagesVisible: null,
+  sqsMessagesDelayed: null,
+  sqsMessagesSent: null,
+  sqsMessagesEmpty: null,
+  sqsOldestMessage: null,
 });
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
@@ -275,11 +313,25 @@ export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
   snapshot: { [name: string]: SnapshotModel };
   defaultSnapshot: SnapshotMetricType;
+  /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
+  defaultTimeRangeInSeconds: number;
 }
 
 export interface InventoryModel {
   id: string;
+  displayName: string;
   requiredModules: string[];
+  fields: {
+    id: string;
+    name: string;
+    ip?: string;
+  };
+  crosslinkSupport: {
+    details: boolean;
+    logs: boolean;
+    apm: boolean;
+    uptime: boolean;
+  };
   metrics: InventoryMetrics;
   requiredMetrics: InventoryMetric[];
 }

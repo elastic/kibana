@@ -21,7 +21,7 @@ import { ServiceNodeOverview } from '../ServiceNodeOverview';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { usePlugins } from '../../../new-platform/plugin';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 
 interface Props {
   tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
@@ -31,8 +31,7 @@ export function ServiceDetailTabs({ tab }: Props) {
   const { urlParams } = useUrlParams();
   const { serviceName } = urlParams;
   const { agentName } = useAgentName();
-  const { apm } = usePlugins();
-  const { apmServiceMapEnabled } = apm.config;
+  const { serviceMapEnabled } = useApmPluginContext().config;
 
   if (!serviceName) {
     // this never happens, urlParams type is not accurate enough
@@ -107,7 +106,7 @@ export function ServiceDetailTabs({ tab }: Props) {
     name: 'service-map'
   };
 
-  if (apmServiceMapEnabled) {
+  if (serviceMapEnabled) {
     tabs.push(serviceMapTab);
   }
 

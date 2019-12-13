@@ -6,7 +6,6 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
 import { hostsActions } from '../../../../store/actions';
@@ -82,7 +81,7 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
   }
 };
 
-const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
+const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
   ({
     activePage,
     data,
@@ -143,6 +142,8 @@ export const UncommonProcessTable = connect(makeMapStateToProps, {
   updateTableActivePage: hostsActions.updateTableActivePage,
   updateTableLimit: hostsActions.updateTableLimit,
 })(UncommonProcessTableComponent);
+
+UncommonProcessTable.displayName = 'UncommonProcessTable';
 
 const getUncommonColumns = (): UncommonProcessTableColumns => [
   {

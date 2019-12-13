@@ -134,6 +134,9 @@ export default class Worker extends EventEmitter {
         this.listening = true;
         this.emit('listening');
         break;
+      case 'RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER':
+        this.emit('reloadLoggingConfigFromServerWorker');
+        break;
     }
   }
 

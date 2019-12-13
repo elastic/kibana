@@ -57,6 +57,8 @@ export const FIELD_ORIGIN = {
 };
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
+export const META_ID_ORIGIN_SUFFIX = 'meta';
+export const SOURCE_META_ID_ORIGIN = `${SOURCE_DATA_ID_ORIGIN}_${META_ID_ORIGIN_SUFFIX}`;
 
 export const GEOJSON_FILE = 'GEOJSON_FILE';
 
@@ -124,6 +126,11 @@ export const COUNT_PROP_LABEL =  i18n.translate('xpack.maps.aggs.defaultCountLab
 export const COUNT_PROP_NAME = 'doc_count';
 
 export const STYLE_TYPE = {
-  'STATIC': 'STATIC',
-  'DYNAMIC': 'DYNAMIC'
+  STATIC: 'STATIC',
+  DYNAMIC: 'DYNAMIC'
+};
+
+export const LAYER_STYLE_TYPE = {
+  VECTOR: 'VECTOR',
+  HEATMAP: 'HEATMAP'
 };

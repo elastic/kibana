@@ -8,7 +8,6 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { rangeShape } from '../style_option_shapes';
 import { getVectorStyleLabel } from '../get_vector_style_label';
 import { StyleLegendRow } from '../../../components/style_legend_row';
 
@@ -16,91 +15,38 @@ const EMPTY_VALUE = '';
 
 export class StylePropertyLegendRow extends Component {
 
-  state = {
-    label: '',
-    hasLoadedFieldFormatter: false,
-  }
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._prevLabel = undefined;
-    this._fieldValueFormatter = undefined;
-    this._loadLabel();
-    this._loadFieldFormatter();
-  }
-
-  componentDidUpdate() {
-    // label could change so it needs to be loaded on update
-    this._loadLabel();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  async _loadFieldFormatter() {
-    if (this.props.style.isDynamic() && this.props.style.isComplete() && this.props.style.getField().getSource()) {
-      const field = this.props.style.getField();
-      const source = field.getSource();
-      this._fieldValueFormatter = await source.getFieldFormatter(field.getName());
-    } else {
-      this._fieldValueFormatter = null;
-    }
-    if (this._isMounted) {
-      this.setState({ hasLoadedFieldFormatter: true });
-    }
-  }
-
-  _loadLabel = async () => {
-    if (this._excludeFromHeader()) {
-      return;
-    }
-
-    // have to load label and then check for changes since field name stays constant while label may change
-    const label = await this.props.style.getField().getLabel();
-    if (this._prevLabel === label) {
-      return;
-    }
-
-    this._prevLabel = label;
-    if (this._isMounted) {
-      this.setState({ label });
-    }
-  }
-
-  _excludeFromHeader() {
-    return !this.props.style.isDynamic() || !this.props.style.isComplete() || !this.props.style.getField().getName();
-  }
-
   _formatValue = value => {
-    if (!this.state.hasLoadedFieldFormatter || !this._fieldValueFormatter || value === EMPTY_VALUE) {
+    if (!this.props.fieldFormatter || value === EMPTY_VALUE) {
       return value;
     }
 
-    return this._fieldValueFormatter(value);
+    return this.props.fieldFormatter(value);
   }
 
   render() {
+    const { meta: range, style } = this.props;
 
-    const { range, style } = this.props;
-    if (this._excludeFromHeader()) {
-      return null;
-    }
+    const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
+    const minLabel = this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange ? `< ${min}` : min;
 
-    const header = style.renderHeader();
+    const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
+    const maxLabel = this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange ? `> ${max}` : max;
+
     return (
       <StyleLegendRow
-        header={header}
-        minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE))}
-        maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE))}
+        header={style.renderHeader()}
+        minLabel={minLabel}
+        maxLabel={maxLabel}
         propertyLabel={getVectorStyleLabel(style.getStyleName())}
-        fieldLabel={this.state.label}
+        fieldLabel={this.props.label}
       />
     );
   }
 }
 
 StylePropertyLegendRow.propTypes = {
-  range: rangeShape,
+  label: PropTypes.string,
+  fieldFormatter: PropTypes.func,
+  meta: PropTypes.object,
   style: PropTypes.object
 };

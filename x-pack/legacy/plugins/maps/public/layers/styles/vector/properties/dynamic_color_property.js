@@ -50,7 +50,7 @@ export class DynamicColorProperty extends DynamicStyleProperty {
   }
 
   isCustomColorRamp() {
-    return !!this._options.customColorRamp;
+    return this._options.useCustomColorRamp;
   }
 
   supportsFeatureState() {

@@ -5,9 +5,10 @@
  */
 
 import { Provider } from 'react-redux';
-import { licenseManagementStore } from '../../public/store/store';
+import { licenseManagementStore } from '../../public/np_ready/application/store/store';
 import React from 'react';
 import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
+import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 
@@ -22,7 +23,10 @@ export const createMockLicense = (
   };
 };
 export const getComponent = (initialState, Component) => {
-  const store = licenseManagementStore(initialState);
+  const services = {
+    http: httpServiceMock.createSetupContract()
+  };
+  const store = licenseManagementStore(initialState, services);
   return mountWithIntl(
     <Provider store={store}>
       <Component />

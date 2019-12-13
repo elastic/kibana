@@ -1,150 +1,52 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`JSON View rendering should match snapshot 1`] = `
-<Component
-  data={
-    Array [
+<JsonEditor
+  data-test-subj="jsonView"
+>
+  <EuiCodeEditor
+    isReadOnly={true}
+    mode="javascript"
+    setOptions={
       Object {
-        "field": "_id",
-        "originalValue": "pEMaMmkBUV60JmNWmWVi",
-        "values": Array [
-          "pEMaMmkBUV60JmNWmWVi",
-        ],
-      },
-      Object {
-        "field": "_index",
-        "originalValue": "filebeat-8.0.0-2019.02.19-000001",
-        "values": Array [
-          "filebeat-8.0.0-2019.02.19-000001",
-        ],
-      },
-      Object {
-        "field": "_type",
-        "originalValue": "_doc",
-        "values": Array [
-          "_doc",
-        ],
-      },
-      Object {
-        "field": "_score",
-        "originalValue": 1,
-        "values": Array [
-          "1",
-        ],
-      },
-      Object {
-        "field": "@timestamp",
-        "originalValue": "2019-02-28T16:50:54.621Z",
-        "values": Array [
-          "2019-02-28T16:50:54.621Z",
-        ],
-      },
-      Object {
-        "field": "agent.ephemeral_id",
-        "originalValue": "9d391ef2-a734-4787-8891-67031178c641",
-        "values": Array [
-          "9d391ef2-a734-4787-8891-67031178c641",
-        ],
-      },
-      Object {
-        "field": "agent.hostname",
-        "originalValue": "siem-kibana",
-        "values": Array [
-          "siem-kibana",
-        ],
-      },
-      Object {
-        "field": "agent.id",
-        "originalValue": "5de03d5f-52f3-482e-91d4-853c7de073c3",
-        "values": Array [
-          "5de03d5f-52f3-482e-91d4-853c7de073c3",
-        ],
-      },
-      Object {
-        "field": "agent.type",
-        "originalValue": "filebeat",
-        "values": Array [
-          "filebeat",
-        ],
-      },
-      Object {
-        "field": "agent.version",
-        "originalValue": "8.0.0",
-        "values": Array [
-          "8.0.0",
-        ],
-      },
-      Object {
-        "field": "cloud.availability_zone",
-        "originalValue": "projects/189716325846/zones/us-east1-b",
-        "values": Array [
-          "projects/189716325846/zones/us-east1-b",
-        ],
-      },
-      Object {
-        "field": "cloud.instance.id",
-        "originalValue": "5412578377715150143",
-        "values": Array [
-          "5412578377715150143",
-        ],
-      },
-      Object {
-        "field": "cloud.instance.name",
-        "originalValue": "siem-kibana",
-        "values": Array [
-          "siem-kibana",
-        ],
-      },
-      Object {
-        "field": "cloud.machine.type",
-        "originalValue": "projects/189716325846/machineTypes/n1-standard-1",
-        "values": Array [
-          "projects/189716325846/machineTypes/n1-standard-1",
-        ],
-      },
-      Object {
-        "field": "cloud.project.id",
-        "originalValue": "elastic-beats",
-        "values": Array [
-          "elastic-beats",
-        ],
-      },
-      Object {
-        "field": "cloud.provider",
-        "originalValue": "gce",
-        "values": Array [
-          "gce",
-        ],
-      },
-      Object {
-        "field": "destination.bytes",
-        "originalValue": 584,
-        "values": Array [
-          "584",
-        ],
-      },
-      Object {
-        "field": "destination.ip",
-        "originalValue": "10.47.8.200",
-        "values": Array [
-          "10.47.8.200",
-        ],
-      },
-      Object {
-        "field": "destination.packets",
-        "originalValue": 4,
-        "values": Array [
-          "4",
-        ],
-      },
-      Object {
-        "field": "destination.port",
-        "originalValue": 902,
-        "values": Array [
-          "902",
-        ],
-      },
-    ]
+        "fontSize": "12px",
+      }
+    }
+    value="{
+  \\"_id\\": \\"pEMaMmkBUV60JmNWmWVi\\",
+  \\"_index\\": \\"filebeat-8.0.0-2019.02.19-000001\\",
+  \\"_type\\": \\"_doc\\",
+  \\"_score\\": 1,
+  \\"@timestamp\\": \\"2019-02-28T16:50:54.621Z\\",
+  \\"agent\\": {
+    \\"ephemeral_id\\": \\"9d391ef2-a734-4787-8891-67031178c641\\",
+    \\"hostname\\": \\"siem-kibana\\",
+    \\"id\\": \\"5de03d5f-52f3-482e-91d4-853c7de073c3\\",
+    \\"type\\": \\"filebeat\\",
+    \\"version\\": \\"8.0.0\\"
+  },
+  \\"cloud\\": {
+    \\"availability_zone\\": \\"projects/189716325846/zones/us-east1-b\\",
+    \\"instance\\": {
+      \\"id\\": \\"5412578377715150143\\",
+      \\"name\\": \\"siem-kibana\\"
+    },
+    \\"machine\\": {
+      \\"type\\": \\"projects/189716325846/machineTypes/n1-standard-1\\"
+    },
+    \\"project\\": {
+      \\"id\\": \\"elastic-beats\\"
+    },
+    \\"provider\\": \\"gce\\"
+  },
+  \\"destination\\": {
+    \\"bytes\\": 584,
+    \\"ip\\": \\"10.47.8.200\\",
+    \\"packets\\": 4,
+    \\"port\\": 902
   }
-/>
+}"
+    width="100%"
+  />
+</JsonEditor>
 `;

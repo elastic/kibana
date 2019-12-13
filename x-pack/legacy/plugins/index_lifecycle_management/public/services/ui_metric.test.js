@@ -21,6 +21,7 @@ import {
 } from '../constants';
 
 import { getUiMetricsForPhases } from './ui_metric';
+jest.mock('ui/new_platform');
 
 describe('getUiMetricsForPhases', () => {
   test('gets cold phase', () => {

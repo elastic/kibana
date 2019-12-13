@@ -35,11 +35,7 @@ import { fatalError, toastNotifications } from '../notify';
 import './config_provider';
 import { createLegacyClass } from '../utils/legacy_class';
 import { callEach } from '../utils/function';
-import { hashedItemStore } from '../../../../plugins/kibana_utils/public';
-import {
-  createStateHash,
-  isStateHash
-} from './state_hashing';
+import { hashedItemStore, isStateHash, createStateHash } from '../../../../plugins/kibana_utils/public';
 
 export function StateProvider(Private, $rootScope, $location, stateManagementConfig, config, kbnUrl, $injector) {
   const Events = Private(EventsProvider);
@@ -318,6 +314,27 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    */
   State.prototype.getQueryParamName = function () {
     return this._urlParam;
+  };
+
+  /**
+   * Returns an object with each property name and value corresponding to the entries in this collection
+   * excluding fields started from '$', '_' and all methods
+   *
+   * @return {object}
+   */
+  State.prototype.toObject = function () {
+    return _.omit(this, (value, key) => {
+      return key.charAt(0) === '$' || key.charAt(0) === '_' || _.isFunction(value);
+    });
+  };
+
+  /** Alias for method 'toObject'
+   *
+   * @obsolete Please use 'toObject' method instead
+   * @return {object}
+   */
+  State.prototype.toJSON = function () {
+    return this.toObject();
   };
 
   return State;

@@ -31,7 +31,7 @@ export default function({ getService }: FtrProviderContext) {
       });
 
       it('should return an HTML page that will parse URL fragment', async () => {
-        const response = await supertest.get('/api/security/v1/oidc/implicit').expect(200);
+        const response = await supertest.get('/api/security/oidc/implicit').expect(200);
         const dom = new JSDOM(response.text, {
           url: formatURL({ ...config.get('servers.kibana'), auth: false }),
           runScripts: 'dangerously',
@@ -44,7 +44,7 @@ export default function({ getService }: FtrProviderContext) {
               Object.defineProperty(window, 'location', {
                 value: {
                   href:
-                    'https://kibana.com/api/security/v1/oidc/implicit#token=some_token&access_token=some_access_token',
+                    'https://kibana.com/api/security/oidc/implicit#token=some_token&access_token=some_access_token',
                   replace(newLocation: string) {
                     this.href = newLocation;
                     resolve();
@@ -61,22 +61,22 @@ export default function({ getService }: FtrProviderContext) {
         expect(response.headers['content-type']).to.be('text/html; charset=utf-8');
         expect(response.headers['cache-control']).to.be('private, no-cache, no-store');
         expect(response.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob:; child-src blob:; style-src 'unsafe-inline' 'self'`
+          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
         );
 
         // Check that script that forwards URL fragment worked correctly.
         expect(dom.window.location.href).to.be(
-          '/api/security/v1/oidc?authenticationResponseURI=https%3A%2F%2Fkibana.com%2Fapi%2Fsecurity%2Fv1%2Foidc%2Fimplicit%23token%3Dsome_token%26access_token%3Dsome_access_token'
+          '/api/security/oidc?authenticationResponseURI=https%3A%2F%2Fkibana.com%2Fapi%2Fsecurity%2Foidc%2Fimplicit%23token%3Dsome_token%26access_token%3Dsome_access_token'
         );
       });
 
       it('should fail if OpenID Connect response is not complemented with handshake cookie', async () => {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
-        const authenticationResponse = `https://kibana.com/api/security/v1/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
+        const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
 
         await supertest
           .get(
-            `/api/security/v1/oidc?authenticationResponseURI=${encodeURIComponent(
+            `/api/security/oidc?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
@@ -86,11 +86,11 @@ export default function({ getService }: FtrProviderContext) {
 
       it('should fail if state is not matching', async () => {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
-        const authenticationResponse = `https://kibana.com/api/security/v1/oidc/implicit#id_token=${idToken}&state=$someothervalue&token_type=bearer&access_token=${accessToken}`;
+        const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=$someothervalue&token_type=bearer&access_token=${accessToken}`;
 
         await supertest
           .get(
-            `/api/security/v1/oidc?authenticationResponseURI=${encodeURIComponent(
+            `/api/security/oidc?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
@@ -102,11 +102,11 @@ export default function({ getService }: FtrProviderContext) {
       // FLAKY: https://github.com/elastic/kibana/issues/43938
       it.skip('should succeed if both the OpenID Connect response and the cookie are provided', async () => {
         const { idToken, accessToken } = createTokens('1', stateAndNonce.nonce);
-        const authenticationResponse = `https://kibana.com/api/security/v1/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
+        const authenticationResponse = `https://kibana.com/api/security/oidc/implicit#id_token=${idToken}&state=${stateAndNonce.state}&token_type=bearer&access_token=${accessToken}`;
 
         const oidcAuthenticationResponse = await supertest
           .get(
-            `/api/security/v1/oidc?authenticationResponseURI=${encodeURIComponent(
+            `/api/security/oidc?authenticationResponseURI=${encodeURIComponent(
               authenticationResponse
             )}`
           )
@@ -129,7 +129,7 @@ export default function({ getService }: FtrProviderContext) {
         expect(sessionCookie.httpOnly).to.be(true);
 
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);

@@ -28,7 +28,6 @@ import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 import chrome from 'ui/chrome';
-import { start as data } from '../../../../core_plugins/data/public/legacy';
 
 function getEscapedQuery(query = '') {
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-regexp-query.html#_standard_operators
@@ -173,7 +172,7 @@ class ListControl extends Control {
 export async function listControlFactory(controlParams, useTimeFilter, SearchSource) {
   let indexPattern;
   try {
-    indexPattern = await data.indexPatterns.indexPatterns.get(controlParams.indexPattern);
+    indexPattern = await npStart.plugins.data.indexPatterns.get(controlParams.indexPattern);
 
     // dynamic options are only allowed on String fields but the setting defaults to true so it could
     // be enabled for non-string fields (since UI input is hidden for non-string fields).

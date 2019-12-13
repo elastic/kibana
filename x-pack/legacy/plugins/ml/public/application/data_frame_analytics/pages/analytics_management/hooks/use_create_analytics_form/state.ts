@@ -46,6 +46,7 @@ export interface State {
     dependentVariable: DependentVariable;
     dependentVariableFetchFail: boolean;
     dependentVariableOptions: Array<{ label: DependentVariable }> | [];
+    description: string;
     destinationIndex: EsIndexName;
     destinationIndexNameExists: boolean;
     destinationIndexNameEmpty: boolean;
@@ -89,6 +90,7 @@ export const getInitialState = (): State => ({
     dependentVariable: '',
     dependentVariableFetchFail: false,
     dependentVariableOptions: [],
+    description: '',
     destinationIndex: '',
     destinationIndexNameExists: false,
     destinationIndexNameEmpty: true,
@@ -131,6 +133,7 @@ export const getJobConfigFromFormState = (
   formState: State['form']
 ): DeepPartial<DataFrameAnalyticsConfig> => {
   const jobConfig: DeepPartial<DataFrameAnalyticsConfig> = {
+    description: formState.description,
     source: {
       // If a Kibana index patterns includes commas, we need to split
       // the into an array of indices to be in the correct format for

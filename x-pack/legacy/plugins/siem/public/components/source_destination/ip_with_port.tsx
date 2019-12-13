@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { Ip } from '../ip';
@@ -22,7 +21,7 @@ IpPortSeparator.displayName = 'IpPortSeparator';
  * Renders a separator (i.e. `:`) and a draggable, hyperlinked port when
  * a port is specified
  */
-const PortWithSeparator = pure<{
+const PortWithSeparator = React.memo<{
   contextId: string;
   eventId: string;
   port?: string | null;
@@ -52,35 +51,33 @@ PortWithSeparator.displayName = 'PortWithSeparator';
  * Renders a draggable, hyperlinked IP address, and if provided, an associated
  * draggable, hyperlinked port (with a separator between the IP address and port)
  */
-export const IpWithPort = pure<{
+export const IpWithPort = React.memo<{
   contextId: string;
   eventId: string;
   ip?: string | null;
   ipFieldName: string;
   port?: string | null;
   portFieldName: string;
-}>(({ contextId, eventId, ip, ipFieldName, port, portFieldName }) => {
-  return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <Ip
-          contextId={contextId}
-          data-test-subj="ip"
-          eventId={eventId}
-          fieldName={ipFieldName}
-          value={ip}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <PortWithSeparator
-          contextId={contextId}
-          eventId={eventId}
-          port={port}
-          portFieldName={portFieldName}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-});
+}>(({ contextId, eventId, ip, ipFieldName, port, portFieldName }) => (
+  <EuiFlexGroup gutterSize="none">
+    <EuiFlexItem grow={false}>
+      <Ip
+        contextId={contextId}
+        data-test-subj="ip"
+        eventId={eventId}
+        fieldName={ipFieldName}
+        value={ip}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <PortWithSeparator
+        contextId={contextId}
+        eventId={eventId}
+        port={port}
+        portFieldName={portFieldName}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+));
 
 IpWithPort.displayName = 'IpWithPort';

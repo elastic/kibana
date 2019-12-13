@@ -40,7 +40,7 @@ export class KbnClientUiSettings {
 
   async get(setting: string) {
     const all = await this.getAll();
-    const value = all.settings[setting] ? all.settings[setting].userValue : undefined;
+    const value = all[setting]?.userValue;
 
     this.log.verbose('uiSettings.value: %j', value);
     return value;
@@ -68,24 +68,24 @@ export class KbnClientUiSettings {
    * with some defaults
    */
   async replace(doc: UiSettingValues) {
-    const all = await this.getAll();
-    for (const [name, { isOverridden }] of Object.entries(all.settings)) {
-      if (!isOverridden) {
-        await this.unset(name);
+    this.log.debug('replacing kibana config doc: %j', doc);
+
+    const changes: Record<string, any> = {
+      ...this.defaults,
+      ...doc,
+    };
+
+    for (const [name, { isOverridden }] of Object.entries(await this.getAll())) {
+      if (!isOverridden && !changes.hasOwnProperty(name)) {
+        changes[name] = null;
       }
     }
-
-    this.log.debug('replacing kibana config doc: %j', doc);
 
     await this.requester.request({
       method: 'POST',
       path: '/api/kibana/settings',
-      body: {
-        changes: {
-          ...this.defaults,
-          ...doc,
-        },
-      },
+      body: { changes },
+      retries: 5,
     });
   }
 
@@ -105,9 +105,11 @@ export class KbnClientUiSettings {
   }
 
   private async getAll() {
-    return await this.requester.request<UiSettingsApiResponse>({
+    const resp = await this.requester.request<UiSettingsApiResponse>({
       path: '/api/kibana/settings',
       method: 'GET',
     });
+
+    return resp.settings;
   }
 }

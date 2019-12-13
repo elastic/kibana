@@ -64,7 +64,6 @@ export interface DashboardPluginSetupDependencies {
 
 export class DashboardPlugin implements Plugin {
   private startDependencies: {
-    dataStart: DataStart;
     npDataStart: NpDataStart;
     savedObjectsClient: SavedObjectsClientContract;
     embeddables: IEmbeddableStart;
@@ -84,7 +83,6 @@ export class DashboardPlugin implements Plugin {
           throw new Error('not started yet');
         }
         const {
-          dataStart,
           savedObjectsClient,
           embeddables,
           navigation,
@@ -96,10 +94,8 @@ export class DashboardPlugin implements Plugin {
           core: contextCore as LegacyCoreStart,
           ...angularDependencies,
           navigation,
-          dataStart,
           share,
           npDataStart,
-          indexPatterns: dataStart.indexPatterns.indexPatterns,
           savedObjectsClient,
           chrome: contextCore.chrome,
           addBasePath: contextCore.http.basePath.prepend,
@@ -136,7 +132,6 @@ export class DashboardPlugin implements Plugin {
     { data: dataStart, embeddables, navigation, npData, share }: DashboardPluginStartDependencies
   ) {
     this.startDependencies = {
-      dataStart,
       npDataStart: npData,
       savedObjectsClient,
       embeddables,

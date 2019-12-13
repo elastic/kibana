@@ -33,3 +33,10 @@ export type GeoBoundingBoxFilter = Filter & {
 
 export const isGeoBoundingBoxFilter = (filter: any): filter is GeoBoundingBoxFilter =>
   filter && filter.geo_bounding_box;
+
+export const getGeoBoundingBoxFilterField = (filter: GeoBoundingBoxFilter) => {
+  return (
+    filter.geo_bounding_box &&
+    Object.keys(filter.geo_bounding_box).find(key => key !== 'ignore_unmapped')
+  );
+};

@@ -6,7 +6,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled, { createGlobalStyle } from 'styled-components';
 
 // SIDE EFFECT: the following `createGlobalStyle` overrides default styling in angular code that was not theme-friendly
@@ -31,7 +30,7 @@ interface LoadingProps {
   position?: string;
 }
 
-export const LoadingPanel = pure<LoadingProps>(
+export const LoadingPanel = React.memo<LoadingProps>(
   ({
     height = 'auto',
     showBorder = true,
