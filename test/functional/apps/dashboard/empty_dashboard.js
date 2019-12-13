@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe('empty dashboard', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/48236
+  describe.skip('empty dashboard', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -47,7 +48,6 @@ export default function ({ getService, getPageObjects }) {
       expect(addButtonExists).to.be(true);
     });
 
-    // Flaky test: https://github.com/elastic/kibana/issues/48236
     it.skip('should open add panel when add button is clicked', async () => {
       await testSubjects.click('emptyDashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
