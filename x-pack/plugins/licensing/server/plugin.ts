@@ -91,11 +91,12 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   public async setup(core: CoreSetup) {
     this.logger.debug('Setting up Licensing plugin');
     const config = await this.config$.pipe(take(1)).toPromise();
+    const pollingFrequency = config.api_polling_frequency;
     const dataClient = await core.elasticsearch.dataClient$.pipe(take(1)).toPromise();
 
     const { refresh, license$ } = this.createLicensePoller(
       dataClient,
-      config.pollingFrequency.asMilliseconds()
+      pollingFrequency.asMilliseconds()
     );
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));

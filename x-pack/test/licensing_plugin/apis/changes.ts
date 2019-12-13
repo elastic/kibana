@@ -73,7 +73,7 @@ export default function({ getService, getPageObjects }: FtrProviderContext) {
     },
 
     async getLicense(): Promise<PublicLicenseJSON> {
-      // > --xpack.licensing.pollingFrequency set in test config
+      // > --xpack.licensing.api_polling_frequency set in test config
       // to wait for Kibana server to re-fetch the license from Elasticsearch
       await delay(1000);
 

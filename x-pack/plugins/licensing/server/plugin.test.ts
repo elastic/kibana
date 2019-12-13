@@ -26,7 +26,6 @@ function buildRawLicense(options: Partial<RawLicense> = {}): RawLicense {
   };
   return Object.assign(defaultRawLicense, options);
 }
-const pollingFrequency = moment.duration(100);
 
 const flushPromises = (ms = 50) => new Promise(res => setTimeout(res, ms));
 
@@ -38,7 +37,7 @@ describe('licensing plugin', () => {
 
       beforeEach(() => {
         pluginInitContextMock = coreMock.createPluginInitializerContext({
-          pollingFrequency,
+          api_polling_frequency: moment.duration(100),
         });
         plugin = new LicensingPlugin(pluginInitContextMock);
       });
@@ -201,7 +200,7 @@ describe('licensing plugin', () => {
         plugin = new LicensingPlugin(
           coreMock.createPluginInitializerContext({
             // disable polling mechanism
-            pollingFrequency: moment.duration(50000),
+            api_polling_frequency: moment.duration(50000),
           })
         );
         const dataClient = elasticsearchServiceMock.createClusterClient();
@@ -230,10 +229,10 @@ describe('licensing plugin', () => {
         await plugin.stop();
       });
 
-      it(`creates a poller fetching license from passed 'clusterClient' every 'pollingFrequency' ms`, async () => {
+      it(`creates a poller fetching license from passed 'clusterClient' every 'api_polling_frequency' ms`, async () => {
         plugin = new LicensingPlugin(
           coreMock.createPluginInitializerContext({
-            pollingFrequency: moment.duration(50000),
+            api_polling_frequency: moment.duration(50000),
           })
         );
 
@@ -274,7 +273,7 @@ describe('licensing plugin', () => {
       it('creates a poller with a manual refresh control', async () => {
         plugin = new LicensingPlugin(
           coreMock.createPluginInitializerContext({
-            pollingFrequency,
+            api_polling_frequency: moment.duration(100),
           })
         );
 
@@ -304,7 +303,7 @@ describe('licensing plugin', () => {
       beforeEach(() => {
         plugin = new LicensingPlugin(
           coreMock.createPluginInitializerContext({
-            pollingFrequency,
+            api_polling_frequency: moment.duration(100),
           })
         );
       });
@@ -333,7 +332,9 @@ describe('licensing plugin', () => {
       let plugin: LicensingPlugin;
 
       beforeEach(() => {
-        plugin = new LicensingPlugin(coreMock.createPluginInitializerContext({ pollingFrequency }));
+        plugin = new LicensingPlugin(
+          coreMock.createPluginInitializerContext({ api_polling_frequency: moment.duration(100) })
+        );
       });
 
       afterEach(async () => {
@@ -354,7 +355,7 @@ describe('licensing plugin', () => {
     it('stops polling', async () => {
       const plugin = new LicensingPlugin(
         coreMock.createPluginInitializerContext({
-          pollingFrequency,
+          api_polling_frequency: moment.duration(100),
         })
       );
       const coreSetup = coreMock.createSetup();
