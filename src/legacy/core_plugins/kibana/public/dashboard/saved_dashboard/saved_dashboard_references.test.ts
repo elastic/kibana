@@ -144,8 +144,8 @@ describe('injectReferences', () => {
     expect(context).toMatchInlineSnapshot(`
 Object {
   "id": "1",
-  "title": "test",
   "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\",\\"type\\":\\"visualization\\"}]",
+  "title": "test",
 }
 `);
     /* eslint-enable max-len */
@@ -160,7 +160,7 @@ Object {
     expect(context).toMatchInlineSnapshot(`
 Object {
   "id": "1",
-   "title": "test",
+  "title": "test",
 }
 `);
   });
@@ -168,15 +168,15 @@ Object {
   test('skips when panelsJSON is not an array', () => {
     const context = {
       id: '1',
-      title: 'test',
       panelsJSON: '{}',
+      title: 'test',
     } as SavedObjectDashboard;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
   "id": "1",
-  "title": "test",
   "panelsJSON": "{}",
+  "title": "test",
 }
 `);
   });
@@ -206,8 +206,8 @@ Object {
     expect(context).toMatchInlineSnapshot(`
 Object {
   "id": "1",
-  "title": "test",
   "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\"}]",
+  "title": "test",
 }
 `);
   });
