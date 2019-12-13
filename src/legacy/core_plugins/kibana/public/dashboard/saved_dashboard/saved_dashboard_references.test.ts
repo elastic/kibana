@@ -18,6 +18,7 @@
  */
 
 import { extractReferences, injectReferences } from './saved_dashboard_references';
+import { SavedObjectDashboard } from './saved_dashboard';
 
 describe('extractReferences', () => {
   test('extracts references from panelsJSON', () => {
@@ -38,6 +39,7 @@ describe('extractReferences', () => {
           },
         ]),
       },
+      references: [],
     };
     const updatedDoc = extractReferences(doc);
     /* eslint-disable max-len */
@@ -76,6 +78,7 @@ Object {
           },
         ]),
       },
+      references: [],
     };
     expect(() => extractReferences(doc)).toThrowErrorMatchingInlineSnapshot(
       `"\\"type\\" attribute is missing from panel \\"0\\""`
@@ -94,6 +97,7 @@ Object {
           },
         ]),
       },
+      references: [],
     };
     expect(extractReferences(doc)).toMatchInlineSnapshot(`
 Object {
@@ -111,7 +115,7 @@ describe('injectReferences', () => {
   test('injects references into context', () => {
     const context = {
       id: '1',
-      foo: true,
+      title: 'test',
       panelsJSON: JSON.stringify([
         {
           panelRefName: 'panel_0',
@@ -122,7 +126,7 @@ describe('injectReferences', () => {
           title: 'Title 2',
         },
       ]),
-    };
+    } as SavedObjectDashboard;
     const references = [
       {
         name: 'panel_0',
@@ -139,8 +143,8 @@ describe('injectReferences', () => {
     /* eslint-disable max-len */
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "foo": true,
   "id": "1",
+  "title": "test",
   "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\",\\"type\\":\\"visualization\\"}]",
 }
 `);
@@ -150,13 +154,13 @@ Object {
   test('skips when panelsJSON is missing', () => {
     const context = {
       id: '1',
-      foo: true,
-    };
+      title: 'test',
+    } as SavedObjectDashboard;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "foo": true,
   "id": "1",
+   "title": "test",
 }
 `);
   });
@@ -164,14 +168,14 @@ Object {
   test('skips when panelsJSON is not an array', () => {
     const context = {
       id: '1',
-      foo: true,
+      title: 'test',
       panelsJSON: '{}',
-    };
+    } as SavedObjectDashboard;
     injectReferences(context, []);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "foo": true,
   "id": "1",
+  "title": "test",
   "panelsJSON": "{}",
 }
 `);
@@ -180,7 +184,7 @@ Object {
   test('skips a panel when panelRefName is missing', () => {
     const context = {
       id: '1',
-      foo: true,
+      title: 'test',
       panelsJSON: JSON.stringify([
         {
           panelRefName: 'panel_0',
@@ -190,7 +194,7 @@ Object {
           title: 'Title 2',
         },
       ]),
-    };
+    } as SavedObjectDashboard;
     const references = [
       {
         name: 'panel_0',
@@ -201,8 +205,8 @@ Object {
     injectReferences(context, references);
     expect(context).toMatchInlineSnapshot(`
 Object {
-  "foo": true,
   "id": "1",
+  "title": "test",
   "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\"}]",
 }
 `);
@@ -211,14 +215,14 @@ Object {
   test(`fails when it can't find the reference in the array`, () => {
     const context = {
       id: '1',
-      foo: true,
+      title: 'test',
       panelsJSON: JSON.stringify([
         {
           panelRefName: 'panel_0',
           title: 'Title 1',
         },
       ]),
-    };
+    } as SavedObjectDashboard;
     expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
       `"Could not find reference \\"panel_0\\""`
     );

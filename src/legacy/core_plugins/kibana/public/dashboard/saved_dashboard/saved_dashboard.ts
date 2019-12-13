@@ -70,6 +70,8 @@ export function createSavedDashboardClass(services: SavedObjectKibanaServices) {
         },
       },
     };
+    public static fieldOrder = ['title', 'description'];
+    public static searchSource = false;
     public showInRecentlyAccessed = true;
 
     constructor(id: string) {

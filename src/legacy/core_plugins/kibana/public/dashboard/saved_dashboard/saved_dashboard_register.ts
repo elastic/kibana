@@ -20,6 +20,6 @@
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import './saved_dashboards';
 
-SavedObjectRegistryProvider.register(savedDashboards => {
+SavedObjectRegistryProvider.register((savedDashboards: any) => {
   return savedDashboards;
 });
