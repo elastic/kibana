@@ -12,7 +12,7 @@ import { AssetReference, InstallationStatus, RegistryPackage } from '../../commo
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
-import { installTemplates } from '../lib/elasticsearch/template/install';
+// import { installTemplates } from '../lib/elasticsearch/template/install';
 import { getPackageInfo, PackageNotInstalledError } from '../packages';
 import * as Registry from '../registry';
 import { Request } from '../types';
@@ -37,7 +37,7 @@ export async function createDatasource(options: {
   const pkg = await Registry.fetchInfo(pkgkey);
 
   await Promise.all([
-    installTemplates(pkg, callCluster),
+    // installTemplates(pkg, callCluster),
     saveDatasourceReferences({
       savedObjectsClient,
       pkg,
