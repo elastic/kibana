@@ -36,7 +36,9 @@ export async function createTestUserService(
     hasService('testSubjects') && getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  const enabledPlugins = await kibanaServer.plugins.getEnabledIds();
+  const enabledPlugins = config.get('security.disableTestUser')
+    ? []
+    : await kibanaServer.plugins.getEnabledIds();
   const isEnabled = () => {
     return enabledPlugins.includes('security') && !config.get('security.disableTestUser');
   };
