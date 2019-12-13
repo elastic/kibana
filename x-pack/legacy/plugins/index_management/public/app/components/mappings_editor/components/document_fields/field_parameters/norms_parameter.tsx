@@ -12,13 +12,9 @@ import { EditFieldFormRow } from '../fields/edit_field';
 
 export const NormsParameter = () => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldTitle', {
-          defaultMessage: 'Use norms',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldTitle', {
+      defaultMessage: 'Use norms',
+    })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.useNormsFieldDescription', {
       defaultMessage: 'Whether field-length should be taken into account when scoring queries.',
     })}

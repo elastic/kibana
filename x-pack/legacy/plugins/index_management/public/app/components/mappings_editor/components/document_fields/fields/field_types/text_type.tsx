@@ -34,7 +34,7 @@ interface Props {
   field: NormalizedField;
 }
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'boost':
     case 'position_increment_gap':
@@ -111,13 +111,9 @@ export const TextType = React.memo(({ field }: Props) => {
         <EditFieldSection>
           {/* fielddata */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
-                  defaultMessage: 'Fielddata',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataTitle', {
+              defaultMessage: 'Fielddata',
+            })}
             description={i18n.translate('xpack.idxMgmt.mappingsEditor.fielddataDescription', {
               defaultMessage:
                 'Whether to use in-memory fielddata for sorting, aggregations, or scripting.',
@@ -166,13 +162,9 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* index_phrases */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesFieldTitle', {
-                  defaultMessage: 'Index phrases',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPhrasesFieldTitle', {
+              defaultMessage: 'Index phrases',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.indexPhrasesFieldDescription',
               {
@@ -185,13 +177,9 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* index_prefixes */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesFieldTitle', {
-                  defaultMessage: 'Set index prefixes',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.indexPrefixesFieldTitle', {
+              defaultMessage: 'Set index prefixes',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.indexPrefixesFieldDescription',
               {
@@ -199,7 +187,7 @@ export const TextType = React.memo(({ field }: Props) => {
                   'Whether to index prefixes of 2 and 5 characters into a separate field. Activating this will speed up prefix queries, but could slow down indexing.',
               }
             )}
-            toggleDefaultValue={getDefaultValueToggle('indexPrefixes', field.source)}
+            defaultToggleValue={getDefaultToggleValue('indexPrefixes', field.source)}
           >
             <EuiFormRow label={i18nTexts.indexPrefixesRangeFieldLabel} fullWidth>
               <UseMultiFields
@@ -233,13 +221,9 @@ export const TextType = React.memo(({ field }: Props) => {
 
           {/* position_increment_gap */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldTitle', {
-                  defaultMessage: 'Set position increment gap',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldTitle', {
+              defaultMessage: 'Set position increment gap',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.positionIncrementGapFieldDescription',
               {
@@ -247,7 +231,7 @@ export const TextType = React.memo(({ field }: Props) => {
                   'The number of fake term positions which should be inserted between each element of an array of strings.',
               }
             )}
-            toggleDefaultValue={getDefaultValueToggle('position_increment_gap', field.source)}
+            defaultToggleValue={getDefaultToggleValue('position_increment_gap', field.source)}
           >
             <FormDataProvider pathsToWatch="index_options">
               {formData => {
@@ -302,20 +286,20 @@ export const TextType = React.memo(({ field }: Props) => {
         <EditFieldSection>
           {/* similarity */}
           <SimilarityParameter
-            defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
+            defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
           />
 
           {/* term vector */}
           <TermVectorParameter
             field={field}
-            defaultToggleValue={getDefaultValueToggle('term_vector', field.source)}
+            defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
           />
 
           {/* copy_to */}
-          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
           {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

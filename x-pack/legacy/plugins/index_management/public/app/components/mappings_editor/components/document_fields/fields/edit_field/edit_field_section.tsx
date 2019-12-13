@@ -5,25 +5,10 @@
  */
 import React from 'react';
 
-import { EuiTitle, EuiSpacer } from '@elastic/eui';
-
 interface Props {
   children: React.ReactNode;
-  title?: string;
 }
 
-export const EditFieldSection = ({ title, children }: Props) => {
-  return (
-    <section className="mappingsEditor__editField__section">
-      {title && (
-        <>
-          <EuiTitle size="s">
-            <h3>{title}</h3>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-        </>
-      )}
-      {children}
-    </section>
-  );
+export const EditFieldSection = ({ children }: Props) => {
+  return <section className="mappingsEditor__editField__section">{children}</section>;
 };

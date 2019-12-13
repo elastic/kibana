@@ -4,14 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiText,
+  EuiSwitch,
+  EuiSpacer,
+  EuiButtonIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import {
   ToggleField,
   UseField,
   FormDataProvider,
-  FieldHook,
   useFormContext,
 } from '../../../../shared_imports';
 
@@ -20,37 +28,38 @@ import { getFieldConfig } from '../../../../lib';
 
 type ChildrenFunc = (isOn: boolean) => React.ReactNode;
 
+interface DocLink {
+  text: string;
+  href: string;
+}
+
 interface Props {
-  title: JSX.Element;
-  withToggle?: boolean;
-  toggleDefaultValue?: boolean;
-  sizeTitle?: 's' | 'xs' | 'xxs';
-  ariaId?: string;
+  title: string;
   description?: string | JSX.Element;
+  docLink?: DocLink;
+  defaultToggleValue?: boolean;
   formFieldPath?: ParameterName;
   children?: React.ReactNode | ChildrenFunc;
+  withToggle?: boolean;
 }
 
 export const EditFieldFormRow = React.memo(
   ({
     title,
     description,
-    withToggle = true,
-    toggleDefaultValue,
-    sizeTitle = 'xs',
+    docLink,
+    defaultToggleValue,
     formFieldPath,
-    ariaId = formFieldPath,
     children,
+    withToggle = true,
   }: Props) => {
     const form = useFormContext();
-    const toggleField = useRef<FieldHook | undefined>(undefined);
-    const switchLabel = title.props.children;
 
     const initialVisibleState =
       withToggle === false
         ? true
-        : toggleDefaultValue !== undefined
-        ? toggleDefaultValue
+        : defaultToggleValue !== undefined
+        ? defaultToggleValue
         : formFieldPath !== undefined
         ? (getFieldConfig(formFieldPath).defaultValue! as boolean)
         : false;
@@ -70,18 +79,10 @@ export const EditFieldFormRow = React.memo(
       setIsContentVisible(!isContentVisible);
     };
 
-    const onClickTitle = () => {
-      if (toggleField.current) {
-        toggleField.current.setValue(!toggleField.current.value);
-      } else {
-        onToggle();
-      }
-    };
-
     const renderToggleInput = () =>
       formFieldPath === undefined ? (
         <EuiSwitch
-          label={switchLabel}
+          label={title}
           checked={isContentVisible}
           onChange={onToggle}
           data-test-subj="input"
@@ -93,10 +94,7 @@ export const EditFieldFormRow = React.memo(
           config={{ ...getFieldConfig(formFieldPath), defaultValue: initialVisibleState }}
         >
           {field => {
-            toggleField.current = field;
-            return (
-              <ToggleField field={field} euiFieldProps={{ label: switchLabel, showLabel: false }} />
-            );
+            return <ToggleField field={field} euiFieldProps={{ label: title, showLabel: false }} />;
           }}
         </UseField>
       );
@@ -108,24 +106,18 @@ export const EditFieldFormRow = React.memo(
         </EuiFlexItem>
       );
 
-      const controlsTitle = title && (
-        <button
-          onClick={onClickTitle}
-          type="button"
-          className="mappingsEditor__editField__formRow__btnTitle"
-        >
-          <EuiTitle
-            id={`${ariaId}-title`}
-            size={sizeTitle}
-            className="mappingsEditor__editField__formRow__title"
-          >
-            {title}
-          </EuiTitle>
-        </button>
+      const controlsTitle = (
+        <EuiTitle size="xs">
+          <h3>{title}</h3>
+        </EuiTitle>
       );
 
       const controlsDescription = description && (
-        <EuiText id={ariaId} size="s" color="subdued">
+        <EuiText
+          size="s"
+          color="subdued"
+          className="mappingsEditor__editField__formRow__description"
+        >
           {description}
         </EuiText>
       );
@@ -136,7 +128,22 @@ export const EditFieldFormRow = React.memo(
             paddingLeft: withToggle === false ? '0' : undefined,
           }}
         >
-          {controlsTitle}
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+            <EuiFlexItem>{controlsTitle}</EuiFlexItem>
+
+            {docLink ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={docLink.text}>
+                  <EuiButtonIcon
+                    href={docLink.href}
+                    target="_blank"
+                    iconType="help"
+                    aria-label={docLink.text}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
           {controlsDescription}
         </div>
       );

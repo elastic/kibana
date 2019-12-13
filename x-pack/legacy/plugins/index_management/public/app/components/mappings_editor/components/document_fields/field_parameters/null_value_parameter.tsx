@@ -8,9 +8,10 @@ import React from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EditFieldFormRow } from '../fields/edit_field';
+import { documentationService } from '../../../../../services/documentation';
 import { getFieldConfig } from '../../../lib';
 import { UseField, Field } from '../../../shared_imports';
+import { EditFieldFormRow } from '../fields/edit_field';
 
 interface Props {
   defaultToggleValue: boolean;
@@ -20,13 +21,9 @@ interface Props {
 
 export const NullValueParameter = ({ defaultToggleValue, description, children }: Props) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldTitle', {
-          defaultMessage: 'Set null value',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFieldTitle', {
+      defaultMessage: 'Set null value',
+    })}
     description={
       description
         ? description
@@ -35,7 +32,13 @@ export const NullValueParameter = ({ defaultToggleValue, description, children }
               'Accepts a string value which is substituted for any explicit null values.',
           })
     }
-    toggleDefaultValue={defaultToggleValue}
+    docLink={{
+      text: i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueDocLinkText', {
+        defaultMessage: 'Null value documentation',
+      }),
+      href: documentationService.getNullValueLink(),
+    }}
+    defaultToggleValue={defaultToggleValue}
   >
     {children ? (
       children

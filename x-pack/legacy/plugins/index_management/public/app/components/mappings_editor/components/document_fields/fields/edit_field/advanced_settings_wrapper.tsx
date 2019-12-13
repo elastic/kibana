@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
@@ -14,19 +15,26 @@ interface Props {
 export const AdvancedSettingsWrapper = ({ children }: Props) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
-  const toggleIsVisilbe = () => {
+  const toggleIsVisible = () => {
     setIsVisible(!isVisible);
   };
 
   return (
     <div className="mappingsEditor__editField__advancedSettings">
-      <div>
-        <EuiButtonEmpty onClick={toggleIsVisilbe}>
-          {isVisible ? 'Hide' : 'Show'} advanced settings
-        </EuiButtonEmpty>
-      </div>
+      <EuiSpacer size="m" />
+
+      <EuiButtonEmpty onClick={toggleIsVisible} flush="left">
+        {isVisible
+          ? i18n.translate('xpack.idxMgmt.mappingsEditor.advancedSettings.hideButtonLabel', {
+              defaultMessage: 'Hide advanced settings',
+            })
+          : i18n.translate('xpack.idxMgmt.mappingsEditor.advancedSettings.showButtonLabel', {
+              defaultMessage: 'Show advanced settings',
+            })}
+      </EuiButtonEmpty>
+
       <div style={{ display: isVisible ? 'block' : 'none' }}>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         {/* We ned to wrap the children inside a "div" to have our css :first-child rule */}
         <div>{children}</div>
       </div>

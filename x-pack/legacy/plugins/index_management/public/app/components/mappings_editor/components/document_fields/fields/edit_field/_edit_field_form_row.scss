@@ -6,16 +6,6 @@
   }
 }
 
-.mappingsEditor__editField__formRow__btnTitle {
-  display: inherit;
-  text-align: left;
-
-  &:focus {
-    animation: none !important;
-  }
-}
-
-.mappingsEditor__editField__formRow__title {
-  line-height: 1;
-  margin-bottom: $euiSizeS;
+.mappingsEditor__editField__formRow__description {
+  padding-top: $euiSizeS;
 }

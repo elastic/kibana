@@ -22,7 +22,7 @@ import {
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 import { PARAMETERS_DEFINITION } from '../../../../constants';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'boost':
     case 'ignore_malformed': {
@@ -44,13 +44,13 @@ interface Props {
 export const NumericType = ({ field }: Props) => {
   return (
     <>
-      {/* scaling_factor only applies to scaled_float numeric type*/}
-      <FormDataProvider pathsToWatch="subType">
-        {formData =>
-          formData.subType === 'scaled_float' ? (
-            <EditFieldSection>
+      <EditFieldSection>
+        {/* scaling_factor only applies to scaled_float numeric type*/}
+        <FormDataProvider pathsToWatch="subType">
+          {formData =>
+            formData.subType === 'scaled_float' ? (
               <EditFieldFormRow
-                title={<h3>{PARAMETERS_DEFINITION.scaling_factor.title}</h3>}
+                title={PARAMETERS_DEFINITION.scaling_factor.title}
                 description={PARAMETERS_DEFINITION.scaling_factor.description}
                 withToggle={false}
               >
@@ -60,11 +60,9 @@ export const NumericType = ({ field }: Props) => {
                   component={Field}
                 />
               </EditFieldFormRow>
-            </EditFieldSection>
-          ) : null
-        }
-      </FormDataProvider>
-      <EditFieldSection>
+            ) : null
+          }
+        </FormDataProvider>
         <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
         <DocValuesParameter />
@@ -87,7 +85,7 @@ export const NumericType = ({ field }: Props) => {
                   'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
               }
             )}
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
           >
             <UseField
               path="null_value"
@@ -97,10 +95,10 @@ export const NumericType = ({ field }: Props) => {
           </NullValueParameter>
 
           {/* copy_to */}
-          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
           {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

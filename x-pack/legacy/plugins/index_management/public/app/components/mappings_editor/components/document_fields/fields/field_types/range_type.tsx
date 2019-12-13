@@ -15,7 +15,7 @@ import {
 } from '../../field_parameters';
 import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   return field.boost !== undefined && field.boost !== getFieldConfig('boost').defaultValue;
 };
 
@@ -37,7 +37,7 @@ export const RangeType = ({ field }: Props) => {
           <CoerceParameter />
 
           {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

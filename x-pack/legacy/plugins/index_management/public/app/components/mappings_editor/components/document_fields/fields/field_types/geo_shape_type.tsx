@@ -16,7 +16,7 @@ import { CoerceParameter, IgnoreMalformedParameter } from '../../field_parameter
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 import { PARAMETERS_OPTIONS } from '../../../../constants';
 
-const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
 
   switch (param) {
@@ -67,13 +67,9 @@ export const GeoShapeType = ({ field }: Props) => {
       <EditFieldSection>
         {/* orientation */}
         <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldTitle', {
-                defaultMessage: 'Set orientation',
-              })}
-            </h3>
-          }
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldTitle', {
+            defaultMessage: 'Set orientation',
+          })}
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldDescription',
             {
@@ -81,7 +77,7 @@ export const GeoShapeType = ({ field }: Props) => {
                 'Define how to interpret vertex order for polygons / multipolygons. This parameter defines one of two coordinate system rules (Right-hand or Left-hand).',
             }
           )}
-          toggleDefaultValue={getDefaultValueToggle('orientation', field.source)}
+          defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
         >
           <UseField
             path="orientation"
@@ -98,13 +94,9 @@ export const GeoShapeType = ({ field }: Props) => {
 
         {/* points_only */}
         <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldTitle', {
-                defaultMessage: 'Points only',
-              })}
-            </h3>
-          }
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldTitle', {
+            defaultMessage: 'Points only',
+          })}
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldDescription',
             {
@@ -116,13 +108,9 @@ export const GeoShapeType = ({ field }: Props) => {
 
         {/* ignore_z_value */}
         <EditFieldFormRow
-          title={
-            <h3>
-              {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldTitle', {
-                defaultMessage: 'Ignore Z value',
-              })}
-            </h3>
-          }
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldTitle', {
+            defaultMessage: 'Ignore Z value',
+          })}
           description={i18n.translate(
             'xpack.idxMgmt.mappingsEditor.geoShape.ignoreZValueFieldDescription',
             {

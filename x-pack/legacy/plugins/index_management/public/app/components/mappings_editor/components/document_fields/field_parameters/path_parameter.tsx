@@ -76,13 +76,9 @@ export const PathParameter = ({ field, allFields }: Props) => {
 
         return (
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldTitle', {
-                  defaultMessage: 'Alias target',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldTitle', {
+              defaultMessage: 'Alias target',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.aliasType.aliasTargetFieldDescription',
               {
@@ -90,7 +86,6 @@ export const PathParameter = ({ field, allFields }: Props) => {
                   'Select the field you want your alias to point to. You will then be able to use the alias instead of the target field in search requests, and selected other APIs like field capabilities.',
               }
             )}
-            ariaId="mappingsEditorPathParameter"
             withToggle={false}
           >
             <>

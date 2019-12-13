@@ -12,7 +12,7 @@ import { getFieldConfig } from '../../../../lib';
 import { UseField, Field } from '../../../../shared_imports';
 import { EditFieldSection, EditFieldFormRow } from '../edit_field';
 
-const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
 
   switch (param) {
@@ -43,13 +43,9 @@ export const ShapeType = ({ field }: Props) => {
     <EditFieldSection>
       {/* orientation */}
       <EditFieldFormRow
-        title={
-          <h3>
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.orientationFieldTitle', {
-              defaultMessage: 'Set orientation',
-            })}
-          </h3>
-        }
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.orientationFieldTitle', {
+          defaultMessage: 'Set orientation',
+        })}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.shapeType.orientationFieldDescription',
           {
@@ -57,7 +53,7 @@ export const ShapeType = ({ field }: Props) => {
               'Define how to interpret vertex order for polygons / multipolygons. This parameter defines one of two coordinate system rules (Right-hand or Left-hand).',
           }
         )}
-        toggleDefaultValue={getDefaultValueToggle('orientation', field.source)}
+        defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
       >
         <UseField
           path="orientation"
@@ -74,13 +70,9 @@ export const ShapeType = ({ field }: Props) => {
 
       {/* ignore_malformed */}
       <EditFieldFormRow
-        title={
-          <h3>
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.ignoreMalformedFieldTitle', {
-              defaultMessage: 'Ignore malformed data',
-            })}
-          </h3>
-        }
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.ignoreMalformedFieldTitle', {
+          defaultMessage: 'Ignore malformed data',
+        })}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.shapeType.ignoredMalformedFieldDescription',
           {
@@ -92,13 +84,9 @@ export const ShapeType = ({ field }: Props) => {
 
       {/* ignore_z_value */}
       <EditFieldFormRow
-        title={
-          <h3>
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.ignoreZvalueFieldTitle', {
-              defaultMessage: 'Ignore Z value',
-            })}
-          </h3>
-        }
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.ignoreZvalueFieldTitle', {
+          defaultMessage: 'Ignore Z value',
+        })}
         description={i18n.translate(
           'xpack.idxMgmt.mappingsEditor.shapeType.ignoreZvalueDescription',
           {
@@ -107,24 +95,20 @@ export const ShapeType = ({ field }: Props) => {
           }
         )}
         formFieldPath="ignore_z_value"
-        toggleDefaultValue={getDefaultValueToggle('ignore_z_value', field.source)}
+        defaultToggleValue={getDefaultToggleValue('ignore_z_value', field.source)}
       />
 
       {/* coerce */}
       <EditFieldFormRow
-        title={
-          <h3>
-            {i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.coerceFieldTitle', {
-              defaultMessage: 'Coerce',
-            })}
-          </h3>
-        }
+        title={i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.coerceFieldTitle', {
+          defaultMessage: 'Coerce',
+        })}
         description={i18n.translate('xpack.idxMgmt.mappingsEditor.shapeType.coerceDescription', {
           defaultMessage:
             'If enabled, unclosed linear rings in polygons will be automatically closed',
         })}
         formFieldPath="coerce"
-        toggleDefaultValue={getDefaultValueToggle('coerce', field.source)}
+        defaultToggleValue={getDefaultToggleValue('coerce', field.source)}
       />
     </EditFieldSection>
   );

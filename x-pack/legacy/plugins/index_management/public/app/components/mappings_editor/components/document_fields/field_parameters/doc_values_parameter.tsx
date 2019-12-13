@@ -12,13 +12,9 @@ import { EditFieldFormRow } from '../fields/edit_field';
 
 export const DocValuesParameter = () => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldTitle', {
-          defaultMessage: 'Save doc values',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldTitle', {
+      defaultMessage: 'Save doc values',
+    })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.docValuesFieldDescription', {
       defaultMessage:
         'Whether to store fields on disk in a column-stride fashion, so that it can later be used for sorting, aggregations, or scripting.',

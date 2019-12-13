@@ -21,7 +21,7 @@ import {
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'analyzer':
     case 'boost': {
@@ -43,13 +43,18 @@ export const TokenCountType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
-        <AnalyzerParameter
-          path="analyzer"
-          defaultValue={field.source.analyzer}
-          allowsIndexDefaultOption={false}
-        />
-      </EditFieldSection>
-      <EditFieldSection>
+        <EditFieldFormRow
+          title={i18n.translate('xpack.idxMgmt.mappingsEditor.tokenCount.analyzerSectionTitle', {
+            defaultMessage: 'Analyzer',
+          })}
+          withToggle={false}
+        >
+          <AnalyzerParameter
+            path="analyzer"
+            defaultValue={field.source.analyzer}
+            allowsIndexDefaultOption={false}
+          />
+        </EditFieldFormRow>
         <StoreParameter />
         <IndexParameter hasIndexOptions={false} />
         <DocValuesParameter />
@@ -59,7 +64,7 @@ export const TokenCountType = ({ field }: Props) => {
         <EditFieldSection>
           {/* null_value */}
           <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.tokenCount.nullValueFieldDescription',
               {
@@ -77,16 +82,12 @@ export const TokenCountType = ({ field }: Props) => {
 
           {/* enable_position_increments */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate(
-                  'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldTitle',
-                  {
-                    defaultMessage: 'Enable position increments',
-                  }
-                )}
-              </h3>
-            }
+            title={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldTitle',
+              {
+                defaultMessage: 'Enable position increments',
+              }
+            )}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.tokenCount.enablePositionIncrementsFieldDescription',
               {
@@ -97,7 +98,7 @@ export const TokenCountType = ({ field }: Props) => {
           />
 
           {/* boost */}
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

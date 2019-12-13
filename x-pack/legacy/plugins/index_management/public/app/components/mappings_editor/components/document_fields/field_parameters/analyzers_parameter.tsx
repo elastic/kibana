@@ -12,7 +12,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { UseField, CheckBoxField, FormDataProvider } from '../../../shared_imports';
 import { NormalizedField } from '../../../types';
 import { getFieldConfig } from '../../../lib';
-import { EditFieldSection } from '../fields/edit_field';
+import { EditFieldFormRow } from '../fields/edit_field';
 import { AnalyzerParameter } from './analyzer_parameter';
 
 interface Props {
@@ -22,10 +22,11 @@ interface Props {
 
 export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: Props) => {
   return (
-    <EditFieldSection
+    <EditFieldFormRow
       title={i18n.translate('xpack.idxMgmt.mappingsEditor.analyzersSectionTitle', {
         defaultMessage: 'Analyzers',
       })}
+      withToggle={false}
     >
       <FormDataProvider pathsToWatch="useSameAnalyzerForSearch">
         {({ useSameAnalyzerForSearch }) => {
@@ -85,6 +86,6 @@ export const AnalyzersParameter = ({ field, withSearchQuoteAnalyzer = false }: P
           />
         </>
       )}
-    </EditFieldSection>
+    </EditFieldFormRow>
   );
 };

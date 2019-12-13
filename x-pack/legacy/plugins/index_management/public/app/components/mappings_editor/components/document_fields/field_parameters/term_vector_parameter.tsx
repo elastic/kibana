@@ -23,17 +23,13 @@ interface Props {
 export const TermVectorParameter = ({ field, defaultToggleValue }: Props) => {
   return (
     <EditFieldFormRow
-      title={
-        <h3>
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldTitle', {
-            defaultMessage: 'Set term vector',
-          })}
-        </h3>
-      }
+      title={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldTitle', {
+        defaultMessage: 'Set term vector',
+      })}
       description={i18n.translate('xpack.idxMgmt.mappingsEditor.termVectorFieldDescription', {
         defaultMessage: 'Whether term vectors should be stored for an analyzed field.',
       })}
-      toggleDefaultValue={defaultToggleValue}
+      defaultToggleValue={defaultToggleValue}
     >
       <FormDataProvider pathsToWatch="term_vector">
         {formData => (
