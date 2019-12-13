@@ -61,8 +61,14 @@ export class PulseService {
       this.loadInstructions().catch(err => console.error(err.stack));
     }, 1000);
 
+    const channelEntries = this.channels.map((channel): [string, PulseChannel] => {
+      return [channel.id, channel];
+    });
+
     return {
-      channels: this.channels,
+      getChannels() {
+        return new Map(channelEntries);
+      },
     };
   }
 
