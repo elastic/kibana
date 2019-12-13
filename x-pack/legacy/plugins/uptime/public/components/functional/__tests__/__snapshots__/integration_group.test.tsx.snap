@@ -6,26 +6,26 @@ exports[`IntegrationGroup will not display APM links when APM is unavailable 1`]
 >
   <EuiFlexItem>
     <IntegrationLink
-      ariaLabel="Check Metricsstructure UI for this montor's ip address"
+      ariaLabel="Check Infrastructure UI for this montor's ip address"
       iconType="metricsApp"
       message="Show host metrics"
-      tooltipContent="Check Metricsstructure UI for the IP \\"\\""
+      tooltipContent="Check Infrastructure UI for the IP \\"\\""
     />
   </EuiFlexItem>
   <EuiFlexItem>
     <IntegrationLink
-      ariaLabel="Check Metricsstructure UI for this monitor's pod UID"
+      ariaLabel="Check Infrastructure UI for this monitor's pod UID"
       iconType="metricsApp"
       message="Show pod metrics"
-      tooltipContent="Check Metricsstructure UI for pod UID \\"\\"."
+      tooltipContent="Check Infrastructure UI for pod UID \\"\\"."
     />
   </EuiFlexItem>
   <EuiFlexItem>
     <IntegrationLink
-      ariaLabel="Check Metricsstructure UI for this monitor's container ID"
+      ariaLabel="Check Infrastructure UI for this monitor's container ID"
       iconType="metricsApp"
       message="Show container metrics"
-      tooltipContent="Check Metricsstructure UI for container ID \\"\\""
+      tooltipContent="Check Infrastructure UI for container ID \\"\\""
     />
   </EuiFlexItem>
   <EuiFlexItem>
@@ -110,26 +110,26 @@ exports[`IntegrationGroup will not display logging links when logging is unavail
   </EuiFlexItem>
   <EuiFlexItem>
     <IntegrationLink
-      ariaLabel="Check Metricsstructure UI for this montor's ip address"
+      ariaLabel="Check Infrastructure UI for this montor's ip address"
       iconType="metricsApp"
       message="Show host metrics"
-      tooltipContent="Check Metricsstructure UI for the IP \\"\\""
+      tooltipContent="Check Infrastructure UI for the IP \\"\\""
     />
   </EuiFlexItem>
   <EuiFlexItem>
     <IntegrationLink
-      ariaLabel="Check Metricsstructure UI for this monitor's pod UID"
+      ariaLabel="Check Infrastructure UI for this monitor's pod UID"
       iconType="metricsApp"
       message="Show pod metrics"
-      tooltipContent="Check Metricsstructure UI for pod UID \\"\\"."
+      tooltipContent="Check Infrastructure UI for pod UID \\"\\"."
     />
   </EuiFlexItem>
   <EuiFlexItem>
     <IntegrationLink
-      ariaLabel="Check Metricsstructure UI for this monitor's container ID"
+      ariaLabel="Check Infrastructure UI for this monitor's container ID"
       iconType="metricsApp"
       message="Show container metrics"
-      tooltipContent="Check Metricsstructure UI for container ID \\"\\""
+      tooltipContent="Check Infrastructure UI for container ID \\"\\""
     />
   </EuiFlexItem>
 </EuiFlexGroup>

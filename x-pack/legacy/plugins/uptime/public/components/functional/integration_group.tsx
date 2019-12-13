@@ -82,7 +82,7 @@ export const IntegrationGroup = ({
               ariaLabel={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.ip.ariaLabel',
                 {
-                  defaultMessage: `Check Metricsstructure UI for this montor's ip address`,
+                  defaultMessage: `Check Infrastructure UI for this montor's ip address`,
                   description: 'This value is shown as the aria label value for screen readers.',
                 }
               )}
@@ -92,13 +92,13 @@ export const IntegrationGroup = ({
                 'xpack.uptime.monitorList.infraIntegrationAction.ip.message',
                 {
                   defaultMessage: 'Show host metrics',
-                  description: `A message explaining that this link will take the user to the Metricsstructure UI, filtered for this monitor's IP Address`,
+                  description: `A message explaining that this link will take the user to the Infrastructure UI, filtered for this monitor's IP Address`,
                 }
               )}
               tooltipContent={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.ip.tooltip',
                 {
-                  defaultMessage: 'Check Metricsstructure UI for the IP "{ip}"',
+                  defaultMessage: 'Check Infrastructure UI for the IP "{ip}"',
                   values: {
                     ip,
                   },
@@ -111,7 +111,7 @@ export const IntegrationGroup = ({
               ariaLabel={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.description',
                 {
-                  defaultMessage: `Check Metricsstructure UI for this monitor's pod UID`,
+                  defaultMessage: `Check Infrastructure UI for this monitor's pod UID`,
                   description: 'This value is shown as the aria label value for screen readers.',
                 }
               )}
@@ -122,13 +122,13 @@ export const IntegrationGroup = ({
                 {
                   defaultMessage: 'Show pod metrics',
                   description:
-                    'A message explaining that this link will take the user to the Metricsstructure UI filtered for the monitor Pod UID.',
+                    'A message explaining that this link will take the user to the Infrastructure UI filtered for the monitor Pod UID.',
                 }
               )}
               tooltipContent={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.tooltip',
                 {
-                  defaultMessage: 'Check Metricsstructure UI for pod UID "{podUid}".',
+                  defaultMessage: 'Check Infrastructure UI for pod UID "{podUid}".',
                   values: {
                     podUid,
                   },
@@ -141,7 +141,7 @@ export const IntegrationGroup = ({
               ariaLabel={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.docker.description',
                 {
-                  defaultMessage: `Check Metricsstructure UI for this monitor's container ID`,
+                  defaultMessage: `Check Infrastructure UI for this monitor's container ID`,
                 }
               )}
               href={getMetricsContainerHref(summary, basePath)}
@@ -155,7 +155,7 @@ export const IntegrationGroup = ({
               tooltipContent={i18n.translate(
                 'xpack.uptime.monitorList.infraIntegrationAction.docker.tooltip',
                 {
-                  defaultMessage: 'Check Metricsstructure UI for container ID "{containerId}"',
+                  defaultMessage: 'Check Infrastructure UI for container ID "{containerId}"',
                   values: {
                     containerId,
                   },
@@ -182,7 +182,7 @@ export const IntegrationGroup = ({
                 'xpack.uptime.monitorList.loggingIntegrationAction.ip.message',
                 {
                   defaultMessage: 'Show host logs',
-                  description: `A message explaining that this link will take the user to the Metricsstructure UI filtered for the monitor's IP Address`,
+                  description: `A message explaining that this link will take the user to the Infrastructure UI filtered for the monitor's IP Address`,
                 }
               )}
               tooltipContent={i18n.translate(
