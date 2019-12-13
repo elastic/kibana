@@ -20,13 +20,15 @@
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { npStart, Field } from '../legacy_imports';
+import { npStart, SearchSource as SearchSourceClass } from '../legacy_imports';
 import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { ControlParams } from '../editor_utils';
+import { InputControlVisDependencies } from '../plugin';
+import { IFieldType } from '../.../../../../../../plugins/data/public';
 
-const minMaxAgg = (field?: Field) => {
+const minMaxAgg = (field?: IFieldType) => {
   const aggBody: any = {};
   if (field) {
     if (field.scripted) {
@@ -50,9 +52,21 @@ const minMaxAgg = (field?: Field) => {
 };
 
 export class RangeControl extends Control<RangeFilterManager> {
+  timefilter: InputControlVisDependencies['timefilter'];
   abortController: any;
   min: any;
   max: any;
+
+  constructor(
+    controlParams: ControlParams,
+    filterManager: RangeFilterManager,
+    useTimeFilter: boolean,
+    SearchSource: SearchSourceClass,
+    timefilter: InputControlVisDependencies['timefilter']
+  ) {
+    super(controlParams, filterManager, useTimeFilter, SearchSource);
+    this.timefilter = timefilter;
+  }
 
   async fetch() {
     // Abort any in-progress fetch
@@ -73,7 +87,9 @@ export class RangeControl extends Control<RangeFilterManager> {
       null,
       indexPattern,
       aggs,
-      this.useTimeFilter
+      this.useTimeFilter,
+      [],
+      this.timefilter
     );
     const abortSignal = this.abortController.signal;
 
@@ -112,8 +128,9 @@ export class RangeControl extends Control<RangeFilterManager> {
 
 export async function rangeControlFactory(
   controlParams: ControlParams,
-  useTimeFilter: any,
-  SearchSource: any
+  useTimeFilter: boolean,
+  SearchSource: SearchSourceClass,
+  timefilter: InputControlVisDependencies['timefilter']
 ): Promise<RangeControl> {
   let indexPattern;
   try {
@@ -133,6 +150,7 @@ export async function rangeControlFactory(
       filterManager
     ),
     useTimeFilter,
-    SearchSource
+    SearchSource,
+    timefilter
   );
 }

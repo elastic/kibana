@@ -18,11 +18,13 @@
  */
 
 import expect from '@kbn/expect';
-import { PhraseFilterManager } from './phrase_filter_manager';
 
-import { IndexPattern } from '../../legacy_imports';
-import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
-import { Filter } from 'src/plugins/data/common/es_query/filters';
+import {
+  esFilters,
+  IIndexPattern,
+  FilterManager as QueryFilterManager,
+} from '../../../../../../plugins/data/public';
+import { PhraseFilterManager } from './phrase_filter_manager';
 
 describe('PhraseFilterManager', function() {
   const controlId = 'control1';
@@ -35,7 +37,7 @@ describe('PhraseFilterManager', function() {
         convert: (value: any) => value,
       },
     };
-    const indexPatternMock: IndexPattern = {
+    const indexPatternMock: IIndexPattern = {
       id: indexPatternId,
       fields: {
         getByName: (name: any) => {
@@ -43,7 +45,7 @@ describe('PhraseFilterManager', function() {
           return fields[name];
         },
       },
-    } as IndexPattern;
+    } as IIndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: PhraseFilterManager;
     beforeEach(() => {
@@ -86,12 +88,12 @@ describe('PhraseFilterManager', function() {
 
   describe('getValueFromFilterBar', function() {
     class MockFindFiltersPhraseFilterManager extends PhraseFilterManager {
-      mockFilters: Filter[];
+      mockFilters: esFilters.Filter[];
 
       constructor(
         id: string,
         fieldName: string,
-        indexPattern: IndexPattern,
+        indexPattern: IIndexPattern,
         queryFilter: QueryFilterManager
       ) {
         super(id, fieldName, indexPattern, queryFilter);
@@ -102,12 +104,12 @@ describe('PhraseFilterManager', function() {
         return this.mockFilters;
       }
 
-      setMockFilters(mockFilters: Filter[]) {
+      setMockFilters(mockFilters: esFilters.Filter[]) {
         this.mockFilters = mockFilters;
       }
     }
 
-    const indexPatternMock: IndexPattern = {} as IndexPattern;
+    const indexPatternMock: IIndexPattern = {} as IIndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: MockFindFiltersPhraseFilterManager;
     beforeEach(() => {
@@ -131,7 +133,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ] as Filter[]);
+      ] as esFilters.Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios']);
     });
 
@@ -157,7 +159,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ] as Filter[]);
+      ] as esFilters.Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
@@ -181,7 +183,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ] as Filter[]);
+      ] as esFilters.Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
@@ -197,7 +199,7 @@ describe('PhraseFilterManager', function() {
             },
           },
         },
-      ] as Filter[]);
+      ] as esFilters.Filter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
     });
   });

@@ -19,20 +19,22 @@
 
 import _ from 'lodash';
 
-import { Filter } from 'src/plugins/data/common/es_query/filters';
-import { IndexPattern } from '../../legacy_imports';
-import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
+import {
+  FilterManager as QueryFilterManager,
+  IIndexPattern,
+  esFilters,
+} from '../../../../../../plugins/data/public';
 
 export abstract class FilterManager {
   controlId: string;
   fieldName: string;
-  indexPattern: IndexPattern;
+  indexPattern: IIndexPattern;
   queryFilter: QueryFilterManager;
 
   constructor(
     controlId: string,
     fieldName: string,
-    indexPattern: IndexPattern,
+    indexPattern: IIndexPattern,
     queryFilter: QueryFilterManager
   ) {
     this.controlId = controlId;
@@ -49,11 +51,11 @@ export abstract class FilterManager {
    *   single phrase: match query
    *   multiple phrases: bool query with should containing list of match_phrase queries
    */
-  abstract createFilter(phrases: any): Filter;
+  abstract createFilter(phrases: any): esFilters.Filter;
 
   abstract getValueFromFilterBar(): any;
 
-  getIndexPattern(): IndexPattern {
+  getIndexPattern(): IIndexPattern {
     return this.indexPattern;
   }
 
@@ -61,7 +63,7 @@ export abstract class FilterManager {
     return this.indexPattern.fields.getByName(this.fieldName);
   }
 
-  findFilters(): Filter[] {
+  findFilters(): esFilters.Filter[] {
     const kbnFilters = _.flatten([
       this.queryFilter.getAppFilters(),
       this.queryFilter.getGlobalFilters(),

@@ -18,17 +18,20 @@
  */
 
 import expect from '@kbn/expect';
+
 import { FilterManager } from './filter_manager';
-import { Filter } from 'src/plugins/data/common/es_query/filters';
-import { IndexPattern } from '../../legacy_imports';
-import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
 import { coreMock } from '../../../../../../core/public/mocks';
+import {
+  esFilters,
+  IIndexPattern,
+  FilterManager as QueryFilterManager,
+} from '../../../../../../plugins/data/public';
 
 const setupMock = coreMock.createSetup();
 
 class FilterManagerTest extends FilterManager {
   createFilter() {
-    return {} as Filter;
+    return {} as esFilters.Filter;
   }
 
   getValueFromFilterBar() {
@@ -40,8 +43,8 @@ describe('FilterManager', function() {
   const controlId = 'control1';
 
   describe('findFilters', function() {
-    const indexPatternMock = {} as IndexPattern;
-    let kbnFilters: Filter[];
+    const indexPatternMock = {} as IIndexPattern;
+    let kbnFilters: esFilters.Filter[];
     const queryFilterMock = new QueryFilterManager(setupMock.uiSettings);
     queryFilterMock.getAppFilters = () => kbnFilters;
     queryFilterMock.getGlobalFilters = () => [];
@@ -53,7 +56,7 @@ describe('FilterManager', function() {
     });
 
     test('should not find filters that are not controlled by any visualization', function() {
-      kbnFilters.push({} as Filter);
+      kbnFilters.push({} as esFilters.Filter);
       const foundFilters = filterManager.findFilters();
       expect(foundFilters.length).to.be(0);
     });
@@ -63,7 +66,7 @@ describe('FilterManager', function() {
         meta: {
           controlledBy: 'anotherControl',
         },
-      } as Filter);
+      } as esFilters.Filter);
       const foundFilters = filterManager.findFilters();
       expect(foundFilters.length).to.be(0);
     });
@@ -73,7 +76,7 @@ describe('FilterManager', function() {
         meta: {
           controlledBy: controlId,
         },
-      } as Filter);
+      } as esFilters.Filter);
       const foundFilters = filterManager.findFilters();
       expect(foundFilters.length).to.be(1);
     });

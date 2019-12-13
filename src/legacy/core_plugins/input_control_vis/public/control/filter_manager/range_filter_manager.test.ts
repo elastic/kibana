@@ -20,9 +20,11 @@
 import expect from '@kbn/expect';
 
 import { RangeFilterManager } from './range_filter_manager';
-import { IndexPattern } from '../../legacy_imports';
-import { FilterManager as QueryFilterManager } from '../../../../../../plugins/data/public';
-import { RangeFilter, RangeFilterMeta } from 'src/plugins/data/common/es_query/filters';
+import {
+  esFilters,
+  IIndexPattern,
+  FilterManager as QueryFilterManager,
+} from '../../../../../../plugins/data/public';
 
 describe('RangeFilterManager', function() {
   const controlId = 'control1';
@@ -32,7 +34,7 @@ describe('RangeFilterManager', function() {
     const fieldMock = {
       name: 'field1',
     };
-    const indexPatternMock: IndexPattern = {
+    const indexPatternMock: IIndexPattern = {
       id: indexPatternId,
       fields: {
         getByName: (name: any) => {
@@ -42,7 +44,7 @@ describe('RangeFilterManager', function() {
           return fields[name];
         },
       },
-    } as IndexPattern;
+    } as IIndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: RangeFilterManager;
     beforeEach(() => {
@@ -67,12 +69,12 @@ describe('RangeFilterManager', function() {
 
   describe('getValueFromFilterBar', function() {
     class MockFindFiltersRangeFilterManager extends RangeFilterManager {
-      mockFilters: RangeFilter[];
+      mockFilters: esFilters.RangeFilter[];
 
       constructor(
         id: string,
         fieldName: string,
-        indexPattern: IndexPattern,
+        indexPattern: IIndexPattern,
         queryFilter: QueryFilterManager
       ) {
         super(id, fieldName, indexPattern, queryFilter);
@@ -83,12 +85,12 @@ describe('RangeFilterManager', function() {
         return this.mockFilters;
       }
 
-      setMockFilters(mockFilters: RangeFilter[]) {
+      setMockFilters(mockFilters: esFilters.RangeFilter[]) {
         this.mockFilters = mockFilters;
       }
     }
 
-    const indexPatternMock: IndexPattern = {} as IndexPattern;
+    const indexPatternMock: IIndexPattern = {} as IIndexPattern;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: MockFindFiltersRangeFilterManager;
     beforeEach(() => {
@@ -109,9 +111,9 @@ describe('RangeFilterManager', function() {
               lt: 3,
             },
           },
-          meta: {} as RangeFilterMeta,
+          meta: {} as esFilters.RangeFilterMeta,
         },
-      ] as RangeFilter[]);
+      ] as esFilters.RangeFilter[]);
       const value = filterManager.getValueFromFilterBar();
       expect(value).to.be.a('object');
       expect(value).to.have.property('min');
@@ -129,9 +131,9 @@ describe('RangeFilterManager', function() {
               lte: 3,
             },
           },
-          meta: {} as RangeFilterMeta,
+          meta: {} as esFilters.RangeFilterMeta,
         },
-      ] as RangeFilter[]);
+      ] as esFilters.RangeFilter[]);
       expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
     });
   });

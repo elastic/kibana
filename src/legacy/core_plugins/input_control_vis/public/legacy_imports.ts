@@ -19,13 +19,8 @@
 
 export { npSetup, npStart } from 'ui/new_platform';
 
-import chrome from 'ui/chrome';
-export { chrome };
-
 export { I18nContext } from 'ui/i18n';
 export { Vis, VisParams } from 'ui/vis';
-export { IndexPattern, Field } from 'ui/index_patterns';
 export { VisOptionsProps } from 'ui/vis/editors/default';
 export { ValidatedDualRange } from 'ui/validated_range';
 export { SearchSource } from 'ui/courier';
-export { timefilter } from 'ui/timefilter';

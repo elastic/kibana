@@ -21,8 +21,8 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { PhraseFilter } from 'src/plugins/data/common/es_query/filters';
 
+import { esFilters } from '../../../../../plugins/data/public';
 import { SearchSource as SearchSourceClass } from '../legacy_imports';
 import { ControlParams, ControlParamsOptions, CONTROL_TYPES } from '../editor_utils';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
@@ -46,7 +46,7 @@ export function noIndexPatternMsg(indexPatternId: string) {
 }
 
 export abstract class Control<FilterManager extends BaseFilterManager> {
-  private kbnFilter: PhraseFilter | null = null;
+  private kbnFilter: esFilters.PhraseFilter | null = null;
 
   enable: boolean = false;
   disabledReason: string = '';

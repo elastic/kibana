@@ -35,7 +35,7 @@ import {
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle, ControlParams, CONTROL_TYPES, ControlParamsOptions } from '../../editor_utils';
-import { IndexPattern } from '../../legacy_imports';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
 
 interface ControlEditorUiProps {
   controlIndex: number;
@@ -45,7 +45,7 @@ interface ControlEditorUiProps {
   handleRemoveControl: (controlIndex: number) => void;
   handleIndexPatternChange: (controlIndex: number, indexPatternId: string) => void;
   handleFieldNameChange: (controlIndex: number, fieldName: string) => void;
-  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
   handleCheckboxOptionChange: (
     controlIndex: number,
     optionName: keyof ControlParamsOptions,

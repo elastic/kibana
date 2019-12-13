@@ -32,7 +32,7 @@ import {
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IndexPattern, Field } from '../../legacy_imports';
+import { IIndexPattern, IFieldType } from '../../../../../../plugins/data/public';
 
 interface ListControlEditorState {
   isLoadingFieldType: boolean;
@@ -41,7 +41,7 @@ interface ListControlEditorState {
 }
 
 interface ListControlEditorProps {
-  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
   controlIndex: number;
   controlParams: ControlParams;
   handleFieldNameChange: (fieldName: string) => void;
@@ -60,7 +60,7 @@ interface ListControlEditorProps {
   parentCandidates: EuiSelectProps['options'];
 }
 
-function filterField(field: Field) {
+function filterField(field: IFieldType) {
   return (
     Boolean(field.aggregatable) &&
     ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
@@ -115,7 +115,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    let indexPattern: IndexPattern;
+    let indexPattern: IIndexPattern;
     try {
       indexPattern = await this.props.getIndexPattern(this.props.controlParams.indexPattern);
     } catch (err) {
@@ -127,7 +127,7 @@ export class ListControlEditor extends PureComponent<
       return;
     }
 
-    const field = (indexPattern.fields as Field[]).find(
+    const field = (indexPattern.fields as IFieldType[]).find(
       ({ name }) => name === this.props.controlParams.fieldName
     );
     if (!field) {

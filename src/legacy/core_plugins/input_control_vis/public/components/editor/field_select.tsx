@@ -24,7 +24,7 @@ import { InjectedIntlProps } from 'react-intl';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { EuiFormRow, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 
-import { IndexPattern, Field } from '../../legacy_imports';
+import { IIndexPattern, IFieldType } from '../../../../../../plugins/data/public';
 
 interface FieldSelectUiState {
   isLoading: boolean;
@@ -33,11 +33,11 @@ interface FieldSelectUiState {
 }
 
 export type FieldSelectUiProps = InjectedIntlProps & {
-  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
   indexPatternId: string;
   onChange: (value: any) => void;
   fieldName?: string;
-  filterField?: (field: Field) => boolean;
+  filterField?: (field: IFieldType) => boolean;
   controlIndex: number;
 };
 
@@ -86,7 +86,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
       return;
     }
 
-    let indexPattern: IndexPattern;
+    let indexPattern: IIndexPattern;
     try {
       indexPattern = await this.props.getIndexPattern(indexPatternId);
     } catch (err) {
@@ -106,11 +106,13 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
 
     const fieldsByTypeMap = new Map<string, string[]>();
     const fields: Array<EuiComboBoxOptionProps<string>> = [];
-    indexPattern.fields.filter(this.props.filterField ?? (() => true)).forEach((field: Field) => {
-      const fieldsList = fieldsByTypeMap.get(field.type) ?? [];
-      fieldsList.push(field.name);
-      fieldsByTypeMap.set(field.type, fieldsList);
-    });
+    indexPattern.fields
+      .filter(this.props.filterField ?? (() => true))
+      .forEach((field: IFieldType) => {
+        const fieldsList = fieldsByTypeMap.get(field.type) ?? [];
+        fieldsList.push(field.name);
+        fieldsByTypeMap.set(field.type, fieldsList);
+      });
 
     fieldsByTypeMap.forEach((fieldsList, fieldType) => {
       fields.push({
@@ -156,7 +158,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
         label={
           <FormattedMessage
             id="inputControl.editor.fieldSelect.fieldLabel"
-            defaultMessage="Field"
+            defaultMessage="IFieldType"
           />
         }
       >

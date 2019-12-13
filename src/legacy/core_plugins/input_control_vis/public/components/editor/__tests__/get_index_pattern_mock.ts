@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { IndexPattern } from '../../../legacy_imports';
+import { IIndexPattern } from '../../../../../../../plugins/data/public';
 
 /**
  * Returns forced **Partial** IndexPattern for use in tests
  */
-export const getIndexPatternMock = (): Promise<IndexPattern> => {
+export const getIndexPatternMock = (): Promise<IIndexPattern> => {
   return Promise.resolve({
     id: 'mockIndexPattern',
     title: 'mockIndexPattern',
@@ -31,5 +31,5 @@ export const getIndexPatternMock = (): Promise<IndexPattern> => {
       { name: 'textField', type: 'string', aggregatable: false },
       { name: 'numberField', type: 'number', aggregatable: true },
     ],
-  } as IndexPattern);
+  } as IIndexPattern);
 };

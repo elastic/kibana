@@ -16,16 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { PhraseFilter } from 'src/plugins/data/common/es_query/filters';
-import { IndexPattern, timefilter } from '../legacy_imports';
+import { esFilters, IIndexPattern } from '../../../../../plugins/data/public';
+import { InputControlVisDependencies } from '../plugin';
 
 export function createSearchSource(
   SearchSource: any,
   initialState: any,
-  indexPattern: IndexPattern,
+  indexPattern: IIndexPattern,
   aggs: any,
-  useTimeFilter: any,
-  filters: PhraseFilter[] = []
+  useTimeFilter: boolean,
+  filters: esFilters.PhraseFilter[] = [],
+  timefilter: InputControlVisDependencies['timefilter']
 ) {
   const searchSource = initialState ? new SearchSource(initialState) : new SearchSource();
   // Do not not inherit from rootSearchSource to avoid picking up time and globals

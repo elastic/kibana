@@ -48,8 +48,8 @@ describe('interpreter/functions#input_control_vis', () => {
     pinFilters: false,
   };
 
-  it('returns an object with the correct structure', () => {
-    const actual = fn(null, { visConfig: JSON.stringify(visConfig) });
+  it('returns an object with the correct structure', async () => {
+    const actual = await fn(null, { visConfig: JSON.stringify(visConfig) });
     expect(actual).toMatchSnapshot();
   });
 });

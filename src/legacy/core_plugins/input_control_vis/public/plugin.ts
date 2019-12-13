@@ -16,18 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { DataPublicPluginSetup } from 'src/plugins/data/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../../core/public';
-
 import { createInputControlVisFn } from './input_control_fn';
-import { inputControlVisTypeDefinition } from './input_control_vis_type';
+import { createInputControlVisTypeDefinition } from './input_control_vis_type';
+
+export interface InputControlVisDependencies {
+  getInjectedVar: CoreSetup['injectedMetadata']['getInjectedVar'];
+  timefilter: DataPublicPluginSetup['query']['timefilter']['timefilter'];
+}
 
 /** @internal */
 export interface InputControlVisPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  data: DataPublicPluginSetup;
 }
 
 /** @internal */
@@ -40,10 +45,17 @@ export class InputControlVisPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations }: InputControlVisPluginSetupDependencies
+    { expressions, visualizations, data }: InputControlVisPluginSetupDependencies
   ) {
+    const visualizationDependencies: Readonly<InputControlVisDependencies> = {
+      getInjectedVar: core.injectedMetadata.getInjectedVar,
+      timefilter: data.query.timefilter.timefilter,
+    };
+
     expressions.registerFunction(createInputControlVisFn);
-    visualizations.types.createBaseVisualization(inputControlVisTypeDefinition);
+    visualizations.types.createBaseVisualization(
+      createInputControlVisTypeDefinition(visualizationDependencies)
+    );
   }
 
   public start(core: CoreStart) {

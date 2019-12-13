@@ -19,27 +19,26 @@
 
 import _ from 'lodash';
 
-import { PhraseFilter } from 'src/plugins/data/common/es_query/filters';
-import { IndexPattern } from '../../legacy_imports';
 import { FilterManager } from './filter_manager';
 import {
-  FilterManager as QueryFilterManager,
   esFilters,
   IFieldType,
+  IIndexPattern,
+  FilterManager as QueryFilterManager,
 } from '../../../../../../plugins/data/public';
 
 export class PhraseFilterManager extends FilterManager {
   constructor(
     controlId: string,
     fieldName: string,
-    indexPattern: IndexPattern,
+    indexPattern: IIndexPattern,
     queryFilter: QueryFilterManager
   ) {
     super(controlId, fieldName, indexPattern, queryFilter);
   }
 
-  createFilter(phrases: any): PhraseFilter {
-    let newFilter: PhraseFilter;
+  createFilter(phrases: any): esFilters.PhraseFilter {
+    let newFilter: esFilters.PhraseFilter;
     // TODO: Fix type to be required
     const value = this.indexPattern.fields.getByName(this.fieldName) as IFieldType;
 
@@ -78,13 +77,13 @@ export class PhraseFilterManager extends FilterManager {
   /**
    * Extract filtering value from kibana filters
    *
-   * @param  {PhraseFilter} kbnFilter
+   * @param  {esFilters.PhraseFilter} kbnFilter
    * @return {Array.<string>} array of values pulled from filter
    */
-  private getValueFromFilter(kbnFilter: PhraseFilter): any {
+  private getValueFromFilter(kbnFilter: esFilters.PhraseFilter): any {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
-      return _.get<PhraseFilter[]>(kbnFilter, 'query.bool.should')
+      return _.get<esFilters.PhraseFilter[]>(kbnFilter, 'query.bool.should')
         .map(kbnQueryFilter => {
           return this.getValueFromFilter(kbnQueryFilter);
         })

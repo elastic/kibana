@@ -43,7 +43,8 @@ import {
   ControlParamsOptions,
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
-import { VisOptionsProps, IndexPattern, npStart } from '../../legacy_imports';
+import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { VisOptionsProps, npStart } from '../../legacy_imports';
 
 interface ControlsTabUiState {
   type: CONTROL_TYPES;
@@ -62,7 +63,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiInjectedProps, ControlsTa
     type: CONTROL_TYPES.LIST,
   };
 
-  getIndexPattern = async (indexPatternId: string): Promise<IndexPattern> => {
+  getIndexPattern = async (indexPatternId: string): Promise<IIndexPattern> => {
     return await npStart.plugins.data.indexPatterns.get(indexPatternId);
   };
 

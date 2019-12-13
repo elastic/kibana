@@ -24,12 +24,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
 import { ControlParams, ControlParamsOptions } from '../../editor_utils';
-import { IndexPattern, Field } from '../../legacy_imports';
+import { IIndexPattern, IFieldType } from '../../../../../../plugins/data/public';
 
 interface RangeControlEditorProps {
   controlIndex: number;
   controlParams: ControlParams;
-  getIndexPattern: (indexPatternId: string) => Promise<IndexPattern>;
+  getIndexPattern: (indexPatternId: string) => Promise<IIndexPattern>;
   handleFieldNameChange: (fieldName: string) => void;
   handleIndexPatternChange: (indexPatternId: string) => void;
   handleNumberOptionChange: (
@@ -39,7 +39,7 @@ interface RangeControlEditorProps {
   ) => void;
 }
 
-function filterField(field: Field) {
+function filterField(field: IFieldType) {
   return field.type === 'number';
 }
 

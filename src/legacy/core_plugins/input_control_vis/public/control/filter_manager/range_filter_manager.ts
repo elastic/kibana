@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { RangeFilterParams, RangeFilter } from 'src/plugins/data/common/es_query/filters/index';
+
 import { FilterManager } from './filter_manager';
 import { esFilters, IFieldType } from '../../../../../../plugins/data/public';
 
@@ -36,7 +36,7 @@ function toRange(sliderValue: SliderValue) {
 }
 
 // Convert ES range filter into slider value
-function fromRange(range: RangeFilterParams): SliderValue {
+function fromRange(range: esFilters.RangeFilterParams): SliderValue {
   const sliderValue: SliderValue = {};
   if (_.has(range, 'gte')) {
     sliderValue.min = _.get(range, 'gte');
@@ -60,7 +60,7 @@ export class RangeFilterManager extends FilterManager {
    * @param {object} react-input-range value - POJO with `min` and `max` properties
    * @return {object} range filter
    */
-  createFilter(value: SliderValue): RangeFilter {
+  createFilter(value: SliderValue): esFilters.RangeFilter {
     const newFilter = esFilters.buildRangeFilter(
       // TODO: Fix type to be required
       this.indexPattern.fields.getByName(this.fieldName) as IFieldType,
@@ -78,7 +78,7 @@ export class RangeFilterManager extends FilterManager {
       return;
     }
 
-    let range: RangeFilterParams;
+    let range: esFilters.RangeFilterParams;
     if (_.has(kbnFilters[0], 'script')) {
       range = _.get(kbnFilters[0], 'script.script.params');
     } else {
