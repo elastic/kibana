@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { aggTypeFieldFilters } from './field_filters';
+export { aggTypeFieldFilters } from '../../index';

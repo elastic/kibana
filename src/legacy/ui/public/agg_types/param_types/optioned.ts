@@ -17,43 +17,4 @@
  * under the License.
  */
 
-import { AggConfig } from '../../vis';
-import { BaseParamType } from './base';
-
-export interface OptionedValueProp {
-  value: string;
-  text: string;
-  disabled?: boolean;
-  isCompatible: (agg: AggConfig) => boolean;
-}
-
-export interface OptionedParamEditorProps<T = OptionedValueProp> {
-  aggParam: {
-    options: T[];
-  };
-}
-
-export class OptionedParamType extends BaseParamType {
-  options: OptionedValueProp[];
-
-  constructor(config: Record<string, any>) {
-    super(config);
-
-    if (!config.write) {
-      this.write = (aggConfig: AggConfig, output: Record<string, any>) => {
-        output.params[this.name] = aggConfig.params[this.name].value;
-      };
-    }
-    if (!config.serialize) {
-      this.serialize = (selected: OptionedValueProp) => {
-        return selected.value;
-      };
-    }
-    if (!config.deserialize) {
-      this.deserialize = (value: any) => {
-        return this.options.find((option: OptionedValueProp) => option.value === value);
-      };
-    }
-    this.options = config.options || [];
-  }
-}
+export { OptionedParamEditorProps, OptionedParamType, OptionedValueProp } from '../index';

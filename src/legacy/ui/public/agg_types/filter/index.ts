@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { aggTypeFilters } from './agg_type_filters';
-export { propFilter } from './prop_filter';
+export { aggTypeFilters, propFilter } from '../index';
