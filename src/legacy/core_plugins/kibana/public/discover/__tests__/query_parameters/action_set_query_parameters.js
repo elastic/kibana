@@ -27,7 +27,7 @@ import { getQueryParameterActions } from '../../np_ready/angular/context/query_p
 
 describe('context app', function () {
   beforeEach(() => pluginInstance.initializeInnerAngular());
-  beforeEach(() => pluginInstance.initializeServices(true));
+  beforeEach(() => pluginInstance.initializeServices());
   beforeEach(ngMock.module('app/discover'));
 
   describe('action setQueryParameters', function () {

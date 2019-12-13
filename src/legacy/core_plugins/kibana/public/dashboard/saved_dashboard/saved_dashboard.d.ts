@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObject } from 'ui/saved_objects/saved_object';
+import { SavedObject } from 'ui/saved_objects/types';
 import { SearchSourceContract } from 'ui/courier';
 import { esFilters, Query, RefreshInterval } from '../../../../../../plugins/data/public';
 

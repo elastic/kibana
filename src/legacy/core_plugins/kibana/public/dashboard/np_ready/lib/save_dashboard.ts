@@ -18,7 +18,7 @@
  */
 
 import { TimefilterContract } from 'src/plugins/data/public';
-import { SaveOptions } from '../../legacy_imports';
+import { SavedObjectSaveOpts } from '../../legacy_imports';
 import { updateSavedDashboard } from './update_saved_dashboard';
 import { DashboardStateManager } from '../dashboard_state_manager';
 
@@ -34,7 +34,7 @@ export function saveDashboard(
   toJson: (obj: any) => string,
   timeFilter: TimefilterContract,
   dashboardStateManager: DashboardStateManager,
-  saveOptions: SaveOptions
+  saveOptions: SavedObjectSaveOpts
 ): Promise<string> {
   dashboardStateManager.saveState();
 
