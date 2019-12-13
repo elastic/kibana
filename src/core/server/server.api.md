@@ -574,15 +574,21 @@ export interface CoreStart {
     savedObjects: SavedObjectsServiceStart;
 }
 
-// @internal
-export class CspConfig {
+// @public
+export class CspConfig implements ICspConfig {
     // Warning: (ae-forgotten-export) The symbol "CspConfigType" needs to be exported by the entry point index.d.ts
+    // 
+    // @internal
     constructor(rawCspConfig?: Partial<CspConfigType>);
     // (undocumented)
     static readonly DEFAULT: CspConfig;
+    // (undocumented)
     readonly header: string;
+    // (undocumented)
     readonly rules: string[];
+    // (undocumented)
     readonly strict: boolean;
+    // (undocumented)
     readonly warnLegacyBrowsers: boolean;
 }
 
@@ -754,10 +760,13 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 // @public
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
 
-// Warning: (ae-incompatible-release-tags) The symbol "ICspConfig" is marked as @public, but its signature references "CspConfig" which is marked as @internal
-// 
 // @public
-export type ICspConfig = Pick<CspConfig, keyof CspConfig>;
+export interface ICspConfig {
+    readonly header: string;
+    readonly rules: string[];
+    readonly strict: boolean;
+    readonly warnLegacyBrowsers: boolean;
+}
 
 // @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {

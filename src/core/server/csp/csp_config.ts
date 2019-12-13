@@ -22,43 +22,49 @@ import { CspConfigType, config } from './config';
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
 /**
- * CSP configuration for use in Kibana.
+ * Csp configuration for use in Kibana.
  * @public
  */
-export type ICspConfig = Pick<CspConfig, keyof CspConfig>;
-
-/**
- * CSP configuration for use in Kibana.
- * @internal
- */
-export class CspConfig {
-  static readonly DEFAULT = new CspConfig();
-
+export interface ICspConfig {
   /**
    * The CSP rules used for Kibana.
    */
-  public readonly rules: string[];
+  readonly rules: string[];
 
   /**
    * Specify whether browsers that do not support CSP should be
    * able to use Kibana. Use `true` to block and `false` to allow.
    */
-  public readonly strict: boolean;
+  readonly strict: boolean;
 
   /**
    * Specify whether users with legacy browsers should be warned
    * about their lack of Kibana security compliance.
    */
-  public readonly warnLegacyBrowsers: boolean;
+  readonly warnLegacyBrowsers: boolean;
 
   /**
    * The CSP rules in a formatted directives string for use
    * in a `Content-Security-Policy` header.
    */
+  readonly header: string;
+}
+
+/**
+ * CSP configuration for use in Kibana.
+ * @public
+ */
+export class CspConfig implements ICspConfig {
+  static readonly DEFAULT = new CspConfig();
+
+  public readonly rules: string[];
+  public readonly strict: boolean;
+  public readonly warnLegacyBrowsers: boolean;
   public readonly header: string;
 
   /**
    * Returns the default CSP configuration when passed with no config
+   * @internal
    */
   constructor(rawCspConfig: Partial<CspConfigType> = {}) {
     const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
