@@ -9,7 +9,7 @@ import { NarrowDateRange } from '../../../components/ml/types';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { InspectQuery, Refetch } from '../../../store/inputs/model';
 
-import { HostsTableType } from '../../../store/hosts/model';
+import { HostsTableType, HostsType } from '../../../store/hosts/model';
 import { NavTab } from '../../../components/navigation/types';
 import { UpdateDateRange } from '../../../components/charts/common';
 
@@ -37,7 +37,7 @@ export type SetQuery = ({
 }) => void;
 
 export interface QueryTabBodyProps {
-  type: 'page' | 'details';
+  type: HostsType;
   startDate: number;
   endDate: number;
   filterQuery?: string | ESTermQuery;

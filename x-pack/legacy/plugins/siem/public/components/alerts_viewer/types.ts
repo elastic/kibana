@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IIndexPattern } from 'src/plugins/data/common';
-import { QueryTabBodyProps } from '../../pages/hosts/navigation/types';
-import { UpdateDateRange } from '../charts/common';
-import { InspectQuery, Refetch } from '../../store/inputs/model';
-import { NarrowDateRange } from '../ml/types';
+import { HostsComponentsQueryProps } from '../../pages/hosts/navigation/types';
+import { NetworkComponentQueryProps } from '../../pages/network/navigation/types';
 
 export interface PageFilterDsl {
   exists: {
@@ -23,21 +20,4 @@ export type AlertsComponentPageFilterDsl = Array<{
   };
 }>;
 
-export type AlertsComponentsQueryProps = QueryTabBodyProps & {
-  deleteQuery?: ({ id }: { id: string }) => void;
-  indexPattern: IIndexPattern;
-  narrowDateRange?: NarrowDateRange;
-  setQuery: ({
-    id,
-    inspect,
-    loading,
-    refetch,
-  }: {
-    id: string;
-    inspect: InspectQuery | null;
-    loading: boolean;
-    refetch: Refetch;
-  }) => void;
-  skip: boolean;
-  updateDateRange?: UpdateDateRange;
-};
+export type AlertsComponentsQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;

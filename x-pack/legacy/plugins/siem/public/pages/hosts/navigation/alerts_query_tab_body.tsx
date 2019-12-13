@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { AlertsComponentsQueryProps } from '../../../components/alerts_viewer/types';
 import { AlertsView } from '../../../components/alerts_viewer';
+import { HostsComponentsQueryProps } from './types';
 
-export const HostAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentsQueryProps) => (
+export const HostAlertsQueryTabBody = React.memo((alertsProps: HostsComponentsQueryProps) => (
   <AlertsView
     {...alertsProps}
     pageFilters={[

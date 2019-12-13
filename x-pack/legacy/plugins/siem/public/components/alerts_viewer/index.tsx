@@ -19,7 +19,6 @@ export const AlertsView = ({
   deleteQuery,
   endDate,
   filterQuery,
-  indexPattern,
   pageFilters,
   skip,
   setQuery,

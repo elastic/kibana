@@ -5,10 +5,10 @@
  */
 
 import React from 'react';
-import { AlertsComponentsQueryProps } from '../../../components/alerts_viewer/types';
 import { AlertsView } from '../../../components/alerts_viewer';
+import { NetworkComponentQueryProps } from './types';
 
-export const NetworkAlertsQueryTabBody = React.memo((alertsProps: AlertsComponentsQueryProps) => (
+export const NetworkAlertsQueryTabBody = React.memo((alertsProps: NetworkComponentQueryProps) => (
   <AlertsView
     {...alertsProps}
     pageFilters={[
