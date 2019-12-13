@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiButton } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -43,7 +43,7 @@ const MonitorListActionsPopoverComponent = ({
   return (
     <EuiPopover
       button={
-        <EuiButtonIcon
+        <EuiButton
           aria-label={i18n.translate(
             'xpack.uptime.monitorList.observabilityIntegrationsColumn.popoverIconButton.ariaLabel',
             {
@@ -53,10 +53,12 @@ const MonitorListActionsPopoverComponent = ({
               values: { monitorUrl },
             }
           )}
-          color="subdued"
-          iconType="boxesHorizontal"
           onClick={() => togglePopoverIsVisible({ id: popoverId, open: true })}
-        />
+          iconType="arrowDown"
+          iconSide="right"
+        >
+          Integrations
+        </EuiButton>
       }
       closePopover={() => togglePopoverIsVisible({ id: popoverId, open: false })}
       id={popoverId}
