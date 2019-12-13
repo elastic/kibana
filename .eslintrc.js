@@ -346,7 +346,7 @@ module.exports = {
                   'Server modules cannot be imported into client modules or shared modules.',
               },
               {
-                target: ['src/**/*'],
+                target: ['src/core/**/*'],
                 from: ['x-pack/**/*'],
                 errorMessage: 'OSS cannot import x-pack files.',
               },

@@ -17,7 +17,6 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { npSetup, npStart } from 'ui/new_platform';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 import { start as navigation } from '../../../../../src/legacy/core_plugins/navigation/public/legacy';
-import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 import { GraphPlugin } from './plugin';
 
 // @ts-ignore
@@ -40,17 +39,13 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
   };
 }
 
-type XpackNpSetupDeps = typeof npSetup.plugins & {
-  licensing: LicensingPluginSetup;
-};
-
 (async () => {
   const instance = new GraphPlugin();
   instance.setup(npSetup.core, {
     __LEGACY: {
       Storage,
     },
-    ...(npSetup.plugins as XpackNpSetupDeps),
+    ...npSetup.plugins,
   });
   instance.start(npStart.core, {
     npData: npStart.plugins.data,

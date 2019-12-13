@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { CoreSetup, CoreStart } from 'kibana/public';
 import { Plugin } from 'src/core/public';
 import { toggleNavLink } from './services/toggle_nav_link';
-import { LicensingPluginSetup } from '../../licensing/public';
+import { LicensingPluginSetup } from '../../licensing/common/types';
 import { checkLicense } from '../common/check_license';
 import {
   FeatureCatalogueCategory,
