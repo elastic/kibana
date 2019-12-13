@@ -128,18 +128,7 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
       break;
 
     case EXPLORER_ACTION.SET_STATE:
-      if (payload.viewBySwimlaneFieldName) {
-        nextState = {
-          ...state,
-          ...payload,
-          appState: appStateReducer(state.appState, {
-            type: EXPLORER_ACTION.APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME,
-            payload: { viewBySwimlaneFieldName: payload.viewBySwimlaneFieldName },
-          }),
-        };
-      } else {
-        nextState = { ...state, ...payload };
-      }
+      nextState = { ...state, ...payload };
       break;
 
     case EXPLORER_ACTION.SET_SWIMLANE_CONTAINER_WIDTH:
@@ -177,12 +166,18 @@ export const explorerReducer = (state: ExplorerState, nextAction: Action): Explo
           filteredFields.includes(viewBySwimlaneFieldName) === false;
       }
 
+      const appStateClearedSelection = appStateReducer(state.appState, {
+        type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
+      });
+      const appStateWithViewBySwimlane = appStateReducer(appStateClearedSelection, {
+        type: EXPLORER_ACTION.APP_STATE_SAVE_VIEW_BY_SWIMLANE_FIELD_NAME,
+        payload: { viewBySwimlaneFieldName },
+      });
+
       nextState = {
         ...state,
         ...getClearedSelectedAnomaliesState(),
-        appState: appStateReducer(state.appState, {
-          type: EXPLORER_ACTION.APP_STATE_CLEAR_SELECTION,
-        }),
+        appState: appStateWithViewBySwimlane,
         maskAll,
         viewBySwimlaneFieldName,
       };

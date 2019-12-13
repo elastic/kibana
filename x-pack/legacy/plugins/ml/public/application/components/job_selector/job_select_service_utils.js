@@ -73,14 +73,15 @@ function loadJobIdsFromGlobalState(globalState) {
   const jobIds = [];
   let groups = [];
 
-  if (globalState.ml && globalState.ml.jobIds) {
+  const ml = globalState.get('ml');
+  if (ml && ml.jobIds) {
     let tempJobIds = [];
-    groups = globalState.ml.groups || [];
+    groups = ml.groups || [];
 
-    if (typeof globalState.ml.jobIds === 'string') {
-      tempJobIds.push(globalState.ml.jobIds);
+    if (typeof ml.jobIds === 'string') {
+      tempJobIds.push(ml.jobIds);
     } else {
-      tempJobIds = globalState.ml.jobIds;
+      tempJobIds = ml.jobIds;
     }
     tempJobIds = tempJobIds.map(id => String(id));
 
@@ -121,21 +122,25 @@ function loadJobIdsFromGlobalState(globalState) {
 // skip updates triggered by timefilter.
 export function setGlobalStateSkipRefresh(globalState, skipRefresh) {
   globalState.fetch();
-  if (globalState.ml === undefined) {
-    globalState.ml = {};
+  let ml = globalState.get('ml');
+  if (ml === undefined) {
+    ml = {};
   }
-  globalState.ml.skipRefresh = skipRefresh;
+  ml.skipRefresh = skipRefresh;
+  globalState.set('ml', ml);
   globalState.save();
 }
 
 export function setGlobalState(globalState, { selectedIds, selectedGroups, skipRefresh }) {
   globalState.fetch();
-  if (globalState.ml === undefined) {
-    globalState.ml = {};
+  let ml = globalState.get('ml');
+  if (ml === undefined) {
+    ml = {};
   }
-  globalState.ml.jobIds = selectedIds;
-  globalState.ml.groups = selectedGroups || [];
-  globalState.ml.skipRefresh = !!skipRefresh;
+  ml.jobIds = selectedIds;
+  ml.groups = selectedGroups || [];
+  ml.skipRefresh = !!skipRefresh;
+  globalState.set('ml');
   globalState.save();
 }
 

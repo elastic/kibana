@@ -12,20 +12,19 @@ function hasEqualKeys(a, b) {
   return isEqual(Object.keys(a).sort(), Object.keys(b).sort());
 }
 
-export function initializeAppState(AppState, stateName, defaultState) {
-  const appState = new AppState();
+export function initializeAppState(appState, stateName, defaultState) {
   appState.fetch();
 
   // Store the state to the AppState so that it's
   // restored on page refresh.
-  if (appState[stateName] === undefined) {
-    appState[stateName] = cloneDeep(defaultState);
+  if (appState.get(stateName) === undefined) {
+    appState.set(stateName, cloneDeep(defaultState));
     appState.save();
   }
 
   // if defaultState isn't defined or if defaultState matches the current value
   // stored in the URL in appState then return appState as is.
-  if (defaultState === undefined || appState[stateName] === defaultState) {
+  if (defaultState === undefined || appState.get(stateName) === defaultState) {
     return appState;
   }
 
@@ -37,10 +36,10 @@ export function initializeAppState(AppState, stateName, defaultState) {
   // - if defaultState is an object, check if current appState has the same keys.
   // - if it's not an object, check if defaultState and current appState are of the same type.
   if (
-    (typeof defaultState === 'object' && !hasEqualKeys(defaultState, appState[stateName])) ||
-    typeof defaultState !== typeof appState[stateName]
+    (typeof defaultState === 'object' && !hasEqualKeys(defaultState, appState.get(stateName))) ||
+    (typeof defaultState !== typeof appState.get(stateName))
   ) {
-    appState[stateName] = cloneDeep(defaultState);
+    appState.set(stateName, cloneDeep(defaultState));
     appState.save();
   }
 
@@ -52,14 +51,14 @@ export function initializeAppState(AppState, stateName, defaultState) {
 // to persist these state changes to AppState and save the state to the url.
 // distinctUntilChanged() makes sure the callback is only triggered upon changes
 // of the state and filters consecutive triggers of the same value.
-export function subscribeAppStateToObservable(AppState, appStateName, o$, callback) {
-  const appState = initializeAppState(AppState, appStateName, o$.getValue());
+export function subscribeAppStateToObservable(appState, appStateName, o$, callback) {
+  appState = initializeAppState(appState, appStateName, o$.getValue());
 
-  o$.next(appState[appStateName]);
+  o$.next(appState.get(appStateName));
 
   const subscription = o$.pipe(distinctUntilChanged()).subscribe(payload => {
     appState.fetch();
-    appState[appStateName] = payload;
+    appState.set(appStateName, payload);
     appState.save();
     if (typeof callback === 'function') {
       callback(payload);
