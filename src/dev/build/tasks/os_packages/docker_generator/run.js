@@ -46,7 +46,7 @@ export async function runDockerGenerator(config, log, build, ubi = false) {
   const dockerBuildDir = config.resolveFromRepo(
     'build',
     'kibana-docker',
-    build.isOss() ? `oss${ ubiImageFlavor }` : `default${ ubiImageFlavor }`
+    build.isOss() ? `oss` : `default${ ubiImageFlavor }`
   );
   const dockerOutputDir = config.resolveFromTarget(`kibana${ imageFlavor }${ ubiImageFlavor }-${ versionTag }-docker.tar.gz`);
   const scope = {
