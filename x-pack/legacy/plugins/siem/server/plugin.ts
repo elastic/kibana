@@ -57,7 +57,7 @@ export class Plugin {
             ],
             read: ['config'],
           },
-          ui: ['show', 'showAlerts', 'showActions'],
+          ui: ['show'],
         },
         read: {
           api: ['siem', 'actions-read', 'actions-all', 'alerting-read', 'alerting-all'],
@@ -70,7 +70,7 @@ export class Plugin {
               timelineSavedObjectType,
             ],
           },
-          ui: ['show', 'showAlerts', 'showActions'],
+          ui: ['show'],
         },
       },
     });
