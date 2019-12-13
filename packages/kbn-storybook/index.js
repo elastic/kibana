@@ -31,12 +31,12 @@ exports.runStorybookCli = config => {
   const { name, storyGlobs } = config;
   run(
     async ({ flags, log, procRunner }) => {
-      log.info('Global config:\n', require('./lib/constants'));
+      log.debug('Global config:\n', require('./lib/constants'));
 
       const currentConfig = JSON.stringify(config, null, 2);
       const currentConfigDir = join(CURRENT_CONFIG, '..');
       await fs.promises.mkdir(currentConfigDir, { recursive: true });
-      log.info('Writing currentConfig:\n', CURRENT_CONFIG + '\n', currentConfig);
+      log.debug('Writing currentConfig:\n', CURRENT_CONFIG + '\n', currentConfig);
       await fs.promises.writeFile(CURRENT_CONFIG, `exports.currentConfig = ${currentConfig};`);
 
       await buildDll({
@@ -65,7 +65,7 @@ exports.runStorybookCli = config => {
         new Promise(() => {
           // storybook never completes, so neither will this promise
           const configDir = join(__dirname, 'storybook_config');
-          log.info('Config dir:', configDir);
+          log.debug('Config dir:', configDir);
           storybook({
             mode: 'dev',
             port: 9001,
