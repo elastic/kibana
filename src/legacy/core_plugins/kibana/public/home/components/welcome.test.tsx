@@ -35,17 +35,25 @@ jest.mock('../kibana_services', () => ({
 test('should render a Welcome screen with the telemetry disclaimer', () => {
   const component = shallow(
     // @ts-ignore
-    <Welcome urlBase="/" onSkip={() => {}} showTelemetryDisclaimer={true} onOptInSeen={() => {}} />
+    <Welcome urlBase="/" onSkip={() => {}} currentOptInStatus={true} onOptInSeen={() => {}} />
   );
 
   expect(component).toMatchSnapshot();
 });
 
-test('should render a Welcome screen with no telemetry disclaimer', () => {
-  // @ts-ignore
+test('should render a Welcome screen with the telemetry disclaimer text addapted to disable and stop collection when optInStatus is true', () => {
   const component = shallow(
     // @ts-ignore
-    <Welcome urlBase="/" onSkip={() => {}} showTelemetryDisclaimer={false} onOptInSeen={() => {}} />
+    <Welcome urlBase="/" onSkip={() => {}} currentOptInStatus={true} onOptInSeen={() => {}} />
+  );
+
+  expect(component).toMatchSnapshot();
+});
+
+test('should render a Welcome screen with the telemetry disclaimer text addapted to enable and start collection when optInStatus is false', () => {
+  const component = shallow(
+    // @ts-ignore
+    <Welcome urlBase="/" onSkip={() => {}} currentOptInStatus={false} onOptInSeen={() => {}} />
   );
 
   expect(component).toMatchSnapshot();

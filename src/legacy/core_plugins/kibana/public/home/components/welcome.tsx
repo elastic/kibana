@@ -96,7 +96,7 @@ export class Welcome extends React.Component<Props> {
         <Fragment>
           <FormattedMessage
             id="kbn.home.dataManagementEnableCollection"
-            defaultMessage=" To enable collection, "
+            defaultMessage=" To start collection, "
           />
           <EuiLink href="#/management/kibana/settings">
             <FormattedMessage
