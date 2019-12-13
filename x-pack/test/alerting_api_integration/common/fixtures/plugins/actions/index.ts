@@ -32,6 +32,30 @@ export default function(kibana: any) {
     require: ['actions'],
     name: NAME,
     init: (server: Hapi.Server) => {
+      server.plugins.xpack_main.registerFeature({
+        id: 'actions',
+        name: 'Actions',
+        app: ['actions', 'kibana'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['action', 'action_task_params'],
+              read: [],
+            },
+            ui: [],
+            api: ['actions-read', 'actions-all'],
+          },
+          read: {
+            savedObject: {
+              all: ['action_task_params'],
+              read: ['action'],
+            },
+            ui: [],
+            api: ['actions-read'],
+          },
+        },
+      });
+
       initSlack(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.SLACK));
       initWebhook(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK));
       initPagerduty(server, getExternalServiceSimulatorPath(ExternalServiceSimulator.PAGERDUTY));
