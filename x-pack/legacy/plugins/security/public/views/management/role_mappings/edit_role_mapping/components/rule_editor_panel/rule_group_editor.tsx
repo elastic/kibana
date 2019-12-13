@@ -114,7 +114,6 @@ export class RuleGroupEditor extends Component<Props, {}> {
                 updatedRule.replaceRule(subRuleIndex, updatedSubRule);
                 this.props.onChange(updatedRule);
               }}
-              allowAdd={this.props.allowAdd}
               allowDelete={this.props.rule.canRemoveRule()}
               onDelete={() => {
                 const updatedRule = this.props.rule.clone() as RuleGroup;

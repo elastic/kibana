@@ -64,4 +64,13 @@ describe('Except Field rule', () => {
       except: { field: { username: '*' } },
     });
   });
+
+  it('can clone itself', () => {
+    const rule = new ExceptFieldRule(new FieldRule('username', '*'));
+    const clone = rule.clone();
+
+    expect(clone.toRaw()).toEqual(rule.toRaw());
+    expect(clone.getRules()).toEqual(rule.getRules());
+    expect(clone.getRules()).not.toBe(rule.getRules());
+  });
 });

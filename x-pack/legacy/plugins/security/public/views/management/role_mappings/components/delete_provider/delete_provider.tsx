@@ -161,7 +161,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({ roleMappingsAPI
           confirmButtonText={i18n.translate(
             'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.confirmButtonLabel',
             {
-              defaultMessage: 'Delete {count, plural, one {role napping} other {role mappings}}',
+              defaultMessage: 'Delete {count, plural, one {role mapping} other {role mappings}}',
               values: { count: roleMappings.length },
             }
           )}

@@ -27,14 +27,9 @@ import { documentationLinks } from '../../../services/documentation_links';
 
 interface Props {
   rule: FieldRule;
-  allowAdd: boolean;
   allowDelete: boolean;
   onChange: (rule: FieldRule) => void;
   onDelete: () => void;
-}
-
-interface State {
-  openPopoverIds: string[];
 }
 
 const userFields = [
@@ -55,16 +50,9 @@ const userFields = [
 const fieldOptions = userFields.map(f => ({ label: f.name }));
 
 type ComparisonOption = 'text' | 'number' | 'null';
-const comparisonOptions: Record<
-  ComparisonOption,
-  { id: string; helpText?: string; defaultValue: FieldRuleValue }
-> = {
+const comparisonOptions: Record<ComparisonOption, { id: string; defaultValue: FieldRuleValue }> = {
   text: {
     id: 'text',
-    helpText: i18n.translate(
-      'xpack.security.management.editRoleMapping.fieldRuleEditor.textHelpText',
-      { defaultMessage: 'also supports wildcards and Lucene regular expressions' }
-    ),
     defaultValue: '*',
   },
   number: {
@@ -77,15 +65,7 @@ const comparisonOptions: Record<
   },
 };
 
-export class FieldRuleEditor extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      openPopoverIds: [],
-    };
-  }
-
+export class FieldRuleEditor extends Component<Props, {}> {
   public render() {
     const { field, value } = this.props.rule;
 
@@ -135,6 +115,7 @@ export class FieldRuleEditor extends Component<Props, State> {
                 onChange={this.onFieldChange}
                 onCreateOption={this.onAddField}
                 options={fieldOptions}
+                data-test-subj={`fieldRuleEditorField-${valueIndex} fieldRuleEditorField-${valueIndex}-combo`}
               />
             </EuiFormRow>
           ) : (
@@ -145,6 +126,7 @@ export class FieldRuleEditor extends Component<Props, State> {
                   { defaultMessage: 'or' }
                 )}
                 value={field}
+                data-test-subj={`fieldRuleEditorField-${valueIndex} fieldRuleEditorField-${valueIndex}-expression`}
               />
             </EuiFormRow>
           )}
@@ -161,6 +143,7 @@ export class FieldRuleEditor extends Component<Props, State> {
               <EuiButtonIcon
                 iconType="trash"
                 color="danger"
+                data-test-subj={`fieldRuleEditorDeleteValue fieldRuleEditorDeleteValue-${valueIndex}`}
                 aria-label={i18n.translate(
                   'xpack.security.management.editRoleMapping.fieldRuleEditor.deleteValueLabel',
                   {
@@ -180,6 +163,7 @@ export class FieldRuleEditor extends Component<Props, State> {
                 iconType="plusInCircle"
                 color="primary"
                 size="s"
+                data-test-subj="addAlternateValueButton"
               >
                 <FormattedMessage
                   id="xpack.security.management.editRoleMapping.fieldRuleEditor.addAlternateValueButton"
@@ -212,6 +196,7 @@ export class FieldRuleEditor extends Component<Props, State> {
             { value: 'number', text: 'number' },
             { value: 'null', text: 'is null' },
           ]}
+          data-test-subj={`fieldRuleEditorValueType-${valueIndex}`}
           value={inputType}
           onChange={e =>
             this.onComparisonTypeChange(valueIndex, e.target.value as ComparisonOption)
@@ -231,12 +216,14 @@ export class FieldRuleEditor extends Component<Props, State> {
     const inputField =
       fieldType === 'text' ? (
         <EuiFieldText
+          data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
           value={isNullValue ? '-- null --' : (rowRuleValue as string)}
           onChange={this.onValueChange(valueIndex)}
           disabled={isNullValue}
         />
       ) : (
         <EuiFieldNumber
+          data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
           value={rowRuleValue as string}
           onChange={this.onNumericValueChange(valueIndex)}
         />

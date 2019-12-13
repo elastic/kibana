@@ -34,5 +34,5 @@ export function isInlineRoleTemplate(
 export function isInvalidRoleTemplate(
   roleMappingTemplate: RoleTemplate
 ): roleMappingTemplate is InvalidRoleTemplate {
-  return roleMappingTemplate.template != null && typeof roleMappingTemplate.template === 'string';
+  return !isStoredRoleTemplate(roleMappingTemplate) && !isInlineRoleTemplate(roleMappingTemplate);
 }

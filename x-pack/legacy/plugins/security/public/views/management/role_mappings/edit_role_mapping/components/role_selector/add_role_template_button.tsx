@@ -17,7 +17,16 @@ interface Props {
 export const AddRoleTemplateButton = (props: Props) => {
   if (!props.canUseStoredScripts && !props.canUseInlineScripts) {
     return (
-      <EuiCallOut iconType="alert" color="danger" title={'Role templates unavailable'}>
+      <EuiCallOut
+        iconType="alert"
+        color="danger"
+        title={
+          <FormattedMessage
+            id="xpack.security.management.editRoleMapping.roleTemplatesUnavailableTitle"
+            defaultMessage="Role templates unavailable"
+          />
+        }
+      >
         <p>
           <FormattedMessage
             id="xpack.security.management.editRoleMapping.roleTemplatesUnavailable"
@@ -36,14 +45,22 @@ export const AddRoleTemplateButton = (props: Props) => {
   );
   if (props.canUseInlineScripts) {
     return (
-      <EuiButtonEmpty iconType="plusInCircle" onClick={() => props.onClick('inline')}>
+      <EuiButtonEmpty
+        iconType="plusInCircle"
+        onClick={() => props.onClick('inline')}
+        data-test-subj="addRoleTemplateButton"
+      >
         {addRoleTemplate}
       </EuiButtonEmpty>
     );
   }
 
   return (
-    <EuiButtonEmpty iconType="plusInCircle" onClick={() => props.onClick('stored')}>
+    <EuiButtonEmpty
+      iconType="plusInCircle"
+      onClick={() => props.onClick('stored')}
+      data-test-subj="addRoleTemplateButton"
+    >
       {addRoleTemplate}
     </EuiButtonEmpty>
   );

@@ -61,4 +61,14 @@ describe('Except All rule', () => {
       except: { all: [{ any: [] }] },
     });
   });
+
+  it('can clone itself', () => {
+    const subRules = [new AllRule()];
+    const rule = new ExceptAllRule(subRules);
+    const clone = rule.clone();
+
+    expect(clone.toRaw()).toEqual(rule.toRaw());
+    expect(clone.getRules()).toEqual(rule.getRules());
+    expect(clone.getRules()).not.toBe(rule.getRules());
+  });
 });

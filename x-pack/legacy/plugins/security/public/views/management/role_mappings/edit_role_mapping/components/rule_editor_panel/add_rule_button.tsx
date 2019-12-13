@@ -20,6 +20,7 @@ export const AddRuleButton = (props: Props) => {
   const button = (
     <EuiButtonEmpty
       iconType="plusInCircle"
+      data-test-subj="roleMappingsAddRuleButton"
       onClick={() => {
         if (props.autoAdd) {
           props.onClick(new AllRule([new FieldRule('username', '*')]));
@@ -37,6 +38,7 @@ export const AddRuleButton = (props: Props) => {
 
   const options = [
     <EuiContextMenuItem
+      id="addRuleOption"
       key="rule"
       name="Add rule"
       icon="user"
@@ -51,6 +53,7 @@ export const AddRuleButton = (props: Props) => {
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
+      id="addRuleGroupOption"
       key="ruleGroup"
       name="Add rule group"
       icon="list"
@@ -69,6 +72,7 @@ export const AddRuleButton = (props: Props) => {
   return (
     <EuiPopover
       id="addRuleContextMenu"
+      data-test-subj="addRuleContextMenu"
       button={button}
       isOpen={isMenuOpen}
       closePopover={() => setIsMenuOpen(false)}

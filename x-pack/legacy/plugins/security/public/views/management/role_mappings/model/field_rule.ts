@@ -35,7 +35,7 @@ export class FieldRule extends Rule {
   public toRaw() {
     return {
       field: {
-        [this.field]: this.value,
+        [this.field]: Array.isArray(this.value) ? [...this.value] : this.value,
       },
     };
   }

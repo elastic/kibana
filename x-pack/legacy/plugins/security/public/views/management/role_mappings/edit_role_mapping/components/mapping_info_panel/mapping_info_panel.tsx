@@ -260,6 +260,7 @@ export class MappingInfoPanel extends Component<Props, State> {
           <EuiSwitch
             name={'enabled'}
             label={'enabled'}
+            data-test-subj="roleMappingsEnabledSwitch"
             showLabel={false}
             checked={this.props.roleMapping.enabled}
             onChange={e => {

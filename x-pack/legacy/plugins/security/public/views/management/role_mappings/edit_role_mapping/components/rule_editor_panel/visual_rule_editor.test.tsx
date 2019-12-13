@@ -32,6 +32,30 @@ describe('VisualRuleEditor', () => {
     expect(findTestSubject(wrapper, 'roleMappingsRulesTooComplex')).toHaveLength(0);
   });
 
+  it('clicking the add button when no rules are defined populates an initial rule set', () => {
+    const props = {
+      rules: null,
+      maxDepth: 0,
+      onSwitchEditorMode: jest.fn(),
+      onChange: jest.fn(),
+    };
+    const wrapper = mountWithIntl(<VisualRuleEditor {...props} />);
+    findTestSubject(wrapper, 'roleMappingsAddRuleButton').simulate('click');
+
+    expect(props.onChange).toHaveBeenCalledTimes(1);
+    const [newRule] = props.onChange.mock.calls[0];
+    expect(newRule).toBeInstanceOf(AllRule);
+    expect(newRule.toRaw()).toEqual({
+      all: [
+        {
+          field: {
+            username: '*',
+          },
+        },
+      ],
+    });
+  });
+
   it('renders a nested rule set', () => {
     const props = {
       rules: new AllRule([

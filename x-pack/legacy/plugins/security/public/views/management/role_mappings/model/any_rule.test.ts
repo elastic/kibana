@@ -62,4 +62,14 @@ describe('Any rule', () => {
       any: [{ all: [] }],
     });
   });
+
+  it('can clone itself', () => {
+    const subRules = [new AllRule()];
+    const rule = new AnyRule(subRules);
+    const clone = rule.clone();
+
+    expect(clone.toRaw()).toEqual(rule.toRaw());
+    expect(clone.getRules()).toEqual(rule.getRules());
+    expect(clone.getRules()).not.toBe(rule.getRules());
+  });
 });

@@ -46,7 +46,11 @@ export const RoleTemplateEditor = ({
       {getEditorForTemplate()}
       <EuiFlexItem grow={false}>
         <EuiFormRow>
-          <EuiLink color="danger" onClick={() => onDelete(roleTemplate)}>
+          <EuiLink
+            color="danger"
+            onClick={() => onDelete(roleTemplate)}
+            data-test-subj="deleteRoleTemplateButton"
+          >
             <FormattedMessage
               id="xpack.security.management.editRoleMapping.deleteRoleTemplateButton"
               defaultMessage="Delete role template"
@@ -152,6 +156,7 @@ export const RoleTemplateEditor = ({
               {...extraProps}
             >
               <EuiFieldText
+                data-test-subj="roleTemplateSourceEditor"
                 value={roleTemplate.template.source}
                 onChange={e => {
                   onChange({
@@ -200,6 +205,7 @@ export const RoleTemplateEditor = ({
               {...extraProps}
             >
               <EuiFieldText
+                data-test-subj="roleTemplateScriptIdEditor"
                 value={roleTemplate.template.id}
                 onChange={e => {
                   onChange({
@@ -218,7 +224,7 @@ export const RoleTemplateEditor = ({
 
     if (isInvalidRoleTemplate(roleTemplate)) {
       return (
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} data-test-subj="roleMappingInvalidRoleTemplate">
           <EuiCallOut
             color="warning"
             title={
