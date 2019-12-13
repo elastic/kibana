@@ -20,7 +20,7 @@ type LegacyDeps = any;
 export class Plugin {
   constructor(context: PluginInitializerContext) {}
   start(core: CoreStart, plugins: ClientPlugins, __LEGACY: LegacyDeps) {
-    startApp(this.composeLibs(core, plugins, __LEGACY));
+    startApp(this.composeLibs(core, plugins, __LEGACY), core, plugins);
   }
 
   composeLibs(core: CoreStart, plugins: ClientPlugins, legacy: LegacyDeps) {
@@ -58,20 +58,9 @@ export class Plugin {
 
     // const framework = new KibanaFramework(infraModule, legacy.uiRoutes, legacy.timezoneProvider);
 
-    const kibanaFramework = {
-      uiCapabilities: core.application.capabilities,
-      http: core.http,
-      notifications: {
-        notfications: core.notifications,
-        overlays: core.overlays,
-      },
-      chrome: core.chrome,
-    };
-
     const libs: InfraFrontendLibs = {
       apolloClient,
       observableApi,
-      kibanaFramework,
     };
     return libs;
   }

@@ -11,12 +11,11 @@ import { ApolloProvider } from 'react-apollo';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
+import { CoreStart } from 'kibana/public';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
-import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { I18nContext } from 'ui/i18n';
-import { npStart } from 'ui/new_platform';
 import { EuiThemeProvider } from '../../../../common/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
 import { PageRouter } from '../routes';
@@ -29,11 +28,8 @@ import {
   KibanaContextProvider,
 } from '../../../../../../src/plugins/kibana_react/public';
 import { ROOT_ELEMENT_ID } from '../index';
-import { KibanaFrameworkProvider } from '../containers/kibana_framework';
 
-const { uiSettings } = npStart.core;
-
-export async function startApp(libs: InfraFrontendLibs) {
+export async function startApp(libs: InfraFrontendLibs, core: CoreStart, plugins: ClientPlugins) {
   const history = createHashHistory();
 
   const libs$ = new BehaviorSubject(libs);
@@ -46,34 +42,30 @@ export async function startApp(libs: InfraFrontendLibs) {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
     return (
-      <KibanaFrameworkProvider value={{ ...libs.kibanaFramework }}>
-        <I18nContext>
-          <UICapabilitiesProvider>
-            <EuiErrorBoundary>
-              <ReduxStoreProvider store={store}>
-                <ReduxStateContextProvider>
-                  <ApolloProvider client={libs.apolloClient}>
-                    <ApolloClientContext.Provider value={libs.apolloClient}>
-                      <EuiThemeProvider darkMode={darkMode}>
-                        <HistoryContext.Provider value={history}>
-                          <PageRouter history={history} />
-                        </HistoryContext.Provider>
-                      </EuiThemeProvider>
-                    </ApolloClientContext.Provider>
-                  </ApolloProvider>
-                </ReduxStateContextProvider>
-              </ReduxStoreProvider>
-            </EuiErrorBoundary>
-          </UICapabilitiesProvider>
-        </I18nContext>
-      </KibanaFrameworkProvider>
+      <I18nContext>
+        <EuiErrorBoundary>
+          <ReduxStoreProvider store={store}>
+            <ReduxStateContextProvider>
+              <ApolloProvider client={libs.apolloClient}>
+                <ApolloClientContext.Provider value={libs.apolloClient}>
+                  <EuiThemeProvider darkMode={darkMode}>
+                    <HistoryContext.Provider value={history}>
+                      <PageRouter history={history} />
+                    </HistoryContext.Provider>
+                  </EuiThemeProvider>
+                </ApolloClientContext.Provider>
+              </ApolloProvider>
+            </ReduxStateContextProvider>
+          </ReduxStoreProvider>
+        </EuiErrorBoundary>
+      </I18nContext>
     );
   };
 
   const node = await document.getElementById(ROOT_ELEMENT_ID);
 
   const App = (
-    <KibanaContextProvider services={{ uiSettings }}>
+    <KibanaContextProvider services={{ ...core, ...plugins }}>
       <InfraPluginRoot />
     </KibanaContextProvider>
   );

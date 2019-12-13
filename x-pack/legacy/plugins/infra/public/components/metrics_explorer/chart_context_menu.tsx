@@ -12,7 +12,6 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
-import { UICapabilities } from 'ui/capabilities';
 import DateMath from '@elastic/datemath';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
@@ -118,7 +117,7 @@ export const MetricsExplorerChartContextMenu = ({
       ]
     : [];
 
-  const openInVisualize = uiCapabilities.visualize.show
+  const openInVisualize = uiCapabilities?.visualize?.show
     ? [
         {
           name: i18n.translate('xpack.infra.metricsExplorer.openInTSVB', {

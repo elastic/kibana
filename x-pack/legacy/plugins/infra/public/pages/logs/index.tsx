@@ -7,8 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
@@ -28,12 +26,10 @@ import {
 } from '../../containers/logs/log_analysis';
 import { useSourceId } from '../../containers/source_id';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
+import { useKibana } from '../../../../../../..//src/plugins/kibana_react/public';
 
-interface LogsPageProps extends RouteComponentProps {
-  uiCapabilities: UICapabilities;
-}
-
-export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPageProps) => {
+export const LogsPage = ({ match }: RouteComponentProps) => {
+  const uiCapabilities = useKibana().services.application?.capabilities;
   const [sourceId] = useSourceId();
   const source = useSource({ sourceId });
   const logAnalysisCapabilities = useLogAnalysisCapabilities();
@@ -72,7 +68,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
                 text: pageTitle,
               },
             ]}
-            readOnlyBadge={!uiCapabilities.logs.save}
+            readOnlyBadge={!uiCapabilities?.logs?.save}
           />
           {source.isLoadingSource ||
           (!source.isLoadingSource &&
@@ -112,7 +108,7 @@ export const LogsPage = injectUICapabilities(({ match, uiCapabilities }: LogsPag
       </LogAnalysisCapabilities.Context.Provider>
     </Source.Context.Provider>
   );
-});
+};
 
 const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',

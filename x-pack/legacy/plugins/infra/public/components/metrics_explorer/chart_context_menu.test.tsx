@@ -8,7 +8,6 @@ import React from 'react';
 import { MetricsExplorerChartContextMenu, createNodeDetailLink } from './chart_context_menu';
 import { mount } from 'enzyme';
 import { options, source, timeRange, chartOptions } from '../../utils/fixtures/metrics_explorer';
-import { UICapabilities } from 'ui/capabilities';
 import { InfraNodeType } from '../../graphql/types';
 import DateMath from '@elastic/datemath';
 import { ReactWrapper } from 'enzyme';

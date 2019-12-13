@@ -8,8 +8,6 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import React, { useContext } from 'react';
-import { UICapabilities } from 'ui/capabilities';
-import { injectUICapabilities } from 'ui/capabilities/react';
 import { SnapshotPageContent } from './page_content';
 import { SnapshotToolbar } from './toolbar';
 
@@ -29,13 +27,10 @@ import { WithWaffleOptionsUrlState } from '../../../containers/waffle/with_waffl
 import { WithWaffleTimeUrlState } from '../../../containers/waffle/with_waffle_time';
 import { WithKibanaChrome } from '../../../containers/with_kibana_chrome';
 import { useTrackPageview } from '../../../hooks/use_track_metric';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
-interface SnapshotPageProps {
-  uiCapabilities: UICapabilities;
-}
-
-export const SnapshotPage = injectUICapabilities((props: SnapshotPageProps) => {
-  const { uiCapabilities } = props;
+export const SnapshotPage = () => {
+  const uiCapabilities = useKibana().services.application?.capabilities;
   const {
     createDerivedIndexPattern,
     hasFailedLoadingSource,
@@ -97,7 +92,7 @@ export const SnapshotPage = injectUICapabilities((props: SnapshotPageProps) => {
                       )}
                     </EuiButton>
                   </EuiFlexItem>
-                  {uiCapabilities.infrastructure.configureSource ? (
+                  {uiCapabilities?.infrastructure?.configureSource ? (
                     <EuiFlexItem>
                       <ViewSourceConfigurationButton
                         data-test-subj="configureSourceButton"
@@ -118,4 +113,4 @@ export const SnapshotPage = injectUICapabilities((props: SnapshotPageProps) => {
       )}
     </ColumnarPage>
   );
-});
+};
