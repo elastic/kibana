@@ -236,10 +236,10 @@ export function getSuggestion(
       kind = monacoEditor.languages.CompletionItemKind.Function;
       detail = `(${
         (suggestion as ITimelionFunction).chainable
-          ? i18n.translate('timelion.expressionSuggestions.func.description.chainableText', {
+          ? i18n.translate('timelion.expressionSuggestions.func.description.chainableHelpText', {
               defaultMessage: 'Chainable',
             })
-          : i18n.translate('timelion.expressionSuggestions.func.description.dataSourceText', {
+          : i18n.translate('timelion.expressionSuggestions.func.description.dataSourceHelpText', {
               defaultMessage: 'Data source',
             })
       })`;
