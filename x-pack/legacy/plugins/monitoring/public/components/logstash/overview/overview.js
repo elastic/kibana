@@ -33,7 +33,7 @@ export class Overview extends PureComponent {
             <h1>
               <FormattedMessage
                 id="xpack.monitoring.logstash.overview.heading"
-                defaultMesage="Logstash Overview"
+                defaultMessage="Logstash Overview"
               />
             </h1>
           </EuiScreenReaderOnly>

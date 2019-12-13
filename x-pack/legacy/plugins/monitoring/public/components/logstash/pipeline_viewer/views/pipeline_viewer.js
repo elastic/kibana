@@ -52,7 +52,7 @@ export class PipelineViewer extends React.Component {
           <EuiScreenReaderOnly>
             <h1>
               <FormattedMessage
-                id="xpack.logstash.pipeline_viewer.heading"
+                id="xpack.monitoring.logstash.pipeline_viewer.heading"
                 defaultMessage="Logstash pipelines"
               />
             </h1>
