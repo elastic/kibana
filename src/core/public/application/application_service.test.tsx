@@ -32,9 +32,9 @@ describe('#setup()', () => {
       const service = new ApplicationService();
       const context = contextServiceMock.createSetupContract();
       const setup = service.setup({ context });
-      setup.register(Symbol(), { id: 'app1' } as any);
+      setup.register(Symbol(), { id: 'app1', mount: jest.fn() } as any);
       expect(() =>
-        setup.register(Symbol(), { id: 'app1' } as any)
+        setup.register(Symbol(), { id: 'app1', mount: jest.fn() } as any)
       ).toThrowErrorMatchingInlineSnapshot(
         `"An application is already registered with the id \\"app1\\""`
       );
@@ -50,6 +50,18 @@ describe('#setup()', () => {
       expect(() =>
         setup.register(Symbol(), { id: 'app1' } as any)
       ).toThrowErrorMatchingInlineSnapshot(`"Applications cannot be registered after \\"setup\\""`);
+    });
+
+    it('logs a warning when registering a deprecated app mount', async () => {
+      const consoleWarnSpy = jest.spyOn(console, 'warn');
+      const service = new ApplicationService();
+      const context = contextServiceMock.createSetupContract();
+      const setup = service.setup({ context });
+      setup.register(Symbol(), { id: 'app1', mount: (ctx: any, params: any) => {} } as any);
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        `App [app1] is using deprecated mount context. Use core.getStartServices() instead.`
+      );
+      consoleWarnSpy.mockRestore();
     });
   });
 
@@ -100,7 +112,7 @@ describe('#start()', () => {
     const service = new ApplicationService();
     const context = contextServiceMock.createSetupContract();
     const setup = service.setup({ context });
-    setup.register(Symbol(), { id: 'app1' } as any);
+    setup.register(Symbol(), { id: 'app1', mount: jest.fn() } as any);
     setup.registerLegacyApp({ id: 'app2' } as any);
 
     const http = httpServiceMock.createStartContract();
@@ -108,12 +120,13 @@ describe('#start()', () => {
     const startContract = await service.start({ http, injectedMetadata });
 
     expect(startContract.availableApps).toMatchInlineSnapshot(`
-                        Map {
-                          "app1" => Object {
-                            "id": "app1",
-                          },
-                        }
-                `);
+      Map {
+        "app1" => Object {
+          "id": "app1",
+          "mount": [MockFunction],
+        },
+      }
+    `);
     expect(startContract.availableLegacyApps).toMatchInlineSnapshot(`
                         Map {
                           "app2" => Object {
@@ -127,14 +140,15 @@ describe('#start()', () => {
     const service = new ApplicationService();
     const context = contextServiceMock.createSetupContract();
     const setup = service.setup({ context });
-    setup.register(Symbol(), { id: 'app1' } as any);
+    const app1 = { id: 'app1', mount: jest.fn() };
+    setup.register(Symbol(), app1 as any);
 
     const http = httpServiceMock.createStartContract();
     const injectedMetadata = injectedMetadataServiceMock.createStartContract();
     await service.start({ http, injectedMetadata });
 
     expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
-      apps: new Map([['app1', { id: 'app1' }]]),
+      apps: new Map([['app1', app1]]),
       legacyApps: new Map(),
       http,
     });

@@ -37,7 +37,17 @@ export function initDashboardApp(app, deps) {
   initDashboardAppDirective(app, deps);
 
   app.directive('dashboardListing', function (reactDirective) {
-    return reactDirective(DashboardListing);
+    return reactDirective(DashboardListing, [
+      ['core', { watchDepth: 'reference' }],
+      ['createItem', { watchDepth: 'reference' }],
+      ['getViewUrl', { watchDepth: 'reference' }],
+      ['editItem', { watchDepth: 'reference' }],
+      ['findItems', { watchDepth: 'reference' }],
+      ['deleteItems', { watchDepth: 'reference' }],
+      ['listingLimit', { watchDepth: 'reference' }],
+      ['hideWriteControls', { watchDepth: 'reference' }],
+      ['initialFilter', { watchDepth: 'reference' }],
+    ]);
   });
 
   function createNewDashboardCtrl($scope) {

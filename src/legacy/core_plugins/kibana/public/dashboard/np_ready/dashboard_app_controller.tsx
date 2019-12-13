@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import angular from 'angular';
-import { uniq, noop } from 'lodash';
+import { uniq } from 'lodash';
 
 import { Subscription } from 'rxjs';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
@@ -35,7 +35,7 @@ import {
   State,
   AppStateClass as TAppStateClass,
   KbnUrl,
-  SaveOptions,
+  SavedObjectSaveOpts,
   unhashUrl,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '../legacy_imports';
@@ -54,6 +54,7 @@ import {
   ErrorEmbeddable,
   ViewMode,
   openAddPanelFlyout,
+  EmbeddableFactoryNotFoundError,
 } from '../../../../embeddable_api/public/np_ready/public';
 import { DashboardAppState, NavAction, ConfirmModalFn, SavedDashboardPanel } from './types';
 
@@ -145,15 +146,19 @@ export class DashboardAppController {
     }
     $scope.showSaveQuery = dashboardCapabilities.saveQuery as boolean;
 
-    $scope.getShouldShowEditHelp = () =>
+    const getShouldShowEditHelp = () =>
       !dashboardStateManager.getPanels().length &&
       dashboardStateManager.getIsEditMode() &&
       !dashboardConfig.getHideWriteControls();
 
-    $scope.getShouldShowViewHelp = () =>
+    const getShouldShowViewHelp = () =>
       !dashboardStateManager.getPanels().length &&
       dashboardStateManager.getIsViewMode() &&
       !dashboardConfig.getHideWriteControls();
+
+    const addVisualization = () => {
+      navActions[TopNavIds.VISUALIZE]();
+    };
 
     const updateIndexPatterns = (container?: DashboardContainer) => {
       if (!container || isErrorEmbeddable(container)) {
@@ -189,7 +194,7 @@ export class DashboardAppController {
         showLinkToVisualize: shouldShowEditHelp,
       };
       if (shouldShowEditHelp) {
-        emptyScreenProps.onVisualizeClick = noop;
+        emptyScreenProps.onVisualizeClick = addVisualization;
       }
       return emptyScreenProps;
     };
@@ -205,8 +210,8 @@ export class DashboardAppController {
       if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
         expandedPanelId = dashboardContainer.getInput().expandedPanelId;
       }
-      const shouldShowEditHelp = $scope.getShouldShowEditHelp();
-      const shouldShowViewHelp = $scope.getShouldShowViewHelp();
+      const shouldShowEditHelp = getShouldShowEditHelp();
+      const shouldShowViewHelp = getShouldShowViewHelp();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
         filters: queryFilter.getFilters(),
@@ -261,8 +266,8 @@ export class DashboardAppController {
           dashboardContainer = container;
 
           dashboardContainer.renderEmpty = () => {
-            const shouldShowEditHelp = $scope.getShouldShowEditHelp();
-            const shouldShowViewHelp = $scope.getShouldShowViewHelp();
+            const shouldShowEditHelp = getShouldShowEditHelp();
+            const shouldShowViewHelp = getShouldShowViewHelp();
             const isEmptyState = shouldShowEditHelp || shouldShowViewHelp;
             return isEmptyState ? (
               <DashboardEmptyScreen {...getEmptyScreenProps(shouldShowEditHelp)} />
@@ -603,7 +608,7 @@ export class DashboardAppController {
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    function save(saveOptions: SaveOptions): Promise<SaveResult> {
+    function save(saveOptions: SavedObjectSaveOpts): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {
@@ -759,7 +764,17 @@ export class DashboardAppController {
       }
     };
 
-    navActions[TopNavIds.VISUALIZE] = async () => {};
+    navActions[TopNavIds.VISUALIZE] = async () => {
+      const type = 'visualization';
+      const factory = embeddables.getEmbeddableFactory(type);
+      if (!factory) {
+        throw new EmbeddableFactoryNotFoundError(type);
+      }
+      const explicitInput = await factory.getExplicitInput();
+      if (dashboardContainer) {
+        await dashboardContainer.addNewEmbeddable(type, explicitInput);
+      }
+    };
 
     navActions[TopNavIds.OPTIONS] = anchorElement => {
       showOptionsPopover({

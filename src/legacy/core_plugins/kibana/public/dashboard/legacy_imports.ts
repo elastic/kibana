@@ -30,7 +30,7 @@ export const legacyChrome = chrome;
 export { State } from 'ui/state_management/state';
 export { AppState } from 'ui/state_management/app_state';
 export { AppStateClass } from 'ui/state_management/app_state';
-export { SaveOptions } from 'ui/saved_objects/saved_object';
+export { SavedObjectSaveOpts } from 'ui/saved_objects/types';
 export { npSetup, npStart } from 'ui/new_platform';
 export { SavedObjectRegistryProvider } from 'ui/saved_objects';
 export { IPrivate } from 'ui/private';

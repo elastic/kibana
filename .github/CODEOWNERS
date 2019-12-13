@@ -107,15 +107,19 @@
 /x-pack/plugins/security/  @elastic/kibana-security
 /x-pack/test/api_integration/apis/security/ @elastic/kibana-security
 
-# Kibana Stack Services
-/src/dev/i18n @elastic/kibana-stack-services
-/packages/kbn-analytics/ @elastic/kibana-stack-services
-/src/legacy/core_plugins/ui_metric/ @elastic/kibana-stack-services
-/src/plugins/usage_collection/ @elastic/kibana-stack-services
-/x-pack/legacy/plugins/telemetry @elastic/kibana-stack-services
-/x-pack/legacy/plugins/alerting @elastic/kibana-stack-services
-/x-pack/legacy/plugins/actions @elastic/kibana-stack-services
-/x-pack/legacy/plugins/task_manager @elastic/kibana-stack-services
+# Kibana Localization
+/src/dev/i18n @elastic/kibana-localization
+
+# Pulse
+/packages/kbn-analytics/ @elastic/pulse
+/src/legacy/core_plugins/ui_metric/ @elastic/pulse
+/src/plugins/usage_collection/ @elastic/pulse
+/x-pack/legacy/plugins/telemetry @elastic/pulse
+
+# Kibana Alerting Services
+/x-pack/legacy/plugins/alerting @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/actions @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
 
 # Design
 **/*.scss  @elastic/kibana-design
