@@ -57,6 +57,9 @@ export interface VisSavedObject extends SavedObject {
   title: string;
   uiStateJSON?: string;
   destroy: () => void;
+  savedSearchRefName?: string;
+  savedSearchId?: string;
+  visState: any;
 }
 
 export interface VisualizeEmbeddableConfiguration {

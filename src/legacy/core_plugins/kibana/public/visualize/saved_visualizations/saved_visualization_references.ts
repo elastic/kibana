@@ -16,8 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { SavedObjectAttributes, SavedObjectReference } from 'kibana/server';
+import { VisSavedObject } from '../embeddable/visualize_embeddable';
 
-export function extractReferences({ attributes, references = [] }) {
+export function extractReferences({
+  attributes,
+  references = [],
+}: {
+  attributes: SavedObjectAttributes;
+  references: SavedObjectReference[];
+}) {
   const updatedAttributes = { ...attributes };
   const updatedReferences = [...references];
 
@@ -26,7 +34,7 @@ export function extractReferences({ attributes, references = [] }) {
     updatedReferences.push({
       name: 'search_0',
       type: 'search',
-      id: updatedAttributes.savedSearchId,
+      id: String(updatedAttributes.savedSearchId),
     });
     delete updatedAttributes.savedSearchId;
     updatedAttributes.savedSearchRefName = 'search_0';
@@ -34,9 +42,9 @@ export function extractReferences({ attributes, references = [] }) {
 
   // Extract index patterns from controls
   if (updatedAttributes.visState) {
-    const visState = JSON.parse(updatedAttributes.visState);
-    const controls = visState.params && visState.params.controls || [];
-    controls.forEach((control, i) => {
+    const visState = JSON.parse(String(updatedAttributes.visState));
+    const controls = (visState.params && visState.params.controls) || [];
+    controls.forEach((control: Record<string, string>, i: number) => {
       if (!control.indexPattern) {
         return;
       }
@@ -57,9 +65,11 @@ export function extractReferences({ attributes, references = [] }) {
   };
 }
 
-export function injectReferences(savedObject, references) {
+export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
   if (savedObject.savedSearchRefName) {
-    const savedSearchReference = references.find(reference => reference.name === savedObject.savedSearchRefName);
+    const savedSearchReference = references.find(
+      reference => reference.name === savedObject.savedSearchRefName
+    );
     if (!savedSearchReference) {
       throw new Error(`Could not find saved search reference "${savedObject.savedSearchRefName}"`);
     }
@@ -68,13 +78,13 @@ export function injectReferences(savedObject, references) {
   }
   if (savedObject.visState) {
     const controls = (savedObject.visState.params && savedObject.visState.params.controls) || [];
-    controls.forEach((control) => {
+    controls.forEach((control: Record<string, string>) => {
       if (!control.indexPatternRefName) {
         return;
       }
-      const reference = references.find(reference => reference.name === control.indexPatternRefName);
+      const reference = references.find(ref => ref.name === control.indexPatternRefName);
       if (!reference) {
-        throw new Error (`Could not find index pattern reference "${control.indexPatternRefName}"`);
+        throw new Error(`Could not find index pattern reference "${control.indexPatternRefName}"`);
       }
       control.indexPattern = reference.id;
       delete control.indexPatternRefName;
