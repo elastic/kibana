@@ -4,10 +4,10 @@
 
 ## SessionStorageCookieOptions.validate property
 
-Function called to validate a cookie content.
+Function called to validate a cookie's decrypted value.
 
 <b>Signature:</b>
 
 ```typescript
-validate: (sessionValue: T) => boolean | Promise<boolean>;
+validate: (sessionValue: T | T[]) => SessionCookieValidationResult;
 ```

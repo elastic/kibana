@@ -34,7 +34,7 @@ import {
 } from './lib';
 
 export default function ({ getService }) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
   describe('index_patterns/* error handler', () => {

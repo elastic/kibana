@@ -23,8 +23,6 @@ import { promisify } from 'util';
 
 import { migrations } from './migrations';
 import manageUuid from './server/lib/manage_uuid';
-import { searchApi } from './server/routes/api/search';
-import { scrollSearchApi } from './server/routes/api/scroll_search';
 import { importApi } from './server/routes/api/import';
 import { exportApi } from './server/routes/api/export';
 import { homeApi } from './server/routes/api/home';
@@ -62,12 +60,12 @@ export default function (kibana) {
 
     uiExports: {
       hacks: [
+        'plugins/kibana/discover',
         'plugins/kibana/dev_tools',
+        'plugins/kibana/visualize',
       ],
-      fieldFormats: ['plugins/kibana/field_formats/register'],
       savedObjectTypes: [
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
-        'plugins/kibana/discover/saved_searches/saved_search_register',
         'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
       ],
       app: {
@@ -328,12 +326,11 @@ export default function (kibana) {
     },
 
     init: async function (server) {
+      const { usageCollection } = server.newPlatform.setup.plugins;
       // uuid
       await manageUuid(server);
       // routes
-      searchApi(server);
       scriptsApi(server);
-      scrollSearchApi(server);
       importApi(server);
       exportApi(server);
       homeApi(server);
@@ -342,8 +339,8 @@ export default function (kibana) {
       registerKqlTelemetryApi(server);
       registerFieldFormats(server);
       registerTutorials(server);
-      makeKQLUsageCollector(server);
-      registerCspCollector(server);
+      makeKQLUsageCollector(usageCollection, server);
+      registerCspCollector(usageCollection, server);
       server.expose('systemApi', systemApi);
       server.injectUiAppVars('kibana', () => injectVars(server));
     },

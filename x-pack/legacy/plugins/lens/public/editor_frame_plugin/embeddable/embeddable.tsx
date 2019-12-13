@@ -7,10 +7,9 @@
 import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-
 import { Query, TimeRange, esFilters } from 'src/plugins/data/public';
-import { StaticIndexPattern } from 'src/legacy/core_plugins/data/public';
-import { ExpressionRenderer } from 'src/legacy/core_plugins/expressions/public';
+import { ExpressionRenderer } from 'src/plugins/expressions/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { Subscription } from 'rxjs';
 import {
   Embeddable as AbstractEmbeddable,
@@ -25,7 +24,7 @@ export interface LensEmbeddableConfiguration {
   savedVis: Document;
   editUrl: string;
   editable: boolean;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
 }
 
 export interface LensEmbeddableInput extends EmbeddableInput {
@@ -35,7 +34,7 @@ export interface LensEmbeddableInput extends EmbeddableInput {
 }
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
 }
 
 export class Embeddable extends AbstractEmbeddable<LensEmbeddableInput, LensEmbeddableOutput> {

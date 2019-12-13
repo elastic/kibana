@@ -18,7 +18,7 @@
  */
 
 import { mapGeoPolygon } from './map_geo_polygon';
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 describe('filter manager utilities', () => {
   let filter: esFilters.GeoPolygonFilter;

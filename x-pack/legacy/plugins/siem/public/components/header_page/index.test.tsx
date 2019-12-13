@@ -7,7 +7,6 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import 'jest-styled-components';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -19,17 +18,15 @@ jest.mock('../../lib/settings/use_kibana_ui_setting');
 describe('HeaderPage', () => {
   test('it renders', () => {
     const wrapper = shallow(
-      <TestProviders>
-        <HeaderPage
-          badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-          border
-          subtitle="Test subtitle"
-          subtitle2="Test subtitle 2"
-          title="Test title"
-        >
-          <p>{'Test supplement'}</p>
-        </HeaderPage>
-      </TestProviders>
+      <HeaderPage
+        badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
+        border
+        subtitle="Test subtitle"
+        subtitle2="Test subtitle 2"
+        title="Test title"
+      >
+        <p>{'Test supplement'}</p>
+      </HeaderPage>
     );
 
     expect(toJson(wrapper)).toMatchSnapshot();

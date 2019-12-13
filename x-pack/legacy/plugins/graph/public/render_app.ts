@@ -21,17 +21,21 @@ import { createTopNavDirective, createTopNavHelper } from 'ui/kbn_top_nav/kbn_to
 import { confirmModalFactory } from 'ui/modals/confirm_modal';
 
 // type imports
-import { DataStart } from 'src/legacy/core_plugins/data/public';
 import {
   AppMountContext,
   ChromeStart,
+  LegacyCoreStart,
   SavedObjectsClientContract,
   ToastsStart,
-  UiSettingsClientContract,
+  IUiSettingsClient,
 } from 'kibana/public';
 // @ts-ignore
 import { initGraphApp } from './app';
-import { Plugin as DataPlugin } from '../../../../../src/plugins/data/public';
+import {
+  Plugin as DataPlugin,
+  IndexPatternsContract,
+} from '../../../../../src/plugins/data/public';
+import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
 
 /**
  * These are dependencies of the Graph app besides the base dependencies
@@ -44,10 +48,11 @@ export interface GraphDependencies extends LegacyAngularInjectedDependencies {
   appBasePath: string;
   capabilities: Record<string, boolean | Record<string, boolean>>;
   coreStart: AppMountContext['core'];
+  navigation: NavigationStart;
   chrome: ChromeStart;
-  config: UiSettingsClientContract;
+  config: IUiSettingsClient;
   toastNotifications: ToastsStart;
-  indexPatterns: DataStart['indexPatterns']['indexPatterns'];
+  indexPatterns: IndexPatternsContract;
   npData: ReturnType<DataPlugin['start']>;
   savedObjectsClient: SavedObjectsClientContract;
   xpackInfo: { get(path: string): unknown };
@@ -75,8 +80,8 @@ export interface LegacyAngularInjectedDependencies {
 }
 
 export const renderApp = ({ appBasePath, element, ...deps }: GraphDependencies) => {
-  const graphAngularModule = createLocalAngularModule(deps.coreStart);
-  configureAppAngularModule(graphAngularModule);
+  const graphAngularModule = createLocalAngularModule(deps.navigation);
+  configureAppAngularModule(graphAngularModule, deps.coreStart as LegacyCoreStart, true);
   initGraphApp(graphAngularModule, deps);
   const $injector = mountGraphApp(appBasePath, element);
   return () => $injector.get('$rootScope').$destroy();
@@ -104,9 +109,9 @@ function mountGraphApp(appBasePath: string, element: HTMLElement) {
   return $injector;
 }
 
-function createLocalAngularModule(core: AppMountContext['core']) {
+function createLocalAngularModule(navigation: NavigationStart) {
   createLocalI18nModule();
-  createLocalTopNavModule();
+  createLocalTopNavModule(navigation);
   createLocalConfirmModalModule();
 
   const graphAngularModule = angular.module(moduleName, [
@@ -125,11 +130,11 @@ function createLocalConfirmModalModule() {
     .directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 }
 
-function createLocalTopNavModule() {
+function createLocalTopNavModule(navigation: NavigationStart) {
   angular
     .module('graphTopNav', ['react'])
     .directive('kbnTopNav', createTopNavDirective)
-    .directive('kbnTopNavHelper', createTopNavHelper);
+    .directive('kbnTopNavHelper', createTopNavHelper(navigation.ui));
 }
 
 function createLocalI18nModule() {

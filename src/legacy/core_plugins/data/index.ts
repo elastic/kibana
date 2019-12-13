@@ -20,7 +20,7 @@
 import { resolve } from 'path';
 import { Legacy } from '../../../../kibana';
 import { mappings } from './mappings';
-import { SavedQuery } from './public';
+import { SavedQuery } from '../../../plugins/data/public';
 
 // eslint-disable-next-line import/no-default-export
 export default function DataPlugin(kibana: any) {
@@ -35,6 +35,7 @@ export default function DataPlugin(kibana: any) {
     },
     init: (server: Legacy.Server) => ({}),
     uiExports: {
+      interpreter: ['plugins/data/search/expressions/boot'],
       injectDefaultVars: () => ({}),
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       mappings,

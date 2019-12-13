@@ -13,12 +13,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import React, { Fragment } from 'react';
-import { idx } from '@kbn/elastic-idx';
-import { KibanaCoreContext } from '../../../../../../observability/public';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';
+import { ApmPluginContext } from '../../../../context/ApmPluginContext';
 
 interface Props {
   urlParams: IUrlParams;
@@ -30,8 +29,8 @@ interface State {
 type FlyoutName = null | 'ML' | 'Watcher';
 
 export class ServiceIntegrations extends React.Component<Props, State> {
-  static contextType = KibanaCoreContext;
-  context!: React.ContextType<typeof KibanaCoreContext>;
+  static contextType = ApmPluginContext;
+  context!: React.ContextType<typeof ApmPluginContext>;
 
   public state: State = { isPopoverOpen: false, activeFlyout: null };
 
@@ -68,7 +67,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
   };
 
   public getWatcherPanelItems = () => {
-    const core = this.context;
+    const { core } = this.context;
 
     return [
       {
@@ -149,9 +148,7 @@ export class ServiceIntegrations extends React.Component<Props, State> {
                 panels={[
                   {
                     id: 0,
-                    items: this.getPanelItems(
-                      idx(license, _ => _.features.ml.is_available)
-                    )
+                    items: this.getPanelItems(license.features.ml?.is_available)
                   }
                 ]}
               />

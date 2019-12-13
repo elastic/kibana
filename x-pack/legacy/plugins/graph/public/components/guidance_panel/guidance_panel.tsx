@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { connect } from 'react-redux';
-import { IDataPluginServices } from 'src/legacy/core_plugins/data/public/types';
+import { IDataPluginServices } from 'src/plugins/data/public';
 import {
   GraphState,
   hasDatasourceSelector,
@@ -80,7 +80,8 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
   } = props;
 
   const kibana = useKibana<IDataPluginServices>();
-  const { overlays, savedObjects, uiSettings, chrome, application } = kibana.services;
+  const { services, overlays } = kibana;
+  const { savedObjects, uiSettings, chrome, application } = services;
   if (!overlays || !chrome || !application) return null;
 
   const onOpenDatasourcePicker = () => {

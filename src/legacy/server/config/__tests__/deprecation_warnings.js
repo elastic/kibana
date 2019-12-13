@@ -26,7 +26,7 @@ const SETUP_NODE_ENV = require.resolve('../../../../setup_node_env');
 const SECOND = 1000;
 
 describe('config/deprecation warnings', function () {
-  this.timeout(15 * SECOND);
+  this.timeout(65 * SECOND);
 
   let stdio = '';
   let proc = null;
@@ -38,6 +38,7 @@ describe('config/deprecation warnings', function () {
     ], {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
+        ...process.env,
         CREATE_SERVER_OPTS: JSON.stringify({
           logging: {
             quiet: false,
@@ -50,9 +51,9 @@ describe('config/deprecation warnings', function () {
       }
     });
 
-    // Either time out in 10 seconds, or resolve once the line is in our buffer
+    // Either time out in 60 seconds, or resolve once the line is in our buffer
     return Promise.race([
-      new Promise((resolve) => setTimeout(resolve, 10000)),
+      new Promise((resolve) => setTimeout(resolve, 60 * SECOND)),
       new Promise((resolve, reject) => {
         proc.stdout.on('data', (chunk) => {
           stdio += chunk.toString('utf8');
@@ -105,7 +106,11 @@ describe('config/deprecation warnings', function () {
         line.tags.includes('warning')
       );
 
-    expect(deprecationLines).to.have.length(1);
-    expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');
+    try {
+      expect(deprecationLines).to.have.length(1);
+      expect(deprecationLines[0]).to.have.property('message', 'uiSettings.enabled is deprecated and is no longer used');
+    } catch (error) {
+      throw new Error(`Expected stdio to include deprecation message about uiSettings.enabled\n\nstdio:\n${stdio}\n\n`);
+    }
   });
 });

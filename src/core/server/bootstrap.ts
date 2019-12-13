@@ -22,6 +22,7 @@ import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
 import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
+import { CriticalError } from './errors';
 
 interface KibanaFeatures {
   // Indicates whether we can run Kibana in a so called cluster mode in which
@@ -70,7 +71,20 @@ export async function bootstrap({
 
   const root = new Root(rawConfigService.getConfig$(), env, onRootShutdown);
 
-  process.on('SIGHUP', () => {
+  process.on('SIGHUP', () => reloadLoggingConfig());
+
+  // This is only used by the LogRotator service
+  // in order to be able to reload the log configuration
+  // under the cluster mode
+  process.on('message', msg => {
+    if (!msg || msg.reloadLoggingConfig !== true) {
+      return;
+    }
+
+    reloadLoggingConfig();
+  });
+
+  function reloadLoggingConfig() {
     const cliLogger = root.logger.get('cli');
     cliLogger.info('Reloading logging configuration due to SIGHUP.', { tags: ['config'] });
 
@@ -81,7 +95,7 @@ export async function bootstrap({
     }
 
     cliLogger.info('Reloaded logging configuration due to SIGHUP.', { tags: ['config'] });
-  });
+  }
 
   process.on('SIGINT', () => shutdown());
   process.on('SIGTERM', () => shutdown());
@@ -112,7 +126,9 @@ function onRootShutdown(reason?: any) {
     // mirror such fatal errors in standard output with `console.error`.
     // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+
+    process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }
 
-  process.exit(reason === undefined ? 0 : (reason as any).processExitCode || 1);
+  process.exit(0);
 }

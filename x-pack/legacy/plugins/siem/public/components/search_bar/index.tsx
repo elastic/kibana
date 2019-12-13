@@ -10,9 +10,8 @@ import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { StaticIndexPattern, IndexPattern } from 'ui/index_patterns';
-
-import { TimeRange, Query } from 'src/plugins/data/common/types';
+import { IndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { OnTimeChangeProps } from '@elastic/eui';
@@ -36,15 +35,14 @@ import {
   toStrSelector,
 } from './selectors';
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const {
   ui: { SearchBar },
-  search,
 } = data;
 
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
-export const savedQueryService = search.services.savedQueryService;
+export const savedQueryService = npStart.plugins.data.query.savedQueries;
 
 interface SiemSearchBarRedux {
   end: number;
@@ -71,8 +69,9 @@ interface SiemSearchBarDispatch {
 
 interface SiemSearchBarProps {
   id: InputsModelId;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   timelineId?: string;
+  dataTestSubj?: string;
 }
 
 const SearchBarContainer = styled.div`
@@ -97,6 +96,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
     timelineId,
     toStr,
     updateSearch,
+    dataTestSubj,
   }) => {
     const { timefilter } = npStart.plugins.data.query.timefilter;
     if (fromStr != null && toStr != null) {
@@ -277,6 +277,7 @@ const SearchBarComponent = memo<SiemSearchBarProps & SiemSearchBarRedux & SiemSe
           showQueryBar={true}
           showQueryInput={true}
           showSaveQuery={true}
+          dataTestSubj={dataTestSubj}
         />
       </SearchBarContainer>
     );

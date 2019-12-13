@@ -100,7 +100,7 @@ export class Plugin {
     plugins.encryptedSavedObjects.registerType({
       type: 'action',
       attributesToEncrypt: new Set(['secrets']),
-      attributesToExcludeFromAAD: new Set(['description']),
+      attributesToExcludeFromAAD: new Set(['name']),
     });
     plugins.encryptedSavedObjects.registerType({
       type: 'action_task_params',

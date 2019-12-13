@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export const JobStoppedCallout: React.FC = () => (
-  <EuiCallOut color="primary" iconType="pause" title={jobStoppedTitle}>
+  <EuiCallOut color="primary" title={jobStoppedTitle}>
     <FormattedMessage
       id="xpack.infra.logs.analysis.jobStoppedCalloutMessage"
       defaultMessage="The ML job has been stopped manually or due to a lack of resources. New log entries will not be processed until the job has been restarted."

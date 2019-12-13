@@ -8,10 +8,6 @@ import { mount } from 'enzyme';
 import * as React from 'react';
 import { MlPopover } from './ml_popover';
 
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-
 jest.mock('../../lib/settings/use_kibana_ui_setting');
 
 jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
@@ -19,14 +15,6 @@ jest.mock('../ml/permissions/has_ml_admin_permissions', () => ({
 }));
 
 describe('MlPopover', () => {
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
-
-  afterAll(() => {
-    console.error = originalError;
-  });
-
   test('shows upgrade popover on mouse click', () => {
     const wrapper = mount(<MlPopover />);
 

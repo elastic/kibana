@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import { castEsToKbnFieldTypeName } from '../plugins/data/common';
-// eslint-disable-next-line max-len
-import { shouldReadFieldFromDocValues } from '../plugins/data/server';
+import {
+  shouldReadFieldFromDocValues,
+  castEsToKbnFieldTypeName,
+} from '../plugins/data/server';
 
 function stubbedLogstashFields() {
   return [

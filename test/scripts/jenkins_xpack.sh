@@ -6,7 +6,7 @@ export TEST_BROWSER_HEADLESS=1
 
 echo " -> Running mocha tests"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Mocha" yarn test
+checks-reporter-with-killswitch "X-Pack Karma Tests" yarn test:browser
 echo ""
 echo ""
 

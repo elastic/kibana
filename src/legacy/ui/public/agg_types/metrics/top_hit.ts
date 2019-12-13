@@ -27,7 +27,7 @@ import { TopSizeParamEditor } from '../../vis/editors/default/controls/top_size'
 import { TopAggregateParamEditor } from '../../vis/editors/default/controls/top_aggregate';
 import { aggTypeFieldFilters } from '../param_types/filter';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { wrapWithInlineComp } from '../buckets/inline_comp_wrapper';
@@ -38,7 +38,7 @@ const isNumericFieldSelected = (agg: IMetricAggConfig) => {
   return field && field.type && field.type === KBN_FIELD_TYPES.NUMBER;
 };
 
-aggTypeFieldFilters.addFilter((field, aggConfig: IMetricAggConfig) => {
+aggTypeFieldFilters.addFilter((field, aggConfig) => {
   if (
     aggConfig.type.name !== METRIC_TYPES.TOP_HITS ||
     _.get(aggConfig.schema, 'aggSettings.top_hits.allowStrings', false)
@@ -82,7 +82,7 @@ export const topHitMetricAgg = new MetricAggType({
       editorComponent: TopFieldParamEditor,
       onlyAggregatable: false,
       filterFieldTypes: '*',
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         const field = agg.getParam('field');
         output.params = {};
 
@@ -196,7 +196,7 @@ export const topHitMetricAgg = new MetricAggType({
           value: 'asc',
         },
       ],
-      write(agg: IMetricAggConfig, output: Record<string, any>) {
+      write(agg, output) {
         const sortField = agg.params.sortField;
         const sortOrder = agg.params.sortOrder;
 

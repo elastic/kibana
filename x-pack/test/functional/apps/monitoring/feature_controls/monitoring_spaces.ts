@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { SpacesService } from '../../../../common/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const spacesService: SpacesService = getService('spaces');
+  const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
   const appsMenu = getService('appsMenu');
   const find = getService('find');
@@ -17,6 +16,12 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
   describe('spaces', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
+    });
+
+    after(async () => {
+      await esArchiver.unload('empty_kibana');
+      await PageObjects.common.navigateToApp('home');
+      await PageObjects.security.logout();
     });
 
     describe('space with no features disabled', () => {

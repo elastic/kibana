@@ -20,12 +20,11 @@
 import React, { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import { CoreStart } from 'src/core/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { SearchBar } from '../../../';
 import { SearchBarOwnProps } from '.';
-import { esFilters } from '../../../../../../../plugins/data/public';
+import { DataPublicPluginStart, esFilters } from '../../../../../../../plugins/data/public';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;

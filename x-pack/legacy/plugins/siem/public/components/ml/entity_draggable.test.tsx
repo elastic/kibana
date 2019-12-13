@@ -7,13 +7,17 @@
 import React from 'react';
 import toJson from 'enzyme-to-json';
 import { shallow, mount } from 'enzyme';
-import { EntityDraggable } from './entity_draggable';
+import { EntityDraggableComponent } from './entity_draggable';
 import { TestProviders } from '../../mock/test_providers';
 
 describe('entity_draggable', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <EntityDraggable idPrefix="id-prefix" entityName="entity-name" entityValue="entity-value" />
+      <EntityDraggableComponent
+        idPrefix="id-prefix"
+        entityName="entity-name"
+        entityValue="entity-value"
+      />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });
@@ -21,7 +25,11 @@ describe('entity_draggable', () => {
   test('renders with entity name with entity value as text', () => {
     const wrapper = mount(
       <TestProviders>
-        <EntityDraggable idPrefix="id-prefix" entityName="entity-name" entityValue="entity-value" />
+        <EntityDraggableComponent
+          idPrefix="id-prefix"
+          entityName="entity-name"
+          entityValue="entity-value"
+        />
       </TestProviders>
     );
     expect(wrapper.text()).toEqual('entity-name: "entity-value"');

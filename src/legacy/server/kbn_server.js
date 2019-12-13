@@ -21,14 +21,14 @@ import { constant, once, compact, flatten } from 'lodash';
 
 
 import { isWorker } from 'cluster';
-import { fromRoot, pkg } from '../utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot, pkg } from '../../core/server/utils';
 import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import httpMixin from './http';
 import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
-import { usageMixin } from './usage';
 import { statusMixin } from './status';
 import pidMixin from './pid';
 import { configDeprecationWarningsMixin } from './config/deprecation_warnings';
@@ -57,7 +57,7 @@ export default class KbnServer {
     this.settings = settings || {};
     this.config = config;
 
-    const { setupDeps, startDeps, handledConfigPaths, logger, __internals, env } = core;
+    const { setupDeps, startDeps, logger, __internals, env } = core;
 
     this.server = __internals.hapiServer;
     this.newPlatform = {
@@ -72,9 +72,6 @@ export default class KbnServer {
       setup: setupDeps,
       start: startDeps,
       stop: null,
-      params: {
-        handledConfigPaths,
-      },
     };
 
     this.uiExports = legacyPlugins.uiExports;
@@ -94,7 +91,6 @@ export default class KbnServer {
       loggingMixin,
       configDeprecationWarningsMixin,
       warningsMixin,
-      usageMixin,
       statusMixin,
 
       // writes pid file

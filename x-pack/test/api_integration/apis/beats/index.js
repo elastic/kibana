@@ -7,7 +7,7 @@
 import { ES_INDEX_NAME } from './constants';
 
 export default function ({ getService, loadTestFile }) {
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('beats', () => {
     const cleanup = () =>

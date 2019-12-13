@@ -75,11 +75,15 @@ export function getPlotValues(
   const yMaxNice = yScale.domain()[1];
   const yTickValues = [0, yMaxNice / 2, yMaxNice];
 
+  // approximate number of x-axis ticks based on the width of the plot. There should by approx 1 tick per 100px
+  // d3 will determine the exact number of ticks based on the selected range
+  const xTickTotal = Math.floor(width / 100);
+
   const xTickValues = d3.time.scale
     .utc()
     .domain([xMinZone, xMaxZone])
     .range([0, width])
-    .ticks()
+    .ticks(xTickTotal)
     .map(x => {
       const time = x.getTime();
       return new Date(time + getTimezoneOffsetInMs(time));

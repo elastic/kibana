@@ -26,9 +26,6 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
-  const fromTime = '2015-09-19 06:31:44.000';
-  const toTime = '2015-09-23 18:31:44.000';
-
   describe('data table', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable';
 
@@ -39,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickDataTable();
       log.debug('clickNewSearch');
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split rows');
       await PageObjects.visualize.clickBucket('Split rows');
       log.debug('Aggregation = Histogram');
@@ -67,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be able to save and load', async function () {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
@@ -112,7 +109,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.clickBucket('Split rows');
       await PageObjects.visualize.selectAggregation('Range');
       await PageObjects.visualize.selectField('bytes');
@@ -129,7 +126,7 @@ export default function ({ getService, getPageObjects }) {
       // check that it works after a save and reload
       const SAVE_NAME = 'viz w/ percents';
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(SAVE_NAME);
-      await PageObjects.visualize.waitForVisualizationSavedToastGone();
+
       await PageObjects.visualize.loadSavedVisualization(SAVE_NAME);
       await PageObjects.visualize.waitForVisualization();
 
@@ -157,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.clickBucket('Metric', 'metrics');
       await PageObjects.visualize.selectAggregation('Average Bucket', 'metrics');
       await PageObjects.visualize.selectAggregation('Terms', 'metrics', 'buckets');
@@ -172,7 +169,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.clickBucket('Split rows');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       await PageObjects.visualize.selectField('@timestamp');
@@ -191,7 +188,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.clickBucket('Split rows');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       await PageObjects.visualize.selectField('@timestamp');
@@ -227,7 +224,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.selectAggregation('Top Hit', 'metrics');
       await PageObjects.visualize.selectField('agent.raw', 'metrics');
@@ -241,7 +238,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.visualize.clickBucket('Split rows');
       await PageObjects.visualize.selectAggregation('Range');
       await PageObjects.visualize.selectField('bytes');
@@ -259,7 +256,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visualize.clickBucket('Split rows');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('extension.raw');
@@ -297,7 +294,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visualize.clickBucket('Split rows');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('extension.raw');
@@ -392,7 +389,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.visualize.clickBucket('Split table');
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('extension.raw');

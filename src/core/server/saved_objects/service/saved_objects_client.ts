@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsRepository } from './lib';
+import { ISavedObjectsRepository } from './lib';
 import {
   SavedObject,
   SavedObjectAttributes,
@@ -141,15 +141,6 @@ export interface SavedObjectsDeleteOptions extends SavedObjectsBaseOptions {
  *
  * @public
  */
-export interface SavedObjectsDeleteByNamespaceOptions extends SavedObjectsBaseOptions {
-  /** The Elasticsearch Refresh setting for this operation */
-  refresh?: MutatingOperationRefreshSetting;
-}
-
-/**
- *
- * @public
- */
 export interface SavedObjectsBulkGetObject {
   id: string;
   type: string;
@@ -191,9 +182,10 @@ export class SavedObjectsClient {
   public static errors = SavedObjectsErrorHelpers;
   public errors = SavedObjectsErrorHelpers;
 
-  private _repository: SavedObjectsRepository;
+  private _repository: ISavedObjectsRepository;
 
-  constructor(repository: SavedObjectsRepository) {
+  /** @internal */
+  constructor(repository: ISavedObjectsRepository) {
     this._repository = repository;
   }
 

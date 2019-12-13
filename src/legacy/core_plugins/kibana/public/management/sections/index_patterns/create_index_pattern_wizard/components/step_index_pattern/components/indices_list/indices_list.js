@@ -61,7 +61,7 @@ export class IndicesList extends Component {
     this.pager = new Pager(props.indices.length, this.state.perPage, this.state.page);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.indices.length !== this.props.indices.length) {
       this.pager.setTotalItems(nextProps.indices.length);
       this.resetPageTo0();

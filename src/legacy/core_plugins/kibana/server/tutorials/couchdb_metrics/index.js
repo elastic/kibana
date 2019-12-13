@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
 
-export function couchdbMetricsSpecProvider(server, context) {
+export function couchdbMetricsSpecProvider(context) {
   const moduleName = 'couchdb';
   return {
     id: 'couchdbMetrics',

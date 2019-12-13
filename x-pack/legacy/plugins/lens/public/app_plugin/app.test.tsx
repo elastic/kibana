@@ -12,8 +12,7 @@ import { EditorFrameInstance } from '../types';
 import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
 import { Document, SavedObjectStore } from '../persistence';
 import { mount } from 'enzyme';
-import { esFilters } from '../../../../../../src/plugins/data/public';
-
+import { esFilters, IFieldType, IIndexPattern } from '../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 const dataStartMock = dataPluginMock.createStartContract();
 
@@ -100,17 +99,18 @@ describe('Lens App', () => {
       data: {
         query: {
           filterManager: createMockFilterManager(),
-        },
-      },
-      dataShim: {
-        indexPatterns: {
-          indexPatterns: {
-            get: jest.fn(id => {
-              return new Promise(resolve => resolve({ id }));
-            }),
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => ({ from: 'now-7d', to: 'now' })),
+              setTime: jest.fn(),
+            },
           },
         },
-        timefilter: { history: {} },
+        indexPatterns: {
+          get: jest.fn(id => {
+            return new Promise(resolve => resolve({ id }));
+          }),
+        },
       },
       storage: {
         get: jest.fn(),
@@ -234,7 +234,7 @@ describe('Lens App', () => {
       await waitForPromises();
 
       expect(args.docStorage.load).toHaveBeenCalledWith('1234');
-      expect(args.dataShim.indexPatterns.indexPatterns.get).toHaveBeenCalledWith('1');
+      expect(args.data.indexPatterns.get).toHaveBeenCalledWith('1');
       expect(TopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
           query: 'fake query',
@@ -593,17 +593,17 @@ describe('Lens App', () => {
       args.editorFrame = frame;
 
       const instance = mount(<App {...args} />);
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
 
-      args.data.query.filterManager.setFilters([
-        esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
-      ]);
+      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
 
       instance.update();
 
       expect(frame.mount).toHaveBeenCalledWith(
         expect.any(Element),
         expect.objectContaining({
-          filters: [esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' })],
+          filters: [esFilters.buildExistsFilter(field, indexPattern)],
         })
       );
     });
@@ -725,9 +725,10 @@ describe('Lens App', () => {
         query: { query: 'new', language: 'lucene' },
       });
 
-      args.data.query.filterManager.setFilters([
-        esFilters.buildExistsFilter({ name: 'myfield' }, { id: 'index1' }),
-      ]);
+      const indexPattern = ({ id: 'index1' } as unknown) as IIndexPattern;
+      const field = ({ name: 'myfield' } as unknown) as IFieldType;
+
+      args.data.query.filterManager.setFilters([esFilters.buildExistsFilter(field, indexPattern)]);
       instance.update();
 
       instance.find(TopNavMenu).prop('onClearSavedQuery')!();

@@ -20,9 +20,7 @@
 import FsOptimizer from './fs_optimizer';
 import { createBundlesRoute } from './bundles_route';
 import { DllCompiler } from './dynamic_dll_plugin';
-import { fromRoot } from '../legacy/utils';
-
-export default async (kbnServer, server, config) => {
+import { fromRoot } from '../core/server/utils'; export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 
   // the watch optimizer sets up two threads, one is the server listening
@@ -66,7 +64,7 @@ export default async (kbnServer, server, config) => {
   const optimizer = new FsOptimizer({
     logWithMetadata: (tags, message, metadata) => server.logWithMetadata(tags, message, metadata),
     uiBundles,
-    discoveredPlugins: newPlatform.__internals.uiPlugins.internal,
+    newPlatformPluginInfo: newPlatform.__internals.uiPlugins.internal,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
     workers: config.get('optimize.workers'),

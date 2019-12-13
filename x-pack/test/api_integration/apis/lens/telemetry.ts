@@ -22,7 +22,7 @@ const COMMON_HEADERS = {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const es: Client = getService('es');
+  const es: Client = getService('legacyEs');
   const callCluster: CallCluster = (((path: 'search', searchParams: SearchParams) => {
     return es[path].call(es, searchParams);
   }) as unknown) as CallCluster;

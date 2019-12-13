@@ -24,20 +24,15 @@ export interface AggListProps {
   onChange(previousAggName: AggName, item: PivotAggsConfig): void;
 }
 
-export const AggListForm: React.SFC<AggListProps> = ({
-  deleteHandler,
-  list,
-  onChange,
-  options,
-}) => {
+export const AggListForm: React.FC<AggListProps> = ({ deleteHandler, list, onChange, options }) => {
   const listKeys = Object.keys(list);
   return (
     <Fragment>
-      {listKeys.map((aggName: AggName) => {
+      {listKeys.map((aggName: AggName, i) => {
         const otherAggNames = listKeys.filter(k => k !== aggName);
         return (
           <Fragment key={aggName}>
-            <EuiPanel paddingSize="s">
+            <EuiPanel paddingSize="s" data-test-subj={`transformAggregationEntry ${i}`}>
               <AggLabelForm
                 deleteHandler={deleteHandler}
                 item={list[aggName]}

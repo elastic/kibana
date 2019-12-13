@@ -1,9 +1,16 @@
-<filter-bar
-  class-name="'globalFilterGroup__filterBar'"
+<kbn-top-nav
+  app-name="'context'"
+  show-search-bar="true"
+  show-filter-bar="true"
+  show-save-query="false"
+  show-date-picker="false"
+
   filters="contextApp.state.queryParameters.filters"
   on-filters-updated="contextApp.actions.updateFilters"
   index-patterns="[contextApp.indexPattern]"
-></filter-bar>
+>
+</kbn-top-nav>
+
 
 <!-- Error feedback -->
 <div

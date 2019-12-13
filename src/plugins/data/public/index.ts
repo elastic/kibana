@@ -18,20 +18,80 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
-import { DataPublicPlugin } from './plugin';
-
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataPublicPlugin(initializerContext);
 }
 
-export { DataPublicPlugin as Plugin };
-export { DataPublicPluginSetup, DataPublicPluginStart } from './types';
-
-export * from '../common';
-export * from './autocomplete_provider';
-
-export * from './types';
-
+/**
+ * Types to be shared externally
+ * @public
+ */
 export { IRequestTypesMap, IResponseTypesMap } from './search';
+export * from './types';
+export {
+  // field formats
+  ContentType, // only used in agg_type
+  FIELD_FORMAT_IDS,
+  IFieldFormat,
+  IFieldFormatId,
+  IFieldFormatType,
+  // index patterns
+  IIndexPattern,
+  IFieldType,
+  IFieldSubType,
+  // kbn field types
+  ES_FIELD_TYPES,
+  KBN_FIELD_TYPES,
+  // query
+  Query,
+  // timefilter
+  RefreshInterval,
+  TimeRange,
+} from '../common';
+
+/**
+ * Static code to be shared externally
+ * @public
+ */
+export * from './autocomplete_provider';
+export * from './field_formats_provider';
+export * from './index_patterns';
 export * from './search';
 export * from './query';
+export * from './ui';
+export {
+  // es query
+  esFilters,
+  esKuery,
+  esQuery,
+  // field formats
+  BoolFormat,
+  BytesFormat,
+  ColorFormat,
+  DateFormat,
+  DateNanosFormat,
+  DEFAULT_CONVERTER_COLOR,
+  DurationFormat,
+  FieldFormat,
+  getHighlightRequest, // only used in search source
+  IpFormat,
+  NumberFormat,
+  PercentFormat,
+  RelativeDateFormat,
+  SourceFormat,
+  StaticLookupFormat,
+  StringFormat,
+  TEXT_CONTEXT_TYPE, // only used in agg_types
+  TruncateFormat,
+  UrlFormat,
+  // index patterns
+  isFilterable,
+  // kbn field types
+  castEsToKbnFieldTypeName,
+  getKbnFieldType,
+  getKbnTypeNames,
+} from '../common';
+
+// Export plugin after all other imports
+import { DataPublicPlugin } from './plugin';
+export { DataPublicPlugin as Plugin };

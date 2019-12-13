@@ -5,7 +5,6 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/es-query';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { StickyContainer } from 'react-sticky';
@@ -30,6 +29,7 @@ import { convertToBuildEsQuery } from '../../lib/keury';
 import { inputsSelectors, State, hostsModel } from '../../store';
 import { setAbsoluteRangeDatePicker as dispatchSetAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { SpyRoute } from '../../utils/route/spy_routes';
+import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { HostsEmptyPage } from './hosts_empty_page';
 import { HostsTabs } from './hosts_tabs';
 import { navTabsHosts } from './nav_tabs';
@@ -58,7 +58,7 @@ const HostsComponent = React.memo<HostsComponentProps>(
         <WithSource sourceId="default">
           {({ indicesExist, indexPattern }) => {
             const filterQuery = convertToBuildEsQuery({
-              config: getEsQueryConfig(core.uiSettings),
+              config: esQuery.getEsQueryConfig(core.uiSettings),
               indexPattern,
               queries: [query],
               filters,

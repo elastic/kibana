@@ -20,15 +20,17 @@
 import { PluginInitializerContext } from '../../../core/public';
 import { ExpressionsPublicPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ExpressionsPublicPlugin(initializerContext);
-}
-
 export { ExpressionsPublicPlugin as Plugin };
 
 export * from './plugin';
 export * from './types';
-export { Type, getType } from './interpreter';
+export * from '../common';
 export { interpreterProvider, ExpressionInterpret } from './interpreter_provider';
-export * from './serialize_provider';
-export * from './expression_types';
+export { ExpressionRenderer, ExpressionRendererProps } from './expression_renderer';
+export { ExpressionDataHandler } from './execute';
+
+export { ExpressionRenderHandler } from './render';
+
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ExpressionsPublicPlugin(initializerContext);
+}

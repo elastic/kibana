@@ -36,6 +36,7 @@ export function tutorialsMixin(kbnServer, server) {
   });
 
   server.decorate('server', 'registerTutorial', (specProvider) => {
+    // registration during setup
     const emptyContext = {};
     const { error } = Joi.validate(specProvider(server, emptyContext), tutorialSchema);
 
@@ -47,6 +48,7 @@ export function tutorialsMixin(kbnServer, server) {
   });
 
   server.decorate('server', 'addScopedTutorialContextFactory', (scopedTutorialContextFactory) => {
+    // returned by the setup method of the new plugin, they will do the same thing as now
     if (typeof scopedTutorialContextFactory !== 'function') {
       throw new Error(`Unable to add scoped(request) context factory because you did not provide a function`);
     }

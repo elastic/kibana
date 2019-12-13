@@ -20,22 +20,22 @@
 import _ from 'lodash';
 import { Subject } from 'rxjs';
 
-import { UiSettingsClientContract } from 'src/core/public';
+import { IUiSettingsClient } from 'src/core/public';
 
 import { compareFilters } from './lib/compare_filters';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { onlyDisabledFiltersChanged } from './lib/only_disabled';
 import { PartitionedFilters } from './types';
-import { esFilters } from '../../../common/es_query';
+import { esFilters } from '../../../common';
 
 export class FilterManager {
   private filters: esFilters.Filter[] = [];
   private updated$: Subject<void> = new Subject();
   private fetch$: Subject<void> = new Subject();
-  private uiSettings: UiSettingsClientContract;
+  private uiSettings: IUiSettingsClient;
 
-  constructor(uiSettings: UiSettingsClientContract) {
+  constructor(uiSettings: IUiSettingsClient) {
     this.uiSettings = uiSettings;
   }
 

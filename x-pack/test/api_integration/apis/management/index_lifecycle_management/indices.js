@@ -13,7 +13,7 @@ import { getPolicyPayload } from './fixtures';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     getIndex,

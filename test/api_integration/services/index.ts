@@ -23,10 +23,7 @@ import { services as commonServices } from '../../common/services';
 import { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './supertest';
 
 export const services = {
-  es: commonServices.es,
-  esArchiver: commonServices.esArchiver,
-  retry: commonServices.retry,
+  ...commonServices,
   supertest: KibanaSupertestProvider,
   esSupertest: ElasticsearchSupertestProvider,
-  randomness: commonServices.randomness,
 };

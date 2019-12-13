@@ -15,14 +15,16 @@ beforeEach(() => jest.resetAllMocks());
 const mockedResponse = {
   id: '1',
   alertTypeId: '1',
+  tags: ['foo'],
   interval: '12s',
-  alertTypeParams: {
+  params: {
     otherField: false,
   },
   actions: [
     {
       group: 'default',
       id: '2',
+      actionTypeId: 'test',
       params: {
         baz: true,
       },
@@ -37,8 +39,9 @@ test('calls the update function with proper parameters', async () => {
     payload: {
       throttle: null,
       name: 'abc',
+      tags: ['bar'],
       interval: '12s',
-      alertTypeParams: {
+      params: {
         otherField: false,
       },
       actions: [
@@ -72,11 +75,14 @@ test('calls the update function with proper parameters', async () => {
               },
             },
           ],
-          "alertTypeParams": Object {
-            "otherField": false,
-          },
           "interval": "12s",
           "name": "abc",
+          "params": Object {
+            "otherField": false,
+          },
+          "tags": Array [
+            "bar",
+          ],
           "throttle": null,
         },
         "id": "1",

@@ -21,7 +21,7 @@ import * as Rx from 'rxjs';
 import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import { npStart } from 'ui/new_platform';
+import { SearchSourceContract } from '../../../../../ui/public/courier';
 import {
   esFilters,
   TimeRange,
@@ -30,6 +30,7 @@ import {
   generateFilters,
   getTime,
   Query,
+  IFieldType,
 } from '../../../../../../plugins/data/public';
 import {
   APPLY_FILTER_TRIGGER,
@@ -50,11 +51,8 @@ import {
   getServices,
   IndexPattern,
   RequestAdapter,
-  SearchSource,
 } from '../kibana_services';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
-
-const { data } = npStart.plugins;
 
 interface SearchScope extends ng.IScope {
   columns?: string[];
@@ -66,7 +64,7 @@ interface SearchScope extends ng.IScope {
   removeColumn?: (column: string) => void;
   addColumn?: (column: string) => void;
   moveColumn?: (column: string, index: number) => void;
-  filter?: (field: { name: string; scripted: boolean }, value: string[], operator: string) => void;
+  filter?: (field: IFieldType, value: string[], operator: string) => void;
   hits?: any[];
   indexPattern?: IndexPattern;
   totalHitCount?: number;
@@ -80,7 +78,7 @@ interface SearchEmbeddableConfig {
   editUrl: string;
   indexPatterns?: IndexPattern[];
   editable: boolean;
-  queryFilter: unknown;
+  filterManager: FilterManager;
 }
 
 export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
@@ -91,7 +89,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
   private inspectorAdaptors: Adapters;
   private searchScope?: SearchScope;
   private panelTitle: string = '';
-  private filtersSearchSource?: SearchSource;
+  private filtersSearchSource?: SearchSourceContract;
   private searchInstance?: JQLite;
   private autoRefreshFetchSubscription?: Subscription;
   private subscription?: Subscription;
@@ -111,7 +109,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       editUrl,
       indexPatterns,
       editable,
-      queryFilter,
+      filterManager,
     }: SearchEmbeddableConfig,
     initialInput: SearchInput,
     private readonly executeTriggerActions: TExecuteTriggerActions,
@@ -123,7 +121,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       parent
     );
 
-    this.filterManager = queryFilter as FilterManager;
+    this.filterManager = filterManager;
     this.savedSearch = savedSearch;
     this.$rootScope = $rootScope;
     this.$compile = $compile;
@@ -131,9 +129,10 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       requests: new RequestAdapter(),
     };
     this.initializeSearchScope();
-    const { timefilter } = data.query.timefilter;
 
-    this.autoRefreshFetchSubscription = timefilter.getAutoRefreshFetch$().subscribe(this.fetch);
+    this.autoRefreshFetchSubscription = getServices()
+      .timefilter.getAutoRefreshFetch$()
+      .subscribe(this.fetch);
 
     this.subscription = Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -193,13 +192,11 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     searchScope.inspectorAdapters = this.inspectorAdaptors;
 
     const { searchSource } = this.savedSearch;
-    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'));
+    const indexPattern = (searchScope.indexPattern = searchSource.getField('index'))!;
 
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchScope || !this.input.timeRange) {
-        return;
-      }
+      if (!this.searchScope || !this.input.timeRange) return;
       return getTime(indexPattern, this.input.timeRange);
     });
 
@@ -240,7 +237,7 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     };
 
     searchScope.filter = async (field, value, operator) => {
-      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id);
+      let filters = generateFilters(this.filterManager, field, value, operator, indexPattern.id!);
       filters = filters.map(filter => ({
         ...filter,
         $state: { store: esFilters.FilterStateStore.APP_STATE },
@@ -282,10 +279,9 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
     });
     const inspectorRequest = this.inspectorAdaptors.requests.start(title, { description });
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
-    searchSource.getSearchRequestBody().then((body: any) => {
+    searchSource.getSearchRequestBody().then((body: Record<string, unknown>) => {
       inspectorRequest.json(body);
     });
-
     this.searchScope.isLoading = true;
 
     try {
@@ -293,7 +289,6 @@ export class SearchEmbeddable extends Embeddable<SearchInput, SearchOutput>
       const resp = await searchSource.fetch({
         abortSignal: this.abortController.signal,
       });
-
       this.searchScope.isLoading = false;
 
       // Log response to inspector

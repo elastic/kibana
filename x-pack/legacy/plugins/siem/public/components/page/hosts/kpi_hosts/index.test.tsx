@@ -8,7 +8,7 @@ import { mockKpiHostsData, mockKpiHostDetailsData } from './mock';
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { KpiHostsComponent } from '.';
+import { KpiHostsComponentBase } from '.';
 import * as statItems from '../../../stat_items';
 import { kpiHostsMapping } from './kpi_hosts_mapping';
 import { kpiHostDetailsMapping } from './kpi_host_details_mapping';
@@ -21,7 +21,7 @@ describe('kpiHostsComponent', () => {
   describe('render', () => {
     test('it should render spinner if it is loading', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent
+        <KpiHostsComponentBase
           data={mockKpiHostsData}
           from={from}
           id={ID}
@@ -35,7 +35,7 @@ describe('kpiHostsComponent', () => {
 
     test('it should render KpiHostsData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent
+        <KpiHostsComponentBase
           data={mockKpiHostsData}
           from={from}
           id={ID}
@@ -49,7 +49,7 @@ describe('kpiHostsComponent', () => {
 
     test('it should render KpiHostDetailsData', () => {
       const wrapper: ShallowWrapper = shallow(
-        <KpiHostsComponent
+        <KpiHostsComponentBase
           data={mockKpiHostDetailsData}
           from={from}
           id={ID}
@@ -80,7 +80,7 @@ describe('kpiHostsComponent', () => {
 
       beforeEach(() => {
         shallow(
-          <KpiHostsComponent
+          <KpiHostsComponentBase
             data={data}
             from={from}
             id={ID}

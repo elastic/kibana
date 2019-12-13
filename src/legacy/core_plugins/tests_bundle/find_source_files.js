@@ -18,7 +18,8 @@
  */
 
 
-import { fromRoot } from '../../../legacy/utils';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { fromRoot } from '../../../core/server/utils';
 import { chain } from 'lodash';
 import { resolve } from 'path';
 import { fromNode } from 'bluebird';

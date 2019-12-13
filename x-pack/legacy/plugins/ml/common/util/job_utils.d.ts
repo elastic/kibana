@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Job } from '../../public/application/jobs/new_job/common/job_creator/configs';
+
 export interface ValidationMessage {
   id: string;
 }
@@ -32,4 +34,12 @@ export const ML_DATA_PREVIEW_COUNT: number;
 
 export function isJobIdValid(jobId: string): boolean;
 
+export function validateModelMemoryLimitUnits(
+  modelMemoryLimit: string
+): { valid: boolean; messages: any[]; contains: () => boolean; find: () => void };
+
 export function processCreatedBy(customSettings: { created_by?: string }): void;
+
+export function mlFunctionToESAggregation(functionName: string): string | null;
+
+export function isModelPlotEnabled(job: Job, detectorIndex: number, entityFields: any[]): boolean;

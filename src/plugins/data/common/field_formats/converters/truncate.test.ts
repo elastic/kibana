@@ -21,25 +21,25 @@ import { TruncateFormat } from './truncate';
 
 describe('String TruncateFormat', () => {
   test('truncate large string', () => {
-    const truncate = new TruncateFormat({ fieldLength: 4 });
+    const truncate = new TruncateFormat({ fieldLength: 4 }, jest.fn());
 
     expect(truncate.convert('This is some text')).toBe('This...');
   });
 
   test('does not truncate large string when field length is not a string', () => {
-    const truncate = new TruncateFormat({ fieldLength: 'not number' });
+    const truncate = new TruncateFormat({ fieldLength: 'not number' }, jest.fn());
 
     expect(truncate.convert('This is some text')).toBe('This is some text');
   });
 
   test('does not truncate large string when field length is null', () => {
-    const truncate = new TruncateFormat({ fieldLength: null });
+    const truncate = new TruncateFormat({ fieldLength: null }, jest.fn());
 
     expect(truncate.convert('This is some text')).toBe('This is some text');
   });
 
   test('does not truncate large string when field length larger than the text', () => {
-    const truncate = new TruncateFormat({ fieldLength: 100000 });
+    const truncate = new TruncateFormat({ fieldLength: 100000 }, jest.fn());
 
     expect(truncate.convert('This is some text')).toBe('This is some text');
   });

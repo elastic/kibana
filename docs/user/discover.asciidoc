@@ -4,7 +4,7 @@
 [partintro]
 --
 *Discover* enables you to explore your data with {kib}'s data discovery functions. 
-You have access to every document in every index that matches the selected index pattern. 
+You have access to every document in every index that matches the selected <<index-patterns, index pattern>>.
 You can submit search queries, filter the search results, and view document data.
 You can also see the number of documents that match the search query and get field value statistics. 
 If a time field is configured for the selected index pattern, the distribution of 

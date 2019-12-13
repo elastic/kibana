@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { OverlayRef } from '../../../../src/core/public';
+import { KibanaReactOverlays } from '../../../../src/plugins/kibana_react/public';
 
 export interface CommonlyUsedRange {
   from: string;
@@ -12,10 +12,4 @@ export interface CommonlyUsedRange {
   display: string;
 }
 
-export type OpenModal = (
-  modalChildren: React.ReactNode,
-  modalProps?: {
-    closeButtonAriaLabel?: string;
-    'data-test-subj'?: string;
-  }
-) => OverlayRef;
+export type OpenModal = KibanaReactOverlays['openModal'];

@@ -21,7 +21,8 @@ import _ from 'lodash';
 import cluster from 'cluster';
 import { EventEmitter } from 'events';
 
-import { BinderFor, fromRoot } from '../../legacy/utils';
+import { BinderFor } from '../../legacy/utils';
+import { fromRoot } from '../../core/server/utils';
 
 const cliPath = fromRoot('src/cli');
 const baseArgs = _.difference(process.argv.slice(2), ['--no-watch']);
@@ -132,6 +133,9 @@ export default class Worker extends EventEmitter {
       case 'WORKER_LISTENING':
         this.listening = true;
         this.emit('listening');
+        break;
+      case 'RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER':
+        this.emit('reloadLoggingConfigFromServerWorker');
         break;
     }
   }

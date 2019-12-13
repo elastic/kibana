@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
+import { decodeGeoHash } from './decode_geo_hash';
 import { gridDimensions } from './grid_dimensions';
-
 
 export function convertToGeoJson(tabifiedResponse, { geohash, geocentroid, metric }) {
 

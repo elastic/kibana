@@ -19,7 +19,7 @@
 
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { getTimerange } from '../../helpers/get_timerange';
-import { buildEsQuery } from '@kbn/es-query';
+import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function query(req, panel, annotation, esQueryConfig, indexPattern, capabilities) {
   return next => doc => {
@@ -30,7 +30,7 @@ export function query(req, panel, annotation, esQueryConfig, indexPattern, capab
     doc.size = 0;
     const queries = !annotation.ignore_global_filters ? req.payload.query : [];
     const filters = !annotation.ignore_global_filters ? req.payload.filters : [];
-    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+    doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
     const timerange = {
       range: {
         [timeField]: {
@@ -44,12 +44,12 @@ export function query(req, panel, annotation, esQueryConfig, indexPattern, capab
 
     if (annotation.query_string) {
       doc.query.bool.must.push(
-        buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
+        esQuery.buildEsQuery(indexPattern, [annotation.query_string], [], esQueryConfig)
       );
     }
 
     if (!annotation.ignore_panel_filters && panel.filter) {
-      doc.query.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
+      doc.query.bool.must.push(esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     if (annotation.fields) {

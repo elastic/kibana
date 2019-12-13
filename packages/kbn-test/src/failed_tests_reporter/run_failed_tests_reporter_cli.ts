@@ -22,19 +22,23 @@ import globby from 'globby';
 
 import { getFailures } from './get_failures';
 import { GithubApi } from './github_api';
-import { updatedFailureIssue, createFailureIssue } from './report_failure';
+import { updateFailureIssue, createFailureIssue } from './report_failure';
 import { getIssueMetadata } from './issue_metadata';
+import { readTestReport } from './test_report';
+import { addMessagesToReport } from './add_messages_to_report';
+import { getReportMessages } from './report_metadata';
 
 export function runFailedTestsReporterCli() {
   run(
     async ({ log, flags }) => {
-      const buildUrl = flags['build-url'];
-      if (typeof buildUrl !== 'string' || !buildUrl) {
-        throw createFlagError('Missing --build-url or process.env.BUILD_URL');
+      let updateGithub = flags['github-update'];
+      if (updateGithub && !process.env.GITHUB_TOKEN) {
+        throw createFailError(
+          'GITHUB_TOKEN environment variable must be set, otherwise use --no-github-update flag'
+        );
       }
 
-      const dryRun = !!flags['dry-run'];
-      if (!dryRun) {
+      if (updateGithub) {
         // JOB_NAME is formatted as `elastic+kibana+7.x` in some places and `elastic+kibana+7.x/JOB=kibana-intake,node=immutable` in others
         const jobNameSplit = (process.env.JOB_NAME || '').split(/\+|\//);
         const branch = jobNameSplit.length >= 3 ? jobNameSplit[2] : process.env.GIT_BRANCH;
@@ -48,26 +52,48 @@ export function runFailedTestsReporterCli() {
         const isMasterOrVersion =
           branch.match(/^(origin\/){0,1}master$/) || branch.match(/^(origin\/){0,1}\d+\.(x|\d+)$/);
         if (!isMasterOrVersion || isPr) {
-          throw createFailError('Failure issues only created on master/version branch jobs', {
-            exitCode: 0,
-          });
-        }
-
-        if (!process.env.GITHUB_TOKEN) {
-          throw createFailError(
-            'GITHUB_TOKEN environment variable must be set, otherwise use --dry-run flag'
-          );
+          log.info('Failure issues only created on master/version branch jobs');
+          updateGithub = false;
         }
       }
 
-      const githubApi = new GithubApi(log, process.env.GITHUB_TOKEN, dryRun);
+      const githubApi = new GithubApi({
+        log,
+        token: process.env.GITHUB_TOKEN,
+        dryRun: !updateGithub,
+      });
+
+      const buildUrl = flags['build-url'] || (updateGithub ? '' : 'http://buildUrl');
+      if (typeof buildUrl !== 'string' || !buildUrl) {
+        throw createFlagError('Missing --build-url or process.env.BUILD_URL');
+      }
+
       const reportPaths = await globby(['target/junit/**/*.xml'], {
         cwd: REPO_ROOT,
         absolute: true,
       });
 
       for (const reportPath of reportPaths) {
-        for (const failure of await getFailures(log, reportPath)) {
+        const report = await readTestReport(reportPath);
+        const messages = getReportMessages(report);
+
+        for (const failure of await getFailures(report)) {
+          const pushMessage = (msg: string) => {
+            messages.push({
+              classname: failure.classname,
+              name: failure.name,
+              message: msg,
+            });
+          };
+
+          if (failure.likelyIrrelevant) {
+            pushMessage(
+              'Failure is likely irrelevant' +
+                (updateGithub ? ', so an issue was not created or updated' : '')
+            );
+            continue;
+          }
+
           const existingIssue = await githubApi.findFailedTestIssue(
             i =>
               getIssueMetadata(i.body, 'test.class') === failure.classname &&
@@ -75,23 +101,45 @@ export function runFailedTestsReporterCli() {
           );
 
           if (existingIssue) {
-            await updatedFailureIssue(buildUrl, existingIssue, log, githubApi);
-          } else {
-            await createFailureIssue(buildUrl, failure, log, githubApi);
+            const newFailureCount = await updateFailureIssue(buildUrl, existingIssue, githubApi);
+            const url = existingIssue.html_url;
+            pushMessage(`Test has failed ${newFailureCount - 1} times on tracked branches: ${url}`);
+            if (updateGithub) {
+              pushMessage(`Updated existing issue: ${url} (fail count: ${newFailureCount})`);
+            }
+            continue;
+          }
+
+          const newIssueUrl = await createFailureIssue(buildUrl, failure, githubApi);
+          pushMessage('Test has not failed recently on tracked branches');
+          if (updateGithub) {
+            pushMessage(`Created new issue: ${newIssueUrl}`);
           }
         }
+
+        // mutates report to include messages and writes updated report to disk
+        await addMessagesToReport({
+          report,
+          messages,
+          log,
+          reportPath,
+          dryRun: !flags['report-update'],
+        });
       }
     },
     {
       description: `a cli that opens issues or updates existing issues based on junit reports`,
       flags: {
-        boolean: ['dry-run'],
+        boolean: ['github-update', 'report-update'],
         string: ['build-url'],
         default: {
+          'github-update': true,
+          'report-update': true,
           'build-url': process.env.BUILD_URL,
         },
         help: `
-          --dry-run          Execute the CLI without contacting Github
+          --no-github-update Execute the CLI without writing to Github
+          --no-report-update Execute the CLI without writing to the JUnit reports
           --build-url        URL of the failed build, defaults to process.env.BUILD_URL
         `,
       },

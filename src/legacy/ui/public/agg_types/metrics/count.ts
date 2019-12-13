@@ -18,11 +18,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
 
 export const countMetricAgg = new MetricAggType({
   name: METRIC_TYPES.COUNT,
@@ -36,7 +35,9 @@ export const countMetricAgg = new MetricAggType({
     });
   },
   getFormat() {
-    return fieldFormats.getDefaultInstance('number');
+    const fieldFormats = npStart.plugins.data.fieldFormats;
+
+    return fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
   },
   getValue(agg, bucket) {
     return bucket.doc_count;

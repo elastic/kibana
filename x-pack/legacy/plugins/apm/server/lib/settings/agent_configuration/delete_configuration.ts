@@ -17,7 +17,7 @@ export async function deleteConfiguration({
 
   const params = {
     refresh: 'wait_for',
-    index: indices['apm_oss.apmAgentConfigurationIndex'],
+    index: indices.apmAgentConfigurationIndex,
     id: configurationId
   };
 

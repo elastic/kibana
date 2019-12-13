@@ -14,15 +14,17 @@ import {
   getTestAlertData,
   ObjectRemover,
   AlertUtils,
+  TaskManagerUtils,
 } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function alertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const retry = getService('retry');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const taskManagerUtils = new TaskManagerUtils(es, retry);
 
   describe('alerts', () => {
     const authorizationIndex = '.kibana-test-authorization';
@@ -51,7 +53,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.index-record',
               config: {
                 unencrypted: `This value shouldn't get encrypted`,
@@ -73,6 +75,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         after(() => objectRemover.add(space.id, indexRecordActionId, 'action'));
 
         it('should schedule task, run alert and schedule actions when appropriate', async () => {
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({ reference });
 
@@ -90,10 +93,19 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              const alertTestRecord = (
-                await esTestIndexTool.waitForDocs('alert:test.always-firing', reference)
-              )[0];
-              expect(alertTestRecord._source).to.eql({
+
+              // Wait for the action to index a document before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Ensure only 1 alert executed with proper params
+              const alertSearchResult = await esTestIndexTool.search(
+                'alert:test.always-firing',
+                reference
+              );
+              expect(alertSearchResult.hits.total.value).to.eql(1);
+              expect(alertSearchResult.hits.hits[0]._source).to.eql({
                 source: 'alert:test.always-firing',
                 reference,
                 state: {},
@@ -102,10 +114,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
                   reference,
                 },
               });
-              const actionTestRecord = (
-                await esTestIndexTool.waitForDocs('action:test.index-record', reference)
-              )[0];
-              expect(actionTestRecord._source).to.eql({
+
+              // Ensure only 1 action executed with proper params
+              const actionSearchResult = await esTestIndexTool.search(
+                'action:test.index-record',
+                reference
+              );
+              expect(actionSearchResult.hits.total.value).to.eql(1);
+              expect(actionSearchResult.hits.hits[0]._source).to.eql({
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
@@ -127,7 +143,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should handle custom retry logic when appropriate', async () => {
-          // We'll use this start time to query tasks created after this point
           const testStart = new Date();
           // We have to provide the test.rate-limit the next runAt, for testing purposes
           const retryDate = new Date(Date.now() + 60000);
@@ -136,7 +151,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'Test rate limit',
+              name: 'Test rate limit',
               actionTypeId: 'test.rate-limit',
               config: {},
             })
@@ -150,9 +165,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send(
               getTestAlertData({
-                interval: '1m',
                 alertTypeId: 'test.always-firing',
-                alertTypeParams: {
+                params: {
                   index: ES_TEST_INDEX_NAME,
                   reference: 'create-test-2',
                 },
@@ -185,6 +199,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
+
+              // Wait for the task to be attempted once and idle
               const scheduledActionTask = await retry.try(async () => {
                 const searchResult = await es.search({
                   index: '.kibana_task_manager',
@@ -222,6 +238,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 expect(searchResult.hits.total.value).to.eql(1);
                 return searchResult.hits.hits[0];
               });
+
+              // Ensure the next runAt is set to the retryDate by custom logic
               expect(scheduledActionTask._source.task.runAt).to.eql(retryDate.toISOString());
               break;
             default:
@@ -230,7 +248,8 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should have proper callCluster and savedObjectsClient authorization for alert type executor when appropriate', async () => {
-          let alertTestRecord: any;
+          let searchResult: any;
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await supertestWithoutAuth
             .post(`${getUrlPrefix(space.id)}/api/alert`)
@@ -239,7 +258,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.authorization',
-                alertTypeParams: {
+                params: {
                   callClusterAuthorizationIndex: authorizationIndex,
                   savedObjectsClientType: 'dashboard',
                   savedObjectsClientId: '1',
@@ -263,20 +282,26 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              alertTestRecord = (
-                await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
-              )[0];
-              expect(alertTestRecord._source.state).to.eql({
+
+              // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Ensure only 1 document exists with proper params
+              searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
+              expect(searchResult.hits.total.value).to.eql(1);
+              expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
-                  ...alertTestRecord._source.state.callClusterError,
+                  ...searchResult.hits.hits[0]._source.state.callClusterError,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
-                  ...alertTestRecord._source.state.savedObjectsClientError,
+                  ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
                   output: {
-                    ...alertTestRecord._source.state.savedObjectsClientError.output,
+                    ...searchResult.hits.hits[0]._source.state.savedObjectsClientError.output,
                     statusCode: 403,
                   },
                 },
@@ -285,16 +310,22 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              alertTestRecord = (
-                await esTestIndexTool.waitForDocs('alert:test.authorization', reference)
-              )[0];
-              expect(alertTestRecord._source.state).to.eql({
+
+              // Wait for test.authorization to index a document before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('alert:test.authorization', reference);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Ensure only 1 document exists with proper params
+              searchResult = await esTestIndexTool.search('alert:test.authorization', reference);
+              expect(searchResult.hits.total.value).to.eql(1);
+              expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
-                  ...alertTestRecord._source.state.savedObjectsClientError,
+                  ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
                   output: {
-                    ...alertTestRecord._source.state.savedObjectsClientError.output,
+                    ...searchResult.hits.hits[0]._source.state.savedObjectsClientError.output,
                     statusCode: 404,
                   },
                 },
@@ -306,13 +337,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should have proper callCluster and savedObjectsClient authorization for action type executor when appropriate', async () => {
-          let actionTestRecord: any;
+          let searchResult: any;
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/action`)
             .set('kbn-xsrf', 'foo')
             .send({
-              description: 'My action',
+              name: 'My action',
               actionTypeId: 'test.authorization',
             })
             .expect(200);
@@ -324,7 +356,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
             .send(
               getTestAlertData({
                 alertTypeId: 'test.always-firing',
-                alertTypeParams: {
+                params: {
                   index: ES_TEST_INDEX_NAME,
                   reference,
                 },
@@ -358,20 +390,26 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              actionTestRecord = (
-                await esTestIndexTool.waitForDocs('action:test.authorization', reference)
-              )[0];
-              expect(actionTestRecord._source.state).to.eql({
+
+              // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('action:test.authorization', reference);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Ensure only 1 document with proper params exists
+              searchResult = await esTestIndexTool.search('action:test.authorization', reference);
+              expect(searchResult.hits.total.value).to.eql(1);
+              expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: false,
                 savedObjectsClientSuccess: false,
                 callClusterError: {
-                  ...actionTestRecord._source.state.callClusterError,
+                  ...searchResult.hits.hits[0]._source.state.callClusterError,
                   statusCode: 403,
                 },
                 savedObjectsClientError: {
-                  ...actionTestRecord._source.state.savedObjectsClientError,
+                  ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
                   output: {
-                    ...actionTestRecord._source.state.savedObjectsClientError.output,
+                    ...searchResult.hits.hits[0]._source.state.savedObjectsClientError.output,
                     statusCode: 403,
                   },
                 },
@@ -380,16 +418,22 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               expect(response.statusCode).to.eql(200);
               objectRemover.add(space.id, response.body.id, 'alert');
-              actionTestRecord = (
-                await esTestIndexTool.waitForDocs('action:test.authorization', reference)
-              )[0];
-              expect(actionTestRecord._source.state).to.eql({
+
+              // Ensure test.authorization indexed 1 document before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('action:test.authorization', reference);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Ensure only 1 document with proper params exists
+              searchResult = await esTestIndexTool.search('action:test.authorization', reference);
+              expect(searchResult.hits.total.value).to.eql(1);
+              expect(searchResult.hits.hits[0]._source.state).to.eql({
                 callClusterSuccess: true,
                 savedObjectsClientSuccess: false,
                 savedObjectsClientError: {
-                  ...actionTestRecord._source.state.savedObjectsClientError,
+                  ...searchResult.hits.hits[0]._source.state.savedObjectsClientError,
                   output: {
-                    ...actionTestRecord._source.state.savedObjectsClientError.output,
+                    ...searchResult.hits.hits[0]._source.state.savedObjectsClientError.output,
                     statusCode: 404,
                   },
                 },
@@ -401,6 +445,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should throttle alerts when appropriate', async () => {
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
@@ -422,13 +467,17 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
+              // Wait until alerts scheduled actions 3 times before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
-              const executedActionsResult = await esTestIndexTool.search(
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Ensure actions only executed once
+              const searchResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
               );
-              expect(executedActionsResult.hits.total.value).to.eql(1);
+              expect(searchResult.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -436,12 +485,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should not throttle when changing groups', async () => {
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
               interval: '1s',
-              alertTypeParams: {
+              params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
                 groupsToScheduleActionsInSeries: ['default', 'other'],
@@ -482,14 +532,19 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              // Wait until alerts scheduled actions 3 times to ensure actions had a chance to execute twice
-              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 3);
-              const executedActionsResult = await esTestIndexTool.search(
+              expect(response.statusCode).to.eql(200);
+              // Wait for actions to execute twice before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Ensure only 2 actions with proper params exists
+              const searchResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
               );
-              expect(executedActionsResult.hits.total.value).to.eql(2);
-              const messages: string[] = executedActionsResult.hits.hits.map(
+              expect(searchResult.hits.total.value).to.eql(2);
+              const messages: string[] = searchResult.hits.hits.map(
                 (hit: { _source: { params: { message: string } } }) => hit._source.params.message
               );
               expect(messages.sort()).to.eql(['from:default', 'from:other']);
@@ -500,12 +555,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it('should reset throttle window when not firing', async () => {
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
             overwrites: {
               interval: '1s',
-              alertTypeParams: {
+              params: {
                 index: ES_TEST_INDEX_NAME,
                 reference,
                 groupsToScheduleActionsInSeries: ['default', null, 'default'],
@@ -526,13 +582,17 @@ export default function alertTests({ getService }: FtrProviderContext) {
               break;
             case 'space_1_all at space1':
             case 'superuser at space1':
-              // Wait until alerts scheduled actions 4 times to ensure actions had a chance to execute twice
-              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 4);
-              const executedActionsResult = await esTestIndexTool.search(
+              // Actions should execute twice before widning things down
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 2);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Ensure only 2 actions are executed
+              const searchResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
               );
-              expect(executedActionsResult.hits.total.value).to.eql(2);
+              expect(searchResult.hits.total.value).to.eql(2);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -540,6 +600,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it(`shouldn't schedule actions when alert is muted`, async () => {
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
@@ -564,8 +625,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               await alertUtils.muteAll(response.body.id);
               await alertUtils.enable(response.body.id);
-              // Wait until alerts schedule actions twice to ensure actions had a chance to skip execution once
+
+              // Wait until alerts schedule actions twice to ensure actions had a chance to skip
+              // execution once before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Should not have executed any action
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
@@ -578,6 +645,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it(`shouldn't schedule actions when alert instance is muted`, async () => {
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
@@ -602,8 +670,14 @@ export default function alertTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
               await alertUtils.muteInstance(response.body.id, '1');
               await alertUtils.enable(response.body.id);
-              // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
+
+              // Wait until alerts scheduled actions twice to ensure actions had a chance to execute
+              // once before disabling the alert and waiting for tasks to finish
               await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Should not have executed any action
               const executedActionsResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
@@ -616,6 +690,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         });
 
         it(`should unmute all instances when unmuting an alert`, async () => {
+          const testStart = new Date();
           const reference = alertUtils.generateReference();
           const response = await alertUtils.createAlwaysFiringAction({
             reference,
@@ -642,13 +717,18 @@ export default function alertTests({ getService }: FtrProviderContext) {
               await alertUtils.muteAll(response.body.id);
               await alertUtils.unmuteAll(response.body.id);
               await alertUtils.enable(response.body.id);
-              // Wait until alerts scheduled actions twice to ensure actions had a chance to execute once
-              await esTestIndexTool.waitForDocs('alert:test.always-firing', reference, 2);
-              const executedActionsResult = await esTestIndexTool.search(
+
+              // Ensure actions are executed once before disabling the alert and waiting for tasks to finish
+              await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1);
+              await alertUtils.disable(response.body.id);
+              await taskManagerUtils.waitForIdle(testStart);
+
+              // Should have one document indexed by the action
+              const searchResult = await esTestIndexTool.search(
                 'action:test.index-record',
                 reference
               );
-              expect(executedActionsResult.hits.total.value).to.eql(1);
+              expect(searchResult.hits.total.value).to.eql(1);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

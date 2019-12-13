@@ -126,12 +126,8 @@ export const spaces = (kibana: Record<string, any>) =>
           kibanaIndex: config.get('kibana.index'),
         },
         savedObjects: server.savedObjects,
-        usage: server.usage,
         tutorial: {
           addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
-        },
-        capabilities: {
-          registerCapabilitiesModifier: server.registerCapabilitiesModifier,
         },
         auditLogger: {
           create: (pluginId: string) =>

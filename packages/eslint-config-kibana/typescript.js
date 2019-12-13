@@ -70,12 +70,31 @@ module.exports = {
           // Old recommended tslint rules
           '@typescript-eslint/adjacent-overload-signatures': 'error',
           '@typescript-eslint/array-type': ['error', { default: 'array-simple', readonly: 'array-simple' }],
-          '@typescript-eslint/ban-types': 'error',
+          '@typescript-eslint/ban-types': ['error', {
+            types: {
+              SFC: {
+                message: 'Use FC or FunctionComponent instead.',
+                fixWith: 'FC'
+              },
+              'React.SFC': {
+                message: 'Use FC or FunctionComponent instead.',
+                fixWith: 'React.FC'
+              },
+              StatelessComponent: {
+                message: 'Use FunctionComponent instead.',
+                fixWith: 'FunctionComponent'
+              },
+              'React.StatelessComponent': {
+                message: 'Use FunctionComponent instead.',
+                fixWith: 'React.FunctionComponent'
+              }
+            }
+          }],
           'camelcase': 'off',
           '@typescript-eslint/camelcase': ['error', {
             'properties': 'never',
             'ignoreDestructuring': true,
-            'allow': ['^[A-Z0-9_]+$']
+            'allow': ['^[A-Z0-9_]+$', '^UNSAFE_']
           }],
           '@typescript-eslint/class-name-casing': 'error',
           '@typescript-eslint/explicit-member-accessibility': ['error',
@@ -97,6 +116,7 @@ module.exports = {
           }],
           '@typescript-eslint/consistent-type-assertions': 'error',
           '@typescript-eslint/no-empty-interface': 'error',
+          '@typescript-eslint/no-extra-non-null-assertion': 'error',
           '@typescript-eslint/no-misused-new': 'error',
           '@typescript-eslint/no-namespace': 'error',
           '@typescript-eslint/triple-slash-reference': ['error', {
@@ -148,6 +168,7 @@ module.exports = {
           'object-shorthand': 'error',
           'one-var': [ 'error', 'never' ],
           'prefer-const': 'error',
+          'prefer-rest-params': 'error',
           'quotes': ['error', 'double', { 'avoidEscape': true }],
           'quote-props': ['error', 'consistent-as-needed'],
           'radix': 'error',

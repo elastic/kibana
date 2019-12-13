@@ -8,7 +8,7 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
-import { AnomalyScores, createJobKey } from './anomaly_scores';
+import { AnomalyScoresComponent, createJobKey } from './anomaly_scores';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';
 import { getEmptyValue } from '../../empty_value';
@@ -28,7 +28,7 @@ describe('anomaly_scores', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <AnomalyScores
+      <AnomalyScoresComponent
         anomalies={anomalies}
         startDate={0}
         endDate={endDate}
@@ -42,7 +42,7 @@ describe('anomaly_scores', () => {
   test('renders spinner when isLoading is true is passed', () => {
     const wrapper = mount(
       <TestProviders>
-        <AnomalyScores
+        <AnomalyScoresComponent
           anomalies={anomalies}
           startDate={0}
           endDate={endDate}
@@ -57,7 +57,7 @@ describe('anomaly_scores', () => {
   test('does NOT render spinner when isLoading is false is passed', () => {
     const wrapper = mount(
       <TestProviders>
-        <AnomalyScores
+        <AnomalyScoresComponent
           anomalies={anomalies}
           startDate={0}
           endDate={endDate}
@@ -72,7 +72,7 @@ describe('anomaly_scores', () => {
   test('renders an empty value if anomalies is null', () => {
     const wrapper = mount(
       <TestProviders>
-        <AnomalyScores
+        <AnomalyScoresComponent
           anomalies={null}
           startDate={0}
           endDate={endDate}
@@ -88,7 +88,7 @@ describe('anomaly_scores', () => {
     anomalies.anomalies = [];
     const wrapper = mount(
       <TestProviders>
-        <AnomalyScores
+        <AnomalyScoresComponent
           anomalies={anomalies}
           startDate={0}
           endDate={endDate}
@@ -108,7 +108,7 @@ describe('anomaly_scores', () => {
   test('should not show a popover on initial render', () => {
     const wrapper = mount(
       <TestProviders>
-        <AnomalyScores
+        <AnomalyScoresComponent
           anomalies={anomalies}
           startDate={0}
           endDate={endDate}
@@ -123,7 +123,7 @@ describe('anomaly_scores', () => {
   test('showing a popover on a mouse click', () => {
     const wrapper = mount(
       <TestProviders>
-        <AnomalyScores
+        <AnomalyScoresComponent
           anomalies={anomalies}
           startDate={0}
           endDate={endDate}

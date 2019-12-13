@@ -30,7 +30,12 @@ export interface ElementsPositionAndAttribute {
 }
 
 export interface Screenshot {
-  base64EncodedData: string;
+  base64EncodedData: Buffer;
   title: string;
   description: string;
+}
+
+export interface ScreenshotResults {
+  timeRange: TimeRange;
+  screenshots: Screenshot[];
 }

@@ -18,7 +18,7 @@
  */
 
 import { get, has } from 'lodash';
-import { esFilters } from '../../../../../common/es_query';
+import { esFilters } from '../../../../../common';
 
 const getFormattedValueFn = (left: any, right: any) => {
   return (formatter?: esFilters.FilterValueFormatter) => {

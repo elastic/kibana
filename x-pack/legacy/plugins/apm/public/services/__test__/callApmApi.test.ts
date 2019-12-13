@@ -81,10 +81,10 @@ describe('callApmApi', () => {
       expect.objectContaining({
         pathname: '/api/apm',
         method: 'POST',
-        body: JSON.stringify({
+        body: {
           foo: 'bar',
           bar: 'foo'
-        })
+        }
       })
     );
   });

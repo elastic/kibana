@@ -38,7 +38,24 @@ exports[`TelemetryForm renders as expected when allows to change optIn status 1`
             "defVal": true,
             "description": <React.Fragment>
               <p>
-                Help us improve the Elastic Stack by providing usage statistics for basic features. We will not share this data outside of Elastic.
+                <FormattedMessage
+                  defaultMessage="Enabling data usage collection helps us manage and improve our products and services. See our {privacyStatementLink} for more details."
+                  id="telemetry.telemetryConfigAndLinkDescription"
+                  values={
+                    Object {
+                      "privacyStatementLink": <ForwardRef
+                        href="https://www.elastic.co/legal/privacy-statement"
+                        target="_blank"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Privacy Statement"
+                          id="telemetry.readOurUsageDataPrivacyStatementLinkText"
+                          values={Object {}}
+                        />
+                      </ForwardRef>,
+                    }
+                  }
+                />
               </p>
               <p>
                 <ForwardRef
@@ -47,18 +64,6 @@ exports[`TelemetryForm renders as expected when allows to change optIn status 1`
                   <FormattedMessage
                     defaultMessage="See an example of what we collect"
                     id="telemetry.seeExampleOfWhatWeCollectLinkText"
-                    values={Object {}}
-                  />
-                </ForwardRef>
-              </p>
-              <p>
-                <ForwardRef
-                  href="https://www.elastic.co/legal/privacy-statement"
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    defaultMessage="Read our usage data privacy statement"
-                    id="telemetry.readOurUsageDataPrivacyStatementLinkText"
                     values={Object {}}
                   />
                 </ForwardRef>

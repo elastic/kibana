@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { EuiIcon, EuiSideNav, IconType } from '@elastic/eui';
+import { EuiIcon, EuiSideNav, IconType, EuiScreenReaderOnly } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -72,17 +72,26 @@ export class SidebarNav extends React.Component<SidebarNavProps, SidebarNavState
   }
 
   public render() {
+    const HEADER_ID = 'management-nav-header';
+
     return (
-      <EuiSideNav
-        aria-label={i18n.translate('common.ui.management.nav.label', {
-          defaultMessage: 'Management',
-        })}
-        mobileTitle={this.renderMobileTitle()}
-        isOpenOnMobile={this.state.isSideNavOpenOnMobile}
-        toggleOpenOnMobile={this.toggleOpenOnMobile}
-        items={sideNavItems(this.props.sections, this.props.selectedId)}
-        className="mgtSideBarNav"
-      />
+      <>
+        <EuiScreenReaderOnly>
+          <h2 id={HEADER_ID}>
+            {i18n.translate('common.ui.management.nav.label', {
+              defaultMessage: 'Management',
+            })}
+          </h2>
+        </EuiScreenReaderOnly>
+        <EuiSideNav
+          aria-labelledby={HEADER_ID}
+          mobileTitle={this.renderMobileTitle()}
+          isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+          toggleOpenOnMobile={this.toggleOpenOnMobile}
+          items={sideNavItems(this.props.sections, this.props.selectedId)}
+          className="mgtSideBarNav"
+        />
+      </>
     );
   }
 

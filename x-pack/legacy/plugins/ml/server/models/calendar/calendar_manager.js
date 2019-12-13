@@ -53,6 +53,20 @@ export class CalendarManager {
     }
   }
 
+  /**
+   * Gets a list of calendar objects based on provided ids.
+   * @param calendarIds
+   * @returns {Promise<*>}
+   */
+  async getCalendarsByIds(calendarIds) {
+    try {
+      const calendars = await this.getAllCalendars();
+      return calendars.filter(calendar => calendarIds.includes(calendar.calendar_id));
+    } catch (error) {
+      throw Boom.badRequest(error);
+    }
+  }
+
   async newCalendar(calendar) {
     const calendarId = calendar.calendarId;
     const events = calendar.events;
@@ -125,5 +139,4 @@ export class CalendarManager {
   async deleteCalendar(calendarId) {
     return this.callWithRequest('ml.deleteCalendar', { calendarId });
   }
-
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Moment } from 'moment';
-import { RefreshInterval, TimeRange } from 'src/plugins/data/public';
+import { TimeRange, RefreshInterval } from '../../../common';
 
 export interface TimefilterConfig {
   timeDefaults: TimeRange;

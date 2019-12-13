@@ -11,7 +11,7 @@ export default function ({ getService }) {
 
   describe('has_privileges', () => {
     before(async () => {
-      const es = getService('es');
+      const es = getService('legacyEs');
 
       await es.shield.postPrivileges({
         body: {
@@ -104,7 +104,7 @@ export default function ({ getService }) {
         });
 
       // Create privilege
-      const es = getService('es');
+      const es = getService('legacyEs');
       await es.shield.postPrivileges({
         body: {
           [application]: {

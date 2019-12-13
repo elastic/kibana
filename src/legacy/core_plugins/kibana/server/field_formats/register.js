@@ -33,7 +33,7 @@ import {
   BoolFormat,
   SourceFormat,
   StaticLookupFormat
-} from '../../../../../plugins/data/common';
+} from '../../../../../plugins/data/server';
 
 export function registerFieldFormats(server) {
   server.registerFieldFormat(UrlFormat);

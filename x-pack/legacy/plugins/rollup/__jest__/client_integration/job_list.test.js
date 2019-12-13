@@ -9,7 +9,6 @@ import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { JOBS } from './helpers/constants';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('../../public/crud_app/services', () => {
   const services = require.requireActual('../../public/crud_app/services');

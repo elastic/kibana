@@ -55,8 +55,7 @@ export interface SavedObjectsClientProviderOptions {
 }
 
 /**
- * @public
- * See {@link SavedObjectsClientProvider}
+ * @internal
  */
 export type ISavedObjectsClientProvider<T = unknown> = Pick<
   SavedObjectsClientProvider<T>,
@@ -65,6 +64,8 @@ export type ISavedObjectsClientProvider<T = unknown> = Pick<
 
 /**
  * Provider for the Scoped Saved Objects Client.
+ *
+ * @internal
  *
  * @internalRemarks Because `getClient` is synchronous the Client Provider does
  * not support creating factories that react to new ES clients emitted from

@@ -18,12 +18,13 @@
  */
 import React from 'react';
 import { CoreStart } from '../../../../core/public';
+import { toMountPoint } from '../../../../plugins/kibana_react/public';
 import { ReplacePanelFlyout } from './replace_panel_flyout';
 import {
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  Start as EmbeddableStart,
+  IEmbeddableStart,
   IContainer,
 } from '../embeddable_plugin';
 
@@ -33,7 +34,7 @@ export async function openReplacePanelFlyout(options: {
   savedObjectFinder: React.ComponentType<any>;
   notifications: CoreStart['notifications'];
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
-  getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
+  getEmbeddableFactories: IEmbeddableStart['getEmbeddableFactories'];
 }) {
   const {
     embeddable,
@@ -44,18 +45,20 @@ export async function openReplacePanelFlyout(options: {
     getEmbeddableFactories,
   } = options;
   const flyoutSession = core.overlays.openFlyout(
-    <ReplacePanelFlyout
-      container={embeddable}
-      onClose={() => {
-        if (flyoutSession) {
-          flyoutSession.close();
-        }
-      }}
-      panelToRemove={panelToRemove}
-      savedObjectsFinder={savedObjectFinder}
-      notifications={notifications}
-      getEmbeddableFactories={getEmbeddableFactories}
-    />,
+    toMountPoint(
+      <ReplacePanelFlyout
+        container={embeddable}
+        onClose={() => {
+          if (flyoutSession) {
+            flyoutSession.close();
+          }
+        }}
+        panelToRemove={panelToRemove}
+        savedObjectsFinder={savedObjectFinder}
+        notifications={notifications}
+        getEmbeddableFactories={getEmbeddableFactories}
+      />
+    ),
     {
       'data-test-subj': 'replacePanelFlyout',
     }

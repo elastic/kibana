@@ -19,7 +19,7 @@
 
 import { offsetTime } from '../../offset_time';
 import { getIntervalAndTimefield } from '../../get_interval_and_timefield';
-import { buildEsQuery } from '@kbn/es-query';
+import { esQuery } from '../../../../../../../../plugins/data/server';
 
 export function query(req, panel, series, esQueryConfig, indexPatternObject) {
   return next => doc => {
@@ -29,7 +29,7 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
     doc.size = 0;
     const queries = !panel.ignore_global_filter ? req.payload.query : [];
     const filters = !panel.ignore_global_filter ? req.payload.filters : [];
-    doc.query = buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
+    doc.query = esQuery.buildEsQuery(indexPatternObject, queries, filters, esQueryConfig);
 
     const timerange = {
       range: {
@@ -43,12 +43,12 @@ export function query(req, panel, series, esQueryConfig, indexPatternObject) {
     doc.query.bool.must.push(timerange);
 
     if (panel.filter) {
-      doc.query.bool.must.push(buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig));
+      doc.query.bool.must.push(esQuery.buildEsQuery(indexPatternObject, [panel.filter], [], esQueryConfig));
     }
 
     if (series.filter) {
       doc.query.bool.must.push(
-        buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
+        esQuery.buildEsQuery(indexPatternObject, [series.filter], [], esQueryConfig)
       );
     }
 

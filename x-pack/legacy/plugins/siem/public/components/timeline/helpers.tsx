@@ -6,13 +6,17 @@
 
 import { isEmpty, isNumber, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
-import { escapeQueryValue, convertToBuildEsQuery, EsQueryConfig } from '../../lib/keury';
+import { escapeQueryValue, convertToBuildEsQuery } from '../../lib/keury';
 
 import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
 import { BrowserFields } from '../../containers/source';
+import {
+  IIndexPattern,
+  Query,
+  esQuery,
+  esFilters,
+} from '../../../../../../../src/plugins/data/public';
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
@@ -101,9 +105,9 @@ export const combineQueries = ({
   end,
   isEventViewer,
 }: {
-  config: EsQueryConfig;
+  config: esQuery.EsQueryConfig;
   dataProviders: DataProvider[];
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   browserFields: BrowserFields;
   filters: esFilters.Filter[];
   kqlQuery: Query;

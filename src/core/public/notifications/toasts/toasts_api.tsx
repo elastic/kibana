@@ -24,8 +24,9 @@ import * as Rx from 'rxjs';
 import { ErrorToast } from './error_toast';
 import { MountPoint } from '../../types';
 import { mountReactNode } from '../../utils';
-import { UiSettingsClientContract } from '../../ui_settings';
+import { IUiSettingsClient } from '../../ui_settings';
 import { OverlayStart } from '../../overlays';
+import { I18nStart } from '../../i18n';
 
 /**
  * Allowed fields for {@link ToastInput}.
@@ -93,17 +94,19 @@ export type IToasts = Pick<
 export class ToastsApi implements IToasts {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
-  private uiSettings: UiSettingsClientContract;
+  private uiSettings: IUiSettingsClient;
 
   private overlays?: OverlayStart;
+  private i18n?: I18nStart;
 
-  constructor(deps: { uiSettings: UiSettingsClientContract }) {
+  constructor(deps: { uiSettings: IUiSettingsClient }) {
     this.uiSettings = deps.uiSettings;
   }
 
   /** @internal */
-  public registerOverlays(overlays: OverlayStart) {
+  public start({ overlays, i18n }: { overlays: OverlayStart; i18n: I18nStart }) {
     this.overlays = overlays;
+    this.i18n = i18n;
   }
 
   /** Observable of the toast messages to show to the user. */
@@ -206,6 +209,7 @@ export class ToastsApi implements IToasts {
           error={error}
           title={options.title}
           toastMessage={message}
+          i18nContext={() => this.i18n!.Context}
         />
       ),
     });

@@ -18,7 +18,7 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { IndexPattern, Field } from '../../types';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 export type ExistsFilterMeta = FilterMeta;
 
@@ -33,7 +33,11 @@ export type ExistsFilter = Filter & {
 
 export const isExistsFilter = (filter: any): filter is ExistsFilter => filter && filter.exists;
 
-export const buildExistsFilter = (field: Field, indexPattern: IndexPattern) => {
+export const getExistsFilterField = (filter: ExistsFilter) => {
+  return filter.exists && filter.exists.field;
+};
+
+export const buildExistsFilter = (field: IFieldType, indexPattern: IIndexPattern) => {
   return {
     meta: {
       index: indexPattern.id,

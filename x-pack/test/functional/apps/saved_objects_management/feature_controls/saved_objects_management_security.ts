@@ -115,7 +115,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             'kibana',
             '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
             }
           );
         });
@@ -233,7 +233,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             'kibana',
             '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
             }
           );
           await testSubjects.existOrFail('savedObjectsEdit');
@@ -316,7 +316,7 @@ export default function({ getPageObjects, getService }: FtrProviderContext) {
             'kibana',
             '/management/kibana/objects/savedVisualizations/75c3e060-1e7c-11e9-8488-65449e65d0ed',
             {
-              loginIfPrompted: false,
+              shouldLoginIfPrompted: false,
               ensureCurrentUrl: false,
             }
           );

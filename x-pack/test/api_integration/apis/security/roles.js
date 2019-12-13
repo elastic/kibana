@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService }) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const supertest = getService('supertest');
   const config = getService('config');
   const basic = config.get('esTestCluster.license') === 'basic';

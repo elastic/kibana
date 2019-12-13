@@ -9,5 +9,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./telemetry_local'));
     loadTestFile(require.resolve('./opt_in'));
+    loadTestFile(require.resolve('./telemetry_optin_notice_seen'));
   });
 }

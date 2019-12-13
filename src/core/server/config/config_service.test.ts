@@ -55,7 +55,7 @@ test('throws if config at path does not match schema', async () => {
   await expect(
     configService.setSchema('key', schema.string())
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"[key]: expected value of type [string] but got [number]"`
+    `"[config validation of [key]]: expected value of type [string] but got [number]"`
   );
 });
 
@@ -78,11 +78,11 @@ test('re-validate config when updated', async () => {
   config$.next(new ObjectToConfigAdapter({ key: 123 }));
 
   await expect(valuesReceived).toMatchInlineSnapshot(`
-Array [
-  "value",
-  [Error: [key]: expected value of type [string] but got [number]],
-]
-`);
+    Array [
+      "value",
+      [Error: [config validation of [key]]: expected value of type [string] but got [number]],
+    ]
+  `);
 });
 
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
@@ -143,7 +143,7 @@ test("throws error if 'schema' is not defined for a key", async () => {
   const configs = configService.atPath('key');
 
   await expect(configs.pipe(first()).toPromise()).rejects.toMatchInlineSnapshot(
-    `[Error: No validation schema has been defined for key]`
+    `[Error: No validation schema has been defined for [key]]`
   );
 });
 
@@ -153,7 +153,7 @@ test("throws error if 'setSchema' called several times for the same key", async 
   const addSchema = async () => await configService.setSchema('key', schema.string());
   await addSchema();
   await expect(addSchema()).rejects.toMatchInlineSnapshot(
-    `[Error: Validation schema for key was already registered.]`
+    `[Error: Validation schema for [key] was already registered.]`
   );
 });
 
@@ -280,6 +280,33 @@ test('handles disabled path and marks config as used', async () => {
   expect(unusedPaths).toEqual([]);
 });
 
+test('does not throw if schema does not define "enabled" schema', async () => {
+  const initialConfig = {
+    pid: {
+      file: '/some/file.pid',
+    },
+  };
+
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
+  const configService = new ConfigService(config$, defaultEnv, logger);
+  expect(
+    configService.setSchema(
+      'pid',
+      schema.object({
+        file: schema.string(),
+      })
+    )
+  ).resolves.toBeUndefined();
+
+  const value$ = configService.atPath('pid');
+  const value: any = await value$.pipe(first()).toPromise();
+  expect(value.enabled).toBe(undefined);
+
+  const valueOptional$ = configService.optionalAtPath('pid');
+  const valueOptional: any = await valueOptional$.pipe(first()).toPromise();
+  expect(valueOptional.enabled).toBe(undefined);
+});
+
 test('treats config as enabled if config path is not present in config', async () => {
   const initialConfig = {};
 
@@ -291,4 +318,46 @@ test('treats config as enabled if config path is not present in config', async (
 
   const unusedPaths = await configService.getUnusedPaths();
   expect(unusedPaths).toEqual([]);
+});
+
+test('read "enabled" even if its schema is not present', async () => {
+  const initialConfig = {
+    foo: {
+      enabled: true,
+    },
+  };
+
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
+  const configService = new ConfigService(config$, defaultEnv, logger);
+
+  const isEnabled = await configService.isEnabledAtPath('foo');
+  expect(isEnabled).toBe(true);
+});
+
+test('allows plugins to specify "enabled" flag via validation schema', async () => {
+  const initialConfig = {};
+
+  const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
+  const configService = new ConfigService(config$, defaultEnv, logger);
+
+  await configService.setSchema(
+    'foo',
+    schema.object({ enabled: schema.boolean({ defaultValue: false }) })
+  );
+
+  expect(await configService.isEnabledAtPath('foo')).toBe(false);
+
+  await configService.setSchema(
+    'bar',
+    schema.object({ enabled: schema.boolean({ defaultValue: true }) })
+  );
+
+  expect(await configService.isEnabledAtPath('bar')).toBe(true);
+
+  await configService.setSchema(
+    'baz',
+    schema.object({ different: schema.boolean({ defaultValue: true }) })
+  );
+
+  expect(await configService.isEnabledAtPath('baz')).toBe(true);
 });

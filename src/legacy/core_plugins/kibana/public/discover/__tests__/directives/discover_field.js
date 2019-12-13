@@ -23,7 +23,7 @@ import _ from 'lodash';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
-import '../../components/field_chooser/discover_field';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 // Load the kibana app dependencies.
@@ -32,8 +32,9 @@ describe('discoverField', function () {
   let $scope;
   let indexPattern;
   let $elem;
-
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(() => pluginInstance.initializeServices());
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(ngMock.module('app/discover'));
   beforeEach(ngMock.inject(function (Private, $rootScope, $compile) {
     $elem = angular.element(`
       <discover-field

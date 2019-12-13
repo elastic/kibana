@@ -35,15 +35,9 @@ const mockTimeHistory = {
   },
 };
 
-jest.mock('../../../../../data/public', () => {
+jest.mock('../../../../../../../plugins/data/public', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
-    QueryBarInput: () => <div className="queryBar" />,
-  };
-});
-
-jest.mock('../../../query/query_bar', () => {
-  return {
     QueryBarTopRow: () => <div className="queryBar" />,
   };
 });
@@ -100,6 +94,11 @@ function wrapSearchBarInContext(testProps: any) {
     notifications: startMock.notifications,
     http: startMock.http,
     storage: createMockStorage(),
+    data: {
+      query: {
+        savedQueries: {},
+      },
+    },
   };
 
   return (

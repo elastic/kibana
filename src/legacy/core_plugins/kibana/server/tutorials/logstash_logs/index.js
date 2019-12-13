@@ -21,7 +21,7 @@ import { i18n }  from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
 
-export function logstashLogsSpecProvider(server, context) {
+export function logstashLogsSpecProvider(context) {
   const moduleName = 'logstash';
   const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'];
   return {

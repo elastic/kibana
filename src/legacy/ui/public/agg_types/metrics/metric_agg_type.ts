@@ -18,33 +18,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { npStart } from 'ui/new_platform';
 import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
+import { KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
-// @ts-ignore
-import { fieldFormats } from '../../registry/field_formats';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
-
-export type IMetricAggConfig = AggConfig;
-
-export interface MetricAggTypeConfig<TMetricAggConfig extends IMetricAggConfig>
-  extends AggTypeConfig<TMetricAggConfig, MetricAggParam> {
-  isScalable?: () => boolean;
-  subtype?: string;
+export interface IMetricAggConfig extends AggConfig {
+  type: InstanceType<typeof MetricAggType>;
 }
 
-export interface MetricAggParam extends AggParamType {
+export interface MetricAggParam<TMetricAggConfig extends AggConfig>
+  extends AggParamType<TMetricAggConfig> {
   filterFieldTypes?: KBN_FIELD_TYPES | KBN_FIELD_TYPES[] | '*';
   onlyAggregatable?: boolean;
 }
 
 const metricType = 'metrics';
 
-export class MetricAggType<
-  TMetricAggConfig extends IMetricAggConfig = IMetricAggConfig
-> extends AggType<TMetricAggConfig, MetricAggParam> {
+interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig>
+  extends AggTypeConfig<TMetricAggConfig, MetricAggParam<TMetricAggConfig>> {
+  isScalable?: () => boolean;
+  subtype?: string;
+}
+
+export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig> extends AggType<
+  TMetricAggConfig,
+  MetricAggParam<TMetricAggConfig>
+> {
   subtype: string;
   isScalable: () => boolean;
   type = metricType;
@@ -72,8 +74,9 @@ export class MetricAggType<
     this.getFormat =
       config.getFormat ||
       (agg => {
+        const registeredFormats = npStart.plugins.data.fieldFormats;
         const field = agg.getField();
-        return field ? field.format : fieldFormats.getDefaultInstance('number');
+        return field ? field.format : registeredFormats.getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       });
 
     this.subtype =

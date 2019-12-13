@@ -5,9 +5,9 @@
  */
 
 import { createSelector } from 'reselect';
-import { Query } from 'src/plugins/data/common';
 import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 import { InputsRange } from '../../store/inputs/model';
+import { Query } from '../../../../../../../src/plugins/data/public';
 
 export {
   endSelector,

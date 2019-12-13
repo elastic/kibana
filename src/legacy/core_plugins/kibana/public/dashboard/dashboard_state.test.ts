@@ -18,19 +18,15 @@
  */
 
 import './np_core.test.mocks';
-
 import { DashboardStateManager } from './dashboard_state_manager';
 import { getAppStateMock, getSavedDashboardMock } from './__tests__';
-import { AppStateClass } from 'ui/state_management/app_state';
+import { AppStateClass } from './legacy_imports';
 import { DashboardAppState } from './types';
-import { TimeRange, TimefilterContract } from 'src/plugins/data/public';
+import { TimeRange, TimefilterContract, InputTimeRange } from 'src/plugins/data/public';
 import { ViewMode } from 'src/plugins/embeddable/public';
-import { InputTimeRange } from 'ui/timefilter';
 
-jest.mock('ui/registry/field_formats', () => ({
-  fieldFormats: {
-    getDefaultInstance: jest.fn(),
-  },
+jest.mock('ui/state_management/state', () => ({
+  State: {},
 }));
 
 describe('DashboardState', function() {
@@ -52,6 +48,7 @@ describe('DashboardState', function() {
       savedDashboard,
       AppStateClass: getAppStateMock() as AppStateClass<DashboardAppState>,
       hideWriteControls: false,
+      kibanaVersion: '7.0.0',
     });
   }
 

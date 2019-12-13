@@ -17,23 +17,4 @@
  * under the License.
  */
 
-import { RefreshInterval, TimeRange, Query, esFilters } from 'src/plugins/data/public';
-
 export * from './components';
-
-export type SavedQueryTimeFilter = TimeRange & {
-  refreshInterval: RefreshInterval;
-};
-
-export interface SavedQuery {
-  id: string;
-  attributes: SavedQueryAttributes;
-}
-
-export interface SavedQueryAttributes {
-  title: string;
-  description: string;
-  query: Query;
-  filters?: esFilters.Filter[];
-  timefilter?: SavedQueryTimeFilter;
-}

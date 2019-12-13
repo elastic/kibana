@@ -86,7 +86,7 @@ describe('CoordinateMapsVisualizationTest', function () {
 
       if(!visRegComplete) {
         visRegComplete = true;
-        visualizationsSetup.types.registerVisualization(() => createTileMapTypeDefinition(dependencies));
+        visualizationsSetup.types.createBaseVisualization(createTileMapTypeDefinition(dependencies));
       }
 
 

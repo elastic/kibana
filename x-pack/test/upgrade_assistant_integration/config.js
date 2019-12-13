@@ -20,9 +20,9 @@ export default async function ({ readConfigFile }) {
     testFiles: [require.resolve('./upgrade_assistant')],
     servers: xPackFunctionalTestsConfig.get('servers'),
     services: {
+      ...kibanaCommonConfig.get('services'),
       supertest: kibanaAPITestsConfig.get('services.supertest'),
-      es: LegacyEsProvider,
-      esArchiver: kibanaCommonConfig.get('services.esArchiver'),
+      legacyEs: LegacyEsProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {

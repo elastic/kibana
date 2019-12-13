@@ -5,9 +5,12 @@
  */
 
 import { combineReducers } from 'redux';
-
+import { monitorReducer } from './monitor';
+import { snapshotReducer } from './snapshot';
 import { uiReducer } from './ui';
 
 export const rootReducer = combineReducers({
+  monitor: monitorReducer,
+  snapshot: snapshotReducer,
   ui: uiReducer,
 });

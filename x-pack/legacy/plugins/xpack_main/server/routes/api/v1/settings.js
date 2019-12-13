@@ -23,8 +23,8 @@ export function settingsRoute(server, kbnServer) {
       const callCluster = (...args) => callWithRequest(req, ...args); // All queries from HTTP API must use authentication headers from the request
 
       try {
-        const { collectorSet } = server.usage;
-        const settingsCollector = collectorSet.getCollectorByType(KIBANA_SETTINGS_TYPE);
+        const { usageCollection } = server.newPlatform.setup.plugins;
+        const settingsCollector = usageCollection.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
         let settings = await settingsCollector.fetch(callCluster);
         if (!settings) {

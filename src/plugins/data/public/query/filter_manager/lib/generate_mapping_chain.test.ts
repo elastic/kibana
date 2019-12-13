@@ -19,7 +19,7 @@
 
 import sinon from 'sinon';
 import { generateMappingChain } from './generate_mapping_chain';
-import { esFilters } from '../../../../../../plugins/data/public';
+import { esFilters } from '../../../../common';
 
 describe('filter manager utilities', () => {
   let mapping: any;

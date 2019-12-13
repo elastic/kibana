@@ -18,26 +18,17 @@
  */
 
 import { buildQueryFilter } from './query_string_filter';
-import { IndexPattern } from '../../types';
 
-describe('Phrase filter builder', () => {
-  let indexPattern: IndexPattern;
-
-  beforeEach(() => {
-    indexPattern = {
-      id: 'id',
-    };
-  });
-
+describe('Query string filter builder', () => {
   it('should be a function', () => {
     expect(typeof buildQueryFilter).toBe('function');
   });
 
   it('should return a query filter when passed a standard field', () => {
-    expect(buildQueryFilter({ foo: 'bar' }, indexPattern.id, '')).toEqual({
+    expect(buildQueryFilter({ foo: 'bar' }, 'index', '')).toEqual({
       meta: {
         alias: '',
-        index: 'id',
+        index: 'index',
       },
       query: {
         foo: 'bar',

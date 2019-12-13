@@ -1,0 +1,7 @@
+{
+  "id": "usageCollection",
+  "configPath": ["usageCollection"],
+  "version": "kibana",
+  "server": true,
+  "ui": false
+}

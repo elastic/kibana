@@ -6,6 +6,7 @@
 
 import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { getBuckets } from '../get_buckets';
+import { APMConfig } from '../../../../../../../../plugins/apm/server';
 
 describe('timeseriesFetcher', () => {
   let clientSpy: jest.Mock;
@@ -34,10 +35,12 @@ describe('timeseriesFetcher', () => {
         internalClient: {
           search: clientSpy
         } as any,
-        config: {
-          get: () => 'myIndex' as any,
-          has: () => true
-        },
+        config: new Proxy(
+          {},
+          {
+            get: () => 'myIndex'
+          }
+        ) as APMConfig,
         uiFiltersES: [
           {
             term: { 'service.environment': 'prod' }
@@ -50,8 +53,9 @@ describe('timeseriesFetcher', () => {
           'apm_oss.spanIndices': 'apm-*',
           'apm_oss.transactionIndices': 'apm-*',
           'apm_oss.metricsIndices': 'apm-*',
-          'apm_oss.apmAgentConfigurationIndex': '.apm-agent-configuration'
-        }
+          apmAgentConfigurationIndex: '.apm-agent-configuration'
+        },
+        dynamicIndexPattern: null as any
       }
     });
   });

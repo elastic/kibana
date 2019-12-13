@@ -21,7 +21,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'home', 'settings', 'discover', 'timePicker']);
 
@@ -72,8 +72,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be able to discover and verify no of hits for alias2', async function () {
       const expectedHitCount = '5';
-      const fromTime = '2016-11-12 05:00:00.000';
-      const toTime = '2016-11-19 05:00:00.000';
+      const fromTime = 'Nov 12, 2016 @ 05:00:00.000';
+      const toTime = 'Nov 19, 2016 @ 05:00:00.000';
 
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('alias2');

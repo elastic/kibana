@@ -19,7 +19,7 @@
 
 import { uiRegistry } from './_registry';
 import { capabilities } from '../capabilities';
-export { FeatureCatalogueCategory } from '../../../../plugins/feature_catalogue/public';
+export { FeatureCatalogueCategory } from '../../../../plugins/home/public';
 
 export const FeatureCatalogueRegistryProvider = uiRegistry({
   name: 'featureCatalogue',

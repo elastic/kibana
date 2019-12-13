@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['dashboard', 'common']);
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
 
   describe('embed mode', () => {
     before(async () => {
@@ -38,8 +39,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('hides the chrome', async () => {
-      const isChromeVisible = await PageObjects.common.isChromeVisible();
-      expect(isChromeVisible).to.be(true);
+      const globalNavShown = await globalNav.exists();
+      expect(globalNavShown).to.be(true);
 
       const currentUrl = await browser.getCurrentUrl();
       const newUrl = currentUrl + '&embed=true';
@@ -48,8 +49,8 @@ export default function ({ getService, getPageObjects }) {
       await browser.get(newUrl.toString(), useTimeStamp);
 
       await retry.try(async () => {
-        const isChromeHidden = await PageObjects.common.isChromeHidden();
-        expect(isChromeHidden).to.be(true);
+        const globalNavHidden = !(await globalNav.exists());
+        expect(globalNavHidden).to.be(true);
       });
     });
 

@@ -418,17 +418,20 @@ describe('start', () => {
         .pipe(toArray())
         .toPromise();
 
-      chrome.setHelpExtension(() => () => undefined);
+      chrome.setHelpExtension({ appName: 'App name', content: () => () => undefined });
       chrome.setHelpExtension(undefined);
       service.stop();
 
       await expect(promise).resolves.toMatchInlineSnapshot(`
-        Array [
-          undefined,
-          [Function],
-          undefined,
-        ]
-      `);
+              Array [
+                undefined,
+                Object {
+                  "appName": "App name",
+                  "content": [Function],
+                },
+                undefined,
+              ]
+            `);
     });
   });
 });

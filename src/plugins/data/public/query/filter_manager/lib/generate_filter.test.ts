@@ -19,13 +19,14 @@
 
 import { generateFilters } from './generate_filters';
 import { FilterManager } from '../filter_manager';
-import { esFilters } from '../../..';
+
+import { esFilters, IFieldType, IIndexPattern } from '../../../../common';
 
 const INDEX_NAME = 'my-index';
 const EXISTS_FIELD_NAME = '_exists_';
 const FIELD = {
   name: 'my-field',
-};
+} as IFieldType;
 const PHRASE_VALUE = 'my-value';
 
 describe('Generate filters', () => {
@@ -70,7 +71,7 @@ describe('Generate filters', () => {
   });
 
   it('should update and re-enable EXISTING exists filter', () => {
-    const filter = esFilters.buildExistsFilter(FIELD, { id: INDEX_NAME });
+    const filter = esFilters.buildExistsFilter(FIELD, { id: INDEX_NAME } as IIndexPattern);
     filter.meta.disabled = true;
     filtersArray.push(filter);
 

@@ -13,11 +13,11 @@ export default function ({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const retry = getService('retry');
 
-  describe('Monitoring is turned off', () => {
+  describe('Monitoring is turned off', function () {
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.monitoring.navigateTo();
+      await PageObjects.monitoring.navigateTo(true);
       await noData.isOnNoDataPage();
     });
 

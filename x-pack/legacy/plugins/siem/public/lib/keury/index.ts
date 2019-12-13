@@ -4,22 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { buildEsQuery, fromKueryExpression, toElasticsearchQuery, JsonObject } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query } from 'src/plugins/data/common';
-
-import { esFilters } from '../../../../../../../src/plugins/data/public';
+import {
+  Query,
+  esFilters,
+  esQuery,
+  esKuery,
+  IIndexPattern,
+} from '../../../../../../../src/plugins/data/public';
 
 import { KueryFilterQuery } from '../../store';
 
 export const convertKueryToElasticSearchQuery = (
   kueryExpression: string,
-  indexPattern: StaticIndexPattern
+  indexPattern: IIndexPattern
 ) => {
   try {
     return kueryExpression
-      ? JSON.stringify(toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern))
+      ? JSON.stringify(
+          esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
+        )
       : '';
   } catch (err) {
     return '';
@@ -28,11 +32,11 @@ export const convertKueryToElasticSearchQuery = (
 
 export const convertKueryToDslFilter = (
   kueryExpression: string,
-  indexPattern: StaticIndexPattern
-): JsonObject => {
+  indexPattern: IIndexPattern
+): esKuery.JsonObject => {
   try {
     return kueryExpression
-      ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
+      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
       : {};
   } catch (err) {
     return {};
@@ -53,7 +57,7 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
 export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | null): boolean => {
   if (kqlFilterQuery && kqlFilterQuery.kind === 'kuery') {
     try {
-      fromKueryExpression(kqlFilterQuery.expression);
+      esKuery.fromKueryExpression(kqlFilterQuery.expression);
     } catch (err) {
       return false;
     }
@@ -77,33 +81,26 @@ const escapeNot = (val: string) => val.replace(/not(\s+)/gi, '\\$&');
 
 export const escapeKuery = flow(escapeSpecialCharacters, escapeAndOr, escapeNot, escapeWhitespace);
 
-export interface EsQueryConfig {
-  allowLeadingWildcards: boolean;
-  queryStringOptions: unknown;
-  ignoreFilterIfFieldNotInIndex: boolean;
-  dateFormatTZ?: string | null;
-}
-
 export const convertToBuildEsQuery = ({
   config,
   indexPattern,
   queries,
   filters,
 }: {
-  config: EsQueryConfig;
-  indexPattern: StaticIndexPattern;
+  config: esQuery.EsQueryConfig;
+  indexPattern: IIndexPattern;
   queries: Query[];
   filters: esFilters.Filter[];
 }) => {
   try {
     return JSON.stringify(
-      buildEsQuery(
+      esQuery.buildEsQuery(
         indexPattern,
         queries,
         filters.filter(f => f.meta.disabled === false),
         {
           ...config,
-          dateFormatTZ: null,
+          dateFormatTZ: undefined,
         }
       )
     );

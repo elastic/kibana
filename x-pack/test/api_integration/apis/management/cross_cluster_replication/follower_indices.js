@@ -14,7 +14,7 @@ import { registerHelpers as registerFollowerIndicesnHelpers } from './follower_i
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const { addCluster, deleteAllClusters } = registerRemoteClustersHelpers(supertest);
   const {

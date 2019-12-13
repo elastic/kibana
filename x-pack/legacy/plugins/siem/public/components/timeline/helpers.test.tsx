@@ -5,15 +5,12 @@
  */
 
 import { cloneDeep } from 'lodash/fp';
-
-import { esFilters } from '../../../../../../../src/plugins/data/public';
-import { FilterStateStore } from '../../../../../../../src/plugins/data/common/es_query/filters';
 import { mockIndexPattern } from '../../mock';
 
 import { mockDataProviders } from './data_providers/mock/mock_data_providers';
 import { buildGlobalQuery, combineQueries } from './helpers';
 import { mockBrowserFields } from '../../containers/source/mock';
-import { EsQueryConfig } from '../../lib/keury';
+import { esQuery, esFilters } from '../../../../../../../src/plugins/data/public';
 
 const cleanUpKqlQuery = (str: string) => str.replace(/\n/g, '').replace(/\s\s+/g, ' ');
 const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
@@ -119,7 +116,7 @@ describe('Build KQL Query', () => {
 });
 
 describe('Combined Queries', () => {
-  const config: EsQueryConfig = {
+  const config: esQuery.EsQueryConfig = {
     allowLeadingWildcards: true,
     queryStringOptions: {},
     ignoreFilterIfFieldNotInIndex: true,
@@ -172,7 +169,7 @@ describe('Combined Queries', () => {
         browserFields: mockBrowserFields,
         filters: [
           {
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: esFilters.FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,
@@ -184,7 +181,7 @@ describe('Combined Queries', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: esFilters.FilterStateStore.APP_STATE },
             meta: {
               alias: null,
               disabled: false,

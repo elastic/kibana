@@ -13,6 +13,17 @@ const liveClusterUuid = 'a12';
 const mockReq = (searchResult = {}) => {
   return {
     server: {
+      newPlatform: {
+        setup: {
+          plugins: {
+            usageCollection: {
+              getCollectorByType: () => ({
+                isReady: () => false
+              }),
+            },
+          },
+        },
+      },
       config() {
         return {
           get: sinon.stub()

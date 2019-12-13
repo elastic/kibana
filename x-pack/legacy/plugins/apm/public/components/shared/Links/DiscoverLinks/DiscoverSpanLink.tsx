@@ -22,7 +22,7 @@ function getDiscoverQuery(span: Span) {
   };
 }
 
-export const DiscoverSpanLink: React.SFC<{
+export const DiscoverSpanLink: React.FC<{
   readonly span: Span;
 }> = ({ span, children }) => {
   return <DiscoverLink query={getDiscoverQuery(span)} children={children} />;

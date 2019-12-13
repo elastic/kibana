@@ -10,7 +10,7 @@ import { ES_INDEX_NAME } from './constants';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const randomness = getService('randomness');
 
   describe('assign_tags_to_beats', () => {

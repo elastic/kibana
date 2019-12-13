@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ExpressionFunction } from 'src/legacy/core_plugins/interpreter/public';
+import { ExpressionFunction } from 'src/plugins/expressions/public';
 // @ts-ignore unconverted local lib
 import { getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';

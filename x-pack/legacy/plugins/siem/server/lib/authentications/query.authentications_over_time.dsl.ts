@@ -27,8 +27,7 @@ export const buildAuthenticationsOverTimeQuery = ({
   ];
 
   const getHistogramAggregation = () => {
-    const minIntervalSeconds = 10;
-    const interval = calculateTimeseriesInterval(from, to, minIntervalSeconds);
+    const interval = calculateTimeseriesInterval(from, to);
     const histogramTimestampField = '@timestamp';
     const dateHistogram = {
       date_histogram: {

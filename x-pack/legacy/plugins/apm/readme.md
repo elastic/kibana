@@ -8,7 +8,7 @@
 git clone git@github.com:elastic/kibana.git
 cd kibana/
 yarn kbn bootstrap
-yarn start
+yarn start --no-base-path
 ```
 
 #### APM Server, Elasticsearch and data
@@ -28,6 +28,29 @@ cd apm-integration-testing/
 ```
 
 _Docker Compose is required_
+
+### Setup default APM users
+
+APM behaves differently depending on which the role and permissions a logged in user has. 
+For testing purposes APM has invented 4 custom users:
+
+
+**elastic**: Apps: read/write. Indices: read/write (all)
+
+**apm_read_user**: Apps: read. Indices: read (`apm-*`)
+
+**apm_write_user**: Apps: read/write. Indices: read (`apm-*`)
+
+**kibana_write_user** Apps: read/write. Indices: None
+
+
+To create the 4 users with the correct roles run the following script:
+
+```sh
+node x-pack/legacy/plugins/apm/scripts/setup-kibana-security.js --username <github-username>
+```
+
+The users will be created with the password specified in kibana.dev.yml for `elasticsearch.password`
 
 ### Debugging Elasticsearch queries
 

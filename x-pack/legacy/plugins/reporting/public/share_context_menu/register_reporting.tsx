@@ -8,35 +8,34 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 // @ts-ignore: implicit any for JS file
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
+import { npSetup } from 'ui/new_platform';
 import React from 'react';
 import chrome from 'ui/chrome';
-import { ShareActionProps } from 'ui/share/share_action';
-import { ShareContextMenuExtensionsRegistryProvider } from 'ui/share/share_action_registry';
-import { unhashUrl } from 'ui/state_management/state_hashing';
 import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content';
+import { ShareContext } from '../../../../../../src/plugins/share/public';
 
-function reportingProvider(dashboardConfig: any) {
-  const getShareActions = ({
+async function reportingProvider() {
+  const injector = await chrome.dangerouslyGetActiveInjector();
+  const getShareMenuItems = ({
     objectType,
     objectId,
-    getUnhashableStates,
     sharingData,
     isDirty,
     onClose,
-  }: ShareActionProps) => {
+    shareableUrl,
+  }: ShareContext) => {
     if (!['dashboard', 'visualization'].includes(objectType)) {
       return [];
     }
     // Dashboard only mode does not currently support reporting
     // https://github.com/elastic/kibana/issues/18286
-    if (objectType === 'dashboard' && dashboardConfig.getHideWriteControls()) {
+    if (objectType === 'dashboard' && injector.get<any>('dashboardConfig').getHideWriteControls()) {
       return [];
     }
 
     const getReportingJobParams = () => {
       // Replace hashes with original RISON values.
-      const unhashedUrl = unhashUrl(window.location.href, getUnhashableStates());
-      const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
+      const relativeUrl = shareableUrl.replace(window.location.origin + chrome.getBasePath(), '');
 
       const browserTimezone =
         chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
@@ -53,8 +52,7 @@ function reportingProvider(dashboardConfig: any) {
 
     const getPngJobParams = () => {
       // Replace hashes with original RISON values.
-      const unhashedUrl = unhashUrl(window.location.href, getUnhashableStates());
-      const relativeUrl = unhashedUrl.replace(window.location.origin + chrome.getBasePath(), '');
+      const relativeUrl = shareableUrl.replace(window.location.origin + chrome.getBasePath(), '');
 
       const browserTimezone =
         chrome.getUiSettingsClient().get('dateFormat:tz') === 'Browser'
@@ -87,6 +85,7 @@ function reportingProvider(dashboardConfig: any) {
           sortOrder: 10,
         },
         panel: {
+          id: 'reportingPdfPanel',
           title: panelTitle,
           content: (
             <ScreenCapturePanelContent
@@ -115,6 +114,7 @@ function reportingProvider(dashboardConfig: any) {
           sortOrder: 10,
         },
         panel: {
+          id: 'reportingPngPanel',
           title: panelTitle,
           content: (
             <ScreenCapturePanelContent
@@ -135,8 +135,10 @@ function reportingProvider(dashboardConfig: any) {
 
   return {
     id: 'screenCaptureReports',
-    getShareActions,
+    getShareMenuItems,
   };
 }
 
-ShareContextMenuExtensionsRegistryProvider.register(reportingProvider);
+(async () => {
+  npSetup.plugins.share.register(await reportingProvider());
+})();

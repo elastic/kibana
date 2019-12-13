@@ -20,16 +20,12 @@
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
-import { TextContextTypeConvert } from '../types';
+import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 
 export class RelativeDateFormat extends FieldFormat {
-  static id = 'relative_date';
+  static id = FIELD_FORMAT_IDS.RELATIVE_DATE;
   static title = 'Relative Date';
   static fieldType = KBN_FIELD_TYPES.DATE;
-
-  constructor(params: Record<string, any>) {
-    super(params);
-  }
 
   textConvert: TextContextTypeConvert = val => {
     if (val === null || val === undefined) {

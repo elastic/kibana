@@ -22,7 +22,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -38,7 +38,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/action/${createdAction.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action updated',
+          name: 'My action updated',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -49,7 +49,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .expect(200, {
           id: createdAction.id,
           actionTypeId: 'test.index-record',
-          description: 'My action updated',
+          name: 'My action updated',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },
@@ -61,7 +61,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/action`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
+          name: 'My action',
           actionTypeId: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -77,7 +77,7 @@ export default function updateActionTests({ getService }: FtrProviderContext) {
         .put(`${getUrlPrefix(Spaces.other.id)}/api/action/${createdAction.id}`)
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action updated',
+          name: 'My action updated',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
           },

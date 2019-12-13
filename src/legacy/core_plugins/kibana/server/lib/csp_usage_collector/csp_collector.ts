@@ -19,6 +19,7 @@
 
 import { Server } from 'hapi';
 import { createCSPRuleString, DEFAULT_CSP_RULES } from '../../../../../server/csp';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
 export function createCspCollector(server: Server) {
   return {
@@ -42,8 +43,7 @@ export function createCspCollector(server: Server) {
   };
 }
 
-export function registerCspCollector(server: Server): void {
-  const { collectorSet } = server.usage;
-  const collector = collectorSet.makeUsageCollector(createCspCollector(server));
-  collectorSet.register(collector);
+export function registerCspCollector(usageCollection: UsageCollectionSetup, server: Server): void {
+  const collector = usageCollection.makeUsageCollector(createCspCollector(server));
+  usageCollection.registerCollector(collector);
 }

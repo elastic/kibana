@@ -10,7 +10,8 @@ import { CreateSourceEditor } from './create_source_editor';
 import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
+import { FIELD_ORIGIN } from '../../../../common/constants';
+import { KibanaRegionField } from '../../fields/kibana_region_field';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
 
@@ -45,11 +46,20 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     );
   };
 
+  createField({ fieldName }) {
+    return new KibanaRegionField({
+      fieldName,
+      source: this,
+      origin: FIELD_ORIGIN.SOURCE
+    });
+  }
+
   async getImmutableProperties() {
     return [
       {
         label: getDataSourceLabel(),
-        value: KibanaRegionmapSource.title },
+        value: KibanaRegionmapSource.title
+      },
       {
         label: i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
           defaultMessage: 'Vector layer'
@@ -59,7 +69,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     ];
   }
 
-  async _getVectorFileMeta() {
+  async getVectorFileMeta() {
     const regionList = getKibanaRegionList();
     const meta = regionList.find(source => source.name === this._descriptor.name);
     if (!meta) {
@@ -75,14 +85,11 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getGeoJsonWithMeta() {
-    const vectorFileMeta = await this._getVectorFileMeta();
+    const vectorFileMeta = await this.getVectorFileMeta();
     const featureCollection = await AbstractVectorSource.getGeoJson({
       format: vectorFileMeta.format.type,
       featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
       fetchUrl: vectorFileMeta.url
-    });
-    featureCollection.features.forEach((feature, index) => {
-      feature.properties[FEATURE_ID_PROPERTY_NAME] = index;
     });
     return {
       data: featureCollection
@@ -90,10 +97,8 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getLeftJoinFields() {
-    const vectorFileMeta = await this._getVectorFileMeta();
-    return vectorFileMeta.fields.map(f => {
-      return { name: f.name, label: f.description };
-    });
+    const vectorFileMeta = await this.getVectorFileMeta();
+    return vectorFileMeta.fields.map(f => this.createField({ fieldName: f.name }));
   }
 
   async getDisplayName() {

@@ -35,9 +35,8 @@ import { getKibanaInfoForStats } from '../lib';
  * the metrics.
  * See PR comment in https://github.com/elastic/kibana/pull/20577/files#r202416647
  */
-export function getOpsStatsCollector(server, kbnServer) {
-  const { collectorSet } = server.usage;
-  return collectorSet.makeStatsCollector({
+export function getOpsStatsCollector(usageCollection, server, kbnServer) {
+  return usageCollection.makeStatsCollector({
     type: KIBANA_STATS_TYPE,
     fetch: () => {
       return {
@@ -48,4 +47,11 @@ export function getOpsStatsCollector(server, kbnServer) {
     isReady: () => true,
     ignoreForInternalUploader: true, // Ignore this one from internal uploader. A different stats collector is used there.
   });
+}
+
+export function registerOpsStatsCollector(usageCollection, server, kbnServer) {
+  if (usageCollection) {
+    const collector = getOpsStatsCollector(usageCollection, server, kbnServer);
+    usageCollection.registerCollector(collector);
+  }
 }

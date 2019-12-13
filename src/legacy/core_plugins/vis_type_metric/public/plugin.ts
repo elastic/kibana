@@ -22,7 +22,7 @@ import { Plugin as ExpressionsPublicPlugin } from '../../../../plugins/expressio
 import { VisualizationsSetup } from '../../visualizations/public';
 
 import { createMetricVisFn } from './metric_vis_fn';
-import { createMetricVisTypeDefinition } from './metric_vis_type';
+import { metricVisDefinition } from './metric_vis_type';
 
 /** @internal */
 export interface MetricVisPluginSetupDependencies {
@@ -40,7 +40,7 @@ export class MetricVisPlugin implements Plugin<void, void> {
 
   public setup(core: CoreSetup, { expressions, visualizations }: MetricVisPluginSetupDependencies) {
     expressions.registerFunction(createMetricVisFn);
-    visualizations.types.registerVisualization(createMetricVisTypeDefinition);
+    visualizations.types.createReactVisualization(metricVisDefinition);
   }
 
   public start(core: CoreStart) {

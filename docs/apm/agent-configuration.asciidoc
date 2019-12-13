@@ -2,17 +2,14 @@
 [[agent-configuration]]
 === APM Agent configuration
 
-beta[] APM Agent configuration allows you to fine-tune your agent configuration directly in Kibana.
+APM Agent configuration allows you to fine-tune your agent configuration directly in Kibana.
 Best of all, changes are automatically propagated to your APM agents so there's no need to redeploy.
 
-To get started, simply choose the service and environment you wish to configure.
+To get started, simply choose the services and environments you wish to configure.
+The APM app will let you know when your configurations have been applied by your agents.
 
 [role="screenshot"]
 image::apm/images/apm-agent-configuration.png[APM Agent configuration in Kibana]
-
-IMPORTANT: As this feature is in Beta, a limited number of configuration settings are supported.
-We recommend you watch your agent logs to confirm that configuration has been applied.
-If you have feedback, please reach out in our https://discuss.elastic.co/c/apm[Discuss forum].
 
 [float]
 ==== Precedence
@@ -33,6 +30,26 @@ Kibana communicates any changed settings to APM Server so that your agents only 
 
 [float]
 ==== Supported configurations
+
+[float]
+===== `CAPTURE_BODY`
+
+added[7.5.0] Can be `"off"`, `"errors"`, `"transactions"`, or `"all"`. Defaults to `"off"`.
+
+For transactions that are HTTP requests, the Agent can optionally capture the request body, e.g., POST variables.
+Remember, request bodies often contain sensitive values like passwords, credit card numbers, etc.
+If your service handles sensitive data, enable this feature with care.
+Turning on body capturing can also significantly increase the overhead the overhead of the Agent,
+and the Elasticsearch index size.
+
+[float]
+===== `TRANSACTION_MAX_SPANS`
+
+added[7.5.0] A number between `0` and `32000`. Defaults to `500`.
+
+Limit the number of spans that are recorded per transaction.
+This is helpful in cases where a transaction creates a very high amount of spans, e.g., thousands of SQL queries.
+Setting an upper limit will help prevent the Agent and the APM Server from being overloaded.
 
 [float]
 ===== `TRANSACTION_SAMPLE_RATE`

@@ -9,7 +9,7 @@ import { LensMultiTable } from '../types';
 import React from 'react';
 import { shallow } from 'enzyme';
 import { MetricConfig } from './types';
-import { FieldFormat } from 'ui/registry/field_formats';
+import { FieldFormat } from '../../../../../../src/plugins/data/public';
 
 function sampleArgs() {
   const data: LensMultiTable = {

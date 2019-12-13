@@ -80,7 +80,7 @@ export class SecurityNavControl extends Component {
 
             <EuiFlexItem>
               <EuiText>
-                <p>{name}</p>
+                <p className="eui-textBreakWord">{name}</p>
               </EuiText>
 
               <EuiSpacer size="m" />

@@ -45,7 +45,7 @@ export function UpgradeAssistantProvider({ getService, getPageObjects }) {
     async expectDeprecationLoggingLabel(labelText) {
       return await retry.try(async () => {
         log.debug('expectDeprecationLoggingLabel()');
-        const label = await find.byCssSelector('[data-test-subj="upgradeAssistantDeprecationToggle"] ~ p');
+        const label = await find.byCssSelector('[data-test-subj="upgradeAssistantDeprecationToggle"] ~ span');
         const value = await label.getVisibleText();
         expect(value).to.equal(labelText);
       });

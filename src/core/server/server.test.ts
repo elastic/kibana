@@ -25,6 +25,7 @@ import {
   mockConfigService,
   mockSavedObjectsService,
   mockContextService,
+  mockEnsureValidConfiguration,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -133,7 +134,7 @@ test('stops services on "stop"', async () => {
   expect(mockSavedObjectsService.stop).toHaveBeenCalledTimes(1);
 });
 
-test(`doesn't setup core services if config validation fails`, async () => {
+test(`doesn't setup core services if services config validation fails`, async () => {
   mockConfigService.setSchema.mockImplementation(() => {
     throw new Error('invalid config');
   });
@@ -145,4 +146,22 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
+});
+
+test(`doesn't setup core services if config validation fails`, async () => {
+  mockEnsureValidConfiguration.mockImplementation(() => {
+    throw new Error('Unknown configuration keys');
+  });
+
+  const server = new Server(config$, env, logger);
+
+  await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Unknown configuration keys"`
+  );
+
+  expect(mockHttpService.setup).not.toHaveBeenCalled();
+  expect(mockElasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockPluginsService.setup).not.toHaveBeenCalled();
+  expect(mockLegacyService.setup).not.toHaveBeenCalled();
+  expect(mockSavedObjectsService.stop).not.toHaveBeenCalled();
 });

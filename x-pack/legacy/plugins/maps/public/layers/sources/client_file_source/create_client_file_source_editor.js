@@ -6,7 +6,7 @@
 
 
 import React from 'react';
-import { JsonUploadAndParse } from '../../../../../file_upload/public';
+import { start as fileUpload } from '../../../../../file_upload/public/legacy';
 
 export function ClientFileCreateSourceEditor({
   previewGeojsonFile,
@@ -16,7 +16,7 @@ export function ClientFileCreateSourceEditor({
   onIndexReady,
 }) {
   return (
-    <JsonUploadAndParse
+    <fileUpload.JsonUploadAndParse
       appName={'Maps'}
       isIndexingTriggered={isIndexingTriggered}
       onFileUpload={previewGeojsonFile}

@@ -4,7 +4,11 @@ exports[`#get correctly handles server config.: default 1`] = `
 Object {
   "autoListen": true,
   "basePath": "/abc",
+  "compression": Object {
+    "enabled": true,
+  },
   "cors": false,
+  "defaultRoute": undefined,
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,
@@ -23,7 +27,11 @@ exports[`#get correctly handles server config.: disabled ssl 1`] = `
 Object {
   "autoListen": true,
   "basePath": "/abc",
+  "compression": Object {
+    "enabled": true,
+  },
   "cors": false,
+  "defaultRoute": undefined,
   "host": "host",
   "keepaliveTimeout": 5000,
   "maxPayload": 1000,

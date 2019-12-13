@@ -51,8 +51,8 @@ export default function ({ getService, getPageObjects }) {
 
     it('Exported dashboard adjusts EST time to UTC', async () => {
       const time = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-      expect(time.start).to.be('2018-04-10 03:00:00.000');
-      expect(time.end).to.be('2018-04-10 04:00:00.000');
+      expect(time.start).to.be('Apr 10, 2018 @ 03:00:00.000');
+      expect(time.end).to.be('Apr 10, 2018 @ 04:00:00.000');
       await pieChart.expectPieSliceCount(4);
     });
 
@@ -63,8 +63,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('time zone test');
       const time = await PageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
-      expect(time.start).to.be('2018-04-09 22:00:00.000');
-      expect(time.end).to.be('2018-04-09 23:00:00.000');
+      expect(time.start).to.be('Apr 9, 2018 @ 22:00:00.000');
+      expect(time.end).to.be('Apr 9, 2018 @ 23:00:00.000');
       await pieChart.expectPieSliceCount(4);
     });
   });

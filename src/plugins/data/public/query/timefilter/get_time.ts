@@ -18,23 +18,14 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { TimeRange } from 'src/plugins/data/public';
+import { TimeRange } from '../../../common';
 
 // TODO: remove this
-import { IndexPattern, Field } from '../../../../../legacy/core_plugins/data/public/index_patterns';
+import { IndexPattern, Field } from '../../../../../legacy/core_plugins/data/public';
+import { esFilters } from '../../../common';
 
 interface CalculateBoundsOptions {
   forceNow?: Date;
-}
-
-interface RangeFilter {
-  gte?: string | number;
-  lte?: string | number;
-  format: string;
-}
-
-export interface Filter {
-  range: { [s: string]: RangeFilter };
 }
 
 export function calculateBounds(timeRange: TimeRange, options: CalculateBoundsOptions = {}) {
@@ -45,10 +36,10 @@ export function calculateBounds(timeRange: TimeRange, options: CalculateBoundsOp
 }
 
 export function getTime(
-  indexPattern: IndexPattern,
+  indexPattern: IndexPattern | undefined,
   timeRange: TimeRange,
   forceNow?: Date
-): Filter | undefined {
+) {
   if (!indexPattern) {
     // in CI, we sometimes seem to fail here.
     return;
@@ -66,17 +57,13 @@ export function getTime(
   if (!bounds) {
     return;
   }
-  const filter: Filter = {
-    range: { [timefield.name]: { format: 'strict_date_optional_time' } },
-  };
-
-  if (bounds.min) {
-    filter.range[timefield.name].gte = bounds.min.toISOString();
-  }
-
-  if (bounds.max) {
-    filter.range[timefield.name].lte = bounds.max.toISOString();
-  }
-
-  return filter;
+  return esFilters.buildRangeFilter(
+    timefield,
+    {
+      ...(bounds.min && { gte: bounds.min.toISOString() }),
+      ...(bounds.max && { lte: bounds.max.toISOString() }),
+      format: 'strict_date_optional_time',
+    },
+    indexPattern
+  );
 }

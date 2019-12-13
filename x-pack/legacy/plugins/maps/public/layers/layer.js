@@ -6,26 +6,22 @@
 import _ from 'lodash';
 import React from 'react';
 import { EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
-import turf from 'turf';
-import turfBooleanContains from '@turf/boolean-contains';
 import { DataRequest } from './util/data_request';
 import {
+  MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
-  SOURCE_DATA_ID_ORIGIN
+  MIN_ZOOM,
+  SOURCE_DATA_ID_ORIGIN,
 } from '../../common/constants';
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../reducers/util';
 import { i18n } from '@kbn/i18n';
 
-const SOURCE_UPDATE_REQUIRED = true;
-const NO_SOURCE_UPDATE_REQUIRED = false;
-
 export class AbstractLayer {
 
-  constructor({ layerDescriptor, source, style }) {
+  constructor({ layerDescriptor, source }) {
     this._descriptor = AbstractLayer.createDescriptor(layerDescriptor);
     this._source = source;
-    this._style = style;
     if (this._descriptor.__dataRequests) {
       this._dataRequests = this._descriptor.__dataRequests.map(dataRequest => new DataRequest(dataRequest));
     } else {
@@ -44,11 +40,10 @@ export class AbstractLayer {
     layerDescriptor.__dataRequests = _.get(options, '__dataRequests', []);
     layerDescriptor.id = _.get(options, 'id', uuid());
     layerDescriptor.label = options.label && options.label.length > 0 ? options.label : null;
-    layerDescriptor.minZoom = _.get(options, 'minZoom', 0);
-    layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
+    layerDescriptor.minZoom = _.get(options, 'minZoom', MIN_ZOOM);
+    layerDescriptor.maxZoom = _.get(options, 'maxZoom', MAX_ZOOM);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.applyGlobalQuery = _.get(options, 'applyGlobalQuery', true);
     layerDescriptor.style = _.get(options, 'style',  {});
 
     return layerDescriptor;
@@ -85,7 +80,7 @@ export class AbstractLayer {
   }
 
   supportsElasticsearchFilters() {
-    return this._source.supportsElasticsearchFilters();
+    return this._source.isESSource();
   }
 
   async supportsFitToBounds() {
@@ -191,11 +186,11 @@ export class AbstractLayer {
     };
   }
 
-  hasLegendDetails() {
+  async hasLegendDetails() {
     return false;
   }
 
-  getLegendDetails() {
+  renderLegendDetails() {
     return null;
   }
 
@@ -229,10 +224,6 @@ export class AbstractLayer {
 
   getQuery() {
     return this._descriptor.query;
-  }
-
-  getApplyGlobalQuery() {
-    return this._descriptor.applyGlobalQuery;
   }
 
   getZoomConfig() {
@@ -320,42 +311,7 @@ export class AbstractLayer {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
 
-  updateDueToExtent(source, prevMeta = {}, nextMeta = {}) {
-    const extentAware = source.isFilterByMapBounds();
-    if (!extentAware) {
-      return NO_SOURCE_UPDATE_REQUIRED;
-    }
 
-    const { buffer: previousBuffer } = prevMeta;
-    const { buffer: newBuffer } = nextMeta;
-
-    if (!previousBuffer) {
-      return SOURCE_UPDATE_REQUIRED;
-    }
-
-    if (_.isEqual(previousBuffer, newBuffer)) {
-      return NO_SOURCE_UPDATE_REQUIRED;
-    }
-
-    const previousBufferGeometry = turf.bboxPolygon([
-      previousBuffer.minLon,
-      previousBuffer.minLat,
-      previousBuffer.maxLon,
-      previousBuffer.maxLat
-    ]);
-    const newBufferGeometry = turf.bboxPolygon([
-      newBuffer.minLon,
-      newBuffer.minLat,
-      newBuffer.maxLon,
-      newBuffer.maxLat
-    ]);
-    const doesPreviousBufferContainNewBuffer = turfBooleanContains(previousBufferGeometry, newBufferGeometry);
-
-    const isTrimmed = _.get(prevMeta, 'areResultsTrimmed', false);
-    return doesPreviousBufferContainNewBuffer && !isTrimmed
-      ? NO_SOURCE_UPDATE_REQUIRED
-      : SOURCE_UPDATE_REQUIRED;
-  }
 
   getLayerTypeIconName() {
     throw new Error('should implement Layer#getLayerTypeIconName');
@@ -383,14 +339,10 @@ export class AbstractLayer {
   }
 
   getIndexPatternIds() {
-    return  [];
+    return [];
   }
 
   getQueryableIndexPatternIds() {
-    if (this.getApplyGlobalQuery()) {
-      return this.getIndexPatternIds();
-    }
-
     return [];
   }
 
@@ -399,6 +351,10 @@ export class AbstractLayer {
   }
 
   async getNumberFields() {
+    return [];
+  }
+
+  async getOrdinalFields() {
     return [];
   }
 
@@ -411,4 +367,3 @@ export class AbstractLayer {
   }
 
 }
-

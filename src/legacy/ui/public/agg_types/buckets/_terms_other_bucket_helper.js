@@ -18,9 +18,8 @@
  */
 
 import _ from 'lodash';
-import { buildQueryFromFilters } from '@kbn/es-query';
 import { AggGroupNames } from '../../vis/editors/default/agg_groups';
-import { esFilters } from '../../../../../plugins/data/public';
+import { esFilters, esQuery } from '../../../../../plugins/data/public';
 
 /**
  * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
@@ -197,7 +196,7 @@ export const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) =>
     });
 
     resultAgg.filters.filters[key] = {
-      bool: buildQueryFromFilters(filters, indexPattern),
+      bool: esQuery.buildQueryFromFilters(filters, indexPattern),
     };
   };
   walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');

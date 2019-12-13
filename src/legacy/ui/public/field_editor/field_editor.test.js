@@ -20,11 +20,14 @@
 jest.mock('ui/kfetch', () => ({}));
 
 import React from 'react';
-import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+import { npStart } from 'ui/new_platform';
+import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 
 jest.mock('brace/mode/groovy', () => ({}));
+jest.mock('ui/new_platform');
 
-import { FieldEditorComponent } from './field_editor';
+import { FieldEditor } from './field_editor';
 
 jest.mock('@elastic/eui', () => ({
   EuiBasicTable: 'eui-basic-table',
@@ -46,6 +49,10 @@ jest.mock('@elastic/eui', () => ({
   EuiSpacer: 'eui-spacer',
   EuiText: 'eui-text',
   EuiTextArea: 'eui-textArea',
+  htmlIdGenerator: () => 42,
+  palettes: {
+    euiPaletteColorBlind: { colors: ['red']  }
+  }
 }));
 
 jest.mock('ui/scripting_languages', () => ({
@@ -53,26 +60,6 @@ jest.mock('ui/scripting_languages', () => ({
   getSupportedScriptingLanguages: () => ['painless'],
   getDeprecatedScriptingLanguages: () => ['testlang'],
 }));
-
-jest.mock('ui/registry/field_formats', () => {
-  class Format {
-    static id = 'test_format'; static title = 'Test format';
-    params() {}
-  }
-
-  return {
-    fieldFormats: {
-      getDefaultType: () => {
-        return Format;
-      },
-      getByFieldType: (fieldType) => {
-        if(fieldType === 'number') {
-          return [Format];
-        }
-      }
-    },
-  };
-});
 
 jest.mock('ui/documentation_links', () => ({
   getDocLink: (doc) => `(docLink for ${doc})`,
@@ -133,11 +120,18 @@ describe('FieldEditor', () => {
     indexPattern = {
       fields,
     };
+
+    npStart.plugins.data.fieldFormats.getDefaultType = jest.fn(() => Format);
+    npStart.plugins.data.fieldFormats.getByFieldType = jest.fn((fieldType) => {
+      if(fieldType === 'number') {
+        return [Format];
+      }
+    });
   });
 
   it('should render create new scripted field correctly', async () => {
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={field}
         helpers={helpers}
@@ -163,8 +157,8 @@ describe('FieldEditor', () => {
       return fields[name];
     };
 
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -191,8 +185,8 @@ describe('FieldEditor', () => {
       return fields[name];
     };
 
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -206,8 +200,8 @@ describe('FieldEditor', () => {
 
   it('should show conflict field warning', async () => {
     const testField = { ...field };
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -229,8 +223,8 @@ describe('FieldEditor', () => {
         text: ['index_name_3']
       }
     };
-    const component = shallowWithIntl(
-      <FieldEditorComponent
+    const component = shallowWithI18nProvider(
+      <FieldEditor
         indexPattern={indexPattern}
         field={testField}
         helpers={helpers}
@@ -242,5 +236,4 @@ describe('FieldEditor', () => {
     component.update();
     expect(component).toMatchSnapshot();
   });
-
 });

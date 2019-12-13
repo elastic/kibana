@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('load', () => {
     it('should return the ES cluster info', async () => {

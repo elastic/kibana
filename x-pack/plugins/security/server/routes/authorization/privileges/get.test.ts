@@ -5,9 +5,7 @@
  */
 
 import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../../src/core/server';
-import { ILicenseCheck } from '../../../../../licensing/server';
-// TODO, require from licensing plugin root once https://github.com/elastic/kibana/pull/44922 is merged.
-import { LICENSE_STATUS } from '../../../../../licensing/server/constants';
+import { LicenseCheck, LICENSE_CHECK_STATE } from '../../../../../licensing/server';
 import { RawKibanaPrivileges } from '../../../../common/model';
 import { defineGetPrivilegesRoutes } from './get';
 
@@ -40,7 +38,7 @@ const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
 };
 
 interface TestOptions {
-  licenseCheckResult?: ILicenseCheck;
+  licenseCheckResult?: LicenseCheck;
   includeActions?: boolean;
   asserts: { statusCode: number; result: Record<string, any> };
 }
@@ -48,7 +46,11 @@ interface TestOptions {
 describe('GET privileges', () => {
   const getPrivilegesTest = (
     description: string,
-    { licenseCheckResult = { check: LICENSE_STATUS.Valid }, includeActions, asserts }: TestOptions
+    {
+      licenseCheckResult = { state: LICENSE_CHECK_STATE.Valid },
+      includeActions,
+      asserts,
+    }: TestOptions
   ) => {
     test(description, async () => {
       const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -79,8 +81,8 @@ describe('GET privileges', () => {
   };
 
   describe('failure', () => {
-    getPrivilegesTest(`returns result of routePreCheckLicense`, {
-      licenseCheckResult: { check: LICENSE_STATUS.Invalid, message: 'test forbidden message' },
+    getPrivilegesTest('returns result of license checker', {
+      licenseCheckResult: { state: LICENSE_CHECK_STATE.Invalid, message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
     });
   });

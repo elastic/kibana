@@ -55,6 +55,7 @@ export default async function ({ readConfigFile }) {
       resolve(__dirname, './apps/snapshot_restore'),
       resolve(__dirname, './apps/cross_cluster_replication'),
       resolve(__dirname, './apps/remote_clusters'),
+      resolve(__dirname, './apps/transform'),
       // This license_management file must be last because it is destructive.
       resolve(__dirname, './apps/license_management'),
     ],
@@ -152,10 +153,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/uptime',
       },
       apm: {
-        pathname: '/app/apm'
+        pathname: '/app/apm',
       },
       ml: {
-        pathname: '/app/ml'
+        pathname: '/app/ml',
       },
       rollupJob: {
         pathname: '/app/kibana',
@@ -192,6 +193,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/management/elasticsearch/watcher/watches/',
       },
+      transform: {
+        pathname: '/app/kibana/',
+        hash: '/management/elasticsearch/transform'
+      }
     },
 
     // choose where esArchiver should load archives from

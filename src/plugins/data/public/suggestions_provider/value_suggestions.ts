@@ -19,36 +19,49 @@
 
 import { memoize } from 'lodash';
 
-import { UiSettingsClientContract, HttpServiceBase } from 'src/core/public';
+import { IUiSettingsClient, HttpServiceBase } from 'src/core/public';
 import { IGetSuggestions } from './types';
-import { Field } from '..';
+import { IFieldType } from '../../common';
 
 export function getSuggestionsProvider(
-  uiSettings: UiSettingsClientContract,
+  uiSettings: IUiSettingsClient,
   http: HttpServiceBase
 ): IGetSuggestions {
   const requestSuggestions = memoize(
-    (index: string, field: Field, query: string, boolFilter: any = []) => {
+    (
+      index: string,
+      field: IFieldType,
+      query: string,
+      boolFilter: any = [],
+      signal?: AbortSignal
+    ) => {
       return http.fetch(`/api/kibana/suggestions/values/${index}`, {
         method: 'POST',
         body: JSON.stringify({ query, field: field.name, boolFilter }),
+        signal,
       });
     },
     resolver
   );
 
-  return async (index: string, field: Field, query: string, boolFilter?: any) => {
+  return async (
+    index: string,
+    field: IFieldType,
+    query: string,
+    boolFilter?: any,
+    signal?: AbortSignal
+  ) => {
     const shouldSuggestValues = uiSettings.get('filterEditor:suggestValues');
     if (field.type === 'boolean') {
       return [true, false];
     } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
       return [];
     }
-    return await requestSuggestions(index, field, query, boolFilter);
+    return await requestSuggestions(index, field, query, boolFilter, signal);
   };
 }
 
-function resolver(index: string, field: Field, query: string, boolFilter: any) {
+function resolver(index: string, field: IFieldType, query: string, boolFilter: any) {
   // Only cache results for a minute
   const ttl = Math.floor(Date.now() / 1000 / 60);
   return [ttl, query, index, field.name, JSON.stringify(boolFilter)].join('|');

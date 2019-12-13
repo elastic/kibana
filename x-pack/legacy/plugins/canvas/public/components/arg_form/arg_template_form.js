@@ -28,7 +28,7 @@ class ArgTemplateFormComponent extends React.Component {
     errorTemplate: PropTypes.oneOfType([PropTypes.element, PropTypes.func]).isRequired,
   };
 
-  componentWillUpdate(prevProps) {
+  UNSAFE_componentWillUpdate(prevProps) {
     //see if error state changed
     if (this.props.error !== prevProps.error) {
       this.props.handlers.destroy();

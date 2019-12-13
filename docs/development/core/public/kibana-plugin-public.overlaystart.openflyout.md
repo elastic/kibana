@@ -4,11 +4,9 @@
 
 ## OverlayStart.openFlyout property
 
+
 <b>Signature:</b>
 
 ```typescript
-openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
-        closeButtonAriaLabel?: string;
-        'data-test-subj'?: string;
-    }) => OverlayRef;
+openFlyout: OverlayFlyoutStart['open'];
 ```

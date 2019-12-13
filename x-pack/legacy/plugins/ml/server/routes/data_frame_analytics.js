@@ -92,6 +92,19 @@ export function dataFrameAnalyticsRoutes({ commonRouteConfig, elasticsearchPlugi
   });
 
   route({
+    method: 'POST',
+    path: '/api/ml/data_frame/analytics/_explain',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
+      return callWithRequest('ml.estimateDataFrameAnalyticsMemoryUsage', { body: request.payload })
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
+  route({
     method: 'DELETE',
     path: '/api/ml/data_frame/analytics/{analyticsId}',
     handler(request) {

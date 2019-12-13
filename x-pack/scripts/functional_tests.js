@@ -13,12 +13,9 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/api_integration/config_security_basic.js'),
   require.resolve('../test/api_integration/config.js'),
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
-  // FLAKY: https://github.com/elastic/kibana/issues/50079
-  // FLAKY: https://github.com/elastic/kibana/issues/50074
-  // FLAKY: https://github.com/elastic/kibana/issues/48709
-  // FLAKY: https://github.com/elastic/kibana/issues/50078
-  // require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
+  require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
   require.resolve('../test/plugin_api_integration/config.js'),
+  require.resolve('../test/plugin_functional/config'),
   require.resolve('../test/kerberos_api_integration/config'),
   require.resolve('../test/kerberos_api_integration/anonymous_access.config'),
   require.resolve('../test/saml_api_integration/config'),
@@ -38,4 +35,5 @@ require('@kbn/test').runTestsCli([
   require.resolve('../test/ui_capabilities/security_only/config'),
   require.resolve('../test/ui_capabilities/spaces_only/config'),
   require.resolve('../test/upgrade_assistant_integration/config'),
+  require.resolve('../test/licensing_plugin/config'),
 ]);

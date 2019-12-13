@@ -35,7 +35,7 @@ FlexItem.displayName = 'FlexItem';
 interface HeaderGlobalProps {
   hideDetectionEngine?: boolean;
 }
-export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = true }) => (
+export const HeaderGlobal = React.memo<HeaderGlobalProps>(({ hideDetectionEngine = false }) => (
   <Wrapper className="siemHeaderGlobal">
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <FlexItem>

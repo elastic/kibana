@@ -15,7 +15,7 @@ import { DEFAULT_POLICY_NAME } from './constants';
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     createIndex,

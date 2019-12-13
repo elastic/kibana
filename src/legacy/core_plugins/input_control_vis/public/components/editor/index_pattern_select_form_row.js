@@ -20,11 +20,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
-import { IndexPatternSelect } from 'ui/index_patterns';
-
 import {
   EuiFormRow,
 } from '@elastic/eui';
+
+import { npStart } from 'ui/new_platform';
+const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 function IndexPatternSelectFormRowUi(props) {
   const {

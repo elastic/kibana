@@ -65,18 +65,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/core/public/application/**/*.{js,ts,tsx}'],
-      rules: {
-        'react/no-danger': 'off',
-      },
-    },
-    {
-      files: ['src/legacy/core_plugins/console/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/legacy/core_plugins/data/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -144,12 +132,6 @@ module.exports = {
       },
     },
     {
-      files: ['src/plugins/eui_utils/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['src/plugins/kibana_react/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/rules-of-hooks': 'off',
@@ -176,20 +158,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/graph/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/index_management/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/infra/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
@@ -215,13 +184,6 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/legacy/plugins/siem/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/exhaustive-deps': 'off',
-        'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
       files: ['x-pack/legacy/plugins/snapshot_restore/**/*.{js,ts,tsx}'],
       rules: {
         'react-hooks/exhaustive-deps': 'off',
@@ -232,13 +194,6 @@ module.exports = {
       rules: {
         'react-hooks/exhaustive-deps': 'off',
         'react-hooks/rules-of-hooks': 'off',
-      },
-    },
-    {
-      files: ['x-pack/legacy/plugins/watcher/**/*.{js,ts,tsx}'],
-      rules: {
-        'react-hooks/rules-of-hooks': 'off',
-        'react-hooks/exhaustive-deps': 'off',
       },
     },
 
@@ -356,6 +311,7 @@ module.exports = {
                   '!src/core/server/index.ts',
                   '!src/core/server/mocks.ts',
                   '!src/core/server/types.ts',
+                  '!src/core/server/test_utils.ts',
                   // for absolute imports until fixed in
                   // https://github.com/elastic/kibana/issues/36096
                   '!src/core/server/types',
@@ -368,6 +324,21 @@ module.exports = {
                   '!src/plugins/**/server/index.{js,ts,tsx}',
                 ],
                 allowSameFolder: true,
+              },
+              {
+                target: ['src/core/**/*'],
+                from: ['x-pack/**/*'],
+                errorMessage: 'OSS cannot import x-pack files.',
+              },
+              {
+                target: ['src/core/**/*'],
+                from: [
+                  'plugins/**/*',
+                  'src/plugins/**/*',
+                  'src/legacy/core_plugins/**/*',
+                  'src/legacy/ui/**/*',
+                ],
+                errorMessage: 'The core cannot depend on any plugins.',
               },
               {
                 from: ['src/legacy/ui/**/*', 'ui/**/*'],
@@ -839,6 +810,8 @@ module.exports = {
         // might be introduced after the other warns are fixed
         // 'react/jsx-sort-props': 'error',
         'react/jsx-tag-spacing': 'error',
+        // might be introduced after the other warns are fixed
+        'react-hooks/exhaustive-deps': 'off',
         'require-atomic-updates': 'error',
         'rest-spread-spacing': ['error', 'never'],
         'symbol-description': 'error',

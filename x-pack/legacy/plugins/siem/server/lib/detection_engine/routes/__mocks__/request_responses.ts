@@ -6,28 +6,68 @@
 
 import { ServerInjectOptions } from 'hapi';
 import { ActionResult } from '../../../../../../actions/server/types';
-import { SignalAlertParamsRest } from '../../alerts/types';
+import { SignalsStatusRestParams, SignalsQueryRestParams } from '../../signals/types';
+import {
+  DETECTION_ENGINE_RULES_URL,
+  DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  DETECTION_ENGINE_PRIVILEGES_URL,
+  DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  INTERNAL_RULE_ID_KEY,
+} from '../../../../../common/constants';
+import { RuleAlertType } from '../../rules/types';
+import { RuleAlertParamsRest } from '../../types';
 
 // The Omit of filter is because of a Hapi Server Typing issue that I am unclear
 // where it comes from. I would hope to remove the "filter" as an omit at some point
 // when we upgrade and Hapi Server is ok with the filter.
-export const typicalPayload = (): Partial<Omit<SignalAlertParamsRest, 'filter'>> => ({
-  id: 'rule-1',
+export const typicalPayload = (): Partial<Omit<RuleAlertParamsRest, 'filter'>> => ({
+  rule_id: 'rule-1',
   description: 'Detecting root and admin users',
   index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
   interval: '5m',
   name: 'Detect Root/Admin Users',
+  output_index: '.siem-signals',
+  risk_score: 50,
   type: 'query',
   from: 'now-6m',
   to: 'now',
   severity: 'high',
   query: 'user.name: root or user.name: admin',
   language: 'kuery',
+  threats: [
+    {
+      framework: 'fake',
+      tactic: { id: 'fakeId', name: 'fakeName', reference: 'fakeRef' },
+      techniques: [{ id: 'techniqueId', name: 'techniqueName', reference: 'techniqueRef' }],
+    },
+  ],
+});
+
+export const typicalSetStatusSignalByIdsPayload = (): Partial<SignalsStatusRestParams> => ({
+  signal_ids: ['somefakeid1', 'somefakeid2'],
+  status: 'closed',
+});
+
+export const typicalSetStatusSignalByQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+  query: { range: { '@timestamp': { gte: 'now-2M', lte: 'now/M' } } },
+  status: 'closed',
+});
+
+export const typicalSignalsQuery = (): Partial<SignalsQueryRestParams> => ({
+  query: { match_all: {} },
+});
+
+export const typicalSignalsQueryAggs = (): Partial<SignalsQueryRestParams> => ({
+  aggs: { statuses: { terms: { field: 'signal.status', size: 10 } } },
+});
+
+export const setStatusSignalMissingIdsAndQueryPayload = (): Partial<SignalsStatusRestParams> => ({
+  status: 'closed',
 });
 
 export const getUpdateRequest = (): ServerInjectOptions => ({
   method: 'PUT',
-  url: '/api/siem/signals',
+  url: DETECTION_ENGINE_RULES_URL,
   payload: {
     ...typicalPayload(),
   },
@@ -35,131 +75,213 @@ export const getUpdateRequest = (): ServerInjectOptions => ({
 
 export const getReadRequest = (): ServerInjectOptions => ({
   method: 'GET',
-  url: '/api/siem/signals/rule-1',
+  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
 });
 
 export const getFindRequest = (): ServerInjectOptions => ({
   method: 'GET',
-  url: '/api/siem/signals/_find',
+  url: `${DETECTION_ENGINE_RULES_URL}/_find`,
 });
 
-export const getFindResult = () => ({
+export const getPrivilegeRequest = (): ServerInjectOptions => ({
+  method: 'GET',
+  url: `${DETECTION_ENGINE_PRIVILEGES_URL}`,
+});
+
+interface FindHit {
+  page: number;
+  perPage: number;
+  total: number;
+  data: RuleAlertType[];
+}
+
+export const getFindResult = (): FindHit => ({
   page: 1,
   perPage: 1,
   total: 0,
   data: [],
 });
 
+export const getFindResultWithSingleHit = (): FindHit => ({
+  page: 1,
+  perPage: 1,
+  total: 0,
+  data: [getResult()],
+});
+
+export const getFindResultWithMultiHits = (data: RuleAlertType[]): FindHit => ({
+  page: 1,
+  perPage: 1,
+  total: 2,
+  data,
+});
+
 export const getDeleteRequest = (): ServerInjectOptions => ({
   method: 'DELETE',
-  url: '/api/siem/signals/rule-1',
+  url: `${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`,
+});
+
+export const getDeleteRequestById = (): ServerInjectOptions => ({
+  method: 'DELETE',
+  url: `${DETECTION_ENGINE_RULES_URL}?id=04128c15-0d1b-4716-a4c5-46997ac7f3bd`,
 });
 
 export const getCreateRequest = (): ServerInjectOptions => ({
   method: 'POST',
-  url: '/api/siem/signals',
+  url: DETECTION_ENGINE_RULES_URL,
   payload: {
     ...typicalPayload(),
   },
 });
 
+export const getSetSignalStatusByIdsRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByIdsPayload(),
+  },
+});
+
+export const getSetSignalStatusByQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+  payload: {
+    ...typicalSetStatusSignalByQueryPayload(),
+  },
+});
+
+export const getSignalsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQuery() },
+});
+
+export const getSignalsAggsQueryRequest = (): ServerInjectOptions => ({
+  method: 'POST',
+  url: DETECTION_ENGINE_QUERY_SIGNALS_URL,
+  payload: { ...typicalSignalsQueryAggs() },
+});
+
 export const createActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
-  description: '',
+  name: '',
   config: {},
 });
 
-export const createAlertResult = () => ({
-  id: 'rule-1',
+export const getResult = (): RuleAlertType => ({
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  name: 'Detect Root/Admin Users',
+  tags: [`${INTERNAL_RULE_ID_KEY}:rule-1`],
   alertTypeId: 'siem.signals',
-  alertTypeParams: {
+  params: {
     description: 'Detecting root and admin users',
-    id: 'rule-1',
+    ruleId: 'rule-1',
     index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    falsePositives: [],
     from: 'now-6m',
     filter: null,
+    immutable: false,
     query: 'user.name: root or user.name: admin',
+    language: 'kuery',
+    outputIndex: '.siem-signals',
+    savedId: null,
+    meta: null,
+    filters: null,
+    riskScore: 50,
     maxSignals: 100,
-    name: 'Detect Root/Admin Users',
+    size: 1,
     severity: 'high',
+    tags: [],
     to: 'now',
     type: 'query',
-    language: 'kuery',
-    references: [],
+    threats: [
+      {
+        framework: 'MITRE ATT&CK',
+        tactic: {
+          id: 'TA0040',
+          name: 'impact',
+          reference: 'https://attack.mitre.org/tactics/TA0040/',
+        },
+        techniques: [
+          {
+            id: 'T1499',
+            name: 'endpoint denial of service',
+            reference: 'https://attack.mitre.org/techniques/T1499/',
+          },
+        ],
+      },
+    ],
+    references: ['http://www.example.com', 'https://ww.example.com'],
   },
   interval: '5m',
   enabled: true,
-  actions: [
-    {
-      group: 'default',
-      params: {
-        message: 'SIEM Alert Fired',
-        level: 'info',
-      },
-      id: '9c3846a3-dbf9-40ce-ba7e-ef635499afa6',
-    },
-  ],
+  actions: [],
   throttle: null,
   createdBy: 'elastic',
   updatedBy: 'elastic',
   apiKeyOwner: 'elastic',
   muteAll: false,
   mutedInstanceIds: [],
-  scheduledTaskId: '78d036d0-f042-11e9-a9ae-51b9a11630ec',
-});
-
-export const getResult = () => ({
-  id: 'result-1',
-  enabled: false,
-  alertTypeId: '',
-  interval: undefined,
-  actions: undefined,
-  alertTypeParams: undefined,
+  scheduledTaskId: '2dabe330-0702-11ea-8b50-773b89126888',
 });
 
 export const updateActionResult = (): ActionResult => ({
   id: 'result-1',
   actionTypeId: 'action-id-1',
-  description: '',
+  name: '',
   config: {},
 });
 
-export const updateAlertResult = () => ({
-  id: 'rule-1',
-  alertTypeId: 'siem.signals',
-  alertTypeParams: {
-    description: 'Detecting root and admin users',
-    id: 'rule-1',
-    index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-    from: 'now-6m',
-    filter: null,
-    query: 'user.name: root or user.name: admin',
-    maxSignals: 100,
-    name: 'Detect Root/Admin Users',
-    severity: 'high',
-    to: 'now',
-    type: 'query',
-    language: 'kuery',
-    references: [],
+export const getMockPrivileges = () => ({
+  username: 'test-space',
+  has_all_requested: false,
+  cluster: {
+    monitor_ml: true,
+    manage_ccr: false,
+    manage_index_templates: true,
+    monitor_watcher: true,
+    monitor_transform: true,
+    read_ilm: true,
+    manage_api_key: false,
+    manage_security: false,
+    manage_own_api_key: false,
+    manage_saml: false,
+    all: false,
+    manage_ilm: true,
+    manage_ingest_pipelines: true,
+    read_ccr: false,
+    manage_rollup: true,
+    monitor: true,
+    manage_watcher: true,
+    manage: true,
+    manage_transform: true,
+    manage_token: false,
+    manage_ml: true,
+    manage_pipeline: true,
+    monitor_rollup: true,
+    transport_client: true,
+    create_snapshot: true,
   },
-  interval: '5m',
-  enabled: true,
-  actions: [
-    {
-      group: 'default',
-      params: {
-        message: 'SIEM Alert Fired',
-        level: 'info',
-      },
-      id: '9c3846a3-dbf9-40ce-ba7e-ef635499afa6',
+  index: {
+    '.siem-signals-frank-hassanabad-test-space': {
+      all: false,
+      manage_ilm: true,
+      read: false,
+      create_index: true,
+      read_cross_cluster: false,
+      index: false,
+      monitor: true,
+      delete: false,
+      manage: true,
+      delete_index: true,
+      create_doc: false,
+      view_index_metadata: true,
+      create: false,
+      manage_follow_index: true,
+      manage_leader_index: true,
+      write: false,
     },
-  ],
-  throttle: null,
-  createdBy: 'elastic',
-  updatedBy: 'elastic',
-  apiKeyOwner: 'elastic',
-  muteAll: false,
-  mutedInstanceIds: [],
-  scheduledTaskId: '78d036d0-f042-11e9-a9ae-51b9a11630ec',
+  },
+  application: {},
 });

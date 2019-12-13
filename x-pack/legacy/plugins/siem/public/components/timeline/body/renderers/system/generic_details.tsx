@@ -7,7 +7,6 @@
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { BrowserFields } from '../../../../../containers/source';
 import { Ecs } from '../../../../../graphql/types';
@@ -43,7 +42,7 @@ interface Props {
   workingDirectory: string | null | undefined;
 }
 
-export const SystemGenericLine = pure<Props>(
+export const SystemGenericLine = React.memo<Props>(
   ({
     contextId,
     hostName,
@@ -141,7 +140,7 @@ interface GenericDetailsProps {
   timelineId: string;
 }
 
-export const SystemGenericDetails = pure<GenericDetailsProps>(
+export const SystemGenericDetails = React.memo<GenericDetailsProps>(
   ({ data, contextId, text, timelineId }) => {
     const id = data._id;
     const message: string | null = data.message != null ? data.message[0] : null;

@@ -24,7 +24,6 @@ import { Vis } from '..';
 import { AggType } from '../../agg_types/agg_type';
 import { AggConfig } from '../../agg_types/agg_config';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { fieldFormats } from '../../registry/field_formats';
 
 describe('AggConfig', function () {
 
@@ -439,12 +438,15 @@ describe('AggConfig', function () {
           }
         ]
       });
-      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(fieldFormats.getDefaultInstance('number').getConverterFor());
+
+      const fieldFormatter = vis.aggs.aggs[0].fieldFormatter();
+
+      expect(fieldFormatter).to.be.defined;
+      expect(fieldFormatter('text')).to.be('text');
     });
   });
 
   describe('#fieldFormatter - no custom getFormat handler', function () {
-
     const visStateAggWithoutCustomGetFormat = {
       aggs: [
         {
@@ -461,24 +463,28 @@ describe('AggConfig', function () {
     });
 
     it('returns the field\'s formatter', function () {
-      expect(vis.aggs.aggs[0].fieldFormatter()).to.be(vis.aggs.aggs[0].getField().format.getConverterFor());
+      expect(vis.aggs.aggs[0].fieldFormatter().toString()).to.be(vis.aggs.aggs[0].getField().format.getConverterFor().toString());
     });
 
     it('returns the string format if the field does not have a format', function () {
       const agg = vis.aggs.aggs[0];
       agg.params.field = { type: 'number', format: null };
-      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
+      const fieldFormatter = agg.fieldFormatter();
+      expect(fieldFormatter).to.be.defined;
+      expect(fieldFormatter('text')).to.be('text');
     });
 
     it('returns the string format if their is no field', function () {
       const agg = vis.aggs.aggs[0];
       delete agg.params.field;
-      expect(agg.fieldFormatter()).to.be(fieldFormats.getDefaultInstance('string').getConverterFor());
+      const fieldFormatter = agg.fieldFormatter();
+      expect(fieldFormatter).to.be.defined;
+      expect(fieldFormatter('text')).to.be('text');
     });
 
     it('returns the html converter if "html" is passed in', function () {
       const field = indexPattern.fields.getByName('bytes');
-      expect(vis.aggs.aggs[0].fieldFormatter('html')).to.be(field.format.getConverterFor('html'));
+      expect(vis.aggs.aggs[0].fieldFormatter('html').toString()).to.be(field.format.getConverterFor('html').toString());
     });
   });
 });

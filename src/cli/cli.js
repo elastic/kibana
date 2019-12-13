@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import { pkg } from '../legacy/utils';
+import { pkg } from '../core/server/utils';
 import Command from './command';
 import serveCommand from './serve/serve';
 

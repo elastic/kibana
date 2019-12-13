@@ -30,8 +30,6 @@ import { timefilter } from 'ui/timefilter';
 import { npStart } from 'ui/new_platform';
 import { getSavedSheetBreadcrumbs, getCreateBreadcrumbs } from './breadcrumbs';
 
-// import the uiExports that we want to "use"
-import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
 
 require('ui/autoload/all');

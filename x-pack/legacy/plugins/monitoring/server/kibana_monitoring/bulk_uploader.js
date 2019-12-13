@@ -68,21 +68,21 @@ export class BulkUploader {
 
   /*
    * Start the interval timer
-   * @param {CollectorSet} collectorSet object to use for initial the fetch/upload and fetch/uploading on interval
+   * @param {usageCollection} usageCollection object to use for initial the fetch/upload and fetch/uploading on interval
    * @return undefined
    */
-  start(collectorSet) {
+  start(usageCollection) {
     this._log.info('Starting monitoring stats collection');
-    const filterCollectorSet = _collectorSet => {
+    const filterCollectorSet = _usageCollection => {
       const successfulUploadInLastDay = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
 
-      return _collectorSet.getFilteredCollectorSet(c => {
+      return _usageCollection.getFilteredCollectorSet(c => {
         // this is internal bulk upload, so filter out API-only collectors
         if (c.ignoreForInternalUploader) {
           return false;
         }
         // Only collect usage data at the same interval as telemetry would (default to once a day)
-        if (successfulUploadInLastDay && _collectorSet.isUsageCollector(c)) {
+        if (successfulUploadInLastDay && _usageCollection.isUsageCollector(c)) {
           return false;
         }
         return true;
@@ -92,11 +92,11 @@ export class BulkUploader {
     if (this._timer) {
       clearInterval(this._timer);
     } else {
-      this._fetchAndUpload(filterCollectorSet(collectorSet)); // initial fetch
+      this._fetchAndUpload(filterCollectorSet(usageCollection)); // initial fetch
     }
 
     this._timer = setInterval(() => {
-      this._fetchAndUpload(filterCollectorSet(collectorSet));
+      this._fetchAndUpload(filterCollectorSet(usageCollection));
     }, this._interval);
   }
 
@@ -121,12 +121,12 @@ export class BulkUploader {
   }
 
   /*
-   * @param {CollectorSet} collectorSet
+   * @param {usageCollection} usageCollection
    * @return {Promise} - resolves to undefined
    */
-  async _fetchAndUpload(collectorSet) {
-    const collectorsReady = await collectorSet.areAllCollectorsReady();
-    const hasUsageCollectors = collectorSet.some(collectorSet.isUsageCollector);
+  async _fetchAndUpload(usageCollection) {
+    const collectorsReady = await usageCollection.areAllCollectorsReady();
+    const hasUsageCollectors = usageCollection.some(usageCollection.isUsageCollector);
     if (!collectorsReady) {
       this._log.debug('Skipping bulk uploading because not all collectors are ready');
       if (hasUsageCollectors) {
@@ -136,8 +136,8 @@ export class BulkUploader {
       return;
     }
 
-    const data = await collectorSet.bulkFetch(this._callClusterWithInternalUser);
-    const payload = this.toBulkUploadFormat(compact(data), collectorSet);
+    const data = await usageCollection.bulkFetch(this._callClusterWithInternalUser);
+    const payload = this.toBulkUploadFormat(compact(data), usageCollection);
 
     if (payload) {
       try {
@@ -202,7 +202,7 @@ export class BulkUploader {
    *      }
    *    ]
    */
-  toBulkUploadFormat(rawData, collectorSet) {
+  toBulkUploadFormat(rawData, usageCollection) {
     if (rawData.length === 0) {
       return;
     }
@@ -210,7 +210,7 @@ export class BulkUploader {
     // convert the raw data to a nested object by taking each payload through
     // its formatter, organizing it per-type
     const typesNested = rawData.reduce((accum, { type, result }) => {
-      const { type: uploadType, payload: uploadData } = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
+      const { type: uploadType, payload: uploadData } = usageCollection.getCollectorByType(type).formatForBulkUpload(result);
       return defaultsDeep(accum, { [uploadType]: uploadData });
     }, {});
     // convert the nested object into a flat array, with each payload prefixed

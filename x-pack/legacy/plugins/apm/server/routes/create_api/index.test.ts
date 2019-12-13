@@ -5,25 +5,49 @@
  */
 import * as t from 'io-ts';
 import { createApi } from './index';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup, Logger } from 'src/core/server';
 import { Params } from '../typings';
-import { LegacySetup } from '../../new-platform/plugin';
+import { BehaviorSubject } from 'rxjs';
+import { APMConfig } from '../../../../../../plugins/apm/server';
+import { LegacySetup } from '../../../../../../plugins/apm/server/plugin';
 
-const getCoreMock = () => (({} as unknown) as CoreSetup);
-
-const getLegacyMock = () =>
-  (({
-    server: {
-      route: jest.fn()
-    }
-  } as unknown) as LegacySetup & {
-    server: { route: ReturnType<typeof jest.fn> };
+const getCoreMock = () => {
+  const get = jest.fn();
+  const post = jest.fn();
+  const put = jest.fn();
+  const createRouter = jest.fn().mockReturnValue({
+    get,
+    post,
+    put
   });
+
+  const mock = {} as CoreSetup;
+
+  return {
+    mock: {
+      ...mock,
+      http: {
+        ...mock.http,
+        createRouter
+      }
+    },
+    get,
+    post,
+    put,
+    createRouter,
+    context: {
+      config$: new BehaviorSubject({} as APMConfig),
+      logger: ({
+        error: jest.fn()
+      } as unknown) as Logger,
+      __LEGACY: {} as LegacySetup
+    }
+  };
+};
 
 describe('createApi', () => {
   it('registers a route with the server', () => {
-    const coreMock = getCoreMock();
-    const legacySetupMock = getLegacyMock();
+    const { mock, context, createRouter, post, get, put } = getCoreMock();
 
     createApi()
       .add(() => ({
@@ -46,236 +70,249 @@ describe('createApi', () => {
         },
         handler: async () => null
       }))
-      .init(coreMock, legacySetupMock);
+      .init(mock, context);
 
-    expect(legacySetupMock.server.route).toHaveBeenCalledTimes(3);
+    expect(createRouter).toHaveBeenCalledTimes(1);
 
-    const firstRoute = legacySetupMock.server.route.mock.calls[0][0];
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(post).toHaveBeenCalledTimes(1);
+    expect(put).toHaveBeenCalledTimes(1);
 
-    expect(firstRoute).toEqual({
-      method: 'GET',
+    expect(get.mock.calls[0][0]).toEqual({
       options: {
         tags: ['access:apm']
       },
       path: '/foo',
-      handler: expect.any(Function)
+      validate: expect.anything()
     });
 
-    const secondRoute = legacySetupMock.server.route.mock.calls[1][0];
-
-    expect(secondRoute).toEqual({
-      method: 'POST',
+    expect(post.mock.calls[0][0]).toEqual({
       options: {
         tags: ['access:apm']
       },
       path: '/bar',
-      handler: expect.any(Function)
+      validate: expect.anything()
     });
 
-    const thirdRoute = legacySetupMock.server.route.mock.calls[2][0];
-
-    expect(thirdRoute).toEqual({
-      method: 'PUT',
+    expect(put.mock.calls[0][0]).toEqual({
       options: {
         tags: ['access:apm', 'access:apm_write']
       },
       path: '/baz',
-      handler: expect.any(Function)
+      validate: expect.anything()
     });
   });
 
   describe('when validating', () => {
     const initApi = (params: Params) => {
-      const core = getCoreMock();
-      const legacySetupMock = getLegacyMock();
-      const handler = jest.fn();
+      const { mock, context, createRouter, get, post } = getCoreMock();
+      const handlerMock = jest.fn();
       createApi()
         .add(() => ({
           path: '/foo',
           params,
-          handler
+          handler: handlerMock
         }))
-        .init(core, legacySetupMock);
+        .init(mock, context);
 
-      const route = legacySetupMock.server.route.mock.calls[0][0];
-
-      const routeHandler = route.handler;
-
-      route.handler = (requestMock: any) => {
-        return routeHandler({
-          // stub hapi's default values
-          params: {},
-          query: {},
-          payload: null,
-          ...requestMock
-        });
+      const routeHandler = get.mock.calls[0][1];
+      const responseMock = {
+        ok: jest.fn(),
+        internalError: jest.fn(),
+        notFound: jest.fn(),
+        forbidden: jest.fn(),
+        badRequest: jest.fn()
       };
 
-      return { route, handler };
+      const simulate = (requestMock: any) => {
+        return routeHandler(
+          {},
+          {
+            // stub default values
+            params: {},
+            query: {},
+            body: null,
+            ...requestMock
+          },
+          responseMock
+        );
+      };
+
+      return { simulate, handlerMock, createRouter, get, post, responseMock };
     };
 
-    it('adds a _debug query parameter by default', () => {
-      const { handler, route } = initApi({});
+    it('adds a _debug query parameter by default', async () => {
+      const { simulate, handlerMock, responseMock } = initApi({});
 
-      expect(() =>
-        route.handler({
-          query: {
-            _debug: 'true'
-          }
-        })
-      ).not.toThrow();
+      await simulate({ query: { _debug: 'true' } });
 
-      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handlerMock).toHaveBeenCalledTimes(1);
 
-      const params = handler.mock.calls[0][1];
+      expect(responseMock.ok).toHaveBeenCalled();
 
-      expect(params).toEqual({});
+      expect(responseMock.badRequest).not.toHaveBeenCalled();
 
-      expect(() =>
-        route.handler({
-          query: {
-            _debug: 1
-          }
-        })
-      ).toThrow();
-    });
-
-    it('throws if any parameters are used but no types are defined', () => {
-      const { route } = initApi({});
-
-      expect(() =>
-        route.handler({
-          query: {
-            _debug: 'true',
-            extra: ''
-          }
-        })
-      ).toThrow();
-
-      expect(() =>
-        route.handler({
-          payload: { foo: 'bar' }
-        })
-      ).toThrow();
-
-      expect(() =>
-        route.handler({
-          params: {
-            foo: 'bar'
-          }
-        })
-      ).toThrow();
-    });
-
-    it('validates path parameters', () => {
-      const { handler, route } = initApi({ path: t.type({ foo: t.string }) });
-
-      expect(() =>
-        route.handler({
-          params: {
-            foo: 'bar'
-          }
-        })
-      ).not.toThrow();
-
-      expect(handler).toHaveBeenCalledTimes(1);
-
-      const params = handler.mock.calls[0][1];
+      const params = handlerMock.mock.calls[0][0].context.params;
 
       expect(params).toEqual({
-        path: {
+        query: {
+          _debug: true
+        }
+      });
+
+      await simulate({
+        query: {
+          _debug: 1
+        }
+      });
+
+      expect(responseMock.badRequest).toHaveBeenCalled();
+    });
+
+    it('throws if any parameters are used but no types are defined', async () => {
+      const { simulate, responseMock } = initApi({});
+
+      await simulate({
+        query: {
+          _debug: true,
+          extra: ''
+        }
+      });
+
+      expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
+
+      await simulate({
+        body: { foo: 'bar' }
+      });
+
+      expect(responseMock.badRequest).toHaveBeenCalledTimes(2);
+
+      await simulate({
+        params: {
           foo: 'bar'
         }
       });
 
-      handler.mockClear();
-
-      expect(() =>
-        route.handler({
-          params: {
-            bar: 'foo'
-          }
-        })
-      ).toThrow();
-
-      expect(() =>
-        route.handler({
-          params: {
-            foo: 9
-          }
-        })
-      ).toThrow();
-
-      expect(() =>
-        route.handler({
-          params: {
-            foo: 'bar',
-            extra: ''
-          }
-        })
-      ).toThrow();
+      expect(responseMock.badRequest).toHaveBeenCalledTimes(3);
     });
 
-    it('validates body parameters', () => {
-      const { handler, route } = initApi({ body: t.string });
-
-      expect(() =>
-        route.handler({
-          payload: ''
+    it('validates path parameters', async () => {
+      const { simulate, handlerMock, responseMock } = initApi({
+        path: t.type({
+          foo: t.string
         })
-      ).not.toThrow();
-
-      expect(handler).toHaveBeenCalledTimes(1);
-
-      const params = handler.mock.calls[0][1];
-
-      expect(params).toEqual({
-        body: ''
       });
 
-      handler.mockClear();
-
-      expect(() =>
-        route.handler({
-          payload: null
-        })
-      ).toThrow();
-    });
-
-    it('validates query parameters', () => {
-      const { handler, route } = initApi({
-        query: t.type({ bar: t.string })
-      });
-
-      expect(() =>
-        route.handler({
-          query: {
-            bar: '',
-            _debug: 'true'
-          }
-        })
-      ).not.toThrow();
-
-      expect(handler).toHaveBeenCalledTimes(1);
-
-      const params = handler.mock.calls[0][1];
-
-      expect(params).toEqual({
-        query: {
-          bar: ''
+      await simulate({
+        params: {
+          foo: 'bar'
         }
       });
 
-      handler.mockClear();
+      expect(handlerMock).toHaveBeenCalledTimes(1);
 
-      expect(() =>
-        route.handler({
-          query: {
-            bar: '',
-            foo: ''
-          }
-        })
-      ).toThrow();
+      expect(responseMock.ok).toHaveBeenCalledTimes(1);
+      expect(responseMock.badRequest).not.toHaveBeenCalled();
+
+      const params = handlerMock.mock.calls[0][0].context.params;
+
+      expect(params).toEqual({
+        path: {
+          foo: 'bar'
+        },
+        query: {
+          _debug: false
+        }
+      });
+
+      await simulate({
+        params: {
+          bar: 'foo'
+        }
+      });
+
+      expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
+
+      await simulate({
+        params: {
+          foo: 9
+        }
+      });
+
+      expect(responseMock.badRequest).toHaveBeenCalledTimes(2);
+
+      await simulate({
+        params: {
+          foo: 'bar',
+          extra: ''
+        }
+      });
+
+      expect(responseMock.badRequest).toHaveBeenCalledTimes(3);
+    });
+
+    it('validates body parameters', async () => {
+      const { simulate, handlerMock, responseMock } = initApi({
+        body: t.string
+      });
+
+      await simulate({
+        body: ''
+      });
+
+      expect(handlerMock).toHaveBeenCalledTimes(1);
+      expect(responseMock.ok).toHaveBeenCalledTimes(1);
+      expect(responseMock.badRequest).not.toHaveBeenCalled();
+
+      const params = handlerMock.mock.calls[0][0].context.params;
+
+      expect(params).toEqual({
+        body: '',
+        query: {
+          _debug: false
+        }
+      });
+
+      await simulate({
+        body: null
+      });
+
+      expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
+    });
+
+    it('validates query parameters', async () => {
+      const { simulate, handlerMock, responseMock } = initApi({
+        query: t.type({ bar: t.string })
+      });
+
+      await simulate({
+        query: {
+          bar: '',
+          _debug: 'true'
+        }
+      });
+
+      expect(handlerMock).toHaveBeenCalledTimes(1);
+      expect(responseMock.ok).toHaveBeenCalledTimes(1);
+      expect(responseMock.badRequest).not.toHaveBeenCalled();
+
+      const params = handlerMock.mock.calls[0][0].context.params;
+
+      expect(params).toEqual({
+        query: {
+          bar: '',
+          _debug: true
+        }
+      });
+
+      await simulate({
+        query: {
+          bar: '',
+          foo: ''
+        }
+      });
+
+      expect(responseMock.badRequest).toHaveBeenCalledTimes(1);
     });
   });
 });

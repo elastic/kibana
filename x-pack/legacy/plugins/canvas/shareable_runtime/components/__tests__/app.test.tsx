@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
-  One test relies on react-dom at a version of 16.9... it can be enabled
-  once renovate completes the upgrade.  Relevant code has been commented out
-  in the meantime.
+/*	
+  One test relies on react-dom at a version of 16.9... it can be enabled	
+  once renovate completes the upgrade.  Relevant code has been commented out	
+  in the meantime.	
 */
 
 import { mount, ReactWrapper } from 'enzyme';
@@ -19,8 +19,6 @@ import {
   getScrubber as scrubber,
   getScrubberSlideContainer as scrubberContainer,
   getPageControlsCenter as center,
-  getSettingsTrigger as trigger,
-  getContextMenuItems as menuItems,
   // getAutoplayTextField as autoplayText,
   // getAutoplayCheckbox as autoplayCheck,
   // getAutoplaySubmit as autoplaySubmit,
@@ -30,6 +28,7 @@ import {
   getPageControlsPrevious as previous,
   getPageControlsNext as next,
 } from '../../test/selectors';
+import { openSettings, selectMenuItem } from '../../test/interactions';
 
 // Mock the renderers
 jest.mock('../../supported_renderers');
@@ -102,13 +101,9 @@ describe('<App />', () => {
 
   test('autohide footer functions on mouseEnter + Leave', async () => {
     const wrapper = getWrapper();
-    trigger(wrapper).simulate('click');
-    await tick(20);
-    menuItems(wrapper)
-      .at(1)
-      .simulate('click');
-    await tick(20);
-    wrapper.update();
+    await openSettings(wrapper);
+    await selectMenuItem(wrapper, 1);
+
     expect(footer(wrapper).prop('isHidden')).toEqual(false);
     expect(footer(wrapper).prop('isAutohide')).toEqual(false);
     toolbarCheck(wrapper).simulate('click');
@@ -125,13 +120,9 @@ describe('<App />', () => {
     expect(scrubber(wrapper).prop('isScrubberVisible')).toEqual(true);
 
     // Open the menu and activate toolbar hiding.
-    trigger(wrapper).simulate('click');
-    await tick(20);
-    menuItems(wrapper)
-      .at(1)
-      .simulate('click');
-    await tick(20);
-    wrapper.update();
+    await openSettings(wrapper);
+    await selectMenuItem(wrapper, 1);
+
     toolbarCheck(wrapper).simulate('click');
     await tick(20);
 

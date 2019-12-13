@@ -9,12 +9,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { get } from 'lodash';
 import { AutocompleteProviderRegister } from 'src/plugins/data/public';
+import { i18n as i18nFormatter } from '@kbn/i18n';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { UptimeApp, UptimeAppProps } from '../../../uptime_app';
 import { getIntegratedAppAvailability } from './capabilities_adapter';
 import { INTEGRATED_SOLUTIONS, PLUGIN } from '../../../../common/constants';
 import { getTelemetryMonitorPageLogger, getTelemetryOverviewPageLogger } from '../telemetry';
-import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
 import { UMFrameworkAdapter, BootstrapUptimeApp } from '../../lib';
 import { createApolloClient } from './apollo_client_adapter';
 
@@ -52,12 +52,20 @@ export const getKibanaFrameworkAdapter = (
     logMonitorPageLoad: getTelemetryMonitorPageLogger('true', basePath.get()),
     logOverviewPageLoad: getTelemetryOverviewPageLogger('true', basePath.get()),
     renderGlobalHelpControls: () =>
-      setHelpExtension((element: HTMLElement) => {
-        ReactDOM.render(
-          renderUptimeKibanaGlobalHelp(ELASTIC_WEBSITE_URL, DOC_LINK_VERSION),
-          element
-        );
-        return () => ReactDOM.unmountComponentAtNode(element);
+      setHelpExtension({
+        appName: i18nFormatter.translate('xpack.uptime.header.appName', {
+          defaultMessage: 'Uptime',
+        }),
+        links: [
+          {
+            linkType: 'documentation',
+            href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/xpack-uptime.html`,
+          },
+          {
+            linkType: 'discuss',
+            href: 'https://discuss.elastic.co/c/uptime',
+          },
+        ],
       }),
     routerBasename: basePath.prepend(PLUGIN.ROUTER_BASE_NAME),
     setBadge,

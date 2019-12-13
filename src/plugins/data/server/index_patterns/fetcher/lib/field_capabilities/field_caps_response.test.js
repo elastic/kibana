@@ -24,7 +24,7 @@ import sinon from 'sinon';
 import * as shouldReadFieldFromDocValuesNS from './should_read_field_from_doc_values';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
 
-import { getKbnFieldType } from '../../../../../../data/common';
+import { getKbnFieldType } from '../../../../../../data/server';
 import { readFieldCapsResponse } from './field_caps_response';
 import esResponse from './__fixtures__/es_field_caps_response.json';
 
@@ -142,6 +142,13 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         const fields = readFieldCapsResponse(esResponse);
         const child = fields.find(f => f.name === 'nested_object_parent.child');
         expect(child).toHaveProperty('subType', { nested: { path: 'nested_object_parent' } });
+      });
+
+      it('returns nested sub-fields as non-aggregatable', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        // Normally a keyword field would be aggregatable, but the fact that it is nested overrides that
+        const child = fields.find(f => f.name === 'nested_object_parent.child.keyword');
+        expect(child).toHaveProperty('aggregatable', false);
       });
 
       it('handles fields that are both nested and multi', () => {

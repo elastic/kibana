@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 
-export const isContainerResizing = () => {
+export const useIsContainerResizing = () => {
   const [isResizing, setIsResizing] = useState(false);
 
   return {

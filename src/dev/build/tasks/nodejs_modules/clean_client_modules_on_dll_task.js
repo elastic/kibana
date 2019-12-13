@@ -66,10 +66,38 @@ export const CleanClientModulesOnDLLTask = {
     // side code entries that were provided
     const serverDependencies = await getDependencies(baseDir, serverEntries);
 
+    // This fulfill a particular exceptional case where
+    // we need to keep loading a file from a node_module
+    // only used in the front-end like we do when using the file-loader
+    // in https://github.com/elastic/kibana/blob/master/x-pack/legacy/plugins/maps/public/connected_components/map/mb/view.js
+    //
+    // manual list of exception modules
+    const manualExceptionModules = [
+      'mapbox-gl'
+    ];
+
+    // consider the top modules as exceptions as the entry points
+    // to look for other exceptions dependent on that one
+    const manualExceptionEntries = [
+      ...manualExceptionModules.map(module => `${baseDir}/node_modules/${module}`)
+    ];
+
+    // dependencies for declared exception modules
+    const manualExceptionModulesDependencies = await getDependencies(baseDir, [
+      ...manualExceptionEntries
+    ]);
+
+    // final list of manual exceptions to add
+    const manualExceptions = [
+      ...manualExceptionModules,
+      ...manualExceptionModulesDependencies
+    ];
+
     // Consider this as our whiteList for the modules we can't delete
     const whiteListedModules = [
       ...serverDependencies,
-      ...kbnWebpackLoaders
+      ...kbnWebpackLoaders,
+      ...manualExceptions
     ];
 
     // Resolve the client vendors dll manifest path

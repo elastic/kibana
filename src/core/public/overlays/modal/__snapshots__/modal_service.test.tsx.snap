@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ModalService ModalRef#close() can be called multiple times on the same ModalRef 1`] = `
+Array [
+  Array [
+    <div />,
+  ],
+]
+`;
+
+exports[`ModalService openModal() renders a modal to the DOM 1`] = `
+Array [
+  Array [
+    <EuiOverlayMask>
+      <mockConstructor>
+        <EuiModal
+          maxWidth={true}
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiModal>
+      </mockConstructor>
+    </EuiOverlayMask>,
+    <div />,
+  ],
+]
+`;
+
+exports[`ModalService openModal() renders a modal to the DOM 2`] = `"<div data-focus-guard=\\"true\\" tabindex=\\"0\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div><div data-focus-guard=\\"true\\" tabindex=\\"1\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div><div data-focus-lock-disabled=\\"false\\"><div class=\\"euiModal euiModal--maxWidth-default\\" tabindex=\\"0\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiModal__closeIcon\\" type=\\"button\\" aria-label=\\"Closes this modal window\\"><svg width=\\"16\\" height=\\"16\\" viewBox=\\"0 0 16 16\\" xmlns=\\"http://www.w3.org/2000/svg\\" class=\\"euiIcon euiIcon--medium euiIcon-isLoading euiButtonIcon__icon\\" focusable=\\"false\\" aria-hidden=\\"true\\"></svg></button><div class=\\"euiModal__flex\\"><div class=\\"kbnOverlayMountWrapper\\"><span>Modal content</span></div></div></div></div><div data-focus-guard=\\"true\\" tabindex=\\"0\\" style=\\"width: 1px; height: 0px; padding: 0px; overflow: hidden; position: fixed; top: 1px; left: 1px;\\"></div>"`;
+
+exports[`ModalService openModal() with a currently active modal replaces the current modal with a new one 1`] = `
+Array [
+  Array [
+    <EuiOverlayMask>
+      <mockConstructor>
+        <EuiModal
+          maxWidth={true}
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiModal>
+      </mockConstructor>
+    </EuiOverlayMask>,
+    <div />,
+  ],
+  Array [
+    <EuiOverlayMask>
+      <mockConstructor>
+        <EuiModal
+          maxWidth={true}
+          onClose={[Function]}
+        >
+          <MountWrapper
+            className="kbnOverlayMountWrapper"
+            mount={[Function]}
+          />
+        </EuiModal>
+      </mockConstructor>
+    </EuiOverlayMask>,
+    <div />,
+  ],
+]
+`;

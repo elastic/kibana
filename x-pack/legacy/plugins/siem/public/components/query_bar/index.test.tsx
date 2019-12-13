@@ -84,6 +84,7 @@ describe('QueryBar ', () => {
     } = wrapper.find(SearchBar).props();
 
     expect(searchBarProps).toEqual({
+      dataTestSubj: undefined,
       dateRangeFrom: 'now-24h',
       dateRangeTo: 'now',
       filters: [],
@@ -178,6 +179,7 @@ describe('QueryBar ', () => {
           title: 'filebeat-*,auditbeat-*,packetbeat-*',
         },
       ],
+      isLoading: false,
       isRefreshPaused: true,
       query: {
         language: 'kuery',

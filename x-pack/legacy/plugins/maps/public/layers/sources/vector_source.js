@@ -48,6 +48,10 @@ export class AbstractVectorSource extends AbstractSource {
     }));
   }
 
+  createField() {
+    throw new Error(`Should implemement ${this.constructor.type} ${this}`);
+  }
+
   _createDefaultLayerDescriptor(options, mapColors) {
     return VectorLayer.createDescriptor(
       {
@@ -55,6 +59,10 @@ export class AbstractVectorSource extends AbstractSource {
         ...options
       },
       mapColors);
+  }
+
+  _getTooltipPropertyNames()  {
+    return this._tooltipFields.map(field => field.getName());
   }
 
   createDefaultLayer(options, mapColors) {
@@ -68,6 +76,10 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   isFilterByMapBounds() {
+    return false;
+  }
+
+  isFilterByMapBoundsConfigurable() {
     return false;
   }
 
@@ -131,4 +143,5 @@ export class AbstractVectorSource extends AbstractSource {
   getSourceTooltipContent(/* sourceDataRequest */) {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
+
 }

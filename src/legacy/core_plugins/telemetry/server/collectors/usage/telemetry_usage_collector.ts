@@ -25,19 +25,12 @@ import { dirname, join } from 'path';
 // look for telemetry.yml in the same places we expect kibana.yml
 import { ensureDeepObject } from './ensure_deep_object';
 import { getXpackConfigWithDeprecated } from '../../../common/get_xpack_config_with_deprecated';
+import { UsageCollectionSetup } from '../../../../../../plugins/usage_collection/server';
 
 /**
  * The maximum file size before we ignore it (note: this limit is arbitrary).
  */
 export const MAX_FILE_SIZE = 10 * 1024; // 10 KB
-
-export interface KibanaHapiServer extends Server {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: (collector: object) => any;
-    };
-  };
-}
 
 /**
  * Determine if the supplied `path` is readable.
@@ -83,19 +76,11 @@ export async function readTelemetryFile(path: string): Promise<object | undefine
   return undefined;
 }
 
-/**
- * Create a usage collector that provides the `telemetry.yml` data as a
- * `static_telemetry` object.
- *
- * Loading of the file is done lazily and on-demand. This avoids hanging
- * onto the data in memory unnecessarily, as well as allows it to be
- * updated out-of-process without having to restart Kibana.
- *
- * @param server The Kibana server instance.
- * @return `UsageCollector` that provides the `static_telemetry` described.
- */
-export function createTelemetryUsageCollector(server: KibanaHapiServer) {
-  return server.usage.collectorSet.makeUsageCollector({
+export function createTelemetryUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  server: Server
+) {
+  return usageCollection.makeUsageCollector({
     type: 'static_telemetry',
     isReady: () => true,
     fetch: async () => {
@@ -105,4 +90,12 @@ export function createTelemetryUsageCollector(server: KibanaHapiServer) {
       return await readTelemetryFile(telemetryPath);
     },
   });
+}
+
+export function registerTelemetryUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  server: Server
+) {
+  const collector = createTelemetryUsageCollector(usageCollection, server);
+  usageCollection.registerCollector(collector);
 }

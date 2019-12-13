@@ -6,31 +6,21 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
-import 'jest-styled-components';
 
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 
 import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
 
-import { StatefulFieldsBrowser } from '.';
-// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* eslint-disable no-console */
-const originalError = console.error;
-describe('StatefulFieldsBrowser', () => {
-  beforeAll(() => {
-    console.error = jest.fn();
-  });
+import { StatefulFieldsBrowserComponent } from '.';
 
-  afterAll(() => {
-    console.error = originalError;
-  });
+describe('StatefulFieldsBrowser', () => {
   const timelineId = 'test';
 
   test('it renders the Fields button, which displays the fields browser on click', () => {
     const wrapper = mount(
       <TestProviders>
-        <StatefulFieldsBrowser
+        <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
@@ -54,7 +44,7 @@ describe('StatefulFieldsBrowser', () => {
     test('it does NOT render the fields browser until the Fields button is clicked', () => {
       const wrapper = mount(
         <TestProviders>
-          <StatefulFieldsBrowser
+          <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
@@ -72,7 +62,7 @@ describe('StatefulFieldsBrowser', () => {
     test('it renders the fields browser when the Fields button is clicked', () => {
       const wrapper = mount(
         <TestProviders>
-          <StatefulFieldsBrowser
+          <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
@@ -100,7 +90,7 @@ describe('StatefulFieldsBrowser', () => {
     test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', () => {
       const wrapper = mount(
         <TestProviders>
-          <StatefulFieldsBrowser
+          <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
@@ -131,7 +121,7 @@ describe('StatefulFieldsBrowser', () => {
     test('it updates the selectedCategoryId state according to most fields returned', () => {
       const wrapper = mount(
         <TestProviders>
-          <StatefulFieldsBrowser
+          <StatefulFieldsBrowserComponent
             browserFields={mockBrowserFields}
             columnHeaders={[]}
             height={FIELD_BROWSER_HEIGHT}
@@ -168,7 +158,7 @@ describe('StatefulFieldsBrowser', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <StatefulFieldsBrowser
+        <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
@@ -194,7 +184,7 @@ describe('StatefulFieldsBrowser', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <StatefulFieldsBrowser
+        <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}
@@ -220,7 +210,7 @@ describe('StatefulFieldsBrowser', () => {
 
     const wrapper = mount(
       <TestProviders>
-        <StatefulFieldsBrowser
+        <StatefulFieldsBrowserComponent
           browserFields={mockBrowserFields}
           columnHeaders={[]}
           height={FIELD_BROWSER_HEIGHT}

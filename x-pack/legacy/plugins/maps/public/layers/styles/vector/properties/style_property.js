@@ -10,4 +10,30 @@ export class AbstractStyleProperty {
     this._options = options;
     this._styleName = styleName;
   }
+
+  isDynamic() {
+    return false;
+  }
+
+  /**
+   * Is the style fully defined and usable? (e.g. for rendering, in legend UX, ...)
+   * Why? during editing, partially-completed descriptors may be added to the layer-descriptor
+   * e.g. dynamic-fields can have an incomplete state when the field is not yet selected from the drop-down
+   * @returns {boolean}
+   */
+  isComplete() {
+    return true;
+  }
+
+  getStyleName() {
+    return this._styleName;
+  }
+
+  getOptions() {
+    return this._options || {};
+  }
+
+  renderHeader() {
+    return null;
+  }
 }

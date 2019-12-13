@@ -19,58 +19,11 @@
 
 import { once } from 'lodash';
 
-import { wrapInI18nContext } from 'ui/i18n';
-
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-import { npStart } from 'ui/new_platform';
-import { FilterBar } from '../filter';
-import { IndexPatterns } from '../index_patterns/index_patterns';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 
 /** @internal */
-export const initLegacyModule = once((indexPatterns: IndexPatterns): void => {
-  uiModules
-    .get('app/kibana', ['react'])
-    .directive('filterBar', () => {
-      return {
-        restrict: 'E',
-        template: '',
-        compile: (elem: any) => {
-          const child = document.createElement('filter-bar-helper');
-
-          // Copy attributes to the child directive
-          for (const attr of elem[0].attributes) {
-            child.setAttribute(attr.name, attr.value);
-          }
-
-          child.setAttribute('ui-settings', 'uiSettings');
-          child.setAttribute('doc-links', 'docLinks');
-          child.setAttribute('plugin-data-start', 'pluginDataStart');
-
-          // Append helper directive
-          elem.append(child);
-
-          const linkFn = ($scope: any) => {
-            $scope.uiSettings = npStart.core.uiSettings;
-            $scope.docLinks = npStart.core.docLinks;
-            $scope.pluginDataStart = npStart.plugins.data;
-          };
-
-          return linkFn;
-        },
-      };
-    })
-    .directive('filterBarHelper', (reactDirective: any) => {
-      return reactDirective(wrapInI18nContext(FilterBar), [
-        ['uiSettings', { watchDepth: 'reference' }],
-        ['docLinks', { watchDepth: 'reference' }],
-        ['onFiltersUpdated', { watchDepth: 'reference' }],
-        ['indexPatterns', { watchDepth: 'collection' }],
-        ['filters', { watchDepth: 'collection' }],
-        ['className', { watchDepth: 'reference' }],
-        ['pluginDataStart', { watchDepth: 'reference' }],
-      ]);
-    });
-
+export const initLegacyModule = once((indexPatterns: IndexPatternsContract): void => {
   uiModules.get('kibana/index_patterns').value('indexPatterns', indexPatterns);
 });

@@ -19,18 +19,16 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { getServices } from '../../../kibana_services';
 
-const { SearchSource } = getServices();
-export function fetchAnchorProvider(indexPatterns) {
+export function fetchAnchorProvider(indexPatterns, searchSource) {
   return async function fetchAnchor(
     indexPatternId,
     anchorId,
     sort
   ) {
     const indexPattern = await indexPatterns.get(indexPatternId);
-    const searchSource = new SearchSource()
-      .setParent(false)
+    searchSource
+      .setParent(undefined)
       .setField('index', indexPattern)
       .setField('version', true)
       .setField('size', 1)

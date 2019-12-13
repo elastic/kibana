@@ -36,6 +36,12 @@ function deleteCalendar(callWithRequest, calendarId) {
   return cal.deleteCalendar(calendarId);
 }
 
+function getCalendarsByIds(callWithRequest, calendarIds) {
+  const cal = new CalendarManager(callWithRequest);
+  return cal.getCalendarsByIds(calendarIds);
+}
+
+
 export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
 
   route({
@@ -53,12 +59,17 @@ export function calendars({ commonRouteConfig, elasticsearchPlugin, route }) {
 
   route({
     method: 'GET',
-    path: '/api/ml/calendars/{calendarId}',
+    path: '/api/ml/calendars/{calendarIds}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(elasticsearchPlugin, request);
-      const calendarId = request.params.calendarId;
-      return getCalendar(callWithRequest, calendarId)
-        .catch(resp => wrapError(resp));
+      const calendarIds = request.params.calendarIds.split(',');
+      if (calendarIds.length === 1) {
+        return getCalendar(callWithRequest, calendarIds[0])
+          .catch(resp => wrapError(resp));
+      } else {
+        return getCalendarsByIds(callWithRequest, calendarIds)
+          .catch(resp => wrapError(resp));
+      }
     },
     config: {
       ...commonRouteConfig

@@ -33,9 +33,10 @@ import {
 
 import { DEFAULT_CONVERTER_COLOR } from '../../../../../../../../plugins/data/public';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
-export class ColorFormatEditorComponent extends DefaultFormatEditor {
+export class ColorFormatEditor extends DefaultFormatEditor {
   constructor(props) {
     super(props);
     this.onChange({
@@ -73,7 +74,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
   }
 
   render() {
-    const { formatParams, fieldType, intl } = this.props;
+    const { formatParams, fieldType } = this.props;
 
     const items = formatParams.colors && formatParams.colors.length && formatParams.colors.map((color, index) => {
       return {
@@ -85,8 +86,10 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
     const columns = [
       fieldType === 'string' ? {
         field: 'regex',
-        name: intl.formatMessage(
-          { id: 'common.ui.fieldEditor.color.patternLabel', defaultMessage: 'Pattern (regular expression)' }),
+        name: <FormattedMessage
+          id="common.ui.fieldEditor.color.patternLabel"
+          defaultMessage="Pattern (regular expression)"
+        />,
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -101,7 +104,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
         }
       } : {
         field: 'range',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.rangeLabel', defaultMessage: 'Range (min:max)' }),
+        name: <FormattedMessage id="common.ui.fieldEditor.color.rangeLabel" defaultMessage="Range (min:max)"/>,
         render: (value, item) => {
           return (
             <EuiFieldText
@@ -117,7 +120,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
       },
       {
         field: 'text',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.textColorLabel', defaultMessage: 'Text color' }),
+        name: <FormattedMessage id="common.ui.fieldEditor.color.textColorLabel" defaultMessage="Text color" />,
         render: (color, item) => {
           return (
             <EuiColorPicker
@@ -133,7 +136,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
       },
       {
         field: 'background',
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.backgroundLabel', defaultMessage: 'Background color' }),
+        name: <FormattedMessage id="common.ui.fieldEditor.color.backgroundLabel" defaultMessage="Background color" />,
         render: (color, item) => {
           return (
             <EuiColorPicker
@@ -148,7 +151,7 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
         }
       },
       {
-        name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.exampleLabel', defaultMessage: 'Example' }),
+        name: <FormattedMessage id="common.ui.fieldEditor.color.exampleLabel" defaultMessage="Example" />,
         render: (item) => {
           return (
             <div
@@ -165,9 +168,8 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
       {
         actions: [
           {
-            name: intl.formatMessage({ id: 'common.ui.fieldEditor.color.deleteAria', defaultMessage: 'Delete' }),
-            description: intl.formatMessage(
-              { id: 'common.ui.fieldEditor.color.deleteTitle', defaultMessage: 'Delete color format' }),
+            name: i18n.translate('common.ui.fieldEditor.color.deleteAria', { defaultMessage: 'Delete' }),
+            description: i18n.translate('common.ui.fieldEditor.color.deleteTitle', { defaultMessage: 'Delete color format' }),
             onClick: (item) => {
               this.removeColor(item.index);
             },
@@ -200,5 +202,4 @@ export class ColorFormatEditorComponent extends DefaultFormatEditor {
   }
 }
 
-export const ColorFormatEditor = injectI18n(ColorFormatEditorComponent);
 ColorFormatEditor.formatId = 'color';

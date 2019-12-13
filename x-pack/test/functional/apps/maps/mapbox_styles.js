@@ -15,7 +15,7 @@ export const MAPBOX_STYLES = {
       'all',
       [
         '==',
-        ['get', '__kbn__isvisible__'],
+        ['get', '__kbn_isvisibleduetojoin__'],
         true
       ],
       [
@@ -89,7 +89,7 @@ export const MAPBOX_STYLES = {
       'all',
       [
         '==',
-        ['get', '__kbn__isvisible__'],
+        ['get', '__kbn_isvisibleduetojoin__'],
         true
       ],
       [
@@ -160,7 +160,7 @@ export const MAPBOX_STYLES = {
       'all',
       [
         '==',
-        ['get', '__kbn__isvisible__'],
+        ['get', '__kbn_isvisibleduetojoin__'],
         true
       ],
       [

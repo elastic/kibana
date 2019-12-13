@@ -11,7 +11,7 @@ import { registerHelpers } from './stats.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const {
     createIndex,

@@ -11,7 +11,7 @@ import { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
 
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common']);
 

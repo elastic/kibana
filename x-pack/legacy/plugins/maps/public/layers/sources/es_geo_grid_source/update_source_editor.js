@@ -8,12 +8,12 @@ import React, { Fragment, Component } from 'react';
 
 import { RENDER_AS } from './render_as';
 import { MetricsEditor } from '../../../components/metrics_editor';
-import { METRIC_TYPE } from '../../../../common/constants';
 import { indexPatternService } from '../../../kibana_services';
 import { ResolutionEditor } from './resolution_editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { isMetricCountable } from '../../util/is_metric_countable';
 
 export class UpdateSourceEditor extends Component {
   state = {
@@ -62,23 +62,23 @@ export class UpdateSourceEditor extends Component {
     this.props.onChange({ propName: 'resolution', value: e });
   };
 
-  _renderMetricsEditor() {
+  _renderMetricsPanel() {
     const metricsFilter =
       this.props.renderAs === RENDER_AS.HEATMAP
         ? metric => {
           //these are countable metrics, where blending heatmap color blobs make sense
-          return [METRIC_TYPE.COUNT, METRIC_TYPE.SUM, METRIC_TYPE.UNIQUE_COUNT].includes(metric.value);
+          return isMetricCountable(metric.value);
         }
         : null;
     const allowMultipleMetrics = this.props.renderAs !== RENDER_AS.HEATMAP;
     return (
-      <div>
-        <EuiTitle size="xxs">
+      <EuiPanel>
+        <EuiTitle size="xs">
           <h6>
             <FormattedMessage id="xpack.maps.source.esGrid.metricsLabel" defaultMessage="Metrics" />
           </h6>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <MetricsEditor
           allowMultipleMetrics={allowMultipleMetrics}
           metricsFilter={metricsFilter}
@@ -86,16 +86,27 @@ export class UpdateSourceEditor extends Component {
           metrics={this.props.metrics}
           onChange={this._onMetricsChange}
         />
-      </div>
+      </EuiPanel>
     );
   }
 
   render() {
     return (
       <Fragment>
-        <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange} />
-        <EuiSpacer size="m" />
-        {this._renderMetricsEditor()}
+        {this._renderMetricsPanel()}
+        <EuiSpacer size="s" />
+
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h6>
+              <FormattedMessage id="xpack.maps.source.esGrid.geoTileGridLabel" defaultMessage="Grid parameters" />
+            </h6>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <ResolutionEditor resolution={this.props.resolution} onChange={this._onResolutionChange} />
+        </EuiPanel>
+        <EuiSpacer size="s" />
+
       </Fragment>
     );
   }

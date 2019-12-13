@@ -18,22 +18,21 @@
  */
 
 import _, { forEach } from 'lodash';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { PersistedState } from 'ui/persisted_state';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { buildPipeline } from 'ui/visualize/loader/pipeline_helpers';
-import { SavedObject } from 'ui/saved_objects/saved_object';
+import { SavedObject } from 'ui/saved_objects/types';
 import { Vis } from 'ui/vis';
-import { SearchSource } from 'ui/courier';
 import { queryGeohashBounds } from 'ui/visualize/loader/utils';
 import { getTableAggs } from 'ui/visualize/loader/pipeline_helpers/utilities';
 import { AppState } from 'ui/state_management/app_state';
 import { npStart } from 'ui/new_platform';
-import { IExpressionLoaderParams } from '../../../../expressions/public/np_ready/public/types';
-import { start as expressions } from '../../../../expressions/public/legacy';
+import { IExpressionLoaderParams } from 'src/plugins/expressions/public';
+import { SearchSourceContract } from '../../../../../ui/public/courier';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
+  IIndexPattern,
   TimeRange,
   Query,
   onlyDisabledFiltersChanged,
@@ -54,7 +53,7 @@ const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<
 export interface VisSavedObject extends SavedObject {
   vis: Vis;
   description?: string;
-  searchSource: SearchSource;
+  searchSource: SearchSourceContract;
   title: string;
   uiStateJSON?: string;
   destroy: () => void;
@@ -62,7 +61,7 @@ export interface VisSavedObject extends SavedObject {
 
 export interface VisualizeEmbeddableConfiguration {
   savedVisualization: VisSavedObject;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   editUrl: string;
   editable: boolean;
   appState?: AppState;
@@ -82,12 +81,12 @@ export interface VisualizeInput extends EmbeddableInput {
 
 export interface VisualizeOutput extends EmbeddableOutput {
   editUrl: string;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   savedObjectId: string;
   visTypeName: string;
 }
 
-type ExpressionLoader = InstanceType<typeof expressions.ExpressionLoader>;
+type ExpressionLoader = InstanceType<typeof npStart.plugins.expressions.ExpressionLoader>;
 
 export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOutput> {
   private handler?: ExpressionLoader;
@@ -149,8 +148,6 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     }
 
     this.vis._setUiState(this.uiState);
-
-    this.appState = appState;
 
     this.subscriptions.push(
       Rx.merge(this.getOutput$(), this.getInput$()).subscribe(() => {
@@ -289,7 +286,7 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     domNode.appendChild(div);
     this.domNode = div;
 
-    this.handler = new expressions.ExpressionLoader(this.domNode);
+    this.handler = new npStart.plugins.expressions.ExpressionLoader(this.domNode);
 
     this.subscriptions.push(
       this.handler.events$.subscribe(async event => {
@@ -378,6 +375,8 @@ export class VisualizeEmbeddable extends Embeddable<VisualizeInput, VisualizeOut
     if (this.handler) {
       this.handler.update(this.expression, expressionParams);
     }
+
+    this.vis.emit('apply');
   }
 
   private handleVisUpdate = async () => {

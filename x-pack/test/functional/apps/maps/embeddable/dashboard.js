@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }) {
 
     it('should pass index patterns to container', async () => {
       const indexPatterns = await filterBar.getIndexPatterns();
-      expect(indexPatterns).to.equal('geo_shapes*,meta_for_geo_shapes*,logstash-*');
+      expect(indexPatterns).to.equal('meta_for_geo_shapes*,logstash-*');
     });
 
     it('should populate inspector with requests for map embeddable', async () => {

@@ -18,10 +18,9 @@
  */
 
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from 'src/plugins/embeddable/public';
-import { StaticIndexPattern } from '../kibana_services';
 import { SavedSearch } from '../types';
 import { SortOrder } from '../angular/doc_table/components/table_header/helpers';
-import { esFilters, TimeRange, Query } from '../../../../../../plugins/data/public';
+import { esFilters, IIndexPattern, TimeRange, Query } from '../../../../../../plugins/data/public';
 
 export interface SearchInput extends EmbeddableInput {
   timeRange: TimeRange;
@@ -34,7 +33,7 @@ export interface SearchInput extends EmbeddableInput {
 
 export interface SearchOutput extends EmbeddableOutput {
   editUrl: string;
-  indexPatterns?: StaticIndexPattern[];
+  indexPatterns?: IIndexPattern[];
   editable: boolean;
 }
 

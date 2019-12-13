@@ -19,18 +19,16 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import chrome from '../chrome';
+import { npStart } from 'ui/new_platform';
 import { parseInterval } from '../utils/parse_interval';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
 } from './calc_es_interval';
-import { fieldFormats } from '../registry/field_formats';
+import { FIELD_FORMAT_IDS } from '../../../../plugins/data/public';
 
-const config = chrome.getUiSettingsClient();
-
-const getConfig = (...args) => config.get(...args);
+const getConfig = (...args) => npStart.core.uiSettings.get(...args);
 
 function isValidMoment(m) {
   return m && ('isValid' in m) && m.isValid();
@@ -237,14 +235,14 @@ TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
   function readInterval() {
     const interval = self._i;
     if (moment.isDuration(interval)) return interval;
-    return calcAutoIntervalNear(config.get('histogram:barTarget'), Number(duration));
+    return calcAutoIntervalNear(getConfig('histogram:barTarget'), Number(duration));
   }
 
   // check to see if the interval should be scaled, and scale it if so
   function maybeScaleInterval(interval) {
     if (!self.hasBounds()) return interval;
 
-    const maxLength = config.get('histogram:maxBars');
+    const maxLength = getConfig('histogram:maxBars');
     const approxLen = duration / interval;
     let scaled;
 
@@ -298,7 +296,7 @@ TimeBuckets.prototype.getInterval = function (useNormalizedEsInterval = true) {
  */
 TimeBuckets.prototype.getScaledDateFormat = function () {
   const interval = this.getInterval();
-  const rules = config.get('dateFormat:scaled');
+  const rules = getConfig('dateFormat:scaled');
 
   for (let i = rules.length - 1; i >= 0; i--) {
     const rule = rules[i];
@@ -307,11 +305,13 @@ TimeBuckets.prototype.getScaledDateFormat = function () {
     }
   }
 
-  return config.get('dateFormat');
+  return getConfig('dateFormat');
 };
 
 TimeBuckets.prototype.getScaledDateFormatter = function () {
-  const DateFieldFormat = fieldFormats.getType('date');
+  const fieldFormats = npStart.plugins.data.fieldFormats;
+  const DateFieldFormat = fieldFormats.getType(FIELD_FORMAT_IDS.DATE);
+
   return new DateFieldFormat({
     pattern: this.getScaledDateFormat()
   }, getConfig);

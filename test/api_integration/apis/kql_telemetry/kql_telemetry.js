@@ -24,7 +24,7 @@ import { get } from 'lodash';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   describe('telemetry API', () => {
     before(() => esArchiver.load('saved_objects/basic'));

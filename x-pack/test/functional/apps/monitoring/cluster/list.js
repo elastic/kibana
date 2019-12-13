@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/multicluster', {
-          from: '2017-08-15 21:00:00.000',
-          to: '2017-08-16 00:00:00.000',
+          from: 'Aug 15, 2017 @ 21:00:00.000',
+          to: 'Aug 16, 2017 @ 00:00:00.000',
         });
 
         await clusterList.assertDefaults();
@@ -76,8 +76,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/multi-basic', {
-          from: '2017-09-07 20:12:04.011',
-          to: '2017-09-07 20:18:55.733',
+          from: 'Sep 7, 2017 @ 20:12:04.011',
+          to: 'Sep 7, 2017 @ 20:18:55.733',
         });
 
         await clusterList.assertDefaults();

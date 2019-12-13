@@ -49,7 +49,7 @@ function mapDispatchToProps(dispatch) {
 }
 
 class GuideSandboxComponent extends Component {
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.openSandbox();
   }
 

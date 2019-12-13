@@ -11,7 +11,7 @@ import moment from 'moment';
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const randomness = getService('randomness');
-  const es = getService('es');
+  const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
   describe('update_beat', () => {

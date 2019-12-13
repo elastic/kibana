@@ -17,34 +17,29 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import { IInjector } from 'ui/chrome';
-
-// @ts-ignore
-import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter';
+import moment from 'moment';
+import { Subscription } from 'rxjs';
 
 import {
   AppStateClass as TAppStateClass,
   AppState as TAppState,
-} from 'ui/state_management/app_state';
-
-import { KbnUrl } from 'ui/url/kbn_url';
-import { TimeRange, Query } from 'src/plugins/data/public';
-import { IndexPattern } from 'ui/index_patterns';
-import { IPrivate } from 'ui/private';
-import { StaticIndexPattern, SavedQuery } from 'plugins/data';
-import moment from 'moment';
-import { Subscription } from 'rxjs';
+  IInjector,
+  KbnUrl,
+} from './legacy_imports';
 
 import { ViewMode } from '../../../embeddable_api/public/np_ready/public';
 import { SavedObjectDashboard } from './saved_dashboard/saved_dashboard';
 import { DashboardAppState, SavedDashboardPanel, ConfirmModalFn } from './types';
-import { esFilters } from '../../../../../../src/plugins/data/public';
+import {
+  IIndexPattern,
+  TimeRange,
+  Query,
+  esFilters,
+  SavedQuery,
+} from '../../../../../../src/plugins/data/public';
 
 import { DashboardAppController } from './dashboard_app_controller';
+import { RenderDeps } from './application';
 
 export interface DashboardAppScope extends ng.IScope {
   dash: SavedObjectDashboard;
@@ -64,7 +59,7 @@ export interface DashboardAppScope extends ng.IScope {
   savedQuery?: SavedQuery;
   refreshInterval: any;
   panels: SavedDashboardPanel[];
-  indexPatterns: StaticIndexPattern[];
+  indexPatterns: IIndexPattern[];
   $evalAsync: any;
   dashboardViewMode: ViewMode;
   expandedPanel?: string;
@@ -91,54 +86,41 @@ export interface DashboardAppScope extends ng.IScope {
   kbnTopNav: any;
   enterEditMode: () => void;
   timefilterSubscriptions$: Subscription;
+  isVisible: boolean;
 }
 
-const app = uiModules.get('app/dashboard', ['elasticsearch', 'ngRoute', 'react', 'kibana/config']);
+export function initDashboardAppDirective(app: any, deps: RenderDeps) {
+  app.directive('dashboardApp', function($injector: IInjector) {
+    const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
+    const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
+    const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
+    const config = deps.uiSettings;
 
-app.directive('dashboardApp', function($injector: IInjector) {
-  const AppState = $injector.get<TAppStateClass<DashboardAppState>>('AppState');
-  const kbnUrl = $injector.get<KbnUrl>('kbnUrl');
-  const confirmModal = $injector.get<ConfirmModalFn>('confirmModal');
-  const config = $injector.get('config');
-
-  const Private = $injector.get<IPrivate>('Private');
-
-  const indexPatterns = $injector.get<{
-    getDefault: () => Promise<IndexPattern>;
-  }>('indexPatterns');
-
-  return {
-    restrict: 'E',
-    controllerAs: 'dashboardApp',
-    controller: (
-      $scope: DashboardAppScope,
-      $route: any,
-      $routeParams: {
-        id?: string;
-      },
-      getAppState: {
-        previouslyStored: () => TAppState | undefined;
-      },
-      dashboardConfig: {
-        getHideWriteControls: () => boolean;
-      },
-      localStorage: {
-        get: (prop: string) => unknown;
-      }
-    ) =>
-      new DashboardAppController({
-        $route,
-        $scope,
-        $routeParams,
-        getAppState,
-        dashboardConfig,
-        localStorage,
-        Private,
-        kbnUrl,
-        AppStateClass: AppState,
-        indexPatterns,
-        config,
-        confirmModal,
-      }),
-  };
-});
+    return {
+      restrict: 'E',
+      controllerAs: 'dashboardApp',
+      controller: (
+        $scope: DashboardAppScope,
+        $route: any,
+        $routeParams: {
+          id?: string;
+        },
+        getAppState: any,
+        globalState: any
+      ) =>
+        new DashboardAppController({
+          $route,
+          $scope,
+          $routeParams,
+          getAppState,
+          globalState,
+          kbnUrl,
+          AppStateClass: AppState,
+          config,
+          confirmModal,
+          indexPatterns: deps.npDataStart.indexPatterns,
+          ...deps,
+        }),
+    };
+  });
+}

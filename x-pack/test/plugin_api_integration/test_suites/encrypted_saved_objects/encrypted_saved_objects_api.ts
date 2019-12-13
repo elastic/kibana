@@ -9,7 +9,7 @@ import { SavedObject } from 'src/core/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function({ getService }: FtrProviderContext) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const randomness = getService('randomness');
   const supertest = getService('supertest');
 

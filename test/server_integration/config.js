@@ -29,9 +29,7 @@ export default async function ({ readConfigFile }) {
 
   return {
     services: {
-      es: commonConfig.get('services.es'),
-      esArchiver: commonConfig.get('services.esArchiver'),
-      retry: commonConfig.get('services.retry'),
+      ...commonConfig.get('services'),
       supertest: KibanaSupertestProvider,
       supertestWithoutAuth: KibanaSupertestWithoutAuthProvider,
       esSupertest: ElasticsearchSupertestProvider,

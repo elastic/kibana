@@ -23,7 +23,7 @@ describe('Boolean Format', () => {
   let boolean: Record<string, any>;
 
   beforeEach(() => {
-    boolean = new BoolFormat();
+    boolean = new BoolFormat({}, jest.fn());
   });
 
   [

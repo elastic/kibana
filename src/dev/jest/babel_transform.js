@@ -25,6 +25,7 @@ module.exports = babelJest.createTransformer({
       '@babel/preset-env': {
         // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
         useBuiltIns: false,
+        corejs: false
       }
     }]
   ],

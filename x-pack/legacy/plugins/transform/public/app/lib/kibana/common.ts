@@ -4,15 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
-import { buildEsQuery, getEsQueryConfig } from '@kbn/es-query';
-
-import { SavedObjectsClientContract, UiSettingsClientContract } from 'src/core/public';
-
-import {
-  IndexPattern as IndexPatternType,
-  IndexPatterns as IndexPatternsType,
-} from 'ui/index_patterns';
+import { SavedObjectsClientContract, IUiSettingsClient } from 'src/core/public';
+import { IndexPattern as IndexPatternType } from 'ui/index_patterns';
+import { esQuery, IndexPatternsContract } from '../../../../../../../../src/plugins/data/public';
 
 type IndexPatternId = string;
 type SavedSearchId = string;
@@ -26,7 +20,7 @@ export let refreshIndexPatterns: () => Promise<unknown>;
 
 export function loadIndexPatterns(
   savedObjectsClient: SavedObjectsClientContract,
-  indexPatterns: IndexPatternsType
+  indexPatterns: IndexPatternsContract
 ) {
   fullIndexPatterns = indexPatterns;
   return savedObjectsClient
@@ -59,7 +53,7 @@ export function loadIndexPatterns(
 type CombinedQuery = Record<'bool', any> | unknown;
 
 export function loadCurrentIndexPattern(
-  indexPatterns: IndexPatternsType,
+  indexPatterns: IndexPatternsContract,
   indexPatternId: IndexPatternId
 ) {
   fullIndexPatterns = indexPatterns;
@@ -76,7 +70,7 @@ export function loadCurrentSavedSearch(savedSearches: any, savedSearchId: SavedS
 export function createSearchItems(
   indexPattern: IndexPatternType | undefined,
   savedSearch: any,
-  config: UiSettingsClientContract
+  config: IUiSettingsClient
 ) {
   // query is only used by the data visualizer as it needs
   // a lucene query_string.
@@ -106,8 +100,8 @@ export function createSearchItems(
 
     const filters = fs.length ? fs : [];
 
-    const esQueryConfigs = getEsQueryConfig(config);
-    combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    const esQueryConfigs = esQuery.getEsQueryConfig(config);
+    combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
   }
 
   return {

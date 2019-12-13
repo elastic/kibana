@@ -30,7 +30,7 @@ describe('DroppableWrapper', () => {
         </TestProviders>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('DroppableWrapper'))).toMatchSnapshot();
     });
 
     test('it renders the children when a render prop is not provided', () => {

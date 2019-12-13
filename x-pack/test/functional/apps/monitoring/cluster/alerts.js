@@ -23,8 +23,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-yellow-platinum', {
-          from: '2017-08-29 17:23:47.528',
-          to: '2017-08-29 17:25:50.701',
+          from: 'Aug 29, 2017 @ 17:23:47.528',
+          to: 'Aug 29, 2017 @ 17:25:50.701',
         });
 
         // ensure cluster alerts are shown on overview
@@ -51,8 +51,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-yellow-platinum--with-10-alerts', {
-          from: '2017-08-29 17:23:47.528',
-          to: '2017-08-29 17:25:50.701',
+          from: 'Aug 29, 2017 @ 17:23:47.528',
+          to: 'Aug 29, 2017 @ 17:25:50.701',
         });
 
         // ensure cluster alerts are shown on overview
@@ -166,8 +166,8 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup('monitoring/singlecluster-yellow-platinum', {
-          from: '2017-08-29 17:23:47.528',
-          to: '2017-08-29 17:25:50.701',
+          from: 'Aug 29, 2017 @ 17:23:47.528',
+          to: 'Aug 29, 2017 @ 17:25:50.701',
         });
 
         // ensure cluster alerts are shown on overview

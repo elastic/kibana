@@ -91,7 +91,7 @@ Array [
               <caption
                 aria-live="polite"
                 aria-relevant="text"
-                className="euiScreenReaderOnly"
+                className="euiScreenReaderOnly euiTableCaption"
                 role="status"
               >
                 <EuiDelayRender
@@ -366,7 +366,7 @@ Array [
             <caption
               aria-live="polite"
               aria-relevant="text"
-              className="euiScreenReaderOnly"
+              className="euiScreenReaderOnly euiTableCaption"
               role="status"
             >
               <EuiDelayRender

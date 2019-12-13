@@ -19,8 +19,8 @@ const TYPES = [
 /**
  * Fetches saved object counts by querying the .kibana index
  */
-export function getKibanaUsageCollector({ collectorSet, config }) {
-  return collectorSet.makeUsageCollector({
+export function getKibanaUsageCollector(usageCollection, config) {
+  return usageCollection.makeUsageCollector({
     type: KIBANA_USAGE_TYPE,
     isReady: () => true,
     async fetch(callCluster) {

@@ -19,7 +19,7 @@
 
 import path from 'path';
 import { format as formatUrl } from 'url';
-import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig } from '@kbn/test';
+import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { services } from './services';
 
 export default function () {
@@ -53,8 +53,8 @@ export default function () {
         '--status.allowAnonymous=true',
         '--optimize.enabled=true',
         `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
-        `--elasticsearch.username=${servers.elasticsearch.username}`,
-        `--elasticsearch.password=${servers.elasticsearch.password}`,
+        `--elasticsearch.username=${kibanaServerTestUser.username}`,
+        `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--kibana.disableWelcomeScreen=true`,
         '--telemetry.banner=false',
         `--server.maxPayloadBytes=1679958`,

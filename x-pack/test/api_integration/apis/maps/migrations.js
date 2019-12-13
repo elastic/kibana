@@ -42,7 +42,7 @@ export default function ({ getService }) {
           type: 'index-pattern'
         }
       ]);
-      expect(resp.body.migrationVersion).to.eql({ map: '7.5.0' });
+      expect(resp.body.migrationVersion).to.eql({ map: '7.6.0' });
       expect(resp.body.attributes.layerListJSON.includes('indexPatternRefName')).to.be(true);
     });
   });

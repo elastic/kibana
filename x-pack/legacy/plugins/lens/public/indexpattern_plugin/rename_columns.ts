@@ -9,7 +9,7 @@ import {
   ExpressionFunction,
   KibanaDatatable,
   KibanaDatatableColumn,
-} from 'src/legacy/core_plugins/interpreter/public';
+} from 'src/plugins/expressions/common';
 import { IndexPatternColumn } from './operations';
 
 interface RemapArgs {

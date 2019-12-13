@@ -21,7 +21,9 @@ export async function getApiIntegrationConfig({ readConfigFile }) {
       ...xPackFunctionalTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.security.session.idleTimeout=3600000', // 1 hour
         '--optimize.enabled=false',
+        '--xpack.endpoint.enabled=true',
       ],
     },
     esTestCluster: {

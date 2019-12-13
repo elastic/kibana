@@ -29,7 +29,7 @@ include::field-formatters/url-formatter.asciidoc[]
 
 Date fields support the `Date`, `Url`, and `String` formatters.
 
-The `Date` formatter enables you to choose the display format of date stamps using the http://moment.js[moment.js]
+The `Date` formatter enables you to choose the display format of date stamps using the https://momentjs.com/[moment.js]
 standard format definitions.
 
 include::field-formatters/string-formatter.asciidoc[]
@@ -65,7 +65,7 @@ the https://adamwdraper.github.io/Numeral-js/[numeral.js] standard format defini
 Scripted fields compute data on the fly from the data in your Elasticsearch indices. Scripted field data is shown on
 the Discover tab as part of the document data, and you can use scripted fields in your visualizations.
 Scripted field values are computed at query time so they aren't indexed and cannot be searched using Kibana's default
-query language. However they can be queried using Kibana's new <<kuery-query, experimental query language>>. Scripted 
+query language. However they can be queried using Kibana's new <<kuery-query, experimental query language>>. Scripted
 fields are also supported in the filter bar.
 
 WARNING: Computing data on the fly with scripted fields can be very resource intensive and can have a direct impact on

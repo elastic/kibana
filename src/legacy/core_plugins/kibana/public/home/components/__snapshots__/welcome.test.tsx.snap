@@ -157,13 +157,13 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
               target="_blank"
             >
               <FormattedMessage
-                defaultMessage="Privacy Policy."
+                defaultMessage="Privacy Statement."
                 id="kbn.home.dataManagementDisclaimerPrivacyLink"
                 values={Object {}}
               />
             </EuiLink>
             <FormattedMessage
-              defaultMessage=" To disable collection, "
+              defaultMessage=" To stop collection, "
               id="kbn.home.dataManagementDisableCollection"
               values={Object {}}
             />
@@ -171,7 +171,7 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
               href="#/management/kibana/settings"
             >
               <FormattedMessage
-                defaultMessage="click here."
+                defaultMessage="disable usage data here."
                 id="kbn.home.dataManagementDisableCollectionLink"
                 values={Object {}}
               />

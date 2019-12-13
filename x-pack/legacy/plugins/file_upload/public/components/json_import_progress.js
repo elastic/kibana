@@ -8,7 +8,7 @@ import React, { Fragment, Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle, EuiProgress, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import chrome from 'ui/chrome';
+import { basePath } from '../kibana_services';
 
 export class JsonImportProgress extends Component {
 
@@ -114,7 +114,7 @@ export class JsonImportProgress extends Component {
                 <a
                   data-test-subj="indexManagementNewIndexLink"
                   target="_blank"
-                  href={`${chrome.getBasePath()}/app/kibana#/
+                  href={`${basePath}/app/kibana#/
                       management/elasticsearch/index_management/indices/
                       filter/${indexName}`.replace(/\s/g, '')}
                 >

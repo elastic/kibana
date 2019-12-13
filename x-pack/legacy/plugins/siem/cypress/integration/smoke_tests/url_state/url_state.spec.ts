@@ -51,7 +51,7 @@ describe('url state', () => {
     );
   });
 
-  it.skip('sets the url state when start and end date are set', () => {
+  it('sets the url state when start and end date are set', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.url);
 
     cy.get(DATE_PICKER_START_DATE_POPOVER_BUTTON).click({ force: true });
@@ -64,7 +64,7 @@ describe('url state', () => {
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newStartTimeTyped}`
     );
 
-    cy.get(DATE_PICKER_APPLY_BUTTON).click({ force: true });
+    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: 5000 }).click();
 
     cy.get(DATE_PICKER_END_DATE_POPOVER_BUTTON).click({ force: true });
 
@@ -76,7 +76,7 @@ describe('url state', () => {
       `{selectall}{backspace}${ABSOLUTE_DATE_RANGE.newEndTimeTyped}`
     );
 
-    cy.get(DATE_PICKER_APPLY_BUTTON).click({ force: true });
+    cy.get(DATE_PICKER_APPLY_BUTTON, { timeout: 5000 }).click();
 
     cy.url().should(
       'include',
@@ -127,7 +127,7 @@ describe('url state', () => {
     );
   });
 
-  it.skip('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
+  it('sets the url state when timeline/global date pickers are unlinked and timeline start and end date are set', () => {
     loginAndWaitForPage(ABSOLUTE_DATE_RANGE.urlUnlinked);
 
     toggleTimelineVisibility();

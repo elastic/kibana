@@ -24,6 +24,7 @@ import {
   EuiForm,
   EuiSpacer,
   EuiIconTip,
+  EuiComboBoxOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -66,6 +67,9 @@ export function FieldEditor({
     if (currentField !== initialField) {
       setCurrentField(initialField);
     }
+    // this hook only updates on change of the prop
+    // it's meant to reset the internal state on changes outside of the component.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialField]);
 
   function updateField() {
@@ -221,7 +225,9 @@ export function FieldEditor({
                     }}
                     singleSelection={{ asPlainText: true }}
                     isClearable={false}
-                    options={toOptions(allFields, initialField)}
+                    options={
+                      toOptions(allFields, initialField) as Array<EuiComboBoxOptionProps<string>>
+                    }
                     selectedOptions={[
                       {
                         value: currentField.name,

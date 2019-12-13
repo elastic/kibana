@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { Field } from '../../common';
+import { IFieldType } from '../../../../plugins/data/public';
 
-export const stubFields: Field[] = [
+export const stubFields: IFieldType[] = [
   {
     name: 'machine.os',
     esTypes: ['text'],

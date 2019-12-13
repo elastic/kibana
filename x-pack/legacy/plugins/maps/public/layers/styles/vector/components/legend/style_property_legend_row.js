@@ -5,166 +5,49 @@
  */
 
 import _ from 'lodash';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import { styleOptionShapes, rangeShape } from '../style_option_shapes';
-import { VectorStyle } from '../../vector_style';
-import { ColorGradient } from '../../../components/color_gradient';
-import { CircleIcon } from './circle_icon';
+import { rangeShape } from '../style_option_shapes';
 import { getVectorStyleLabel } from '../get_vector_style_label';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { StyleLegendRow } from '../../../components/style_legend_row';
-
-function getLineWidthIcons() {
-  const defaultStyle = {
-    stroke: 'grey',
-    fill: 'none',
-    width: '12px',
-  };
-  return [
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '1px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '2px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '3px' }}/>,
-  ];
-}
-
-function getSymbolSizeIcons() {
-  const defaultStyle = {
-    stroke: 'grey',
-    strokeWidth: 'none',
-    fill: 'grey',
-  };
-  return [
-    <CircleIcon style={{ ...defaultStyle, width: '4px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, width: '8px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, width: '12px' }}/>,
-  ];
-}
-
-function renderHeaderWithIcons(icons) {
-  return (
-    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-      {
-        icons.map((icon, index) => {
-          const isLast = index === icons.length - 1;
-          let spacer;
-          if (!isLast) {
-            spacer = (
-              <EuiFlexItem>
-                <EuiHorizontalRule margin="xs" />
-              </EuiFlexItem>
-            );
-          }
-          return (
-            <Fragment key={index}>
-              <EuiFlexItem grow={false}>
-                {icon}
-              </EuiFlexItem>
-              {spacer}
-            </Fragment>
-          );
-        })
-      }
-    </EuiFlexGroup>
-  );
-}
 
 const EMPTY_VALUE = '';
 
 export class StylePropertyLegendRow extends Component {
 
-  state = {
-    label: '',
-    hasLoadedFieldFormatter: false,
-  }
-
-  componentDidMount() {
-    this._isMounted = true;
-    this._prevLabel = undefined;
-    this._fieldValueFormatter = undefined;
-    this._loadLabel();
-    this._loadFieldFormatter();
-  }
-
-  componentDidUpdate() {
-    // label could change so it needs to be loaded on update
-    this._loadLabel();
-  }
-
-  componentWillUnmount() {
-    this._isMounted = false;
-  }
-
-  async _loadFieldFormatter() {
-    this._fieldValueFormatter = await this.props.getFieldFormatter(this.props.options.field);
-    if (this._isMounted) {
-      this.setState({ hasLoadedFieldFormatter: true });
-    }
-  }
-
-  _loadLabel = async () => {
-    if (this._isStatic()) {
-      return;
-    }
-
-    // have to load label and then check for changes since field name stays constant while label may change
-    const label = await this.props.getFieldLabel(this.props.options.field.name);
-    if (this._prevLabel === label) {
-      return;
-    }
-
-    this._prevLabel = label;
-    if (this._isMounted) {
-      this.setState({ label });
-    }
-  }
-
-  _isStatic() {
-    return this.props.type === VectorStyle.STYLE_TYPE.STATIC ||
-        !this.props.options.field || !this.props.options.field.name;
-  }
-
   _formatValue = value => {
-    if (!this.state.hasLoadedFieldFormatter || !this._fieldValueFormatter || value === EMPTY_VALUE) {
+    if (!this.props.fieldFormatter || value === EMPTY_VALUE) {
       return value;
     }
 
-    return this._fieldValueFormatter(value);
+    return this.props.fieldFormatter(value);
   }
 
   render() {
-    const { name, options, range } = this.props;
-    if (this._isStatic()) {
-      return null;
-    }
+    const { range, style } = this.props;
 
-    let header;
-    if (options.color) {
-      header = <ColorGradient colorRampName={options.color}/>;
-    } else if (name === 'lineWidth') {
-      header = renderHeaderWithIcons(getLineWidthIcons());
-    } else if (name === 'iconSize') {
-      header = renderHeaderWithIcons(getSymbolSizeIcons());
-    }
+    const min = this._formatValue(_.get(range, 'min', EMPTY_VALUE));
+    const minLabel = this.props.style.isFieldMetaEnabled() && range && range.isMinOutsideStdRange ? `< ${min}` : min;
+
+    const max = this._formatValue(_.get(range, 'max', EMPTY_VALUE));
+    const maxLabel = this.props.style.isFieldMetaEnabled() && range && range.isMaxOutsideStdRange ? `> ${max}` : max;
 
     return (
       <StyleLegendRow
-        header={header}
-        minLabel={this._formatValue(_.get(range, 'min', EMPTY_VALUE))}
-        maxLabel={this._formatValue(_.get(range, 'max', EMPTY_VALUE))}
-        propertyLabel={getVectorStyleLabel(name)}
-        fieldLabel={this.state.label}
+        header={style.renderHeader()}
+        minLabel={minLabel}
+        maxLabel={maxLabel}
+        propertyLabel={getVectorStyleLabel(style.getStyleName())}
+        fieldLabel={this.props.label}
       />
     );
   }
 }
 
 StylePropertyLegendRow.propTypes = {
-  name: PropTypes.string.isRequired,
-  type: PropTypes.string,
-  options: PropTypes.oneOfType(styleOptionShapes).isRequired,
+  label: PropTypes.string,
+  fieldFormatter: PropTypes.func,
   range: rangeShape,
-  getFieldLabel: PropTypes.func.isRequired,
-  getFieldFormatter: PropTypes.func.isRequired,
+  style: PropTypes.object
 };

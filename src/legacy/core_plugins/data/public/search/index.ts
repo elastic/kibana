@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export * from './search_service';
 export * from './search_bar';

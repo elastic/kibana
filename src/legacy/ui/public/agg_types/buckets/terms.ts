@@ -19,17 +19,11 @@
 
 import chrome from 'ui/chrome';
 import { noop } from 'lodash';
-import { SearchSource } from 'ui/courier';
 import { i18n } from '@kbn/i18n';
-import { BucketAggType, BucketAggParam } from './_bucket_agg_type';
+import { SearchSource, getRequestInspectorStats, getResponseInspectorStats } from '../../courier';
+import { BucketAggType } from './_bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../../plugins/data/common';
-import { AggConfigOptions } from '../agg_config';
 import { IBucketAggConfig } from './_bucket_agg_type';
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../courier/utils/courier_inspector_utils';
 import { createFilterTerms } from './create_filter/terms';
 import { wrapWithInlineComp } from './inline_comp_wrapper';
 import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
@@ -39,10 +33,10 @@ import { OrderByParamEditor, aggFilter } from '../../vis/editors/default/control
 import { SizeParamEditor } from '../../vis/editors/default/controls/size';
 import { MissingBucketParamEditor } from '../../vis/editors/default/controls/missing_bucket';
 import { OtherBucketParamEditor } from '../../vis/editors/default/controls/other_bucket';
-import { ContentType } from '../../../../../plugins/data/common';
 import { AggConfigs } from '../agg_configs';
 
 import { Adapters } from '../../../../../plugins/inspector/public';
+import { ContentType, FieldFormat, KBN_FIELD_TYPES } from '../../../../../plugins/data/public';
 
 // @ts-ignore
 import { Schemas } from '../../vis/editors/default/schemas';
@@ -76,7 +70,7 @@ export const termsBucketAgg = new BucketAggType({
     const params = agg.params;
     return agg.getFieldDisplayName() + ': ' + params.order.text;
   },
-  getFormat(bucket) {
+  getFormat(bucket): FieldFormat {
     return {
       getConverterFor: (type: ContentType) => {
         return (val: any) => {
@@ -92,10 +86,11 @@ export const termsBucketAgg = new BucketAggType({
             basePath: chrome.getBasePath(),
           };
           const converter = bucket.params.field.format.getConverterFor(type);
+
           return converter(val, undefined, undefined, parsedUrl);
         };
       },
-    };
+    } as FieldFormat;
   },
   createFilter: createFilterTerms,
   postFlightRequest: async (
@@ -162,18 +157,21 @@ export const termsBucketAgg = new BucketAggType({
       type: 'agg',
       default: null,
       editorComponent: OrderAggParamEditor,
-      makeAgg(termsAgg: IBucketAggConfig, state: AggConfigOptions) {
+      makeAgg(termsAgg, state) {
         state = state || {};
         state.schema = orderAggSchema;
-        const orderAgg = termsAgg.aggConfigs.createAggConfig(state, { addToAggConfigs: false });
+        const orderAgg = termsAgg.aggConfigs.createAggConfig<IBucketAggConfig>(state, {
+          addToAggConfigs: false,
+        });
         orderAgg.id = termsAgg.id + '-orderAgg';
+
         return orderAgg;
       },
-      write(agg: IBucketAggConfig, output: Record<string, any>, aggs: AggConfigs) {
+      write(agg, output, aggs) {
         const dir = agg.params.order.value;
         const order: Record<string, any> = (output.params.order = {});
 
-        let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
+        let orderAgg = agg.params.orderAgg || aggs!.getResponseAggById(agg.params.orderBy);
 
         // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
         // thus causing issues with filtering. This probably causes other issues since float might not
@@ -198,7 +196,8 @@ export const termsBucketAgg = new BucketAggType({
         }
 
         const orderAggId = orderAgg.id;
-        if (orderAgg.parentId) {
+
+        if (orderAgg.parentId && aggs) {
           orderAgg = aggs.byId(orderAgg.parentId);
         }
 
@@ -247,9 +246,9 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForOtherBucketLabel', {
         defaultMessage: 'Label for other bucket',
       }),
-      shouldShow: (agg: IBucketAggConfig) => agg.getParam('otherBucket'),
+      shouldShow: agg => agg.getParam('otherBucket'),
       write: noop,
-    } as BucketAggParam,
+    },
     {
       name: 'missingBucket',
       default: false,
@@ -267,7 +266,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
         defaultMessage: 'Label for missing values',
       }),
-      shouldShow: (agg: IBucketAggConfig) => agg.getParam('missingBucket'),
+      shouldShow: agg => agg.getParam('missingBucket'),
       write: noop,
     },
     {
@@ -290,5 +289,5 @@ export const termsBucketAgg = new BucketAggType({
       shouldShow: isStringType,
       ...migrateIncludeExcludeFormat,
     },
-  ] as BucketAggParam[],
+  ],
 });

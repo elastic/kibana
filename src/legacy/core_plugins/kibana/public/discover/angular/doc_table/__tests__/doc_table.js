@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import _ from 'lodash';
 import ngMock from 'ng_mock';
 import 'ui/private';
-import '..';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import hits from 'fixtures/real_hits';
 
@@ -65,8 +65,8 @@ const destroy = function () {
 
 describe('docTable', function () {
   let $elem;
-
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(ngMock.module('app/discover'));
   beforeEach(function () {
     $elem = angular.element(`
       <doc-table

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
 import { cryptoFactory } from '../../../server/lib/crypto';
 import { createMockServer } from '../../../test_helpers/create_mock_server';
-import { decryptJobHeaders } from './index';
+import { Logger } from '../../../types';
+import { decryptJobHeaders } from './decrypt_job_headers';
 
 let mockServer: any;
 beforeEach(() => {
@@ -24,17 +24,16 @@ describe('headers', () => {
     await expect(
       decryptJobHeaders({
         job: {
-          title: 'cool-job-bro',
-          type: 'csv',
-          jobParams: {
-            savedObjectId: 'abc-123',
-            isImmediate: false,
-            savedObjectType: 'search',
-          },
+          headers: 'Q53+9A+zf+Xe+ceR/uB/aR/Sw/8e+M+qR+WiG+8z+EY+mo+HiU/zQL+Xn',
         },
+        logger: ({
+          error: jest.fn(),
+        } as unknown) as Logger,
         server: mockServer,
       })
-    ).rejects.toBeDefined();
+    ).rejects.toMatchInlineSnapshot(
+      `[Error: Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report. Error: Invalid IV length]`
+    );
   });
 
   test(`passes back decrypted headers that were passed in`, async () => {
@@ -48,13 +47,9 @@ describe('headers', () => {
       job: {
         title: 'cool-job-bro',
         type: 'csv',
-        jobParams: {
-          savedObjectId: 'abc-123',
-          isImmediate: false,
-          savedObjectType: 'search',
-        },
         headers: encryptedHeaders,
       },
+      logger: {} as Logger,
       server: mockServer,
     });
     expect(decryptedHeaders).toEqual(headers);

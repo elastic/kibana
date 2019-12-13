@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { FilterManager, esFilters, Field } from '../../..';
+import { esFilters, IFieldType, IIndexPattern } from '../../../../common';
+import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
   appFilters: esFilters.Filter[],
@@ -41,7 +42,7 @@ function getExistingFilter(
     }
 
     if (esFilters.isScriptedPhraseFilter(filter)) {
-      return filter.meta.field === fieldName && filter.meta.script!.script.params.value === value;
+      return filter.meta.field === fieldName && filter.script!.script.params.value === value;
     }
   });
 }
@@ -67,17 +68,17 @@ function updateExistingFilter(existingFilter: esFilters.Filter, negate: boolean)
  */
 export function generateFilters(
   filterManager: FilterManager,
-  field: Field | string,
+  field: IFieldType | string,
   values: any,
   operation: string,
   index: string
 ): esFilters.Filter[] {
   values = Array.isArray(values) ? values : [values];
-  const fieldObj = _.isObject(field)
+  const fieldObj = (_.isObject(field)
     ? field
     : {
         name: field,
-      };
+      }) as IFieldType;
   const fieldName = fieldObj.name;
   const newFilters: esFilters.Filter[] = [];
   const appFilters = filterManager.getAppFilters();
@@ -92,17 +93,20 @@ export function generateFilters(
       updateExistingFilter(existing, negate);
       filter = existing;
     } else {
-      const tmpIndexPattern = { id: index };
-      switch (fieldName) {
-        case '_exists_':
-          filter = esFilters.buildExistsFilter(fieldObj, tmpIndexPattern);
-          break;
-        default:
-          filter = esFilters.buildPhraseFilter(fieldObj, value, tmpIndexPattern);
-          break;
-      }
+      const tmpIndexPattern = { id: index } as IIndexPattern;
 
-      filter.meta.negate = negate;
+      const filterType =
+        fieldName === '_exists_' ? esFilters.FILTERS.EXISTS : esFilters.FILTERS.PHRASE;
+      filter = esFilters.buildFilter(
+        tmpIndexPattern,
+        fieldObj,
+        filterType,
+        negate,
+        false,
+        value,
+        null,
+        esFilters.FilterStateStore.APP_STATE
+      );
     }
 
     newFilters.push(filter);

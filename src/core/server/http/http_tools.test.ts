@@ -90,6 +90,7 @@ describe('timeouts', () => {
       host: '127.0.0.1',
       maxPayload: new ByteSizeValue(1024),
       ssl: {},
+      compression: { enabled: true },
     } as HttpConfig);
     registerRouter(router);
 

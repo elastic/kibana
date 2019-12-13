@@ -5,20 +5,19 @@
  */
 
 import { first, get } from 'lodash';
-import {
-  InfraFrameworkRequest,
-  InfraBackendFrameworkAdapter,
-} from '../../../lib/adapters/framework';
+import { RequestHandlerContext } from 'src/core/server';
+import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
-import { getIdFieldName } from './get_id_field_name';
+import { findInventoryFields } from '../../../../common/inventory_models';
 
 export const getPodNodeName = async (
-  framework: InfraBackendFrameworkAdapter,
-  req: InfraFrameworkRequest,
+  framework: KibanaFramework,
+  requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
   nodeType: 'host' | 'pod' | 'container'
 ): Promise<string | undefined> => {
+  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -30,7 +29,7 @@ export const getPodNodeName = async (
       query: {
         bool: {
           filter: [
-            { match: { [getIdFieldName(sourceConfiguration, nodeType)]: nodeId } },
+            { match: { [fields.id]: nodeId } },
             { exists: { field: `kubernetes.node.name` } },
           ],
         },
@@ -40,7 +39,7 @@ export const getPodNodeName = async (
   const response = await framework.callWithRequest<
     { _source: { kubernetes: { node: { name: string } } } },
     {}
-  >(req, 'search', params);
+  >(requestContext, 'search', params);
   const firstHit = first(response.hits.hits);
   if (firstHit) {
     return get(firstHit, '_source.kubernetes.node.name');

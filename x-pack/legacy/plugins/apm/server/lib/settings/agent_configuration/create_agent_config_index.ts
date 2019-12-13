@@ -4,31 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { IClusterClient } from 'src/core/server';
+import { APMConfig } from '../../../../../../../plugins/apm/server';
 import { CallCluster } from '../../../../../../../../src/legacy/core_plugins/elasticsearch';
-import { getApmIndices } from '../apm_indices/get_apm_indices';
-import { LegacySetup } from '../../../new-platform/plugin';
-import { getInternalSavedObjectsClient } from '../../helpers/saved_objects_client';
+import { getApmIndicesConfig } from '../apm_indices/get_apm_indices';
 
-export async function createApmAgentConfigurationIndex(
-  core: CoreSetup,
-  { server }: LegacySetup
-) {
+export async function createApmAgentConfigurationIndex({
+  esClient,
+  config
+}: {
+  esClient: IClusterClient;
+  config: APMConfig;
+}) {
   try {
-    const config = server.config();
-    const internalSavedObjectsClient = getInternalSavedObjectsClient(server);
-    const indices = await getApmIndices({
-      savedObjectsClient: internalSavedObjectsClient,
-      config
-    });
-    const index = indices['apm_oss.apmAgentConfigurationIndex'];
-    const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
-      'admin'
-    );
-    const indexExists = await callWithInternalUser('indices.exists', { index });
+    const index = getApmIndicesConfig(config).apmAgentConfigurationIndex;
+    const { callAsInternalUser } = esClient;
+    const indexExists = await callAsInternalUser('indices.exists', { index });
     const result = indexExists
-      ? await updateExistingIndex(index, callWithInternalUser)
-      : await createNewIndex(index, callWithInternalUser);
+      ? await updateExistingIndex(index, callAsInternalUser)
+      : await createNewIndex(index, callAsInternalUser);
 
     if (!result.acknowledged) {
       const resultError =

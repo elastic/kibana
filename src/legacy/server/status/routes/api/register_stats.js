@@ -29,7 +29,7 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
 
 /*
  * API for Kibana meta info and accumulated operations stats
- * Including ?extended in the query string fetches Elasticsearch cluster_uuid and server.usage.collectorSet data
+ * Including ?extended in the query string fetches Elasticsearch cluster_uuid and usageCollection data
  *   - Requests to set isExtended = true
  *       GET /api/stats?extended=true
  *       GET /api/stats?extended
@@ -37,9 +37,8 @@ const STATS_NOT_READY_MESSAGE = i18n.translate('server.stats.notReadyMessage', {
  *   - Any other value causes a statusCode 400 response (Bad Request)
  * Including ?exclude_usage in the query string excludes the usage stats from the response. Same value semantics as ?extended
  */
-export function registerStatsApi(kbnServer, server, config) {
+export function registerStatsApi(usageCollection, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
-  const { collectorSet } = server.usage;
 
   const getClusterUuid = async callCluster => {
     const { cluster_uuid: uuid } = await callCluster('info', { filterPath: 'cluster_uuid', });
@@ -47,8 +46,8 @@ export function registerStatsApi(kbnServer, server, config) {
   };
 
   const getUsage = async callCluster => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster);
-    return collectorSet.toObject(usage);
+    const usage = await usageCollection.bulkFetchUsage(callCluster);
+    return usageCollection.toObject(usage);
   };
 
   server.route(
@@ -74,7 +73,7 @@ export function registerStatsApi(kbnServer, server, config) {
         if (isExtended) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
-          const collectorsReady = await collectorSet.areAllCollectorsReady();
+          const collectorsReady = await usageCollection.areAllCollectorsReady();
 
           if (shouldGetUsage && !collectorsReady) {
             return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
@@ -126,7 +125,7 @@ export function registerStatsApi(kbnServer, server, config) {
               };
             }
             else {
-              extended = collectorSet.toApiFieldNames({
+              extended = usageCollection.toApiFieldNames({
                 usage: modifiedUsage,
                 clusterUuid
               });
@@ -139,12 +138,12 @@ export function registerStatsApi(kbnServer, server, config) {
         /* kibana_stats gets singled out from the collector set as it is used
          * for health-checking Kibana and fetch does not rely on fetching data
          * from ES */
-        const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
+        const kibanaStatsCollector = usageCollection.getCollectorByType(KIBANA_STATS_TYPE);
         if (!await kibanaStatsCollector.isReady()) {
           return boom.serverUnavailable(STATS_NOT_READY_MESSAGE);
         }
         let kibanaStats = await kibanaStatsCollector.fetch();
-        kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
+        kibanaStats = usageCollection.toApiFieldNames(kibanaStats);
 
         return {
           ...kibanaStats,

@@ -12,7 +12,7 @@ import { registerHelpers as registerPoliciesHelpers } from './policies.helpers';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const { createIndexTemplate, cleanUp: cleanUpEsResources } = initElasticsearchHelpers(es);
 

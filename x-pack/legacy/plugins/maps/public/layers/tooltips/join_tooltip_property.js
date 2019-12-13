@@ -38,12 +38,14 @@ export class JoinTooltipProperty extends TooltipProperty {
 
     for (let i = 0; i < this._leftInnerJoins.length; i++) {
       const rightSource =  this._leftInnerJoins[i].getRightJoinSource();
-      const esTooltipProperty = await rightSource.createESTooltipProperty(
-        rightSource.getTerm(),
-        this._tooltipProperty.getRawValue()
-      );
-      if (esTooltipProperty) {
-        esFilters.push(...(await esTooltipProperty.getESFilters()));
+      const termField = rightSource.getTermField();
+      try {
+        const esTooltipProperty = await termField.createTooltipProperty(this._tooltipProperty.getRawValue());
+        if (esTooltipProperty) {
+          esFilters.push(...(await esTooltipProperty.getESFilters()));
+        }
+      } catch(e) {
+        console.error('Cannot create joined filter', e);
       }
     }
 

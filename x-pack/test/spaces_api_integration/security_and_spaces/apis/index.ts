@@ -9,7 +9,7 @@ import { TestInvoker } from '../../common/lib/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile, getService }: TestInvoker) {
-  const es = getService('es');
+  const es = getService('legacyEs');
   const supertest = getService('supertest');
 
   describe('spaces api with security', function() {

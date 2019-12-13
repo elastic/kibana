@@ -12,7 +12,7 @@ import numeral from '@elastic/numeral';
 import { ALLOWED_DATA_UNITS, JOB_ID_MAX_LENGTH } from '../constants/validation';
 import { parseInterval } from './parse_interval';
 import { maxLengthValidator } from './validators';
-import { CREATED_BY_LABEL } from '../../public/jobs/new_job_new/common/job_creator/util/constants';
+import { CREATED_BY_LABEL } from '../../common/constants/new_job';
 
 // work out the default frequency based on the bucket_span in seconds
 export function calculateDatafeedFrequencyDefaultSeconds(bucketSpanSeconds) {
@@ -405,10 +405,11 @@ export function basicJobValidation(job, fields, limits, skipMmlChecks = false) {
 
     if (skipMmlChecks === false) {
       // model memory limit
+      const mml = job.analysis_limits && job.analysis_limits.model_memory_limit;
       const {
         messages: mmlUnitMessages,
         valid: mmlUnitValid,
-      } = validateModelMemoryLimitUnits(job);
+      } = validateModelMemoryLimitUnits(mml);
 
       messages.push(...mmlUnitMessages);
       valid = (valid && mmlUnitValid);
@@ -494,12 +495,12 @@ export function validateModelMemoryLimit(job, limits) {
   };
 }
 
-export function validateModelMemoryLimitUnits(job) {
+export function validateModelMemoryLimitUnits(modelMemoryLimit) {
   const messages = [];
   let valid = true;
 
-  if (typeof job.analysis_limits !== 'undefined' && typeof job.analysis_limits.model_memory_limit !== 'undefined') {
-    const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+  if (modelMemoryLimit !== undefined) {
+    const mml = modelMemoryLimit.toUpperCase();
     const mmlSplit = mml.match(/\d+(\w+)$/);
     const unit = (mmlSplit && mmlSplit.length === 2) ? mmlSplit[1] : null;
 

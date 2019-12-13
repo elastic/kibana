@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SortDirection } from './sorting';
+import { SortDirection } from '../../../../../../../../ui/public/courier';
 
 export type IntervalValue = number | null;
 

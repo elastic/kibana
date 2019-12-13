@@ -3,7 +3,7 @@
 exports[`Header renders correctly against snapshot 1`] = `
 <Resizeable
   bottom={0}
-  handle={<EventsHeadingHandle />}
+  handle={<ForwardRef(styled.div) />}
   id="@timestamp"
   onResize={[Function]}
   positionAbsolute={true}

@@ -47,7 +47,7 @@ describe('Tls Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(TlsTableComponent)'))).toMatchSnapshot();
     });
   });
 

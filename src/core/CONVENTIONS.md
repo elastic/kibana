@@ -23,6 +23,8 @@ my_plugin/
 └── server
     ├── routes
     │   └── index.ts
+    ├── collectors
+    │   └── register.ts
     ├── services
     │   ├── my_service
     │   │   └── index.ts
@@ -30,7 +32,6 @@ my_plugin/
     ├── index.ts
     └── plugin.ts
 ```
-
 - Both `server` and `public` should have an `index.ts` and a `plugin.ts` file:
   - `index.ts` should only contain:
     - The `plugin` export
@@ -44,8 +45,9 @@ my_plugin/
   - If there is only a single application, this directory can be called `application` that exports the `renderApp` function.
 - Services provided to other plugins as APIs should live inside the `services` subdirectory.
   - Services should model the plugin lifecycle (more details below).
-- HTTP routes should be contained inside the `routes` directory.
+- HTTP routes should be contained inside the `server/routes` directory.
   - More should be fleshed out here...
+- Usage collectors for Telemetry should be defined in a separate `server/collectors/` directory.
 
 ### The PluginInitializer
 
@@ -210,3 +212,45 @@ export class Plugin {
   }
 }
 ```
+
+### Usage Collection
+
+For creating and registering a Usage Collector. Collectors should be defined in a separate directory `server/collectors/`. You can read more about usage collectors on `src/plugins/usage_collection/README.md`.
+
+```ts
+// server/collectors/register.ts
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
+export function registerMyPluginUsageCollector(usageCollection?: UsageCollectionSetup): void {
+  // usageCollection is an optional dependency, so make sure to return if it is not registered.
+  if (!usageCollection) {
+    return;
+  }
+
+  // create usage collector
+  const myCollector = usageCollection.makeUsageCollector({
+    type: MY_USAGE_TYPE,
+    fetch: async (callCluster: CallCluster) => {
+
+    // query ES and get some data
+    // summarize the data into a model
+    // return the modeled object that includes whatever you want to track
+
+      return {
+        my_objects: {
+          total: SOME_NUMBER
+        }
+      };
+    },
+  });
+
+  // register usage collector
+  usageCollection.registerCollector(myCollector);
+}
+```
+
+### Naming conventions
+
+Export start and setup contracts as `MyPluginStart` and `MyPluginSetup`. 
+This avoids naming clashes, if everyone exported them simply as `Start` and `Setup`.

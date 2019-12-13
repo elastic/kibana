@@ -18,8 +18,9 @@
  */
 
 import { Filter, FilterMeta } from './meta_filter';
-import { Field, IndexPattern } from '../../types';
 import { getPhraseScript } from './phrase_filter';
+import { FILTERS } from './index';
+import { IIndexPattern, IFieldType } from '../../index_patterns';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: string[]; // The unformatted values
@@ -31,16 +32,22 @@ export type PhrasesFilter = Filter & {
 };
 
 export const isPhrasesFilter = (filter: any): filter is PhrasesFilter =>
-  filter && filter.meta.type === 'phrases';
+  filter?.meta?.type === FILTERS.PHRASES;
+
+export const getPhrasesFilterField = (filter: PhrasesFilter) => {
+  // Phrases is a newer filter type that has always been created via a constructor that ensures
+  // `meta.key` is set to the field name
+  return filter.meta.key;
+};
 
 // Creates a filter where the given field matches one or more of the given values
 // params should be an array of values
-export const buildPhrasesFilter = (field: Field, params: any, indexPattern: IndexPattern) => {
+export const buildPhrasesFilter = (field: IFieldType, params: any, indexPattern: IIndexPattern) => {
   const index = indexPattern.id;
-  const type = 'phrases';
+  const type = FILTERS.PHRASES;
   const key = field.name;
 
-  const format = (f: Field, value: any) =>
+  const format = (f: IFieldType, value: any) =>
     f && f.format && f.format.convert ? f.format.convert(value) : value;
 
   const value = params.map((v: any) => format(field, v)).join(', ');

@@ -9,7 +9,6 @@ import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiCallOut } from '@elastic/eui';
 
-import { IndexPatternSelect } from 'ui/index_patterns';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { indexPatternService } from '../../../kibana_services';
 import { NoIndexPatternCallout } from '../../../components/no_index_pattern_callout';
@@ -18,6 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { kfetch } from 'ui/kfetch';
 import { ES_GEO_FIELD_TYPE, GIS_API_PATH, ES_SIZE_LIMIT } from '../../../../common/constants';
 import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
+
+import { npStart } from 'ui/new_platform';
+const { IndexPatternSelect } = npStart.plugins.data.ui;
 
 function filterGeoField(field) {
   return [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(field.type);

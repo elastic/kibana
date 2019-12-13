@@ -102,7 +102,7 @@ export default function ({ getPageObjects, getService }) {
       const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
       const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
-        return feature.properties.__kbn__isvisible__;
+        return feature.properties.__kbn_isvisibleduetojoin__;
       });
 
       expect(visibilitiesOfFeatures).to.eql([false, true, true, true]);
@@ -111,32 +111,19 @@ export default function ({ getPageObjects, getService }) {
 
     describe('query bar', () => {
       before(async () => {
-        await PageObjects.maps.setAndSubmitQuery('prop1 < 10 or _index : "geo_shapes*"');
+        await PageObjects.maps.setAndSubmitQuery('prop1 < 10');
       });
 
-      afterEach(async () => {
+      after(async () => {
         await inspector.close();
+        await PageObjects.maps.setAndSubmitQuery('');
       });
 
-      it('should apply query to join request', async () => {
+      it('should not apply query to source and apply query to join', async () => {
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
         const requestStats = await inspector.getTableData();
         const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
         expect(totalHits).to.equal('3');
-        const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
-        expect(hits).to.equal('0'); // aggregation requests do not return any documents
-        const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
-        expect(indexPatternName).to.equal('meta_for_geo_shapes*');
-      });
-
-      it('should not apply query to join request when apply global query is disabled', async () => {
-        await PageObjects.maps.openLayerPanel('geo_shapes*');
-        await PageObjects.maps.disableApplyGlobalQuery();
-
-        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
-        const requestStats = await inspector.getTableData();
-        const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
-        expect(totalHits).to.equal('6');
         const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
         expect(hits).to.equal('0'); // aggregation requests do not return any documents
         const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
@@ -179,7 +166,7 @@ export default function ({ getPageObjects, getService }) {
         const vectorSource = mapboxStyle.sources[VECTOR_SOURCE_ID];
 
         const visibilitiesOfFeatures = vectorSource.data.features.map(feature => {
-          return feature.properties.__kbn__isvisible__;
+          return feature.properties.__kbn_isvisibleduetojoin__;
         });
 
         expect(visibilitiesOfFeatures).to.eql([false, true, false, false]);

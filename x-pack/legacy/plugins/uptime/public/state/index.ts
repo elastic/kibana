@@ -3,12 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { compose, createStore } from 'redux';
 
+import { compose, createStore, applyMiddleware } from 'redux';
+import createSagaMiddleware from 'redux-saga';
+import { rootEffect } from './effects';
 import { rootReducer } from './reducers';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-export const store = createStore(rootReducer, composeEnhancers());
+const sagaMW = createSagaMiddleware();
+
+export const store = createStore(rootReducer, composeEnhancers(applyMiddleware(sagaMW)));
 
 export type AppState = ReturnType<typeof rootReducer>;
+
+sagaMW.run(rootEffect);

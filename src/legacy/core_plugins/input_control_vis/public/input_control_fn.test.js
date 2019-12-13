@@ -18,7 +18,9 @@
  */
 
 jest.mock('ui/new_platform');
-import { functionWrapper } from '../../interpreter/test_helpers';
+
+// eslint-disable-next-line
+import { functionWrapper } from '../../../../plugins/expressions/public/functions/tests/utils';
 import { inputControlVis } from './input_control_fn';
 
 describe('interpreter/functions#input_control_vis', () => {

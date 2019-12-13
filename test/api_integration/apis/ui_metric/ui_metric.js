@@ -22,7 +22,7 @@ import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const es = getService('legacyEs');
 
   const createStatsMetric = (eventName) => ({
     key: ReportManager.createMetricKey({ appName: 'myApp', type: METRIC_TYPE.CLICK, eventName }),

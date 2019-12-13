@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`alias 1`] = `
+<Fragment>
+  geo.coordinates in US
+</Fragment>
+`;
+
+exports[`negated alias 1`] = `
+<Fragment>
+  <EuiTextColor
+    color="danger"
+  >
+     NOT 
+  </EuiTextColor>
+  geo.coordinates in US
+</Fragment>
+`;

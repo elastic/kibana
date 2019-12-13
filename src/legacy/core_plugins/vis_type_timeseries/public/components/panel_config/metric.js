@@ -48,7 +48,7 @@ export class MetricPanelConfig extends Component {
     this.state = { selectedTab: 'data' };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { model } = this.props;
     if (
       !model.background_color_rules ||

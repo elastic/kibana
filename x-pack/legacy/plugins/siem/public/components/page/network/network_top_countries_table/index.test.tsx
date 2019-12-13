@@ -57,7 +57,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(NetworkTopCountriesTableComponent)'))).toMatchSnapshot();
     });
     test('it renders the IP Details NetworkTopCountries table', () => {
       const wrapper = shallow(
@@ -82,7 +82,7 @@ describe('NetworkTopCountries Table Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('Connect(NetworkTopCountriesTableComponent)'))).toMatchSnapshot();
     });
   });
 

@@ -4,145 +4,188 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
-import moment from 'moment';
+import { Observable, Subject, Subscription, timer } from 'rxjs';
+import { take } from 'rxjs/operators';
+import moment, { Duration } from 'moment';
+import { createHash } from 'crypto';
+import stringify from 'json-stable-stringify';
+
 import {
   CoreSetup,
   CoreStart,
   Logger,
-  Plugin as CorePlugin,
+  Plugin,
   PluginInitializerContext,
+  IClusterClient,
 } from 'src/core/server';
-import { Poller } from '../../../../src/core/utils/poller';
-import { LicensingConfigType, LicensingPluginSetup, ILicense } from './types';
-import { LicensingConfig } from './licensing_config';
-import { License } from './license';
-import { createRouteHandlerContext } from './licensing_route_handler_context';
 
-declare module 'src/core/server' {
-  interface RequestHandlerContext {
-    licensing: {
-      license: ILicense;
-    };
-  }
+import { ILicense, LicensingPluginSetup, PublicLicense, PublicFeatures } from '../common/types';
+import { License } from '../common/license';
+import { createLicenseUpdate } from '../common/license_update';
+
+import { ElasticsearchError, RawLicense, RawFeatures } from './types';
+import { registerRoutes } from './routes';
+
+import { LicenseConfigType } from './licensing_config';
+import { createRouteHandlerContext } from './licensing_route_handler_context';
+import { createOnPreResponseHandler } from './on_pre_response_handler';
+
+function normalizeServerLicense(license: RawLicense): PublicLicense {
+  return {
+    uid: license.uid,
+    type: license.type,
+    expiryDateInMillis: license.expiry_date_in_millis,
+    status: license.status,
+  };
 }
 
-export class Plugin implements CorePlugin<LicensingPluginSetup> {
+function normalizeFeatures(rawFeatures: RawFeatures) {
+  const features: PublicFeatures = {};
+  for (const [name, feature] of Object.entries(rawFeatures)) {
+    features[name] = {
+      isAvailable: feature.available,
+      isEnabled: feature.enabled,
+    };
+  }
+  return features;
+}
+
+function sign({
+  license,
+  features,
+  error,
+}: {
+  license?: PublicLicense;
+  features?: PublicFeatures;
+  error?: string;
+}) {
+  return createHash('sha256')
+    .update(
+      stringify({
+        license,
+        features,
+        error,
+      })
+    )
+    .digest('hex');
+}
+
+/**
+ * @public
+ * A plugin for fetching, refreshing, and receiving information about the license for the
+ * current Kibana instance.
+ */
+export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
+  private stop$ = new Subject();
   private readonly logger: Logger;
-  private readonly config$: Observable<LicensingConfig>;
-  private poller!: Poller<ILicense>;
+  private readonly config$: Observable<LicenseConfigType>;
+  private loggingSubscription?: Subscription;
 
   constructor(private readonly context: PluginInitializerContext) {
     this.logger = this.context.logger.get();
-    this.config$ = this.context.config
-      .create<LicensingConfigType | { config: LicensingConfigType }>()
-      .pipe(
-        map(config =>
-          'config' in config
-            ? new LicensingConfig(config.config, this.context.env)
-            : new LicensingConfig(config, this.context.env)
-        )
-      );
-  }
-
-  private hasLicenseInfoChanged(newLicense: any) {
-    const currentLicense = this.poller.subject$.getValue();
-
-    if ((currentLicense && !newLicense) || (newLicense && !currentLicense)) {
-      return true;
-    }
-
-    return (
-      newLicense.type !== currentLicense.type ||
-      newLicense.status !== currentLicense.status ||
-      newLicense.expiry_date_in_millis !== currentLicense.expiryDateInMillis
-    );
-  }
-
-  private async fetchInfo(core: CoreSetup, clusterSource: string, pollingFrequency: number) {
-    this.logger.debug(
-      `Calling [${clusterSource}] Elasticsearch _xpack API. Polling frequency: ${pollingFrequency}`
-    );
-
-    const cluster = await core.elasticsearch.dataClient$.pipe(first()).toPromise();
-
-    try {
-      const response = await cluster.callAsInternalUser('transport.request', {
-        method: 'GET',
-        path: '/_xpack',
-      });
-      const rawLicense = response && response.license;
-      const features = (response && response.features) || {};
-      const licenseInfoChanged = this.hasLicenseInfoChanged(rawLicense);
-
-      if (!licenseInfoChanged) {
-        return { license: false, error: null, features: null };
-      }
-
-      const currentLicense = this.poller.subject$.getValue();
-      const licenseInfo = [
-        'type' in rawLicense && `type: ${rawLicense.type}`,
-        'status' in rawLicense && `status: ${rawLicense.status}`,
-        'expiry_date_in_millis' in rawLicense &&
-          `expiry date: ${moment(rawLicense.expiry_date_in_millis, 'x').format()}`,
-      ]
-        .filter(Boolean)
-        .join(' | ');
-
-      this.logger.info(
-        `Imported ${currentLicense ? 'changed ' : ''}license information` +
-          ` from Elasticsearch for the [${clusterSource}] cluster: ${licenseInfo}`
-      );
-
-      return { license: rawLicense, error: null, features };
-    } catch (err) {
-      this.logger.warn(
-        `License information could not be obtained from Elasticsearch` +
-          ` for the [${clusterSource}] cluster. ${err}`
-      );
-
-      return { license: null, error: err, features: {} };
-    }
-  }
-
-  private create({ clusterSource, pollingFrequency }: LicensingConfig, core: CoreSetup) {
-    this.poller = new Poller<ILicense>(
-      pollingFrequency,
-      new License(null, {}, null, clusterSource),
-      async () => {
-        const { license, features, error } = await this.fetchInfo(
-          core,
-          clusterSource,
-          pollingFrequency
-        );
-
-        if (license !== false) {
-          return new License(license, features, error, clusterSource);
-        }
-      }
-    );
-
-    return this.poller;
+    this.config$ = this.context.config.create<LicenseConfigType>();
   }
 
   public async setup(core: CoreSetup) {
-    const config = await this.config$.pipe(first()).toPromise();
-    const poller = this.create(config, core);
-    const license$ = poller.subject$.asObservable();
+    this.logger.debug('Setting up Licensing plugin');
+    const config = await this.config$.pipe(take(1)).toPromise();
+    const dataClient = await core.elasticsearch.dataClient$.pipe(take(1)).toPromise();
+
+    const { refresh, license$ } = this.createLicensePoller(dataClient, config.pollingFrequency);
 
     core.http.registerRouteHandlerContext('licensing', createRouteHandlerContext(license$));
 
+    registerRoutes(core.http.createRouter());
+    core.http.registerOnPreResponse(createOnPreResponseHandler(refresh, license$));
+
     return {
+      refresh,
       license$,
     };
+  }
+
+  private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: Duration) {
+    const intervalRefresh$ = timer(0, pollingFrequency.asMilliseconds());
+
+    const { license$, refreshManually } = createLicenseUpdate(intervalRefresh$, this.stop$, () =>
+      this.fetchLicense(clusterClient)
+    );
+
+    this.loggingSubscription = license$.subscribe(license =>
+      this.logger.debug(
+        'Imported license information from Elasticsearch:' +
+          [
+            `type: ${license.type}`,
+            `status: ${license.status}`,
+            `expiry date: ${moment(license.expiryDateInMillis, 'x').format()}`,
+          ].join(' | ')
+      )
+    );
+
+    return {
+      refresh: async () => {
+        this.logger.debug('Requesting Elasticsearch licensing API');
+        return await refreshManually();
+      },
+      license$,
+    };
+  }
+
+  private fetchLicense = async (clusterClient: IClusterClient): Promise<ILicense> => {
+    try {
+      const response = await clusterClient.callAsInternalUser('transport.request', {
+        method: 'GET',
+        path: '/_xpack',
+      });
+
+      const normalizedLicense = response.license
+        ? normalizeServerLicense(response.license)
+        : undefined;
+      const normalizedFeatures = response.features
+        ? normalizeFeatures(response.features)
+        : undefined;
+
+      const signature = sign({
+        license: normalizedLicense,
+        features: normalizedFeatures,
+        error: '',
+      });
+
+      return new License({
+        license: normalizedLicense,
+        features: normalizedFeatures,
+        signature,
+      });
+    } catch (error) {
+      this.logger.warn(
+        `License information could not be obtained from Elasticsearch due to ${error} error`
+      );
+      const errorMessage = this.getErrorMessage(error);
+      const signature = sign({ error: errorMessage });
+
+      return new License({
+        error: this.getErrorMessage(error),
+        signature,
+      });
+    }
+  };
+
+  private getErrorMessage(error: ElasticsearchError): string {
+    if (error.status === 400) {
+      return 'X-Pack plugin is not installed on the Elasticsearch cluster.';
+    }
+    return error.message;
   }
 
   public async start(core: CoreStart) {}
 
   public stop() {
-    if (this.poller) {
-      this.poller.unsubscribe();
+    this.stop$.next();
+    this.stop$.complete();
+
+    if (this.loggingSubscription !== undefined) {
+      this.loggingSubscription.unsubscribe();
+      this.loggingSubscription = undefined;
     }
   }
 }

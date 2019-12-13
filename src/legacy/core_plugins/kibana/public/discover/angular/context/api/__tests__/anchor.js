@@ -19,13 +19,15 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 
 import { createIndexPatternsStub, createSearchSourceStub } from './_stubs';
 
 import { fetchAnchorProvider } from '../anchor';
 
 describe('context app', function () {
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(ngMock.module('app/discover'));
 
   describe('function fetchAnchor', function () {
     let fetchAnchor;
@@ -35,11 +37,11 @@ describe('context app', function () {
       $provide.value('indexPatterns', createIndexPatternsStub());
     }));
 
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
+    beforeEach(ngMock.inject(function createPrivateStubs() {
       searchSourceStub = createSearchSourceStub([
         { _id: 'hit1' },
       ]);
-      fetchAnchor = Private(fetchAnchorProvider);
+      fetchAnchor = fetchAnchorProvider(createIndexPatternsStub(), searchSourceStub);
     }));
 
     afterEach(() => {
@@ -58,7 +60,7 @@ describe('context app', function () {
         .then(() => {
           const setParentSpy = searchSourceStub.setParent;
           expect(setParentSpy.calledOnce).to.be(true);
-          expect(setParentSpy.firstCall.args[0]).to.eql(false);
+          expect(setParentSpy.firstCall.args[0]).to.be(undefined);
         });
     });
 

@@ -9,7 +9,6 @@ import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './help
 import { getFollowerIndexMock } from '../../fixtures/follower_index';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 jest.mock('ui/chrome', () => ({
   addBasePath: () => 'api/cross_cluster_replication',

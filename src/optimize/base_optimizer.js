@@ -31,8 +31,8 @@ import WrapperPlugin from 'wrapper-webpack-plugin';
 
 import { defaults } from 'lodash';
 
-import { IS_KIBANA_DISTRIBUTABLE, fromRoot } from '../legacy/utils';
-
+import { IS_KIBANA_DISTRIBUTABLE } from '../legacy/utils';
+import { fromRoot } from '../core/server/utils';
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
@@ -61,7 +61,7 @@ export default class BaseOptimizer {
   constructor(opts) {
     this.logWithMetadata = opts.logWithMetadata || (() => null);
     this.uiBundles = opts.uiBundles;
-    this.discoveredPlugins = opts.discoveredPlugins;
+    this.newPlatformPluginInfo = opts.newPlatformPluginInfo;
     this.profile = opts.profile || false;
     this.workers = opts.workers;
 
@@ -543,16 +543,17 @@ export default class BaseOptimizer {
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
       stats.toJson(defaults({
         warningsFilter: STATS_WARNINGS_FILTER,
-        ...Stats.presetToOptions('detailed')
+        ...Stats.presetToOptions('detailed'),
+        maxModules: 1000,
       }))
     );
   }
 
   _getDiscoveredPluginEntryPoints() {
     // New platform plugin entry points
-    return [...this.discoveredPlugins.entries()]
-      .reduce((entryPoints, [pluginId, plugin]) => {
-        entryPoints[`plugin/${pluginId}`] = `${plugin.path}/public`;
+    return [...this.newPlatformPluginInfo.entries()]
+      .reduce((entryPoints, [pluginId, pluginInfo]) => {
+        entryPoints[`plugin/${pluginId}`] = pluginInfo.entryPointPath;
         return entryPoints;
       }, {});
   }

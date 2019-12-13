@@ -5,6 +5,7 @@
  */
 
 import * as t from 'io-ts';
+import Boom from 'boom';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
@@ -21,8 +22,8 @@ import { markAppliedByAgent } from '../../lib/settings/agent_configuration/mark_
 // get list of configurations
 export const agentConfigurationRoute = createRoute(core => ({
   path: '/api/apm/settings/agent-configuration',
-  handler: async req => {
-    const setup = await setupRequest(req);
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
     return await listConfigurations({ setup });
   }
 }));
@@ -39,9 +40,9 @@ export const deleteAgentConfigurationRoute = createRoute(() => ({
       configurationId: t.string
     })
   },
-  handler: async (req, { path }) => {
-    const setup = await setupRequest(req);
-    const { configurationId } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { configurationId } = context.params.path;
     return await deleteConfiguration({
       configurationId,
       setup
@@ -53,8 +54,8 @@ export const deleteAgentConfigurationRoute = createRoute(() => ({
 export const listAgentConfigurationServicesRoute = createRoute(() => ({
   method: 'GET',
   path: '/api/apm/settings/agent-configuration/services',
-  handler: async req => {
-    const setup = await setupRequest(req);
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
     return await getServiceNames({
       setup
     });
@@ -84,9 +85,9 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
   params: {
     query: t.partial({ serviceName: t.string })
   },
-  handler: async (req, { query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.query;
     return await getEnvironments({ serviceName, setup });
   }
 }));
@@ -97,9 +98,9 @@ export const agentConfigurationAgentNameRoute = createRoute(() => ({
   params: {
     query: t.type({ serviceName: t.string })
   },
-  handler: async (req, { query }) => {
-    const setup = await setupRequest(req);
-    const { serviceName } = query;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { serviceName } = context.params.query;
     const agentName = await getAgentNameByService({ serviceName, setup });
     return agentName;
   }
@@ -114,9 +115,12 @@ export const createAgentConfigurationRoute = createRoute(() => ({
   options: {
     tags: ['access:apm', 'access:apm_write']
   },
-  handler: async (req, { body }) => {
-    const setup = await setupRequest(req);
-    return await createOrUpdateConfiguration({ configuration: body, setup });
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    return await createOrUpdateConfiguration({
+      configuration: context.params.body,
+      setup
+    });
   }
 }));
 
@@ -132,12 +136,12 @@ export const updateAgentConfigurationRoute = createRoute(() => ({
     }),
     body: agentPayloadRt
   },
-  handler: async (req, { path, body }) => {
-    const setup = await setupRequest(req);
-    const { configurationId } = path;
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { configurationId } = context.params.path;
     return await createOrUpdateConfiguration({
       configurationId,
-      configuration: body,
+      configuration: context.params.body,
       setup
     });
   }
@@ -156,8 +160,9 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
       etag: t.string
     })
   },
-  handler: async (req, { body }, h) => {
-    const setup = await setupRequest(req);
+  handler: async ({ context, request }) => {
+    const setup = await setupRequest(context, request);
+    const { body } = context.params;
     const config = await searchConfigurations({
       serviceName: body.service.name,
       environment: body.service.environment,
@@ -165,7 +170,10 @@ export const agentConfigurationSearchRoute = createRoute(core => ({
     });
 
     if (!config) {
-      return h.response().code(404);
+      context.logger.info(
+        `Config was not found for ${body.service.name}/${body.service.environment}`
+      );
+      throw new Boom('Not found', { statusCode: 404 });
     }
 
     // update `applied_by_agent` field if etags match

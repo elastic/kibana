@@ -1,14 +1,10 @@
 .dshAppContainer {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .dshStartScreen {
   text-align: center;
-  padding: $euiSize;
-
-  > * {
-    max-width: 36em !important;
-  }
+  padding: $euiSizeS;
 }

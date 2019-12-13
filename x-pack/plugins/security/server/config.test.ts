@@ -21,8 +21,12 @@ describe('config schema', () => {
                           },
                           "cookieName": "sid",
                           "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "loginAssistanceMessage": "",
                           "secureCookies": false,
-                          "sessionTimeout": null,
+                          "session": Object {
+                            "idleTimeout": null,
+                            "lifespan": null,
+                          },
                         }
                 `);
 
@@ -35,8 +39,12 @@ describe('config schema', () => {
                           },
                           "cookieName": "sid",
                           "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                          "loginAssistanceMessage": "",
                           "secureCookies": false,
-                          "sessionTimeout": null,
+                          "session": Object {
+                            "idleTimeout": null,
+                            "lifespan": null,
+                          },
                         }
                 `);
 
@@ -48,8 +56,12 @@ describe('config schema', () => {
                             ],
                           },
                           "cookieName": "sid",
+                          "loginAssistanceMessage": "",
                           "secureCookies": false,
-                          "sessionTimeout": null,
+                          "session": Object {
+                            "idleTimeout": null,
+                            "lifespan": null,
+                          },
                         }
                 `);
   });
@@ -250,7 +262,11 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock, true)
       .pipe(first())
       .toPromise();
-    expect(config).toEqual({ encryptionKey: 'ab'.repeat(16), secureCookies: true });
+    expect(config).toEqual({
+      encryptionKey: 'ab'.repeat(16),
+      secureCookies: true,
+      session: { idleTimeout: null, lifespan: null },
+    });
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
                         Array [
@@ -270,7 +286,7 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock, false)
       .pipe(first())
       .toPromise();
-    expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: false });
+    expect(config.secureCookies).toEqual(false);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
                         Array [
@@ -290,7 +306,7 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock, false)
       .pipe(first())
       .toPromise();
-    expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: true });
+    expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toMatchInlineSnapshot(`
                         Array [
@@ -310,7 +326,7 @@ describe('createConfig$()', () => {
     const config = await createConfig$(contextMock, true)
       .pipe(first())
       .toPromise();
-    expect(config).toEqual({ encryptionKey: 'a'.repeat(32), secureCookies: true });
+    expect(config.secureCookies).toEqual(true);
 
     expect(loggingServiceMock.collect(contextMock.logger).warn).toEqual([]);
   });

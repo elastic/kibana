@@ -18,7 +18,6 @@
  */
 
 import semver from 'semver';
-import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 import { createUiStatsReporter, METRIC_TYPE } from '../../../../ui_metric/public';
 import {
@@ -37,7 +36,10 @@ import { migratePanelsTo730 } from '../migrations/migrate_to_730_panels';
  *
  * Once we hit a major version, we can remove support for older style URLs and get rid of this logic.
  */
-export function migrateAppState(appState: { [key: string]: unknown } | DashboardAppState) {
+export function migrateAppState(
+  appState: { [key: string]: unknown } | DashboardAppState,
+  kibanaVersion: string
+) {
   if (!appState.panels) {
     throw new Error(
       i18n.translate('kbn.dashboard.panel.invalidData', {
@@ -73,7 +75,7 @@ export function migrateAppState(appState: { [key: string]: unknown } | Dashboard
         | SavedDashboardPanel630
         | SavedDashboardPanel640To720
       >,
-      chrome.getKibanaVersion(),
+      kibanaVersion,
       appState.useMargins,
       appState.uiState
     );

@@ -6,17 +6,16 @@
 
 import { isEqual, isEmpty } from 'lodash/fp';
 import React, { memo, useCallback, useState, useEffect } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
-import { Query } from 'src/plugins/data/common/types';
 import { Subscription } from 'rxjs';
 
-import { SavedQueryTimeFilter } from '../../../../../../../../src/legacy/core_plugins/data/public/search';
-import { SavedQuery } from '../../../../../../../../src/legacy/core_plugins/data/public';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import {
-  Filter,
-  FilterStateStore,
-} from '../../../../../../../../src/plugins/data/common/es_query/filters';
+  IIndexPattern,
+  Query,
+  esFilters,
+  FilterManager,
+  SavedQuery,
+  SavedQueryTimeFilter,
+} from '../../../../../../../../src/plugins/data/public';
 
 import { BrowserFields } from '../../../containers/source';
 import { convertKueryToElasticSearchQuery } from '../../../lib/keury';
@@ -33,17 +32,17 @@ export interface QueryBarTimelineComponentProps {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
-  filters: Filter[];
+  filters: esFilters.Filter[];
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
   from: number;
   fromStr: string;
   kqlMode: KqlMode;
-  indexPattern: StaticIndexPattern;
+  indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
   refreshInterval: number;
   savedQueryId: string | null;
-  setFilters: (filters: Filter[]) => void;
+  setFilters: (filters: esFilters.Filter[]) => void;
   setKqlFilterQueryDraft: (expression: string, kind: KueryFilterQueryKind) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   timelineId: string;
@@ -89,7 +88,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       query: filterQuery != null ? filterQuery.expression : '',
       language: filterQuery != null ? filterQuery.kind : 'kuery',
     });
-    const [queryBarFilters, setQueryBarFilters] = useState<Filter[]>([]);
+    const [queryBarFilters, setQueryBarFilters] = useState<esFilters.Filter[]>([]);
     const [dataProvidersDsl, setDataProvidersDsl] = useState<string>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
@@ -109,7 +108,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
             if (isSubscribed) {
               const filterWithoutDropArea = filterManager
                 .getFilters()
-                .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
+                .filter((f: esFilters.Filter) => f.meta.controlledBy !== timelineFilterDropArea);
               setFilters(filterWithoutDropArea);
               setQueryBarFilters(filterWithoutDropArea);
             }
@@ -126,7 +125,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     useEffect(() => {
       const filterWithoutDropArea = filterManager
         .getFilters()
-        .filter((f: Filter) => f.meta.controlledBy !== timelineFilterDropArea);
+        .filter((f: esFilters.Filter) => f.meta.controlledBy !== timelineFilterDropArea);
       if (!isEqual(filters, filterWithoutDropArea)) {
         filterManager.setFilters(filters);
       }
@@ -162,15 +161,24 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       let isSubscribed = true;
       async function setSavedQueryByServices() {
         if (savedQueryId != null && savedQueryServices != null) {
-          const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
-          if (isSubscribed) {
-            setSavedQuery({
-              ...mySavedQuery,
-              attributes: {
-                ...mySavedQuery.attributes,
-                filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
-              },
-            });
+          try {
+            // The getSavedQuery function will throw a promise rejection in
+            // src/legacy/core_plugins/data/public/search/search_bar/lib/saved_query_service.ts
+            // if the savedObjectsClient is undefined. This is happening in a test
+            // so I wrapped this in a try catch to keep the unhandled promise rejection
+            // warning from appearing in tests.
+            const mySavedQuery = await savedQueryServices.getSavedQuery(savedQueryId);
+            if (isSubscribed && mySavedQuery != null) {
+              setSavedQuery({
+                ...mySavedQuery,
+                attributes: {
+                  ...mySavedQuery.attributes,
+                  filters: filters.filter(f => f.meta.controlledBy !== timelineFilterDropArea),
+                },
+              });
+            }
+          } catch (exc) {
+            setSavedQuery(null);
           }
         } else if (isSubscribed) {
           setSavedQuery(null);
@@ -284,12 +292,13 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         refreshInterval={refreshInterval}
         savedQuery={savedQuery}
         onSavedQuery={onSavedQuery}
+        dataTestSubj={'timelineQueryInput'}
       />
     );
   }
 );
 
-export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
+export const getDataProviderFilter = (dataProviderDsl: string): esFilters.Filter => {
   const dslObject = JSON.parse(dataProviderDsl);
   const key = Object.keys(dslObject);
   return {
@@ -304,7 +313,7 @@ export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
       value: dataProviderDsl,
     },
     $state: {
-      store: FilterStateStore.APP_STATE,
+      store: esFilters.FilterStateStore.APP_STATE,
     },
   };
 };

@@ -14,6 +14,8 @@ cacheDir="$HOME/.kibana"
 RED='\033[0;31m'
 C_RESET='\033[0m' # Reset color
 
+export NODE_OPTIONS="$NODE_OPTIONS --throw-deprecation"
+
 ###
 ### Since the Jenkins logging output collector doesn't look like a TTY
 ### Node/Chalk and other color libs disable their color output. But Jenkins
@@ -21,6 +23,15 @@ C_RESET='\033[0m' # Reset color
 ### to enable color support in Chalk and other related modules.
 ###
 export FORCE_COLOR=1
+
+###
+### The @babel/register cache collects the build output from each file in
+### a map, in memory, and then when the process exits it writes that to the
+### babel cache file as a JSON encoded object. Stringifying that object
+### causes OOMs on CI regularly enough that we need to find another solution,
+### and until we do we need to disable the cache
+###
+export BABEL_DISABLE_CACHE=true
 
 ###
 ### check that we seem to be in a kibana project

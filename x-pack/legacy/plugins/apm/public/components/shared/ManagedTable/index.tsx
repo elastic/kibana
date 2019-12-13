@@ -7,7 +7,6 @@
 import { EuiBasicTable } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import React, { useMemo, useCallback, ReactNode } from 'react';
-import { idx } from '@kbn/elastic-idx';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
 import { fromQuery, toQuery } from '../Links/url_helpers';
@@ -42,7 +41,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     columns,
     initialPageIndex = 0,
     initialPageSize = 10,
-    initialSortField = idx(props, _ => _.columns[0].field) || '',
+    initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
     hidePerPageOptions = true,
     noItemsMessage,
@@ -120,4 +119,4 @@ const ManagedTable = React.memo(
   UnoptimizedManagedTable
 ) as typeof UnoptimizedManagedTable;
 
-export { ManagedTable };
+export { ManagedTable, UnoptimizedManagedTable };

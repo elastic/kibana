@@ -69,3 +69,22 @@ test('should not show "within" relation when filter geometry is not closed', asy
 
   expect(component).toMatchSnapshot();
 });
+
+test('should render error message', async () => {
+  const component = shallow(
+    <GeometryFilterForm
+      {...defaultProps}
+      geoFields={[
+        {
+          geoFieldName: 'my geo field',
+          geoFieldType: 'geo_point',
+          indexPatternTitle: 'My index',
+          indexPatternId: 1
+        }
+      ]}
+      errorMsg="Simulated error"
+    />
+  );
+
+  expect(component).toMatchSnapshot();
+});

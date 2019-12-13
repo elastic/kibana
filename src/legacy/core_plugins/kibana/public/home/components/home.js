@@ -51,7 +51,7 @@ export class Home extends Component {
       getServices().getInjected('disableWelcomeScreen') ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
-    const showTelemetryDisclaimer = getServices().getInjected('allowChangingOptInStatus');
+    const showTelemetryDisclaimer = getServices().getInjected('telemetryNotifyUserAboutOptInDefault');
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -231,6 +231,7 @@ export class Home extends Component {
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
         showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
+        onOptInSeen={this.props.onOptInSeen}
       />
     );
   }
@@ -269,4 +270,5 @@ Home.propTypes = {
   localStorage: PropTypes.object.isRequired,
   urlBasePath: PropTypes.string.isRequired,
   mlEnabled: PropTypes.bool.isRequired,
+  onOptInSeen: PropTypes.func.isRequired,
 };

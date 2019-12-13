@@ -23,11 +23,12 @@ export interface HttpServiceSetup
 |  [registerAuth](./kibana-plugin-server.httpservicesetup.registerauth.md) | <code>(handler: AuthenticationHandler) =&gt; void</code> | To define custom authentication and/or authorization mechanism for incoming requests. |
 |  [registerOnPostAuth](./kibana-plugin-server.httpservicesetup.registeronpostauth.md) | <code>(handler: OnPostAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
 |  [registerOnPreAuth](./kibana-plugin-server.httpservicesetup.registeronpreauth.md) | <code>(handler: OnPreAuthHandler) =&gt; void</code> | To define custom logic to perform for incoming requests. |
+|  [registerOnPreResponse](./kibana-plugin-server.httpservicesetup.registeronpreresponse.md) | <code>(handler: OnPreResponseHandler) =&gt; void</code> | To define custom logic to perform for the server response. |
 |  [registerRouteHandlerContext](./kibana-plugin-server.httpservicesetup.registerroutehandlercontext.md) | <code>&lt;T extends keyof RequestHandlerContext&gt;(contextName: T, provider: RequestHandlerContextProvider&lt;T&gt;) =&gt; RequestHandlerContextContainer</code> | Register a context provider for a route handler. |
 
 ## Example
 
-To handle an incoming request in your plugin you should: - Create a `Router` instance. Router is already configured to use `plugin-id` to prefix path segment for your routes.
+To handle an incoming request in your plugin you should: - Create a `Router` instance.
 
 ```ts
 const router = httpSetup.createRouter();
@@ -61,7 +62,7 @@ const handler = async (context: RequestHandlerContext, request: KibanaRequest, r
 }
 
 ```
-- Register route handler for GET request to 'my-app/path/<!-- -->{<!-- -->id<!-- -->}<!-- -->' path
+- Register route handler for GET request to 'path/<!-- -->{<!-- -->id<!-- -->}<!-- -->' path
 
 ```ts
 import { schema, TypeOf } from '@kbn/config-schema';
