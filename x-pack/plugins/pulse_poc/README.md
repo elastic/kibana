@@ -23,35 +23,12 @@ localhost and port 5601 (the defaults) and not be using the basepath proxy:
 yarn start --no-base-path
 ```
 
-You must have the `pulse-poc-raw` index created for the APIs to work properly.
-Start up Kibana and run the following requests in the Kibana Dev Tools Console:
-
-```
-PUT pulse-poc-raw
-{
-    "settings" : {
-        "number_of_shards" : 1
-    },
-    "mappings" : {
-        "properties" : {
-            "deployment_id" : { "type" : "keyword" }
-        }
-    }
-}
-POST /pulse-poc-raw/_doc
-{
-  "deployment_id": "123"
-}
-```
-
-This index is for the raw telemetry payloads received by the service.
-
 ## Rest API
 
 These APIs are accessible through Kibana for this POC. The actual service would
 live at a dedicated elastic.co URL.
 
-### `POST /api/pulse_poc/intake`
+### `POST /api/pulse_poc/intake/{deploymentId}`
 
 Used to send channel-based telemetry into the pulse service.
 
