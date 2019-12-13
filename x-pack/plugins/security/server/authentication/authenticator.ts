@@ -493,10 +493,14 @@ export class Authenticator {
     existingSession: ProviderSession | null
   ): { idleTimeoutExpiration: number | null; lifespanExpiration: number | null } {
     const now = Date.now();
-    let lifespanExpiration = this.lifespan && now + this.lifespan.asMilliseconds();
-    if (existingSession && existingSession.lifespanExpiration && this.lifespan) {
-      lifespanExpiration = existingSession.lifespanExpiration;
-    }
+    // if we are renewing an existing session, use its `lifespanExpiration` -- otherwise, set this value
+    // based on the configured server `lifespan`.
+    // note, if the server had a `lifespan` set and then removes it, remove `lifespanExpiration` on renewed sessions
+    // also, if the server did not have a `lifespan` set and then adds it, add `lifespanExpiration` on renewed sessions
+    const lifespanExpiration =
+      existingSession?.lifespanExpiration && this.lifespan
+        ? existingSession.lifespanExpiration
+        : this.lifespan && now + this.lifespan.asMilliseconds();
     const idleTimeoutExpiration = this.idleTimeout && now + this.idleTimeout.asMilliseconds();
 
     return { idleTimeoutExpiration, lifespanExpiration };
