@@ -17,12 +17,12 @@
  * under the License.
  */
 
-let _canTrackUiMetrics = false;
+import { PluginInitializerContext } from '../../../core/public';
+import { UsageCollectionPlugin } from './plugin';
 
-export function setCanTrackUiMetrics(flag: boolean) {
-  _canTrackUiMetrics = flag;
-}
+export { METRIC_TYPE } from '@kbn/analytics';
+export { UsageCollectionSetup } from './plugin';
 
-export function getCanTrackUiMetrics(): boolean {
-  return _canTrackUiMetrics;
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new UsageCollectionPlugin(initializerContext);
 }

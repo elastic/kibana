@@ -19,6 +19,7 @@
 
 import sinon from 'sinon';
 import { getFieldFormatsRegistry } from '../../../../test_utils/public/stub_field_formats';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 const mockObservable = () => {
   return {
@@ -50,6 +51,11 @@ export const npSetup = {
     uiSettings: mockUiSettings,
   },
   plugins: {
+    usageCollection: {
+      allowTrackUserAgent: sinon.fake(),
+      reportUiStats: sinon.fake(),
+      METRIC_TYPE,
+    },
     embeddable: {
       registerEmbeddableFactory: sinon.fake(),
     },

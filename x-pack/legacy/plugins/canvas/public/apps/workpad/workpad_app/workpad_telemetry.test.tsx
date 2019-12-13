@@ -10,9 +10,10 @@ import {
   withUnconnectedElementsLoadedTelemetry,
   WorkpadLoadedMetric,
   WorkpadLoadedWithErrorsMetric,
-} from '../workpad_telemetry';
-import { METRIC_TYPE } from '../../../../lib/ui_metric';
+} from './workpad_telemetry';
+import { METRIC_TYPE } from '../../../lib/ui_metric';
 
+jest.mock('ui/new_platform');
 const trackMetric = jest.fn();
 const Component = withUnconnectedElementsLoadedTelemetry(() => <div />, trackMetric);
 
