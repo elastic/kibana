@@ -18,6 +18,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 /**
  * Receives observable that emits strings, and returns a new observable
@@ -32,28 +33,27 @@ import { Observable, Subject } from 'rxjs';
  *     asdf -> fdf -> aaa -> dfsdf
  *
  */
-export const split = (splitter: string = '\n') => (in$: Observable<string>): Observable<string> => {
+export const split = (delimiter: string = '\n') => (
+  in$: Observable<string>
+): Observable<string> => {
   const out$ = new Subject<string>();
   let startingText = '';
 
   in$.subscribe(
     chunk => {
-      const parts = chunk.split(splitter);
-      if (parts.length === 0) return;
-      if (parts.length === 1) {
-        startingText += chunk;
-        return;
-      }
-      if (startingText || parts[0]) out$.next(startingText + parts[0]);
-      for (let i = 1; i < parts.length - 1; i++) if (parts[i]) out$.next(parts[i]);
-      startingText = parts[parts.length - 1];
+      const messages = (startingText + chunk).split(delimiter);
+
+      // We don't want to send the last message here, since it may or
+      // may not be a partial message.
+      messages.slice(0, -1).forEach(out$.next.bind(out$));
+      startingText = messages.length ? messages[messages.length - 1] : '';
     },
     out$.error.bind(out$),
     () => {
-      if (startingText) out$.next(startingText);
+      out$.next(startingText);
       out$.complete();
     }
   );
 
-  return out$;
+  return out$.pipe(filter<string>(Boolean));
 };
