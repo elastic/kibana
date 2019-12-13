@@ -24,12 +24,12 @@ const isFields = (path: string) => {
  */
 export async function installTemplates(
   pkg: RegistryPackage,
-  datasetsToInstall: Dataset[],
+  datasets: Dataset[],
   callCluster: CallESAsCurrentUser
 ) {
   // If no datasets exist in this package, no templates have to be installed.
   if (!pkg.datasets) return;
-  return datasetsToInstall.map(async dataset => {
+  return datasets.map(async dataset => {
     // Fetch all assset entries for this dataset
     const assetEntries = await getAssetsData(pkg, isFields, dataset.name);
     // Merge all the fields of a dataset together and create an Elasticsearch index template

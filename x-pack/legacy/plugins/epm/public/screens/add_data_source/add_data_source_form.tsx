@@ -52,7 +52,7 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
     try {
       await installDatasource({
         pkgkey: `${pkgName}-${pkgVersion}`,
-        datasetsToInstall: datasets.filter(d => formState.datasets[d.name] === true),
+        datasets: datasets.filter(d => formState.datasets[d.name] === true),
         datasourceName: formState.datasourceName,
       });
       setAddDataSourceSuccess(true);

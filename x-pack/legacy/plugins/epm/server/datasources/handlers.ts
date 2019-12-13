@@ -29,6 +29,7 @@ export async function handleRequestInstallDatasource(
   request: CreateDatasourceRequest,
   extra: Extra
 ) {
+  const { pkgkey, datasets, datasourceName } = request.payload;
   const user = await request.server.plugins.security?.getUser(request);
   if (!user) return Boom.unauthorized('Must be logged in to perform this operation');
 
@@ -38,7 +39,9 @@ export async function handleRequestInstallDatasource(
   try {
     const result = await createDatasource({
       savedObjectsClient,
-      payload: request.payload,
+      pkgkey,
+      datasets,
+      datasourceName,
       callCluster,
       // long-term, I don't want to pass `request` through
       // but this was the fastest/least invasive change way to make the change

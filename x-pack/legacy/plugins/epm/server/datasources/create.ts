@@ -12,7 +12,7 @@ import {
   AssetReference,
   InstallationStatus,
   RegistryPackage,
-  DatasourcePayload,
+  CreateFakeDatasource,
   Dataset,
 } from '../../common/types';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
@@ -25,17 +25,18 @@ import { Request } from '../types';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  payload: DatasourcePayload;
   callCluster: CallESAsCurrentUser;
   request: Request;
+  pkgkey: string;
+  datasourceName: string;
+  datasets: Dataset[];
 }) {
-  const { savedObjectsClient, payload, callCluster, request } = options;
-  const { pkgkey, datasetsToInstall, datasourceName } = payload;
+  const { savedObjectsClient, callCluster, pkgkey, datasets, datasourceName, request } = options;
   const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
   if (packageInfo.status !== InstallationStatus.installed) {
     throw new PackageNotInstalledError(pkgkey);
   }
-  const datasetNames = datasetsToInstall.map(d => d.name);
+  const datasetNames = datasets.map(d => d.name);
   const toSave = await installPipelines({ pkgkey, datasetNames, callCluster });
 
   // TODO: This should be moved out of the initial data source creation in the end
@@ -48,7 +49,7 @@ export async function createDatasource(options: {
       savedObjectsClient,
       pkg,
       datasourceName,
-      datasetsToInstall,
+      datasets,
       toSave,
       request,
     }),
@@ -73,12 +74,12 @@ async function baseSetup(callCluster: CallESAsCurrentUser) {
 async function saveDatasourceReferences(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkg: RegistryPackage;
-  datasetsToInstall: Dataset[];
+  datasets: Dataset[];
   datasourceName: string;
   toSave: AssetReference[];
   request: Request;
 }) {
-  const { savedObjectsClient, pkg, toSave, datasetsToInstall, datasourceName, request } = options;
+  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request } = options;
   const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
   const savedAssets = savedDatasource?.package.assets;
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
@@ -87,13 +88,18 @@ async function saveDatasourceReferences(options: {
     return current;
   };
 
-  const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets, );
-  const datasource: Datasource = createFakeDatasource(pkg, datasourceName, datasetsToInstall, toInstall);
+  const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
+  const datasource: Datasource = createFakeDatasource({
+    pkg,
+    datasourceName,
+    datasets,
+    assets: toInstall,
+  });
   // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
   // or something similar, but it's a class not an object so many pieces are missing
   // we'd still need `user` from the request object, but that's not terrible
   // lacking that we make another http request to Ingest
-  await ingestDatasourceCreate({ request, datasource });
+  await ingestDatasourceCreate({ request, datasource });;
 
   return toInstall;
 }
@@ -110,14 +116,14 @@ async function getDatasource(options: {
   return datasource?.attributes;
 }
 
-function createFakeDatasource(
-  pkg: RegistryPackage,
-  datasourceName: string,
-  datasetsToInstall: Dataset[],
-  assets: Asset[] = []
-): Datasource {
-  const streams = datasetsToInstall.map(stream => ({
-    id: stream.name,
+function createFakeDatasource({
+  pkg,
+  datasourceName,
+  datasets,
+  assets = [],
+}: CreateFakeDatasource): Datasource {
+  const streams = datasets.map(dataset => ({
+    id: dataset.name,
     input: {
       type: InputType.Log,
       config: { config: 'values', go: 'here' },
