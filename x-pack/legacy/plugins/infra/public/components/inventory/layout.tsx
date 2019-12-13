@@ -8,7 +8,6 @@ import React from 'react';
 import { InfraWaffleMapOptions, InfraWaffleMapBounds } from '../../lib/lib';
 import {
   InfraNodeType,
-  InfraTimerangeInput,
   InfraSnapshotMetricInput,
   InfraSnapshotGroupbyInput,
 } from '../../graphql/types';
@@ -23,7 +22,7 @@ export interface LayoutProps {
   options: InfraWaffleMapOptions;
   nodeType: InfraNodeType;
   onDrilldown: (filter: KueryFilterQuery) => void;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   onViewChange: (view: string) => void;
   view: string;
   boundsOverride: InfraWaffleMapBounds;
@@ -42,7 +41,7 @@ export const Layout = (props: LayoutProps) => {
     props.groupBy,
     props.nodeType,
     props.sourceId,
-    props.timeRange
+    props.currentTime
   );
   return (
     <>
@@ -55,7 +54,7 @@ export const Layout = (props: LayoutProps) => {
           loading={loading}
           reload={reload}
           onDrilldown={props.onDrilldown}
-          timeRange={props.timeRange}
+          currentTime={props.currentTime}
           onViewChange={props.onViewChange}
           view={props.view}
           autoBounds={props.autoBounds}

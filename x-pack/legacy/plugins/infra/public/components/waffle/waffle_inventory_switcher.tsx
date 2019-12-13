@@ -4,8 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPopover, EuiContextMenu, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import {
+  EuiPopover,
+  EuiContextMenu,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiContextMenuPanelDescriptor,
+} from '@elastic/eui';
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,6 +21,7 @@ import {
   InfraSnapshotGroupbyInput,
 } from '../../graphql/types';
 import { findInventoryModel } from '../../../common/inventory_models';
+import { InventoryItemType } from '../../../common/inventory_models/types';
 
 interface WaffleInventorySwitcherProps {
   nodeType: InfraNodeType;
@@ -23,6 +29,11 @@ interface WaffleInventorySwitcherProps {
   changeGroupBy: (groupBy: InfraSnapshotGroupbyInput[]) => void;
   changeMetric: (metric: InfraSnapshotMetricInput) => void;
 }
+
+const getDisplayNameForType = (type: InventoryItemType) => {
+  const inventoryModel = findInventoryModel(type);
+  return inventoryModel.displayName;
+};
 
 export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = ({
   changeNodeType,
@@ -48,44 +59,62 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
   const goToHost = useCallback(() => goToNodeType('host' as InfraNodeType), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod' as InfraNodeType), [goToNodeType]);
   const goToDocker = useCallback(() => goToNodeType('container' as InfraNodeType), [goToNodeType]);
+  const goToAwsEC2 = useCallback(() => goToNodeType('awsEC2' as InfraNodeType), [goToNodeType]);
+  const goToAwsS3 = useCallback(() => goToNodeType('awsS3' as InfraNodeType), [goToNodeType]);
+  const goToAwsRDS = useCallback(() => goToNodeType('awsRDS' as InfraNodeType), [goToNodeType]);
+  const goToAwsSQS = useCallback(() => goToNodeType('awsSQS' as InfraNodeType), [goToNodeType]);
   const panels = useMemo(
-    () => [
-      {
-        id: 0,
-        items: [
-          {
-            name: i18n.translate('xpack.infra.waffle.nodeTypeSwitcher.hostsLabel', {
-              defaultMessage: 'Hosts',
-            }),
-            icon: 'host',
-            onClick: goToHost,
-          },
-          {
-            name: 'Kubernetes',
-            icon: 'kubernetes',
-            onClick: goToK8,
-          },
-          {
-            name: 'Docker',
-            icon: 'docker',
-            onClick: goToDocker,
-          },
-        ],
-      },
-    ],
-    [goToDocker, goToHost, goToK8]
+    () =>
+      [
+        {
+          id: 'firstPanel',
+          items: [
+            {
+              name: getDisplayNameForType('host'),
+              onClick: goToHost,
+            },
+            {
+              name: getDisplayNameForType('pod'),
+              onClick: goToK8,
+            },
+            {
+              name: getDisplayNameForType('container'),
+              onClick: goToDocker,
+            },
+            {
+              name: 'AWS',
+              panel: 'awsPanel',
+            },
+          ],
+        },
+        {
+          id: 'awsPanel',
+          title: 'AWS',
+          items: [
+            {
+              name: getDisplayNameForType('awsEC2'),
+              onClick: goToAwsEC2,
+            },
+            {
+              name: getDisplayNameForType('awsS3'),
+              onClick: goToAwsS3,
+            },
+            {
+              name: getDisplayNameForType('awsRDS'),
+              onClick: goToAwsRDS,
+            },
+            {
+              name: getDisplayNameForType('awsSQS'),
+              onClick: goToAwsSQS,
+            },
+          ],
+        },
+      ] as EuiContextMenuPanelDescriptor[],
+    [goToAwsEC2, goToAwsRDS, goToAwsS3, goToAwsSQS, goToDocker, goToHost, goToK8]
   );
+
   const selectedText = useMemo(() => {
-    switch (nodeType) {
-      case InfraNodeType.host:
-        return i18n.translate('xpack.infra.waffle.nodeTypeSwitcher.hostsLabel', {
-          defaultMessage: 'Hosts',
-        });
-      case InfraNodeType.pod:
-        return 'Kubernetes';
-      case InfraNodeType.container:
-        return 'Docker';
-    }
+    return getDisplayNameForType(nodeType);
   }, [nodeType]);
 
   return (
@@ -107,7 +136,7 @@ export const WaffleInventorySwitcher: React.FC<WaffleInventorySwitcherProps> = (
         withTitle
         anchorPosition="downLeft"
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <EuiContextMenu initialPanelId="firstPanel" panels={panels} />
       </EuiPopover>
     </EuiFilterGroup>
   );
