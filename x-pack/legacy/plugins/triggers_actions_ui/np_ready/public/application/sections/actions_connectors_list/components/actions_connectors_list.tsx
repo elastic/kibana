@@ -22,14 +22,15 @@ import { useAppDependencies } from '../../../app_dependencies';
 import { deleteActions, loadAllActions, loadActionTypes } from '../../../lib/action_connector_api';
 import { ActionConnector, ActionConnectorTableItem, ActionTypeIndex } from '../../../../types';
 import { ConnectorAddFlyout, ConnectorEditFlyout } from '../../action_connector_form';
+import { hasDeleteActionsCapability, hasSaveActionsCapability } from '../../../lib/capabilities';
 
 export const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
     core: { http },
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
-  const canDelete = capabilities.get().actions.delete;
-  const canSave = capabilities.get().actions.save;
+  const canDelete = hasDeleteActionsCapability(capabilities.get());
+  const canSave = hasSaveActionsCapability(capabilities.get());
 
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [actions, setActions] = useState<ActionConnector[]>([]);

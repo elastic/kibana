@@ -25,6 +25,7 @@ import { registerBuiltInActionTypes } from './application/components/builtin_act
 import { AlertTypeRegistry } from './application/alert_type_registry';
 import { registerAlertTypes } from './application/sections/alert_add/alert_types';
 import { setSavedObjectsClient } from './application/lib/api';
+import { hasShowActionsCapability, hasShowAlertsCapability } from './application/lib/capabilities';
 
 export type Setup = void;
 export type Start = void;
@@ -55,8 +56,8 @@ export class Plugin implements CorePlugin<Setup, Start> {
       management: { getSection },
     } = plugins;
 
-    const canShowActions = capabilities.get().actions.show;
-    const canShowAlerts = capabilities.get().alerting.show;
+    const canShowActions = hasShowActionsCapability(capabilities.get());
+    const canShowAlerts = hasShowAlertsCapability(capabilities.get());
     if (canShowActions || canShowAlerts) {
       registerBuiltInActionTypes({
         actionTypeRegistry: this.actionTypeRegistry,
@@ -79,8 +80,8 @@ export class Plugin implements CorePlugin<Setup, Start> {
 
   public start(core: CoreStart, plugins: any) {
     const { capabilities } = plugins;
-    const canShowActions = capabilities.get().actions.show;
-    const canShowAlerts = capabilities.get().alerting.show;
+    const canShowActions = hasShowActionsCapability(capabilities.get());
+    const canShowAlerts = hasShowAlertsCapability(capabilities.get());
     // AppCore/AppPlugins to be passed on as React context
     const AppDependencies = {
       core,

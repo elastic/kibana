@@ -26,6 +26,7 @@ import { useAppDependencies } from '../../app_dependencies';
 import { connectorReducer } from './connector_reducer';
 import { ActionsConnectorsContext } from '../../context/actions_connectors_context';
 import { ActionConnector, IErrorObject } from '../../../types';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 interface ActionConnectorProps {
   initialConnector: any;
@@ -45,7 +46,7 @@ export const ActionConnectorForm = ({
   } = useAppDependencies();
 
   const { reloadConnectors } = useContext(ActionsConnectorsContext);
-  const canSave = capabilities.get().actions.save;
+  const canSave = hasSaveActionsCapability(capabilities.get());
 
   // hooks
   const [{ connector }, dispatch] = useReducer(connectorReducer, { connector: initialConnector });

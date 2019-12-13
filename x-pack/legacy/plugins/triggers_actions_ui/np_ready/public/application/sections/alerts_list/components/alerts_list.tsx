@@ -20,14 +20,15 @@ import { TypeFilter } from './type_filter';
 import { ActionTypeFilter } from './action_type_filter';
 import { loadAlerts, loadAlertTypes } from '../../../lib/alert_api';
 import { loadActionTypes } from '../../../lib/action_connector_api';
+import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 
 export const AlertsList: React.FunctionComponent = () => {
   const {
     core: { http, injectedMetadata },
     plugins: { capabilities, toastNotifications },
   } = useAppDependencies();
-  const canDelete = capabilities.get().alerting.delete;
-  const canSave = capabilities.get().alerting.save;
+  const canDelete = hasDeleteAlertsCapability(capabilities.get());
+  const canSave = hasSaveAlertsCapability(capabilities.get());
   const createAlertUiEnabled = injectedMetadata.getInjectedVar('createAlertUiEnabled');
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);

@@ -60,30 +60,6 @@ export class Plugin {
   ): Promise<PluginSetupContract> {
     this.adminClient = await core.elasticsearch.adminClient$.pipe(first()).toPromise();
 
-    plugins.xpack_main.registerFeature({
-      id: 'alerting',
-      name: 'Alerting',
-      app: ['alerting', 'kibana'],
-      privileges: {
-        all: {
-          savedObject: {
-            all: ['alert'],
-            read: [],
-          },
-          ui: ['save', 'show', 'delete'],
-          api: ['alerting-read', 'alerting-all'],
-        },
-        read: {
-          savedObject: {
-            all: [],
-            read: ['alert'],
-          },
-          ui: ['show'],
-          api: ['alerting-read'],
-        },
-      },
-    });
-
     // Encrypted attributes
     plugins.encryptedSavedObjects.registerType({
       type: 'alert',

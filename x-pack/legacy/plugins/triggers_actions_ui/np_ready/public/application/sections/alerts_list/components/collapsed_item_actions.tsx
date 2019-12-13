@@ -18,6 +18,7 @@ import {
 
 import { AlertTableItem } from '../../../../types';
 import { useAppDependencies } from '../../../app_dependencies';
+import { hasDeleteAlertsCapability, hasSaveAlertsCapability } from '../../../lib/capabilities';
 import {
   deleteAlerts,
   disableAlerts,
@@ -40,8 +41,8 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     plugins: { capabilities },
   } = useAppDependencies();
 
-  const canDelete = capabilities.get().alerting.delete;
-  const canSave = capabilities.get().alerting.save;
+  const canDelete = hasDeleteAlertsCapability(capabilities.get());
+  const canSave = hasSaveAlertsCapability(capabilities.get());
 
   const [isEnabled, setIsEnabled] = useState<boolean>(item.enabled);
   const [isMuted, setIsMuted] = useState<boolean>(item.muteAll);

@@ -9,6 +9,7 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import { BASE_PATH, Section } from './constants';
 import { TriggersActionsUIHome } from './home';
 import { useAppDependencies } from './app_dependencies';
+import { hasShowAlertsCapability } from './lib/capabilities';
 
 class ShareRouter extends Component {
   static contextTypes = {
@@ -44,7 +45,7 @@ export const AppWithoutRouter = ({ sectionsRegex }: any) => {
   const {
     plugins: { capabilities },
   } = useAppDependencies();
-  const canShowAlerts = capabilities.get().alerting.show;
+  const canShowAlerts = hasShowAlertsCapability(capabilities.get());
   const DEFAULT_SECTION = canShowAlerts ? 'alerts' : 'connectors';
   return (
     <Switch>

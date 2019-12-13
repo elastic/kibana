@@ -22,6 +22,7 @@ import { BASE_PATH, Section, routeToConnectors, routeToAlerts } from './constant
 import { breadcrumbService } from './lib/breadcrumb';
 import { docTitleService } from './lib/doc_title';
 import { useAppDependencies } from './app_dependencies';
+import { hasShowActionsCapability, hasShowAlertsCapability } from './lib/capabilities';
 
 import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
 import { AlertsList } from './sections/alerts_list/components/alerts_list';
@@ -40,8 +41,8 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     plugins: { capabilities },
   } = useAppDependencies();
 
-  const canShowActions = capabilities.get().actions.show;
-  const canShowAlerts = capabilities.get().alerting.show;
+  const canShowActions = hasShowActionsCapability(capabilities.get());
+  const canShowAlerts = hasShowAlertsCapability(capabilities.get());
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
