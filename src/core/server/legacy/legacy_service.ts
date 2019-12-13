@@ -23,7 +23,7 @@ import { CoreService } from '../../types';
 import { CoreSetup, CoreStart } from '../';
 import { InternalCoreSetup, InternalCoreStart } from '../internal_types';
 import { SavedObjectsLegacyUiExports } from '../types';
-import { Config } from '../config';
+import { Config, ConfigDeprecationProvider } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig, DevConfigType } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType } from '../http';
@@ -32,7 +32,7 @@ import { PluginsServiceSetup, PluginsServiceStart } from '../plugins';
 import { findLegacyPluginSpecs } from './plugins';
 import { LegacyPluginSpec } from './plugins/find_legacy_plugin_specs';
 import { PathConfigType } from '../path';
-import { LegacyConfig } from './config';
+import { LegacyConfig, convertLegacyDeprecationProvider } from './config';
 
 interface LegacyKbnServer {
   applyLoggingConfiguration: (settings: Readonly<Record<string, any>>) => void;
@@ -156,6 +156,18 @@ export class LegacyService implements CoreService {
       disabledPluginSpecs,
       uiExports,
     };
+
+    const deprecationProviders = await pluginSpecs
+      .map(spec => spec.getDeprecationsProvider())
+      .reduce(async (providers, current) => {
+        if (current) {
+          return [...(await providers), await convertLegacyDeprecationProvider(current)];
+        }
+        return providers;
+      }, Promise.resolve([] as ConfigDeprecationProvider[]));
+    deprecationProviders.forEach(provider =>
+      this.coreContext.configService.addDeprecationProvider('', provider)
+    );
 
     this.legacyRawConfig = pluginExtendedConfig;
 

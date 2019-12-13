@@ -19,11 +19,12 @@
 
 jest.mock('../../../legacy/server/kbn_server');
 jest.mock('../../../cli/cluster/cluster_manager');
-
+jest.mock('./config/legacy_deprecation_adapters', () => ({
+  convertLegacyDeprecationProvider: (provider: any) => Promise.resolve(provider),
+}));
 import { findLegacyPluginSpecsMock } from './legacy_service.test.mocks';
 
 import { BehaviorSubject, throwError } from 'rxjs';
-
 import { LegacyService, LegacyServiceSetupDeps, LegacyServiceStartDeps } from '.';
 // @ts-ignore: implicit any for JS file
 import MockClusterManager from '../../../cli/cluster/cluster_manager';
@@ -32,6 +33,7 @@ import { Config, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { BasePathProxyServer } from '../http';
 import { DiscoveredPlugin } from '../plugins';
+import { findLegacyPluginSpecs } from './plugins/find_legacy_plugin_specs';
 
 import { configServiceMock } from '../config/config_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
@@ -43,6 +45,7 @@ import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mo
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
+const findLegacyPluginSpecsMock: jest.Mock<typeof findLegacyPluginSpecs> = findLegacyPluginSpecs as any;
 
 let coreId: symbol;
 let env: Env;
@@ -114,6 +117,7 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.clearAllMocks();
+  findLegacyPluginSpecsMock.mockReset();
 });
 
 describe('once LegacyService is set up with connection info', () => {
@@ -392,6 +396,55 @@ test('Cannot start without setup phase', async () => {
   await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Legacy service is not setup yet."`
   );
+});
+
+describe('#discoverPlugins()', () => {
+  it('calls findLegacyPluginSpecs with correct parameters', async () => {
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.discoverPlugins();
+    expect(findLegacyPluginSpecs).toHaveBeenCalledTimes(1);
+    expect(findLegacyPluginSpecs).toHaveBeenCalledWith(expect.any(Object), logger);
+  });
+
+  it(`register legacy plugin's deprecation providers`, async () => {
+    findLegacyPluginSpecsMock.mockImplementation(
+      settings =>
+        Promise.resolve({
+          pluginSpecs: [
+            {
+              getDeprecationsProvider: () => undefined,
+            },
+            {
+              getDeprecationsProvider: () => 'providerA',
+            },
+            {
+              getDeprecationsProvider: () => 'providerB',
+            },
+          ],
+          pluginExtendedConfig: settings,
+          disabledPluginSpecs: [],
+          uiExports: [],
+        }) as any
+    );
+
+    const legacyService = new LegacyService({
+      coreId,
+      env,
+      logger,
+      configService: configService as any,
+    });
+
+    await legacyService.discoverPlugins();
+    expect(configService.addDeprecationProvider).toHaveBeenCalledTimes(2);
+    expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerA');
+    expect(configService.addDeprecationProvider).toHaveBeenCalledWith('', 'providerB');
+  });
 });
 
 test('Sets the server.uuid property on the legacy configuration', async () => {
