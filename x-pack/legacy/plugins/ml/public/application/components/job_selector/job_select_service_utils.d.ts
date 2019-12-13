@@ -6,7 +6,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { State } from 'ui/state_management/state';
+import { UrlState } from '../../util/url_state';
+
+export const getSelectedJobIds: (
+  globalState: UrlState
+) => { jobIds: string[]; selectedGroups: string[] };
 
 export declare type JobSelectService$ = BehaviorSubject<{
   selection: string[];
@@ -14,9 +18,4 @@ export declare type JobSelectService$ = BehaviorSubject<{
   resetSelection: boolean;
 }>;
 
-declare interface JobSelectService {
-  jobSelectService$: JobSelectService$;
-  unsubscribeFromGlobalState(): void;
-}
-
-export const jobSelectServiceFactory: (globalState: State) => JobSelectService;
+export const getJobSelectService$: (globalState: UrlState) => JobSelectService$;

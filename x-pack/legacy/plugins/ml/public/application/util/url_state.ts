@@ -4,55 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
+import { useEffect } from 'react';
 // @ts-ignore
 import queryString from 'query-string';
 import { decode, encode } from 'rison-node';
-
+import { BehaviorSubject, Observable } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { useHistory, useLocation } from 'react-router-dom';
 
-export const useUrlState = (accessor: string) => {
+import { Dictionary } from '../../../common/types/common';
+
+export interface UrlState {
+  urlState$: Observable<Dictionary<any>>;
+  fetch: () => void;
+  get: (attribute: string) => any;
+  save: () => void;
+  set: (attribute: string, value: any) => void;
+}
+
+export const useUrlState = (accessor: string): UrlState => {
   const history = useHistory();
   const location = useLocation();
 
-  let state: any = {};
+  let urlState: Dictionary<any> = {};
+  const urlStateSubject$ = new BehaviorSubject(urlState);
+  const urlState$ = urlStateSubject$.pipe(distinctUntilChanged(isEqual));
 
   const fetch = () => {
     try {
       const parsedQueryString = queryString.parse(location.search);
-      state = decode(parsedQueryString[accessor]);
+      urlState = decode(parsedQueryString[accessor]) as Dictionary<any>;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Could not fetch url state');
     }
   };
 
-  // initial fetch
-  fetch();
+  useEffect(() => {
+    fetch();
+    urlStateSubject$.next(urlState);
+  }, []);
 
   const get = (attribute: string) => {
-    return state[attribute];
+    return urlState[attribute];
   };
 
   const set = (attribute: string, value: any) => {
-    state[attribute] = value;
+    urlState[attribute] = value;
   };
-
-  const on = () => {};
-  const off = () => {};
 
   const save = () => {
     try {
       const parsedQueryString = queryString.parse(location.search);
       const oldLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
-      parsedQueryString[accessor] = encode(state);
+      parsedQueryString[accessor] = encode(urlState);
       // location.search = queryString.stringify(parsedQueryString);
       const newLocationSearch = queryString.stringify(parsedQueryString, { encode: false });
       if (oldLocationSearch !== newLocationSearch) {
-        setTimeout(() => {
-          history.push({
-            search: queryString.stringify(parsedQueryString),
-          });
-        }, 0);
+        history.push({
+          search: queryString.stringify(parsedQueryString),
+        });
+        urlStateSubject$.next(urlState);
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -63,9 +76,8 @@ export const useUrlState = (accessor: string) => {
   return {
     fetch,
     get,
-    on,
-    off,
     save,
     set,
+    urlState$,
   };
 };

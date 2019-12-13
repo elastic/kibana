@@ -6,12 +6,12 @@
 
 import { FC } from 'react';
 
-import { State } from 'ui/state_management/state';
+import { UrlState } from '../util/url_state';
 
 import { JobSelectService$ } from '../components/job_selector/job_select_service_utils';
 
 declare interface ExplorerProps {
-  globalState: State;
+  globalState: UrlState;
   jobSelectService$: JobSelectService$;
 }
 

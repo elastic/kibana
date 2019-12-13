@@ -16,7 +16,7 @@ import { Explorer } from '../../explorer';
 import { mlJobService } from '../../services/job_service';
 import { ExplorerAppState } from '../../explorer/reducers';
 import { explorerService } from '../../explorer/explorer_dashboard_service';
-import { jobSelectServiceFactory } from '../../components/job_selector/job_select_service_utils';
+import { getJobSelectService$ } from '../../components/job_selector/job_select_service_utils';
 import { subscribeAppStateToObservable } from '../../util/app_state_utils';
 import { useUrlState } from '../../util/url_state';
 
@@ -42,43 +42,39 @@ export const explorerRoute: MlRoute = {
   breadcrumbs,
 };
 
-const PageWrapper: FC<PageProps> = ({ location, config, deps }) => {
+const PageWrapper: FC<PageProps> = ({ config, deps }) => {
   const { context } = useResolver(undefined, undefined, config, {
     ...basicResolvers(deps),
     jobs: mlJobService.loadJobsWrapper,
   });
 
-  const appState = useUrlState('_a');
-  const globalState = useUrlState('_g');
-
-  if (appState.get('mlExplorerSwimlane') === undefined) {
-    appState.set('mlExplorerSwimlane', {});
-  }
-
-  if (appState.get('mlExplorerFilter') === undefined) {
-    appState.set('mlExplorerFilter', {});
-  }
-
-  appState.save();
-
   return (
     <PageLoader context={context}>
-      <ExplorerWrapper
-        {...{
-          globalState,
-          appState,
-        }}
-      />
+      <ExplorerStateManager />
     </PageLoader>
   );
 };
 
-const ExplorerWrapper: FC<{ globalState: any; appState: any }> = ({ globalState, appState }) => {
-  const { jobSelectService$, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
+const ExplorerStateManager: FC = () => {
+  const appState = useUrlState('_a');
+  const globalState = useUrlState('_g');
+
+  const jobSelectService$ = getJobSelectService$(globalState);
 
   useEffect(() => {
+    if (appState.get('mlExplorerSwimlane') === undefined) {
+      appState.set('mlExplorerSwimlane', {});
+    }
+
+    if (appState.get('mlExplorerFilter') === undefined) {
+      appState.set('mlExplorerFilter', {});
+    }
+
+    appState.save();
+
     const subscriptions = new Subscription();
 
+    globalState.fetch();
     const globalStateTime = globalState.get('time');
     if (globalStateTime) {
       timefilter.setTime({
@@ -90,9 +86,10 @@ const ExplorerWrapper: FC<{ globalState: any; appState: any }> = ({ globalState,
     // Pass the current URL AppState on to anomaly explorer's reactive state.
     // After this hand-off, the appState stored in explorerState$ is the single
     // source of truth.
-    const mlExplorerFilter = appState.get('mlExplorerFilter');
-    const mlExplorerSwimlane = appState.get('mlExplorerSwimlane');
-    explorerService.setAppState({ mlExplorerSwimlane, mlExplorerFilter });
+    explorerService.setAppState({
+      mlExplorerSwimlane: appState.get('mlExplorerSwimlane'),
+      mlExplorerFilter: appState.get('mlExplorerFilter'),
+    });
 
     // Now that appState in explorerState$ is the single source of truth,
     // subscribe to it and update the actual URL appState on changes.
@@ -117,9 +114,8 @@ const ExplorerWrapper: FC<{ globalState: any; appState: any }> = ({ globalState,
 
     return () => {
       subscriptions.unsubscribe();
-      unsubscribeFromGlobalState();
     };
-  });
+  }, []);
 
   return (
     <div className="ml-explorer">
