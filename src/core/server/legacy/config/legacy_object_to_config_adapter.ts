@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { ConfigPath, ObjectToConfigAdapter } from '../../config';
+import { ConfigPath } from '../../config';
+import { ObjectToConfigAdapter } from '../../config/object_to_config_adapter';
 
 /**
  * Represents logging config supported by the legacy platform.
