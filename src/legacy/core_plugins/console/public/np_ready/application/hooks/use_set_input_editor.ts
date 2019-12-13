@@ -16,15 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import { useCallback } from 'react';
 import { useEditorActionContext } from '../contexts/editor_context';
 import { instance as registry } from '../contexts/editor_context/editor_registry';
 
 export const useSetInputEditor = () => {
   const dispatch = useEditorActionContext();
 
-  return (editor: any) => {
-    dispatch({ type: 'setInputEditor', payload: editor });
-    registry.setInputEditor(editor);
-  };
+  return useCallback(
+    (editor: any) => {
+      dispatch({ type: 'setInputEditor', payload: editor });
+      registry.setInputEditor(editor);
+    },
+    [dispatch]
+  );
 };

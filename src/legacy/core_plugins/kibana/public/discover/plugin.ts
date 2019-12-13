@@ -106,11 +106,11 @@ export class DiscoverPlugin implements Plugin<DiscoverSetup, DiscoverStart> {
       this.innerAngularInitialized = true;
     };
 
-    this.initializeServices = async (test = false) => {
+    this.initializeServices = async () => {
       if (this.servicesInitialized) {
         return;
       }
-      const services = await buildServices(core, plugins, test);
+      const services = await buildServices(core, plugins);
       setServices(services);
       this.servicesInitialized = true;
     };
