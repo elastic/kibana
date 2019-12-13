@@ -17,6 +17,7 @@ import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 import { setHttpClient } from '../../public/services/api';
 setHttpClient(axios.create({ adapter: axiosXhrAdapter }));
 import sinon from 'sinon';
+jest.mock('ui/new_platform');
 let server = null;
 
 let store = null;
