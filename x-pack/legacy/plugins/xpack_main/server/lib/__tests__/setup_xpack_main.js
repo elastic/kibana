@@ -49,9 +49,8 @@ describe('setupXPackMain()', () => {
       ext() {}
     });
 
-    // Make sure we don't misspell config key.
+    // Make sure plugins doesn't consume config
     const configGetStub = sinon.stub().throws(new Error('`config.get` is called with unexpected key.'));
-    configGetStub.withArgs('xpack.xpack_main.xpack_api_polling_frequency_millis').returns(1234);
     mockServer.config.returns({ get: configGetStub });
   });
 

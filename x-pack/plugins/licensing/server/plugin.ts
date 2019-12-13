@@ -111,6 +111,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup> {
   }
 
   private createLicensePoller(clusterClient: IClusterClient, pollingFrequency: number) {
+    this.logger.debug(`Polling Elasticsearch License API with frequency ${pollingFrequency}ms.`);
+
     const intervalRefresh$ = timer(0, pollingFrequency);
 
     const { license$, refreshManually } = createLicenseUpdate(intervalRefresh$, this.stop$, () =>
