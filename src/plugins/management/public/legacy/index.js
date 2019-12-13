@@ -17,17 +17,4 @@
  * under the License.
  */
 
-export {
-  PAGE_TITLE_COMPONENT,
-  PAGE_SUBTITLE_COMPONENT,
-  PAGE_FOOTER_COMPONENT,
-} from '../../../core_plugins/kibana/public/management/sections/settings/components/default_component_registry';
-export {
-  registerSettingsComponent
-} from '../../../core_plugins/kibana/public/management/sections/settings/components/component_registry';
-export { Field } from '../../../core_plugins/kibana/public/management/sections/settings/components/field/field';
-export { SidebarNav } from './components';
-export { MANAGEMENT_BREADCRUMB } from './breadcrumbs';
-
-import { npStart } from 'ui/new_platform';
-export const management = npStart.plugins.management.legacy;
+export { management } from './sections_register';

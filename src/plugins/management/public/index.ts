@@ -17,36 +17,9 @@
  * under the License.
  */
 
-import { ManagementSection } from './section';
-import { i18n } from '@kbn/i18n';
+import { PluginInitializerContext } from 'kibana/public';
+import { ManagementPlugin } from './plugin';
 
-export const management = new ManagementSection('management', {
-  display: i18n.translate('common.ui.management.displayName', {
-    defaultMessage: 'Management',
-  }),
-});
-
-management.register('data', {
-  display: i18n.translate('common.ui.management.connectDataDisplayName', {
-    defaultMessage: 'Connect Data',
-  }),
-  order: 0,
-});
-
-management.register('elasticsearch', {
-  display: 'Elasticsearch',
-  order: 20,
-  icon: 'logoElasticsearch',
-});
-
-management.register('kibana', {
-  display: 'Kibana',
-  order: 30,
-  icon: 'logoKibana',
-});
-
-management.register('logstash', {
-  display: 'Logstash',
-  order: 30,
-  icon: 'logoLogstash',
-});
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ManagementPlugin();
+}

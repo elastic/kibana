@@ -18,8 +18,8 @@
  */
 
 import { assign } from 'lodash';
-import { IndexedArray } from '../indexed_array';
-import { capabilities } from '../capabilities';
+import { IndexedArray } from '../../../../legacy/ui/public/indexed_array';
+// import { capabilities } from '../capabilities';
 
 const listeners = [];
 
@@ -37,7 +37,7 @@ export class ManagementSection {
    * @returns {ManagementSection}
    */
 
-  constructor(id, options = {}) {
+  constructor(id, options = {}, capabilities) {
     this.display = id;
     this.id = id;
     this.items = new IndexedArray({
@@ -49,13 +49,14 @@ export class ManagementSection {
     this.tooltip = '';
     this.icon = '';
     this.url = '';
+    this.capabilities = capabilities;
 
     assign(this, options);
   }
 
   get visibleItems() {
     return this.items.inOrder.filter(item => {
-      const capabilityManagementSection = capabilities.get().management[this.id];
+      const capabilityManagementSection = this.capabilities.management[this.id];
       const itemCapability = capabilityManagementSection
         ? capabilityManagementSection[item.id]
         : null;
@@ -83,7 +84,7 @@ export class ManagementSection {
    */
 
   register(id, options = {}) {
-    const item = new ManagementSection(id, assign(options, { parent: this }));
+    const item = new ManagementSection(id, assign(options, { parent: this }), this.capabilities);
 
     if (this.hasItem(id)) {
       throw new Error(`'${id}' is already registered`);
