@@ -20,25 +20,25 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'home']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const a11y = getService('a11y');
 
-  describe('Kibana Home', () => {
+  describe('Visualize', () => {
     before(async () => {
-      await PageObjects.common.navigateToApp('home');
+      await PageObjects.common.navigateToApp('visualize');
     });
 
-    it('Kibana Home view', async () => {
+    it('visualize', async () => {
       await a11y.testAppSnapshot();
     });
 
-    it('Add Kibana sample data page', async () => {
-      await PageObjects.common.navigateToUrl('home', 'tutorial_directory/sampleData');
+    it('click on create visualize wizard', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
       await a11y.testAppSnapshot();
     });
 
-    it('Add flights sample data set', async () => {
-      await PageObjects.home.addSampleDataSet('flights');
+    it.skip('create visualize button', async () => {
+      await PageObjects.visualize.clickNewVisualization();
       await a11y.testAppSnapshot();
     });
   });

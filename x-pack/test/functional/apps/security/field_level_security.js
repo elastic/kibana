@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('user customer1 should see ssn', async function () {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await PageObjects.security.login('customer1', 'changeme');
       await PageObjects.common.navigateToApp('discover');
       await retry.tryForTime(10000, async () => {
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('user customer2 should not see ssn', async function () {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
       await PageObjects.security.login('customer2', 'changeme');
       await PageObjects.common.navigateToApp('discover');
       await retry.tryForTime(10000, async () => {
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     after(async function () {
-      await PageObjects.security.logout();
+      await PageObjects.security.forceLogout();
     });
 
   });
