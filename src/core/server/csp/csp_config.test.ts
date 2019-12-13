@@ -78,20 +78,5 @@ describe('CspConfig', () => {
         "warnLegacyBrowsers": true,
       }
     `);
-
-    cspConfig.rules = ['delta', 'epsilon', 'zeta'];
-
-    expect(cspConfig).toMatchInlineSnapshot(`
-      CspConfig {
-        "header": "delta; epsilon; zeta",
-        "rules": Array [
-          "delta",
-          "epsilon",
-          "zeta",
-        ],
-        "strict": true,
-        "warnLegacyBrowsers": true,
-      }
-    `);
   });
 });
