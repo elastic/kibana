@@ -19,7 +19,7 @@ export default function ({ getService }) {
 
   async function createSessionCookie() {
     const response = await supertest
-      .post('/api/security/v1/login')
+      .post('/internal/security/login')
       .set('kbn-xsrf', 'true')
       .send({ username: 'elastic', password: 'changeme' });
 
@@ -36,7 +36,7 @@ export default function ({ getService }) {
       const cookie = await createSessionCookie();
 
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', cookie.cookieString())
         .expect(200);
@@ -47,14 +47,14 @@ export default function ({ getService }) {
 
       // try it once
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', cookie.cookieString())
         .expect(200);
 
       // try it again to verity it isn't invalidated after a single request
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'true')
         .set('cookie', cookie.cookieString())
         .expect(200);
@@ -85,7 +85,7 @@ export default function ({ getService }) {
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const firstResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'true')
           .set('cookie', originalCookie.cookieString())
           .expect(200);
@@ -96,7 +96,7 @@ export default function ({ getService }) {
         // Request with old cookie should return another valid cookie we can use to authenticate requests
         // if it happens within 60 seconds of the refresh token being used
         const secondResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'true')
           .set('Cookie', originalCookie.cookieString())
           .expect(200);
@@ -110,14 +110,14 @@ export default function ({ getService }) {
 
         // The first new cookie should authenticate a subsequent request
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'true')
           .set('Cookie', firstNewCookie.cookieString())
           .expect(200);
 
         // The second new cookie should authenticate a subsequent request
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'true')
           .set('Cookie', secondNewCookie.cookieString())
           .expect(200);

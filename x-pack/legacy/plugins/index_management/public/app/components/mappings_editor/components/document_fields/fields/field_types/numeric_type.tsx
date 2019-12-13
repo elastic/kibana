@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
-import { UseField, FormDataProvider, NumericField } from '../../../../shared_imports';
+import { UseField, FormDataProvider, NumericField, Field } from '../../../../shared_imports';
 import {
   StoreParameter,
   IndexParameter,
@@ -21,8 +20,9 @@ import {
   CopyToParameter,
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
+import { PARAMETERS_DEFINITION } from '../../../../constants';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'copy_to':
     case 'coerce':
@@ -46,6 +46,25 @@ export const NumericType = ({ field }: Props) => {
   return (
     <>
       <EditFieldSection>
+        {/* scaling_factor */}
+        <FormDataProvider pathsToWatch="subType">
+          {formData =>
+            formData.subType === 'scaled_float' ? (
+              <EditFieldFormRow
+                title={PARAMETERS_DEFINITION.scaling_factor.title}
+                description={PARAMETERS_DEFINITION.scaling_factor.description}
+                withToggle={false}
+              >
+                <UseField
+                  path="scaling_factor"
+                  config={getFieldConfig('scaling_factor')}
+                  component={Field}
+                />
+              </EditFieldFormRow>
+            ) : null
+          }
+        </FormDataProvider>
+
         <IndexParameter hasIndexOptions={false} />
 
         <IgnoreMalformedParameter />
@@ -55,45 +74,9 @@ export const NumericType = ({ field }: Props) => {
         <EditFieldSection>
           <CoerceParameter />
 
-          {/* scaling_factor */}
-          <FormDataProvider pathsToWatch="subType">
-            {formData =>
-              formData.subType === 'scaled_float' ? (
-                <EditFieldFormRow
-                  title={
-                    <h3>
-                      {i18n.translate('xpack.idxMgmt.mappingsEditor.scalingFactorFieldTitle', {
-                        defaultMessage: 'Set scaling factor',
-                      })}
-                    </h3>
-                  }
-                  description={i18n.translate(
-                    'xpack.idxMgmt.mappingsEditor.scalingFactorFieldDescription',
-                    {
-                      defaultMessage: 'The scaling factor to use when encoding values.',
-                    }
-                  )}
-                  toggleDefaultValue={true}
-                >
-                  <UseField path="scaling_factor" config={getFieldConfig('scaling_factor')}>
-                    {scalingFactorField => (
-                      <EuiRange
-                        min={1}
-                        max={50}
-                        value={scalingFactorField.value as string}
-                        onChange={scalingFactorField.onChange as any}
-                        showInput
-                      />
-                    )}
-                  </UseField>
-                </EditFieldFormRow>
-              ) : null
-            }
-          </FormDataProvider>
-
           <DocValuesParameter />
 
-          <CopyToParameter defaultToggleValue={getDefaultValueToggle('copy_to', field.source)} />
+          <CopyToParameter defaultToggleValue={getDefaultToggleValue('copy_to', field.source)} />
 
           <NullValueParameter
             description={i18n.translate(
@@ -103,7 +86,7 @@ export const NumericType = ({ field }: Props) => {
                   'Accepts a numeric value of the same type as the field which is substituted for any explicit null values.',
               }
             )}
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
           >
             <UseField
               path="null_value"
@@ -114,7 +97,7 @@ export const NumericType = ({ field }: Props) => {
 
           <StoreParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

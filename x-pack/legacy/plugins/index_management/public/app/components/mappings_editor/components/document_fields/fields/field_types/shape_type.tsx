@@ -16,7 +16,7 @@ import {
   OrientationParameter,
 } from '../../field_parameters';
 
-const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
 
   switch (param) {
@@ -56,7 +56,7 @@ export const ShapeType = ({ field }: Props) => {
       <AdvancedSettingsWrapper>
         <EditFieldSection>
           <OrientationParameter
-            defaultToggleValue={getDefaultValueToggle('orientation', field.source)}
+            defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
           />
 
           <IgnoreZValueParameter />

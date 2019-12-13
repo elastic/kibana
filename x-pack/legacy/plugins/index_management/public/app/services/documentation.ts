@@ -51,6 +51,10 @@ class DocumentationService {
     }
     return `${this.esDocsBase}${typeDefinition.documentation[uri]}`;
   };
+
+  public getNullValueLink() {
+    return `${this.esDocsBase}/null-value.html`;
+  }
 }
 
 export const documentationService = new DocumentationService();

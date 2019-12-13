@@ -18,17 +18,13 @@ interface Props {
 
 export const CopyToParameter = ({ defaultToggleValue }: Props) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.copyToFieldTitle', {
-          defaultMessage: 'Copy to',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.copyToFieldTitle', {
+      defaultMessage: 'Copy to',
+    })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.copyToFieldDescription', {
       defaultMessage: 'Whether to copy the values of multiple fields into a group field.',
     })}
-    toggleDefaultValue={defaultToggleValue}
+    defaultToggleValue={defaultToggleValue}
   >
     <UseField path="copy_to" config={getFieldConfig('copy_to')} component={Field} />
   </EditFieldFormRow>

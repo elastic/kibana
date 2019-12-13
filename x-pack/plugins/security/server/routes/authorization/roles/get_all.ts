@@ -6,7 +6,7 @@
 
 import { RouteDefinitionParams } from '../..';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { wrapError } from '../../../errors';
+import { wrapIntoCustomErrorResponse } from '../../../errors';
 import { ElasticsearchRole, transformElasticsearchRoleToRole } from './model';
 
 export function defineGetAllRolesRoutes({ router, authz, clusterClient }: RouteDefinitionParams) {
@@ -22,11 +22,7 @@ export function defineGetAllRolesRoutes({ router, authz, clusterClient }: RouteD
         return response.ok({
           body: Object.entries(elasticsearchRoles)
             .map(([roleName, elasticsearchRole]) =>
-              transformElasticsearchRoleToRole(
-                elasticsearchRole,
-                roleName,
-                authz.getApplicationName()
-              )
+              transformElasticsearchRoleToRole(elasticsearchRole, roleName, authz.applicationName)
             )
             .sort((roleA, roleB) => {
               if (roleA.name < roleB.name) {
@@ -41,11 +37,7 @@ export function defineGetAllRolesRoutes({ router, authz, clusterClient }: RouteD
             }),
         });
       } catch (error) {
-        const wrappedError = wrapError(error);
-        return response.customError({
-          body: wrappedError,
-          statusCode: wrappedError.output.statusCode,
-        });
+        return response.customError(wrapIntoCustomErrorResponse(error));
       }
     })
   );

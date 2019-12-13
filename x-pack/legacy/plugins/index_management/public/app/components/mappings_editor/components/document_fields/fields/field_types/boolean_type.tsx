@@ -19,13 +19,13 @@ import {
 } from '../../field_parameters';
 import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'boost': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
     }
     case 'null_value': {
-      return field.null_value !== undefined && field.null_value !== '';
+      return field.null_value !== undefined;
     }
     default:
       return false;
@@ -67,7 +67,7 @@ export const BooleanType = ({ field }: Props) => {
           <DocValuesParameter />
 
           <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.booleanNullValueFieldDescription',
               {
@@ -90,7 +90,7 @@ export const BooleanType = ({ field }: Props) => {
 
           <StoreParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

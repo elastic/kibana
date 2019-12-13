@@ -19,7 +19,7 @@ import {
 } from '../../field_parameters';
 import { EditFieldSection, EditFieldFormRow, AdvancedSettingsWrapper } from '../edit_field';
 
-const getDefaultValueToggle = (param: ParameterName, field: FieldType): boolean => {
+const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean => {
   const { defaultValue } = getFieldConfig(param);
 
   switch (param) {
@@ -81,18 +81,14 @@ export const GeoShapeType = ({ field }: Props) => {
       <AdvancedSettingsWrapper>
         <EditFieldSection>
           <OrientationParameter
-            defaultToggleValue={getDefaultValueToggle('orientation', field.source)}
+            defaultToggleValue={getDefaultToggleValue('orientation', field.source)}
           />
 
           {/* points_only */}
           <EditFieldFormRow
-            title={
-              <h3>
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldTitle', {
-                  defaultMessage: 'Points only',
-                })}
-              </h3>
-            }
+            title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldTitle', {
+              defaultMessage: 'Points only',
+            })}
             description={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.geoShape.pointsOnlyFieldDescription',
               {

@@ -33,12 +33,24 @@ export type MainType =
   | 'range'
   | 'object'
   | 'nested'
-  | 'date_type'
-  | 'geo'
   | 'alias'
-  | 'specialised';
+  | 'completion'
+  | 'dense_vector'
+  | 'flattened'
+  | 'ip'
+  | 'join'
+  | 'percolator'
+  | 'rank_feature'
+  | 'rank_features'
+  | 'shape'
+  | 'search_as_you_type'
+  | 'date'
+  | 'date_nanos'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'token_count';
 
-export type SubType = NumericType | DateType | RangeType | GeoType | SpecialisedType;
+export type SubType = NumericType | RangeType;
 
 export type DataType = MainType | SubType;
 
@@ -52,30 +64,12 @@ export type NumericType =
   | 'half_float'
   | 'scaled_float';
 
-export type DateType = 'date' | 'date_nanos';
-
 export type RangeType =
   | 'integer_range'
   | 'float_range'
   | 'long_range'
   | 'double_range'
   | 'date_range';
-
-export type GeoType = 'geo_point' | 'geo_shape';
-
-export type SpecialisedType =
-  | 'alias'
-  | 'completion'
-  | 'dense_vector'
-  | 'flattened'
-  | 'ip'
-  | 'join'
-  | 'percolator'
-  | 'rank_feature'
-  | 'rank_features'
-  | 'search_as_you_type'
-  | 'shape'
-  | 'token_count';
 
 export type ParameterName =
   | 'name'
@@ -225,4 +219,5 @@ export type IndexSettings = IndexSettingsInterface | { index: IndexSettingsInter
 
 export interface ComboBoxOption {
   label: string;
+  value?: unknown;
 }

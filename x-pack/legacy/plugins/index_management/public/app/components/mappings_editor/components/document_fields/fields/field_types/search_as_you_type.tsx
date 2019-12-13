@@ -21,7 +21,7 @@ interface Props {
   field: NormalizedField;
 }
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'similarity':
     case 'term_vector': {
@@ -51,12 +51,12 @@ export const SearchAsYouType = React.memo(({ field }: Props) => {
           <NormsParameter />
 
           <SimilarityParameter
-            defaultToggleValue={getDefaultValueToggle('similarity', field.source)}
+            defaultToggleValue={getDefaultToggleValue('similarity', field.source)}
           />
 
           <TermVectorParameter
             field={field}
-            defaultToggleValue={getDefaultValueToggle('term_vector', field.source)}
+            defaultToggleValue={getDefaultToggleValue('term_vector', field.source)}
           />
 
           <StoreParameter />

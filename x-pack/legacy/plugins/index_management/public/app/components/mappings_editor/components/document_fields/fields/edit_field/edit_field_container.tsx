@@ -24,6 +24,7 @@ export const EditFieldContainer = React.memo(({ field, allFields }: Props) => {
     defaultValue: { ...field.source },
     serializer: fieldSerializer,
     deserializer: fieldDeserializer,
+    options: { stripEmptyFields: false },
   });
 
   useEffect(() => {

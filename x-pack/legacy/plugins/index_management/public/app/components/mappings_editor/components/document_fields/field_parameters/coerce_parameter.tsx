@@ -18,13 +18,9 @@ export const CoerceParameter = ({
   formFieldPath?: CoerceParameterNames;
 }) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.coerceFieldTitle', {
-          defaultMessage: 'Coerce to number',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceFieldTitle', {
+      defaultMessage: 'Coerce to number',
+    })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceDescription', {
       defaultMessage:
         'Whether to try to convert strings to numbers and truncate fractions for integers.',

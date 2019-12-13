@@ -38,6 +38,8 @@ export * from './copy_to_parameter';
 
 export * from './term_vector_parameter';
 
+export * from './type_parameter';
+
 export * from './ignore_z_value_parameter';
 
 export * from './orientation_parameter';

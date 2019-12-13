@@ -206,6 +206,9 @@ export const SharedGlobalConfigKeys = {
   path: ['data'] as const,
 };
 
+/**
+ * @public
+ */
 export type SharedGlobalConfig = RecursiveReadonly<{
   kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
   elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;

@@ -13,10 +13,8 @@ import {
   ValidationFuncArg,
   fieldFormatters,
 } from '../shared_imports';
-import { INDEX_DEFAULT } from '../constants';
-import { AliasOption, DataType } from '../types';
-
-import { ComboBoxOption } from '../types';
+import { INDEX_DEFAULT, TYPE_DEFINITION } from '../constants';
+import { AliasOption, DataType, ComboBoxOption } from '../types';
 
 const { toInt } = fieldFormatters;
 const { emptyField, containsCharsField } = fieldValidators;
@@ -46,6 +44,15 @@ const nullValueLabel = i18n.translate('xpack.idxMgmt.mappingsEditor.nullValueFie
   defaultMessage: 'Null value',
 });
 
+const nullValueValidateEmptyField = emptyField(
+  i18n.translate(
+    'xpack.idxMgmt.mappingsEditor.parameters.validations.nullValueIsRequiredErrorMessage',
+    {
+      defaultMessage: 'Specify a null value.',
+    }
+  )
+);
+
 const mapIndexToValue = ['true', true, 'false', false];
 
 const indexOptionsConfig = {
@@ -61,7 +68,9 @@ const indexOptionsConfig = {
 export const PARAMETERS_DEFINITION = {
   name: {
     fieldConfig: {
-      label: 'Field name',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.nameFieldLabel', {
+        defaultMessage: 'Field name',
+      }),
       defaultValue: '',
       validations: [
         {
@@ -96,9 +105,35 @@ export const PARAMETERS_DEFINITION = {
   },
   type: {
     fieldConfig: {
-      label: 'Field type',
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.typeFieldLabel', {
+        defaultMessage: 'Field type',
+      }),
       defaultValue: 'text',
-      type: FIELD_TYPES.SELECT,
+      deserializer: (fieldType: DataType | undefined) => {
+        if (typeof fieldType === 'string' && Boolean(fieldType)) {
+          return [
+            {
+              label: TYPE_DEFINITION[fieldType] ? TYPE_DEFINITION[fieldType].label : fieldType,
+              value: fieldType,
+            },
+          ];
+        }
+        return [];
+      },
+      serializer: (fieldType: ComboBoxOption[] | undefined) =>
+        fieldType && fieldType.length ? fieldType[0].value : fieldType,
+      validations: [
+        {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.typeIsRequiredErrorMessage',
+              {
+                defaultMessage: 'Specify a field type.',
+              }
+            )
+          ),
+        },
+      ],
     },
   },
   store: {
@@ -181,30 +216,23 @@ export const PARAMETERS_DEFINITION = {
       defaultValue: '',
       type: FIELD_TYPES.TEXT,
       label: nullValueLabel,
-      validations: [
-        {
-          validator: emptyField(
-            i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.nullValueIsRequiredErrorMessage',
-              {
-                defaultMessage: 'Specify a null value.',
-              }
-            )
-          ),
-        },
-      ],
     },
   },
   null_value_numeric: {
     fieldConfig: {
-      defaultValue: '',
+      defaultValue: '', // Needed for FieldParams typing
       label: nullValueLabel,
       formatters: [toInt],
+      validations: [
+        {
+          validator: nullValueValidateEmptyField,
+        },
+      ],
     },
   },
   null_value_boolean: {
     fieldConfig: {
-      defaultValue: '',
+      defaultValue: false,
       label: nullValueLabel,
       deserializer: (value: string | boolean) => mapIndexToValue.indexOf(value),
       serializer: (value: number) => mapIndexToValue[value],
@@ -212,8 +240,13 @@ export const PARAMETERS_DEFINITION = {
   },
   null_value_geo_point: {
     fieldConfig: {
-      defaultValue: '',
+      defaultValue: '', // Needed for FieldParams typing
       label: nullValueLabel,
+      validations: [
+        {
+          validator: nullValueValidateEmptyField,
+        },
+      ],
       deserializer: (value: any) => {
         if (value === '') {
           return value;
@@ -323,19 +356,52 @@ export const PARAMETERS_DEFINITION = {
     } as FieldConfig,
   },
   scaling_factor: {
+    title: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldTitle', {
+      defaultMessage: 'Scaling factor',
+    }),
+    description: i18n.translate(
+      'xpack.idxMgmt.mappingsEditor.parameters.scalingFactorFieldDescription',
+      {
+        defaultMessage:
+          'Values will be multiplied by this factor at index time and rounded to the closest long value. High factor values improve accuracy, but also increase space requirements.',
+      }
+    ),
     fieldConfig: {
-      defaultValue: 1.0,
+      defaultValue: '',
       type: FIELD_TYPES.NUMBER,
       formatters: [toInt],
+      label: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorLabel', {
+        defaultMessage: 'Scaling factor',
+      }),
       validations: [
         {
+          validator: emptyField(
+            i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.scalingFactorIsRequiredErrorMessage',
+              {
+                defaultMessage: 'A scaling factor is required.',
+              }
+            )
+          ),
+        },
+        {
           validator: ({ value }: ValidationFuncArg<any, number>) => {
-            if (value < 0) {
-              return { message: commonErrorMessages.smallerThanZero };
+            if (value <= 0) {
+              return {
+                message: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.validations.greaterThanZeroErrorMessage',
+                  {
+                    defaultMessage: 'The scaling factor must be greater than 0.',
+                  }
+                ),
+              };
             }
           },
         },
       ],
+      helpText: i18n.translate('xpack.idxMgmt.mappingsEditor.parameters.scalingFactorHelpText', {
+        defaultMessage: 'Value must be greater than 0.',
+      }),
     } as FieldConfig,
   },
   dynamic: {

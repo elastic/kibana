@@ -39,7 +39,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.numericSubtypeDescription', {
         defaultMessage: 'Numeric type',
       }),
-      types: ['long', 'integer', 'short', 'byte', 'double', 'float', 'half_float', 'scaled_float'],
+      types: ['byte', 'double', 'float', 'half_float', 'integer', 'long', 'scaled_float', 'short'],
     },
   },
   byte: {
@@ -89,18 +89,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       defaultMessage: 'Short',
     }),
     value: 'short',
-  },
-  date_type: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateTypeDescription', {
-      defaultMessage: 'Date type',
-    }),
-    value: 'date',
-    subTypes: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateSubtypeDescription', {
-        defaultMessage: 'Date type',
-      }),
-      types: ['date', 'date_nanos'],
-    },
   },
   date: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.dateDescription', {
@@ -159,7 +147,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
       label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.rangeSubtypeDescription', {
         defaultMessage: 'Range type',
       }),
-      types: ['integer_range', 'float_range', 'long_range', 'double_range', 'date_range'],
+      types: ['date_range', 'double_range', 'float_range', 'integer_range', 'long_range'],
     },
   },
   object: {
@@ -237,16 +225,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     }),
     value: 'long_range',
   },
-  geo: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.geoDescription', {
-      defaultMessage: 'Geo',
-    }),
-    value: 'geo',
-    subTypes: {
-      label: 'Geo type',
-      types: ['geo_point', 'geo_shape'],
-    },
-  },
   geo_point: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.geoPointDescription', {
       defaultMessage: 'Geo-point',
@@ -264,30 +242,6 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
     documentation: {
       main: '/geo-shape.html',
       learnMore: '/geo-shape.html#geoshape-indexing-approach',
-    },
-  },
-  specialised: {
-    label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.specialisedDescription', {
-      defaultMessage: 'Specialised',
-    }),
-    value: 'specialised',
-    subTypes: {
-      label: i18n.translate('xpack.idxMgmt.mappingsEditor.dataType.specialisedTypeDescription', {
-        defaultMessage: 'Specialised type',
-      }),
-      types: [
-        'completion',
-        'dense_vector',
-        'flattened',
-        'ip',
-        'join',
-        'percolator',
-        'rank_feature',
-        'rank_features',
-        'shape',
-        'search_as_you_type',
-        'token_count',
-      ],
     },
   },
   completion: {
@@ -365,18 +319,30 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
 };
 
 export const MAIN_TYPES: MainType[] = [
-  'text',
-  'keyword',
-  'numeric',
-  'boolean',
-  'date_type',
-  'binary',
-  'geo',
-  'range',
-  'object',
-  'nested',
   'alias',
-  'specialised',
+  'binary',
+  'boolean',
+  'completion',
+  'date',
+  'date_nanos',
+  'dense_vector',
+  'flattened',
+  'geo_point',
+  'geo_shape',
+  'ip',
+  'join',
+  'keyword',
+  'nested',
+  'numeric',
+  'object',
+  'percolator',
+  'range',
+  'rank_feature',
+  'rank_features',
+  'search_as_you_type',
+  'shape',
+  'text',
+  'token_count',
 ];
 
 export const MAIN_DATA_TYPE_DEFINITION: {

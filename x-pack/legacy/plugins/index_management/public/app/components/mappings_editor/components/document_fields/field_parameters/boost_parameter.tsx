@@ -17,17 +17,13 @@ interface Props {
 
 export const BoostParameter = ({ defaultToggleValue }: Props) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.boostFieldTitle', {
-          defaultMessage: 'Set boost level',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.boostFieldTitle', {
+      defaultMessage: 'Set boost level',
+    })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.boostFieldDescription', {
       defaultMessage: 'Mapping field-level query time boosting.',
     })}
-    toggleDefaultValue={defaultToggleValue}
+    defaultToggleValue={defaultToggleValue}
   >
     {/* Boost level */}
     <UseField

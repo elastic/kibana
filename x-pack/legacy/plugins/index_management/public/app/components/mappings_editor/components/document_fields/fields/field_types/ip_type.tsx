@@ -17,7 +17,7 @@ import {
 } from '../../field_parameters';
 import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
 
-const getDefaultValueToggle = (param: string, field: FieldType) => {
+const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'boost': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
@@ -46,12 +46,12 @@ export const IpType = ({ field }: Props) => {
           <DocValuesParameter />
 
           <NullValueParameter
-            defaultToggleValue={getDefaultValueToggle('null_value', field.source)}
+            defaultToggleValue={getDefaultToggleValue('null_value', field.source)}
           />
 
           <StoreParameter />
 
-          <BoostParameter defaultToggleValue={getDefaultValueToggle('boost', field.source)} />
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

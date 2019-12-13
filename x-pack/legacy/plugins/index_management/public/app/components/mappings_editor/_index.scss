@@ -13,16 +13,14 @@
 }
 
 .mappingsEditor__editField__section {
-  border-bottom: $euiBorderThin;
-  margin-bottom: $euiSizeXL;
-  padding-bottom: $euiSizeXL;
+  padding-bottom: $euiSizeL;
+
+  & + & {
+    border-bottom: $euiBorderThin;
+  }
 
   &:last-child {
     margin-bottom: 0;
-  }
-
-  + .mappingsEditor__editField__advancedSettings {
-    margin-top: $euiSizeL * -1;
   }
 }
 

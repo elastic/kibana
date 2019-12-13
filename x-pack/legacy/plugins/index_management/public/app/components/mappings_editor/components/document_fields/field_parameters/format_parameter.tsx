@@ -34,17 +34,13 @@ export const FormatParameter = ({ defaultValue, defaultToggleValue }: Props) => 
 
   return (
     <EditFieldFormRow
-      title={
-        <h3>
-          {i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldTitle', {
-            defaultMessage: 'Set format',
-          })}
-        </h3>
-      }
+      title={i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldTitle', {
+        defaultMessage: 'Set format',
+      })}
       description={i18n.translate('xpack.idxMgmt.mappingsEditor.formatParameter.fieldDescription', {
         defaultMessage: 'The date format(s) that can be parsed.',
       })}
-      toggleDefaultValue={defaultToggleValue}
+      defaultToggleValue={defaultToggleValue}
     >
       <UseField path="format" config={getFieldConfig('format')}>
         {formatField => {

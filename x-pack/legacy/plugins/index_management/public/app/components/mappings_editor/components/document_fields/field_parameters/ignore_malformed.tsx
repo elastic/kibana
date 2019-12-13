@@ -12,13 +12,9 @@ import { EditFieldFormRow } from '../fields/edit_field';
 
 export const IgnoreMalformedParameter = ({ description }: { description?: string }) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreMalformedFieldTitle', {
-          defaultMessage: 'Ignore malformed data',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreMalformedFieldTitle', {
+      defaultMessage: 'Ignore malformed data',
+    })}
     description={
       description
         ? description
