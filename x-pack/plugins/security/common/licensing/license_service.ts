@@ -65,7 +65,7 @@ export class SecurityLicenseService {
   ): SecurityLicenseFeatures {
     // If, for some reason, we cannot get license information from Elasticsearch,
     // assume worst-case and lock user at login screen.
-    if (rawLicense === undefined || !rawLicense.isAvailable) {
+    if (!rawLicense?.isAvailable) {
       return {
         showLogin: true,
         allowLogin: false,
@@ -73,7 +73,7 @@ export class SecurityLicenseService {
         allowRoleDocumentLevelSecurity: false,
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
-        layout:
+        layout: !rawLicense?.isAvailable ? 'error-xpack-unavailable' : 'error-es-unavailable',
           rawLicense !== undefined && !rawLicense.isAvailable
             ? 'error-xpack-unavailable'
             : 'error-es-unavailable',
