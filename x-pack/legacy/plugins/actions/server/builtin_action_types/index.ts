@@ -30,7 +30,9 @@ export function registerBuiltInActionTypes({
     getEmailActionType({ logger, configurationUtilities: actionsConfigUtils })
   );
   actionTypeRegistry.register(getIndexActionType({ logger }));
-  actionTypeRegistry.register(getPagerDutyActionType({ logger }));
+  actionTypeRegistry.register(
+    getPagerDutyActionType({ logger, configurationUtilities: actionsConfigUtils })
+  );
   actionTypeRegistry.register(
     getWebhookActionType({ logger, configurationUtilities: actionsConfigUtils })
   );
