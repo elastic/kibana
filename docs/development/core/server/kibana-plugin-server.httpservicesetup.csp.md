@@ -9,5 +9,5 @@ The CSP config used for Kibana.
 <b>Signature:</b>
 
 ```typescript
-csp: CspConfig;
+csp: ICspConfig;
 ```

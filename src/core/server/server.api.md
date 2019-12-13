@@ -574,10 +574,12 @@ export interface CoreStart {
     savedObjects: SavedObjectsServiceStart;
 }
 
-// @public
+// @internal
 export class CspConfig {
     // Warning: (ae-forgotten-export) The symbol "CspConfigType" needs to be exported by the entry point index.d.ts
     constructor(rawCspConfig?: Partial<CspConfigType>);
+    // (undocumented)
+    static readonly DEFAULT: CspConfig;
     readonly header: string;
     readonly rules: string[];
     readonly strict: boolean;
@@ -723,7 +725,7 @@ export interface HttpServiceSetup {
     basePath: IBasePath;
     createCookieSessionStorageFactory: <T>(cookieOptions: SessionStorageCookieOptions<T>) => Promise<SessionStorageFactory<T>>;
     createRouter: () => IRouter;
-    csp: CspConfig;
+    csp: ICspConfig;
     isTlsEnabled: boolean;
     registerAuth: (handler: AuthenticationHandler) => void;
     registerOnPostAuth: (handler: OnPostAuthHandler) => void;
@@ -751,6 +753,11 @@ export interface IContextContainer<THandler extends HandlerFunction<any>> {
 
 // @public
 export type IContextProvider<THandler extends HandlerFunction<any>, TContextName extends keyof HandlerContextType<THandler>> = (context: Partial<HandlerContextType<THandler>>, ...rest: HandlerParameters<THandler>) => Promise<HandlerContextType<THandler>[TContextName]> | HandlerContextType<THandler>[TContextName];
+
+// Warning: (ae-incompatible-release-tags) The symbol "ICspConfig" is marked as @public, but its signature references "CspConfig" which is marked as @internal
+// 
+// @public
+export type ICspConfig = Pick<CspConfig, keyof CspConfig>;
 
 // @public
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
