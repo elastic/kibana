@@ -45,7 +45,6 @@ import { capabilitiesServiceMock } from '../capabilities/capabilities_service.mo
 import { uuidServiceMock } from '../uuid/uuid_service.mock';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
-const findLegacyPluginSpecsMock: jest.Mock<typeof findLegacyPluginSpecs> = findLegacyPluginSpecs as any;
 
 let coreId: symbol;
 let env: Env;
@@ -117,7 +116,6 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.clearAllMocks();
-  findLegacyPluginSpecsMock.mockReset();
 });
 
 describe('once LegacyService is set up with connection info', () => {
