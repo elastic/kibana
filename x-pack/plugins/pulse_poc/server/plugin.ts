@@ -31,6 +31,11 @@ export class PulsePocPlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public async setup(core: CoreSetup) {
+    const logger = this.initializerContext.logger.get('pulse-service');
+    logger.info(
+      `Starting up POC pulse service, which wouldn't actually be part of Kibana in reality`
+    );
+
     const router = core.http.createRouter();
 
     router.post(
