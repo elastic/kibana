@@ -4,14 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { MachineLearningCommonProvider } from './common';
+import { MlCommon } from './common';
 
 export function MachineLearningJobWizardAdvancedProvider(
   { getService }: FtrProviderContext,
-  mlCommon: ProvidedType<typeof MachineLearningCommonProvider>
+  mlCommon: MlCommon
 ) {
   const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');

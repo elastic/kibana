@@ -183,7 +183,7 @@ async function createOrUpdateUser(newUser: User) {
 async function createUser(newUser: User) {
   const user = await callKibana<User>({
     method: 'POST',
-    url: `/api/security/v1/users/${newUser.username}`,
+    url: `/internal/security/users/${newUser.username}`,
     data: {
       ...newUser,
       enabled: true,
@@ -209,7 +209,7 @@ async function updateUser(existingUser: User, newUser: User) {
   // assign role to user
   await callKibana({
     method: 'POST',
-    url: `/api/security/v1/users/${username}`,
+    url: `/internal/security/users/${username}`,
     data: { ...existingUser, roles: allRoles }
   });
 
@@ -219,7 +219,7 @@ async function updateUser(existingUser: User, newUser: User) {
 async function getUser(username: string) {
   try {
     return await callKibana<User>({
-      url: `/api/security/v1/users/${username}`
+      url: `/internal/security/users/${username}`
     });
   } catch (e) {
     const err = e as AxiosError;
