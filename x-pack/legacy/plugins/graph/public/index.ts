@@ -12,8 +12,6 @@ import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 import { IPrivate } from 'ui/private';
 // @ts-ignore
-import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
-// @ts-ignore
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 
 import { npSetup, npStart } from 'ui/new_platform';
@@ -45,9 +43,9 @@ async function getAngularInjectedDependencies(): Promise<LegacyAngularInjectedDe
   const instance = new GraphPlugin();
   instance.setup(npSetup.core, {
     __LEGACY: {
-      xpackInfo,
       Storage,
     },
+    ...npSetup.plugins,
   });
   instance.start(npStart.core, {
     npData: npStart.plugins.data,
