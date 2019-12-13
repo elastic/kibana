@@ -32,6 +32,11 @@ export function createSavedSearchClass(services: SavedObjectKibanaServices) {
       sort: 'keyword',
       version: 'integer',
     };
+    // Order these fields to the top, the rest are alphabetical
+    public static fieldOrder = ['title', 'description'];
+    public static searchSource = true;
+
+    public id: string;
     public showInRecentlyAccessed: boolean;
 
     constructor(id: string) {
