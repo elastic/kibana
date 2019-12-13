@@ -21,6 +21,21 @@ import $ from 'jquery';
 import _ from 'lodash';
 import tableCellFilterHtml from './table_cell_filter.html';
 
+function getFormattedValue(formatter, value) {
+  let formattedValue;
+
+  if (formatter.htmlConvert) {
+    formattedValue = formatter.htmlConvert(value, false, false, {
+      origin: window.location.origin,
+      pathname: window.location.pathname,
+    });
+  } else if (formatter.textConvert) {
+    formattedValue = formatter.textConvert(value);
+  }
+
+  return formattedValue || value;
+}
+
 export function KbnRows($compile) {
   return {
     restrict: 'A',
@@ -43,12 +58,15 @@ export function KbnRows($compile) {
             }
 
             $scope.filter({
-              data: [{
-                table: $scope.table,
-                row: $scope.rows.findIndex(r => r === row),
-                column: $scope.table.columns.findIndex(c => c.id === column.id),
-                value,
-              }], negate,
+              data: [
+                {
+                  table: $scope.table,
+                  row: $scope.rows.findIndex(r => r === row),
+                  column: $scope.table.columns.findIndex(c => c.id === column.id),
+                  value,
+                },
+              ],
+              negate,
             });
           };
 
@@ -58,7 +76,7 @@ export function KbnRows($compile) {
         let $cell;
         let $cellContent;
 
-        const contentsIsDefined = (contents !== null && contents !== undefined);
+        const contentsIsDefined = contents !== null && contents !== undefined;
 
         if (column.filterable && contentsIsDefined) {
           $cell = createFilterableCell(contents);
@@ -69,7 +87,7 @@ export function KbnRows($compile) {
 
         // An AggConfigResult can "enrich" cell contents by applying a field formatter,
         // which we want to do if possible.
-        contents = contentsIsDefined ? column.formatter.convert(contents, 'html') : '';
+        contents = contentsIsDefined ? getFormattedValue(column.formatter, contents) : '';
 
         if (_.isObject(contents)) {
           if (contents.attr) {
@@ -100,10 +118,7 @@ export function KbnRows($compile) {
         $tr.append($cell);
       }
 
-      $scope.$watchMulti([
-        attr.kbnRows,
-        attr.kbnRowsMin,
-      ], function (vals) {
+      $scope.$watchMulti([attr.kbnRows, attr.kbnRowsMin], function (vals) {
         let rows = vals[0];
         const min = vals[1];
 
