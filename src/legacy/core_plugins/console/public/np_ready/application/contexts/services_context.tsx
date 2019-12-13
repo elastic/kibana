@@ -22,7 +22,7 @@ import { NotificationsSetup } from 'kibana/public';
 import { History, Storage, Settings } from '../../services';
 import { Metrics } from '../../../legacy';
 
-interface ContextValue {
+export interface ContextValue {
   services: {
     history: History;
     storage: Storage;
