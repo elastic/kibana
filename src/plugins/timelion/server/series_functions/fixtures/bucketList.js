@@ -17,13 +17,11 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import moment from 'moment';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default [
+  moment('1980-01-01T00:00:00.000Z'),
+  moment('1981-01-01T00:00:00.000Z'),
+  moment('1982-01-01T00:00:00.000Z'),
+  moment('1983-01-01T00:00:00.000Z')
+];

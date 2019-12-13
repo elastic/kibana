@@ -17,13 +17,23 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export function buildAggBody(fieldName, scriptedFields) {
+
+  const scriptedField = scriptedFields.find(field => {
+    return field.name === fieldName;
+  });
+
+  if (scriptedField) {
+    return {
+      script: {
+        source: scriptedField.script,
+        lang: scriptedField.lang
+      }
+    };
+  }
+
+  return {
+    field: fieldName
+  };
+}

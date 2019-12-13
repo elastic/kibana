@@ -17,13 +17,29 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+const fn = require(`src/plugins/timelion/server/series_functions/hide`);
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import _ from 'lodash';
+const expect = require('chai').expect;
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('hide.js', () => {
+
+  let seriesList;
+  beforeEach(() => {
+    seriesList = require('./fixtures/seriesList.js')();
+  });
+
+  it('hides a series', () => {
+    return invoke(fn, [seriesList, true]).then((r) => {
+      _.each(r.output.list, (series) => expect(series._hide).to.equal(true));
+    });
+  });
+
+  it('unhides a series', () => {
+    return invoke(fn, [seriesList, false]).then((r) => {
+      _.each(r.output.list, (series) => expect(series._hide).to.equal(false));
+    });
+  });
+
+});

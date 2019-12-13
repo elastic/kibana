@@ -17,13 +17,23 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import moment from 'moment';
+import splitInterval from './split_interval.js';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default function (tlConfig) {
+  const min = moment(tlConfig.time.from);
+  const max = moment(tlConfig.time.to);
+
+  const intervalParts = splitInterval(tlConfig.time.interval);
+
+  let current = min.startOf(intervalParts.unit);
+
+  const targetSeries = [];
+
+  while (current.valueOf() < max.valueOf()) {
+    targetSeries.push(current.valueOf());
+    current = current.add(intervalParts.count, intervalParts.unit);
+  }
+
+  return targetSeries;
+}

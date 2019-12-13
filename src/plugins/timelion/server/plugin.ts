@@ -17,11 +17,12 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext, RecursiveReadonly } from '../../../../src/core/server';
+import { CoreSetup, PluginInitializerContext, RecursiveReadonly } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { ConfigSchema } from './config';
+import loadFunctions from './lib/load_functions';
 
 /**
  * Describes public Timelion plugin contract returned at the `setup` stage.
@@ -36,11 +37,17 @@ export interface PluginSetupContract {
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof ConfigSchema>>()
       .pipe(first())
       .toPromise();
+
+    const globalConfig = await this.initializerContext.config.legacy.globalConfig$.pipe(first()).toPromise();
+    const shardTimeout = globalConfig.elasticsearch.shardTimeout.asMilliseconds();
+    const allowedUrls = config.graphiteUrls;
+
+    const functions = loadFunctions('series_functions');
 
     return deepFreeze({ uiEnabled: config.ui.enabled });
   }

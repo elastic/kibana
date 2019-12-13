@@ -17,13 +17,28 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import _ from 'lodash';
+import configFile from '../../timelion.json';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default function () {
+  function flattenWith(dot, nestedObj, flattenArrays) {
+    const stack = []; // track key stack
+    const flatObj = {};
+    (function flattenObj(obj) {
+      _.keys(obj).forEach(function (key) {
+        stack.push(key);
+        if (!flattenArrays && Array.isArray(obj[key])) flatObj[stack.join(dot)] = obj[key];
+        else if (_.isObject(obj[key])) flattenObj(obj[key]);
+        else flatObj[stack.join(dot)] = obj[key];
+        stack.pop();
+      });
+    }(nestedObj));
+    return flatObj;
+  }
+
+  const timelionDefaults = flattenWith('.', configFile);
+  return _.reduce(timelionDefaults, (result, value, key) => {
+    result['timelion:' + key] = value;
+    return result;
+  }, {});
+}

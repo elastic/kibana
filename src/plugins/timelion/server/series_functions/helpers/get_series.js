@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import _ from 'lodash';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default function getSeries(name, buckets, points) {
+  const fill = _.partial(_.zip, _.map(buckets, function (bucket) { return bucket.valueOf(); }));
+  return {
+    data: fill(points),
+    type: 'series',
+    label: name
+  };
+}

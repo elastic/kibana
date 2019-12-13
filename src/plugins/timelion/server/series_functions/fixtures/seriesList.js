@@ -17,13 +17,16 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import buckets from './bucketList';
+import getSeries from '../helpers/get_series';
+import getSeriesList from '../helpers/get_series_list';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default function () {
+  return getSeriesList([
+    getSeries('Negative', buckets,     [-51, 17, 82, 20]),
+    getSeries('Nice', buckets,         [100, 50, 50, 20]),
+    getSeries('All the same', buckets, [1, 1, 1, 1]),
+    getSeries('Decimals', buckets,     [3.1415926535, 2, 1.439, 0.3424235]),
+    getSeries('PowerOfTen', buckets,   [10, 100, 10, 1]),
+  ]);
+}

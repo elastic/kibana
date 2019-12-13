@@ -17,13 +17,18 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import _ from 'lodash';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default function (func) {
+  const functions = {};
+  functions[func.name] = func;
+  if (func.aliases) {
+    _.each(func.aliases, function (alias) {
+      const aliasFn = _.clone(func);
+      aliasFn.isAlias = true;
+      functions[alias] = aliasFn;
+    });
+  }
+
+  return functions;
+}

@@ -17,13 +17,23 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import alter from '../lib/alter.js';
+import Chainable from '../lib/classes/chainable';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default new Chainable('first', {
+  args: [
+    {
+      name: 'inputSeries',
+      types: ['seriesList']
+    }
+  ],
+  help: i18n.translate('timelion.help.functions.firstHelpText', {
+    defaultMessage: `This is an internal function that simply returns the input seriesList. Don't use this`,
+  }),
+  fn: function firstFn(args) {
+    return alter(args, function (eachSeries) {
+      return eachSeries;
+    });
+  }
+});

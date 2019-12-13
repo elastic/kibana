@@ -17,13 +17,26 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+// invokes a series_function with the specified arguments
+import _ from 'lodash';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import indexArguments from '../../handlers/lib/index_arguments';
+
+export default function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
+  const tlConfig = _.merge(require('../fixtures/tlConfig')(), tlConfigOverrides);
+
+  return Promise.all(args).then(function (args) {
+    args.byName = indexArguments(fnDef, args);
+
+    const input = _.cloneDeep(args);
+
+    return Promise.resolve(fnDef.originalFn(args, tlConfig)).then(function (output) {
+
+      const result = {
+        output: output,
+        input: input
+      };
+      return result;
+    });
+  });
+}

@@ -17,13 +17,26 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import _ from 'lodash';
+import buildTarget from '../../lib/build_target.js';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default function tlConfigFn(setup) {
+  let targetSeries;
+
+  let tlConfig = {
+    getTargetSeries: function () {
+      return _.map(targetSeries, function (bucket) { // eslint-disable-line no-use-before-define
+        return [bucket, null];
+      });
+    },
+    setTargetSeries: function () {
+      targetSeries = buildTarget(this);
+    },
+    writeTargetSeries: function (series) {
+      targetSeries = _.map(series, function (p) {return p[0];});
+    }
+  };
+
+  tlConfig = _.extend(tlConfig, setup);
+  return tlConfig;
+}

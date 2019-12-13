@@ -16,14 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { TimelionFunctionInterface } from '../types';
 
-import { schema } from '@kbn/config-schema';
+declare function loadFunctions(directory: string): LoadFunctions;
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export interface LoadFunctions {
+  [key: string]: TimelionFunctionInterface;
+}
+
+// eslint-disable-next-line import/no-default-export
+export default loadFunctions;

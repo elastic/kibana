@@ -17,13 +17,28 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+const fn = require(`src/plugins/timelion/server/series_functions/static`);
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import _ from 'lodash';
+const expect = require('chai').expect;
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('static.js', () => {
+  it('returns a series in which all numbers are the same', () => {
+    return invoke(fn, [5]).then((r) => {
+      expect(_.unique(_.map(r.output.list[0].data, 1))).to.eql([5]);
+    });
+  });
+
+  it('plots a provided series', () => {
+    return invoke(fn, ['4:3:2:1']).then((r) => {
+      expect(_.map(r.output.list[0].data, 1)).to.eql([4, 3, 2, 1]);
+    });
+  });
+
+  it('leaves interpolation up to the data source wrapper', () => {
+    return invoke(fn, ['1:4']).then((r) => {
+      expect(_.map(r.output.list[0].data, 1)).to.eql([1, 4]);
+    });
+  });
+});

@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+// **DON'T USE THIS**
+// Performing joins/math with other sets that don't match perfectly will be wrong
+// Does not resample at all.
+export default function none(dataTuples) {
+  return dataTuples;
+}

@@ -17,13 +17,23 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import _ from 'lodash';
+import { IRouter } from 'kibana/server';
+import { TimelionFunctionInterface } from '../types';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export function functionsRoute(router: IRouter, functions: TimelionFunctionInterface[]) {
+  router.get(
+    {
+      path: '/api/timelion/functions',
+      validate: false,
+    },
+    async (context, request, response) => {
+      const functionArray = _.map(functions, function(val, key) {
+        // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
+        return _.extend({}, val, { name: key });
+      });
+
+      return response.ok({ body: _.sortBy(functionArray, 'name') });
+    }
+  );
+}

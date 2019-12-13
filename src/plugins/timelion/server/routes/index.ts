@@ -16,14 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Legacy } from 'kibana';
 
-import { schema } from '@kbn/config-schema';
+// @ts-ignore
+import { runRoute } from './run';
+// @ts-ignore
+import { functionsRoute } from './functions';
+// @ts-ignore
+import { validateEsRoute } from './validate_es';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export function initRoutes(server: Legacy.Server) {
+  runRoute(server);
+  functionsRoute(server);
+  validateEsRoute(server);
+}

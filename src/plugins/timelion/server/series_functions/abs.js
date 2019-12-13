@@ -17,13 +17,28 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
+import alter from '../lib/alter.js';
+import _ from 'lodash';
+import Chainable from '../lib/classes/chainable';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+export default new Chainable('abs', {
+  args: [
+    {
+      name: 'inputSeries',
+      types: ['seriesList']
+    }
+  ],
+  help: i18n.translate('timelion.help.functions.absHelpText', {
+    defaultMessage: 'Return the absolute value of each value in the series list',
+  }),
+  fn: function absFn(args) {
+    return alter(args, function (eachSeries) {
+      const data = _.map(eachSeries.data, function (point) {
+        return [point[0], Math.abs(point[1])];
+      });
+      eachSeries.data = data;
+      return eachSeries;
+    });
+  }
+});

@@ -17,13 +17,29 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+const fn = require(`src/plugins/timelion/server/series_functions/precision`);
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+import _ from 'lodash';
+const expect = require('chai').expect;
+import invoke from './helpers/invoke_series_fn.js';
+
+describe('precision.js', () => {
+
+  let seriesList;
+  beforeEach(() => {
+    seriesList = require('./fixtures/seriesList.js')();
+  });
+
+  it('keeps the min of a series vs a number', () => {
+    return invoke(fn, [seriesList, 2]).then((r) => {
+      expect(_.map(r.output.list[3].data, 1)).to.eql([3.14, 2, 1.43, 0.34]);
+    });
+  });
+
+
+  it('Adds a _meta to describe the precision to display', () => {
+    return invoke(fn, [seriesList, 2]).then((r) => {
+      expect(r.output.list[3]._meta.precision).to.eql(2);
+    });
+  });
+});

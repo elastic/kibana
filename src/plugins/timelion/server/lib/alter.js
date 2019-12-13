@@ -17,13 +17,33 @@
  * under the License.
  */
 
-import { schema } from '@kbn/config-schema';
+import Bluebird from 'bluebird';
+import _ from 'lodash';
 
-export const ConfigSchema = schema.object(
-  {
-    ui: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    graphiteUrls: schema.arrayOf(schema.string()),
-  },
-  // This option should be removed as soon as we entirely migrate config from legacy Timelion plugin.
-  { allowUnknowns: true }
-);
+/* @param {Array} args
+ * - args[0] must be a seriesList
+
+ * @params {Function} fn - Function to apply to each series in the seriesList
+ * @return {seriesList}
+ */
+
+export default function alter(args, fn) {
+  // In theory none of the args should ever be promises. This is probably a waste.
+  return Bluebird.all(args).then(function (args) {
+
+    const seriesList = args.shift();
+
+    if (seriesList.type !== 'seriesList') {
+      throw new Error ('args[0] must be a seriesList');
+    }
+
+    const list = _.chain(seriesList.list).map(function (series) {
+      return fn.apply(this, [series].concat(args));
+    }).flatten().value();
+
+    seriesList.list = list;
+    return seriesList;
+  }).catch(function (e) {
+    throw e;
+  });
+}
