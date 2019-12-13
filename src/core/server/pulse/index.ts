@@ -64,6 +64,15 @@ export class PulseService {
       this.loadInstructions().catch(err => console.error(err.stack));
     }, 1000);
 
+    // eslint-disable-next-line no-console
+    console.log('Will attempt first telemetry collection in 5 seconds...');
+    setTimeout(() => {
+      setInterval(() => {
+        // eslint-disable-next-line no-console
+        this.sendTelemetry().catch(err => console.error(err.stack));
+      }, 5000);
+    }, 5000);
+
     return {
       getChannel: (id: string) => {
         const channel = this.channels.get(id);
@@ -121,6 +130,43 @@ export class PulseService {
       );
     } else if (this.retriableErrors > 120) {
       this.retriableErrors = 0;
+    }
+  }
+
+  private async sendTelemetry() {
+    const url = 'http://localhost:5601/api/pulse_poc/intake/123';
+    let response: any;
+    try {
+      response = await fetch(url, {
+        method: 'post',
+        headers: {
+          'content-type': 'application/json',
+          'kbn-xsrf': 'true',
+        },
+        body: JSON.stringify({
+          channels: [
+            {
+              channel_id: 'default',
+              records: [{}],
+            },
+          ],
+        }),
+      });
+    } catch (err) {
+      if (!err.message.includes('ECONNREFUSED')) {
+        throw err;
+      }
+      // the instructions polling should handle logging for this case, yay for POCs
+      return;
+    }
+    if (response.status === 503) {
+      // the instructions polling should handle logging for this case, yay for POCs
+      return;
+    }
+
+    if (response.status !== 200) {
+      const responseBody = await response.text();
+      throw new Error(`${response.status}: ${responseBody}`);
     }
   }
 }
