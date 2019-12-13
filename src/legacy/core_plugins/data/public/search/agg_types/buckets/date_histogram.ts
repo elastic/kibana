@@ -66,7 +66,7 @@ export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHist
 
 export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggConfig>({
   name: BUCKET_TYPES.DATE_HISTOGRAM,
-  title: i18n.translate('common.ui.aggTypes.buckets.dateHistogramTitle', {
+  title: i18n.translate('data.search.aggs.buckets.dateHistogramTitle', {
     defaultMessage: 'Date Histogram',
   }),
   ordered: {
@@ -80,7 +80,7 @@ export const dateHistogramBucketAgg = new BucketAggType<IBucketDateHistogramAggC
     }
 
     const field = agg.getFieldDisplayName();
-    return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
+    return i18n.translate('data.search.aggs.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',
       values: {
         fieldName: field,

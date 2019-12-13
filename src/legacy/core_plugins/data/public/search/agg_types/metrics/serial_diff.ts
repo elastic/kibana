@@ -23,11 +23,11 @@ import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
 
-const serialDiffTitle = i18n.translate('common.ui.aggTypes.metrics.serialDiffTitle', {
+const serialDiffTitle = i18n.translate('data.search.aggs.metrics.serialDiffTitle', {
   defaultMessage: 'Serial Diff',
 });
 
-const serialDiffLabel = i18n.translate('common.ui.aggTypes.metrics.serialDiffLabel', {
+const serialDiffLabel = i18n.translate('data.search.aggs.metrics.serialDiffLabel', {
   defaultMessage: 'serial diff',
 });
 

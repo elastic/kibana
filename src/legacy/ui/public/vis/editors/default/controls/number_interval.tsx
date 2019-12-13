@@ -28,14 +28,14 @@ import { AggParamEditorProps } from '..';
 const label = (
   <>
     <FormattedMessage
-      id="common.ui.aggTypes.numberInterval.minimumIntervalLabel"
+      id="data.search.aggs.numberInterval.minimumIntervalLabel"
       defaultMessage="Minimum interval"
     />{' '}
     <EuiIconTip
       position="right"
       content={
         <FormattedMessage
-          id="common.ui.aggTypes.numberInterval.minimumIntervalTooltip"
+          id="data.search.aggs.numberInterval.minimumIntervalTooltip"
           defaultMessage="Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}"
           values={{ histogramMaxBars: 'histogram:maxBars' }}
         />
@@ -86,7 +86,7 @@ function NumberIntervalParamEditor({
         onBlur={setTouched}
         fullWidth={true}
         compressed
-        placeholder={i18n.translate('common.ui.aggTypes.numberInterval.selectIntervalPlaceholder', {
+        placeholder={i18n.translate('data.search.aggs.numberInterval.selectIntervalPlaceholder', {
           defaultMessage: 'Enter an interval',
         })}
       />

@@ -38,7 +38,7 @@ const valueProps = {
     const customLabel = this.getParam('customLabel');
     const label = customLabel || this.getFieldDisplayName();
 
-    return i18n.translate('common.ui.aggTypes.metrics.percentiles.valuePropsLabel', {
+    return i18n.translate('data.search.aggs.metrics.percentiles.valuePropsLabel', {
       defaultMessage: '{percentile} percentile of {label}',
       values: { percentile: ordinalSuffix(this.key), label },
     });
@@ -47,11 +47,11 @@ const valueProps = {
 
 export const percentilesMetricAgg = new MetricAggType<IPercentileAggConfig>({
   name: METRIC_TYPES.PERCENTILES,
-  title: i18n.translate('common.ui.aggTypes.metrics.percentilesTitle', {
+  title: i18n.translate('data.search.aggs.metrics.percentilesTitle', {
     defaultMessage: 'Percentiles',
   }),
   makeLabel(agg) {
-    return i18n.translate('common.ui.aggTypes.metrics.percentilesLabel', {
+    return i18n.translate('data.search.aggs.metrics.percentilesLabel', {
       defaultMessage: 'Percentiles of {field}',
       values: { field: agg.getFieldDisplayName() },
     });

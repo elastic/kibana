@@ -36,7 +36,7 @@ function MetricAggParamEditor({
   setTouched,
   metricAggs = [],
 }: AggParamEditorProps<string>) {
-  const label = i18n.translate('common.ui.aggTypes.metricLabel', {
+  const label = i18n.translate('data.search.aggs.metricLabel', {
     defaultMessage: 'Metric',
   });
   const isValid = !!value;

@@ -23,11 +23,11 @@ import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
 
-const cumulativeSumLabel = i18n.translate('common.ui.aggTypes.metrics.cumulativeSumLabel', {
+const cumulativeSumLabel = i18n.translate('data.search.aggs.metrics.cumulativeSumLabel', {
   defaultMessage: 'cumulative sum',
 });
 
-const cumulativeSumTitle = i18n.translate('common.ui.aggTypes.metrics.cumulativeSumTitle', {
+const cumulativeSumTitle = i18n.translate('data.search.aggs.metrics.cumulativeSumTitle', {
   defaultMessage: 'Cumulative Sum',
 });
 

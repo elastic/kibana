@@ -25,12 +25,12 @@ import { METRIC_TYPES } from './metric_agg_types';
 
 export const countMetricAgg = new MetricAggType({
   name: METRIC_TYPES.COUNT,
-  title: i18n.translate('common.ui.aggTypes.metrics.countTitle', {
+  title: i18n.translate('data.search.aggs.metrics.countTitle', {
     defaultMessage: 'Count',
   }),
   hasNoDsl: true,
   makeLabel() {
-    return i18n.translate('common.ui.aggTypes.metrics.countLabel', {
+    return i18n.translate('data.search.aggs.metrics.countLabel', {
       defaultMessage: 'Count',
     });
   },

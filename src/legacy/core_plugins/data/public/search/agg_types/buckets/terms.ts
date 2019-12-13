@@ -66,7 +66,7 @@ const [orderAggSchema] = new Schemas([
   },
 ]).all;
 
-const termsTitle = i18n.translate('common.ui.aggTypes.buckets.termsTitle', {
+const termsTitle = i18n.translate('data.search.aggs.buckets.termsTitle', {
   defaultMessage: 'Terms',
 });
 
@@ -117,11 +117,11 @@ export const termsBucketAgg = new BucketAggType({
       nestedSearchSource.setField('aggs', filterAgg);
 
       const request = inspectorAdapters.requests.start(
-        i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketTitle', {
+        i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
           defaultMessage: 'Other bucket',
         }),
         {
-          description: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketDescription', {
+          description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
             defaultMessage:
               'This request counts the number of documents that fall ' +
               'outside the criterion of the data buckets.',
@@ -219,13 +219,13 @@ export const termsBucketAgg = new BucketAggType({
       editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [
         {
-          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
+          text: i18n.translate('data.search.aggs.buckets.terms.orderDescendingTitle', {
             defaultMessage: 'Descending',
           }),
           value: 'desc',
         },
         {
-          text: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
+          text: i18n.translate('data.search.aggs.buckets.terms.orderAscendingTitle', {
             defaultMessage: 'Ascending',
           }),
           value: 'asc',
@@ -247,10 +247,10 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'otherBucketLabel',
       type: 'string',
-      default: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketLabel', {
+      default: i18n.translate('data.search.aggs.buckets.terms.otherBucketLabel', {
         defaultMessage: 'Other',
       }),
-      displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForOtherBucketLabel', {
+      displayName: i18n.translate('data.search.aggs.otherBucket.labelForOtherBucketLabel', {
         defaultMessage: 'Label for other bucket',
       }),
       shouldShow: agg => agg.getParam('otherBucket'),
@@ -264,13 +264,13 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'missingBucketLabel',
-      default: i18n.translate('common.ui.aggTypes.buckets.terms.missingBucketLabel', {
+      default: i18n.translate('data.search.aggs.buckets.terms.missingBucketLabel', {
         defaultMessage: 'Missing',
         description: `Default label used in charts when documents are missing a field.
           Visible when you create a chart with a terms aggregation and enable "Show missing values"`,
       }),
       type: 'string',
-      displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
+      displayName: i18n.translate('data.search.aggs.otherBucket.labelForMissingValuesLabel', {
         defaultMessage: 'Label for missing values',
       }),
       shouldShow: agg => agg.getParam('missingBucket'),
@@ -278,7 +278,7 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'exclude',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.excludeLabel', {
+      displayName: i18n.translate('data.search.aggs.buckets.terms.excludeLabel', {
         defaultMessage: 'Exclude',
       }),
       type: 'string',
@@ -288,7 +288,7 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'include',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.includeLabel', {
+      displayName: i18n.translate('data.search.aggs.buckets.terms.includeLabel', {
         defaultMessage: 'Include',
       }),
       type: 'string',

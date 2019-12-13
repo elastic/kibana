@@ -39,12 +39,12 @@ const metricAggFilter = [
   '!geo_centroid',
 ];
 
-const metricAggTitle = i18n.translate('common.ui.aggTypes.metrics.metricAggTitle', {
+const metricAggTitle = i18n.translate('data.search.aggs.metrics.metricAggTitle', {
   defaultMessage: 'Metric agg',
 });
 
 const subtypeLabel = i18n.translate(
-  'common.ui.aggTypes.metrics.parentPipelineAggregationsSubtypeTitle',
+  'data.search.aggs.metrics.parentPipelineAggregationsSubtypeTitle',
   {
     defaultMessage: 'Parent Pipeline Aggregations',
   }

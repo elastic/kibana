@@ -65,14 +65,11 @@ export function TopAggregateParamEditor({
 
   const label = (
     <>
-      <FormattedMessage
-        id="common.ui.aggTypes.aggregateWithLabel"
-        defaultMessage="Aggregate with"
-      />{' '}
+      <FormattedMessage id="data.search.aggs.aggregateWithLabel" defaultMessage="Aggregate with" />{' '}
       <EuiIconTip
         position="right"
         type="questionInCircle"
-        content={i18n.translate('common.ui.aggTypes.aggregateWithTooltip', {
+        content={i18n.translate('data.search.aggs.aggregateWithTooltip', {
           defaultMessage:
             'Choose a strategy for combining multiple hits or a multi-valued field into a single metric.',
         })}

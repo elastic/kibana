@@ -32,7 +32,7 @@ import {
   TEXT_CONTEXT_TYPE,
 } from '../../../../../../../plugins/data/public';
 
-const dateRangeTitle = i18n.translate('common.ui.aggTypes.buckets.dateRangeTitle', {
+const dateRangeTitle = i18n.translate('data.search.aggs.buckets.dateRangeTitle', {
   defaultMessage: 'Date Range',
 });
 

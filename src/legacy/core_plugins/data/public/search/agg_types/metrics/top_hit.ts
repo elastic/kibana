@@ -53,14 +53,14 @@ aggTypeFieldFilters.addFilter((field, aggConfig) => {
 
 export const topHitMetricAgg = new MetricAggType({
   name: METRIC_TYPES.TOP_HITS,
-  title: i18n.translate('common.ui.aggTypes.metrics.topHitTitle', {
+  title: i18n.translate('data.search.aggs.metrics.topHitTitle', {
     defaultMessage: 'Top Hit',
   }),
   makeLabel(aggConfig) {
-    const lastPrefixLabel = i18n.translate('common.ui.aggTypes.metrics.topHit.lastPrefixLabel', {
+    const lastPrefixLabel = i18n.translate('data.search.aggs.metrics.topHit.lastPrefixLabel', {
       defaultMessage: 'Last',
     });
-    const firstPrefixLabel = i18n.translate('common.ui.aggTypes.metrics.topHit.firstPrefixLabel', {
+    const firstPrefixLabel = i18n.translate('data.search.aggs.metrics.topHit.firstPrefixLabel', {
       defaultMessage: 'First',
     });
 
@@ -115,7 +115,7 @@ export const topHitMetricAgg = new MetricAggType({
       editorComponent: wrapWithInlineComp(TopAggregateParamEditor),
       options: [
         {
-          text: i18n.translate('common.ui.aggTypes.metrics.topHit.minLabel', {
+          text: i18n.translate('data.search.aggs.metrics.topHit.minLabel', {
             defaultMessage: 'Min',
           }),
           isCompatible: isNumericFieldSelected,
@@ -123,7 +123,7 @@ export const topHitMetricAgg = new MetricAggType({
           value: 'min',
         },
         {
-          text: i18n.translate('common.ui.aggTypes.metrics.topHit.maxLabel', {
+          text: i18n.translate('data.search.aggs.metrics.topHit.maxLabel', {
             defaultMessage: 'Max',
           }),
           isCompatible: isNumericFieldSelected,
@@ -131,7 +131,7 @@ export const topHitMetricAgg = new MetricAggType({
           value: 'max',
         },
         {
-          text: i18n.translate('common.ui.aggTypes.metrics.topHit.sumLabel', {
+          text: i18n.translate('data.search.aggs.metrics.topHit.sumLabel', {
             defaultMessage: 'Sum',
           }),
           isCompatible: isNumericFieldSelected,
@@ -139,7 +139,7 @@ export const topHitMetricAgg = new MetricAggType({
           value: 'sum',
         },
         {
-          text: i18n.translate('common.ui.aggTypes.metrics.topHit.averageLabel', {
+          text: i18n.translate('data.search.aggs.metrics.topHit.averageLabel', {
             defaultMessage: 'Average',
           }),
           isCompatible: isNumericFieldSelected,
@@ -147,7 +147,7 @@ export const topHitMetricAgg = new MetricAggType({
           value: 'average',
         },
         {
-          text: i18n.translate('common.ui.aggTypes.metrics.topHit.concatenateLabel', {
+          text: i18n.translate('data.search.aggs.metrics.topHit.concatenateLabel', {
             defaultMessage: 'Concatenate',
           }),
           isCompatible(aggConfig: IMetricAggConfig) {
@@ -186,13 +186,13 @@ export const topHitMetricAgg = new MetricAggType({
       editorComponent: OrderParamEditor,
       options: [
         {
-          text: i18n.translate('common.ui.aggTypes.metrics.topHit.descendingLabel', {
+          text: i18n.translate('data.search.aggs.metrics.topHit.descendingLabel', {
             defaultMessage: 'Descending',
           }),
           value: 'desc',
         },
         {
-          text: i18n.translate('common.ui.aggTypes.metrics.topHit.ascendingLabel', {
+          text: i18n.translate('data.search.aggs.metrics.topHit.ascendingLabel', {
             defaultMessage: 'Ascending',
           }),
           value: 'asc',

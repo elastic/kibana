@@ -22,11 +22,11 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const geoCentroidTitle = i18n.translate('common.ui.aggTypes.metrics.geoCentroidTitle', {
+const geoCentroidTitle = i18n.translate('data.search.aggs.metrics.geoCentroidTitle', {
   defaultMessage: 'Geo Centroid',
 });
 
-const geoCentroidLabel = i18n.translate('common.ui.aggTypes.metrics.geoCentroidLabel', {
+const geoCentroidLabel = i18n.translate('data.search.aggs.metrics.geoCentroidLabel', {
   defaultMessage: 'Geo Centroid',
 });
 

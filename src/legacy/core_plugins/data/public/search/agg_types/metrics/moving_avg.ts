@@ -23,11 +23,11 @@ import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { makeNestedLabel } from './lib/make_nested_label';
 import { METRIC_TYPES } from './metric_agg_types';
 
-const movingAvgTitle = i18n.translate('common.ui.aggTypes.metrics.movingAvgTitle', {
+const movingAvgTitle = i18n.translate('data.search.aggs.metrics.movingAvgTitle', {
   defaultMessage: 'Moving Avg',
 });
 
-const movingAvgLabel = i18n.translate('common.ui.aggTypes.metrics.movingAvgLabel', {
+const movingAvgLabel = i18n.translate('data.search.aggs.metrics.movingAvgLabel', {
   defaultMessage: 'moving avg',
 });
 

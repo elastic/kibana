@@ -22,7 +22,7 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const averageTitle = i18n.translate('common.ui.aggTypes.metrics.averageTitle', {
+const averageTitle = i18n.translate('data.search.aggs.metrics.averageTitle', {
   defaultMessage: 'Average',
 });
 
@@ -30,7 +30,7 @@ export const avgMetricAgg = new MetricAggType({
   name: METRIC_TYPES.AVG,
   title: averageTitle,
   makeLabel: aggConfig => {
-    return i18n.translate('common.ui.aggTypes.metrics.averageLabel', {
+    return i18n.translate('data.search.aggs.metrics.averageLabel', {
       defaultMessage: 'Average {field}',
       values: { field: aggConfig.getFieldDisplayName() },
     });

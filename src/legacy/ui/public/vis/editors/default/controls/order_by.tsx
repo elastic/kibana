@@ -31,7 +31,7 @@ import { AggParamEditorProps } from '..';
 const DEFAULT_VALUE = '_key';
 const DEFAULT_OPTIONS = [
   {
-    text: i18n.translate('common.ui.aggTypes.orderAgg.alphabeticalLabel', {
+    text: i18n.translate('data.search.aggs.orderAgg.alphabeticalLabel', {
       defaultMessage: 'Alphabetical',
     }),
     value: DEFAULT_VALUE,
@@ -62,7 +62,7 @@ function OrderByParamEditor({
   setTouched,
   metricAggs,
 }: AggParamEditorProps<string>) {
-  const label = i18n.translate('common.ui.aggTypes.orderAgg.orderByLabel', {
+  const label = i18n.translate('data.search.aggs.orderAgg.orderByLabel', {
     defaultMessage: 'Order by',
   });
   const isValid = !!value;

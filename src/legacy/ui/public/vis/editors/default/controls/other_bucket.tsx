@@ -26,10 +26,10 @@ function OtherBucketParamEditor(props: AggParamEditorProps<boolean>) {
   return (
     <SwitchParamEditor
       dataTestSubj="otherBucketSwitch"
-      displayLabel={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesLabel', {
+      displayLabel={i18n.translate('data.search.aggs.otherBucket.groupValuesLabel', {
         defaultMessage: 'Group other values in separate bucket',
       })}
-      displayToolTip={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesTooltip', {
+      displayToolTip={i18n.translate('data.search.aggs.otherBucket.groupValuesTooltip', {
         defaultMessage:
           'Values not in the top N are grouped in this bucket. ' +
           "To include documents with missing values, enable 'Show missing values'.",

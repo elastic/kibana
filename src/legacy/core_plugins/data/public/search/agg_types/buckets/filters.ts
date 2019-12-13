@@ -32,7 +32,7 @@ import { getQueryLog, esQuery } from '../../../../../../../plugins/data/public';
 const config = chrome.getUiSettingsClient();
 const storage = new Storage(window.localStorage);
 
-const filtersTitle = i18n.translate('common.ui.aggTypes.buckets.filtersTitle', {
+const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
   defaultMessage: 'Filters',
   description:
     'The name of an aggregation, that allows to specify multiple individual filters to group data by.',

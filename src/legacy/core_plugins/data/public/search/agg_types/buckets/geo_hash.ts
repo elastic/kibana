@@ -71,7 +71,7 @@ function getPrecision(val: string) {
 const isOutsideCollar = (bounds: GeoBoundingBox, collar: MapCollar) =>
   bounds && collar && !geoContains(collar, bounds);
 
-const geohashGridTitle = i18n.translate('common.ui.aggTypes.buckets.geohashGridTitle', {
+const geohashGridTitle = i18n.translate('data.search.aggs.buckets.geohashGridTitle', {
   defaultMessage: 'Geohash',
 });
 

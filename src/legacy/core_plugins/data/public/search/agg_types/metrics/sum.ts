@@ -22,7 +22,7 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const sumTitle = i18n.translate('common.ui.aggTypes.metrics.sumTitle', {
+const sumTitle = i18n.translate('data.search.aggs.metrics.sumTitle', {
   defaultMessage: 'Sum',
 });
 
@@ -30,7 +30,7 @@ export const sumMetricAgg = new MetricAggType({
   name: METRIC_TYPES.SUM,
   title: sumTitle,
   makeLabel(aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.sumLabel', {
+    return i18n.translate('data.search.aggs.metrics.sumLabel', {
       defaultMessage: 'Sum of {field}',
       values: { field: aggConfig.getFieldDisplayName() },
     });

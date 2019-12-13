@@ -51,7 +51,7 @@ function validateValue(value: number | '', numberRange: NumberListRange) {
     result.isInvalid = true;
   } else if (!numberRange.within(value)) {
     result.isInvalid = true;
-    result.error = i18n.translate('common.ui.aggTypes.numberList.invalidRangeErrorMessage', {
+    result.error = i18n.translate('data.search.aggs.numberList.invalidRangeErrorMessage', {
       defaultMessage: 'The value should be in the range of {min} to {max}.',
       values: { min: numberRange.min, max: numberRange.max },
     });

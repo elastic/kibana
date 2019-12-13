@@ -45,7 +45,7 @@ const getUIConfig = () => npStart.core.uiSettings;
 
 export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
   name: BUCKET_TYPES.HISTOGRAM,
-  title: i18n.translate('common.ui.aggTypes.buckets.histogramTitle', {
+  title: i18n.translate('data.search.aggs.buckets.histogramTitle', {
     defaultMessage: 'Histogram',
   }),
   ordered: {},
@@ -122,7 +122,7 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
           .catch((e: Error) => {
             if (e.name === 'AbortError') return;
             toastNotifications.addWarning(
-              i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
+              i18n.translate('data.search.aggs.histogram.missingMaxMinValuesWarning', {
                 // eslint-disable-next-line max-len
                 defaultMessage:
                   'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.',

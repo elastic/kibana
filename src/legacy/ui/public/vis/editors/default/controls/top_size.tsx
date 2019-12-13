@@ -30,7 +30,7 @@ function TopSizeParamEditor(props: AggParamEditorProps<number | ''>) {
       {' '}
       <EuiIconTip
         position="right"
-        content={i18n.translate('common.ui.aggTypes.sizeTooltip', {
+        content={i18n.translate('data.search.aggs.sizeTooltip', {
           defaultMessage:
             "Request top-K hits. Multiple hits will be combined via 'aggregate with'.",
         })}

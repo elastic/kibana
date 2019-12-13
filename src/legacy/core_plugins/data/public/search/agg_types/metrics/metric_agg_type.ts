@@ -81,7 +81,7 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
     this.subtype =
       config.subtype ||
-      i18n.translate('common.ui.aggTypes.metrics.metricAggregationsSubtypeTitle', {
+      i18n.translate('data.search.aggs.metrics.metricAggregationsSubtypeTitle', {
         defaultMessage: 'Metric Aggregations',
       });
 

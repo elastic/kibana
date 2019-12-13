@@ -34,10 +34,10 @@ function SubMetricParamEditor({
   setTouched,
   subAggParams,
 }: AggParamEditorProps<AggConfig>) {
-  const metricTitle = i18n.translate('common.ui.aggTypes.metrics.metricTitle', {
+  const metricTitle = i18n.translate('data.search.aggs.metrics.metricTitle', {
     defaultMessage: 'Metric',
   });
-  const bucketTitle = i18n.translate('common.ui.aggTypes.metrics.bucketTitle', {
+  const bucketTitle = i18n.translate('data.search.aggs.metrics.bucketTitle', {
     defaultMessage: 'Bucket',
   });
   const type = aggParam.name;

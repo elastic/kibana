@@ -22,7 +22,7 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const maxTitle = i18n.translate('common.ui.aggTypes.metrics.maxTitle', {
+const maxTitle = i18n.translate('data.search.aggs.metrics.maxTitle', {
   defaultMessage: 'Max',
 });
 
@@ -30,7 +30,7 @@ export const maxMetricAgg = new MetricAggType({
   name: METRIC_TYPES.MAX,
   title: maxTitle,
   makeLabel(aggConfig) {
-    return i18n.translate('common.ui.aggTypes.metrics.maxLabel', {
+    return i18n.translate('data.search.aggs.metrics.maxLabel', {
       defaultMessage: 'Max {field}',
       values: { field: aggConfig.getFieldDisplayName() },
     });

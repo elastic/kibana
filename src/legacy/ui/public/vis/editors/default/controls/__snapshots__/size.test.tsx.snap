@@ -13,7 +13,7 @@ exports[`SizeParamEditor should init with the default set of props 1`] = `
     <React.Fragment>
       <FormattedMessage
         defaultMessage="Size"
-        id="common.ui.aggTypes.sizeLabel"
+        id="data.search.aggs.sizeLabel"
         values={Object {}}
       />
     </React.Fragment>

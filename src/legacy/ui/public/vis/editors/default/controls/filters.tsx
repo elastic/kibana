@@ -111,7 +111,7 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
         data-test-subj="visEditorAddFilterButton"
       >
         <FormattedMessage
-          id="common.ui.aggTypes.filters.addFilterButtonLabel"
+          id="data.search.aggs.filters.addFilterButtonLabel"
           defaultMessage="Add filter"
         />
       </EuiButton>

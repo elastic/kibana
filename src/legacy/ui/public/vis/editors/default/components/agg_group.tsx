@@ -84,7 +84,7 @@ function DefaultEditorAggGroup({
 
   const bucketsError =
     lastParentPipelineAggTitle && groupName === AggGroupNames.Buckets && !group.length
-      ? i18n.translate('common.ui.aggTypes.buckets.mustHaveBucketErrorMessage', {
+      ? i18n.translate('data.search.aggs.buckets.mustHaveBucketErrorMessage', {
           defaultMessage: 'Add a bucket with "Date Histogram" or "Histogram" aggregation.',
           description: 'Date Histogram and Histogram should not be translated',
         })

@@ -22,11 +22,11 @@ import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
 
-const overallMinLabel = i18n.translate('common.ui.aggTypes.metrics.overallMinLabel', {
+const overallMinLabel = i18n.translate('data.search.aggs.metrics.overallMinLabel', {
   defaultMessage: 'overall min',
 });
 
-const minBucketTitle = i18n.translate('common.ui.aggTypes.metrics.minBucketTitle', {
+const minBucketTitle = i18n.translate('data.search.aggs.metrics.minBucketTitle', {
   defaultMessage: 'Min Bucket',
 });
 

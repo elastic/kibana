@@ -31,7 +31,7 @@ function PrecisionParamEditor({ agg, value, setValue }: AggParamEditorProps<numb
     return null;
   }
 
-  const label = i18n.translate('common.ui.aggTypes.precisionLabel', {
+  const label = i18n.translate('data.search.aggs.precisionLabel', {
     defaultMessage: 'Precision',
   });
 

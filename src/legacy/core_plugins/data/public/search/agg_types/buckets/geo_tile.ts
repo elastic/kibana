@@ -27,7 +27,7 @@ import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 import { IBucketAggConfig } from './_bucket_agg_type';
 import { METRIC_TYPES } from '../metrics/metric_agg_types';
 
-const geotileGridTitle = i18n.translate('common.ui.aggTypes.buckets.geotileGridTitle', {
+const geotileGridTitle = i18n.translate('data.search.aggs.buckets.geotileGridTitle', {
   defaultMessage: 'Geotile',
 });
 

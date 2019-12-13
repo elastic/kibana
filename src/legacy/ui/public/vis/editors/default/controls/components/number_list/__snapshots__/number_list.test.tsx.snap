@@ -64,7 +64,7 @@ exports[`NumberList should be rendered with default set of props 1`] = `
     >
       <FormattedMessage
         defaultMessage="Add {unitName}"
-        id="common.ui.aggTypes.numberList.addUnitButtonLabel"
+        id="data.search.aggs.numberList.addUnitButtonLabel"
         values={
           Object {
             "unitName": "value",

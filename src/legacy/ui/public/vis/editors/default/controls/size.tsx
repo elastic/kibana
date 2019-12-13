@@ -39,7 +39,7 @@ function SizeParamEditor({
 }: SizeParamEditorProps) {
   const label = (
     <>
-      <FormattedMessage id="common.ui.aggTypes.sizeLabel" defaultMessage="Size" />
+      <FormattedMessage id="data.search.aggs.sizeLabel" defaultMessage="Size" />
       {iconTip}
     </>
   );

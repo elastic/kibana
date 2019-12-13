@@ -26,10 +26,10 @@ function DropPartialsParamEditor(props: AggParamEditorProps<boolean>) {
   return (
     <SwitchParamEditor
       dataTestSubj="dropPartialBucketsCheckbox"
-      displayLabel={i18n.translate('common.ui.aggTypes.dropPartialBucketsLabel', {
+      displayLabel={i18n.translate('data.search.aggs.dropPartialBucketsLabel', {
         defaultMessage: 'Drop partial buckets',
       })}
-      displayToolTip={i18n.translate('common.ui.aggTypes.dropPartialBucketsTooltip', {
+      displayToolTip={i18n.translate('data.search.aggs.dropPartialBucketsTooltip', {
         defaultMessage:
           "Remove buckets that span time outside the time range so the histogram doesn't start and end with incomplete buckets.",
       })}

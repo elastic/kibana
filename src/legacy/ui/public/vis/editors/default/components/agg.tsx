@@ -79,7 +79,7 @@ function DefaultEditorAgg({
     if (['date_histogram', 'histogram'].includes(agg.type.name)) {
       disabledParams = ['min_doc_count'];
     } else {
-      aggError = i18n.translate('common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage', {
+      aggError = i18n.translate('data.search.aggs.metrics.wrongLastBucketTypeErrorMessage', {
         defaultMessage:
           'Last bucket aggregation must be "Date Histogram" or "Histogram" when using "{type}" metric aggregation.',
         values: { type: lastParentPipelineAggTitle },

@@ -22,11 +22,11 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { KBN_FIELD_TYPES } from '../../../../../../../plugins/data/public';
 
-const geoBoundsTitle = i18n.translate('common.ui.aggTypes.metrics.geoBoundsTitle', {
+const geoBoundsTitle = i18n.translate('data.search.aggs.metrics.geoBoundsTitle', {
   defaultMessage: 'Geo Bounds',
 });
 
-const geoBoundsLabel = i18n.translate('common.ui.aggTypes.metrics.geoBoundsLabel', {
+const geoBoundsLabel = i18n.translate('data.search.aggs.metrics.geoBoundsLabel', {
   defaultMessage: 'Geo Bounds',
 });
 

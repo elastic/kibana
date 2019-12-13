@@ -25,10 +25,10 @@ import { AggParamEditorProps } from '..';
 function IsFilteredByCollarParamEditor(props: AggParamEditorProps<boolean>) {
   return (
     <SwitchParamEditor
-      displayLabel={i18n.translate('common.ui.aggTypes.onlyRequestDataAroundMapExtentLabel', {
+      displayLabel={i18n.translate('data.search.aggs.onlyRequestDataAroundMapExtentLabel', {
         defaultMessage: 'Only request data around map extent',
       })}
-      displayToolTip={i18n.translate('common.ui.aggTypes.onlyRequestDataAroundMapExtentTooltip', {
+      displayToolTip={i18n.translate('data.search.aggs.onlyRequestDataAroundMapExtentTooltip', {
         defaultMessage:
           'Apply geo_bounding_box filter aggregation to narrow the subject area to the map view box with collar',
       })}

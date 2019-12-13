@@ -32,7 +32,7 @@ function PercentilesEditor({
   setValidity,
   setValue,
 }: AggParamEditorProps<Array<number | undefined>>) {
-  const label = i18n.translate('common.ui.aggTypes.percentiles.percentsLabel', {
+  const label = i18n.translate('data.search.aggs.percentiles.percentsLabel', {
     defaultMessage: 'Percents',
   });
   const [isValid, setIsValid] = useState(true);
@@ -56,7 +56,7 @@ function PercentilesEditor({
         numberArray={value}
         range="[0,100]"
         validateAscendingOrder={false}
-        unitName={i18n.translate('common.ui.aggTypes.percentileRanks.percentUnitNameText', {
+        unitName={i18n.translate('data.search.aggs.percentileRanks.percentUnitNameText', {
           defaultMessage: 'percent',
         })}
         showValidation={showValidation}

@@ -24,11 +24,11 @@ import { makeNestedLabel } from './lib/make_nested_label';
 import { siblingPipelineAggHelper } from './lib/sibling_pipeline_agg_helper';
 import { METRIC_TYPES } from './metric_agg_types';
 
-const overallMaxLabel = i18n.translate('common.ui.aggTypes.metrics.overallMaxLabel', {
+const overallMaxLabel = i18n.translate('data.search.aggs.metrics.overallMaxLabel', {
   defaultMessage: 'overall max',
 });
 
-const maxBucketTitle = i18n.translate('common.ui.aggTypes.metrics.maxBucketTitle', {
+const maxBucketTitle = i18n.translate('data.search.aggs.metrics.maxBucketTitle', {
   defaultMessage: 'Max Bucket',
 });
 

@@ -56,11 +56,11 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
     }),
     getRemoveBtnAriaLabel: (item: MaskModel) =>
       item.mask.value
-        ? i18n.translate('common.ui.aggTypes.ipRanges.removeCidrMaskButtonAriaLabel', {
+        ? i18n.translate('data.search.aggs.ipRanges.removeCidrMaskButtonAriaLabel', {
             defaultMessage: 'Remove the CIDR mask value of {mask}',
             values: { mask: item.mask.value },
           })
-        : i18n.translate('common.ui.aggTypes.ipRanges.removeEmptyCidrMaskButtonAriaLabel', {
+        : i18n.translate('data.search.aggs.ipRanges.removeEmptyCidrMaskButtonAriaLabel', {
             defaultMessage: 'Remove the CIDR mask default value',
           }),
     onChangeFn: ({ mask }: MaskModel) => {
@@ -73,7 +73,7 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
     renderInputRow: ({ mask }: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText
-          aria-label={i18n.translate('common.ui.aggTypes.ipRanges.cidrMaskAriaLabel', {
+          aria-label={i18n.translate('data.search.aggs.ipRanges.cidrMaskAriaLabel', {
             defaultMessage: 'CIDR mask: {mask}',
             values: { mask: mask.value || '*' },
           })}

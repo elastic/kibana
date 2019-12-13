@@ -21,7 +21,7 @@ import { IBucketAggConfig } from './_bucket_agg_type';
 
 export const intervalOptions = [
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.autoDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.autoDisplayName', {
       defaultMessage: 'Auto',
     }),
     val: 'auto',
@@ -32,49 +32,49 @@ export const intervalOptions = [
     },
   },
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.millisecondDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.millisecondDisplayName', {
       defaultMessage: 'Millisecond',
     }),
     val: 'ms',
   },
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.secondDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.secondDisplayName', {
       defaultMessage: 'Second',
     }),
     val: 's',
   },
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.minuteDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.minuteDisplayName', {
       defaultMessage: 'Minute',
     }),
     val: 'm',
   },
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.hourlyDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.hourlyDisplayName', {
       defaultMessage: 'Hourly',
     }),
     val: 'h',
   },
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.dailyDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.dailyDisplayName', {
       defaultMessage: 'Daily',
     }),
     val: 'd',
   },
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.weeklyDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.weeklyDisplayName', {
       defaultMessage: 'Weekly',
     }),
     val: 'w',
   },
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.monthlyDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.monthlyDisplayName', {
       defaultMessage: 'Monthly',
     }),
     val: 'M',
   },
   {
-    display: i18n.translate('common.ui.aggTypes.buckets.intervalOptions.yearlyDisplayName', {
+    display: i18n.translate('data.search.aggs.buckets.intervalOptions.yearlyDisplayName', {
       defaultMessage: 'Yearly',
     }),
     val: 'y',

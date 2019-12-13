@@ -35,10 +35,10 @@ function RawJsonParamEditor({
 }: AggParamEditorProps<string>) {
   const label = (
     <>
-      <FormattedMessage id="common.ui.aggTypes.jsonInputLabel" defaultMessage="JSON input" />{' '}
+      <FormattedMessage id="data.search.aggs.jsonInputLabel" defaultMessage="JSON input" />{' '}
       <EuiIconTip
         position="right"
-        content={i18n.translate('common.ui.aggTypes.jsonInputTooltip', {
+        content={i18n.translate('data.search.aggs.jsonInputTooltip', {
           defaultMessage:
             "Any JSON formatted properties you add here will be merged with the elasticsearch aggregation definition for this section. For example 'shard_size' on a terms aggregation.",
         })}

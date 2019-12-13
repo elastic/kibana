@@ -35,10 +35,10 @@ function MissingBucketParamEditor(props: AggParamEditorProps<boolean>) {
   return (
     <SwitchParamEditor
       dataTestSubj="missingBucketSwitch"
-      displayLabel={i18n.translate('common.ui.aggTypes.otherBucket.showMissingValuesLabel', {
+      displayLabel={i18n.translate('data.search.aggs.otherBucket.showMissingValuesLabel', {
         defaultMessage: 'Show missing values',
       })}
-      displayToolTip={i18n.translate('common.ui.aggTypes.otherBucket.showMissingValuesTooltip', {
+      displayToolTip={i18n.translate('data.search.aggs.otherBucket.showMissingValuesTooltip', {
         defaultMessage:
           'Only works for fields of type "string". When enabled, include documents with missing ' +
           'values in the search. If this bucket is in the top N, it appears in the chart. ' +

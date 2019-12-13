@@ -29,7 +29,7 @@ function TopFieldParamEditor(props: AggParamEditorProps<Field>) {
   let customError;
 
   if (props.value && !compatibleAggs.length) {
-    customError = i18n.translate('common.ui.aggTypes.aggregateWith.noAggsErrorTooltip', {
+    customError = i18n.translate('data.search.aggs.aggregateWith.noAggsErrorTooltip', {
       defaultMessage: 'The chosen field has no compatible aggregations.',
     });
   }

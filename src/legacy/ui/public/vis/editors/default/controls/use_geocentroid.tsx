@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '..';
 
 function UseGeocentroidParamEditor({ value = false, setValue }: AggParamEditorProps<boolean>) {
-  const label = i18n.translate('common.ui.aggTypes.placeMarkersOffGridLabel', {
+  const label = i18n.translate('data.search.aggs.placeMarkersOffGridLabel', {
     defaultMessage: 'Place markers off grid (use geocentroid)',
   });
 

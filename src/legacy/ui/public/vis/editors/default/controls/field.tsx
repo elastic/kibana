@@ -28,7 +28,7 @@ import { formatListAsProse, parseCommaSeparatedList } from '../../../../../../ut
 import { AggParam, FieldParamType } from '../../../../agg_types';
 import { AggParamEditorProps, ComboBoxGroupedOptions } from '..';
 
-const label = i18n.translate('common.ui.aggTypes.field.fieldLabel', { defaultMessage: 'Field' });
+const label = i18n.translate('data.search.aggs.field.fieldLabel', { defaultMessage: 'Field' });
 
 export interface FieldParamEditorProps extends AggParamEditorProps<Field> {
   customError?: string;
@@ -65,7 +65,7 @@ function FieldParamEditor({
 
   if (!indexedFields.length) {
     errors.push(
-      i18n.translate('common.ui.aggTypes.field.noCompatibleFieldsDescription', {
+      i18n.translate('data.search.aggs.field.noCompatibleFieldsDescription', {
         defaultMessage:
           'The index pattern {indexPatternTitle} does not contain any of the following compatible field types: {fieldTypes}',
         values: {
@@ -111,7 +111,7 @@ function FieldParamEditor({
     >
       <EuiComboBox
         compressed
-        placeholder={i18n.translate('common.ui.aggTypes.field.selectFieldPlaceholder', {
+        placeholder={i18n.translate('data.search.aggs.field.selectFieldPlaceholder', {
           defaultMessage: 'Select a field',
         })}
         options={indexedFields}
