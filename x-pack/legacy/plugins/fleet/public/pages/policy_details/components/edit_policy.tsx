@@ -18,8 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Policy } from '../../../../common/types/domain_data';
-import { PolicyForm } from '../../../components/policy_form';
-import { useLibs } from '../../../hooks/use_libs';
+import { PolicyForm } from '../../../components';
+import { useLibs } from '../../../hooks';
 
 interface RouterProps {
   policy: Policy;

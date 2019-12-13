@@ -12,7 +12,7 @@ import { BASE_PATH } from '../common/constants';
 import { compose } from './lib/compose/kibana';
 import { FrontendLibs } from './lib/types';
 import { AppRoutes } from './routes';
-import { LibsContext } from './hooks/use_libs';
+import { LibsContext } from './hooks';
 
 async function startApp(libs: FrontendLibs) {
   libs.framework.renderUIAtPath(

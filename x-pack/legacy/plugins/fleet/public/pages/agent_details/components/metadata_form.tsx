@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
@@ -19,9 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { AxiosError } from 'axios';
 import { Agent } from '../../../../common/types/domain_data';
-import { useLibs } from '../../../hooks/use_libs';
-import { useAgentRefresh } from '../hooks/use_agent';
-import { useInput } from '../../../hooks/use_input';
+import { useLibs, useAgentRefresh, useInput } from '../../../hooks/use_libs';
 
 function useAddMetadataForm(agent: Agent, done: () => void) {
   const libs = useLibs();
@@ -86,7 +84,7 @@ function useAddMetadataForm(agent: Agent, done: () => void) {
   };
 }
 
-export const MetadataForm: FC<{ agent: Agent }> = ({ agent }) => {
+export const MetadataForm: React.FC<{ agent: Agent }> = ({ agent }) => {
   const [isOpen, setOpen] = useState(false);
 
   const form = useAddMetadataForm(agent, () => {

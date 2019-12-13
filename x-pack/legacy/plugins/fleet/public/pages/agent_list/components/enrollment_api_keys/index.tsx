@@ -9,10 +9,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 import { EnrollmentApiKey } from '../../../../../common/types/domain_data';
-import { useLibs } from '../../../../hooks/use_libs';
-import { usePagination } from '../../../../hooks/use_pagination';
+import { useLibs, usePagination } from '../../../../hooks';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { CreateApiKeyForm } from './create_api_key_form';
+
+export { useEnrollmentApiKeys, useEnrollmentApiKey } from './hooks';
 
 export const EnrollmentApiKeysTable: React.FC = () => {
   const { enrollmentApiKeys } = useLibs();

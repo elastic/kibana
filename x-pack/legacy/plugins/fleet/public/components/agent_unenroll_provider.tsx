@@ -8,7 +8,7 @@ import React, { Fragment, useRef, useState } from 'react';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useLibs } from '../hooks/use_libs';
+import { useLibs } from '../hooks';
 
 interface Props {
   children: (unenrollAgents: UnenrollAgents) => React.ReactElement;

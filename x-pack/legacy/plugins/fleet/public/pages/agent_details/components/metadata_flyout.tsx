@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -15,7 +15,6 @@ import {
   EuiFlyoutBody,
   EuiHorizontalRule,
 } from '@elastic/eui';
-
 import { Agent } from '../../../../common/types/domain_data';
 import { MetadataForm } from './metadata_form';
 
@@ -23,7 +22,7 @@ interface Props {
   agent: Agent;
   flyout: { hide: () => void };
 }
-export const AgentMetadataFlyout: FC<Props> = ({ agent, flyout }) => {
+export const AgentMetadataFlyout: React.FC<Props> = ({ agent, flyout }) => {
   const mapMetadata = (obj: { [key: string]: string } | undefined) => {
     return Object.keys(obj || {}).map(key => ({
       title: key,

@@ -6,7 +6,6 @@
 import React from 'react';
 import { EuiSteps, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { Writer } from 'mustache';
-
 export { ShellEnrollmentInstructions } from './shell';
 export { ContainerEnrollmentInstructions } from './container';
 export { ToolsEnrollmentInstructions } from './tools';

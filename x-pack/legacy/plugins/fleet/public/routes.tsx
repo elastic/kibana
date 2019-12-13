@@ -5,13 +5,11 @@
  */
 
 import { get } from 'lodash';
-import React, { useState, useEffect, FC } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import { Loading } from './components/loading';
-import { ChildRoutes } from './components/navigation/child_routes';
-import { URLStateProps, WithURLState } from './hooks/with_url_state';
+import { Loading, ChildRoutes } from './components';
+import { useLibs, URLStateProps, WithUrlState } from './hooks';
 import { routeMap } from './pages';
-import { useLibs } from './hooks/use_libs';
 
 function useWaitUntilFrameworkReady() {
   const libs = useLibs();
@@ -34,7 +32,7 @@ function useWaitUntilFrameworkReady() {
   return { isLoading };
 }
 
-export const AppRoutes: FC = () => {
+export const AppRoutes: React.FC = () => {
   const { isLoading } = useWaitUntilFrameworkReady();
   const libs = useLibs();
 
@@ -84,9 +82,9 @@ export const AppRoutes: FC = () => {
       </Switch>
 
       {/* Render routes from the FS */}
-      <WithURLState>
+      <WithUrlState>
         {(URLProps: URLStateProps) => <ChildRoutes routes={routeMap} {...URLProps} />}
-      </WithURLState>
+      </WithUrlState>
     </React.Fragment>
   );
 };

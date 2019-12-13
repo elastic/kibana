@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -19,13 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Agent } from '../../../../common/types/domain_data';
-import { ConnectedLink } from '../../../components/navigation/connected_link';
-import { AgentHealth } from '../../../components/agent_health';
-import { AgentUnenrollProvider } from '../../../components/agent_unenroll_provider';
+import { ConnectedLink, AgentHealth, AgentUnenrollProvider } from '../../../components';
 import { AgentMetadataFlyout } from './metadata_flyout';
-import { useAgentRefresh } from '../hooks/use_agent';
+import { useAgentRefresh } from '../hooks';
 
-const Item: FC<{ label: string }> = ({ label, children }) => {
+const Item: React.FC<{ label: string }> = ({ label, children }) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiDescriptionList compressed>
@@ -48,7 +46,7 @@ function useFlyout() {
 interface Props {
   agent: Agent;
 }
-export const AgentDetailSection: FC<Props> = ({ agent }) => {
+export const AgentDetailSection: React.FC<Props> = ({ agent }) => {
   const metadataFlyout = useFlyout();
   const refreshAgent = useAgentRefresh();
 
