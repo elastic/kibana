@@ -58,6 +58,11 @@ export interface LicensingPluginSetup {
    */
   refresh(): Promise<ILicense>;
 
+  /**
+   * Creates a license poller to retrieve a license data with.
+   * Allows a plugin to configure a cluster to retrieve data from at
+   * given polling frequency.
+   */
   createLicensePoller: (
     clusterClient: IClusterClient,
     pollingFrequency: number
