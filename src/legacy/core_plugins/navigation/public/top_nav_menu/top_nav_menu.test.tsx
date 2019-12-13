@@ -22,8 +22,6 @@ import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-jest.mock('ui/new_platform');
-
 const mockTimeHistory = {
   add: () => {},
   get: () => {

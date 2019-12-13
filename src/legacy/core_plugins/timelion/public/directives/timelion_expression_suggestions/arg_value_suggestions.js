@@ -18,11 +18,11 @@
  */
 
 import _ from 'lodash';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { npStart } from 'ui/new_platform';
 
-export function ArgValueSuggestionsProvider(Private, indexPatterns) {
-
-  const savedObjectsClient = Private(SavedObjectsClientProvider);
+export function ArgValueSuggestionsProvider() {
+  const { indexPatterns } = npStart.plugins.data;
+  const { client: savedObjectsClient } = npStart.core.savedObjects;
 
   async function getIndexPattern(functionArgs) {
     const indexPatternArg = functionArgs.find(argument => {

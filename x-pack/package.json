@@ -114,7 +114,7 @@
     "chalk": "^2.4.2",
     "chance": "1.0.18",
     "cheerio": "0.22.0",
-    "commander": "3.0.0",
+    "commander": "3.0.2",
     "copy-webpack-plugin": "^5.0.4",
     "cypress": "^3.6.1",
     "cypress-multi-reporters": "^1.2.3",
@@ -345,7 +345,7 @@
     "xregexp": "4.2.4"
   },
   "engines": {
-    "yarn": "^1.10.1"
+    "yarn": "^1.21.1"
   },
   "workspaces": {
     "nohoist": [
