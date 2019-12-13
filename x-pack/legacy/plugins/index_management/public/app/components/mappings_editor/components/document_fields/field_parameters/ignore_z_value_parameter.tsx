@@ -10,15 +10,11 @@ import { i18n } from '@kbn/i18n';
 
 import { EditFieldFormRow } from '../fields/edit_field';
 
-export const IgnoreZValueParameter = ({ description }: { description?: string }) => (
+export const IgnoreZValueParameter = () => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreZValueFieldTitle', {
-          defaultMessage: 'Ignore Z value',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoreZValueFieldTitle', {
+      defaultMessage: 'Ignore Z value',
+    })}
     description={i18n.translate('xpack.idxMgmt.mappingsEditor.ignoredMalformedFieldDescription', {
       defaultMessage:
         'If true, three dimension points will be accepted, but only latitude and longitude values will be indexed; the third dimension is ignored.',

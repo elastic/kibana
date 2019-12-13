@@ -61,7 +61,7 @@ export const ShapeType = ({ field }: Props) => {
 
           <IgnoreZValueParameter />
 
-          <CoerceParameter formFieldPath="coerce_shape" />
+          <CoerceParameter configPath="coerce_shape" />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

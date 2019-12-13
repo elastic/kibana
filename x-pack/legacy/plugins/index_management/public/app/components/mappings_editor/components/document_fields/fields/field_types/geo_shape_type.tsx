@@ -45,37 +45,39 @@ interface Props {
 export const GeoShapeType = ({ field }: Props) => {
   return (
     <>
-      <EuiCallOut color="primary">
-        <p>
-          <FormattedMessage
-            id="xpack.idxMgmt.mappingsEditor.geoShape.infoMessage"
-            defaultMessage="GeoShape types are indexed by decomposing the shape into a triangular mesh and indexing each triangle as a 7 dimension point in a BKD tree. {docsLink}"
-            values={{
-              docsLink: (
-                <EuiLink
-                  href={documentationService.getTypeDocLink('geo_shape', 'learnMore')}
-                  target="_blank"
-                >
-                  {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.learnMoreLink', {
-                    defaultMessage: 'Learn more.',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiCallOut>
-
-      <EuiSpacer />
       <EditFieldSection>
-        <IgnoreMalformedParameter
-          description={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.geoShape.ignoreMalformedFieldDescription',
-            {
-              defaultMessage: 'Whether to ignore malformed GeoJSON or WKT shapes.',
-            }
-          )}
-        />
+        <>
+          <EuiCallOut color="primary">
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.mappingsEditor.geoShape.infoMessage"
+                defaultMessage="GeoShape types are indexed by decomposing the shape into a triangular mesh and indexing each triangle as a 7 dimension point in a BKD tree. {docsLink}"
+                values={{
+                  docsLink: (
+                    <EuiLink
+                      href={documentationService.getTypeDocLink('geo_shape', 'learnMore')}
+                      target="_blank"
+                    >
+                      {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShape.learnMoreLink', {
+                        defaultMessage: 'Learn more.',
+                      })}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiCallOut>
+
+          <EuiSpacer />
+          <IgnoreMalformedParameter
+            description={i18n.translate(
+              'xpack.idxMgmt.mappingsEditor.geoShape.ignoreMalformedFieldDescription',
+              {
+                defaultMessage: 'Whether to ignore malformed GeoJSON or WKT shapes.',
+              }
+            )}
+          />
+        </>
       </EditFieldSection>
 
       <AdvancedSettingsWrapper>
@@ -100,7 +102,7 @@ export const GeoShapeType = ({ field }: Props) => {
 
           <IgnoreZValueParameter />
 
-          <CoerceParameter formFieldPath="coerce_geo_shape" />
+          <CoerceParameter configPath="coerce_geo_shape" />
         </EditFieldSection>
       </AdvancedSettingsWrapper>
     </>

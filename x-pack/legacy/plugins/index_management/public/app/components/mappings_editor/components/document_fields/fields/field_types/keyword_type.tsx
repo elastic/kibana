@@ -98,7 +98,7 @@ export const KeywordType = ({ field }: Props) => {
             />
           </EditFieldFormRow>
 
-          <NormsParameter />
+          <NormsParameter configPath="norms_keyword" />
         </EditFieldSection>
 
         <EditFieldSection>

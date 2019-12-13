@@ -15,13 +15,9 @@ import { PARAMETERS_OPTIONS } from '../../../constants';
 
 export const OrientationParameter = ({ defaultToggleValue }: { defaultToggleValue: boolean }) => (
   <EditFieldFormRow
-    title={
-      <h3>
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldTitle', {
-          defaultMessage: 'Set orientation',
-        })}
-      </h3>
-    }
+    title={i18n.translate('xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldTitle', {
+      defaultMessage: 'Set orientation',
+    })}
     description={i18n.translate(
       'xpack.idxMgmt.mappingsEditor.geoShapeType.orientationFieldDescription',
       {
@@ -29,7 +25,7 @@ export const OrientationParameter = ({ defaultToggleValue }: { defaultToggleValu
           'Define how to interpret vertex order for polygons / multipolygons. This parameter defines one of two coordinate system rules (Right-hand or Left-hand).',
       }
     )}
-    toggleDefaultValue={defaultToggleValue}
+    defaultToggleValue={defaultToggleValue}
   >
     <UseField
       path="orientation"

@@ -12,7 +12,7 @@ export const BinaryType = () => {
   return (
     <AdvancedSettingsWrapper>
       <EditFieldSection>
-        <DocValuesParameter />
+        <DocValuesParameter configPath="doc_values_binary" />
 
         <StoreParameter />
       </EditFieldSection>

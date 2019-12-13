@@ -13,9 +13,9 @@ import { EditFieldFormRow } from '../fields/edit_field';
 type CoerceParameterNames = 'coerce' | 'coerce_geo_shape' | 'coerce_shape';
 
 export const CoerceParameter = ({
-  formFieldPath = 'coerce',
+  configPath = 'coerce',
 }: {
-  formFieldPath?: CoerceParameterNames;
+  configPath?: CoerceParameterNames;
 }) => (
   <EditFieldFormRow
     title={i18n.translate('xpack.idxMgmt.mappingsEditor.coerceFieldTitle', {
@@ -25,6 +25,7 @@ export const CoerceParameter = ({
       defaultMessage:
         'Whether to try to convert strings to numbers and truncate fractions for integers.',
     })}
-    formFieldPath={formFieldPath}
+    formFieldPath="coerce"
+    configPath={configPath}
   />
 );
