@@ -5,6 +5,7 @@
  */
 
 import * as rt from 'io-ts';
+import { ItemTypeRT } from '../inventory_models/types';
 
 const AWSAccountRT = rt.type({
   value: rt.string,
@@ -19,6 +20,7 @@ export const InventoryMetaResponseRT = rt.type({
 
 export const InventoryMetaRequestRT = rt.type({
   sourceId: rt.string,
+  nodeType: ItemTypeRT,
 });
 
 export type InventoryMetaRequest = rt.TypeOf<typeof InventoryMetaRequestRT>;

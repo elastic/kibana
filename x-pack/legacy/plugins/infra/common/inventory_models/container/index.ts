@@ -13,7 +13,7 @@ export const container: InventoryModel = {
   displayName: i18n.translate('xpack.infra.inventoryModel.container.displayName', {
     defaultMessage: 'Docker Containers',
   }),
-  requiredModules: ['docker'],
+  requiredDataset: 'docker',
   crosslinkSupport: {
     details: true,
     logs: true,

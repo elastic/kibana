@@ -12,6 +12,8 @@ import {
 } from '../../../lib/adapters/framework';
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
+import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { findInventoryModel } from '../../../../common/inventory_models';
 
 export interface AWSInventoryMetadata {
   accounts: InventoryAWSAccount[];
@@ -22,8 +24,11 @@ export interface AWSInventoryMetadata {
 export const getAWSMetadata = async (
   framework: KibanaFramework,
   req: RequestHandlerContext,
-  sourceConfiguration: InfraSourceConfiguration
+  sourceConfiguration: InfraSourceConfiguration,
+  nodeType: InventoryItemType
 ): Promise<AWSInventoryMetadata> => {
+  const model = findInventoryModel(nodeType);
+
   const metricQuery = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -31,7 +36,7 @@ export const getAWSMetadata = async (
     body: {
       query: {
         bool: {
-          must: [{ match: { 'event.dataset': 'aws.ec2' } }],
+          must: [{ match: { 'event.dataset': model.requiredDataset } }],
         },
       },
       size: 0,

@@ -13,7 +13,7 @@ export const awsSQS: InventoryModel = {
   displayName: i18n.translate('xpack.infra.inventoryModels.awsSQS.displayName', {
     defaultMessage: 'SQS Queues',
   }),
-  requiredModules: ['aws'],
+  requiredDataset: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,

@@ -13,7 +13,7 @@ export const awsRDS: InventoryModel = {
   displayName: i18n.translate('xpack.infra.inventoryModels.awsRDS.displayName', {
     defaultMessage: 'RDS Databases',
   }),
-  requiredModules: ['aws'],
+  requiredDataset: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,

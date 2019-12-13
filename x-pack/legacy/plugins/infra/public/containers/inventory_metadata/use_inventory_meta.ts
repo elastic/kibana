@@ -13,8 +13,9 @@ import {
   InventoryMetaResponseRT,
   InventoryMetaResponse,
 } from '../../../common/http_api/inventory_meta_api';
+import { InfraNodeType } from '../../graphql/types';
 
-export function useInventoryMeta(sourceId: string) {
+export function useInventoryMeta(sourceId: string, nodeType: InfraNodeType) {
   const decodeResponse = (response: any) => {
     return pipe(
       InventoryMetaResponseRT.decode(response),
@@ -27,13 +28,14 @@ export function useInventoryMeta(sourceId: string) {
     'POST',
     JSON.stringify({
       sourceId,
-      decodeResponse,
-    })
+      nodeType,
+    }),
+    decodeResponse
   );
 
   useEffect(() => {
     makeRequest();
-  }, []);
+  }, [makeRequest]);
 
   return {
     error,

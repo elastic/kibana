@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { InfraWaffleMapOptions, InfraWaffleMapBounds } from '../../lib/lib';
 import {
   InfraNodeType,
@@ -36,7 +36,7 @@ export interface LayoutProps {
 }
 
 export const Layout = (props: LayoutProps) => {
-  const { accounts, regions } = useInventoryMeta(props.sourceId);
+  const { accounts, regions } = useInventoryMeta(props.sourceId, props.nodeType);
   const { loading, nodes, reload } = useSnapshot(
     props.filterQuery,
     props.metric,
@@ -45,6 +45,7 @@ export const Layout = (props: LayoutProps) => {
     props.sourceId,
     props.currentTime
   );
+
   return (
     <>
       <Toolbar accounts={accounts} regions={regions} nodeType={props.nodeType} />

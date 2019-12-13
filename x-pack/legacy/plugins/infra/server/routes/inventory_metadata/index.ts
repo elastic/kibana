@@ -32,7 +32,7 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
     },
     async (requestContext, request, response) => {
       try {
-        const { sourceId } = pipe(
+        const { sourceId, nodeType } = pipe(
           InventoryMetaRequestRT.decode(request.body),
           fold(throwErrors(Boom.badRequest), identity)
         );
@@ -41,7 +41,12 @@ export const initInventoryMetaRoute = (libs: InfraBackendLibs) => {
           requestContext,
           sourceId
         );
-        const awsMetadata = await getAWSMetadata(framework, requestContext, configuration);
+        const awsMetadata = await getAWSMetadata(
+          framework,
+          requestContext,
+          configuration,
+          nodeType
+        );
 
         return response.ok({
           body: InventoryMetaResponseRT.encode(awsMetadata),
