@@ -37,16 +37,16 @@ describe('Create app mount search context', () => {
     const context = createAppMountSearchContext({
       mysearch: search =>
         Promise.resolve({
-          search: () => from(Promise.resolve({ percentComplete: 98 })),
+          search: () => from(Promise.resolve({ total: 100, loaded: 98 })),
         }),
       anothersearch: search =>
         Promise.resolve({
-          search: () => from(Promise.resolve({ percentComplete: 0 })),
+          search: () => from(Promise.resolve({ total: 100, loaded: 0 })),
         }),
     });
 
     context.search({}, {}, 'mysearch').subscribe(response => {
-      expect(response).toEqual({ percentComplete: 98 });
+      expect(response).toEqual({ total: 100, loaded: 98 });
       done();
     });
   });

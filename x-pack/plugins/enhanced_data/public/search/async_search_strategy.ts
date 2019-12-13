@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interval, Observable, merge } from 'rxjs';
-import { flatMap, map, takeWhile, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { mergeMap, takeWhile, expand, delay } from 'rxjs/operators';
 import {
   IKibanaSearchResponse,
   ISearchContext,
@@ -20,6 +20,9 @@ import {
 export const ASYNC_SEARCH_STRATEGY = 'ASYNC_SEARCH_STRATEGY';
 
 export interface IAsyncSearchOptions extends ISearchOptions {
+  /**
+   * The number of milliseconds to wait between receiving a response and sending another request
+   */
   pollInterval?: number;
 }
 
@@ -42,22 +45,19 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
       request: IAsyncSearchRequest,
       { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
     ): Observable<IKibanaSearchResponse> => {
-      return merge(
-        search(request, options, SYNC_SEARCH_STRATEGY).pipe(
-          tap(response => {
-            // After the initial request, we only send the ID and server strategy in subsequent requests
-            request = { id: response.id, serverStrategy: request.serverStrategy };
-          })
-        ),
-        interval(pollInterval).pipe(
-          flatMap(() => {
-            return search(request, options, SYNC_SEARCH_STRATEGY);
-          })
-        )
-      ).pipe(
-        takeWhile(response => {
-          return (response.loaded ?? 0) < (response.total ?? 1);
-        })
+      const { serverStrategy } = request;
+
+      return search(request, options, 'SYNC_SEARCH_STRATEGY').pipe(
+        expand(({ id }) => {
+          return of(null).pipe(
+            // Delay by the given poll interval
+            delay(pollInterval),
+            // Send future requests using just the ID from the response
+            mergeMap(() => search({ id, serverStrategy }, options, 'SYNC_SEARCH_STRATEGY'))
+          );
+        }),
+        // Continue polling until the response indicates it is complete
+        takeWhile(({ total = 1, loaded = 1 }) => loaded < total, true)
       );
     },
   };

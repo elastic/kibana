@@ -7,88 +7,59 @@
 import { of } from 'rxjs';
 import { CoreSetup } from '../../../../../src/core/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
-import { asyncSearchStrategyProvider } from './async_search_strategy';
-
-jest.useFakeTimers();
+import { asyncSearchStrategyProvider, IAsyncSearchOptions } from './async_search_strategy';
 
 describe('Async search strategy', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
   const mockSearch = jest.fn();
+  const mockRequest = { params: {}, serverStrategy: 'foo' };
+  const mockOptions = { pollInterval: 0 };
 
   beforeEach(() => {
     mockCoreSetup = coreMock.createSetup();
-    mockSearch.mockClear();
+    mockSearch.mockReset();
   });
 
   it('only sends one request if the first response is complete', async () => {
-    const request = { params: {}, serverStrategy: 'foo' };
-    const options = {};
+    mockSearch.mockReturnValueOnce(of({ id: 1, total: 1, loaded: 1 }));
 
-    mockSearch.mockReturnValueOnce(
-      of({
-        id: 1,
-        total: 1,
-        loaded: 1,
-      })
-    );
+    const asyncSearch = asyncSearchStrategyProvider({ core: mockCoreSetup }, mockSearch);
 
-    const asyncSearch = asyncSearchStrategyProvider(
-      {
-        core: mockCoreSetup,
-      },
-      mockSearch
-    );
+    await asyncSearch.search(mockRequest, mockOptions).toPromise();
 
-    await asyncSearch.search(request, options).toPromise();
-    jest.runAllTimers();
-
-    expect(mockSearch.mock.calls[0][0]).toEqual(request);
-    expect(mockSearch.mock.calls[0][1]).toEqual(options);
+    expect(mockSearch.mock.calls[0][0]).toEqual(mockRequest);
+    expect(mockSearch.mock.calls[0][1]).toEqual({});
     expect(mockSearch).toBeCalledTimes(1);
   });
 
-  // it('polls using the given interval', done => {
-  //   const request = { params: {}, serverStrategy: 'foo' };
-  //   const pollInterval = 100;
-  //   const options = { pollInterval };
-  //
-  //   mockSearch
-  //     .mockReturnValueOnce(
-  //       of({
-  //         id: 1,
-  //         total: 2,
-  //         loaded: 1,
-  //       })
-  //     )
-  //     .mockReturnValueOnce(
-  //       of({
-  //         id: 1,
-  //         total: 2,
-  //         loaded: 2,
-  //       })
-  //     );
-  //
-  //   const asyncSearch = asyncSearchStrategyProvider(
-  //     {
-  //       core: mockCoreSetup,
-  //     },
-  //     mockSearch
-  //   );
-  //
-  //   expect(mockSearch).toBeCalledTimes(0);
-  //
-  //   asyncSearch.search(request, options).subscribe(
-  //     () => {
-  //       jest.advanceTimersByTime(pollInterval);
-  //     },
-  //     () => {},
-  //     () => {
-  //       done();
-  //     }
-  //   );
-  // });
+  it('stops polling when the response is complete', async () => {
+    mockSearch
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1 }))
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }))
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
 
-  // it('continues polling until it reaches 100% complete');
+    const asyncSearch = asyncSearchStrategyProvider({ core: mockCoreSetup }, mockSearch);
 
-  // it('only sends the ID and server strategy after the first request');
+    expect(mockSearch).toBeCalledTimes(0);
+
+    await asyncSearch.search(mockRequest, mockOptions).toPromise();
+
+    expect(mockSearch).toBeCalledTimes(2);
+  });
+
+  it('only sends the ID and server strategy after the first request', async () => {
+    mockSearch
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 1 }))
+      .mockReturnValueOnce(of({ id: 1, total: 2, loaded: 2 }));
+
+    const asyncSearch = asyncSearchStrategyProvider({ core: mockCoreSetup }, mockSearch);
+
+    expect(mockSearch).toBeCalledTimes(0);
+
+    await asyncSearch.search(mockRequest, mockOptions).toPromise();
+
+    expect(mockSearch).toBeCalledTimes(2);
+    expect(mockSearch.mock.calls[0][0]).toEqual(mockRequest);
+    expect(mockSearch.mock.calls[1][0]).toEqual({ id: 1, serverStrategy: 'foo' });
+  });
 });
