@@ -5,7 +5,7 @@
  */
 
 import { of, BehaviorSubject } from 'rxjs';
-import { ILicense } from '../../../licensing/server';
+import { ILicense } from '../../../licensing/public';
 import { SecurityLicenseService } from './license_service';
 
 function getMockRawLicense({ isAvailable = false } = {}) {
