@@ -25,8 +25,6 @@ interface ChannelConfig {
 }
 
 export class PulseChannel {
-  private readonly instructionsInternal$ = new BehaviorSubject<string[]>([]);
-
   constructor(private readonly config: ChannelConfig) {}
 
   public get id() {
@@ -34,6 +32,6 @@ export class PulseChannel {
   }
 
   public instructions$() {
-    return this.instructionsInternal$.asObservable();
+    return this.config.instructions$.asObservable();
   }
 }
