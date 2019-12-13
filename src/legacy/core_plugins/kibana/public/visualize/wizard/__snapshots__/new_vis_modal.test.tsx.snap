@@ -277,6 +277,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                         class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                         focusable="false"
                                         height="16"
+                                        role="img"
                                         viewBox="0 0 16 16"
                                         width="16"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -292,6 +293,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
+                                    role="img"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -606,6 +608,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                 class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                                 focusable="false"
                                                 height="16"
+                                                role="img"
                                                 viewBox="0 0 16 16"
                                                 width="16"
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -621,6 +624,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                             class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
+                                            role="img"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -874,6 +878,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                   class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                                   focusable="false"
                                                   height="16"
+                                                  role="img"
                                                   viewBox="0 0 16 16"
                                                   width="16"
                                                   xmlns="http://www.w3.org/2000/svg"
@@ -889,6 +894,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                               class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
+                                              role="img"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -1318,16 +1324,18 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                             type="popout"
                                                           >
                                                             <EuiIconEmpty
-                                                              aria-hidden="true"
+                                                              aria-hidden={true}
                                                               className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                                               focusable="false"
+                                                              role="img"
                                                               style={null}
                                                             >
                                                               <svg
-                                                                aria-hidden="true"
+                                                                aria-hidden={true}
                                                                 className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                                                 focusable="false"
                                                                 height={16}
+                                                                role="img"
                                                                 style={null}
                                                                 viewBox="0 0 16 16"
                                                                 width={16}
@@ -1351,16 +1359,18 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                                       type="empty"
                                                     >
                                                       <EuiIconEmpty
-                                                        aria-hidden="true"
+                                                        aria-hidden={true}
                                                         className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
+                                                        role="img"
                                                         style={null}
                                                       >
                                                         <svg
-                                                          aria-hidden="true"
+                                                          aria-hidden={true}
                                                           className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
                                                           height={16}
+                                                          role="img"
                                                           style={null}
                                                           viewBox="0 0 16 16"
                                                           width={16}
@@ -1946,6 +1956,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                         class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                         focusable="false"
                                         height="16"
+                                        role="img"
                                         viewBox="0 0 16 16"
                                         width="16"
                                         xmlns="http://www.w3.org/2000/svg"
@@ -1961,6 +1972,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                     focusable="false"
                                     height="16"
+                                    role="img"
                                     viewBox="0 0 16 16"
                                     width="16"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -2272,6 +2284,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                 class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                                 focusable="false"
                                                 height="16"
+                                                role="img"
                                                 viewBox="0 0 16 16"
                                                 width="16"
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -2287,6 +2300,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                             class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                             focusable="false"
                                             height="16"
+                                            role="img"
                                             viewBox="0 0 16 16"
                                             width="16"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -2537,6 +2551,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                                   class="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                                   focusable="false"
                                                   height="16"
+                                                  role="img"
                                                   viewBox="0 0 16 16"
                                                   width="16"
                                                   xmlns="http://www.w3.org/2000/svg"
@@ -2552,6 +2567,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                               class="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                               focusable="false"
                                               height="16"
+                                              role="img"
                                               viewBox="0 0 16 16"
                                               width="16"
                                               xmlns="http://www.w3.org/2000/svg"
@@ -3014,16 +3030,18 @@ exports[`NewVisModal should render as expected 1`] = `
                                                             type="popout"
                                                           >
                                                             <EuiIconEmpty
-                                                              aria-hidden="true"
+                                                              aria-hidden={true}
                                                               className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                                               focusable="false"
+                                                              role="img"
                                                               style={null}
                                                             >
                                                               <svg
-                                                                aria-hidden="true"
+                                                                aria-hidden={true}
                                                                 className="euiIcon euiIcon--medium euiIcon-isLoading euiBetaBadge__icon"
                                                                 focusable="false"
                                                                 height={16}
+                                                                role="img"
                                                                 style={null}
                                                                 viewBox="0 0 16 16"
                                                                 width={16}
@@ -3047,16 +3065,18 @@ exports[`NewVisModal should render as expected 1`] = `
                                                       type="empty"
                                                     >
                                                       <EuiIconEmpty
-                                                        aria-hidden="true"
+                                                        aria-hidden={true}
                                                         className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                         focusable="false"
+                                                        role="img"
                                                         style={null}
                                                       >
                                                         <svg
-                                                          aria-hidden="true"
+                                                          aria-hidden={true}
                                                           className="euiIcon euiIcon--large euiIcon--secondary euiIcon-isLoading"
                                                           focusable="false"
                                                           height={16}
+                                                          role="img"
                                                           style={null}
                                                           viewBox="0 0 16 16"
                                                           width={16}
