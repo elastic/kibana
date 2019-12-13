@@ -7,6 +7,7 @@
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
 import { EndpointRequestContext } from '../handlers/endpoint_handler';
+import { endpointRequestSchema } from '../services/query/endpoint_query_builder';
 
 export function registerEndpointRoutes(router: IRouter, endpointHandler: EndpointRequestContext) {
   router.get(
@@ -27,15 +28,10 @@ export function registerEndpointRoutes(router: IRouter, endpointHandler: Endpoin
     }
   );
 
-  router.get(
+  router.post(
     {
       path: '/api/endpoint/endpoints',
-      validate: {
-        query: schema.object({
-          pageSize: schema.number({ defaultValue: 10 }),
-          pageIndex: schema.number({ defaultValue: 0 }),
-        }),
-      },
+      validate: endpointRequestSchema,
       options: { authRequired: true },
     },
     async (context, req, res) => {

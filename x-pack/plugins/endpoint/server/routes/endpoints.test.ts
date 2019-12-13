@@ -65,7 +65,7 @@ describe('endpoints route test', () => {
     };
     endpointHandler.findLatestOfAllEndpoints.mockReturnValue(Promise.resolve(response));
     registerEndpointRoutes(routerMock, endpointHandler);
-    [routeConfig, routeHandler] = routerMock.get.mock.calls.find(
+    [routeConfig, routeHandler] = routerMock.post.mock.calls.find(
       ([{ path }]) => path === '/api/endpoint/endpoints'
     )!;
     await routeHandler(({} as unknown) as RequestHandlerContext, mockRequest, mockResponse);

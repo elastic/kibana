@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouter, RequestHandler, RouteConfig, LoggerFactory } from 'kibana/server';
+import { IRouter, RequestHandler, RouteConfig } from 'kibana/server';
 
 import { BootstrapService } from '../services/bootstrap';
 import { wrapError } from '../services/bootstrap/errors';
