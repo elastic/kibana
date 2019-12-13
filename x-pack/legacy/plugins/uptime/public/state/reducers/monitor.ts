@@ -60,9 +60,8 @@ export function monitorReducer(state = initialState, action: MonitorActionTypes)
         loading: true,
       };
     case FETCH_MONITOR_LOCATIONS_SUCCESS:
-      const { monitorId: monId } = action.payload;
       const monLocations = state.monitorLocationsList;
-      monLocations.set(monId, action.payload);
+      monLocations.set(action.payload.monitorId, action.payload);
       return {
         ...state,
         monitorLocationsList: monLocations,
