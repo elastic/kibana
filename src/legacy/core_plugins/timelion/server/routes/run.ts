@@ -16,14 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-/* eslint-disable @typescript-eslint/no-var-requires */
 import Joi from 'joi';
 import Bluebird from 'bluebird';
 import _ from 'lodash';
 import { Legacy } from 'kibana';
 // @ts-ignore
 import chainRunnerFn from '../handlers/chain_runner.js';
-const timelionDefaults = require('../lib/get_namespaced_settings')();
+// @ts-ignore
+import getNamespacesSettings from '../lib/get_namespaced_settings';
+// @ts-ignore
+import getTlConfig from '../handlers/lib/tl_config';
+
+const timelionDefaults = getNamespacesSettings();
 
 export interface TimelionRequestQuery {
   payload: {
@@ -95,7 +99,7 @@ export function runRoute(server: Legacy.Server) {
       try {
         const uiSettings = await request.getUiSettingsService().getAll();
 
-        const tlConfig = require('../handlers/lib/tl_config.js')({
+        const tlConfig = getTlConfig({
           server,
           request,
           settings: _.defaults(uiSettings, timelionDefaults), // Just in case they delete some setting.
