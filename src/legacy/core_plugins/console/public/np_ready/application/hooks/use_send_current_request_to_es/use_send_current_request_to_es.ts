@@ -21,7 +21,7 @@ import { useCallback } from 'react';
 import { instance as registry } from '../../contexts/editor_context/editor_registry';
 import { useRequestActionContext, useServicesContext } from '../../contexts';
 import { sendRequestToES } from './send_request_to_es';
-import { getEndpointFromPosition } from '../../../lib/autocomplete/autocomplete';
+import { track } from './track';
 // @ts-ignore
 import mappings from '../../../lib/mappings/mappings';
 
@@ -50,16 +50,8 @@ export const useSendCurrentRequestToES = () => {
         return;
       }
 
-      // This `patterns` variable gets its value from the server-side generated JSON files which
-      // are a combination of JS, automatically generated JSON and manual overrides. That means
-      // the metrics reported from here will be tied to the definitions in those files.
-      const { patterns } = getEndpointFromPosition(
-        editor,
-        editor.getCoreEditor().getCurrentPosition(),
-        editor.parser
-      );
-
-      trackUiMetric(METRIC_TYPE.COUNT, `${requests[0]?.method ?? ''} ${patterns.join('|')}`);
+      // Fire and forget
+      track(requests, editor, trackUiMetric, METRIC_TYPE.COUNT);
 
       const results = await sendRequestToES({ requests });
 
