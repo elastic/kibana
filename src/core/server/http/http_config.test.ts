@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import uuid from 'uuid';
 import { config, HttpConfig } from '.';
 import { Env } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
@@ -75,6 +76,14 @@ test('throws if basepath is not specified, but rewriteBasePath is set', () => {
     rewriteBasePath: true,
   };
   expect(() => httpSchema.validate(obj)).toThrowErrorMatchingSnapshot();
+});
+
+test('accepts only valid uuids for server.uuid', () => {
+  const httpSchema = config.schema;
+  expect(() => httpSchema.validate({ uuid: uuid.v4() })).not.toThrow();
+  expect(() => httpSchema.validate({ uuid: 'not an uuid' })).toThrowErrorMatchingInlineSnapshot(
+    `"[uuid]: must be a valid uuid"`
+  );
 });
 
 describe('with TLS', () => {

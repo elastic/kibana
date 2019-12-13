@@ -22,6 +22,7 @@ import { Env } from '../config';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
+const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
@@ -91,7 +92,11 @@ export const config = {
           )
         ),
       }),
-      uuid: schema.maybe(schema.string()),
+      uuid: schema.maybe(
+        schema.string({
+          validate: match(uuidRegexp, 'must be a valid uuid'),
+        })
+      ),
     },
     {
       validate: rawConfig => {
