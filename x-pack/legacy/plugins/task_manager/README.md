@@ -272,14 +272,12 @@ Using `runNow` you can instruct TaskManger to run an existing task on-demand, wi
 const taskManager = server.plugins.task_manager;
 
 try {
-  const taskRunResult = await taskManager.runNow('91760f10-1799-11ea-ba42-698eedde9799');
-  // if no error is thrown, the task has completed successfully.
-  // we don't expose internal state for security reasons, but rest assured the task has completed
-  // if no error is thrown and a `RunNowResult` ({ id: "91760f10-1799-11ea-ba42-698eedde9799" })
+  const taskRunResult = await taskManager.runNow('91760f10-ba42-de9799');
+  // If no error is thrown, the task has completed successfully.
 } catch(err: Error) {
-  // error happened, so err will have the folllowing messages
-  //  when the task doesnt exist: `Error: failed to run task "${id}" as it does not exist`
-  //  when the task is already running:`Error: failed to run task "${id}" as it is currently running`
+  // If running the task has failed, we throw an error with an appropriate message.
+  // For example, if the requested task doesnt exist: `Error: failed to run task "91760f10-ba42-de9799" as it does not exist`
+  // Or if, for example, the task is already running: `Error: failed to run task "91760f10-ba42-de9799" as it is currently running`
 }
 ```
 
@@ -327,31 +325,32 @@ server.plugins.task_manager.addMiddleware({
 ## Task Poller: polling for work
 TaskManager used to work in a `pull` model, but it now needs to support both `push` and `pull`, so it has been remodeled internally to support a single `push` model.
 
-Task Manager's lifecycle is pushed by the following operations:
+Task Manager's _push_ mechanism is driven by the following operations:
 
 1. A polling interval has been reached.
 2. A new Task is scheduled.
 3. A Task is run using `runNow`.
 
-The polling interval straight forward: TaskPoller is configured to emit an event at a fixed interval.
-We wish to ignore any polling interval that goes off when there are no workers available, so we'll throttle that on workerAvailability
+The polling interval is straight forward: TaskPoller is configured to emit an event at a fixed interval.
+That said, if there are no workers available, we want to ignore these events, so we'll throttle the interval on worker availability.
 
-Every time a Task is scheduled we want to trigger an early polling in order to respond to the newly scheduled task asap, but this too we only wish to do if there are available workers, so we can throttle this too.
+Whenever a user uses the `schedule` api to schedule a new Task, we want to trigger an early polling in order to respond to the newly scheduled task as soon as possible, but this too we only wish to do if there are available workers, so we can throttle this too.
 
-When a runNow call is made we need to force a poll as the user will now be waiting on the result of the runNow call, but
-there is a complexity here- we don't want to force polling as there might not be any worker capacity, but we also can't throttle, as we can't afford to "drop" these requests (as we are bypassing normal scheduling), so we'll have to buffer these.
+When a `runNow` call is made we need to force a poll as the user will now be waiting on the result of the `runNow` call, but
+there is a complexity here- we don't want to force polling (as there might not be any worker capacity and it's possible that a polling cycle is already running), but we also can't throttle, as we can't afford to "drop" these requests, so we'll have to buffer these.
 
-We now want to respond to all three of these push events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity top handle.
-Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", unlike `Run Task Now` which also means "poll for these specific tasks", so our capacity only needs to be applied to `Run Task Now`.
+We now want to respond to all three of these push events, but we still need to balance against our worker capacity, so if there are too many requests buffered, we only want to `take` as many requests as we have capacity to handle.
+Luckily, `Polling Interval` and `Task Scheduled` simply denote a request to "poll for work as soon as possible", unlike `Run Task Now` which also means "poll for these specific tasks", so our worker capacity only needs to be applied to `Run Task Now`.
 
-We achieve this model by maintaining a queue using a Set (which removes duplicated).
-TODO: We don't want an unbounded queue, sobest to add a configurable cap and return an error to the `runNow` call when this cap is reached.
+We achieve this model by buffering requests into a queue using a Set (which removes duplicated). As we don't want an unbounded queue in our system, we have limited the size of this queue (configurable by the `xpack.task_manager.request_capacity` config, defaulting to 1,000 requests) which forces us to throw an error once this cap is reachedand to all subsequent calls to `runNow` until the queue drain bellow the cap.
 
 Our current model, then, is this:
 ```
-  Polling Interval  --> filter(workerAvailability > 0) --   []   --\ 
-  Task Scheduled    --> filter(workerAvailability > 0) --   []   ---|==>  Set([] + [] + [`ID`]) ==> work([`ID`])
-  Run Task `ID` Now --> buffer(workerAvailability > 0) -- [`ID`] --/ 
+  Polling Interval  --> filter(availableWorkers > 0) - mapTo([]) -------\\ 
+  Task Scheduled    --> filter(availableWorkers > 0) - mapTo([]) --------||==>Set([]+[]+[`1`,`2`]) ==> work([`1`,`2`])
+  Run Task `1` Now --\                                                  //
+                      ----> buffer(availableWorkers > 0) -- [`1`,`2`] -// 
+  Run Task `2` Now --/
 ```
 
 ## Limitations in v1.0

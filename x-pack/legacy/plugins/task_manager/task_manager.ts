@@ -82,15 +82,18 @@ export type TaskLifecycleEvent = TaskMarkRunning | TaskRun | TaskClaim | TaskRun
  * The public interface into the task manager system.
  */
 export class TaskManager {
-  private maxWorkers: number;
-  private definitions: TaskDictionary<TaskDefinition>;
+  private definitions: TaskDictionary<TaskDefinition> = {};
   private store: TaskStore;
   private logger: Logger;
   private pool: TaskPool;
-  private events$: Subject<TaskLifecycleEvent>;
-  private claimRequests$: Subject<Option<string>>;
-  private pollingSubscription: Subscription;
+  // all task related events (task claimed, task marked as running, etc.) are emitted through events$
+  private events$ = new Subject<TaskLifecycleEvent>();
+  // all on-demand requests we wish to pipe into the poller
+  private claimRequests$ = new Subject<Option<string>>();
+  // the task poller that polls for work on fixed intervals and on demand
   private poller$: Observable<Result<FillPoolResult, PollingError<string>>>;
+  // our subscription to the poller
+  private pollingSubscription: Subscription = Subscription.EMPTY;
 
   private startQueue: Array<() => void> = [];
   private middleware = {
@@ -105,8 +108,6 @@ export class TaskManager {
    * mechanism.
    */
   constructor(opts: TaskManagerOpts) {
-    this.maxWorkers = opts.config.get('xpack.task_manager.max_workers');
-    this.definitions = {};
     this.logger = opts.logger;
 
     const taskManagerId = opts.config.get('server.uuid');
@@ -118,9 +119,6 @@ export class TaskManager {
     } else {
       this.logger.info(`TaskManager is identified by the Kibana UUID: ${taskManagerId}`);
     }
-
-    // all task related events (task claimed, task marked as running, etc.) are emitted through events$
-    this.events$ = new Subject();
 
     this.store = new TaskStore({
       serializer: opts.serializer,
@@ -136,11 +134,9 @@ export class TaskManager {
 
     this.pool = new TaskPool({
       logger: this.logger,
-      maxWorkers: this.maxWorkers,
+      maxWorkers: opts.config.get('xpack.task_manager.max_workers'),
     });
 
-    this.claimRequests$ = new Subject();
-    this.pollingSubscription = Subscription.EMPTY;
     this.poller$ = createTaskPoller<string, FillPoolResult>({
       pollInterval: opts.config.get('xpack.task_manager.poll_interval'),
       bufferCapacity: opts.config.get('xpack.task_manager.request_capacity'),
@@ -171,7 +167,7 @@ export class TaskManager {
   };
 
   public get isStarted() {
-    return this.pollingSubscription && !this.pollingSubscription.closed;
+    return !this.pollingSubscription.closed;
   }
 
   private pollForWork = async (...tasksToClaim: string[]): Promise<FillPoolResult> => {

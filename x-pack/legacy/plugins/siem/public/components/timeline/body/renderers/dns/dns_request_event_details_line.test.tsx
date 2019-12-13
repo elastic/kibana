@@ -10,15 +10,17 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 
 import { DnsRequestEventDetailsLine } from './dns_request_event_details_line';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 describe('DnsRequestEventDetailsLine', () => {
+  const mount = useMountAppended();
+
   test('it renders the expected text when all properties are provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -44,7 +46,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when dnsQuestionName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -70,7 +72,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when dnsQuestionType is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -96,7 +98,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when dnsResolvedIp is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -122,7 +124,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when dnsResponseCode is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -148,7 +150,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when eventCode is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -174,7 +176,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when hostName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -200,7 +202,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processExecutable is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -226,7 +228,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -252,7 +254,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when processPid is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -278,7 +280,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when userDomain is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -304,7 +306,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when userName is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -330,7 +332,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when winlogEventId is NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
@@ -356,7 +358,7 @@ describe('DnsRequestEventDetailsLine', () => {
   });
 
   test('it renders the expected text when both eventCode and winlogEventId are NOT provided', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <DnsRequestEventDetailsLine
           contextId="test"
