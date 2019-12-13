@@ -22,18 +22,12 @@ import _ from 'lodash';
 import tableCellFilterHtml from './table_cell_filter.html';
 
 function getFormattedValue(formatter, value) {
-  let formattedValue;
+  const parsedUrl = {
+    origin: window.location.origin,
+    pathname: window.location.pathname,
+  };
 
-  if (formatter.htmlConvert) {
-    formattedValue = formatter.htmlConvert(value, false, false, {
-      origin: window.location.origin,
-      pathname: window.location.pathname,
-    });
-  } else {
-    formattedValue = formatter.convert(value, 'html');
-  }
-
-  return formattedValue || value;
+  return formatter.getConverterFor('html')(value, false, false, parsedUrl);
 }
 
 export function KbnRows($compile) {
