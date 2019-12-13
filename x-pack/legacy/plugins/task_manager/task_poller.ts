@@ -24,7 +24,7 @@ interface Opts<T, H> {
   pollInterval: number;
   bufferCapacity: number;
   getCapacity: () => number;
-  pollRequests$: Subject<Option<T>>;
+  pollRequests$: Observable<Option<T>>;
   work: WorkFn<T, H>;
 }
 
