@@ -22,8 +22,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-import { Capabilities } from 'src/core/public';
-import { Feature } from '../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../plugins/features/public';
 import { isReservedSpace } from '../../../../common';
 import { DEFAULT_SPACE_ID } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
