@@ -30,12 +30,7 @@ export function plugin() {
 export { DataStart };
 
 export { Field, FieldType, IFieldList, IndexPattern } from './index_patterns';
-export { SearchBar, SearchBarProps } from './search';
-export {
-  SavedQueryAttributes,
-  SavedQuery,
-  SavedQueryTimeFilter,
-} from '../../../../plugins/data/public';
+export { SavedQuery, SavedQueryTimeFilter } from '../../../../plugins/data/public';
 
 /** @public static code */
 export * from '../common';

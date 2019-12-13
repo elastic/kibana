@@ -36,27 +36,40 @@ export default function({ getService, getPageObjects }: PluginFunctionalProvider
         expect(corePluginB).to.equal(`Plugin A said: Hello from Plugin A!`);
       });
     });
+
     describe('have injectedMetadata service provided', function describeIndexTests() {
       before(async () => {
         await PageObjects.common.navigateToApp('bar');
       });
 
-      it('should attach string to window.corePluginB', async () => {
+      it('should attach boolean to window.hasAccessToInjectedMetadata', async () => {
         const hasAccessToInjectedMetadata = await browser.execute(
           'return window.hasAccessToInjectedMetadata'
         );
         expect(hasAccessToInjectedMetadata).to.equal(true);
       });
     });
+
     describe('have env data provided', function describeIndexTests() {
       before(async () => {
         await PageObjects.common.navigateToApp('bar');
       });
 
-      it('should attach pluginContext to window.corePluginB', async () => {
+      it('should attach pluginContext to window.env', async () => {
         const envData: any = await browser.execute('return window.env');
         expect(envData.mode.dev).to.be(true);
         expect(envData.packageInfo.version).to.be.a('string');
+      });
+    });
+
+    describe('have access to start services via coreSetup.getStartServices', function describeIndexTests() {
+      before(async () => {
+        await PageObjects.common.navigateToApp('bar');
+      });
+
+      it('should attach boolean to window.receivedStartServices', async () => {
+        const receivedStartServices = await browser.execute('return window.receivedStartServices');
+        expect(receivedStartServices).to.equal(true);
       });
     });
   });
