@@ -2,73 +2,69 @@
 
 exports[`MonitorStatusBar component renders duration in ms, not us 1`] = `
 <div
-  class="euiPanel euiPanel--paddingMedium"
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
 >
   <div
-    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <div
+      aria-label="Monitor status"
+      class="euiHealth"
+      style="line-height:inherit"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <svg
+            aria-hidden="true"
+            class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
+            focusable="false"
+            height="16"
+            role="img"
+            viewBox="0 0 16 16"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
+          />
+        </div>
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          Up
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
   >
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
-      <div
-        aria-label="Monitor status"
-        class="euiHealth"
-        style="line-height:inherit"
+      <a
+        aria-label="Monitor URL link"
+        class="euiLink euiLink--primary"
+        href="https://www.example.com/"
+        rel="noopener noreferrer"
+        target="_blank"
       >
-        <div
-          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
-        >
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <svg
-              aria-hidden="true"
-              class="euiIcon euiIcon--medium euiIcon--success euiIcon-isLoading"
-              focusable="false"
-              height="16"
-              role="img"
-              viewBox="0 0 16 16"
-              width="16"
-              xmlns="http://www.w3.org/2000/svg"
-            />
-          </div>
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            Up
-          </div>
-        </div>
-      </div>
+        https://www.example.com/
+      </a>
     </div>
-    <div
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      <div
-        class="euiFlexItem euiFlexItem--flexGrowZero"
-      >
-        <a
-          aria-label="Monitor URL link"
-          class="euiLink euiLink--primary"
-          href="https://www.example.com/"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          https://www.example.com/
-        </a>
-      </div>
-    </div>
-    <div
-      aria-label="Monitor duration in milliseconds"
-      class="euiFlexItem euiFlexItem--flexGrowZero"
-    >
-      1234ms
-    </div>
-    <div
-      aria-label="Time since last check"
-      class="euiFlexItem"
-    >
-      15 minutes ago
-    </div>
+  </div>
+  <div
+    aria-label="Monitor duration in milliseconds"
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    1234ms
+  </div>
+  <div
+    aria-label="Time since last check"
+    class="euiFlexItem"
+  >
+    15 minutes ago
   </div>
 </div>
 `;

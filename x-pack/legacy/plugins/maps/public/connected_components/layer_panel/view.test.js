@@ -40,12 +40,6 @@ jest.mock('./layer_settings', () => ({
   }
 }));
 
-jest.mock('./source_settings', () => ({
-  SourceSettings: () => {
-    return (<div>mockSourceSettings</div>);
-  }
-}));
-
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -62,11 +56,13 @@ const mockLayer = {
   isJoinable: () => { return true; },
   supportsElasticsearchFilters: () => { return false; },
   getLayerTypeIconName: () => { return 'vector'; },
+  renderSourceSettingsEditor: () => { return (<div>mockSourceSettings</div>); },
 };
 
 const defaultProps = {
   selectedLayer: mockLayer,
   fitToBounds: () => {},
+  updateSourceProp: () => {},
 };
 
 describe('LayerPanel', () => {

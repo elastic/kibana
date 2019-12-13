@@ -124,7 +124,7 @@ export const AnomaliesTable: React.FunctionComponent<{
         setItemIdToExpandedRowMap(newItemIdToExpandedRowMap);
       }
     },
-    [results, setTimeRange, timeRange, itemIdToExpandedRowMap, setItemIdToExpandedRowMap]
+    [itemIdToExpandedRowMap, jobId, results, setTimeRange, timeRange]
   );
 
   const columns = [

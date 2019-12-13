@@ -22,7 +22,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import chrome from 'ui/chrome';
 import { EventsTable } from '../events_table';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -190,7 +189,7 @@ export const CalendarForm = injectI18n(function CalendarForm({
         <EuiFlexItem grow={false}>
           <EuiButton
             isDisabled={saving}
-            href={`${chrome.getBasePath()}/app/ml#/settings/calendars_list`}
+            href={'#/settings/calendars_list'}
           >
             <FormattedMessage
               id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"

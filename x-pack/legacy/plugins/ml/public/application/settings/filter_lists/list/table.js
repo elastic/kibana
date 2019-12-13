@@ -26,7 +26,6 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import chrome from 'ui/chrome';
 import { DeleteFilterListModal } from '../components/delete_filter_list_modal';
 
 
@@ -68,7 +67,7 @@ function NewFilterButton({ canCreateFilter }) {
   return (
     <EuiButton
       key="new_filter_list"
-      href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists/new_filter_list`}
+      href="#/settings/filter_lists/new_filter_list"
       isDisabled={(canCreateFilter === false)}
       data-test-subj="mlFilterListsButtonCreate"
     >
@@ -89,7 +88,7 @@ function getColumns() {
         defaultMessage: 'ID',
       }),
       render: (id) => (
-        <EuiLink href={`${chrome.getBasePath()}/app/ml#/settings/filter_lists/edit_filter_list/${id}`} >
+        <EuiLink href={`#/settings/filter_lists/edit_filter_list/${id}`} >
           {id}
         </EuiLink>
       ),

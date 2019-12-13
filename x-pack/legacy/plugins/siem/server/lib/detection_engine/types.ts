@@ -65,3 +65,5 @@ export type OutputRuleAlertRest = RuleAlertParamsRest & {
   created_by: string | undefined | null;
   updated_by: string | undefined | null;
 };
+
+export type CallWithRequest<T, U, V> = (endpoint: string, params: T, options?: U) => Promise<V>;

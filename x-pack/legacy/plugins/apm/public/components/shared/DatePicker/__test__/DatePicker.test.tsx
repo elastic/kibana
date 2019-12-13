@@ -10,13 +10,13 @@ import {
   UrlParamsContext,
   useUiFilters
 } from '../../../../context/UrlParamsContext';
-import { tick } from '../../../../utils/testHelpers';
 import { DatePicker } from '../index';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { history } from '../../../../utils/history';
 import { mount } from 'enzyme';
 import { EuiSuperDatePicker } from '@elastic/eui';
 import { MemoryRouter } from 'react-router-dom';
+import { wait } from '@testing-library/react';
 
 const mockHistoryPush = jest.spyOn(history, 'push');
 const mockRefreshTimeRange = jest.fn();
@@ -84,7 +84,7 @@ describe('DatePicker', () => {
     });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
-    await tick();
+    await wait();
     expect(mockRefreshTimeRange).toHaveBeenCalled();
     wrapper.unmount();
   });
@@ -94,7 +94,7 @@ describe('DatePicker', () => {
     mountDatePicker({ refreshPaused: true, refreshInterval: 1000 });
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1000);
-    await tick();
+    await wait();
     expect(mockRefreshTimeRange).not.toHaveBeenCalled();
   });
 });
