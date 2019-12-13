@@ -15,7 +15,7 @@ interface Props {
 export const AdvancedSettingsWrapper = ({ children }: Props) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
 
-  const toggleIsVisilbe = () => {
+  const toggleIsVisible = () => {
     setIsVisible(!isVisible);
   };
 
@@ -23,7 +23,7 @@ export const AdvancedSettingsWrapper = ({ children }: Props) => {
     <div className="mappingsEditor__editField__advancedSettings">
       <EuiSpacer size="m" />
 
-      <EuiButtonEmpty onClick={toggleIsVisilbe} flush="left">
+      <EuiButtonEmpty onClick={toggleIsVisible} flush="left">
         {isVisible
           ? i18n.translate('xpack.idxMgmt.mappingsEditor.advancedSettings.hideButtonLabel', {
               defaultMessage: 'Hide advanced settings',
