@@ -17,12 +17,12 @@
  * under the License.
  */
 
-import { CspConfigType, config } from './config';
+import { config } from './config';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
 /**
- * Csp configuration for use in Kibana.
+ * CSP configuration for use in Kibana.
  * @public
  */
 export interface ICspConfig {
@@ -66,7 +66,7 @@ export class CspConfig implements ICspConfig {
    * Returns the default CSP configuration when passed with no config
    * @internal
    */
-  constructor(rawCspConfig: Partial<CspConfigType> = {}) {
+  constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}) {
     const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
 
     this.rules = source.rules;

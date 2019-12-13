@@ -576,10 +576,8 @@ export interface CoreStart {
 
 // @public
 export class CspConfig implements ICspConfig {
-    // Warning: (ae-forgotten-export) The symbol "CspConfigType" needs to be exported by the entry point index.d.ts
-    // 
     // @internal
-    constructor(rawCspConfig?: Partial<CspConfigType>);
+    constructor(rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>);
     // (undocumented)
     static readonly DEFAULT: CspConfig;
     // (undocumented)
