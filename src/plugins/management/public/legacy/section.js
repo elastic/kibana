@@ -19,7 +19,6 @@
 
 import { assign } from 'lodash';
 import { IndexedArray } from '../../../../legacy/ui/public/indexed_array';
-// import { capabilities } from '../capabilities';
 
 const listeners = [];
 

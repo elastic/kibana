@@ -32,6 +32,7 @@ import { DevToolsSetup, DevToolsStart } from '../../../../plugins/dev_tools/publ
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../../../plugins/kibana_legacy/public';
 import { HomePublicPluginSetup, HomePublicPluginStart } from '../../../../plugins/home/public';
 import { SharePluginSetup, SharePluginStart } from '../../../../plugins/share/public';
+import { ManagementStart } from '../../../../plugins/management/public';
 
 export interface PluginsSetup {
   data: ReturnType<DataPlugin['setup']>;
@@ -56,6 +57,7 @@ export interface PluginsStart {
   dev_tools: DevToolsStart;
   kibana_legacy: KibanaLegacyStart;
   share: SharePluginStart;
+  management: ManagementStart;
 }
 
 export const npSetup = {

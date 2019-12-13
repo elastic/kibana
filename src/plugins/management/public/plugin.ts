@@ -19,6 +19,7 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { ManagementStart } from './types';
+// @ts-ignorets-ignore
 import { management } from './legacy';
 
 export class ManagementPlugin implements Plugin<{}, ManagementStart> {

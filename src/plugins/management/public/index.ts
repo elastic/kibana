@@ -23,3 +23,5 @@ import { ManagementPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ManagementPlugin();
 }
+
+export { ManagementStart } from './types';

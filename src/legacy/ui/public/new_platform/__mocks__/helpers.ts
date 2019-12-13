@@ -24,6 +24,7 @@ import { embeddablePluginMock } from '../../../../../plugins/embeddable/public/m
 import { expressionsPluginMock } from '../../../../../plugins/expressions/public/mocks';
 import { inspectorPluginMock } from '../../../../../plugins/inspector/public/mocks';
 import { uiActionsPluginMock } from '../../../../../plugins/ui_actions/public/mocks';
+import { managementPluginMock } from '../../../../../plugins/management/public/mocks';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export const pluginsMock = {
@@ -40,6 +41,7 @@ export const pluginsMock = {
     inspector: inspectorPluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
     uiActions: uiActionsPluginMock.createStartContract(),
+    management: managementPluginMock.createStartContract(),
   }),
 };
 
