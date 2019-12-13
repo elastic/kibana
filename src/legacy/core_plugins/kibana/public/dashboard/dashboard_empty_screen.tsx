@@ -17,7 +17,7 @@
  * under the License.
  */
 import React from 'react';
-import { I18nProvider, FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n/react';
 import {
   EuiIcon,
   EuiLink,
@@ -26,6 +26,7 @@ import {
   EuiPageBody,
   EuiPage,
   EuiText,
+  EuiButton,
 } from '@elastic/eui';
 import * as constants from './dashboard_empty_screen_constants';
 
@@ -38,23 +39,20 @@ export interface DashboardEmptyScreenProps {
 export function DashboardEmptyScreen({
   showLinkToVisualize,
   onLinkClick,
+  onVisualizeClick,
 }: DashboardEmptyScreenProps) {
   const linkToVisualizeParagraph = (
-    <EuiText data-test-subj="linkToVisualizeParagraph">
-      <p>
-        <FormattedMessage
-          id="kbn.dashboard.addVisualizationDescription3"
-          defaultMessage="If you haven't set up any visualizations yet, {visualizeAppLink} to create your first visualization"
-          values={{
-            visualizeAppLink: (
-              <a className="euiLink" href="#/visualize">
-                {constants.visualizeAppLinkTest}
-              </a>
-            ),
-          }}
-        />
-      </p>
-    </EuiText>
+    <p data-test-subj="linkToVisualizeParagraph">
+      <EuiButton
+        iconSide="right"
+        fill
+        iconType="arrowDown"
+        onClick={onVisualizeClick}
+        data-test-subj="addVisualizationButton"
+      >
+        {constants.createNewVisualizationButton}
+      </EuiButton>
+    </p>
   );
   const paragraph = (
     description1: string,
@@ -96,7 +94,7 @@ export function DashboardEmptyScreen({
   );
   return (
     <I18nProvider>
-      <EuiPage className="dshStartScreen" restrictWidth={'36em'}>
+      <EuiPage className="dshStartScreen" restrictWidth="36em">
         <EuiPageBody>
           <EuiPageContent verticalPosition="center" horizontalPosition="center">
             <EuiIcon type="dashboardApp" size="xxl" color="subdued" />

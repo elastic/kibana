@@ -19,7 +19,7 @@ import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/type
 // @public
 export interface App extends AppBase {
     chromeless?: boolean;
-    mount: (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+    mount: AppMount | AppMountDeprecated;
 }
 
 // @public (undocumented)
@@ -37,7 +37,8 @@ export interface AppBase {
 // @public (undocumented)
 export interface ApplicationSetup {
     register(app: App): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
+    // @deprecated
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
 
 // @public (undocumented)
@@ -50,10 +51,14 @@ export interface ApplicationStart {
         path?: string;
         state?: any;
     }): void;
-    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<App['mount'], T>): void;
+    // @deprecated
+    registerMountContext<T extends keyof AppMountContext>(contextName: T, provider: IContextProvider<AppMountDeprecated, T>): void;
 }
 
 // @public
+export type AppMount = (params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
+
+// @public @deprecated
 export interface AppMountContext {
     core: {
         application: Pick<ApplicationStart, 'capabilities' | 'navigateToApp'>;
@@ -70,6 +75,9 @@ export interface AppMountContext {
         };
     };
 }
+
+// @public @deprecated
+export type AppMountDeprecated = (context: AppMountContext, params: AppMountParameters) => AppUnmount | Promise<AppUnmount>;
 
 // @public (undocumented)
 export interface AppMountParameters {
@@ -275,13 +283,14 @@ export interface CoreContext {
 }
 
 // @public
-export interface CoreSetup {
+export interface CoreSetup<TPluginsStart extends object = object> {
     // (undocumented)
     application: ApplicationSetup;
-    // (undocumented)
+    // @deprecated (undocumented)
     context: ContextSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
+    getStartServices(): Promise<[CoreStart, TPluginsStart]>;
     // (undocumented)
     http: HttpSetup;
     // @deprecated
@@ -653,7 +662,7 @@ export interface IUiSettingsClient {
 }
 
 // @public @deprecated
-export interface LegacyCoreSetup extends CoreSetup {
+export interface LegacyCoreSetup extends CoreSetup<any> {
     // Warning: (ae-forgotten-export) The symbol "InjectedMetadataSetup" needs to be exported by the entry point index.d.ts
     // 
     // @deprecated (undocumented)
@@ -749,7 +758,7 @@ export interface PackageInfo {
 // @public
 export interface Plugin<TSetup = void, TStart = void, TPluginsSetup extends object = object, TPluginsStart extends object = object> {
     // (undocumented)
-    setup(core: CoreSetup, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
+    setup(core: CoreSetup<TPluginsStart>, plugins: TPluginsSetup): TSetup | Promise<TSetup>;
     // (undocumented)
     start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
     // (undocumented)
