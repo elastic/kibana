@@ -17,32 +17,58 @@
  * under the License.
  */
 
-import { HttpSetup, HttpStart, HttpServiceBase } from './types';
-import { setup } from './http_setup';
+import { HttpSetup, HttpStart, HttpFetchOptions } from './types';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
+import { BasePath } from './base_path';
+import { AnonymousPaths } from './anonymous_paths';
+import { LoadingCountService } from './loading_count_service';
+import { Fetch } from './fetch';
+import { CoreService } from '../../types';
 
 interface HttpDeps {
   injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup | null;
+  fatalErrors: FatalErrorsSetup;
 }
 
 /** @internal */
-export class HttpService {
-  private service!: HttpServiceBase;
+export class HttpService implements CoreService<HttpSetup, HttpStart> {
+  private readonly loadingCount = new LoadingCountService();
 
-  public setup(deps: HttpDeps): HttpSetup {
-    this.service = setup(deps.injectedMetadata, deps.fatalErrors);
-    return this.service;
+  public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
+    const kibanaVersion = injectedMetadata.getKibanaVersion();
+    const basePath = new BasePath(injectedMetadata.getBasePath());
+    const anonymousPaths = new AnonymousPaths(basePath);
+    const fetchService = new Fetch({ basePath, kibanaVersion });
+    const loadingCount = this.loadingCount.setup({ fatalErrors });
+
+    function shorthand(method: string) {
+      return (path: string, options: HttpFetchOptions = {}) =>
+        fetchService.fetch(path, { ...options, method });
+    }
+
+    return {
+      basePath,
+      anonymousPaths,
+      intercept: fetchService.intercept.bind(fetchService),
+      removeAllInterceptors: fetchService.removeAllInterceptors.bind(fetchService),
+      fetch: fetchService.fetch.bind(fetchService),
+      delete: shorthand('DELETE'),
+      get: shorthand('GET'),
+      head: shorthand('HEAD'),
+      options: shorthand('OPTIONS'),
+      patch: shorthand('PATCH'),
+      post: shorthand('POST'),
+      put: shorthand('PUT'),
+      ...loadingCount,
+    };
   }
 
-  public start(deps: HttpDeps): HttpStart {
-    return this.service || this.setup(deps);
+  public start(deps: HttpDeps) {
+    return this.setup(deps);
   }
 
   public stop() {
-    if (this.service) {
-      this.service.stop();
-    }
+    this.loadingCount.stop();
   }
 }

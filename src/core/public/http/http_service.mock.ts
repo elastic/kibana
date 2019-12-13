@@ -20,7 +20,7 @@
 import { HttpService } from './http_service';
 import { HttpSetup } from './types';
 import { BehaviorSubject } from 'rxjs';
-import { BasePath } from './base_path_service';
+import { BasePath } from './base_path';
 
 export type HttpSetupMock = jest.Mocked<HttpSetup> & {
   basePath: BasePath;
@@ -43,13 +43,12 @@ const createServiceMock = ({ basePath = '' } = {}): HttpSetupMock => ({
   },
   addLoadingCount: jest.fn(),
   getLoadingCount$: jest.fn().mockReturnValue(new BehaviorSubject(0)),
-  stop: jest.fn(),
   intercept: jest.fn(),
   removeAllInterceptors: jest.fn(),
 });
 
 const createMock = ({ basePath = '' } = {}) => {
-  const mocked: jest.Mocked<Required<HttpService>> = {
+  const mocked: jest.Mocked<PublicMethodsOf<HttpService>> = {
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),

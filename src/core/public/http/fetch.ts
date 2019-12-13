@@ -35,7 +35,7 @@ interface Params {
 const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
 const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
 
-export class FetchService {
+export class Fetch {
   private readonly interceptors = new Set<HttpInterceptor>();
 
   constructor(private readonly params: Params) {}

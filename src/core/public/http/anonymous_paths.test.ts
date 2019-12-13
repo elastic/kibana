@@ -18,7 +18,7 @@
  */
 
 import { AnonymousPaths } from './anonymous_paths';
-import { BasePath } from './base_path_service';
+import { BasePath } from './base_path';
 
 describe('#register', () => {
   it(`allows paths that don't start with /`, () => {

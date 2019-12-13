@@ -21,7 +21,7 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
   IUiSettingsClient,
-  HttpServiceBase,
+  HttpSetup,
 } from 'src/core/public';
 
 import { createIndexPatternCache } from './_pattern_cache';
@@ -39,7 +39,7 @@ export class IndexPatterns {
   constructor(
     config: IUiSettingsClient,
     savedObjectsClient: SavedObjectsClientContract,
-    http: HttpServiceBase
+    http: HttpSetup
   ) {
     this.apiClient = new IndexPatternsApiClient(http);
     this.config = config;

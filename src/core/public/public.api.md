@@ -544,14 +544,17 @@ export interface HttpRequestInit {
 }
 
 // @public (undocumented)
-export interface HttpServiceBase {
-    addLoadingCount(countSource$: Observable<number>): void;
+export interface HttpSetup {
+    // Warning: (ae-forgotten-export) The symbol "LoadingCountSetup" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "LoadingCountSetup"
+    addLoadingCount: LoadingCountSetup['addLoadingCount'];
     anonymousPaths: IAnonymousPaths;
     basePath: IBasePath;
     delete: HttpHandler;
     fetch: HttpHandler;
     get: HttpHandler;
-    getLoadingCount$(): Observable<number>;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "LoadingCountSetup"
+    getLoadingCount$: LoadingCountSetup['getLoadingCount$'];
     head: HttpHandler;
     intercept(interceptor: HttpInterceptor): () => void;
     options: HttpHandler;
@@ -559,15 +562,10 @@ export interface HttpServiceBase {
     post: HttpHandler;
     put: HttpHandler;
     removeAllInterceptors(): void;
-    // @internal (undocumented)
-    stop(): void;
 }
 
 // @public
-export type HttpSetup = HttpServiceBase;
-
-// @public
-export type HttpStart = HttpServiceBase;
+export type HttpStart = HttpSetup;
 
 // @public
 export interface I18nStart {
@@ -877,7 +875,7 @@ export interface SavedObjectsBulkUpdateOptions {
 // @public
 export class SavedObjectsClient {
     // @internal
-    constructor(http: HttpServiceBase);
+    constructor(http: HttpSetup);
     bulkCreate: (objects?: SavedObjectsBulkCreateObject<SavedObjectAttributes>[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<SavedObjectAttributes>>;
     bulkGet: (objects?: {
         id: string;

@@ -17,13 +17,10 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
+import { LoadingCountSetup } from './loading_count_service';
 
 /** @public */
-export interface HttpServiceBase {
-  /** @internal */
-  stop(): void;
-
+export interface HttpSetup {
   /**
    * APIs for manipulating the basePath on URL segments.
    */
@@ -63,18 +60,17 @@ export interface HttpServiceBase {
   /** Makes an HTTP request with the PUT method. See {@link HttpHandler} for options. */
   put: HttpHandler;
 
-  /**
-   * Adds a new source of loading counts. Used to show the global loading indicator when sum of all observed counts are
-   * more than 0.
-   * @param countSource$ an Observable to subscribe to for loading count updates.
-   */
-  addLoadingCount(countSource$: Observable<number>): void;
-
-  /**
-   * Get the sum of all loading count sources as a single Observable.
-   */
-  getLoadingCount$(): Observable<number>;
+  /** See {@link LoadingCountSetup.addLoadingCount}. */
+  addLoadingCount: LoadingCountSetup['addLoadingCount'];
+  /** See {@link LoadingCountSetup.getLoadingCount$}. */
+  getLoadingCount$: LoadingCountSetup['getLoadingCount$'];
 }
+
+/**
+ * See {@link HttpSetup}
+ * @public
+ */
+export type HttpStart = HttpSetup;
 
 /**
  * APIs for manipulating the basePath on URL segments.
@@ -111,18 +107,6 @@ export interface IAnonymousPaths {
    */
   register(path: string): void;
 }
-
-/**
- * See {@link HttpServiceBase}
- * @public
- */
-export type HttpSetup = HttpServiceBase;
-
-/**
- * See {@link HttpServiceBase}
- * @public
- */
-export type HttpStart = HttpServiceBase;
 
 /** @public */
 export interface HttpHeadersInit {
