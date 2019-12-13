@@ -11,6 +11,8 @@ import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../common/cancellation_token';
 import { FieldFormatsService } from  '../../../../../../../../src/legacy/ui/field_formats/mixin/field_formats_service';
+// Reporting uses an unconventional directory structure so the linter marks this as a violation
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { StringFormat } from '../../../../../../../../src/plugins/data/server';
 
 import { executeJobFactory } from '../execute_job';
