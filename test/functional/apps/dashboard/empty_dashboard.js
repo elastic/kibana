@@ -24,9 +24,12 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardVisualizations = getService('dashboardVisualizations');
+  const dashboardExpect = getService('dashboardExpect');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe('empty dashboard', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/48236
+  describe.skip('empty dashboard', () => {
     before(async () => {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({
@@ -47,13 +50,18 @@ export default function ({ getService, getPageObjects }) {
       expect(addButtonExists).to.be(true);
     });
 
-    // Flaky test: https://github.com/elastic/kibana/issues/48236
     it.skip('should open add panel when add button is clicked', async () => {
       await testSubjects.click('emptyDashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
     });
 
+    it('should add new visualization from dashboard', async () => {
+      await testSubjects.click('addVisualizationButton');
+      await dashboardVisualizations.createAndAddMarkdown({ name: 'Dashboard Test Markdown', markdown: 'Markdown text' }, false);
+      await PageObjects.dashboard.waitForRenderComplete();
+      await dashboardExpect.markdownWithValuesExists(['Markdown text']);
+    });
   });
 }
 
