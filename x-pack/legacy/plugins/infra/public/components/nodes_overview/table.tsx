@@ -10,12 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import React from 'react';
 import { createWaffleMapNode } from '../../containers/waffle/nodes_to_wafflemap';
-import {
-  InfraSnapshotNode,
-  InfraSnapshotNodePath,
-  InfraTimerangeInput,
-  InfraNodeType,
-} from '../../graphql/types';
+import { InfraSnapshotNode, InfraSnapshotNodePath, InfraNodeType } from '../../graphql/types';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../lib/lib';
 import { fieldToName } from '../waffle/lib/field_to_display_name';
 import { NodeContextMenu } from '../waffle/node_context_menu';
@@ -25,7 +20,7 @@ interface Props {
   nodeType: InfraNodeType;
   options: InfraWaffleMapOptions;
   formatter: (subject: string | number) => string;
-  timeRange: InfraTimerangeInput;
+  currentTime: number;
   onFilter: (filter: string) => void;
 }
 
@@ -49,7 +44,7 @@ const getGroupPaths = (path: InfraSnapshotNodePath[]) => {
 export const TableView = class extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
-    const { nodes, options, formatter, timeRange, nodeType } = this.props;
+    const { nodes, options, formatter, currentTime, nodeType } = this.props;
     const columns = [
       {
         field: 'name',
@@ -68,7 +63,7 @@ export const TableView = class extends React.PureComponent<Props, State> {
               node={item.node}
               nodeType={nodeType}
               closePopover={this.closePopoverFor(uniqueID)}
-              timeRange={timeRange}
+              currentTime={currentTime}
               isPopoverOpen={this.state.isPopoverOpen.includes(uniqueID)}
               options={options}
               popoverPosition="rightCenter"

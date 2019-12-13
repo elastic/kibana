@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import sinon from 'sinon';
 import { XPackInfo } from '../xpack_info';
 import { setupXPackMain } from '../setup_xpack_main';
 import * as InjectXPackInfoSignatureNS from '../inject_xpack_info_signature';
+
 
 describe('setupXPackMain()', () => {
   const sandbox = sinon.createSandbox();
@@ -39,7 +41,7 @@ describe('setupXPackMain()', () => {
         elasticsearch: mockElasticsearchPlugin,
         xpack_main: mockXPackMainPlugin
       },
-      newPlatform: { setup: { plugins: { features: {} } } },
+      newPlatform: { setup: { plugins: { features: {}, licensing: { license$: new BehaviorSubject() } } } },
       events: { on() {} },
       log() {},
       config() {},
@@ -47,9 +49,8 @@ describe('setupXPackMain()', () => {
       ext() {}
     });
 
-    // Make sure we don't misspell config key.
+    // Make sure plugins doesn't consume config
     const configGetStub = sinon.stub().throws(new Error('`config.get` is called with unexpected key.'));
-    configGetStub.withArgs('xpack.xpack_main.xpack_api_polling_frequency_millis').returns(1234);
     mockServer.config.returns({ get: configGetStub });
   });
 
