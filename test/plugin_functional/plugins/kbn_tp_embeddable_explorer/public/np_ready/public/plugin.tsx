@@ -19,13 +19,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { IUiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
-import { createHelloWorldAction } from '../../../../../../../src/plugins/ui_actions/public/tests/test_samples';
-
+import { IUiActionsStart } from 'src/plugins/ui_actions/public';
+import { createHelloWorldAction } from 'src/plugins/ui_actions/public/tests/test_samples';
 import {
   Start as InspectorStartContract,
   Setup as InspectorSetupContract,
-} from '../../../../../../../src/plugins/inspector/public';
+} from 'src/plugins/inspector/public';
+import {
+  SavedObjectFinderProps,
+  SavedObjectFinderUi,
+} from 'src/plugins/kibana_react/public/saved_objects';
 
 import { CONTEXT_MENU_TRIGGER } from './embeddable_api';
 
@@ -38,10 +41,6 @@ import {
   ContactCardEmbeddableFactory,
 } from './embeddable_api';
 import { App } from './app';
-import {
-  SavedObjectFinderProps,
-  SavedObjectFinderUi,
-} from '../../../../../../../src/plugins/kibana_react/public/saved_objects';
 import {
   IEmbeddableStart,
   IEmbeddableSetup,

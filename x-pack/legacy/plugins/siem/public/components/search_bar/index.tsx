@@ -11,11 +11,10 @@ import { Dispatch } from 'redux';
 import { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { IndexPattern } from 'ui/index_patterns';
-import { IIndexPattern } from 'src/plugins/data/public';
-import { SavedQuery } from 'src/legacy/core_plugins/data/public';
-
 import { OnTimeChangeProps } from '@elastic/eui';
 import { npStart } from 'ui/new_platform';
+import { IIndexPattern, TimeRange, Query, esFilters } from 'src/plugins/data/public';
+import { SavedQuery } from 'src/legacy/core_plugins/data/public';
 
 import { inputsActions } from '../../store/inputs';
 import { InputsRange } from '../../store/inputs/model';
@@ -34,7 +33,6 @@ import {
   toStrSelector,
 } from './selectors';
 import { timelineActions, hostsActions, networkActions } from '../../store/actions';
-import { TimeRange, Query, esFilters } from '../../../../../../../src/plugins/data/public';
 
 export const siemFilterManager = npStart.plugins.data.query.filterManager;
 export const savedQueryService = npStart.plugins.data.query.savedQueries;
