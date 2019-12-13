@@ -19,6 +19,9 @@
 
 import { TypeOf, schema } from '@kbn/config-schema';
 
+/**
+ * @internal
+ */
 export type CspConfigType = TypeOf<typeof config.schema>;
 
 export const config = {
