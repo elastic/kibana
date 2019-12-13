@@ -142,9 +142,13 @@ async function ingestDatasourceCreate({
   // OMG, so gross! Will not keep
   // if we end up keeping the "make another HTTP request" method,
   // we'll clean this up via proxy or something else which prevents these functions from needing to know this.
-  // The key here is to show the Saved Object we create being stored/retrieved by Inges
-  const base = `http://${request.headers.host}`;
-  const url = `${base}/api/ingest/datasources`;
+  // The key here is to show the Saved Object we create being stored/retrieved by Ingest
+
+  // node-fetch requires absolute urls because there isn't an origin on Node
+  const origin = request.server.info.uri; // e.g. http://localhost:5601
+  const basePath = request.getBasePath(); // e.g. /abc
+  const apiPath = '/api/ingest/datasources';
+  const url = `${origin}${basePath}${apiPath}`;
   const body = { datasource };
 
   return fetch(url, {
@@ -153,6 +157,7 @@ async function ingestDatasourceCreate({
     headers: {
       'kbn-xsrf': 'some value, any value',
       'Content-Type': 'application/json',
+      // the main (only?) one we want is `authorization`
       ...request.headers,
     },
   }).then(response => response.json());
