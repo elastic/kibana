@@ -14,13 +14,21 @@ import { Core } from '../legacy';
 
 export { BASE_PATH, REACT_ROOT_ID } from './constants';
 
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { createKibanaReactContext } from '../../../../../../src/plugins/kibana_react/public';
+
 export const mountReactApp = (elem: HTMLElement | null, { core }: { core: Core }): void => {
+  const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
+    uiSettings: core.uiSettings,
+  });
   if (elem) {
     const AppProviders = getAppProviders({ core });
     render(
-      <AppProviders>
-        <App />
-      </AppProviders>,
+      <KibanaReactContextProvider>
+        <AppProviders>
+          <App />
+        </AppProviders>
+      </KibanaReactContextProvider>,
       elem
     );
   }

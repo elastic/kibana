@@ -23,9 +23,8 @@ import { breadcrumbService } from './services/navigation';
 import { useCore } from './app_context';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public/code_editor';
-import { LANGUAGE_ID } from '../../../canvas/public/lib/monaco_language_def';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
+
 export const App = () => {
   const {
     i18n: { FormattedMessage },
@@ -36,7 +35,7 @@ export const App = () => {
     breadcrumbService.setBreadcrumbs('home');
   }, []);
 
-  const { error, isLoading, data } = useLoadPainless();
+  const { error, data } = useLoadPainless();
   console.log('Loaded data', data);
 
   const renderPageHeader = () => (
@@ -78,11 +77,6 @@ export const App = () => {
   const value = 'def foo = bar;';
   const isCompact = false;
 
-  const kibana = useKibana();
-
-  const uiSettings = kibana.services.uiSettings;
-  if (!uiSettings) return null;
-
   return (
     <EuiPageBody>
       <EuiPageContent>{renderPageHeader()}</EuiPageContent>
@@ -91,20 +85,13 @@ export const App = () => {
           className="canvasExpressionInput__inner"
           fullWidth
           isInvalid={Boolean(error)}
-          error={error}
+          error={error as any}
         >
           <div className="canvasExpressionInput__editor">
             <CodeEditor
-              languageId={LANGUAGE_ID}
+              languageId={'TODO'}
               value={value}
-              //onChange={this.forceUpdate()}
-              suggestionProvider={{
-                triggerCharacters: [' '],
-                //provideCompletionItems: this.provideSuggestions,
-              }}
-              hoverProvider={{
-                //provideHover: this.providerHover,
-              }}
+              onChange={() => {} /* No op */}
               options={{
                 fontSize: isCompact ? 12 : 16,
                 scrollBeyondLastLine: false,
@@ -116,7 +103,7 @@ export const App = () => {
                 wordWrap: 'on',
                 wrappingIndent: 'indent',
               }}
-              //editorDidMount={this.editorDidMount}
+              // editorDidMount={this.editorDidMount}
             />
           </div>
         </EuiFormRow>
