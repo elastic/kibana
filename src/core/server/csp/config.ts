@@ -17,16 +17,26 @@
  * under the License.
  */
 
-export const DEFAULT_CSP_RULES = Object.freeze([
-  `script-src 'unsafe-eval' 'self'`,
-  `worker-src blob: 'self'`,
-  `style-src 'unsafe-inline' 'self'`,
-]);
+import { TypeOf, schema } from '@kbn/config-schema';
 
-export const DEFAULT_CSP_STRICT = false;
+/**
+ * @internal
+ */
+export type CspConfigType = TypeOf<typeof config.schema>;
 
-export const DEFAULT_CSP_WARN_LEGACY_BROWSERS = true;
-
-export function createCSPRuleString(rules: string[]) {
-  return rules.join('; ');
-}
+export const config = {
+  // TODO: Move this to server.csp using config deprecations
+  // ? https://github.com/elastic/kibana/pull/52251
+  path: 'csp',
+  schema: schema.object({
+    rules: schema.arrayOf(schema.string(), {
+      defaultValue: [
+        `script-src 'unsafe-eval' 'self'`,
+        `worker-src blob: 'self'`,
+        `style-src 'unsafe-inline' 'self'`,
+      ],
+    }),
+    strict: schema.boolean({ defaultValue: false }),
+    warnLegacyBrowsers: schema.boolean({ defaultValue: true }),
+  }),
+};
