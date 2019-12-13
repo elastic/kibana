@@ -54,6 +54,9 @@ export class EmbeddableExamplesPlugin
   }
 
   public start(core: CoreStart, deps: EmbeddableExamplesStartDependencies) {
+    // These are registered in the start method because `getEmbeddableFactory `
+    // is only available in start. We could reconsider this I think and make it
+    // available in both.
     deps.embeddable.registerEmbeddableFactory(
       SEARCHABLE_LIST_CONTAINER,
       new SearchableListContainerFactory(deps.embeddable.getEmbeddableFactory)

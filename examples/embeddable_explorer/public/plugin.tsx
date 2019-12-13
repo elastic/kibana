@@ -17,22 +17,18 @@
  * under the License.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
-import { EmbeddableAppMountContext } from '../../../src/plugins/embeddable/public';
+import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
+import { IEmbeddableStart } from '../../../src/plugins/embeddable/public';
 
-declare module 'kibana/public' {
-  interface AppMountContext {
-    embeddable?: EmbeddableAppMountContext;
-  }
-}
 export class EmbeddableExplorerPlugin implements Plugin {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<{ embeddable: IEmbeddableStart }>) {
     core.application.register({
       id: 'embeddableExplorer',
       title: 'Embeddable explorer',
-      async mount(context, params) {
-        const { renderApp } = await import('./application');
-        return renderApp(context, params);
+      async mount(params: AppMountParameters) {
+        const [coreStart, depsStart] = await core.getStartServices();
+        const { renderApp } = await import('./app');
+        return renderApp(coreStart, depsStart.embeddable, params);
       },
     });
   }

@@ -51,12 +51,20 @@ export function HelloWorldEmbeddableExample({ getEmbeddableFactory }: Props) {
       </EuiPageHeader>
       <EuiPageContent>
         <EuiPageContentBody>
-          <EuiText>Here the embeddable is rendered without the factory</EuiText>
+          <EuiText>
+            Here the embeddable is rendered without the factory. A developer may use this method if
+            they want to statically embed a single embeddable into their application or page.
+          </EuiText>
           <EuiPanel data-test-subj="helloWorldEmbeddablePanel" paddingSize="none" role="figure">
             <EmbeddableRoot embeddable={new HelloWorldEmbeddable({ id: 'hello' })} />
           </EuiPanel>
 
-          <EuiText>Here the embeddable is rendered using the factory.create method</EuiText>
+          <EuiText>
+            Here the embeddable is rendered using the factory.create method. This method is used
+            programatically when a container embeddable attempts to initialize it&#39;s children
+            embeddables. This method can be used when you only have a string representing the type
+            of embeddable, and input data.
+          </EuiText>
           <EuiPanel
             data-test-subj="helloWorldEmbeddableFromFactory"
             paddingSize="none"

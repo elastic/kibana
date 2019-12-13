@@ -116,6 +116,12 @@ export class TodoEmbeddableExample extends React.Component<Props, State> {
                   this.embeddable.updateInput(&#123; task, title, icon &#125;);
                 </code>
               </pre>
+              <p>
+                You may also notice this example uses `EmbeddableRoot` instead of the
+                `EmbeddableFactoryRenderer` helper component. This is because it needs a reference
+                to the embeddable to update it, and `EmbeddableFactoryRenderer` creates and holds
+                the embeddable instance internally.
+              </p>
             </EuiText>
             <EuiFlexGroup>
               <EuiFlexItem grow={true}>

@@ -23,7 +23,8 @@ import { BrowserRouter as Router, Route, withRouter, RouteComponentProps } from 
 
 import { EuiPage, EuiPageSideBar, EuiSideNav } from '@elastic/eui';
 
-import { AppMountContext, AppMountParameters } from '../../../src/core/public';
+import { IEmbeddableStart } from 'src/plugins/embeddable/public';
+import { AppMountContext, AppMountParameters, CoreStart } from '../../../src/core/public';
 import { HelloWorldEmbeddableExample } from './hello_world_embeddable_example';
 import { TodoEmbeddableExample } from './todo_embeddable_example';
 import { ListContainerExample } from './list_container_example';
@@ -62,34 +63,32 @@ const Nav = withRouter(({ history, navigateToApp, pages }: NavProps) => {
 
 const EmbeddableExplorerApp = ({
   basename,
-  context,
+  navigateToApp,
+  embeddableApi,
 }: {
   basename: string;
-  context: AppMountContext;
+  navigateToApp: CoreStart['application']['navigateToApp'];
+  embeddableApi: IEmbeddableStart;
 }) => {
   const pages: PageDef[] = [
     {
       title: 'Hello world embeddable',
       id: 'helloWorldEmbeddableSection',
       component: (
-        <HelloWorldEmbeddableExample
-          getEmbeddableFactory={context.embeddable!.getEmbeddableFactory}
-        />
+        <HelloWorldEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
       ),
     },
     {
       title: 'Todo embeddable',
       id: 'todoEmbeddableSection',
       component: (
-        <TodoEmbeddableExample getEmbeddableFactory={context.embeddable!.getEmbeddableFactory} />
+        <TodoEmbeddableExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />
       ),
     },
     {
       title: 'List container embeddable',
       id: 'listContainerSection',
-      component: (
-        <ListContainerExample getEmbeddableFactory={context.embeddable!.getEmbeddableFactory} />
-      ),
+      component: <ListContainerExample getEmbeddableFactory={embeddableApi.getEmbeddableFactory} />,
     },
   ];
 
@@ -101,7 +100,7 @@ const EmbeddableExplorerApp = ({
     <Router basename={basename}>
       <EuiPage>
         <EuiPageSideBar>
-          <Nav navigateToApp={context.core.application.navigateToApp} pages={pages} />
+          <Nav navigateToApp={navigateToApp} pages={pages} />
         </EuiPageSideBar>
         {routes}
       </EuiPage>
@@ -110,10 +109,18 @@ const EmbeddableExplorerApp = ({
 };
 
 export const renderApp = (
-  context: AppMountContext,
+  core: CoreStart,
+  embeddableApi: IEmbeddableStart,
   { appBasePath, element }: AppMountParameters
 ) => {
-  ReactDOM.render(<EmbeddableExplorerApp basename={appBasePath} context={context} />, element);
+  ReactDOM.render(
+    <EmbeddableExplorerApp
+      basename={appBasePath}
+      navigateToApp={core.application.navigateToApp}
+      embeddableApi={embeddableApi}
+    />,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };
