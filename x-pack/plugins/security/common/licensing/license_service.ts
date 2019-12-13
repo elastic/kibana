@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Observable, Subscription, of } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { ILicense } from '../../../licensing/common/types';
 import { SecurityLicenseFeatures } from './license_features';
@@ -74,9 +74,6 @@ export class SecurityLicenseService {
         allowRoleFieldLevelSecurity: false,
         allowRbac: false,
         layout: !rawLicense?.isAvailable ? 'error-xpack-unavailable' : 'error-es-unavailable',
-          rawLicense !== undefined && !rawLicense.isAvailable
-            ? 'error-xpack-unavailable'
-            : 'error-es-unavailable',
       };
     }
 

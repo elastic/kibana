@@ -57,8 +57,35 @@ describe('license features', function() {
     const subscription = serviceSetup.license.features$.subscribe(subscriptionHandler);
     try {
       expect(subscriptionHandler).toHaveBeenCalledTimes(1);
-      rawLicense$.next(getMockRawLicense({ isAvailable: false }));
+      expect(subscriptionHandler.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "allowLogin": false,
+            "allowRbac": false,
+            "allowRoleDocumentLevelSecurity": false,
+            "allowRoleFieldLevelSecurity": false,
+            "layout": "error-xpack-unavailable",
+            "showLinks": false,
+            "showLogin": true,
+          },
+        ]
+      `);
+
+      rawLicense$.next(getMockRawLicense({ isAvailable: true }));
       expect(subscriptionHandler).toHaveBeenCalledTimes(2);
+      expect(subscriptionHandler.mock.calls[1]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "allowLogin": false,
+            "allowRbac": false,
+            "allowRoleDocumentLevelSecurity": false,
+            "allowRoleFieldLevelSecurity": false,
+            "linksMessage": "Access is denied because Security is disabled in Elasticsearch.",
+            "showLinks": false,
+            "showLogin": false,
+          },
+        ]
+      `);
     } finally {
       subscription.unsubscribe();
     }
