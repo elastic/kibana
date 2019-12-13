@@ -23,16 +23,25 @@ interface CreateDatasourceRequest extends Request {
   };
 }
 
-export async function handleRequestInstallDatasource(req: CreateDatasourceRequest, extra: Extra) {
-  const { pkgkey } = req.params;
-  const savedObjectsClient = getClient(req);
-  const callCluster = getClusterAccessor(extra.context.esClient, req);
+export async function handleRequestInstallDatasource(
+  request: CreateDatasourceRequest,
+  extra: Extra
+) {
+  const user = await request.server.plugins.security?.getUser(request);
+  if (!user) return Boom.unauthorized('Must be logged in to perform this operation');
+
+  const { pkgkey } = request.params;
+  const savedObjectsClient = getClient(request);
+  const callCluster = getClusterAccessor(extra.context.esClient, request);
 
   try {
     const result = await createDatasource({
       savedObjectsClient,
       pkgkey,
       callCluster,
+      // long-term, I don't want to pass `request` through
+      // but this was the fastest/least invasive change way to make the change
+      request,
     });
 
     return result;
