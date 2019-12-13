@@ -5,9 +5,9 @@
  */
 
 import { ReturnTypeBulkDelete } from '../../common/types/std_return_format';
-import { FrameworkUser } from './adapters/framework/adapter_types';
 import { StoredDatasource } from './adapters/datasource/adapter_types';
 import { DatasourceAdapter } from './adapters/datasource/default';
+import { FrameworkUser } from './adapters/framework/adapter_types';
 import { BackendFrameworkLib } from './framework';
 import { Datasource } from './types';
 
@@ -25,7 +25,7 @@ export class DatasourcesLib {
       throw new Error('Could not get version information about Kibana from xpack');
     }
 
-    return await this.adapter.create(withUser, datasource);
+    return await this.adapter.create(withUser, datasource, { id: datasource.id });
   }
 
   public async get(user: FrameworkUser, id: string): Promise<Datasource | null> {
