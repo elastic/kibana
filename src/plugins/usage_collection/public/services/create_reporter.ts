@@ -17,29 +17,30 @@
  * under the License.
  */
 
-// @ts-ignore
-import { uiModules } from 'ui/modules';
-import chrome from 'ui/chrome';
-import { kfetch } from 'ui/kfetch';
-import {
-  createAnalyticsReporter,
-  setTelemetryReporter,
-  trackUserAgent,
-} from '../services/telemetry_analytics';
-import { isUnauthenticated } from '../../../telemetry/public/services';
+import { Reporter, Storage } from '@kbn/analytics';
+import { HttpServiceBase } from 'kibana/public';
 
-function telemetryInit($injector: any) {
-  const uiMetricEnabled = chrome.getInjected('uiMetricEnabled');
-  const debug = chrome.getInjected('debugUiMetric');
-  if (!uiMetricEnabled || isUnauthenticated()) {
-    return;
-  }
-  const localStorage = $injector.get('localStorage');
-
-  const uiReporter = createAnalyticsReporter({ localStorage, debug, kfetch });
-  setTelemetryReporter(uiReporter);
-  uiReporter.start();
-  trackUserAgent('kibana');
+interface AnalyicsReporterConfig {
+  localStorage: Storage;
+  debug: boolean;
+  fetch: HttpServiceBase;
 }
 
-uiModules.get('kibana').run(telemetryInit);
+export function createReporter(config: AnalyicsReporterConfig): Reporter {
+  const { localStorage, debug, fetch } = config;
+
+  return new Reporter({
+    debug,
+    storage: localStorage,
+    async http(report) {
+      const response = await fetch.post('/api/ui_metric/report', {
+        body: JSON.stringify({ report }),
+      });
+
+      if (response.status !== 'ok') {
+        throw Error('Unable to store report.');
+      }
+      return response;
+    },
+  });
+}

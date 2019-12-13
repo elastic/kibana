@@ -16,9 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npSetup } from 'ui/new_platform';
 
-export const createUiStatsReporter = (appName: string) => {
-  const { usageCollection } = npSetup.plugins;
-  return usageCollection.reportUiStats.bind(usageCollection, appName);
-};
+export { storeReport } from './store_report';
+export { reportSchema } from './schema';

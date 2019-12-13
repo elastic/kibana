@@ -23,6 +23,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { VisType } from '../legacy_imports';
 import { TypesStart } from '../../../../visualizations/public/np_ready/public/types';
 
+jest.mock('ui/new_platform');
 jest.mock('../legacy_imports', () => ({
   State: () => null,
   AppState: () => null,

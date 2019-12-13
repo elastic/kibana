@@ -7,6 +7,7 @@
 
 import { updateFields, updateFormErrors } from './follower_index_form';
 
+jest.mock('ui/new_platform');
 jest.mock('ui/indices', () => ({
   INDEX_ILLEGAL_CHARACTERS_VISIBLE: [],
 }));

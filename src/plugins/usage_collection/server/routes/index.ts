@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { npSetup } from 'ui/new_platform';
 
-export const createUiStatsReporter = (appName: string) => {
-  const { usageCollection } = npSetup.plugins;
-  return usageCollection.reportUiStats.bind(usageCollection, appName);
-};
+import { IRouter } from '../../../../../src/core/server';
+import { registerUiMetricRoute } from './report_metrics';
+
+export function setupRoutes(router: IRouter, getLegacySavedObjects: any) {
+  registerUiMetricRoute(router, getLegacySavedObjects);
+}
