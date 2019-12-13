@@ -29,8 +29,8 @@ function getFormattedValue(formatter, value) {
       origin: window.location.origin,
       pathname: window.location.pathname,
     });
-  } else if (formatter.textConvert) {
-    formattedValue = formatter.textConvert(value);
+  } else {
+    formattedValue = formatter.convert(value, 'html');
   }
 
   return formattedValue || value;
