@@ -156,4 +156,16 @@ export interface InvalidRepositoryVerification {
   error: object;
 }
 
+export interface ValidRepositoryCleanup {
+  cleaned: true;
+  response: object;
+}
+
+export interface InvalidRepositoryCleanup {
+  cleaned: false;
+  error: object;
+}
+
 export type RepositoryVerification = ValidRepositoryVerification | InvalidRepositoryVerification;
+
+export type RepositoryCleanup = ValidRepositoryCleanup | InvalidRepositoryCleanup;

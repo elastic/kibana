@@ -28,12 +28,17 @@ import { documentationLinksService } from '../../../../services/documentation';
 import {
   useLoadRepository,
   verifyRepository as verifyRepositoryRequest,
+  cleanupRepository as cleanupRepositoryRequest,
 } from '../../../../services/http';
 import { textService } from '../../../../services/text';
 import { linkToSnapshots, linkToEditRepository } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
-import { Repository, RepositoryVerification } from '../../../../../../common/types';
+import {
+  Repository,
+  RepositoryVerification,
+  RepositoryCleanup,
+} from '../../../../../../common/types';
 import {
   RepositoryDeleteProvider,
   SectionError,
@@ -61,7 +66,9 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
   const { FormattedMessage } = i18n;
   const { error, data: repositoryDetails } = useLoadRepository(repositoryName);
   const [verification, setVerification] = useState<RepositoryVerification | undefined>(undefined);
+  const [cleanup, setCleanup] = useState<RepositoryCleanup | undefined>(undefined);
   const [isLoadingVerification, setIsLoadingVerification] = useState<boolean>(false);
+  const [isLoadingCleanup, setIsLoadingCleanup] = useState<boolean>(false);
 
   const verifyRepository = async () => {
     setIsLoadingVerification(true);
@@ -70,11 +77,20 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
     setIsLoadingVerification(false);
   };
 
-  // Reset verification state when repository name changes, either from adjust URL or clicking
+  const cleanupRepository = async () => {
+    setIsLoadingCleanup(true);
+    const { data } = await cleanupRepositoryRequest(repositoryName);
+    setCleanup(data);
+    setIsLoadingCleanup(false);
+  };
+
+  // Reset verification state and cleanup when repository name changes, either from adjust URL or clicking
   // into a different repository in table list.
   useEffect(() => {
     setVerification(undefined);
     setIsLoadingVerification(false);
+    setCleanup(undefined);
+    setIsLoadingCleanup(false);
   }, [repositoryName]);
 
   const renderBody = () => {
@@ -231,6 +247,8 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />
         {renderVerification()}
+        <EuiSpacer size="l" />
+        {renderCleanup()}
       </Fragment>
     );
   };
@@ -311,6 +329,83 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
               defaultMessage="Verify repository"
+            />
+          </EuiButton>
+        </Fragment>
+      )}
+    </Fragment>
+  );
+
+  const renderCleanup = () => (
+    <Fragment>
+      <EuiTitle size="s">
+        <h3>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.cleanupTitle"
+            defaultMessage="Clean Unreferenced Data"
+          />
+        </h3>
+      </EuiTitle>
+      {cleanup ? (
+        <Fragment>
+          <EuiSpacer size="s" />
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryDetails.cleanupDetailsTitle"
+                defaultMessage="Details"
+              />
+            </h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {cleanup ? (
+            <EuiCodeEditor
+              mode="json"
+              theme="textmate"
+              width="100%"
+              isReadOnly
+              value={JSON.stringify(cleanup.cleaned ? cleanup.response : cleanup.error, null, 2)}
+              setOptions={{
+                showLineNumbers: false,
+                tabSize: 2,
+                maxLines: Infinity,
+              }}
+              editorProps={{
+                $blockScrolling: Infinity,
+              }}
+              showGutter={false}
+              minLines={6}
+              aria-label={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.cleanupDetails"
+                  defaultMessage="Cleanup details for repository '{name}'"
+                  values={{
+                    name,
+                  }}
+                />
+              }
+            />
+          ) : null}
+          <EuiSpacer size="m" />
+          <EuiButton onClick={cleanupRepository} color="primary" isLoading={isLoadingCleanup}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.cleanupButtonLabel"
+              defaultMessage="Cleanup repository"
+            />
+          </EuiButton>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <EuiButton
+            onClick={cleanupRepository}
+            color="primary"
+            isLoading={isLoadingCleanup}
+            data-test-subj="cleanupRepositoryButton"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.cleanupButtonLabel"
+              defaultMessage="Cleanup repository"
             />
           </EuiButton>
         </Fragment>
