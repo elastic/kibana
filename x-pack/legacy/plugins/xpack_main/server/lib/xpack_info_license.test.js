@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { licensingMock } from '../../../../../plugins/licensing/server/licensing.mock';
 import { XPackInfoLicense } from './xpack_info_license';
 
 function getXPackInfoLicense(getRawLicense) {
@@ -25,7 +24,7 @@ describe('XPackInfoLicense', () => {
   test('getUid returns uid field', () => {
     const uid = 'abc123';
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { uid } }));
+    getRawLicense.mockReturnValue({ uid });
 
     expect(xpackInfoLicense.getUid()).toBe(uid);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
@@ -34,14 +33,14 @@ describe('XPackInfoLicense', () => {
   });
 
   test('isActive returns true if status is active', () => {
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'active' } }));
+    getRawLicense.mockReturnValue({ status: 'active' });
 
     expect(xpackInfoLicense.isActive()).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
   });
 
   test('isActive returns false if status is not active', () => {
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'aCtIvE' } }));  // needs to match exactly
+    getRawLicense.mockReturnValue({ status: 'aCtIvE' }); // needs to match exactly
 
     expect(xpackInfoLicense.isActive()).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
@@ -50,7 +49,7 @@ describe('XPackInfoLicense', () => {
   });
 
   test('getExpiryDateInMillis returns expiry_date_in_millis', () => {
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { expiryDateInMillis: 123 } }));
+    getRawLicense.mockReturnValue({ expiry_date_in_millis: 123 });
 
     expect(xpackInfoLicense.getExpiryDateInMillis()).toBe(123);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
@@ -59,7 +58,7 @@ describe('XPackInfoLicense', () => {
   });
 
   test('isOneOf returns true of the mode includes one of the types', () => {
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { mode: 'platinum' } }));
+    getRawLicense.mockReturnValue({ mode: 'platinum' });
 
     expect(xpackInfoLicense.isOneOf('platinum')).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
@@ -79,12 +78,12 @@ describe('XPackInfoLicense', () => {
   });
 
   test('getType returns the type', () => {
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { type: 'basic' } }));
+    getRawLicense.mockReturnValue({ type: 'basic' });
 
     expect(xpackInfoLicense.getType()).toBe('basic');
     expect(getRawLicense).toHaveBeenCalledTimes(1);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { type: 'gold' } }));
+    getRawLicense.mockReturnValue({ type: 'gold' });
 
     expect(xpackInfoLicense.getType()).toBe('gold');
     expect(getRawLicense).toHaveBeenCalledTimes(2);
@@ -93,12 +92,12 @@ describe('XPackInfoLicense', () => {
   });
 
   test('getMode returns the mode', () => {
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { mode: 'basic' } }));
+    getRawLicense.mockReturnValue({ mode: 'basic' });
 
     expect(xpackInfoLicense.getMode()).toBe('basic');
     expect(getRawLicense).toHaveBeenCalledTimes(1);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { mode: 'gold' } }));
+    getRawLicense.mockReturnValue({ mode: 'gold' });
 
     expect(xpackInfoLicense.getMode()).toBe('gold');
     expect(getRawLicense).toHaveBeenCalledTimes(2);
@@ -109,22 +108,22 @@ describe('XPackInfoLicense', () => {
   test('isActiveLicense returns the true if active and typeChecker matches', () => {
     const expectAbc123 = type => type === 'abc123';
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'active', mode: 'abc123' } }));
+    getRawLicense.mockReturnValue({ status: 'active', mode: 'abc123' });
 
     expect(xpackInfoLicense.isActiveLicense(expectAbc123)).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'NOTactive', mode: 'abc123' } }));
+    getRawLicense.mockReturnValue({ status: 'NOTactive', mode: 'abc123' });
 
     expect(xpackInfoLicense.isActiveLicense(expectAbc123)).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(2);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'NOTactive', mode: 'NOTabc123' } }));
+    getRawLicense.mockReturnValue({ status: 'NOTactive', mode: 'NOTabc123' });
 
     expect(xpackInfoLicense.isActiveLicense(expectAbc123)).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(3);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'active', mode: 'NOTabc123' } }));
+    getRawLicense.mockReturnValue({ status: 'active', mode: 'NOTabc123' });
 
     expect(xpackInfoLicense.isActiveLicense(expectAbc123)).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(4);
@@ -133,22 +132,22 @@ describe('XPackInfoLicense', () => {
   });
 
   test('isBasic returns the true if active and basic', () => {
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'active', mode: 'basic' } }));
+    getRawLicense.mockReturnValue({ status: 'active', mode: 'basic' });
 
     expect(xpackInfoLicense.isBasic()).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'NOTactive', mode: 'gold' } }));
+    getRawLicense.mockReturnValue({ status: 'NOTactive', mode: 'gold' });
 
     expect(xpackInfoLicense.isBasic()).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(2);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'NOTactive', mode: 'trial' } }));
+    getRawLicense.mockReturnValue({ status: 'NOTactive', mode: 'trial' });
 
     expect(xpackInfoLicense.isBasic()).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(3);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'active', mode: 'platinum' } }));
+    getRawLicense.mockReturnValue({ status: 'active', mode: 'platinum' });
 
     expect(xpackInfoLicense.isBasic()).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(4);
@@ -158,22 +157,22 @@ describe('XPackInfoLicense', () => {
 
 
   test('isNotBasic returns the true if active and not basic', () => {
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'active', mode: 'platinum' } }));
+    getRawLicense.mockReturnValue({ status: 'active', mode: 'platinum' });
 
     expect(xpackInfoLicense.isNotBasic()).toBe(true);
     expect(getRawLicense).toHaveBeenCalledTimes(1);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'NOTactive', mode: 'gold' } }));
+    getRawLicense.mockReturnValue({ status: 'NOTactive', mode: 'gold' });
 
     expect(xpackInfoLicense.isNotBasic()).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(2);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'NOTactive', mode: 'trial' } }));
+    getRawLicense.mockReturnValue({ status: 'NOTactive', mode: 'trial' });
 
     expect(xpackInfoLicense.isNotBasic()).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(3);
 
-    getRawLicense.mockReturnValue(licensingMock.createLicense({ license: { status: 'active', mode: 'basic' } }));
+    getRawLicense.mockReturnValue({ status: 'active', mode: 'basic' });
 
     expect(xpackInfoLicense.isNotBasic()).toBe(false);
     expect(getRawLicense).toHaveBeenCalledTimes(4);

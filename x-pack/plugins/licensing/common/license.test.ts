@@ -6,7 +6,7 @@
 
 import { License } from './license';
 import { LICENSE_CHECK_STATE } from './types';
-import { licenseMock } from './licensing.mock';
+import { licenseMock } from './license.mock';
 
 describe('License', () => {
   const basicLicense = licenseMock.create();

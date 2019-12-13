@@ -8,7 +8,4 @@ export declare class Poller {
   constructor(options: any);
 
   public start(): void;
-  public stop(): void;
-  public isRunning(): boolean;
-  public getPollFrequency(): number;
 }
