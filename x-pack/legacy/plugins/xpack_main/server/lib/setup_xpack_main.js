@@ -16,12 +16,16 @@ import { XPackInfo } from './xpack_info';
  * @param server {Object} The Kibana server object.
  */
 export function setupXPackMain(server) {
-  const info = new XPackInfo(server, {
-    pollFrequencyInMillis: server.config().get('xpack.xpack_main.xpack_api_polling_frequency_millis')
-  });
+  const info = new XPackInfo(server, { licensing: server.newPlatform.setup.plugins.licensing });
 
   server.expose('info', info);
-  server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
+  server.expose('createXPackInfo', (options) => {
+    const client = server.newPlatform.setup.core.elasticsearch.createClient(options.clusterSource);
+    const monitoringLicensing = server.newPlatform.setup.plugins.licensing.createLicensePoller(client, options.pollFrequencyInMillis);
+
+    return new XPackInfo(server, { licensing: monitoringLicensing });
+  });
+
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
 
   const { registerFeature, getFeatures } = server.newPlatform.setup.plugins.features;

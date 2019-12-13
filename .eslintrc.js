@@ -326,7 +326,7 @@ module.exports = {
                 allowSameFolder: true,
               },
               {
-                target: ['src/core/**/*'],
+                target: ['src/**/*'],
                 from: ['x-pack/**/*'],
                 errorMessage: 'OSS cannot import x-pack files.',
               },
