@@ -50,7 +50,16 @@ import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 
 export { bootstrap } from './bootstrap';
 export { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
-export { ConfigPath, ConfigService, EnvironmentMode, PackageInfo } from './config';
+export {
+  ConfigPath,
+  ConfigService,
+  ConfigDeprecation,
+  ConfigDeprecationProvider,
+  ConfigDeprecationLogger,
+  ConfigDeprecationFactory,
+  EnvironmentMode,
+  PackageInfo,
+} from './config';
 export {
   IContextContainer,
   IContextProvider,
@@ -143,6 +152,7 @@ export {
   PluginInitializerContext,
   PluginManifest,
   PluginName,
+  SharedGlobalConfig,
 } from './plugins';
 
 export {

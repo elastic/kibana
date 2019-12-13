@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 import { getEMSClient } from '../../../meta';
+import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class UpdateSourceEditor extends Component {
 
@@ -53,13 +55,29 @@ export class UpdateSourceEditor extends Component {
   };
 
   render() {
-
     return (
-      <TooltipSelector
-        tooltipFields={this.props.tooltipFields}
-        onChange={this._onTooltipPropertiesSelect}
-        fields={this.state.fields}
-      />
+      <Fragment>
+        <EuiPanel>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.maps.emsSource.tooltipsTitle"
+                defaultMessage="Tooltip fields"
+              />
+            </h5>
+          </EuiTitle>
+
+          <EuiSpacer size="m" />
+
+          <TooltipSelector
+            tooltipFields={this.props.tooltipFields}
+            onChange={this._onTooltipPropertiesSelect}
+            fields={this.state.fields}
+          />
+        </EuiPanel>
+
+        <EuiSpacer size="s" />
+      </Fragment>
     );
   }
 }

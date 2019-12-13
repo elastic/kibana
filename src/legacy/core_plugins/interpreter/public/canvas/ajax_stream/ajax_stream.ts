@@ -64,34 +64,19 @@ function processBatchResponseStream<T>(handler: BatchResponseHandler<T>) {
   return (text: string) => {
     // While there's text to process...
     while (index < text.length) {
-      // Our messages are delimited by colon: len:json
-      const delim = ':';
+      // We're using new line-delimited JSON.
+      const delim = '\n';
       const delimIndex = text.indexOf(delim, index);
-      const payloadStart = delimIndex + delim.length;
 
       // We've got an incomplete batch length
       if (delimIndex < 0) {
         return;
       }
 
-      const rawLen = text.slice(index, delimIndex);
-      const payloadLen = parseInt(rawLen, 10);
-      const payloadEnd = payloadStart + payloadLen;
-
-      // We've got an invalid batch message (e.g. one without a numeric length: prefix)
-      if (isNaN(payloadLen)) {
-        throw new Error(`Invalid stream response length: ${rawLen}`);
-      }
-
-      // We've got an incomplete batch message
-      if (text.length < payloadEnd) {
-        return;
-      }
-
-      const payload = JSON.parse(text.slice(payloadStart, payloadEnd));
+      const payload = JSON.parse(text.slice(index, delimIndex));
       handler(payload);
 
-      index = payloadEnd;
+      index = delimIndex + 1;
     }
   };
 }

@@ -140,7 +140,7 @@ export const useAnalysisSetupState = <JobType extends string>({
         ? [...errors, ...index.errors]
         : errors;
     }, []);
-  }, [selectedIndexNames, validatedIndices, validateIndicesRequest.state]);
+  }, [isValidating, validateIndicesRequest.state, selectedIndexNames, validatedIndices]);
 
   return {
     cleanupAndSetup,

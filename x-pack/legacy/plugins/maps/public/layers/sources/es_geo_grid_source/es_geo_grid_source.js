@@ -85,7 +85,6 @@ export class ESGeoGridSource extends AbstractESAggSource {
         metrics={this._descriptor.metrics}
         renderAs={this._descriptor.requestType}
         resolution={this._descriptor.resolution}
-        applyGlobalQuery={this._descriptor.applyGlobalQuery}
       />
     );
   }

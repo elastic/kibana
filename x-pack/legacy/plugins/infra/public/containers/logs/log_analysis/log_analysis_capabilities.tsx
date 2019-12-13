@@ -46,7 +46,7 @@ export const useLogAnalysisCapabilities = () => {
 
   useEffect(() => {
     fetchMlCapabilities();
-  }, []);
+  }, [fetchMlCapabilities]);
 
   const isLoading = useMemo(() => fetchMlCapabilitiesRequest.state === 'pending', [
     fetchMlCapabilitiesRequest.state,
