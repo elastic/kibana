@@ -110,6 +110,7 @@
 /x-pack/legacy/plugins/alerting @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/actions @elastic/kibana-alerting-services
 /x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
+/x-pack/legacy/plugins/triggers_actions_ui @elastic/kibana-alerting-services
 
 # Design
 **/*.scss  @elastic/kibana-design
