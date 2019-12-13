@@ -27,6 +27,10 @@ interface SecureSavedObjectsClientWrapperOptions {
   checkSavedObjectsPrivilegesAsCurrentUser: CheckSavedObjectsPrivileges;
 }
 
+interface SavedObjectNamespaces {
+  namespaces?: string[];
+}
+
 export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContract {
   private readonly actions: Actions;
   private readonly auditLogger: PublicMethodsOf<SecurityAuditLogger>;
@@ -54,7 +58,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   ) {
     await this.ensureAuthorized(type, 'create', options.namespace, { type, attributes, options });
 
-    return await this.baseClient.create(type, attributes, options);
+    const savedObject = await this.baseClient.create(type, attributes, options);
+    return await this.filterSavedObjectNamespaces(savedObject);
   }
 
   public async bulkCreate(
@@ -98,7 +103,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
   public async get(type: string, id: string, options: SavedObjectsBaseOptions = {}) {
     await this.ensureAuthorized(type, 'get', options.namespace, { type, id, options });
 
-    return await this.baseClient.get(type, id, options);
+    const savedObject = await this.baseClient.get(type, id, options);
+    return await this.filterSavedObjectNamespaces(savedObject);
   }
 
   public async update<T extends SavedObjectAttributes>(
@@ -114,7 +120,8 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       options,
     });
 
-    return await this.baseClient.update(type, id, attributes, options);
+    const savedObject = await this.baseClient.update(type, id, attributes, options);
+    return await this.filterSavedObjectNamespaces(savedObject);
   }
 
   public async updateNamespaces(
@@ -222,5 +229,26 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private getUniqueObjectTypes(objects: Array<{ type: string }>) {
     return [...new Set(objects.map(o => o.type))];
+  }
+
+  private async filterSavedObjectNamespaces<T extends SavedObjectNamespaces>(
+    savedObject: T
+  ): Promise<T> {
+    if (savedObject.namespaces == null) {
+      return savedObject;
+    }
+
+    const action = this.actions.login;
+    const checkPrivilegesResult = await this.checkSavedObjectsPrivilegesAsCurrentUser.atNamespaces(
+      action,
+      savedObject.namespaces
+    );
+    const authorizedNamespaces = Object.entries(
+      checkPrivilegesResult.spacePrivileges
+    ).map(([spaceId, privileges]) => (privileges[action] === true ? spaceId : '?'));
+    return {
+      ...savedObject,
+      namespaces: authorizedNamespaces,
+    };
   }
 }

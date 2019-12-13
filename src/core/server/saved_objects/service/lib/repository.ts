@@ -42,7 +42,6 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
   SavedObjectsDeleteOptions,
-  SavedObjectsDeleteByNamespaceOptions,
   SavedObjectsUpdateNamespacesOptions,
 } from '../saved_objects_client';
 import {
