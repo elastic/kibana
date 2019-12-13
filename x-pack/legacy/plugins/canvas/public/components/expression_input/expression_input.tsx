@@ -258,6 +258,7 @@ export class ExpressionInput extends React.Component<Props> {
 
   render() {
     const { value, error, isCompact } = this.props;
+    console.log('EDITOR', value);
 
     return (
       <div className="canvasExpressionInput">

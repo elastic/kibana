@@ -20,5 +20,6 @@
 export function createHandlers() {
   return {
     environment: 'client',
+    debug: () => ({}),
   };
 }

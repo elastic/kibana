@@ -95,6 +95,14 @@ export function interpreterProvider(config: InterpreterConfig): ExpressionInterp
       const { resolvedArgs } = await resolveArgs(fnDef, context, fnArgs);
       const newContext = await invokeFunction(fnDef, context, resolvedArgs);
 
+      handlers.debug({
+        args: resolvedArgs,
+        input: context,
+        fn: fnDef,
+        output: newContext,
+        chain: chainArr,
+      });
+
       // if something failed, just return the failure
       if (getType(newContext) === 'error') return newContext;
 

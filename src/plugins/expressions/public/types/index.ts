@@ -66,6 +66,7 @@ export interface IInterpreterHandlers {
   getInitialContext: IGetInitialContext;
   inspectorAdapters?: Adapters;
   abortSignal?: AbortSignal;
+  debug?: (data: any) => void;
 }
 
 export interface IInterpreterRenderHandlers {
