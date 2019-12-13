@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 
 import { AlertsOverTimeData, MatrixOverTimeHistogramData } from '../../graphql/types';
 
@@ -13,7 +13,7 @@ import { inspectStringifyObject } from '../../utils/build_query';
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { buildAlertsHistogramQuery } from './query.dsl';
 
-import { AlertsAdapter, AlertsGroupData } from './types';
+import { AlertsAdapter, AlertsGroupData, AlertsBucket } from './types';
 import { TermAggregation } from '../types';
 import { EventHit } from '../events/types';
 
@@ -47,14 +47,16 @@ export class ElasticsearchAlertsAdapter implements AlertsAdapter {
 const getAlertsOverTimeByModule = (data: AlertsGroupData[]): MatrixOverTimeHistogramData[] => {
   let result: MatrixOverTimeHistogramData[] = [];
   data.forEach(({ key: group, alerts }) => {
-    const alertsData = getOr([], 'buckets', alerts).map(
-      ({ key, doc_count }: { key: number; doc_count: number }) => ({
+    const alertsData: AlertsBucket[] = get('buckets', alerts);
+
+    result = [
+      ...result,
+      ...alertsData.map(({ key, doc_count }: AlertsBucket) => ({
         x: key,
         y: doc_count,
         g: group,
-      })
-    );
-    result = [...result, ...alertsData];
+      })),
+    ];
   });
 
   return result;

@@ -7,11 +7,16 @@
 import { AlertsOverTimeData } from '../../graphql/types';
 import { FrameworkRequest, RequestBasicOptions } from '../framework';
 
+export interface AlertsBucket {
+  key: number;
+  doc_count: number;
+}
+
 export interface AlertsGroupData {
   key: string;
   doc_count: number;
   alerts: {
-    buckets: Array<{ key: string; doc_count: number }>;
+    buckets: AlertsBucket[];
   };
 }
 export interface AlertsAdapter {
