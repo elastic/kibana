@@ -10,7 +10,7 @@ import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('security', ['ngResource']);
 module.service('ShieldUser', ($resource, chrome) => {
-  const baseUrl = chrome.addBasePath('/api/security/v1/users/:username');
+  const baseUrl = chrome.addBasePath('/internal/security/users/:username');
   const ShieldUser = $resource(baseUrl, {
     username: '@username'
   }, {
@@ -21,7 +21,7 @@ module.service('ShieldUser', ($resource, chrome) => {
     },
     getCurrent: {
       method: 'GET',
-      url: chrome.addBasePath('/api/security/v1/me')
+      url: chrome.addBasePath('/internal/security/me')
     }
   });
 

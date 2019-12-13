@@ -28,6 +28,7 @@ import { defineRoutes } from './routes';
 import { SecurityLicenseService, SecurityLicense } from '../common/licensing';
 import { setupSavedObjects } from './saved_objects';
 import { SecurityAuditLogger } from './audit';
+import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -76,7 +77,8 @@ export interface PluginSetupContract {
         lifespan: number | null;
       };
       secureCookies: boolean;
-      authc: { providers: string[] };
+      cookieName: string;
+      loginAssistanceMessage: string;
     }>;
   };
 }
@@ -128,7 +130,7 @@ export class Plugin {
       .toPromise();
 
     this.clusterClient = core.elasticsearch.createClient('security', {
-      plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
+      plugins: [elasticsearchClientPlugin],
     });
 
     this.securityLicenseService = new SecurityLicenseService();
@@ -213,7 +215,6 @@ export class Plugin {
           },
           secureCookies: config.secureCookies,
           cookieName: config.cookieName,
-          authc: { providers: config.authc.providers },
         },
       },
     });

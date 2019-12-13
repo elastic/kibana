@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { ProvidedType } from '@kbn/test/types/ftr';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -10,6 +11,8 @@ interface SetValueOptions {
   clearWithKeyboard?: boolean;
   typeCharByChar?: boolean;
 }
+
+export type MlCommon = ProvidedType<typeof MachineLearningCommonProvider>;
 
 export function MachineLearningCommonProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
