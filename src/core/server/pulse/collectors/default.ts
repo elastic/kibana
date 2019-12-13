@@ -17,31 +17,6 @@
  * under the License.
  */
 
-import { Subject } from 'rxjs';
-
-export interface PulseInstruction {
-  owner: string;
-  id: string;
-  value: unknown;
-}
-
-interface ChannelConfig {
-  id: string;
-  instructions$: Subject<PulseInstruction>;
-}
-
-export class PulseChannel {
-  public readonly getRecords: () => Promise<Record<string, any>>;
-
-  constructor(private readonly config: ChannelConfig) {
-    this.getRecords = require(`${__dirname}/collectors/${this.id}`).getRecords;
-  }
-
-  public get id() {
-    return this.config.id;
-  }
-
-  public instructions$() {
-    return this.config.instructions$.asObservable();
-  }
+export async function getRecords() {
+  return [{}];
 }

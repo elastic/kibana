@@ -135,6 +135,16 @@ export class PulseService {
 
   private async sendTelemetry() {
     const url = 'http://localhost:5601/api/pulse_poc/intake/123';
+
+    const channels = [];
+    for (const channel of this.channels.values()) {
+      const records = await channel.getRecords();
+      channels.push({
+        records,
+        channel_id: channel.id,
+      });
+    }
+
     let response: any;
     try {
       response = await fetch(url, {
@@ -144,12 +154,7 @@ export class PulseService {
           'kbn-xsrf': 'true',
         },
         body: JSON.stringify({
-          channels: [
-            {
-              channel_id: 'default',
-              records: [{}],
-            },
-          ],
+          channels,
         }),
       });
     } catch (err) {
