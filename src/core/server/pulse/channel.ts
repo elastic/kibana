@@ -17,11 +17,17 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
+
+export interface PulseInstruction {
+  owner: string;
+  id: string;
+  value: unknown;
+}
 
 interface ChannelConfig {
   id: string;
-  instructions$: BehaviorSubject<string[]>;
+  instructions$: Subject<PulseInstruction>;
 }
 
 export class PulseChannel {
