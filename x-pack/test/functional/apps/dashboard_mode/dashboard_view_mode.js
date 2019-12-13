@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
       it('shows only the dashboard app link', async () => {
         await security.testUser.setRoles(['test_logstash_reader', 'kibana_dashboard_only_user']);
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await PageObjects.security.logout();
+        await PageObjects.security.forceLogout();
         await PageObjects.security.login('test_user', 'changeme');
 
         const appLinks = await appsMenu.readLinks();

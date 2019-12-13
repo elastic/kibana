@@ -25,7 +25,7 @@ import { px, unit, units } from '../style/variables';
 import { LoadingIndicatorProvider } from '../context/LoadingIndicatorContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
-import { getRoutes } from '../components/app/Main/route_config';
+import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
 import { MatchedRouteProvider } from '../context/MatchedRouteContext';
 import { createStaticIndexPattern } from '../services/rest/index_pattern';
@@ -34,7 +34,6 @@ import { setReadonlyBadge } from './updateBadge';
 import { featureCatalogueEntry } from './featureCatalogueEntry';
 import { getConfigFromInjectedMetadata } from './getConfigFromInjectedMetadata';
 import { toggleAppLinkInNav } from './toggleAppLinkInNav';
-import { BreadcrumbRoute } from '../components/app/Main/ProvideBreadcrumbs';
 import { ApmPluginContext } from '../context/ApmPluginContext';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
@@ -45,7 +44,7 @@ const MainContainer = styled.main`
   height: 100%;
 `;
 
-const App = ({ routes }: { routes: BreadcrumbRoute[] }) => {
+const App = () => {
   return (
     <MainContainer data-test-subj="apmMainContainer">
       <UpdateBreadcrumbs routes={routes} />
@@ -115,8 +114,6 @@ export class ApmPlugin
     // Until then we use a shim to get it from legacy metadata:
     const packageInfo = metadata as PackageInfo;
 
-    const routes = getRoutes(config);
-
     // render APM feedback link in global help menu
     setHelpExtension(core);
     setReadonlyBadge(core);
@@ -138,7 +135,7 @@ export class ApmPlugin
                 <UrlParamsProvider>
                   <LoadingIndicatorProvider>
                     <LicenseProvider>
-                      <App routes={routes} />
+                      <App />
                     </LicenseProvider>
                   </LoadingIndicatorProvider>
                 </UrlParamsProvider>

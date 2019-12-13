@@ -154,7 +154,7 @@
     "check-disk-space": "^2.1.0",
     "chokidar": "3.2.1",
     "color": "1.0.3",
-    "commander": "3.0.0",
+    "commander": "3.0.2",
     "compare-versions": "3.5.1",
     "core-js": "^3.2.1",
     "css-loader": "2.1.1",
@@ -351,11 +351,11 @@
     "@types/redux": "^3.6.31",
     "@types/redux-actions": "^2.2.1",
     "@types/request": "^2.48.2",
-    "@types/selenium-webdriver": "^4.0.3",
+    "@types/selenium-webdriver": "^4.0.5",
     "@types/semver": "^5.5.0",
     "@types/sinon": "^7.0.13",
     "@types/strip-ansi": "^3.0.0",
-    "@types/styled-components": "^4.4.0",
+    "@types/styled-components": "^4.4.1",
     "@types/supertest": "^2.0.5",
     "@types/supertest-as-promised": "^2.0.38",
     "@types/testing-library__react": "^9.1.2",
@@ -377,7 +377,7 @@
     "chai": "3.5.0",
     "chance": "1.0.18",
     "cheerio": "0.22.0",
-    "chromedriver": "78.0.1",
+    "chromedriver": "79.0.0",
     "classnames": "2.2.6",
     "dedent": "^0.7.0",
     "delete-empty": "^2.0.0",
@@ -468,6 +468,6 @@
   },
   "engines": {
     "node": "10.15.2",
-    "yarn": "^1.10.1"
+    "yarn": "^1.21.1"
   }
 }
