@@ -18,8 +18,8 @@ import { TabNavigationProps } from '../tab_navigation/types';
 import { getSearch } from '../helpers';
 import { SearchNavTab } from '../types';
 
-export const setBreadcrumbs = (object: RouteSpyState & TabNavigationProps) => {
-  const breadcrumbs = getBreadcrumbsForRoute(object);
+export const setBreadcrumbs = (spyState: RouteSpyState & TabNavigationProps) => {
+  const breadcrumbs = getBreadcrumbsForRoute(spyState);
   if (breadcrumbs) {
     chrome.breadcrumbs.set(breadcrumbs);
   }
@@ -32,55 +32,60 @@ export const siemRootBreadcrumb: Breadcrumb[] = [
   },
 ];
 
-const isNetworkRoutes = (object: RouteSpyState): object is NetworkRouteSpyState =>
-  object != null && object.pageName === SiemPageName.network;
+const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpyState =>
+  spyState != null && spyState.pageName === SiemPageName.network;
 
-const isHostsRoutes = (object: RouteSpyState): object is HostRouteSpyState =>
-  object != null && object.pageName === SiemPageName.hosts;
+const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
+  spyState != null && spyState.pageName === SiemPageName.hosts;
 
 export const getBreadcrumbsForRoute = (
-  spyState: RouteSpyState & TabNavigationProps
+  object: RouteSpyState & TabNavigationProps
 ): Breadcrumb[] | null => {
-  const object: RouteSpyState = omit('navTabs', spyState);
-  if (isHostsRoutes(object) && spyState.navTabs) {
+  const spyState: RouteSpyState = omit('navTabs', object);
+  if (isHostsRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, object.pageName, spyState.navTabs)];
-    if (object.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, object.tabName, spyState.navTabs)];
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
     }
     return [
       ...siemRootBreadcrumb,
       ...getHostDetailsBreadcrumbs(
-        object,
+        spyState,
         urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, spyState)],
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
         )
       ),
     ];
   }
-  if (isNetworkRoutes(object) && spyState.navTabs) {
+  if (isNetworkRoutes(spyState) && object.navTabs) {
     const tempNav: SearchNavTab = { urlKey: 'network', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, object.pageName, spyState.navTabs)];
-    if (object.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, object.tabName, spyState.navTabs)];
+    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
+    if (spyState.tabName != null) {
+      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
     }
     return [
       ...siemRootBreadcrumb,
       ...getIPDetailsBreadcrumbs(
-        object,
+        spyState,
         urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, spyState)],
+          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
           []
         )
       ),
     ];
   }
-  if (object != null && spyState.navTabs && object.pageName && spyState.navTabs[object.pageName]) {
+  if (
+    spyState != null &&
+    object.navTabs &&
+    spyState.pageName &&
+    object.navTabs[spyState.pageName]
+  ) {
     return [
       ...siemRootBreadcrumb,
       {
-        text: spyState.navTabs[object.pageName].name,
+        text: object.navTabs[spyState.pageName].name,
         href: '',
       },
     ];
