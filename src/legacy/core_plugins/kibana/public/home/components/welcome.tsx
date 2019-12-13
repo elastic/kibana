@@ -44,7 +44,6 @@ interface Props {
   urlBasePath: string;
   onSkip: () => void;
   onOptInSeen: () => any;
-  // showTelemetryDisclaimer: boolean;
   currentOptInStatus: boolean;
 }
 

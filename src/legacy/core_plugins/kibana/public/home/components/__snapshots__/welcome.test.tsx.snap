@@ -1,81 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should render a Welcome screen with no telemetry disclaimer 1`] = `
-<EuiPortal>
-  <div
-    className="homWelcome"
-  >
-    <header
-      className="homWelcome__header"
-    >
-      <div
-        className="homWelcome__content eui-textCenter"
-      >
-        <EuiSpacer
-          size="xl"
-        />
-        <span
-          className="homWelcome__logo"
-        >
-          <EuiIcon
-            size="xxl"
-            type="logoKibana"
-          />
-        </span>
-        <EuiTitle
-          className="homWelcome__title"
-          size="l"
-        >
-          <h1>
-            <FormattedMessage
-              defaultMessage="Welcome to Kibana"
-              id="kbn.home.welcomeTitle"
-              values={Object {}}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiText
-          className="homWelcome__subtitle"
-          color="subdued"
-          size="s"
-        >
-          <p>
-            <FormattedMessage
-              defaultMessage="Your window into the Elastic Stack"
-              id="kbn.home.welcomeDescription"
-              values={Object {}}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer
-          size="m"
-        />
-      </div>
-    </header>
-    <div
-      className="homWelcome__content homWelcome-body"
-    >
-      <EuiFlexGroup
-        gutterSize="l"
-      >
-        <EuiFlexItem>
-          <SampleDataCard
-            onConfirm={[Function]}
-            onDecline={[Function]}
-          />
-          <EuiSpacer
-            size="s"
-          />
-          <EuiSpacer
-            size="xs"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
-  </div>
-</EuiPortal>
-`;
-
 exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
 <EuiPortal>
   <div
@@ -173,6 +97,228 @@ exports[`should render a Welcome screen with the telemetry disclaimer 1`] = `
               <FormattedMessage
                 defaultMessage="disable usage data here."
                 id="kbn.home.dataManagementDisableCollectionLink"
+                values={Object {}}
+              />
+            </EuiLink>
+          </EuiTextColor>
+          <EuiSpacer
+            size="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</EuiPortal>
+`;
+
+exports[`should render a Welcome screen with the telemetry disclaimer text addapted to disable and stop collection when optInStatus is true 1`] = `
+<EuiPortal>
+  <div
+    className="homWelcome"
+  >
+    <header
+      className="homWelcome__header"
+    >
+      <div
+        className="homWelcome__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xl"
+        />
+        <span
+          className="homWelcome__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          />
+        </span>
+        <EuiTitle
+          className="homWelcome__title"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to Kibana"
+              id="kbn.home.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiText
+          className="homWelcome__subtitle"
+          color="subdued"
+          size="s"
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Your window into the Elastic Stack"
+              id="kbn.home.welcomeDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+      </div>
+    </header>
+    <div
+      className="homWelcome__content homWelcome-body"
+    >
+      <EuiFlexGroup
+        gutterSize="l"
+      >
+        <EuiFlexItem>
+          <SampleDataCard
+            onConfirm={[Function]}
+            onDecline={[Function]}
+          />
+          <EuiSpacer
+            size="s"
+          />
+          <EuiTextColor
+            className="euiText--small"
+            color="subdued"
+          >
+            <FormattedMessage
+              defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+              id="kbn.home.dataManagementDisclaimerPrivacy"
+              values={Object {}}
+            />
+            <EuiLink
+              href="https://www.elastic.co/legal/privacy-statement"
+              rel="noopener"
+              target="_blank"
+            >
+              <FormattedMessage
+                defaultMessage="Privacy Statement."
+                id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                values={Object {}}
+              />
+            </EuiLink>
+            <FormattedMessage
+              defaultMessage=" To stop collection, "
+              id="kbn.home.dataManagementDisableCollection"
+              values={Object {}}
+            />
+            <EuiLink
+              href="#/management/kibana/settings"
+            >
+              <FormattedMessage
+                defaultMessage="disable usage data here."
+                id="kbn.home.dataManagementDisableCollectionLink"
+                values={Object {}}
+              />
+            </EuiLink>
+          </EuiTextColor>
+          <EuiSpacer
+            size="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  </div>
+</EuiPortal>
+`;
+
+exports[`should render a Welcome screen with the telemetry disclaimer text addapted to enable and start collection when optInStatus is false 1`] = `
+<EuiPortal>
+  <div
+    className="homWelcome"
+  >
+    <header
+      className="homWelcome__header"
+    >
+      <div
+        className="homWelcome__content eui-textCenter"
+      >
+        <EuiSpacer
+          size="xl"
+        />
+        <span
+          className="homWelcome__logo"
+        >
+          <EuiIcon
+            size="xxl"
+            type="logoKibana"
+          />
+        </span>
+        <EuiTitle
+          className="homWelcome__title"
+          size="l"
+        >
+          <h1>
+            <FormattedMessage
+              defaultMessage="Welcome to Kibana"
+              id="kbn.home.welcomeTitle"
+              values={Object {}}
+            />
+          </h1>
+        </EuiTitle>
+        <EuiText
+          className="homWelcome__subtitle"
+          color="subdued"
+          size="s"
+        >
+          <p>
+            <FormattedMessage
+              defaultMessage="Your window into the Elastic Stack"
+              id="kbn.home.welcomeDescription"
+              values={Object {}}
+            />
+          </p>
+        </EuiText>
+        <EuiSpacer
+          size="m"
+        />
+      </div>
+    </header>
+    <div
+      className="homWelcome__content homWelcome-body"
+    >
+      <EuiFlexGroup
+        gutterSize="l"
+      >
+        <EuiFlexItem>
+          <SampleDataCard
+            onConfirm={[Function]}
+            onDecline={[Function]}
+          />
+          <EuiSpacer
+            size="s"
+          />
+          <EuiTextColor
+            className="euiText--small"
+            color="subdued"
+          >
+            <FormattedMessage
+              defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+              id="kbn.home.dataManagementDisclaimerPrivacy"
+              values={Object {}}
+            />
+            <EuiLink
+              href="https://www.elastic.co/legal/privacy-statement"
+              rel="noopener"
+              target="_blank"
+            >
+              <FormattedMessage
+                defaultMessage="Privacy Statement."
+                id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                values={Object {}}
+              />
+            </EuiLink>
+            <FormattedMessage
+              defaultMessage=" To start collection, "
+              id="kbn.home.dataManagementEnableCollection"
+              values={Object {}}
+            />
+            <EuiLink
+              href="#/management/kibana/settings"
+            >
+              <FormattedMessage
+                defaultMessage="enable usage data here."
+                id="kbn.home.dataManagementEnableCollectionLink"
                 values={Object {}}
               />
             </EuiLink>
