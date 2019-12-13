@@ -17,7 +17,7 @@
  * under the License.
  */
 import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
 import { ConfigService, Env, Config, ConfigPath } from './config';
@@ -112,8 +112,33 @@ export class Server {
       http: httpSetup,
     });
 
-    await this.pulse.setup({
+    const pulseSetup = await this.pulse.setup({
       elasticsearch: elasticsearchServiceSetup,
+    });
+
+    // example of retrieving instructions for a specific channel
+    const defaultChannelInstructions$ = pulseSetup.getChannel('default').instructions$();
+
+    // example of retrieving only instructions that you "own"
+    // use this to only pay attention to pulse instructions you care about
+    const coreInstructions$ = defaultChannelInstructions$.pipe(
+      filter(instruction => instruction.owner === 'core')
+    );
+
+    // example of retrieving only instructions of a specific type
+    // use this to only pay attention to specific instructions
+    const pulseTelemetryInstructions$ = coreInstructions$.pipe(
+      filter(instruction => instruction.id === 'pulse_telemetry')
+    );
+
+    // example of retrieving only instructions with a specific value
+    // use this when you want to handle a specific scenario/use case for some type of instruction
+    const retryTelemetryInstructions$ = pulseTelemetryInstructions$.pipe(
+      filter(instruction => instruction.value === 'try_again')
+    );
+
+    retryTelemetryInstructions$.subscribe(() => {
+      this.log.info(`Received instructions to retry telemetry collection`);
     });
 
     const uiSettingsSetup = await this.uiSettings.setup({

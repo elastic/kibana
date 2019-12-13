@@ -17,14 +17,14 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { Subject } from 'rxjs';
 // @ts-ignore
 import fetch from 'node-fetch';
 
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { PulseChannel } from './channel';
+import { PulseChannel, PulseInstruction } from './channel';
 
 export interface PulseSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
@@ -32,7 +32,7 @@ export interface PulseSetupDeps {
 
 interface ChannelResponse {
   id: string;
-  instructions: Array<Record<string, unknown>>;
+  instructions: PulseInstruction[];
 }
 
 interface InstructionsResponse {
@@ -41,16 +41,19 @@ interface InstructionsResponse {
 
 export class PulseService {
   private readonly log: Logger;
-  private readonly channels: PulseChannel[];
-  private readonly instructions: Map<string, BehaviorSubject<any>> = new Map();
+  private readonly channels: Map<string, PulseChannel>;
+  private readonly instructions: Map<string, Subject<any>> = new Map();
 
   constructor(coreContext: CoreContext) {
     this.log = coreContext.logger.get('pulse-service');
-    this.channels = ['default'].map(id => {
-      const instructions$ = new BehaviorSubject<string[]>([]);
-      this.instructions.set(id, instructions$);
-      return new PulseChannel({ id, instructions$ });
-    });
+    this.channels = new Map(
+      ['default'].map((id): [string, PulseChannel] => {
+        const instructions$ = new Subject<PulseInstruction>();
+        this.instructions.set(id, instructions$);
+        const channel = new PulseChannel({ id, instructions$ });
+        return [channel.id, channel];
+      })
+    );
   }
   public async setup(deps: PulseSetupDeps) {
     this.log.debug('Setting up pulse service');
@@ -61,13 +64,13 @@ export class PulseService {
       this.loadInstructions().catch(err => console.error(err.stack));
     }, 1000);
 
-    const channelEntries = this.channels.map((channel): [string, PulseChannel] => {
-      return [channel.id, channel];
-    });
-
     return {
-      getChannels() {
-        return new Map(channelEntries);
+      getChannel: (id: string) => {
+        const channel = this.channels.get(id);
+        if (!channel) {
+          throw new Error(`Unknown channel: ${id}`);
+        }
+        return channel;
       },
     };
   }
@@ -105,7 +108,7 @@ export class PulseService {
         );
       }
 
-      instructions$.next(channel.instructions);
+      channel.instructions.forEach(instruction => instructions$.next(instruction));
     });
   }
 
