@@ -15,8 +15,6 @@ import { licenseMock } from '../common/licensing.mock';
 import { coreMock } from '../../../../src/core/public/mocks';
 import { HttpInterceptor } from 'src/core/public';
 
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-
 describe('licensing plugin', () => {
   let plugin: LicensingPlugin;
 
@@ -34,15 +32,7 @@ describe('licensing plugin', () => {
         const coreSetup = coreMock.createSetup();
         const firstLicense = licenseMock.create({ license: { uid: 'first', type: 'basic' } });
         const secondLicense = licenseMock.create({ license: { uid: 'second', type: 'gold' } });
-        coreSetup.http.get
-          .mockImplementationOnce(async () => {
-            await delay(100);
-            return firstLicense;
-          })
-          .mockImplementationOnce(async () => {
-            await delay(100);
-            return secondLicense;
-          });
+        coreSetup.http.get.mockResolvedValueOnce(firstLicense).mockResolvedValueOnce(secondLicense);
 
         const { license$, refresh } = await plugin.setup(coreSetup);
 
