@@ -9,6 +9,5 @@
 // indices and aliases exist. Based on that the final setting will be available
 // as an injectedVar on the client side and can be accessed like:
 //
-// import chrome from 'ui/chrome';
-// const mlAnnotationsEnabled = chrome.getInjected('mlAnnotationsEnabled', false);
+
 export const FEATURE_ANNOTATIONS_ENABLED = true;

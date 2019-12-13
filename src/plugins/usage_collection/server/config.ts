@@ -32,6 +32,10 @@ export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('ui_metric.enabled', 'usageCollection.uiMetric.enabled'),
+    renameFromRoot('ui_metric.debug', 'usageCollection.uiMetric.debug'),
+  ],
   exposeToBrowser: {
     uiMetric: true,
   },

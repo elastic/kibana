@@ -217,7 +217,7 @@ export class Join extends Component {
         <GlobalFilterCheckbox
           applyGlobalQuery={right.applyGlobalQuery}
           setApplyGlobalQuery={this._onApplyGlobalQueryChange}
-          customLabel={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
+          label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
             defaultMessage: `Apply global filter to join`,
           })}
         />

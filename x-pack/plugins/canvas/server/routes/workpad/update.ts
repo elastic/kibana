@@ -15,15 +15,10 @@ import {
   API_ROUTE_WORKPAD_STRUCTURES,
   API_ROUTE_WORKPAD_ASSETS,
 } from '../../../../../legacy/plugins/canvas/common/lib/constants';
-import { CanvasWorkpad } from '../../../../../legacy/plugins/canvas/types';
+import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema, WorkpadAssetSchema } from './workpad_schema';
-import { okResponse } from './ok_response';
+import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
-
-export type WorkpadAttributes = Pick<CanvasWorkpad, Exclude<keyof CanvasWorkpad, 'id'>> & {
-  '@timestamp': string;
-  '@created': string;
-};
 
 const AssetsRecordSchema = schema.recordOf(schema.string(), WorkpadAssetSchema);
 

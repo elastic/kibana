@@ -47,4 +47,15 @@ describe('DashboardEmptyScreen', () => {
     const paragraph = findTestSubject(component, 'linkToVisualizeParagraph');
     expect(paragraph.length).toBe(0);
   });
+
+  test('when specified, prop onVisualizeClick is called correctly', () => {
+    const onVisualizeClick = jest.fn();
+    const component = mountComponent({
+      ...defaultProps,
+      ...{ showLinkToVisualize: true, onVisualizeClick },
+    });
+    const button = findTestSubject(component, 'addVisualizationButton');
+    button.simulate('click');
+    expect(onVisualizeClick).toHaveBeenCalled();
+  });
 });
