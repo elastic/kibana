@@ -17,19 +17,33 @@
  * under the License.
  */
 
-import { createRoot } from '../../../../../test_utils/kbn_server';
+import { get } from './get';
 
-(async function run() {
-  const root = createRoot(JSON.parse(process.env.CREATE_SERVER_OPTS));
-
-  // We just need the server to run through startup so that it will
-  // log the deprecation messages. Once it has started up we close it
-  // to allow the process to exit naturally
-  try {
-    await root.setup();
-    await root.start();
-  } finally {
-    await root.shutdown();
+/**
+ * Unset a (potentially nested) key from given object.
+ * This mutates the original object.
+ *
+ * @example
+ * ```
+ * unset(myObj, 'someRootProperty');
+ * unset(myObj, 'some.nested.path');
+ * ```
+ */
+export function unset<OBJ extends { [k: string]: any }>(obj: OBJ, atPath: string) {
+  const paths = atPath
+    .split('.')
+    .map(s => s.trim())
+    .filter(v => v !== '');
+  if (paths.length === 0) {
+    return;
   }
-
-}());
+  if (paths.length === 1) {
+    delete obj[paths[0]];
+    return;
+  }
+  const property = paths.pop() as string;
+  const parent = get(obj, paths as any) as any;
+  if (parent !== undefined) {
+    delete parent[property];
+  }
+}
