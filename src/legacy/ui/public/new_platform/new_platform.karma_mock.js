@@ -153,8 +153,10 @@ export const npStart = {
         getProvider: sinon.fake(),
       },
       getSuggestions: sinon.fake(),
+      indexPatterns: sinon.fake(),
       ui: {
         IndexPatternSelect: mockComponent,
+        SearchBar: mockComponent,
       },
       query: {
         filterManager: {
