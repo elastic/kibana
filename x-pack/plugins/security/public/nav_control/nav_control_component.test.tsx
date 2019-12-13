@@ -8,7 +8,7 @@ import React from 'react';
 import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SecurityNavControl } from './nav_control_component';
 import { AuthenticatedUser } from '../../common/model';
-import { EuiPopover, EuiAvatar } from '@elastic/eui';
+import { EuiPopover, EuiHeaderSectionItemButton } from '@elastic/eui';
 import { findTestSubject } from 'test_utils/find_test_subject';
 
 describe('SecurityNavControl', () => {
@@ -65,6 +65,27 @@ describe('SecurityNavControl', () => {
     `);
   });
 
+  it(`doesn't render the popover when the user hasn't been loaded yet`, async () => {
+    const props = {
+      user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
+      editProfileUrl: '',
+      logoutUrl: '',
+    };
+
+    const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
+    // not awaiting the user promise
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
+
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
+
+    expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
+  });
+
   it('renders a popover when the avatar is clicked.', async () => {
     const props = {
       user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
@@ -80,7 +101,7 @@ describe('SecurityNavControl', () => {
     expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
 
-    wrapper.find(EuiAvatar).simulate('click');
+    wrapper.find(EuiHeaderSectionItemButton).simulate('click');
 
     expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(1);
