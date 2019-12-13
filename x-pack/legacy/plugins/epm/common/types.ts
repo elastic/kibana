@@ -156,3 +156,9 @@ export type NotInstalled<T = {}> = T & {
 };
 
 export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
+
+export interface DatasourcePayload {
+  pkgkey: string;
+  datasourceName: string;
+  datasetsToInstall: Dataset[];
+}

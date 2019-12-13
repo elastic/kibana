@@ -50,7 +50,11 @@ export const AddDataSourceForm = (props: AddDataSourceStepsProps) => {
 
   const handleRequestInstallDatasource = async () => {
     try {
-      await installDatasource(`${pkgName}-${pkgVersion}`);
+      await installDatasource({
+        pkgkey: `${pkgName}-${pkgVersion}`,
+        datasetsToInstall: datasets.filter(d => formState.datasets[d.name] === true),
+        datasourceName: formState.datasourceName,
+      });
       setAddDataSourceSuccess(true);
       notifications.toasts.addSuccess({
         title: `Added ${pkgTitle} data source`,

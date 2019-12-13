@@ -11,6 +11,7 @@ import { PluginContext } from '../plugin';
 import { getClient } from '../saved_objects';
 import { Request, ResponseToolkit } from '../types';
 import { createDatasource } from './create';
+import { DatasourcePayload } from '../../common/types';
 
 // TODO: duplicated from packages/handlers.ts. unduplicate.
 interface Extra extends ResponseToolkit {
@@ -21,6 +22,7 @@ interface CreateDatasourceRequest extends Request {
   params: {
     pkgkey: string;
   };
+  payload: DatasourcePayload;
 }
 
 export async function handleRequestInstallDatasource(
@@ -30,14 +32,13 @@ export async function handleRequestInstallDatasource(
   const user = await request.server.plugins.security?.getUser(request);
   if (!user) return Boom.unauthorized('Must be logged in to perform this operation');
 
-  const { pkgkey } = request.params;
   const savedObjectsClient = getClient(request);
   const callCluster = getClusterAccessor(extra.context.esClient, request);
 
   try {
     const result = await createDatasource({
       savedObjectsClient,
-      pkgkey,
+      payload: request.payload,
       callCluster,
       // long-term, I don't want to pass `request` through
       // but this was the fastest/least invasive change way to make the change
