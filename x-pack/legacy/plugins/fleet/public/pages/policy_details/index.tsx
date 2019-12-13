@@ -7,7 +7,6 @@ import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
-  EuiInMemoryTable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
@@ -15,25 +14,19 @@ import {
   EuiCallOut,
   EuiText,
   EuiSpacer,
-  EuiEmptyPrompt,
-  EuiButton,
   EuiTitle,
   EuiHealth,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
+import { Loading, ConnectedLink } from '../../components';
 import {
-  DEFAULT_AGENTS_PAGE_SIZE,
-  AGENTS_PAGE_SIZE_OPTIONS,
-} from '../../../common/constants/agent';
-import { Datasource } from '../../../common/types/domain_data';
-import { Loading } from '../../components/loading';
-import { ConnectedLink } from '../../components/navigation/connected_link';
-import { useLibs } from '../../hooks/use_libs';
-import { useGetPolicy, PolicyRefreshContext } from './hooks/use_policy';
-import { useGetAgentStatus, AgentStatusRefreshContext } from './hooks/use_agent_status';
-import { DonutChart } from './components/donut_chart';
-import { EditPolicyFlyout } from './components/edit_policy';
+  useGetPolicy,
+  PolicyRefreshContext,
+  useGetAgentStatus,
+  AgentStatusRefreshContext,
+} from './hooks';
+import { DatasourcesTable, DonutChart, EditPolicyFlyout } from './components';
 
 export const Layout: React.FC = ({ children }) => (
   <EuiPageBody>
@@ -50,7 +43,6 @@ export const PolicyDetailsPage: React.FC<Props> = ({
     params: { policyId },
   },
 }) => {
-  const { framework } = useLibs();
   const { policy, isLoading, error, refreshPolicy } = useGetPolicy(policyId);
   const {
     result: agentStatus,
@@ -284,98 +276,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
             </h3>
           </EuiTitle>
           <EuiSpacer size="l" />
-          <EuiInMemoryTable
-            message={
-              !policy.datasources || policy.datasources.length === 0 ? (
-                <EuiEmptyPrompt
-                  title={
-                    <h2>
-                      <FormattedMessage
-                        id="xpack.fleet.policyDetails.noDatasourcesPrompt"
-                        defaultMessage="Policy has no data sources"
-                      />
-                    </h2>
-                  }
-                  actions={
-                    <EuiButton
-                      fill
-                      iconType="plusInCircle"
-                      href={`${window.location.origin}${framework.info.basePath}/app/epm`}
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.policyDetails.addDatasourceButtonText"
-                        defaultMessage="Add a data source"
-                      />
-                    </EuiButton>
-                  }
-                />
-              ) : null
-            }
-            itemId="id"
-            items={policy.datasources}
-            columns={[
-              {
-                field: 'name',
-                name: i18n.translate('xpack.fleet.policyList.datasourcesTable.ameColumnTitle', {
-                  defaultMessage: 'Name/ID',
-                }),
-              },
-              {
-                field: 'package.title',
-                name: i18n.translate(
-                  'xpack.fleet.policyList.datasourcesTable.packageNameColumnTitle',
-                  {
-                    defaultMessage: 'Package',
-                  }
-                ),
-              },
-              {
-                field: 'package.version',
-                name: i18n.translate(
-                  'xpack.fleet.policyList.datasourcesTable.packageVersionColumnTitle',
-                  {
-                    defaultMessage: 'Version',
-                  }
-                ),
-              },
-              {
-                field: 'streams',
-                name: i18n.translate(
-                  'xpack.fleet.policyList.datasourcesTable.streamsCountColumnTitle',
-                  {
-                    defaultMessage: 'Streams',
-                  }
-                ),
-                render: (streams: Datasource['streams']) => (streams ? streams.length : 0),
-              },
-            ]}
-            sorting={{
-              field: 'name',
-              direction: 'asc',
-            }}
-            pagination={{
-              initialPageSize: DEFAULT_AGENTS_PAGE_SIZE,
-              pageSizeOptions: AGENTS_PAGE_SIZE_OPTIONS,
-            }}
-            search={{
-              toolsRight: [
-                <EuiButton
-                  fill
-                  iconType="plusInCircle"
-                  href={`${window.location.origin}${framework.info.basePath}/app/epm`}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.policyDetails.addDatasourceButtonText"
-                    defaultMessage="Add a data source"
-                  />
-                </EuiButton>,
-              ],
-              box: {
-                incremental: true,
-                schema: true,
-              },
-            }}
-          />
+          <DatasourcesTable datasources={policy.datasources} />
         </Layout>
       </AgentStatusRefreshContext.Provider>
     </PolicyRefreshContext.Provider>
