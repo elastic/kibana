@@ -7,10 +7,11 @@
 import { resolve } from 'path';
 import { i18n } from '@kbn/i18n';
 
+import { LegacyPluginInitializer } from 'src/legacy/plugin_discovery/types';
+
 // @ts-ignore
 import migrations from './migrations';
 import mappings from './mappings.json';
-import { LegacyPluginInitializer } from '../../../../src/legacy/plugin_discovery/types';
 
 export const graph: LegacyPluginInitializer = kibana => {
   return new kibana.Plugin({
