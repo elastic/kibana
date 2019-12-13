@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDefinitionParams } from '../../index';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import { wrapError } from '../../../errors';
+import { wrapIntoCustomErrorResponse } from '../../../errors';
 import {
   ElasticsearchRole,
   getPutPayloadSchema,
@@ -52,11 +52,7 @@ export function definePutRolesRoutes({ router, authz, clusterClient }: RouteDefi
 
         return response.noContent();
       } catch (error) {
-        const wrappedError = wrapError(error);
-        return response.customError({
-          body: wrappedError,
-          statusCode: wrappedError.output.statusCode,
-        });
+        return response.customError(wrapIntoCustomErrorResponse(error));
       }
     })
   );

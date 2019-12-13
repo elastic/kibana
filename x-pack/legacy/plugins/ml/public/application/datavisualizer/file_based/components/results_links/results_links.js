@@ -121,7 +121,7 @@ export class ResultsLinks extends Component {
                 />
               }
               description=""
-              href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
+              href={`#/jobs/new_job/step/job_type?index=${indexPatternId}${_g}`}
             />
           </EuiFlexItem>
         }
@@ -137,7 +137,7 @@ export class ResultsLinks extends Component {
                 />
               }
               description=""
-              href={`${uiChrome.getBasePath()}/app/ml#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
+              href={`#/jobs/new_job/datavisualizer?index=${indexPatternId}${_g}`}
             />
           </EuiFlexItem>
         }

@@ -205,7 +205,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
     });
 
     // Need to encode the _a parameter in case any entities contain unsafe characters such as '+'.
-    let path = `${chrome.getBasePath()}/app/ml#/timeseriesexplorer`;
+    let path = '#/timeseriesexplorer';
     path += `?_g=${_g}&_a=${encodeURIComponent(_a)}`;
     window.open(path, '_blank');
   }

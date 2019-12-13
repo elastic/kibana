@@ -16,11 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Observable } from 'rxjs';
+
 import { take } from 'rxjs/operators';
 import { Type } from '@kbn/config-schema';
 
-import { ConfigService, Env, Config, ConfigPath } from './config';
+import {
+  ConfigService,
+  Env,
+  ConfigPath,
+  RawConfigurationProvider,
+  coreDeprecationProvider,
+} from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService, InternalHttpServiceSetup } from './http';
 import { LegacyService, ensureValidConfiguration } from './legacy';
@@ -44,6 +50,7 @@ import { InternalCoreSetup } from './internal_types';
 import { CapabilitiesService } from './capabilities';
 
 const coreId = Symbol('core');
+const rootConfigPath = '';
 
 export class Server {
   public readonly configService: ConfigService;
@@ -58,12 +65,12 @@ export class Server {
   private readonly uiSettings: UiSettingsService;
 
   constructor(
-    public readonly config$: Observable<Config>,
+    rawConfigProvider: RawConfigurationProvider,
     public readonly env: Env,
     private readonly logger: LoggerFactory
   ) {
     this.log = this.logger.get('server');
-    this.configService = new ConfigService(config$, env, logger);
+    this.configService = new ConfigService(rawConfigProvider, env, logger);
 
     const core = { coreId, configService: this.configService, env, logger };
     this.context = new ContextService(core);
@@ -84,6 +91,7 @@ export class Server {
     const legacyPlugins = await this.legacy.discoverPlugins();
 
     // Immediately terminate in case of invalid configuration
+    await this.configService.validate();
     await ensureValidConfiguration(this.configService, legacyPlugins);
 
     const contextServiceSetup = this.context.setup({
@@ -207,7 +215,7 @@ export class Server {
     );
   }
 
-  public async setupConfigSchemas() {
+  public async setupCoreConfig() {
     const schemas: Array<[ConfigPath, Type<unknown>]> = [
       [pathConfig.path, pathConfig.schema],
       [elasticsearchConfig.path, elasticsearchConfig.schema],
@@ -219,6 +227,8 @@ export class Server {
       [savedObjectsConfig.path, savedObjectsConfig.schema],
       [uiSettingsConfig.path, uiSettingsConfig.schema],
     ];
+
+    this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
 
     for (const [path, schema] of schemas) {
       await this.configService.setSchema(path, schema);

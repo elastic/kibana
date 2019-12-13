@@ -32,7 +32,7 @@ export default function ({ getService }) {
 
     it('should reject API requests if client is not authenticated', async () => {
       await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .expect(401);
     });
@@ -41,24 +41,24 @@ export default function ({ getService }) {
       const wrongUsername = `wrong-${validUsername}`;
       const wrongPassword = `wrong-${validPassword}`;
 
-      await supertest.post('/api/security/v1/login')
+      await supertest.post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: wrongUsername, password: wrongPassword })
         .expect(401);
 
-      await supertest.post('/api/security/v1/login')
+      await supertest.post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: wrongPassword })
         .expect(401);
 
-      await supertest.post('/api/security/v1/login')
+      await supertest.post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: wrongUsername, password: validPassword })
         .expect(401);
     });
 
     it('should set authentication cookie for login with valid credentials', async () => {
-      const loginResponse = await supertest.post('/api/security/v1/login')
+      const loginResponse = await supertest.post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: validPassword })
         .expect(204);
@@ -77,17 +77,17 @@ export default function ({ getService }) {
       const wrongUsername = `wrong-${validUsername}`;
       const wrongPassword = `wrong-${validPassword}`;
 
-      await supertest.get('/api/security/v1/me')
+      await supertest.get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `Basic ${Buffer.from(`${wrongUsername}:${wrongPassword}`).toString('base64')}`)
         .expect(401);
 
-      await supertest.get('/api/security/v1/me')
+      await supertest.get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `Basic ${Buffer.from(`${validUsername}:${wrongPassword}`).toString('base64')}`)
         .expect(401);
 
-      await supertest.get('/api/security/v1/me')
+      await supertest.get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `Basic ${Buffer.from(`${wrongUsername}:${validPassword}`).toString('base64')}`)
         .expect(401);
@@ -95,7 +95,7 @@ export default function ({ getService }) {
 
     it('should allow access to the API with valid credentials in the header', async () => {
       const apiResponse = await supertest
-        .get('/api/security/v1/me')
+        .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', `Basic ${Buffer.from(`${validUsername}:${validPassword}`).toString('base64')}`)
         .expect(200);
@@ -116,7 +116,7 @@ export default function ({ getService }) {
     describe('with session cookie', () => {
       let sessionCookie;
       beforeEach(async () => {
-        const loginResponse = await supertest.post('/api/security/v1/login')
+        const loginResponse = await supertest.post('/internal/security/login')
           .set('kbn-xsrf', 'xxx')
           .send({ username: validUsername, password: validPassword })
           .expect(204);
@@ -128,12 +128,12 @@ export default function ({ getService }) {
         // There is no session cookie provided and no server side session should have
         // been established, so request should be rejected.
         await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .expect(401);
 
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -153,7 +153,7 @@ export default function ({ getService }) {
 
       it('should extend cookie on every successful non-system API call', async () => {
         const apiResponseOne = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -165,7 +165,7 @@ export default function ({ getService }) {
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
 
         const apiResponseTwo = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
@@ -179,7 +179,7 @@ export default function ({ getService }) {
 
       it('should not extend cookie for system API calls', async () => {
         const systemAPIResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('kbn-system-api', 'true')
           .set('Cookie', sessionCookie.cookieString())
@@ -190,7 +190,7 @@ export default function ({ getService }) {
 
       it('should fail and preserve session cookie if unsupported authentication schema is used', async () => {
         const apiResponse = await supertest
-          .get('/api/security/v1/me')
+          .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Bearer AbCdEf')
           .set('Cookie', sessionCookie.cookieString())
@@ -200,7 +200,7 @@ export default function ({ getService }) {
       });
 
       it('should clear cookie on logout and redirect to login', async ()=> {
-        const logoutResponse = await supertest.get('/api/security/v1/logout?next=%2Fabc%2Fxyz&msg=test')
+        const logoutResponse = await supertest.get('/api/security/logout?next=%2Fabc%2Fxyz&msg=test')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -256,7 +256,7 @@ export default function ({ getService }) {
         });
 
       it('should redirect to home page if cookie is not provided', async ()=> {
-        const logoutResponse = await supertest.get('/api/security/v1/logout')
+        const logoutResponse = await supertest.get('/api/security/logout')
           .expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);

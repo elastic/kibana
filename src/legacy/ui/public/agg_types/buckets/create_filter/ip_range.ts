@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CidrMask } from '../../../utils/cidr_mask';
+import { CidrMask } from '../lib/cidr_mask';
 import { IBucketAggConfig } from '../_bucket_agg_type';
 import { IpRangeKey } from '../ip_range';
 import { esFilters } from '../../../../../../plugins/data/public';
