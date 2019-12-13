@@ -1807,8 +1807,6 @@ export interface UserProvidedValues<T = any> {
     userValue?: T;
 }
 
-// Warning: (ae-missing-release-tag) "UuidServiceSetup" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
-// 
 // @public
 export interface UuidServiceSetup {
     getInstanceUuid(): string;

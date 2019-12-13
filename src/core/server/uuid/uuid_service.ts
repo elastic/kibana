@@ -24,6 +24,8 @@ import { IConfigService } from '../config';
 
 /**
  * APIs to access the application's instance uuid.
+ *
+ * @public
  */
 export interface UuidServiceSetup {
   /**
