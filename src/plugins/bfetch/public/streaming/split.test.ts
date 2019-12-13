@@ -50,6 +50,8 @@ const streams = [
 
 for (const stream of streams) {
   test(`splits stream by delimiter correctly "${stream}"`, () => {
+    const correctResult = stream.split('.').filter(Boolean);
+
     for (let j = 0; j < 100; j++) {
       const list: string[] = [];
       const subject = new Subject<string>();
@@ -63,7 +65,7 @@ for (const stream of streams) {
         i += len;
       }
       subject.complete();
-      expect(list).toEqual(stream.split('.').filter(Boolean));
+      expect(list).toEqual(correctResult);
     }
   });
 }

@@ -47,10 +47,10 @@ export class BfetchPublicPlugin
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: BfetchPublicSetupDependencies): BfetchPublicSetup {
-    const fetchStreaming = this.fetchStreaming(
-      this.initializerContext.env.packageInfo.version,
-      core.http.basePath.get()
-    );
+    const { version } = this.initializerContext.env.packageInfo;
+    const basePath = core.http.basePath.get();
+
+    const fetchStreaming = this.fetchStreaming(version, basePath);
 
     this.api = {
       fetchStreaming,

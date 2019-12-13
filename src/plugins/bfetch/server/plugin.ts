@@ -23,9 +23,7 @@ import { StreamingResponseHandler, removeLeadingSlash } from '../common';
 import { createStreamingResponseStream } from './streaming';
 
 // eslint-disable-next-line
-export interface BfetchServerSetupDependencies {
-  
-}
+export interface BfetchServerSetupDependencies {}
 
 // eslint-disable-next-line
 export interface BfetchServerStartDependencies {}
@@ -67,7 +65,7 @@ export class BfetchServerPlugin
   ): BfetchServerSetup['addStreamingResponseRoute'] => (path, handler) => {
     router.post(
       {
-        path: `/bfetch/stream/${removeLeadingSlash(path)}`,
+        path: `/${removeLeadingSlash(path)}`,
         validate: {
           body: schema.any(),
         },
