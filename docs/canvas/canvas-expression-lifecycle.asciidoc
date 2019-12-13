@@ -2,21 +2,15 @@
 [[canvas-expression-lifecycle]]
 == Canvas expression lifecycle
 
-[[canvas-understanding-the-syntax]]
-=== Understanding the Syntax
+Elements in Canvas are all created using an *expression language* that defines how to retrieve, manipulate, and ultimately visualize data. The goal is to allow you to do most of what you need without understanding the *expression language*, but learning how it works unlocks a lot of Canvas's power.
 
-Elements in Canvas are all created using an *expression language* that defines how to retrieve, manipulate, and ultimately visualize data. The goal is to allow users to do most of what they need without having to edit or even know that it exists, but learning how it works unlocks a lot of the application’s power.
-
-Learning a new language can be a chore, but the *expressions* in Canvas are intentionally readable, and once you understand the syntax, you will hopefully find them pretty approachable. The easiest way to explain how they work is by walking through an example expression and explaining what happens step by step. 
 
 [[canvas-expressions-always-start-with-a-function]]
-=== Expressions Always Start with a Function
+=== Expressions always start with a function
 
-Expressions simply execute <<canvas-function-reference, functions>>, in a specific order, which produce some kind of output. That output can then be piped into another function, and another after that, until it produces the output you need. Let’s start with the following expression, which uses random data available in Canvas to produce a table.
+Expressions simply execute <<canvas-function-reference, functions>> in a specific order, which produce some kind of output. That output can then be inserted into another function, and another after that, until it produces the output you need. Let’s start with the following expression, which uses random data available in Canvas to produce a table.
 
-*[Note] You can follow along*
-
-You can run all of the following expressions to see the output yourself
+Run the following expression:
 
 [source,text]
 ----
@@ -26,15 +20,15 @@ filters
 | render
 ----
 
-This expression starts out with the <<filters_fn, function>> function, which provides the value of any time filters or dropdown filters in the workpad. This is then piped to <<demodata_fn, demodata>>, a function that returns exactly what you expect, demo data. Because the <<demodata_fn, demodata>> function receives the filter information from the <<filters_fn, filters>> function before it, it applies those filters to reduce the set of data it returns. We call the output from the previous function _context_.
+This expression starts out with the <<filters_fn, function>> function, which provides the value of any time filters or dropdown filters in the workpad. This is then inserted into <<demodata_fn, demodata>>, a function that returns exactly what you expect, demo data. Because the <<demodata_fn, demodata>> function receives the filter information from the <<filters_fn, filters>> function before it, it applies those filters to reduce the set of data it returns. We call the output from the previous function _context_.
 
-The filtered <<demodata_fn, demodata>> then becomes the _context_ of the next function, <<table_fn, table>>, which creates a table visualization from this data set. This function isn’t strictly required, but by being explicit you also have the option of providing arguments to control things like the font used in the table. Finally, that output becomes the _context_ of the next function, <<render_fn, render>>, and like <<table_fn, table>> before it, this function isn’t required either. But, just like before, using it allows access to other arguments, such as styling the border of the element or injecting custom CSS.
+The filtered <<demodata_fn, demo data>> becomes the _context_ of the next function, <<table_fn, table>>, which creates a table visualization from this data set. The <<table_fn, table>> function isn’t strictly required, but by being explicit, you have the option of providing arguments to control things like the font used in the table. The output of the <<table_fn, table>> function becomes the _context_ of the <<render_fn, render>> function. Like the <<table_fn, table>>, the <<render_fn, render>> function isn’t required either, but it allows access to other arguments, such as styling the border of the element or injecting custom CSS.
 
 
-[[canvas-function-can-take-arguments]]
-=== Functions Can Take Arguments
+[[canvas-function-arguments]]
+=== Function arguments
 
-Let’s look at another expression, which uses the same <<demodata_fn>> function but this time produces a pie chart instead.
+Let’s look at another expression, which uses the same <<demodata_fn, demodata>> function, but instead produces a pie chart.
 
 image::images/canvas-functions-can-take-arguments-pie-chart.png[Pie Chart]
 [source,text]
@@ -46,11 +40,11 @@ filters
 | render
 ----
 
-This one starts out just like before, using the <<filters_fn>> and <<demodata_fn>> functions to produce a filtered set of random data. This time, however, the output becomes the context for <<pointseries_fn>>, which is a way to "aggregate" or "roll up" your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn>> function. Each unique value in the "state" column will have an associated "size" value, which in this case, will be the maximum value of the "price" column.
+To produce a filtered set of random data, the expression uses the <<filters_fn, filters>> and <<demodata_fn, demodata>> functions. This time, however, the output becomes the context for the <<pointseries_fn, pointseries>> function, which is a way to aggregate your data, similar to how Elasticsearch works, but more generalized. In this case, the data is split up using the `color` and `size` dimensions, using arguments on the <<pointseries_fn>> function. Each unique value in the "state" column will have an associated "size" value, which in this case, will be the maximum value of the "price" column.
 
-If the expression stopped there, it would produce a `pointseries` data type as the output of this expression. But instead of looking at the raw values, the result is piped to <<pie_fn>>, which will produce an output that will render a pie visualization. And just like before, this is piped to <<render_fn>>, which is useful for its arguments.
+If the expression stopped there, it would produce a `pointseries` data type as the output of this expression. But instead of looking at the raw values, the result is inserted into <<pie_fn>>, which will produce an output that will render a pie visualization. And just like before, this is inserted into <<render_fn>>, which is useful for its arguments.
 
-The end result is a simple pie chart that uses the default color palette. But <<pie_fn>> can take some additional arguments that control how it gets rendered. For example, you can provide a `hole` argument to turn your pie chart into a donut chart, one that has a "hole" in the middle of it, but changing the expression to this:
+The end result is a simple pie chart that uses the default color palette, but <<pie_fn>> can take additional arguments that control how it gets rendered. For example, you can provide a hole argument to turn your pie chart into a donut chart by changing the expression to:
 
 
 image::images/canvas-functions-can-take-arguments-donut-chart.png[Donut Chart]
@@ -65,22 +59,29 @@ filters
 
 
 [[canvas-aliases-and-unnamed-arguments]]
-=== Aliases and Unnamed Arguments
+=== Aliases and unnamed arguments
 
-Argument definitions have one canonical name, which is always provided in the underlying code, but when used in an expression they often times include aliases that make them easier or faster to type, usually both. 
+Argument definitions have one canonical name, which is always provided in the underlying code. When argument definitions are used in an expression, they often include aliases that make them easier or faster to type.
 
-Take, as one example, the <<mapColumn_fn>> function, which has 2 arguments: `expression`, the expression to use to produce a calculated value, and `name`, the name of column to place the resulting data in. The `expression` argument includes some aliases, namely `exp`, `fn`, and `function`. That means that you can use any of those four options to provide that argument’s value. So in your expression, if you use `mapColumn name=newColumn fn={string example}`, this produces the same output as if you wrote the more verbose `mapColumn name=newColumn expression={string example}`.
+For example, the <<mapColumn_fn, mapColumn>> function has 2 arguments:
 
-There’s also a special type of alias which allows you to leave off the argument’s name entirely. The alias for this is simply `+_+`, which indicates that the argument is an _unnamed_ argument, and can be provided without explicitly naming it in the expression. The `name` argument here uses the _unnamed_ alias, which means that you can further simplify our example to `mapColumn newColumn fn={string example}`.
+* `expression` - Produces a calculated value
+* `name` - The name of column
+
+The `expression` argument includes some aliases, namely `exp`, `fn`, and `function`. That means that you can use any of those four options to provide that argument’s value. 
+
+So `mapColumn name=newColumn fn={string example}` is equal to `mapColumn name=newColumn expression={string example}`.
+
+There’s also a special type of alias which allows you to leave off the argument’s name entirely. The alias for this is simply `+_+`, which indicates that the argument is an _unnamed_ argument and can be provided without explicitly naming it in the expression. The `name` argument here uses the _unnamed_ alias, which means that you can further simplify our example to `mapColumn newColumn fn={string example}`.
 
 NOTE: There can only be one _unnamed_ argument for each function.
 
 
 [[canvas-change-your-expression-change-your-output]]
-=== Change Your Expression, Change Your Output
-In the previous section, you saw how you can add arguments to a function to change its output, but you can also substitute one function for another in many situations. For example, you could change the visualization by swapping out the <<pie_fn, pie>> function for another *renderer*, a function that returns a `render` data type. 
+=== Change your expression, change your output
+You can substitute one function for another to change the output. For example, you could change the visualization by swapping out the <<pie_fn, pie>> function for another renderer, a function that returns a `render` data type. 
 
-Let’s change that last pie visualization into a bubble chart by replacing the <<pie_fn, pie>> function with the <<plot_fn, plot>> function. This is possible because both functions can accept a `pointseries` data type as their _context_. Just switching the functions will work, but it won’t produce a useful visualization on its own, since you don’t have any axis dimensions, i.e. `x` or `y`, defined. You’ll also need to modify the <<pointseries_fn, pointseries>> function to change its output as well. In this case, you can change the `size` argument to `y`, so the maximum price values are plotted on the y-axis, and add an `x` argument using the `@timestamp` field in the data to plot those values over time. This leaves you with the following expression and produces a bubble chart showing the max price of each state over time:
+Let’s change that last pie chart into a bubble chart by replacing the <<pie_fn, pie>> function with the <<plot_fn, plot>> function. This is possible because both functions can accept a `pointseries` data type as their _context_. Switching the functions will work, but it won’t produce a useful visualization on its own since you don’t have the x-axis and y-axis defined. You will also need to modify the <<pointseries_fn, pointseries>> function to change its output. In this case, you can change the `size` argument to `y`, so the maximum price values are plotted on the y-axis, and add an `x` argument using the `@timestamp` field in the data to plot those values over time. This leaves you with the following expression and produces a bubble chart showing the max price of each state over time:
 
 image::images/canvas-change-your-expression-chart.png[Bubble Chart]
 [source,text]
@@ -92,7 +93,7 @@ filters
 | render
 ----
 
-The <<plot_fn, plot>> function, like <<pie_fn, pie>>, also takes several arguments, which will again control what the final visualization looks like. As one example, passing a `legend` argument with a value of `false` to the function will hide the legend on the chart.
+Similar to the <<pie_fn, pie>> function, the <<plot_fn, plot>> function takes arguments that control the design elements of the visualization. As one example, passing a `legend` argument with a value of `false` to the function will hide the legend on the chart.
 
 [source,text,subs=+quotes]
 ----
@@ -104,16 +105,16 @@ filters
 ----
 
 
-[[canvas-expressions-only-fetch-and-manipulate-data]]
-=== Expressions Only Fetch and Manipulate Data
-So far you’ve only seen expressions as a way to produce visualizations, but that’s not really what’s happening. Expressions only produce data which is then used to create something, which in the case of Canvas, means rendering an element. An element can be a visualization, driven by data, but it can also be something much simpler, like a static image. Either way, an expression is used to produce an output that is used to render the desired result. For example, here’s an expression that shows a placekitten image:
+[[canvas-fetch-and-manipulate-data]]
+=== Fetch and manipulate data
+So far, you have only seen expressions as a way to produce visualizations, but that’s not really what’s happening. Expressions only produce data, which is then used to create something, which in the case of Canvas, means rendering an element. An element can be a visualization, driven by data, but it can also be something much simpler, like a static image. Either way, an expression is used to produce an output that is used to render the desired result. For example, here’s an expression that shows an image:
 
 [source,text]
 ----
 image dataurl=https://placekitten.com/160/160 mode="cover"
 ----
 
-But as mentioned, this doesn’t actually _render that image_, but instead it _produces some output that can be used to render that image_. That’s an important distinction, and you can see the actual output by adding in the render function and telling it to produce debug output, like so:
+But as mentioned, this doesn’t actually _render that image_, but instead it _produces some output that can be used to render that image_. That’s an important distinction, and you can see the actual output by adding in the render function and telling it to produce debug output. For example:
 
 [source,text]
 ----
@@ -121,7 +122,7 @@ image dataurl=https://placekitten.com/160/160 mode="cover"
 | render as=debug
 ----
 
-If you run that in Canvas, instead of seeing an image, you should see the following JSON output.
+The follow appears as JSON output:
 
 [source,JSON]
 ----
@@ -134,27 +135,34 @@ If you run that in Canvas, instead of seeing an image, you should see the follow
 
 NOTE: You may need to expand the element’s size to see the whole output.
 
-Canvas uses this output’s "data type" to map to a specific renderer and passes the entire output into it. It’s up to the image render function in this case to produce an image on the workpad’s page. In this case, the expression produces some JSON output, but expressions can also produce other, simpler data, like a string or a number. But usually more useful results tend to be JSON.
+Canvas uses this output’s data type to map to a specific renderer and passes the entire output into it. It’s up to the image render function to produce an image on the workpad’s page. In this case, the expression produces some JSON output, but expressions can also produce other, simpler data, like a string or a number. Typically, useful results use JSON.
 
-If this had been the output of the table, pie chart, or plot chart from the previous sections, it would have been much more complex, but the idea is the same; call some function, pass in the expression’s output, and render something on the page. As far as the expression, and the associated interpreter, is concerned, the expression produced an output and its job is done.
+Canvas uses the output to render an element, but other applications can use expressions to do pretty much anything. As stated previously, expressions simply execute functions, and the functions are all written in Javascript. That means if you can do something in Javascript, you can do it with an expression. 
 
-Canvas uses that output to render an element, but other applications can use expressions to do pretty much anything. As stated previously, expressions simply execute functions, and the functions are all written in Javascript. That means if you can do something in Javascript, you can do it with an expression. This can include, just to name a few things, sending emails or notifications, reading from or writing to a file, controlling devices with WebUSB or Web Bluetooth, consuming an external API, really just about anything. If your Javascript works in the environment where the code will run, such as in Node.js or in a browser, you can do it with an expression.
+This can include:
 
-[[canvas-expressions-composing-functions-with-subexpressions]]
-=== Composing Functions with Sub-Expressions
+* Sending emails
+* Sending notifications
+* Reading from a file
+* Writing to a file
+* Controlling devices with WebUSB or Web Bluetooth
+* Consuming external APIs
+
+If your Javascript works in the environment where the code will run, such as in Node.js or in a browser, you can do it with an expression.
+
+[[canvas-expressions-compose-functions-with-subexpressions]]
+=== Compose functions with sub-expressions
 
 You may have noticed another syntax in examples from other sections, namely expressions inside of curly brackets. These are called sub-expressions, and they can be used to provide a calculated value to another expression, instead of just a static one.
 
 A simple example of this is when you upload your own images to a Canvas workpad. That upload becomes an asset, and that asset can be retrieved using the `asset` function. Usually you’ll just do this from the UI, adding an image element to the page and uploading your image from the control in the sidebar, or picking an existing asset from there as well. In both cases, the system will consume that asset via the `asset` function, and you’ll end up with an expression similar to this:
-
-*[NOTE] The examples in this section can’t be copied and pasted directly, since the values used throughout will not exist in your workpad*
 
 [source,text]
 ----
 image dataurl={asset 3cb3ec3a-84d7-48fa-8709-274ad5cc9e0b}
 ----
 
-Sub-expressions are executed before the function that uses them is executed. In this case, `asset` will be run first, it will produce a value, the base64-encoded value of the image, and that value will be used as the value for the `dataurl` argument in the <<image_fn, image>> function. So at first pass, you’ll have something like this, after the asset function executes:
+Sub-expressions are executed before the function that uses them is executed. In this case, `asset` will be run first, it will produce a value, the base64-encoded value of the image and that value will be used as the value for the `dataurl` argument in the <<image_fn, image>> function. After the asset function executes, you will get the following output:
 
 [source,text]
 ----
@@ -173,11 +181,21 @@ demodata
 }
 ----
 
-Here, the expression to use for the value of the `condition` argument, `getCell price | gte 100`, runs first since it is nested deeper. This expressions retrieves the value from the “price” column in the first row of the datatable produced by `demodata` and piping the value to the `gte` function, comparing the value to `100` and returning `true` if it’s 100 or more and `false` if it’s under 100. That boolean value becomes the value for the `condition` argument and the output from the `then` expression is used as the output when `condition` is `true`, while the output from the "else" expression is used when `condition` is false. In both cases, a base64-encoded image will be returned and one of the two images will be displayed.
+NOTE: The examples in this section can’t be copy and pasted directly, since the values used throughout will not exist in your workpad.
 
-You might be wondering how the <<getCell_fn, getCell>> function in the sub-expression accessed the data from the <<demodata_fn, demoData>> function, even though <<demodata_fn, demoData>> was not being directly piped into <<getCell_fn, getCell>>. The answer is simple, but important to understand; when nested sub-expressions are executed, they automatically receive the same _context_, or output of the previous function, that its parent function receives. In this specific expression, demodata’s datatable is automatically provided to the nested expression’s `getCell` function, which allows that expression to pull out a value and compare it to another value. 
+Here, the expression to use for the value of the `condition` argument, `getCell price | gte 100`, runs first since it is nested deeper.
 
-The passing of the _context_ is automatic, and it happens no matter how deeply you nest your sub-expressions. To demonstrate this, let’s modify the expression slightly to compare the value of the "price" against multiple conditions using the <<all_fn, all>> function. 
+The expression does the following:
+* Retrieves the value from the *price* column in the first row of the `demodata` data table
+* Inputs the value to the `gte` function
+* Compares the value to `100`
+* Returns `true` if the value is 100 or greater, and `false` if the value is 100 or less
+
+That boolean value becomes the value for the `condition` argument. The output from the `then` expression is used as the output when `condition` is `true`. The output from the "else" expression is used when `condition` is false. In both cases, a base64-encoded image will be returned, and one of the two images will be displayed.
+
+You might be wondering how the <<getCell_fn, getCell>> function in the sub-expression accessed the data from the <<demodata_fn, demoData>> function, even though <<demodata_fn, demoData>> was not being directly piped into <<getCell_fn, getCell>>. The answer is simple, but important to understand. When nested sub-expressions are executed, they automatically receive the same _context_, or output of the previous function, that its parent function receives. In this specific expression, demodata’s data table is automatically provided to the nested expression’s `getCell` function, which allows that expression to pull out a value and compare it to another value. 
+
+The passing of the _context_ is automatic, and it happens no matter how deeply you nest your sub-expressions. To demonstrate this, let’s modify the expression slightly to compare the value of the price against multiple conditions using the <<all_fn, all>> function. 
 
 [source,text]
 ----
@@ -189,9 +207,9 @@ demodata
 }
 ----
 
-This time, `getCell price` is run, and the result is passed into the next function as the context.  Then, each sub expression of the <<all_fn, all>> function is run, with the context given to their parent, which in this case is the result of `getCell price`. If `all` of these subexpressions evaluate to true, then the `if` condition argument will be true. 
+This time, `getCell price` is run, and the result is passed into the next function as the context.  Then, each sub-expression of the <<all_fn, all>> function is run, with the context given to their parent, which in this case is the result of `getCell price`. If `all` of these sub-expressions evaluate to `true`, then the `if` condition argument will be true. 
 
-Sub-expressions can seem a little foreign, especially if you aren’t a developer, but they’re worth getting familiar with, since they provide a ton of power and flexibility. Since you can nest any expression you want, you can also use this behavior to mix data from multiple indices, or even data from multiple different sources. As an example, you could query an API for a value to use as part of the query provided to <<essql_fn, essql>>. 
+Sub-expressions can seem a little foreign, especially if you aren’t a developer, but they’re worth getting familiar with, since they provide a ton of power and flexibility. Since you can nest any expression you want, you can also use this behavior to mix data from multiple indices, or even data from multiple sources. As an example, you could query an API for a value to use as part of the query provided to <<essql_fn, essql>>. 
 
 This whole section is really just scratching the surface, but hopefully after reading it you at least understand how to read expressions and make sense of what they are doing. With a little practice, you’ll get the hang of mixing _context_ and sub-expressions together to turn any input into your desired output.
 
