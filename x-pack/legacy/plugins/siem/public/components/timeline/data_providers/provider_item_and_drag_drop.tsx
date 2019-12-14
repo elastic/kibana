@@ -27,7 +27,7 @@ import { ProviderItemAnd } from './provider_item_and';
 import * as i18n from './translations';
 
 const DropAndTargetDataProvidersContainer = styled(EuiFlexItem)`
-  margin: 0 8px;
+  margin: 0px 8px;
 `;
 
 DropAndTargetDataProvidersContainer.displayName = 'DropAndTargetDataProvidersContainer';
