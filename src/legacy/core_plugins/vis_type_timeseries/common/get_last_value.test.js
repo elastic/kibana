@@ -33,7 +33,12 @@ describe('getLastValue(data)', () => {
   });
 
   test('should returns 0 if second to last is not defined (default)', () => {
-    expect(getLastValue([[1, null], [2, null]])).toBe(0);
+    expect(
+      getLastValue([
+        [1, null],
+        [2, null],
+      ])
+    ).toBe(0);
   });
 
   test('should allows to override the default value', () => {

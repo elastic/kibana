@@ -12,34 +12,34 @@ import * as logstashMetrics from '../../../../../legacy/plugins/monitoring/serve
 import * as beatsMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/beats/metrics';
 import * as apmMetrics from '../../../../../legacy/plugins/monitoring/server/lib/metrics/apm/metrics';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const es = getService('legacyEs');
 
   const metricSets = [
     {
       metrics: esMetrics.metrics,
       name: 'es metrics',
-      indexTemplate: '.monitoring-es'
+      indexTemplate: '.monitoring-es',
     },
     {
       metrics: kibanaMetrics.metrics,
       name: 'kibana metrics',
-      indexTemplate: '.monitoring-kibana'
+      indexTemplate: '.monitoring-kibana',
     },
     {
       metrics: logstashMetrics.metrics,
       name: 'logstash metrics',
-      indexTemplate: '.monitoring-logstash'
+      indexTemplate: '.monitoring-logstash',
     },
     {
       metrics: beatsMetrics.metrics,
       name: 'beats metrics',
-      indexTemplate: '.monitoring-beats'
+      indexTemplate: '.monitoring-beats',
     },
     {
       metrics: apmMetrics.metrics,
       name: 'apm metrics',
-      indexTemplate: '.monitoring-beats' // apm uses the same as beats
+      indexTemplate: '.monitoring-beats', // apm uses the same as beats
     },
   ];
 
@@ -52,15 +52,20 @@ export default function ({ getService }) {
         mappings = get(template, [indexTemplate, 'mappings', 'properties']);
       });
 
-      describe(`for ${name}`, () => { // eslint-disable-line no-loop-func
+      describe(`for ${name}`, () => {
+        // eslint-disable-line no-loop-func
         for (const metric of Object.values(metrics)) {
           for (const field of metric.getFields()) {
-            it(`${field} should exist in the mappings`, () => { // eslint-disable-line no-loop-func
-              const propertyGetter = field.split('.').reduce((list, field) => {
-                list.push(field);
-                list.push('properties');
-                return list;
-              }, []).slice(0, -1); // Remove the trailing 'properties'
+            it(`${field} should exist in the mappings`, () => {
+              // eslint-disable-line no-loop-func
+              const propertyGetter = field
+                .split('.')
+                .reduce((list, field) => {
+                  list.push(field);
+                  list.push('properties');
+                  return list;
+                }, [])
+                .slice(0, -1); // Remove the trailing 'properties'
 
               const foundMapping = get(mappings, propertyGetter, null);
               expect(foundMapping).to.not.equal(null);

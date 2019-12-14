@@ -15,7 +15,7 @@ function getMockXPackInfoAPIResponse(license = {}, features = {}) {
   return Promise.resolve({
     build: {
       hash: '5927d85',
-      date: '2010-10-10T00:00:00.000Z'
+      date: '2010-10-10T00:00:00.000Z',
     },
     license: {
       uid: 'custom-uid',
@@ -23,21 +23,21 @@ function getMockXPackInfoAPIResponse(license = {}, features = {}) {
       mode: 'gold',
       status: 'active',
       expiry_date_in_millis: 1286575200000,
-      ...license
+      ...license,
     },
     features: {
       security: {
         description: 'Security for the Elastic Stack',
         available: true,
-        enabled: true
+        enabled: true,
       },
       watcher: {
         description: 'Alerting, Notification and Automation for the Elastic Stack',
         available: true,
-        enabled: false
+        enabled: false,
       },
-      ...features
-    }
+      ...features,
+    },
   });
 }
 
@@ -58,24 +58,26 @@ describe('XPackInfo', () => {
     sandbox.useFakeTimers(nowDate.getTime());
 
     mockElasticsearchCluster = {
-      callWithInternalUser: sinon.stub()
+      callWithInternalUser: sinon.stub(),
     };
 
     mockElasticsearchPlugin = {
-      getCluster: sinon.stub().returns(mockElasticsearchCluster)
+      getCluster: sinon.stub().returns(mockElasticsearchCluster),
     };
 
     mockServer = sinon.stub({
       plugins: { elasticsearch: mockElasticsearchPlugin },
       events: { on() {} },
-      log() { }
+      log() {},
     });
   });
 
   afterEach(() => sandbox.restore());
 
   it('correctly initializes its own properties with defaults.', () => {
-    mockElasticsearchPlugin.getCluster.throws(new Error('`getCluster` is called with unexpected source.'));
+    mockElasticsearchPlugin.getCluster.throws(
+      new Error('`getCluster` is called with unexpected source.')
+    );
     mockElasticsearchPlugin.getCluster.withArgs('data').returns(mockElasticsearchCluster);
 
     const xPackInfo = new XPackInfo(mockServer, { pollFrequencyInMillis: 1500 });
@@ -90,13 +92,15 @@ describe('XPackInfo', () => {
   });
 
   it('correctly initializes its own properties with custom cluster type.', () => {
-    mockElasticsearchPlugin.getCluster.throws(new Error('`getCluster` is called with unexpected source.'));
+    mockElasticsearchPlugin.getCluster.throws(
+      new Error('`getCluster` is called with unexpected source.')
+    );
     mockElasticsearchPlugin.getCluster.withArgs('monitoring').returns(mockElasticsearchCluster);
 
-    const xPackInfo = new XPackInfo(
-      mockServer,
-      { clusterSource: 'monitoring', pollFrequencyInMillis: 1234 }
-    );
+    const xPackInfo = new XPackInfo(mockServer, {
+      clusterSource: 'monitoring',
+      pollFrequencyInMillis: 1234,
+    });
 
     expect(xPackInfo.isAvailable()).to.be(false);
     expect(xPackInfo.license.isActive()).to.be(false);
@@ -118,15 +122,18 @@ describe('XPackInfo', () => {
 
     it('forces xpack info to be immediately updated with the data returned from Elasticsearch API.', async () => {
       sinon.assert.calledOnce(mockElasticsearchCluster.callWithInternalUser);
-      sinon.assert.calledWithExactly(mockElasticsearchCluster.callWithInternalUser, 'transport.request', {
-        method: 'GET',
-        path: '/_xpack'
-      });
+      sinon.assert.calledWithExactly(
+        mockElasticsearchCluster.callWithInternalUser,
+        'transport.request',
+        {
+          method: 'GET',
+          path: '/_xpack',
+        }
+      );
 
       expect(xPackInfo.isAvailable()).to.be(true);
       expect(xPackInfo.license.isActive()).to.be(true);
     });
-
 
     it('communicates X-Pack being unavailable', async () => {
       const badRequestError = new Error('Bad request');
@@ -170,7 +177,7 @@ describe('XPackInfo', () => {
         mockServer.log,
         ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-        ` for the [data] cluster. ${randomError}`
+          ` for the [data] cluster. ${randomError}`
       );
 
       const badRequestError = new Error('Bad request');
@@ -187,7 +194,7 @@ describe('XPackInfo', () => {
         mockServer.log,
         ['license', 'warning', 'xpack'],
         `License information from the X-Pack plugin could not be obtained from Elasticsearch` +
-        ` for the [data] cluster. ${badRequestError}`
+          ` for the [data] cluster. ${badRequestError}`
       );
 
       mockElasticsearchCluster.callWithInternalUser.returns(getMockXPackInfoAPIResponse());
@@ -201,8 +208,9 @@ describe('XPackInfo', () => {
       sinon.assert.calledWithExactly(
         mockServer.log,
         ['license', 'info', 'xpack'],
-        sinon.match('Imported license information from Elasticsearch for the [data] cluster: ' +
-          'mode: gold | status: active | expiry date: '
+        sinon.match(
+          'Imported license information from Elasticsearch for the [data] cluster: ' +
+            'mode: gold | status: active | expiry date: '
         )
       );
       mockServer.log.resetHistory();
@@ -222,8 +230,9 @@ describe('XPackInfo', () => {
       sinon.assert.calledWithExactly(
         mockServer.log,
         ['license', 'info', 'xpack'],
-        sinon.match('Imported changed license information from Elasticsearch for the [data] cluster: ' +
-          'mode: platinum | status: expired | expiry date: '
+        sinon.match(
+          'Imported changed license information from Elasticsearch for the [data] cluster: ' +
+            'mode: platinum | status: expired | expiry date: '
         )
       );
     });
@@ -282,9 +291,7 @@ describe('XPackInfo', () => {
 
       expect(xPackInfo.license.getUid()).to.be('new-custom-uid');
 
-      mockElasticsearchCluster.callWithInternalUser.returns(
-        Promise.reject(new Error('Uh oh'))
-      );
+      mockElasticsearchCluster.callWithInternalUser.returns(Promise.reject(new Error('Uh oh')));
       await xPackInfo.refreshNow();
 
       expect(xPackInfo.license.getUid()).to.be(undefined);
@@ -314,9 +321,7 @@ describe('XPackInfo', () => {
 
       expect(xPackInfo.license.isActive()).to.be(true);
 
-      mockElasticsearchCluster.callWithInternalUser.returns(
-        Promise.reject(new Error('Uh oh'))
-      );
+      mockElasticsearchCluster.callWithInternalUser.returns(Promise.reject(new Error('Uh oh')));
       await xPackInfo.refreshNow();
 
       expect(xPackInfo.license.isActive()).to.be(false);
@@ -332,9 +337,7 @@ describe('XPackInfo', () => {
 
       expect(xPackInfo.license.getExpiryDateInMillis()).to.be(10203040);
 
-      mockElasticsearchCluster.callWithInternalUser.returns(
-        Promise.reject(new Error('Uh oh'))
-      );
+      mockElasticsearchCluster.callWithInternalUser.returns(Promise.reject(new Error('Uh oh')));
       await xPackInfo.refreshNow();
 
       expect(xPackInfo.license.getExpiryDateInMillis()).to.be(undefined);
@@ -350,9 +353,7 @@ describe('XPackInfo', () => {
 
       expect(xPackInfo.license.getType()).to.be('basic');
 
-      mockElasticsearchCluster.callWithInternalUser.returns(
-        Promise.reject(new Error('Uh oh'))
-      );
+      mockElasticsearchCluster.callWithInternalUser.returns(Promise.reject(new Error('Uh oh')));
       await xPackInfo.refreshNow();
 
       expect(xPackInfo.license.getType()).to.be(undefined);
@@ -385,12 +386,15 @@ describe('XPackInfo', () => {
     let xPackInfo;
     beforeEach(async () => {
       mockElasticsearchCluster.callWithInternalUser.returns(
-        getMockXPackInfoAPIResponse({}, {
-          feature: {
-            available: false,
-            enabled: true
+        getMockXPackInfoAPIResponse(
+          {},
+          {
+            feature: {
+              available: false,
+              enabled: true,
+            },
           }
-        })
+        )
       );
 
       xPackInfo = new XPackInfo(mockServer, { pollFrequencyInMillis: 1500 });
@@ -428,38 +432,38 @@ describe('XPackInfo', () => {
       expect(xPackInfo.toJSON().features.security).to.be(undefined);
       expect(xPackInfo.toJSON().features.watcher).to.be(undefined);
 
-      securityFeature.registerLicenseCheckResultsGenerator((info) => {
+      securityFeature.registerLicenseCheckResultsGenerator(info => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
-          someCustomValue: 100500
+          someCustomValue: 100500,
         };
       });
 
       expect(xPackInfo.toJSON().features.security).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(xPackInfo.toJSON().features.watcher).to.be(undefined);
 
-      watcherFeature.registerLicenseCheckResultsGenerator((info) => {
+      watcherFeature.registerLicenseCheckResultsGenerator(info => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
-          someAnotherCustomValue: 500100
+          someAnotherCustomValue: 500100,
         };
       });
 
       expect(xPackInfo.toJSON().features.security).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(xPackInfo.toJSON().features.watcher).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someAnotherCustomValue: 500100
+        someAnotherCustomValue: 500100,
       });
 
       mockElasticsearchCluster.callWithInternalUser.returns(
@@ -470,12 +474,12 @@ describe('XPackInfo', () => {
       expect(xPackInfo.toJSON().features.security).to.eql({
         isXPackInfo: true,
         license: 'platinum',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(xPackInfo.toJSON().features.watcher).to.eql({
         isXPackInfo: true,
         license: 'platinum',
-        someAnotherCustomValue: 500100
+        someAnotherCustomValue: 500100,
       });
     });
 
@@ -486,38 +490,38 @@ describe('XPackInfo', () => {
       expect(securityFeature.getLicenseCheckResults()).to.be(undefined);
       expect(watcherFeature.getLicenseCheckResults()).to.be(undefined);
 
-      securityFeature.registerLicenseCheckResultsGenerator((info) => {
+      securityFeature.registerLicenseCheckResultsGenerator(info => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
-          someCustomValue: 100500
+          someCustomValue: 100500,
         };
       });
 
       expect(securityFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(watcherFeature.getLicenseCheckResults()).to.be(undefined);
 
-      watcherFeature.registerLicenseCheckResultsGenerator((info) => {
+      watcherFeature.registerLicenseCheckResultsGenerator(info => {
         return {
           isXPackInfo: info instanceof XPackInfo,
           license: info.license.getType(),
-          someAnotherCustomValue: 500100
+          someAnotherCustomValue: 500100,
         };
       });
 
       expect(securityFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(watcherFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'gold',
-        someAnotherCustomValue: 500100
+        someAnotherCustomValue: 500100,
       });
 
       mockElasticsearchCluster.callWithInternalUser.returns(
@@ -528,12 +532,12 @@ describe('XPackInfo', () => {
       expect(securityFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'platinum',
-        someCustomValue: 100500
+        someCustomValue: 100500,
       });
       expect(watcherFeature.getLicenseCheckResults()).to.eql({
         isXPackInfo: true,
         license: 'platinum',
-        someAnotherCustomValue: 500100
+        someAnotherCustomValue: 500100,
       });
     });
   });
@@ -543,14 +547,16 @@ describe('XPackInfo', () => {
     const xPackInfo = new XPackInfo(mockServer, { pollFrequencyInMillis: 1500 });
     await xPackInfo.refreshNow();
 
-    expect(xPackInfo.getSignature()).to.be(getSignature({
-      license: {
-        type: 'gold',
-        isActive: true,
-        expiryDateInMillis: 1286575200000
-      },
-      features: {}
-    }));
+    expect(xPackInfo.getSignature()).to.be(
+      getSignature({
+        license: {
+          type: 'gold',
+          isActive: true,
+          expiryDateInMillis: 1286575200000,
+        },
+        features: {},
+      })
+    );
 
     mockElasticsearchCluster.callWithInternalUser.returns(
       getMockXPackInfoAPIResponse({ type: 'platinum', expiry_date_in_millis: nowDate.getTime() })
@@ -562,9 +568,9 @@ describe('XPackInfo', () => {
       license: {
         type: 'platinum',
         isActive: true,
-        expiryDateInMillis: nowDate.getTime()
+        expiryDateInMillis: nowDate.getTime(),
       },
-      features: {}
+      features: {},
     });
     expect(xPackInfo.getSignature()).to.be(expectedSignature);
 
