@@ -59,6 +59,14 @@ class DocumentationService {
     return `${this.esDocsBase}/dynamic-field-mapping.html`;
   }
 
+  public getMappingSourceFieldLink() {
+    return `${this.esDocsBase}/mapping-source-field.html`;
+  }
+
+  public getDisablingMappingSourceFieldLink() {
+    return `${this.esDocsBase}/mapping-source-field.html#disable-source-field`;
+  }
+
   public getNullValueLink() {
     return `${this.esDocsBase}/null-value.html`;
   }

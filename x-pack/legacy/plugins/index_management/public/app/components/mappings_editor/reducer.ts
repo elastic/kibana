@@ -24,6 +24,12 @@ export interface MappingsConfiguration {
   dynamic_date_formats: string[];
 }
 
+export interface SourceField {
+  enabled?: boolean;
+  includes?: string[];
+  excludes?: string[];
+}
+
 export interface MappingsFields {
   [key: string]: any;
 }
@@ -40,6 +46,7 @@ interface DocumentFieldsState {
 export interface State {
   isValid: boolean | undefined;
   configuration: OnFormUpdateArg<MappingsConfiguration>;
+  sourceField: OnFormUpdateArg<SourceField>;
   documentFields: DocumentFieldsState;
   fields: NormalizedFields;
   fieldForm?: OnFormUpdateArg<any>;
@@ -51,6 +58,7 @@ export interface State {
 
 export type Action =
   | { type: 'configuration.update'; value: OnFormUpdateArg<MappingsConfiguration> }
+  | { type: 'sourceField.update'; value: OnFormUpdateArg<SourceField> }
   | { type: 'fieldForm.update'; value: OnFormUpdateArg<any> }
   | { type: 'field.add'; value: Field }
   | { type: 'field.remove'; value: string }
@@ -220,6 +228,17 @@ export const reducer = (state: State, action: Action): State => {
       const nextState = {
         ...state,
         configuration: action.value,
+      };
+
+      const isValid = isStateValid(nextState);
+      nextState.isValid = isValid;
+
+      return nextState;
+    }
+    case 'sourceField.update': {
+      const nextState = {
+        ...state,
+        sourceField: action.value,
       };
 
       const isValid = isStateValid(nextState);
