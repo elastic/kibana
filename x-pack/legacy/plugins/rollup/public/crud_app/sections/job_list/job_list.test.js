@@ -8,6 +8,7 @@ import { registerTestBed } from '../../../../../../../test_utils';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
+jest.mock('ui/new_platform');
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
   breadcrumbs: { set: () => {} },
