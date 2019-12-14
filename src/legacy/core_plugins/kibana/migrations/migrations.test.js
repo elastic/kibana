@@ -490,7 +490,6 @@ Object {
   "type": "visualization",
 }
 `);
-
     });
 
     it('extracts index patterns from controls', () => {
@@ -534,7 +533,6 @@ Object {
   "type": "visualization",
 }
 `);
-
     });
 
     it('skips extracting savedSearchId when missing', () => {
@@ -1629,7 +1627,6 @@ Object {
   "type": "dashboard",
 }
 `);
-
     });
 
     test('skips error when panelsJSON is not a string', () => {
@@ -1967,7 +1964,6 @@ Object {
   "type": "search",
 }
 `);
-
     });
   });
 

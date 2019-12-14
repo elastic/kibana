@@ -141,7 +141,6 @@ it('rewrites url imports', async () => {
     },
   }).build();
 
-
   expect(readFileSync(targetPath, 'utf8').replace(/(\/\*# sourceMappingURL=).*( \*\/)/, '$1...$2'))
     .toMatchInlineSnapshot(`
     "/* 1 */

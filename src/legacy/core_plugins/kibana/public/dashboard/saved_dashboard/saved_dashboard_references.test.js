@@ -61,7 +61,6 @@ Object {
   ],
 }
 `);
-
   });
 
   test('fails when "type" attribute is missing from a panel', () => {
@@ -144,7 +143,6 @@ Object {
   "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\",\\"type\\":\\"visualization\\"}]",
 }
 `);
-
   });
 
   test('skips when panelsJSON is missing', () => {

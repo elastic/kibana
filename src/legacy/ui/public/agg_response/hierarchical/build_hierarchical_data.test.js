@@ -77,7 +77,6 @@ describe('buildHierarchicalData convertTable', () => {
           { id: 'col-5-agg_1', name: 'Average bytes' },
         ],
         rows: [
-
           {
             'col-0-agg_2': 'png',
             'col-2-agg_3': 'IT',
@@ -174,7 +173,6 @@ describe('buildHierarchicalData convertTable', () => {
             'col-3-agg_1': 8293,
             'col-5-agg_1': 3029,
           },
-
         ],
       };
       dimensions = {

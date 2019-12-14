@@ -123,7 +123,6 @@ export const histogramBucketAgg = new BucketAggType<IBucketHistogramAggConfig>({
             if (e.name === 'AbortError') return;
             toastNotifications.addWarning(
               i18n.translate('common.ui.aggTypes.histogram.missingMaxMinValuesWarning', {
-
                 defaultMessage:
                   'Unable to retrieve max and min values to auto-scale histogram buckets. This may lead to poor visualization performance.',
               })
