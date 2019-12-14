@@ -32,7 +32,7 @@ interface Props {
 
 export const CompletionType = ({ field }: Props) => {
   return (
-    <AdvancedSettingsWrapper>
+    <AdvancedSettingsWrapper hasBasicSettings={false}>
       <EditFieldSection>
         <AnalyzersParameter field={field} />
 

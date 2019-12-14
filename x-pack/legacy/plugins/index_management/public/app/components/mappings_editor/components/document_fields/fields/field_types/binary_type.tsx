@@ -10,7 +10,7 @@ import { EditFieldSection, AdvancedSettingsWrapper } from '../edit_field';
 
 export const BinaryType = () => {
   return (
-    <AdvancedSettingsWrapper>
+    <AdvancedSettingsWrapper hasBasicSettings={false}>
       <EditFieldSection>
         <DocValuesParameter configPath="doc_values_binary" />
 
