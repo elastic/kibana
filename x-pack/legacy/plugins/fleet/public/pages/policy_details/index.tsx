@@ -21,7 +21,9 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
+import { Datasource } from '../../../common/types/domain_data';
 import { Loading, ConnectedLink } from '../../components';
+import { useLibs, sendRequest } from '../../hooks';
 import {
   useGetPolicy,
   PolicyRefreshContext,
@@ -50,6 +52,7 @@ export const PolicyDetailsPage: React.FC<Props> = ({
     params: { policyId },
   },
 }) => {
+  const { framework, httpClient } = useLibs();
   const { policy, isLoading, error, refreshPolicy } = useGetPolicy(policyId);
   const {
     result: agentStatus,
@@ -58,6 +61,10 @@ export const PolicyDetailsPage: React.FC<Props> = ({
     refreshAgentStatus,
   } = useGetAgentStatus(policyId);
 
+  // Unassign data sources states
+  const [isUnassignLoading, setIsUnassignLoading] = useState<boolean>(false);
+  const [selectedDatasources, setSelectedDatasources] = useState<string[]>([]);
+
   // Flyout states
   const [isEditPolicyFlyoutOpen, setIsEditPolicyFlyoutOpen] = useState<boolean>(false);
   const [isDatasourcesFlyoutOpen, setIsDatasourcesFlyoutOpen] = useState<boolean>(false);
@@ -65,6 +72,41 @@ export const PolicyDetailsPage: React.FC<Props> = ({
   const refreshData = () => {
     refreshPolicy();
     refreshAgentStatus();
+  };
+
+  const unassignSelectedDatasources = async () => {
+    setIsUnassignLoading(true);
+    const { error: unassignError } = await sendRequest(httpClient, {
+      path: `/api/ingest/policies/${policyId}/removeDatasources`,
+      method: 'post',
+      body: {
+        datasources: selectedDatasources,
+      },
+    });
+    setIsUnassignLoading(false);
+    if (unassignError) {
+      framework.notifications.addDanger(
+        i18n.translate('xpack.fleet.policyDetails.unassignDatasources.errorNotificationTitle', {
+          defaultMessage:
+            'Error unassigning {count, plural, one {data source} other {# data sources}}',
+          values: {
+            count: selectedDatasources.length,
+          },
+        })
+      );
+    } else {
+      framework.notifications.addSuccess(
+        i18n.translate('xpack.fleet.policyDetails.unassignDatasources.successNotificationTitle', {
+          defaultMessage:
+            'Successfully unassigned {count, plural, one {data source} other {# data sources}}',
+          values: {
+            count: selectedDatasources.length,
+          },
+        })
+      );
+      setSelectedDatasources([]);
+      refreshData();
+    }
   };
 
   if (isLoading) {
@@ -335,11 +377,34 @@ export const PolicyDetailsPage: React.FC<Props> = ({
                   />
                 </EuiButton>,
               ],
+              toolsLeft: selectedDatasources.length
+                ? [
+                    <EuiButton
+                      color="danger"
+                      disabled={isUnassignLoading}
+                      isLoading={isUnassignLoading}
+                      onClick={unassignSelectedDatasources}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.unassignDatasourcesButtonLabel"
+                        defaultMessage="Unassign {count, plural, one {# data source} other {# data sources}}"
+                        values={{
+                          count: selectedDatasources.length,
+                        }}
+                      />
+                    </EuiButton>,
+                  ]
+                : null,
               box: {
                 incremental: true,
                 schema: true,
               },
             }}
+            selection={{
+              onSelectionChange: (selection: Datasource[]) =>
+                setSelectedDatasources(selection.map(ds => ds.id)),
+            }}
+            isSelectable={true}
           />
         </Layout>
       </AgentStatusRefreshContext.Provider>
