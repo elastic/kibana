@@ -22,7 +22,6 @@ timeout(time: 120, unit: 'MINUTES') {
         buildArchives('to-archive')
 
         dir('to-archive') {
-          def uuid = UUID.randomUUID().toString()
           def now = new Date()
           def date = now.format("yyyyMMdd-HHmmss")
 
@@ -41,7 +40,7 @@ timeout(time: 120, unit: 'MINUTES') {
             return [
               filename: filename,
               checksum: filename + '.sha512',
-              url: "https://storage.cloud.google.com/kibana-ci-es-snapshots/${destination}/${filename}".toString(),
+              url: "https://storage.googleapis.com/kibana-ci-es-snapshots/${destination}/${filename}".toString(),
               version: parts[1],
               platform: parts.size() >= 5 ? parts[3] : '',
               architecture: parts.size() >= 5 ? parts[4].split('\\.')[0] : '',
@@ -52,7 +51,6 @@ timeout(time: 120, unit: 'MINUTES') {
           sh 'find * -exec bash -c "shasum -a 512 {} > {}.sha512" \\;'
 
           def manifest = [
-            id: uuid,
             bucket: "kibana-ci-es-snapshots/${destination}".toString(),
             branch: BRANCH,
             sha: GIT_COMMIT,
@@ -75,6 +73,7 @@ timeout(time: 120, unit: 'MINUTES') {
 }
 
 def checkoutEs(branch) {
+  // TODO wrap in a new retryWithDelay(15, 8){}
   return checkout([
     $class: 'GitSCM',
     branches: [[name: branch]],

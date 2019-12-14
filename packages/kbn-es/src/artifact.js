@@ -95,8 +95,9 @@ exports.Artifact = class Artifact {
   static async getSnapshot(license, version, log) {
     const urlVersion = `${encodeURIComponent(version)}-SNAPSHOT`;
 
-    const customSnapshotArtifactSpec = resolveCustomSnapshotUrl(urlVersion, license);
+    const customSnapshotArtifactSpec = await resolveCustomSnapshotUrl(urlVersion, license);
     if (customSnapshotArtifactSpec) {
+      console.log(customSnapshotArtifactSpec);
       return new Artifact(customSnapshotArtifactSpec, log);
     }
 

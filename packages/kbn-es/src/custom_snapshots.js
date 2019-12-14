@@ -16,16 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+const AbortController = require('abort-controller');
+const fetch = require('node-fetch');
 const { basename } = require('path');
+
+const { createCliError } = require('./errors');
 
 function isVersionFlag(a) {
   return a.startsWith('--version');
 }
 
+function shouldUseUnverifiedSnapshot() {
+  return !!process.env.KBN_ES_SNAPSHOT_USE_UNVERIFIED;
+}
+
 function getCustomSnapshotUrl() {
   // force use of manually created snapshots until ReindexPutMappings fix
   if (!process.env.KBN_ES_SNAPSHOT_URL && !process.argv.some(isVersionFlag)) {
+    return;
     return 'https://storage.googleapis.com/kibana-ci-tmp-artifacts/{name}-{version}-{os}-x86_64.{ext}';
   }
 
@@ -34,10 +42,67 @@ function getCustomSnapshotUrl() {
   }
 }
 
-function resolveCustomSnapshotUrl(urlVersion, license) {
+// TODO all of this stuff will probably move somewhere else
+async function fetchSnapshotManifest(url) {
+  const abc = new AbortController();
+  const resp = await fetch(url, { signal: abc.signal });
+  const json = await resp.text();
+
+  return { abc, resp, json };
+}
+
+async function getSnapshotManifest(urlVersion, license) {
+  const desiredVersion = urlVersion.replace('-SNAPSHOT', '');
+  const desiredLicense = license === 'oss' ? 'oss' : 'default';
+
+  let { abc, resp, json } = await fetchSnapshotManifest(
+    `https://storage.googleapis.com/kibana-ci-es-snapshots/${desiredVersion}/manifest-latest${
+      shouldUseUnverifiedSnapshot() ? '' : '-verified'
+    }.json`
+  );
+  if (!shouldUseUnverifiedSnapshot() && resp.status === 404) {
+    ({ abc, resp, json } = await fetchSnapshotManifest(
+      `https://storage.googleapis.com/kibana-ci-es-snapshots-permanent/${desiredVersion}/manifest.json`
+    ));
+  }
+
+  if (resp.status === 404) {
+    abc.abort();
+    throw createCliError(`Snapshots for ${desiredVersion} are not available`);
+  }
+
+  if (!resp.ok) {
+    abc.abort();
+    throw new Error(`Unable to read artifact info: ${resp.statusText}\n  ${json}`);
+  }
+
+  const manifest = JSON.parse(json);
+
+  const platform = process.platform === 'win32' ? 'windows' : process.platform;
+  const archive = manifest.archives.find(
+    archive =>
+      archive.version === desiredVersion &&
+      archive.platform === platform &&
+      archive.license === desiredLicense
+  );
+
+  return {
+    url: archive.url,
+    checksumUrl: archive.url + '.sha512',
+    checksumType: 'sha512',
+    filename: archive.filename,
+  };
+}
+
+async function resolveCustomSnapshotUrl(urlVersion, license) {
   const customSnapshotUrl = getCustomSnapshotUrl();
 
   if (!customSnapshotUrl) {
+    const manifest = getSnapshotManifest(urlVersion, license);
+    if (manifest) {
+      return manifest;
+    }
+
     return;
   }
 
