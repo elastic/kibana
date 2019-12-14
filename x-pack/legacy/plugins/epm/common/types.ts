@@ -9,6 +9,7 @@ import {
   SavedObjectAttributes,
   SavedObjectReference,
 } from '../../../../../src/core/server';
+import { Asset } from '../../ingest/server/libs/types';
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -156,3 +157,16 @@ export type NotInstalled<T = {}> = T & {
 };
 
 export type AssetReference = Pick<SavedObjectReference, 'id' | 'type'>;
+
+export interface DatasourcePayload {
+  pkgkey: string;
+  datasourceName: string;
+  datasets: Dataset[];
+}
+
+export interface CreateFakeDatasource {
+  pkg: RegistryPackage;
+  datasourceName: string;
+  datasets: Dataset[];
+  assets: Asset[] | undefined;
+}

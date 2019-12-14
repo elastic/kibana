@@ -8,7 +8,13 @@ import fetch from 'node-fetch';
 import { SavedObjectsClientContract } from 'src/core/server/';
 import { Asset, Datasource, InputType } from '../../../ingest/server/libs/types';
 import { SAVED_OBJECT_TYPE_DATASOURCES } from '../../common/constants';
-import { AssetReference, InstallationStatus, RegistryPackage } from '../../common/types';
+import {
+  AssetReference,
+  InstallationStatus,
+  RegistryPackage,
+  CreateFakeDatasource,
+  Dataset,
+} from '../../common/types';
 import { CallESAsCurrentUser } from '../lib/cluster_access';
 import { installILMPolicy, policyExists } from '../lib/elasticsearch/ilm/install';
 import { installPipelines } from '../lib/elasticsearch/ingest_pipeline/ingest_pipelines';
@@ -19,18 +25,19 @@ import { Request } from '../types';
 
 export async function createDatasource(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgkey: string;
   callCluster: CallESAsCurrentUser;
   request: Request;
+  pkgkey: string;
+  datasourceName: string;
+  datasets: Dataset[];
 }) {
-  const { savedObjectsClient, pkgkey, callCluster, request } = options;
+  const { savedObjectsClient, callCluster, pkgkey, datasets, datasourceName, request } = options;
   const packageInfo = await getPackageInfo({ savedObjectsClient, pkgkey });
-
   if (packageInfo.status !== InstallationStatus.installed) {
     throw new PackageNotInstalledError(pkgkey);
   }
-
-  const toSave = await installPipelines({ pkgkey, callCluster });
+  const datasetNames = datasets.map(d => d.name);
+  const toSave = await installPipelines({ pkgkey, datasetNames, callCluster });
 
   // TODO: This should be moved out of the initial data source creation in the end
   await baseSetup(callCluster);
@@ -41,6 +48,8 @@ export async function createDatasource(options: {
     saveDatasourceReferences({
       savedObjectsClient,
       pkg,
+      datasourceName,
+      datasets,
       toSave,
       request,
     }),
@@ -65,10 +74,12 @@ async function baseSetup(callCluster: CallESAsCurrentUser) {
 async function saveDatasourceReferences(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkg: RegistryPackage;
+  datasets: Dataset[];
+  datasourceName: string;
   toSave: AssetReference[];
   request: Request;
 }) {
-  const { savedObjectsClient, pkg, toSave, request } = options;
+  const { savedObjectsClient, pkg, toSave, datasets, datasourceName, request } = options;
   const savedDatasource = await getDatasource({ savedObjectsClient, pkg });
   const savedAssets = savedDatasource?.package.assets;
   const assetsReducer = (current: Asset[] = [], pending: Asset) => {
@@ -78,7 +89,12 @@ async function saveDatasourceReferences(options: {
   };
 
   const toInstall = (toSave as Asset[]).reduce(assetsReducer, savedAssets);
-  const datasource: Datasource = createFakeDatasource(pkg, toInstall);
+  const datasource: Datasource = createFakeDatasource({
+    pkg,
+    datasourceName,
+    datasets,
+    assets: toInstall,
+  });
   // ideally we'd call .create from /x-pack/legacy/plugins/ingest/server/libs/datasources.ts#L22
   // or something similar, but it's a class not an object so many pieces are missing
   // we'd still need `user` from the request object, but that's not terrible
@@ -100,10 +116,30 @@ async function getDatasource(options: {
   return datasource?.attributes;
 }
 
-function createFakeDatasource(pkg: RegistryPackage, assets: Asset[] = []): Datasource {
+function createFakeDatasource({
+  pkg,
+  datasourceName,
+  datasets,
+  assets = [],
+}: CreateFakeDatasource): Datasource {
+  const streams = datasets.map(dataset => ({
+    id: dataset.name,
+    input: {
+      type: InputType.Log,
+      config: { config: 'values', go: 'here' },
+      ingest_pipelines: ['string'],
+      id: 'string',
+      index_template: 'string',
+      ilm_policy: 'string',
+      fields: [{}],
+    },
+    config: { config: 'values', go: 'here' },
+    output_id: 'output_id',
+    processors: ['string'],
+  }));
   return {
     id: Registry.pkgToPkgKey(pkg),
-    name: 'name',
+    name: datasourceName,
     read_alias: 'read_alias',
     package: {
       name: pkg.name,
@@ -112,23 +148,7 @@ function createFakeDatasource(pkg: RegistryPackage, assets: Asset[] = []): Datas
       title: pkg.title,
       assets,
     },
-    streams: [
-      {
-        id: 'string',
-        input: {
-          type: InputType.Log,
-          config: { config: 'values', go: 'here' },
-          ingest_pipelines: ['string'],
-          id: 'string',
-          index_template: 'string',
-          ilm_policy: 'string',
-          fields: [{}],
-        },
-        config: { config: 'values', go: 'here' },
-        output_id: 'output_id',
-        processors: ['string'],
-      },
-    ],
+    streams,
   };
 }
 
@@ -150,7 +170,7 @@ async function ingestDatasourceCreate({
   const apiPath = '/api/ingest/datasources';
   const url = `${origin}${basePath}${apiPath}`;
   const body = { datasource };
-
+  delete request.headers['transfer-encoding'];
   return fetch(url, {
     method: 'post',
     body: JSON.stringify(body),
