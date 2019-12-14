@@ -27,7 +27,7 @@ export const DocumentFieldsHeader = () => {
           values={{
             docsLink: (
               <EuiLink href={documentationService.getMappingTypesLink()} target="_blank">
-                {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsDocumentionLink', {
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink', {
                   defaultMessage: 'Learn more.',
                 })}
               </EuiLink>
