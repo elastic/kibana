@@ -137,7 +137,7 @@ describe('ML - job utils', () => {
             field_name: 'bytes',
             partition_field_name: 'clientip',
             detector_description: 'High bytes client IP',
-          }, // eslint-disable-line max-len
+          },
           {
             function: 'freq_rare',
             by_field_name: 'uri',

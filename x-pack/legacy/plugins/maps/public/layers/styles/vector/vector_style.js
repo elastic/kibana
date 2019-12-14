@@ -80,7 +80,7 @@ export class VectorStyle extends AbstractStyle {
       this._descriptor.properties[VECTOR_STYLES.ICON_SIZE],
       VECTOR_STYLES.ICON_SIZE
     );
-    // eslint-disable-next-line max-len
+
     this._iconOrientationProperty = this._makeOrientationProperty(
       this._descriptor.properties[VECTOR_STYLES.ICON_ORIENTATION],
       VECTOR_STYLES.ICON_ORIENTATION

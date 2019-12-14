@@ -54,7 +54,6 @@ export default function({ getService, getPageObjects }) {
       const indicesAll = await indicesList.getIndicesAll();
 
       const tableData = [
-        /*eslint-disable max-len*/
         {
           name: 'many-0006_gkuqbjonkjmg',
           status: 'Health: green',
