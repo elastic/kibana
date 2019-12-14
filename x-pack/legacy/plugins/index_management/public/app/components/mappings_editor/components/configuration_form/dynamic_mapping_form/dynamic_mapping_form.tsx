@@ -9,12 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiLink } from '@elastic/eui';
 
-import { useForm, getUseField, Form, FormDataProvider } from '../../shared_imports';
-import { FormRow, Field } from '../../shared_imports';
-import { DYNAMIC_SETTING_OPTIONS, ALL_DATE_FORMAT_OPTIONS } from '../../constants';
-import { Types, useDispatch } from '../../mappings_state';
-import { schema } from './form.schema';
-import { documentationService } from '../../../../services/documentation';
+import { documentationService } from '../../../../../services/documentation';
+import {
+  useForm,
+  getUseField,
+  Form,
+  FormDataProvider,
+  FormRow,
+  Field,
+} from '../../../shared_imports';
+import { DYNAMIC_SETTING_OPTIONS, ALL_DATE_FORMAT_OPTIONS } from '../../../constants';
+import { Types, useDispatch } from '../../../mappings_state';
+import { dynamicMappingSchema } from './dynamic_mapping_schema';
 
 type MappingsConfiguration = Types['MappingsConfiguration'];
 
@@ -24,8 +30,8 @@ interface Props {
 
 const UseField = getUseField({ component: Field });
 
-export const DynamicMappingConfig = React.memo(({ defaultValue }: Props) => {
-  const { form } = useForm<MappingsConfiguration>({ schema, defaultValue });
+export const DynamicMappingForm = React.memo(({ defaultValue }: Props) => {
+  const { form } = useForm<MappingsConfiguration>({ schema: dynamicMappingSchema, defaultValue });
   const dispatch = useDispatch();
 
   useEffect(() => {

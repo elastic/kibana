@@ -5,12 +5,17 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
-import { MappingsConfiguration } from '../../reducer';
+import {
+  FormSchema,
+  FIELD_TYPES,
+  VALIDATION_TYPES,
+  fieldValidators,
+} from '../../../shared_imports';
+import { MappingsConfiguration } from '../../../reducer';
 
 const { containsCharsField } = fieldValidators;
 
-export const schema: FormSchema<MappingsConfiguration> = {
+export const dynamicMappingSchema: FormSchema<MappingsConfiguration> = {
   dynamic: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.dynamicFieldLabel', {
       defaultMessage: 'Dynamic field',
@@ -72,3 +77,5 @@ export const schema: FormSchema<MappingsConfiguration> = {
     ],
   },
 };
+
+export const CONFIGURATION_FIELDS = Object.keys(dynamicMappingSchema);

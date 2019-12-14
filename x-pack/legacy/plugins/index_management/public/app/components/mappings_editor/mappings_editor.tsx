@@ -25,42 +25,43 @@ interface Props {
   indexSettings?: IndexSettings;
 }
 
-export const MappingsEditor = React.memo(({ onUpdate, defaultValue, indexSettings }: Props) => {
-  const configurationDefaultValue = useMemo(
-    () =>
-      (defaultValue === undefined
-        ? {}
-        : pick(defaultValue, CONFIGURATION_FIELDS)) as Types['MappingsConfiguration'],
-    [defaultValue]
-  );
+export const MappingsEditor = React.memo(
+  ({ onUpdate, defaultValue = {}, indexSettings }: Props) => {
+    const { configurationDefaultValue, sourceFieldDefaultValue, fieldsDefaultValue } = useMemo(
+      () => ({
+        configurationDefaultValue: pick(
+          defaultValue,
+          CONFIGURATION_FIELDS
+        ) as Types['MappingsConfiguration'],
+        sourceFieldDefaultValue: defaultValue._source || {},
+        fieldsDefaultValue: defaultValue.properties || {},
+      }),
+      [defaultValue]
+    );
 
-  const fieldsDefaultValue =
-    defaultValue === undefined || defaultValue.properties === undefined
-      ? {}
-      : defaultValue.properties;
+    return (
+      <IndexSettingsProvider indexSettings={indexSettings}>
+        <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
+          {({ editor: editorType, getProperties }) => {
+            const editor =
+              editorType === 'json' ? (
+                <DocumentFieldsJsonEditor defaultValue={getProperties()} />
+              ) : (
+                <DocumentFields />
+              );
 
-  return (
-    <IndexSettingsProvider indexSettings={indexSettings}>
-      <MappingsState onUpdate={onUpdate} defaultValue={{ fields: fieldsDefaultValue }}>
-        {({ editor: editorType, getProperties }) => {
-          const editor =
-            editorType === 'json' ? (
-              <DocumentFieldsJsonEditor defaultValue={getProperties()} />
-            ) : (
-              <DocumentFields />
+            return (
+              <div className="mappingsEditor">
+                <ConfigurationForm defaultValue={configurationDefaultValue} />
+                <EuiSpacer />
+                <DocumentFieldsHeader />
+                <EuiSpacer />
+                {editor}
+              </div>
             );
-
-          return (
-            <div className="mappingsEditor">
-              <ConfigurationForm defaultValue={configurationDefaultValue} />
-              <EuiSpacer />
-              <DocumentFieldsHeader />
-              <EuiSpacer />
-              {editor}
-            </div>
-          );
-        }}
-      </MappingsState>
-    </IndexSettingsProvider>
-  );
-});
+          }}
+        </MappingsState>
+      </IndexSettingsProvider>
+    );
+  }
+);

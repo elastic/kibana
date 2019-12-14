@@ -12,19 +12,22 @@ import {
   MappingsConfiguration,
   MappingsFields,
   State,
+  SourceField,
   Dispatch,
 } from './reducer';
 import { Field, FieldsEditor } from './types';
 import { normalize, deNormalize, canUseMappingsEditor } from './lib';
 
-type Mappings = MappingsConfiguration & {
-  properties: MappingsFields;
-};
+type Mappings = MappingsConfiguration &
+  SourceField & {
+    properties: MappingsFields;
+  };
 
 export interface Types {
   Mappings: Mappings;
   MappingsConfiguration: MappingsConfiguration;
   MappingsFields: MappingsFields;
+  SourceField: SourceField;
 }
 
 export interface OnUpdateHandlerArg {
@@ -57,6 +60,13 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
   const initialState: State = {
     isValid: undefined,
     configuration: {
+      data: {
+        raw: {},
+        format: () => ({} as Mappings),
+      },
+      validate: () => Promise.resolve(true),
+    },
+    sourceField: {
       data: {
         raw: {},
         format: () => ({} as Mappings),
@@ -113,6 +123,9 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
 
         return {
           ...nextState.configuration.data.format(),
+          _source: {
+            ...nextState.sourceField.data.format(),
+          },
           properties:
             // Pull the mappings properties from the current editor
             nextState.documentFields.editor === 'json'

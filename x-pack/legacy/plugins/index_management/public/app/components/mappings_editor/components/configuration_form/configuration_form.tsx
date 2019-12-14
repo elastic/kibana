@@ -5,19 +5,28 @@
  */
 import React from 'react';
 
+import { EuiSpacer } from '@elastic/eui';
+
 import { Types } from '../../mappings_state';
-import { DynamicMappingConfig } from './dynamic_mapping_config';
+import { DynamicMappingForm } from './dynamic_mapping_form';
+import { SourceFieldForm } from './source_field_form';
 
 type MappingsConfiguration = Types['MappingsConfiguration'];
+type SourceField = Types['SourceField'];
 
 interface Props {
-  defaultValue?: MappingsConfiguration;
+  configurationDefaultValue?: MappingsConfiguration;
+  sourceFieldDefaultValue?: SourceField;
 }
 
-export const ConfigurationForm = React.memo(({ defaultValue }: Props) => {
-  return (
-    <>
-      <DynamicMappingConfig defaultValue={defaultValue} />
-    </>
-  );
-});
+export const ConfigurationForm = React.memo(
+  ({ configurationDefaultValue, sourceFieldDefaultValue }: Props) => {
+    return (
+      <>
+        <DynamicMappingForm defaultValue={configurationDefaultValue} />
+        <EuiSpacer size="m" />
+        <SourceFieldForm defaultValue={sourceFieldDefaultValue} />
+      </>
+    );
+  }
+);
