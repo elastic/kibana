@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 import { uniq } from 'lodash';
-import { APMPluginContract } from '../../../../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../../../../plugins/apm/server';
 import { getESClient, ESClient } from '../helpers/es_client';
 import { getNextTransactionSamples } from './get_next_transaction_samples';
 import { getServiceConnections } from './get_service_connections';

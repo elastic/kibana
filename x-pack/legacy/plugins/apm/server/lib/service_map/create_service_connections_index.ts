@@ -5,7 +5,7 @@
  */
 
 import { Server } from 'hapi';
-import { APMPluginContract } from '../../../../../../plugins/apm/server/plugin';
+import { APMPluginContract } from '../../../../../../plugins/apm/server';
 import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
 import { CallCluster } from '../../../../../../../src/legacy/core_plugins/elasticsearch';
 import { TIMESTAMP } from '../../../common/elasticsearch_fieldnames';
@@ -32,9 +32,12 @@ export async function createServiceConnectionsIndex(server: Server) {
         );
       }
     }
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error('Could not create APM Service Connections:', e.message);
+  } catch (error) {
+    server.log(
+      ['apm', 'error'],
+      `Could not create APM Service Connections: ${error.message}`
+    );
+    throw error;
   }
 }
 
