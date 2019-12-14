@@ -6,8 +6,23 @@
 import { FlatObject } from '../../../../common/types/helpers';
 
 export interface RestAPIAdapter {
-  get<ResponseData>(url: string, query?: FlatObject<object>): Promise<ResponseData>;
-  post<ResponseData>(url: string, body?: { [key: string]: any }): Promise<ResponseData>;
+  get<ResponseData>(
+    url: string,
+    config?: {
+      query?: FlatObject<object>;
+    }
+  ): Promise<ResponseData>;
+  post<ResponseData>(
+    url: string,
+    config: {
+      body: { [key: string]: any };
+    }
+  ): Promise<ResponseData>;
   delete<T>(url: string): Promise<T>;
-  put<ResponseData>(url: string, body?: any): Promise<ResponseData>;
+  put<ResponseData>(
+    url: string,
+    config: {
+      body: { [key: string]: any };
+    }
+  ): Promise<ResponseData>;
 }

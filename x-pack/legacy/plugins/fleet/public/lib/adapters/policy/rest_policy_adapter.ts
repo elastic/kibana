@@ -31,9 +31,11 @@ export class RestPolicyAdapter extends PolicyAdapter {
   public async getAll(page: number, perPage: number, kuery?: string) {
     try {
       return await this.REST.get<ReturnTypeList<Policy>>(`/api/ingest/policies`, {
-        page,
-        perPage,
-        kuery: kuery !== '' ? kuery : undefined,
+        query: {
+          page,
+          perPage,
+          kuery: kuery !== '' ? kuery : undefined,
+        },
       });
     } catch (e) {
       return {
@@ -47,11 +49,13 @@ export class RestPolicyAdapter extends PolicyAdapter {
   }
 
   public async create(policy: Partial<Policy>) {
-    return await this.REST.post<ReturnTypeCreate<Policy>>(`/api/ingest/policies`, policy);
+    return await this.REST.post<ReturnTypeCreate<Policy>>(`/api/ingest/policies`, { body: policy });
   }
 
   public async update(id: string, policy: Partial<Policy>) {
-    return await this.REST.put<ReturnTypeUpdate<Policy>>(`/api/ingest/policies/${id}`, policy);
+    return await this.REST.put<ReturnTypeUpdate<Policy>>(`/api/ingest/policies/${id}`, {
+      body: policy,
+    });
   }
 
   public async getAgentStatus(policyId: string) {
