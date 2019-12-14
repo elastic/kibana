@@ -8,24 +8,34 @@ import { Server } from 'hapi';
 import { uniq } from 'lodash';
 import { APMPluginContract } from '../../../../../../plugins/apm/server/plugin';
 import { getESClient, ESClient } from '../helpers/es_client';
-import { Span } from '../../../typings/es_schemas/ui/Span';
 import { getNextTransactionSamples } from './get_next_transaction_samples';
 import { getServiceConnections } from './get_service_connections';
 import { mapTraceToBulkServiceConnection } from './map_trace_to_bulk_service_connection';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import { getInternalSavedObjectsClient } from '../helpers/saved_objects_client';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
+import {
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  SPAN_ID,
+  TIMESTAMP,
+  TRANSACTION_ID,
+  PARENT_ID,
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  DESTINATION_ADDRESS
+} from '../../../common/elasticsearch_fieldnames';
 
 interface MappedDocument {
-  transaction?: boolean;
-  id: string; // span or transaction id
-  parent?: string; // parent.id
-  environment?: string; // service.environment
-  destination?: string; // destination.address
-  span_type?: Span['span']['type'];
-  span_subtype?: Span['span']['subtype'];
-  timestamp: string;
-  service_name: Span['service']['name'];
+  [TIMESTAMP]: string;
+  [TRANSACTION_ID]: string;
+  [PARENT_ID]?: string;
+  [SPAN_ID]?: string;
+  [SPAN_TYPE]: string;
+  [SPAN_SUBTYPE]?: string;
+  [SERVICE_NAME]: string;
+  [SERVICE_ENVIRONMENT]?: string;
+  [DESTINATION_ADDRESS]: string;
 }
 
 export interface TraceConnection {
@@ -72,19 +82,22 @@ async function indexLatestConnections(
     const servicesInTrace = uniq(
       traceConnections.map(
         serviceConnection =>
-          `${serviceConnection.caller.service_name}/${serviceConnection.caller
-            .environment || ENVIRONMENT_NOT_DEFINED}`
+          `${serviceConnection.caller[SERVICE_NAME]}/${serviceConnection.caller[
+            SERVICE_ENVIRONMENT
+          ] || ENVIRONMENT_NOT_DEFINED}`
       )
     );
     return traceConnections.flatMap(
       mapTraceToBulkServiceConnection(apmIndices, servicesInTrace)
     );
   });
-  await esClient.bulk({
-    body: bulkIndexConnectionDocs
-      .map(bulkObject => JSON.stringify(bulkObject))
-      .join('\n')
-  });
+  if (bulkIndexConnectionDocs.length > 0) {
+    await esClient.bulk({
+      body: bulkIndexConnectionDocs
+        .map(bulkObject => JSON.stringify(bulkObject))
+        .join('\n')
+    });
+  }
   return await indexLatestConnections(
     apmIndices,
     esClient,

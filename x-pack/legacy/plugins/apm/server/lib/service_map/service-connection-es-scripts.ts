@@ -4,108 +4,117 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const initServiceConnsScript = {
+  lang: 'painless',
+  source: `
+    state.mappedDocs = new HashMap();
+    String[] docKeys = new String[] {
+      '@timestamp',
+      'transaction.id',
+      'parent.id',
+      'span.id',
+      'span.type',
+      'span.subtype',
+      'service.name',
+      'service.environment',
+      'destination.address'
+    };
+    state.docKeys = docKeys;
+  `
+};
+
 export const mapServiceConnsScript = {
   lang: 'painless',
   source: `
-    def s = new HashMap();
+    def mappedDoc = new HashMap();
+    for (docKey in state.docKeys) {
+      if (!doc[docKey].empty) {
+        mappedDoc[docKey] = doc[docKey].value;
+      }
+    }
 
+    if(!state.mappedDocs.containsKey(mappedDoc['parent.id'])) {
+      state.mappedDocs.put(mappedDoc['parent.id'], new ArrayList());
+    }
+
+    def id;
     if (!doc['span.id'].empty) {
-      s.id = doc['span.id'].value
+      id = doc['span.id'].value;
     } else {
-      s.id = doc['transaction.id'].value;
-      s.transaction = true;
-    }
-    if (!doc['parent.id'].empty) {
-      s.parent = doc['parent.id'].value;
-    }
-    if (!doc['service.environment'].empty) {
-      s.environment = doc['service.environment'].value;
+      id = doc['transaction.id'].value;
     }
 
-    if (!doc['destination.address'].empty) {
-      s.destination = doc['destination.address'].value;
-    }
-
-    if (!doc['span.type'].empty) {
-      s.span_type = doc['span.type'].value;
-    }
-
-    if (!doc['span.subtype'].empty) {
-      s.span_subtype = doc['span.subtype'].value;
-    }
-
-    s.timestamp = doc['@timestamp'].value;
-    s.service_name = doc['service.name'].value;
-    if(!state.spans.containsKey(s.parent)) {
-      state.spans.put(s.parent, new ArrayList())
-    }
-
-    if (s.parent != s.id) {
-      state.spans[s.parent].add(s)
+    if (mappedDoc['parent.id'] != id) {
+      state.mappedDocs[mappedDoc['parent.id']].add(mappedDoc);
     }
   `
+};
+
+export const combineServiceConnsScript = {
+  lang: 'painless',
+  source: `return state.mappedDocs`
 };
 
 export const reduceServiceConnsScript = {
   lang: 'painless',
   source: `
-    void extractChildren(def caller, def spans, def upstream, def conns, def count) {
-      // TODO: simplify this
-      if (spans.containsKey(caller.id)) {
-        for (s in spans[caller.id]) {
-          if (caller.span_type == 'external') {
-            upstream.add(caller.service_name + "/" + caller.environment);
-            def conn = new HashMap();
-            conn.caller = caller;
-            conn.callee = s;
-            conn.upstream = new ArrayList(upstream);
-            conns.add(conn);
-            extractChildren(s, spans, upstream, conns, count);
+    void extractChildren(def caller, def mappedDocs, def upstream, def serviceConnections) {
+      def callerId;
+      if (caller.containsKey('span.id')) {
+        callerId = caller['span.id'];
+      } else {
+        callerId = caller['transaction.id'];
+      }
+      if (mappedDocs.containsKey(callerId)) {
+        for (mappedDoc in mappedDocs[callerId]) {
+          if (caller['span.type'] == 'external') {
+            upstream.add(caller['service.name'] + "/" + caller['service.environment']);
+            def serviceConnection = new HashMap();
+            serviceConnection.caller = caller;
+            serviceConnection.callee = mappedDoc;
+            serviceConnection.upstream = new ArrayList(upstream);
+            serviceConnections.add(serviceConnection);
+            extractChildren(mappedDoc, mappedDocs, upstream, serviceConnections);
             upstream.remove(upstream.size() - 1);
           } else {
-            extractChildren(s, spans, upstream, conns, count);
+            extractChildren(mappedDoc, mappedDocs, upstream, serviceConnections);
           }
         }
       } else {
         // no connection found
-        def conn = new HashMap();
-        conn.caller = caller;
-        conn.upstream = new ArrayList(upstream);
-        conn.upstream.add(caller.service_name + "/" + caller.environment);
-        conns.add(conn);
+        def serviceConnection = new HashMap();
+        serviceConnection.caller = caller;
+        serviceConnection.upstream = new ArrayList(upstream);
+        serviceConnection.upstream.add(caller['service.name'] + "/" + caller['service.environment']);
+        serviceConnections.add(serviceConnection);
       }
     }
 
-    def conns = new HashSet();
-    def spans = new HashMap();
+
+    def serviceConnections = new ArrayList();
+    def mappedDocs = new HashMap();
 
     // merge results from shards
     for (state in states) {
       for (s in state.entrySet()) {
         def v = s.getValue();
         def k = s.getKey();
-        if (!spans.containsKey(k)) {
-          spans[k] = v;
+        if (!mappedDocs.containsKey(k)) {
+          mappedDocs[k] = v;
         } else {
           for (p in v) {
-            spans[k].add(p);
+            mappedDocs[k].add(p);
           }
         }
       }
     }
 
-    if (spans.containsKey(null) && spans[null].size() > 0) {
-      def node = spans[null][0];
+    if (mappedDocs.containsKey(null) && mappedDocs[null].size() > 0) {
+      def node = mappedDocs[null][0];
       def upstream = new ArrayList();
-      extractChildren(node, spans, upstream, conns, 0);
-      return new ArrayList(conns)
+      extractChildren(node, mappedDocs, upstream, serviceConnections);
+      return serviceConnections;
     }
-
     return [];
   `
-};
-
-export const combineServiceConnsScript = {
-  lang: 'painless',
-  source: `return state.spans`
 };

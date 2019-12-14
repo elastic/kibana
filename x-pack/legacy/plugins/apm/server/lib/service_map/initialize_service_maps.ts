@@ -14,6 +14,11 @@ import {
 } from '../../../common/service_map_constants';
 import { createServiceConnectionsIndex } from './create_service_connections_index';
 
+function isLessThan1Hour(unixTimestamp = 0) {
+  const hourMilliseconds = 60 * 60 * 1000;
+  return Date.now() - unixTimestamp < hourMilliseconds;
+}
+
 export async function initializeServiceMaps(server: Server) {
   await createServiceConnectionsIndex(server);
 
@@ -29,12 +34,12 @@ export async function initializeServiceMaps(server: Server) {
           return {
             async run() {
               const { state } = taskInstance;
-
               const { latestTransactionTime } = await runServiceMapTask(
                 server,
-                state.latestTransactionTime
+                isLessThan1Hour(state.latestTransactionTime)
+                  ? state.latestTransactionTime
+                  : 'now-1h'
               );
-
               return { state: { latestTransactionTime } };
             }
           };

@@ -6,14 +6,14 @@
 
 import { ESClient } from '../helpers/es_client';
 import {
+  initServiceConnsScript,
   mapServiceConnsScript,
   combineServiceConnsScript,
   reduceServiceConnsScript
 } from './service-connection-es-scripts';
 import {
-  SPAN_ID,
   TRACE_ID,
-  TRANSACTION_TYPE
+  PROCESSOR_EVENT
 } from '../../../common/elasticsearch_fieldnames';
 
 export async function getServiceConnections({
@@ -25,21 +25,24 @@ export async function getServiceConnections({
   traceIds: string[];
   esClient: ESClient;
 }) {
-  const traceIdFilters = traceIds.map(traceId => ({
-    term: { [TRACE_ID]: traceId }
-  }));
   const params = {
     index: targetApmIndices,
     body: {
       size: 0,
       query: {
         bool: {
-          should: [
-            { exists: { field: SPAN_ID } },
-            { exists: { field: TRANSACTION_TYPE } },
-            ...traceIdFilters
-          ],
-          minimum_should_match: 2
+          filter: [
+            {
+              terms: {
+                [PROCESSOR_EVENT]: ['transaction', 'span']
+              }
+            },
+            {
+              terms: {
+                [TRACE_ID]: traceIds
+              }
+            }
+          ]
         }
       },
       aggs: {
@@ -47,12 +50,13 @@ export async function getServiceConnections({
           terms: {
             field: TRACE_ID,
             order: { _key: 'asc' as const },
-            size: traceIds.length
+            size: traceIds.length,
+            execution_hint: 'map'
           },
           aggs: {
             connections: {
               scripted_metric: {
-                init_script: 'state.spans = new HashMap();',
+                init_script: initServiceConnsScript,
                 map_script: mapServiceConnsScript,
                 combine_script: combineServiceConnsScript,
                 reduce_script: reduceServiceConnsScript

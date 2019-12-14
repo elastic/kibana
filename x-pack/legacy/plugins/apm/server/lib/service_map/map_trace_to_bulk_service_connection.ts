@@ -5,7 +5,14 @@
  */
 
 import { TraceConnection } from './run_service_map_task';
-import { TIMESTAMP } from '../../../common/elasticsearch_fieldnames';
+import {
+  TIMESTAMP,
+  SERVICE_NAME,
+  SERVICE_ENVIRONMENT,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  DESTINATION_ADDRESS
+} from '../../../common/elasticsearch_fieldnames';
 import { ApmIndicesConfig } from '../settings/apm_indices/get_apm_indices';
 
 export function mapTraceToBulkServiceConnection(
@@ -20,24 +27,24 @@ export function mapTraceToBulkServiceConnection(
     };
 
     const source = {
-      [TIMESTAMP]: traceConnection.caller.timestamp,
+      [TIMESTAMP]: traceConnection.caller[TIMESTAMP],
       service: {
-        name: traceConnection.caller.service_name,
-        environment: traceConnection.caller.environment
+        name: traceConnection.caller[SERVICE_NAME],
+        environment: traceConnection.caller[SERVICE_ENVIRONMENT]
       },
       callee: {
-        name: traceConnection.callee?.service_name,
-        environment: traceConnection.callee?.environment
+        name: traceConnection.callee?.[SERVICE_NAME],
+        environment: traceConnection.callee?.[SERVICE_ENVIRONMENT]
       },
       connection: {
         upstream: {
           list: traceConnection.upstream
         },
         in_trace: servicesInTrace,
-        type: traceConnection.caller.span_type,
-        subtype: traceConnection.caller.span_subtype
+        type: traceConnection.caller[SPAN_TYPE],
+        subtype: traceConnection.caller[SPAN_SUBTYPE]
       },
-      destination: { address: traceConnection.caller.destination }
+      destination: { address: traceConnection.caller[DESTINATION_ADDRESS] }
     };
     return [indexAction, source];
   };
