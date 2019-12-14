@@ -23,7 +23,7 @@ import { IndexedArray } from '../../../../legacy/ui/public/indexed_array';
 const capabilitiesMock = {
   management: {
     kibana: { sampleFeature2: false },
-  }
+  },
 };
 
 describe('ManagementSection', () => {
@@ -64,7 +64,11 @@ describe('ManagementSection', () => {
     });
 
     it('assigns all options', () => {
-      const section = new ManagementSection('kibana', { description: 'test', url: 'foobar' }, capabilitiesMock);
+      const section = new ManagementSection(
+        'kibana',
+        { description: 'test', url: 'foobar' },
+        capabilitiesMock
+      );
       expect(section.description).toBe('test');
       expect(section.url).toBe('foobar');
     });
