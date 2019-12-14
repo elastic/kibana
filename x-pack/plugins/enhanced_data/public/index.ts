@@ -12,3 +12,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export { EnhancedDataPublicPlugin as Plugin };
+
+export { IAsyncSearchRequest, IAsyncSearchOptions } from './search/types';

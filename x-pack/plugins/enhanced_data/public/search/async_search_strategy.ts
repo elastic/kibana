@@ -10,25 +10,13 @@ import {
   IKibanaSearchResponse,
   ISearchContext,
   ISearchGeneric,
-  ISearchOptions,
   ISearchStrategy,
-  ISyncSearchRequest,
   SYNC_SEARCH_STRATEGY,
   TSearchStrategyProvider,
 } from '../../../../../src/plugins/data/public';
+import { IAsyncSearchRequest, IAsyncSearchOptions } from './types';
 
 export const ASYNC_SEARCH_STRATEGY = 'ASYNC_SEARCH_STRATEGY';
-
-export interface IAsyncSearchOptions extends ISearchOptions {
-  /**
-   * The number of milliseconds to wait between receiving a response and sending another request
-   */
-  pollInterval?: number;
-}
-
-export interface IAsyncSearchRequest extends ISyncSearchRequest {
-  id?: string;
-}
 
 declare module '../../../../../src/plugins/data/public' {
   export interface IRequestTypesMap {
@@ -47,13 +35,13 @@ export const asyncSearchStrategyProvider: TSearchStrategyProvider<typeof ASYNC_S
     ): Observable<IKibanaSearchResponse> => {
       const { serverStrategy } = request;
 
-      return search(request, options, 'SYNC_SEARCH_STRATEGY').pipe(
+      return search(request, options, SYNC_SEARCH_STRATEGY).pipe(
         expand(({ id }) => {
           return of(null).pipe(
             // Delay by the given poll interval
             delay(pollInterval),
             // Send future requests using just the ID from the response
-            mergeMap(() => search({ id, serverStrategy }, options, 'SYNC_SEARCH_STRATEGY'))
+            mergeMap(() => search({ id, serverStrategy }, options, SYNC_SEARCH_STRATEGY))
           );
         }),
         // Continue polling until the response indicates it is complete
