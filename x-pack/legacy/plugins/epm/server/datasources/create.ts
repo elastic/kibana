@@ -99,7 +99,7 @@ async function saveDatasourceReferences(options: {
   // or something similar, but it's a class not an object so many pieces are missing
   // we'd still need `user` from the request object, but that's not terrible
   // lacking that we make another http request to Ingest
-  await ingestDatasourceCreate({ request, datasource });;
+  await ingestDatasourceCreate({ request, datasource });
 
   return toInstall;
 }
@@ -170,7 +170,7 @@ async function ingestDatasourceCreate({
   const apiPath = '/api/ingest/datasources';
   const url = `${origin}${basePath}${apiPath}`;
   const body = { datasource };
-
+  delete request.headers['transfer-encoding'];
   return fetch(url, {
     method: 'post',
     body: JSON.stringify(body),
