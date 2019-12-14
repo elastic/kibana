@@ -109,7 +109,7 @@ export class EsQueryParser {
       ) {
         throw new Error(
           i18n.translate('visTypeVega.esQueryParser.legacyContextCanBeTrueErrorMessage', {
-            // eslint-disable-next-line max-len
+
             defaultMessage:
               'Legacy {legacyContext} can either be {trueValue} (ignores time range picker), or it can be the name of the time field, e.g. {timestampParam}',
             values: {
