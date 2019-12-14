@@ -32,5 +32,4 @@ export const updateTableLimit = actionCreator<{
 export const updateHostsSort = actionCreator<{
   sort: HostsSortField;
   hostsType: HostsType;
-  tableType: HostsTableType;
 }>('UPDATE_HOSTS_SORT');

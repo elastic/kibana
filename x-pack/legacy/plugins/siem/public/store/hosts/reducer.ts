@@ -126,14 +126,14 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       },
     },
   }))
-  .case(updateHostsSort, (state, { sort, hostsType, tableType }) => ({
+  .case(updateHostsSort, (state, { sort, hostsType }) => ({
     ...state,
     [hostsType]: {
       ...state[hostsType],
       queries: {
         ...state[hostsType].queries,
-        [tableType]: {
-          ...state[hostsType].queries[tableType],
+        [HostsTableType.hosts]: {
+          ...state[hostsType].queries[HostsTableType.hosts],
           direction: sort.direction,
           sortField: sort.field,
         },
