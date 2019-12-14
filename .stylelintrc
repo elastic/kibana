@@ -1,5 +1,10 @@
 {
-  "extends": [
-    "stylelint-config-recommended",
-  ]
+  "extends": ["stylelint-config-standard", "stylelint-config-prettier"],
+  "rules": {
+    "font-family-no-missing-generic-family-keyword": null,
+    "no-empty-source": null,
+    "no-descending-specificity": null,
+    "declaration-empty-line-before": null,
+    "declaration-block-trailing-semicolon": null
+  }
 }
