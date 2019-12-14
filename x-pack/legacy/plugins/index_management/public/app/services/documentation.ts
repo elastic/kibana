@@ -52,6 +52,10 @@ class DocumentationService {
     return `${this.esDocsBase}${typeDefinition.documentation[uri]}`;
   };
 
+  public getMappingTypesLink() {
+    return `${this.esDocsBase}/mapping-types.html`;
+  }
+
   public getNullValueLink() {
     return `${this.esDocsBase}/null-value.html`;
   }

@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiText, EuiSpacer, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { documentationService } from '../../../../services/documentation';
 
-export const DocumentFieldsHeaders = () => {
+export const DocumentFieldsHeader = () => {
   return (
     <>
       <EuiTitle size="s">
@@ -19,9 +21,19 @@ export const DocumentFieldsHeaders = () => {
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsDescription', {
-          defaultMessage: 'Define which fields the documents of your index will contain.',
-        })}
+        <FormattedMessage
+          id="xpack.idxMgmt.mappingsEditor.documentFieldsDescription"
+          defaultMessage="Define the fields you expect your indexed documents to have. {docsLink}"
+          values={{
+            docsLink: (
+              <EuiLink href={documentationService.getMappingTypesLink()} target="_blank">
+                {i18n.translate('xpack.idxMgmt.mappingsEditor.documentFieldsDocumentationLink', {
+                  defaultMessage: 'Learn more.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
       </EuiText>
     </>
   );
