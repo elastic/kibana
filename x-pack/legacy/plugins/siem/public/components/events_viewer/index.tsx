@@ -228,7 +228,6 @@ export const StatefulEventsViewer = connect(makeMapStateToProps, {
   createTimeline: timelineActions.createTimeline,
   deleteEventQuery: inputsActions.deleteOneQuery,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
-  updateSort: timelineActions.updateSort,
   removeColumn: timelineActions.removeColumn,
   upsertColumn: timelineActions.upsertColumn,
   setSearchBarFilter: inputsActions.setSearchBarFilter,
