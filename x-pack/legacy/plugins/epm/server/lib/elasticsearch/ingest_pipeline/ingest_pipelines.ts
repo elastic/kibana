@@ -36,11 +36,15 @@ export function rewriteIngestPipeline(
 export async function installPipelines({
   callCluster,
   pkgkey,
+  datasetNames,
 }: {
   callCluster: CallESAsCurrentUser;
   pkgkey: string;
+  datasetNames: string[];
 }) {
-  const paths = await Registry.getArchiveInfo(pkgkey, isPipeline);
+  const paths = await Registry.getArchiveInfo(pkgkey, (entry: Registry.ArchiveEntry) =>
+    isDatasetPipeline(entry, datasetNames)
+  );
   const installationPromises = paths.map(path => installPipeline({ callCluster, path }));
 
   return Promise.all(installationPromises);
@@ -86,8 +90,16 @@ async function installPipeline({
 }
 
 const isDirectory = ({ path }: Registry.ArchiveEntry) => path.endsWith('/');
-const isPipeline = ({ path }: Registry.ArchiveEntry) =>
-  !isDirectory({ path }) && Registry.pathParts(path).type === ElasticsearchAssetType.ingestPipeline;
+const isDatasetPipeline = ({ path }: Registry.ArchiveEntry, datasetNames: string[]) => {
+  // TODO: better way to get particular assets
+  const pathParts = Registry.pathParts(path);
+  return (
+    !isDirectory({ path }) &&
+    pathParts.type === ElasticsearchAssetType.ingestPipeline &&
+    pathParts.dataset !== undefined &&
+    datasetNames.includes(pathParts.dataset)
+  );
+};
 
 const getExtension = (path: string): string => {
   const splitPath = path.split('.');

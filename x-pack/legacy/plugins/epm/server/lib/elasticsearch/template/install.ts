@@ -22,14 +22,16 @@ const isFields = (path: string) => {
  * in one datasets, they are merged together into 1 and then converted to a template
  * The template is currently loaded with the pkgey-package-dataset
  */
-export async function installTemplates(pkg: RegistryPackage, callCluster: CallESAsCurrentUser) {
+export async function installTemplates(
+  pkg: RegistryPackage,
+  datasets: Dataset[],
+  callCluster: CallESAsCurrentUser
+) {
   // If no datasets exist in this package, no templates have to be installed.
   if (!pkg.datasets) return;
-
-  return pkg.datasets.map(async dataset => {
+  return datasets.map(async dataset => {
     // Fetch all assset entries for this dataset
     const assetEntries = await getAssetsData(pkg, isFields, dataset.name);
-
     // Merge all the fields of a dataset together and create an Elasticsearch index template
     let fields: Field[] = [];
     for (const entry of assetEntries) {

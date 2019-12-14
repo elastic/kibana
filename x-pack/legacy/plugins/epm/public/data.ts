@@ -21,6 +21,7 @@ import {
   PackageInfo,
   PackageList,
   PackagesGroupedByStatus,
+  DatasourcePayload,
 } from '../common/types';
 
 const defaultClient: HttpHandler = (path: string, options?: HttpFetchOptions) =>
@@ -83,7 +84,8 @@ export async function getFileByPath(filePath: string): Promise<string> {
   return _fetch(path);
 }
 
-export async function installDatasource(pkgkey: string): Promise<AssetReference[]> {
-  const path = getInstallDatasourcePath(pkgkey);
-  return _fetch(path);
+export async function installDatasource(datasource: DatasourcePayload): Promise<AssetReference[]> {
+  const path = getInstallDatasourcePath(datasource.pkgkey);
+  const body = JSON.stringify(datasource);
+  return _fetch(path, { body, method: 'POST' });
 }
