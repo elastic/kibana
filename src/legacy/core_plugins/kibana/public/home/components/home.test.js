@@ -63,6 +63,9 @@ describe('home', () => {
         setItem: sinon.mock(),
       },
       urlBasePath: 'goober',
+      onOptInSeen() {
+        return false;
+      },
     };
   });
 

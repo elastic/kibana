@@ -23,7 +23,7 @@
  * in Elasticsearch.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiLink,
   EuiTextColor,
@@ -45,6 +45,7 @@ interface Props {
   onSkip: () => void;
   onOptInSeen: () => any;
   showTelemetryDisclaimer: boolean;
+  currentOptInStatus: boolean;
 }
 
 /**
@@ -83,6 +84,40 @@ export class Welcome extends React.Component<Props> {
   componentWillUnmount() {
     document.removeEventListener('keydown', this.hideOnEsc);
   }
+
+  private renderTelemetryEnabledOrDisabledText = () => {
+    if (this.props.currentOptInStatus) {
+      return (
+        <Fragment>
+          <FormattedMessage
+            id="kbn.home.dataManagementDisableCollection"
+            defaultMessage="To stop collection, "
+          />
+          <EuiLink href="#/management/kibana/settings">
+            <FormattedMessage
+              id="kbn.home.dataManagementDisableCollectionLink"
+              defaultMessage="disable usage data here."
+            />
+          </EuiLink>
+        </Fragment>
+      );
+    } else {
+      return (
+        <Fragment>
+          <FormattedMessage
+            id="kbn.home.dataManagementEnableCollection"
+            defaultMessage=" To start collection, "
+          />
+          <EuiLink href="#/management/kibana/settings">
+            <FormattedMessage
+              id="kbn.home.dataManagementEnableCollectionLink"
+              defaultMessage="enable usage data here."
+            />
+          </EuiLink>
+        </Fragment>
+      );
+    }
+  };
 
   render() {
     const { urlBasePath, showTelemetryDisclaimer } = this.props;
@@ -137,16 +172,7 @@ export class Welcome extends React.Component<Props> {
                         defaultMessage="Privacy Statement."
                       />
                     </EuiLink>
-                    <FormattedMessage
-                      id="kbn.home.dataManagementDisableCollection"
-                      defaultMessage=" To stop collection, "
-                    />
-                    <EuiLink href="#/management/kibana/settings">
-                      <FormattedMessage
-                        id="kbn.home.dataManagementDisableCollectionLink"
-                        defaultMessage="disable usage data here."
-                      />
-                    </EuiLink>
+                    {this.renderTelemetryEnabledOrDisabledText()}
                   </EuiTextColor>
                 )}
                 <EuiSpacer size="xs" />

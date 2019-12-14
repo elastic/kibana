@@ -54,6 +54,7 @@ export class Home extends Component {
     const showTelemetryDisclaimer = getServices().getInjected(
       'telemetryNotifyUserAboutOptInDefault'
     );
+    const currentOptInStatus = getServices().getInjected('telemetryOptedIn');
 
     this.state = {
       // If welcome is enabled, we wait for loading to complete
@@ -64,6 +65,7 @@ export class Home extends Component {
       isNewKibanaInstance: false,
       isWelcomeEnabled,
       showTelemetryDisclaimer,
+      currentOptInStatus,
     };
   }
 
@@ -230,6 +232,7 @@ export class Home extends Component {
         urlBasePath={this.props.urlBasePath}
         showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
         onOptInSeen={this.props.onOptInSeen}
+        currentOptInStatus={this.state.currentOptInStatus}
       />
     );
   }
