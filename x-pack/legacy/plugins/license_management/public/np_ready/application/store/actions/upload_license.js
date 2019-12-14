@@ -64,7 +64,6 @@ const dispatchFromResponse = async (
     const first = i18n.translate(
       'xpack.licenseMgmt.uploadLicense.problemWithUploadedLicenseDescription',
       {
-
         defaultMessage:
           'Some functionality will be lost if you replace your {currentLicenseType} license with a {newLicenseType} license. Review the list of features below.',
         values: {

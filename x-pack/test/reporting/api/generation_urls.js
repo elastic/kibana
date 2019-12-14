@@ -6,8 +6,6 @@
 
 // These all have the domain name portion stripped out. The api infrastructure assumes it when we post to it anyhow.
 
-
-
 // The URL below was captured from release 6.4 and then the layout section was removed to test structure before
 // preserve_layout was introduced. See https://github.com/elastic/kibana/issues/23414
 export const PDF_PRINT_DASHBOARD_PRE_6_2 =
