@@ -22,13 +22,13 @@ import { i18n } from '@kbn/i18n';
 
 export const management = (capabilities) => {
   const main = new ManagementSection('management', {
-    display: i18n.translate('common.ui.management.displayName', {
+    display: i18n.translate('management.displayName', {
       defaultMessage: 'Management',
     }),
   }, capabilities);
 
   main.register('data', {
-    display: i18n.translate('common.ui.management.connectDataDisplayName', {
+    display: i18n.translate('management.connectDataDisplayName', {
       defaultMessage: 'Connect Data',
     }),
     order: 0,
