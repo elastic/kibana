@@ -17,6 +17,7 @@ import {
   tabToHumanizedMap,
 } from '../../components';
 
+jest.mock('ui/new_platform');
 jest.mock('../../../services', () => {
   const services = require.requireActual('../../../services');
   return {

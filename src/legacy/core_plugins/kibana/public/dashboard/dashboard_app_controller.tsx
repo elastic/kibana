@@ -35,7 +35,7 @@ import {
   State,
   AppStateClass as TAppStateClass,
   KbnUrl,
-  SaveOptions,
+  SavedObjectSaveOpts,
   unhashUrl,
 } from './legacy_imports';
 import { FilterStateManager, IndexPattern } from '../../../data/public';
@@ -608,7 +608,7 @@ export class DashboardAppController {
      * @return {Promise}
      * @resolved {String} - The id of the doc
      */
-    function save(saveOptions: SaveOptions): Promise<SaveResult> {
+    function save(saveOptions: SavedObjectSaveOpts): Promise<SaveResult> {
       return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
         .then(function(id) {
           if (id) {

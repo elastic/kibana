@@ -9,6 +9,7 @@ import { CoreSetup, CoreStart, Plugin, SavedObjectsClientContract } from 'src/co
 import { Plugin as DataPlugin } from 'src/plugins/data/public';
 import { LegacyAngularInjectedDependencies } from './render_app';
 import { NavigationStart } from '../../../../../src/legacy/core_plugins/navigation/public';
+import { LicensingPluginSetup } from '../../../../plugins/licensing/public';
 
 export interface GraphPluginStartDependencies {
   npData: ReturnType<DataPlugin['start']>;
@@ -18,8 +19,8 @@ export interface GraphPluginStartDependencies {
 export interface GraphPluginSetupDependencies {
   __LEGACY: {
     Storage: any;
-    xpackInfo: any;
   };
+  licensing: LicensingPluginSetup;
 }
 
 export interface GraphPluginStartDependencies {
@@ -34,7 +35,7 @@ export class GraphPlugin implements Plugin {
   private savedObjectsClient: SavedObjectsClientContract | null = null;
   private angularDependencies: LegacyAngularInjectedDependencies | null = null;
 
-  setup(core: CoreSetup, { __LEGACY: { xpackInfo, Storage } }: GraphPluginSetupDependencies) {
+  setup(core: CoreSetup, { __LEGACY: { Storage }, licensing }: GraphPluginSetupDependencies) {
     core.application.register({
       id: 'graph',
       title: 'Graph',
@@ -42,10 +43,10 @@ export class GraphPlugin implements Plugin {
         const { renderApp } = await import('./render_app');
         return renderApp({
           ...params,
+          licensing,
           navigation: this.navigationStart!,
           npData: this.npDataStart!,
           savedObjectsClient: this.savedObjectsClient!,
-          xpackInfo,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           canEditDrillDownUrls: core.injectedMetadata.getInjectedVar(

@@ -23,7 +23,7 @@ import { capabilities } from 'ui/capabilities';
 import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-import { Feature } from '../../../../../../../plugins/features/server';
+import { Feature } from '../../../../../../../plugins/features/public';
 import { isReservedSpace } from '../../../../common';
 import { DEFAULT_SPACE_ID } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';

@@ -12,7 +12,6 @@ import { initLoggedOutView } from './server/routes/views/logged_out';
 import { AuditLogger } from '../../server/lib/audit_logger';
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import { KibanaRequest } from '../../../../src/core/server';
-import { createCSPRuleString } from '../../../../src/legacy/server/csp';
 
 export const security = (kibana) => new kibana.Plugin({
   id: 'security',
@@ -21,16 +20,17 @@ export const security = (kibana) => new kibana.Plugin({
   require: ['kibana', 'elasticsearch', 'xpack_main'],
 
   config(Joi) {
+    const HANDLED_IN_NEW_PLATFORM = Joi.any().description('This key is handled in the new platform security plugin ONLY');
     return Joi.object({
       enabled: Joi.boolean().default(true),
-      cookieName: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
-      encryptionKey: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      cookieName: HANDLED_IN_NEW_PLATFORM,
+      encryptionKey: HANDLED_IN_NEW_PLATFORM,
       session: Joi.object({
-        idleTimeout: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
-        lifespan: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+        idleTimeout: HANDLED_IN_NEW_PLATFORM,
+        lifespan: HANDLED_IN_NEW_PLATFORM,
       }).default(),
-      secureCookies: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
-      loginAssistanceMessage: Joi.any().description('This key is handled in the new platform security plugin ONLY'),
+      secureCookies: HANDLED_IN_NEW_PLATFORM,
+      loginAssistanceMessage: HANDLED_IN_NEW_PLATFORM,
       authorization: Joi.object({
         legacyFallback: Joi.object({
           enabled: Joi.boolean().default(true) // deprecated
@@ -39,7 +39,7 @@ export const security = (kibana) => new kibana.Plugin({
       audit: Joi.object({
         enabled: Joi.boolean().default(false)
       }).default(),
-      authc: Joi.any().description('This key is handled in the new platform security plugin ONLY')
+      authc: HANDLED_IN_NEW_PLATFORM
     }).default();
   },
 
@@ -91,8 +91,6 @@ export const security = (kibana) => new kibana.Plugin({
         secureCookies: securityPlugin.__legacyCompat.config.secureCookies,
         session: {
           tenant: server.newPlatform.setup.core.http.basePath.serverBasePath,
-          idleTimeout: securityPlugin.__legacyCompat.config.session.idleTimeout,
-          lifespan: securityPlugin.__legacyCompat.config.session.lifespan,
         },
         enableSpaceAwarePrivileges: server.config().get('xpack.spaces.enabled'),
       };
@@ -127,7 +125,6 @@ export const security = (kibana) => new kibana.Plugin({
       isSystemAPIRequest: server.plugins.kibana.systemApi.isSystemApiRequest.bind(
         server.plugins.kibana.systemApi
       ),
-      cspRules: createCSPRuleString(config.get('csp.rules')),
     });
 
     // Legacy xPack Info endpoint returns whatever we return in a callback for `registerLicenseCheckResultsGenerator`
