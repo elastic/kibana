@@ -73,7 +73,6 @@ export class DemoStrategy extends React.Component<Props, State> {
     const request: IDemoRequest = {
       name: this.state.name,
       mood: this.state.mood,
-      serverStrategy: 'DEMO_SEARCH_STRATEGY',
     };
     return (
       <React.Fragment>
@@ -98,9 +97,9 @@ export class DemoStrategy extends React.Component<Props, State> {
         </EuiFlexGroup>
         <DoSearch
           request={request}
-          strategy={'ASYNC_SEARCH_STRATEGY'}
+          strategy={DEMO_SEARCH_STRATEGY}
           search={(signal: AbortSignal) =>
-            this.props.search(request, { signal }, 'ASYNC_SEARCH_STRATEGY')
+            this.props.search(request, { signal }, DEMO_SEARCH_STRATEGY)
           }
         />
       </React.Fragment>
