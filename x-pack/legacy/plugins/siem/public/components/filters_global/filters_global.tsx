@@ -7,7 +7,7 @@
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Sticky } from 'react-sticky';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { gutterTimeline } from '../../lib/helpers';
 
@@ -24,7 +24,10 @@ const Wrapper = styled.aside<{ isSticky?: boolean }>`
     border-bottom: ${theme.eui.euiBorderThin};
     padding: ${`${theme.eui.paddingSizes.m} ${gutterTimeline} ${theme.eui.paddingSizes.m} ${theme.eui.paddingSizes.l}`};
     
-    ${isSticky && `top: ${offsetChrome}px !important;`} 
+    ${isSticky &&
+      css`
+        top: ${offsetChrome}px !important;
+      `} 
 
     @media only ${disableSticky} {
       position: static !important;

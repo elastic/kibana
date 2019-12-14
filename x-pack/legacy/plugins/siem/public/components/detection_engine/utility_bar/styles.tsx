@@ -19,7 +19,7 @@ export const Bar = styled.aside.attrs({
 })<BarProps>`
   ${({ border, theme }) => `
     ${border &&
-      `
+      css`
         border-bottom: ${theme.eui.euiBorderThin};
         padding-bottom: ${theme.eui.paddingSizes.s};
       `}

@@ -7,7 +7,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiOutsideClickDetector } from '@elastic/eui';
 import React, { useEffect, useCallback } from 'react';
 import { noop } from 'lodash/fp';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
 import { ColumnHeader } from '../timeline/body/column_headers/column_header';
@@ -25,7 +25,7 @@ import {
 import { FieldBrowserProps, OnHideFieldBrowser } from './types';
 
 const FieldsBrowserContainer = styled.div<{ width: number }>`
-  ${({ theme, width }) => `
+  ${({ theme, width }) => css`
     background-color: ${theme.eui.euiColorLightestShade};
     border: ${theme.eui.euiBorderWidthThin} solid ${theme.eui.euiColorMediumShade};
     border-radius: ${theme.eui.euiBorderRadius};
