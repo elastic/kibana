@@ -39,7 +39,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { getServices } from '../kibana_services';
 
 import { SampleDataCard } from './sample_data';
-
 interface Props {
   urlBasePath: string;
   onSkip: () => void;
@@ -53,6 +52,7 @@ interface Props {
  */
 export class Welcome extends React.Component<Props> {
   private services = getServices();
+  private optInStatusFromConfig = this.services.getInjected('telemetryOptedIn');
 
   private hideOnEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -86,7 +86,10 @@ export class Welcome extends React.Component<Props> {
   }
 
   private renderTelemetryEnabledOrDisabledText = () => {
-    if (this.props.currentOptInStatus) {
+    if (
+      this.optInStatusFromConfig &&
+      this.optInStatusFromConfig !== this.props.currentOptInStatus
+    ) {
       return (
         <Fragment>
           <FormattedMessage
@@ -156,25 +159,23 @@ export class Welcome extends React.Component<Props> {
                   onDecline={this.onSampleDataDecline}
                 />
                 <EuiSpacer size="s" />
-                {showTelemetryDisclaimer && (
-                  <EuiTextColor className="euiText--small" color="subdued">
+                <EuiTextColor className="euiText--small" color="subdued">
+                  <FormattedMessage
+                    id="kbn.home.dataManagementDisclaimerPrivacy"
+                    defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+                  />
+                  <EuiLink
+                    href="https://www.elastic.co/legal/privacy-statement"
+                    target="_blank"
+                    rel="noopener"
+                  >
                     <FormattedMessage
-                      id="kbn.home.dataManagementDisclaimerPrivacy"
-                      defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
+                      id="kbn.home.dataManagementDisclaimerPrivacyLink"
+                      defaultMessage="Privacy Statement."
                     />
-                    <EuiLink
-                      href="https://www.elastic.co/legal/privacy-statement"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      <FormattedMessage
-                        id="kbn.home.dataManagementDisclaimerPrivacyLink"
-                        defaultMessage="Privacy Statement."
-                      />
-                    </EuiLink>
-                    {this.renderTelemetryEnabledOrDisabledText()}
-                  </EuiTextColor>
-                )}
+                  </EuiLink>
+                  {this.renderTelemetryEnabledOrDisabledText()}
+                </EuiTextColor>
                 <EuiSpacer size="xs" />
               </EuiFlexItem>
             </EuiFlexGroup>

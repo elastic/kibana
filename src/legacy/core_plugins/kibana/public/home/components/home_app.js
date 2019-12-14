@@ -29,14 +29,14 @@ import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
 import { npSetup } from 'ui/new_platform';
-
+// note: using getOptIn fetches the status from savedObjects. it's not reading it from the kibana.yml file
 export function HomeApp({ directories }) {
   const {
     getInjected,
     savedObjectsClient,
     getBasePath,
     addBasePath,
-    telemetryOptInProvider: { setOptInNoticeSeen },
+    telemetryOptInProvider: { setOptInNoticeSeen, getOptIn },
   } = getServices();
   const { cloud } = npSetup.plugins;
   const isCloudEnabled = !!(cloud && cloud.isCloudEnabled);
@@ -87,6 +87,7 @@ export function HomeApp({ directories }) {
               localStorage={localStorage}
               urlBasePath={getBasePath()}
               onOptInSeen={setOptInNoticeSeen}
+              getOptInStatus={getOptIn}
             />
           </Route>
           <Route path="/home">

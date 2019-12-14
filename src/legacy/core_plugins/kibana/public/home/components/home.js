@@ -54,8 +54,7 @@ export class Home extends Component {
     const showTelemetryDisclaimer = getServices().getInjected(
       'telemetryNotifyUserAboutOptInDefault'
     );
-    const currentOptInStatus = getServices().getInjected('telemetryOptedIn');
-
+    const currentOptInStatus = this.props.getOptInStatus();
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering
@@ -224,7 +223,6 @@ export class Home extends Component {
   renderLoading() {
     return '';
   }
-
   renderWelcome() {
     return (
       <Welcome
@@ -272,4 +270,5 @@ Home.propTypes = {
   urlBasePath: PropTypes.string.isRequired,
   mlEnabled: PropTypes.bool.isRequired,
   onOptInSeen: PropTypes.func.isRequired,
+  getOptInStatus: PropTypes.func.isRequired,
 };
