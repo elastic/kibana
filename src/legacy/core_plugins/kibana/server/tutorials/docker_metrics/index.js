@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function dockerMetricsSpecProvider(server, context) {
   const moduleName = 'docker';
@@ -33,7 +37,8 @@ export function dockerMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch metrics about your Docker containers.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.dockerMetrics.longDescription', {
-      defaultMessage: 'The `docker` Metricbeat module fetches metrics from the Docker server. \
+      defaultMessage:
+        'The `docker` Metricbeat module fetches metrics from the Docker server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-docker.html',
@@ -44,20 +49,23 @@ export function dockerMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'AV4REOpp5NkDleZmzKkE-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.dockerMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Docker metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.dockerMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Docker metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-docker.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-docker.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/docker_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

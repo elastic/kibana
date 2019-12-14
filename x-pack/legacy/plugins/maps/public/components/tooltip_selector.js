@@ -31,8 +31,7 @@ const reorder = (list, startIndex, endIndex) => {
 };
 
 export class TooltipSelector extends Component {
-
-  _getPropertyLabel = (propertyName) => {
+  _getPropertyLabel = propertyName => {
     if (!this.props.fields) {
       return propertyName;
     }
@@ -41,20 +40,18 @@ export class TooltipSelector extends Component {
       return field.name === propertyName;
     });
 
-    return field && field.label
-      ? field.label
-      : propertyName;
-  }
+    return field && field.label ? field.label : propertyName;
+  };
 
-  _onAdd = (properties) => {
+  _onAdd = properties => {
     if (!this.props.tooltipProperties) {
       this.props.onChange([...properties]);
     } else {
       this.props.onChange([...this.props.tooltipProperties, ...properties]);
     }
-  }
+  };
 
-  _removeProperty = (index) => {
+  _removeProperty = index => {
     if (!this.props.tooltipProperties) {
       this.props.onChange([]);
     } else {
@@ -62,7 +59,7 @@ export class TooltipSelector extends Component {
       tooltipProperties.splice(index, 1);
       this.props.onChange(tooltipProperties);
     }
-  }
+  };
 
   _onDragEnd = ({ source, destination }) => {
     // Dragging item out of EuiDroppable results in destination of null
@@ -81,7 +78,7 @@ export class TooltipSelector extends Component {
     return (
       <EuiDragDropContext onDragEnd={this._onDragEnd}>
         <EuiDroppable droppableId="mapLayerTOC" spacing="none">
-          {(provided, snapshot) => (
+          {(provided, snapshot) =>
             this.props.tooltipProperties.map((propertyName, idx) => (
               <EuiDraggable
                 spacing="none"
@@ -95,7 +92,7 @@ export class TooltipSelector extends Component {
                   <div
                     className={classNames('mapTooltipSelector__propertyRow', {
                       'mapTooltipSelector__propertyRow-isDragging': state.isDragging,
-                      'mapTooltipSelector__propertyRow-isDraggingOver': snapshot.isDraggingOver
+                      'mapTooltipSelector__propertyRow-isDraggingOver': snapshot.isDraggingOver,
                     })}
                   >
                     <EuiText className="mapTooltipSelector__propertyContent" size="s">
@@ -107,22 +104,28 @@ export class TooltipSelector extends Component {
                         color="danger"
                         onClick={this._removeProperty.bind(null, idx)}
                         title={i18n.translate('xpack.maps.tooltipSelector.trashButtonTitle', {
-                          defaultMessage: 'Remove property'
+                          defaultMessage: 'Remove property',
                         })}
-                        aria-label={i18n.translate('xpack.maps.tooltipSelector.trashButtonAriaLabel', {
-                          defaultMessage: 'Remove property'
-                        })}
+                        aria-label={i18n.translate(
+                          'xpack.maps.tooltipSelector.trashButtonAriaLabel',
+                          {
+                            defaultMessage: 'Remove property',
+                          }
+                        )}
                       />
                       <EuiButtonIcon
                         className="mapTooltipSelector__grab"
                         iconType="grab"
                         color="subdued"
                         title={i18n.translate('xpack.maps.tooltipSelector.grabButtonTitle', {
-                          defaultMessage: 'Reorder property'
+                          defaultMessage: 'Reorder property',
                         })}
-                        aria-label={i18n.translate('xpack.maps.tooltipSelector.grabButtonAriaLabel', {
-                          defaultMessage: 'Reorder property'
-                        })}
+                        aria-label={i18n.translate(
+                          'xpack.maps.tooltipSelector.grabButtonAriaLabel',
+                          {
+                            defaultMessage: 'Reorder property',
+                          }
+                        )}
                         {...provided.dragHandleProps}
                       />
                     </div>
@@ -130,25 +133,27 @@ export class TooltipSelector extends Component {
                 )}
               </EuiDraggable>
             ))
-          )}
+          }
         </EuiDroppable>
       </EuiDragDropContext>
     );
   }
 
   render() {
-
     const selectedFields = this.props.tooltipProperties
       ? this.props.tooltipProperties.map(propertyName => {
-        return { name: propertyName };
-      })
+          return { name: propertyName };
+        })
       : [];
 
     return (
       <div>
         <EuiTitle size="xxs">
           <h6>
-            <FormattedMessage id="xpack.maps.tooltipSelectorLabel" defaultMessage="Fields to display in tooltip" />
+            <FormattedMessage
+              id="xpack.maps.tooltipSelectorLabel"
+              defaultMessage="Fields to display in tooltip"
+            />
           </h6>
         </EuiTitle>
         <EuiSpacer size="xs" />

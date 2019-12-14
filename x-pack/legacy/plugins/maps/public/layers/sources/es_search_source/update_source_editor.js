@@ -6,13 +6,7 @@
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import {
-  EuiFormRow,
-  EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { TooltipSelector } from '../../../components/tooltip_selector';
 
@@ -100,7 +94,7 @@ export class UpdateSourceEditor extends Component {
 
   onSortOrderChange = e => {
     this.props.onChange({ propName: 'sortOrder', value: e.target.value });
-  }
+  };
 
   onTopHitsSizeChange = size => {
     this.props.onChange({ propName: 'topHitsSize', value: size });
@@ -179,10 +173,7 @@ export class UpdateSourceEditor extends Component {
             defaultMessage: `Sort`,
           })}
         >
-          <EuiFlexGroup
-            gutterSize="none"
-            justifyContent="flexEnd"
-          >
+          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd">
             <EuiFlexItem>
               <SingleFieldSelect
                 placeholder={i18n.translate(
@@ -202,7 +193,7 @@ export class UpdateSourceEditor extends Component {
                 disabled={!this.props.sortField}
                 options={[
                   { text: 'ASC', value: SORT_ORDER.ASC },
-                  { text: 'DESC', value: SORT_ORDER.DESC }
+                  { text: 'DESC', value: SORT_ORDER.DESC },
                 ]}
                 value={this.props.sortOrder}
                 onChange={this.onSortOrderChange}
@@ -235,7 +226,6 @@ export class UpdateSourceEditor extends Component {
             compressed
           />
         </EuiFormRow>
-
       </Fragment>
     );
   }

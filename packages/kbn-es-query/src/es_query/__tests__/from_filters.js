@@ -20,9 +20,9 @@
 import expect from '@kbn/expect';
 import { buildQueryFromFilters } from '../from_filters';
 
-describe('build query', function () {
-  describe('buildQueryFromFilters', function () {
-    it('should return the parameters of an Elasticsearch bool query', function () {
+describe('build query', function() {
+  describe('buildQueryFromFilters', function() {
+    it('should return the parameters of an Elasticsearch bool query', function() {
       const result = buildQueryFromFilters([]);
       const expected = {
         must: [],
@@ -33,7 +33,7 @@ describe('build query', function () {
       expect(result).to.eql(expected);
     });
 
-    it('should transform an array of kibana filters into ES queries combined in the bool clauses', function () {
+    it('should transform an array of kibana filters into ES queries combined in the bool clauses', function() {
       const filters = [
         {
           match_all: {},
@@ -45,17 +45,14 @@ describe('build query', function () {
         },
       ];
 
-      const expectedESQueries = [
-        { match_all: {} },
-        { exists: { field: 'foo' } },
-      ];
+      const expectedESQueries = [{ match_all: {} }, { exists: { field: 'foo' } }];
 
       const result = buildQueryFromFilters(filters);
 
       expect(result.filter).to.eql(expectedESQueries);
     });
 
-    it('should place negated filters in the must_not clause', function () {
+    it('should place negated filters in the must_not clause', function() {
       const filters = [
         {
           match_all: {},
@@ -70,7 +67,7 @@ describe('build query', function () {
       expect(result.must_not).to.eql(expectedESQueries);
     });
 
-    it('should translate old ES filter syntax into ES 5+ query objects', function () {
+    it('should translate old ES filter syntax into ES 5+ query objects', function() {
       const filters = [
         {
           query: { exists: { field: 'foo' } },
@@ -89,7 +86,7 @@ describe('build query', function () {
       expect(result.filter).to.eql(expectedESQueries);
     });
 
-    it('should migrate deprecated match syntax', function () {
+    it('should migrate deprecated match syntax', function() {
       const filters = [
         {
           query: { match: { extension: { query: 'foo', type: 'phrase' } } },
@@ -108,7 +105,7 @@ describe('build query', function () {
       expect(result.filter).to.eql(expectedESQueries);
     });
 
-    it('should not add query:queryString:options to query_string filters', function () {
+    it('should not add query:queryString:options to query_string filters', function() {
       const filters = [
         {
           query: { query_string: { query: 'foo' } },

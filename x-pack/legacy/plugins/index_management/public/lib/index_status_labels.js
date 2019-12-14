@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import {
   INDEX_CLEARING_CACHE,
   INDEX_CLOSED,
@@ -17,9 +17,12 @@ import {
 } from '../../common/constants';
 
 export const indexStatusLabels = {
-  [INDEX_CLEARING_CACHE]: i18n.translate('xpack.idxMgmt.indexStatusLabels.clearingCacheStatusLabel', {
-    defaultMessage: 'clearing cache...',
-  }),
+  [INDEX_CLEARING_CACHE]: i18n.translate(
+    'xpack.idxMgmt.indexStatusLabels.clearingCacheStatusLabel',
+    {
+      defaultMessage: 'clearing cache...',
+    }
+  ),
   [INDEX_CLOSED]: i18n.translate('xpack.idxMgmt.indexStatusLabels.closedStatusLabel', {
     defaultMessage: 'closed',
   }),
@@ -40,5 +43,5 @@ export const indexStatusLabels = {
   }),
   [INDEX_FORCEMERGING]: i18n.translate('xpack.idxMgmt.indexStatusLabels.forcingMergeStatusLabel', {
     defaultMessage: 'forcing merge...',
-  })
+  }),
 };

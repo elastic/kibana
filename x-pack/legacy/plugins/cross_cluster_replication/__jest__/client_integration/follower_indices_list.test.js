@@ -91,13 +91,7 @@ describe('<FollowerIndicesList />', () => {
       httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
 
       // Mount the component
-      ({
-        find,
-        exists,
-        component,
-        table,
-        actions,
-      } = setup());
+      ({ find, exists, component, table, actions } = setup());
 
       await nextTick(); // Make sure that the Http request is fulfilled
       component.update();
@@ -123,18 +117,15 @@ describe('<FollowerIndicesList />', () => {
     test('should list the follower indices in the table', () => {
       expect(tableCellsValues.length).toEqual(followerIndices.length);
       expect(tableCellsValues).toEqual([
-        [ '', // Empty because the first column is the checkbox to select row
+        [
+          '', // Empty because the first column is the checkbox to select row
           index1.name,
           'Active',
           index1.remoteCluster,
           index1.leaderIndex,
-          '' // Empty because the last column is for the "actions" on the resource
-        ], [ '',
-          index2.name,
-          'Paused',
-          index2.remoteCluster,
-          index2.leaderIndex,
-          '' ]
+          '', // Empty because the last column is for the "actions" on the resource
+        ],
+        ['', index2.name, 'Paused', index2.remoteCluster, index2.leaderIndex, ''],
       ]);
     });
 
@@ -160,7 +151,7 @@ describe('<FollowerIndicesList />', () => {
         expect(buttonsLabel).toEqual([
           'Pause replication',
           'Edit follower index',
-          'Unfollow leader index'
+          'Unfollow leader index',
         ]);
       });
 
@@ -175,7 +166,7 @@ describe('<FollowerIndicesList />', () => {
         expect(buttonsLabel).toEqual([
           'Resume replication',
           'Edit follower index',
-          'Unfollow leader index'
+          'Unfollow leader index',
         ]);
       });
 
@@ -220,7 +211,7 @@ describe('<FollowerIndicesList />', () => {
         expect(buttonLabels).toEqual([
           'Pause replication',
           'Edit follower index',
-          'Unfollow leader index'
+          'Unfollow leader index',
         ]);
       });
 
@@ -236,7 +227,7 @@ describe('<FollowerIndicesList />', () => {
         expect(buttonLabels).toEqual([
           'Resume replication',
           'Edit follower index',
-          'Unfollow leader index'
+          'Unfollow leader index',
         ]);
       });
 
@@ -291,7 +282,11 @@ describe('<FollowerIndicesList />', () => {
 
       test('should have a "settings" section', () => {
         actions.clickFollowerIndexAt(0);
-        expect(find('followerIndexDetail.settingsSection').find('h3').text()).toEqual('Settings');
+        expect(
+          find('followerIndexDetail.settingsSection')
+            .find('h3')
+            .text()
+        ).toEqual('Settings');
         expect(exists('followerIndexDetail.settingsValues')).toBe(true);
       });
 
@@ -306,7 +301,7 @@ describe('<FollowerIndicesList />', () => {
           maxWriteBufferCount: 'maxWriteBufferCount',
           maxWriteBufferSize: 'maxWriteBufferSize',
           maxRetryDelay: 'maxRetryDelay',
-          readPollTimeout: 'readPollTimeout'
+          readPollTimeout: 'readPollTimeout',
         };
 
         actions.clickFollowerIndexAt(0);
@@ -325,7 +320,9 @@ describe('<FollowerIndicesList />', () => {
       test('should not have settings values for a "paused" follower index', () => {
         actions.clickFollowerIndexAt(1); // the second follower index is paused
         expect(exists('followerIndexDetail.settingsValues')).toBe(false);
-        expect(find('followerIndexDetail.settingsSection').text()).toContain('paused follower index does not have settings');
+        expect(find('followerIndexDetail.settingsSection').text()).toContain(
+          'paused follower index does not have settings'
+        );
       });
 
       test('should have a section to render the follower index shards stats', () => {

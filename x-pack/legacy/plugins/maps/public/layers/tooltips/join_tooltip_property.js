@@ -7,7 +7,6 @@
 import { TooltipProperty } from './tooltip_property';
 
 export class JoinTooltipProperty extends TooltipProperty {
-
   constructor(tooltipProperty, leftInnerJoins) {
     super();
     this._tooltipProperty = tooltipProperty;
@@ -37,7 +36,7 @@ export class JoinTooltipProperty extends TooltipProperty {
     }
 
     for (let i = 0; i < this._leftInnerJoins.length; i++) {
-      const rightSource =  this._leftInnerJoins[i].getRightJoinSource();
+      const rightSource = this._leftInnerJoins[i].getRightJoinSource();
       const esTooltipProperty = await rightSource.createESTooltipProperty(
         rightSource.getTerm(),
         this._tooltipProperty.getRawValue()

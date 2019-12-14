@@ -4,8 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LicenseStatus } from '../../../license_management/public/sections/license_dashboard/license_status/license_status';
-export { AddLicense } from '../../../license_management/public/sections/license_dashboard/add_license/add_license';
+export {
+  LicenseStatus,
+} from '../../../license_management/public/sections/license_dashboard/license_status/license_status';
+export {
+  AddLicense,
+} from '../../../license_management/public/sections/license_dashboard/add_license/add_license';
 
 /*
  * For to link to management

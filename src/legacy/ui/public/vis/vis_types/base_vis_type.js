@@ -22,41 +22,41 @@ import { createFiltersFromEvent, onBrushEvent } from '../vis_filters';
 
 export class BaseVisType {
   constructor(opts = {}) {
-
     if (!opts.name) {
-      throw('vis_type must define its name');
+      throw 'vis_type must define its name';
     }
     if (!opts.title) {
-      throw('vis_type must define its title');
+      throw 'vis_type must define its title';
     }
     if (!opts.description) {
-      throw('vis_type must define its description');
+      throw 'vis_type must define its description';
     }
     if (!opts.icon && !opts.image) {
-      throw('vis_type must define its icon or image');
+      throw 'vis_type must define its icon or image';
     }
     if (!opts.visualization) {
-      throw('vis_type must define visualization controller');
+      throw 'vis_type must define visualization controller';
     }
 
     const _defaults = {
       // name, title, description, icon, image
-      visualization: null,       // must be a class with render/resize/destroy methods
+      visualization: null, // must be a class with render/resize/destroy methods
       visConfig: {
-        defaults: {},            // default configuration
+        defaults: {}, // default configuration
       },
-      requestHandler: 'courier',    // select one from registry or pass a function
+      requestHandler: 'courier', // select one from registry or pass a function
       responseHandler: 'none',
       editor: 'default',
       editorConfig: {
-        collections: {},         // collections used for configuration (list of positions, ...)
+        collections: {}, // collections used for configuration (list of positions, ...)
       },
-      options: {                // controls the visualize editor
+      options: {
+        // controls the visualize editor
         showTimePicker: true,
         showQueryBar: true,
         showFilterBar: true,
         showIndexSelection: true,
-        hierarchicalData: false  // we should get rid of this i guess ?
+        hierarchicalData: false, // we should get rid of this i guess ?
       },
       events: {
         filterBucket: {
@@ -65,7 +65,7 @@ export class BaseVisType {
         brush: {
           defaultAction: onBrushEvent,
           disabled: true,
-        }
+        },
       },
       stage: 'production',
       feedbackMessage: '',

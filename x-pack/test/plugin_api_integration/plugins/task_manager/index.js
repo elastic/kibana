@@ -39,7 +39,8 @@ export default function TaskTestingAPI(kibana) {
                 throw new Error(params.failWith);
               }
 
-              const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+              const callCluster = server.plugins.elasticsearch.getCluster('admin')
+                .callWithInternalUser;
               await callCluster('index', {
                 index: '.task_manager_test_result',
                 body: {

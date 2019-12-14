@@ -23,22 +23,23 @@ import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { createFilterTerms } from '../../../buckets/create_filter/terms';
 
-describe('AggConfig Filters', function () {
-
-  describe('terms', function () {
+describe('AggConfig Filters', function() {
+  describe('terms', function() {
     let indexPattern;
     let Vis;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(VisProvider);
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    }));
+    beforeEach(
+      ngMock.inject(function(Private) {
+        Vis = Private(VisProvider);
+        indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      })
+    );
 
-    it('should return a match filter for terms', function () {
+    it('should return a match filter for terms', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
+        aggs: [{ type: 'terms', schema: 'segment', params: { field: '_type' } }],
       });
       const aggConfig = vis.aggs.byName('terms')[0];
       const filter = createFilterTerms(aggConfig, 'apache');
@@ -49,13 +50,12 @@ describe('AggConfig Filters', function () {
       expect(filter.query.match._type).to.have.property('type', 'phrase');
       expect(filter).to.have.property('meta');
       expect(filter.meta).to.have.property('index', indexPattern.id);
-
     });
 
     it('should set query to true or false for boolean filter', () => {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs: [ { type: 'terms', schema: 'segment', params: { field: 'ssl' } } ]
+        aggs: [{ type: 'terms', schema: 'segment', params: { field: 'ssl' } }],
       });
       const aggConfig = vis.aggs.byName('terms')[0];
       const filterFalse = createFilterTerms(aggConfig, 0);
@@ -74,7 +74,7 @@ describe('AggConfig Filters', function () {
     it('should generate correct __missing__ filter', () => {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
+        aggs: [{ type: 'terms', schema: 'segment', params: { field: '_type' } }],
       });
       const aggConfig = vis.aggs.byName('terms')[0];
       const filter = createFilterTerms(aggConfig, '__missing__');
@@ -88,7 +88,7 @@ describe('AggConfig Filters', function () {
     it('should generate correct __other__ filter', () => {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs: [ { type: 'terms', schema: 'segment', params: { field: '_type' } } ]
+        aggs: [{ type: 'terms', schema: 'segment', params: { field: '_type' } }],
       });
       const aggConfig = vis.aggs.byName('terms')[0];
       const filter = createFilterTerms(aggConfig, '__other__', { terms: ['apache'] })[0];

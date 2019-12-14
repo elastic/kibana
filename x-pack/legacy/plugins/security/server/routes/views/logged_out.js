@@ -20,7 +20,7 @@ export function initLoggedOutView({ config: { cookieName } }, server) {
       return h.renderAppWithDefaultConfig(loggedOut);
     },
     config: {
-      auth: false
-    }
+      auth: false,
+    },
   });
 }

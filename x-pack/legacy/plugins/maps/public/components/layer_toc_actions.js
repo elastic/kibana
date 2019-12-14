@@ -6,17 +6,10 @@
 
 import React, { Component, Fragment } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiPopover,
-  EuiContextMenu,
-  EuiIcon,
-  EuiToolTip
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover, EuiContextMenu, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export class LayerTocActions extends Component {
-
   state = {
     isPopoverOpen: false,
     supportsFitToBounds: false,
@@ -46,22 +39,30 @@ export class LayerTocActions extends Component {
 
   _closePopover = () => {
     this.setState(() => ({
-      isPopoverOpen: false
+      isPopoverOpen: false,
     }));
   };
 
   _renderPopoverToggleButton() {
-    const {
-      icon,
-      tooltipContent,
-      footnotes,
-    } = this.props.layer.getIconAndTooltipContent(this.props.zoom, this.props.isUsingSearch);
+    const { icon, tooltipContent, footnotes } = this.props.layer.getIconAndTooltipContent(
+      this.props.zoom,
+      this.props.isUsingSearch
+    );
 
     const footnoteIcons = footnotes.map((footnote, index) => {
-      return <Fragment key={index}>{''}{footnote.icon}</Fragment>;
+      return (
+        <Fragment key={index}>
+          {''}
+          {footnote.icon}
+        </Fragment>
+      );
     });
     const footnoteTooltipContent = footnotes.map((footnote, index) => {
-      return <div key={index}>{footnote.icon}{' '}{footnote.message}</div>;
+      return (
+        <div key={index}>
+          {footnote.icon} {footnote.message}
+        </div>
+      );
     });
 
     return (
@@ -85,9 +86,7 @@ export class LayerTocActions extends Component {
           data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>
-          {this.props.displayName}
-          {' '}
-          {footnoteIcons}
+          {this.props.displayName} {footnoteIcons}
         </EuiButtonEmpty>
       </EuiToolTip>
     );
@@ -99,16 +98,13 @@ export class LayerTocActions extends Component {
         name: i18n.translate('xpack.maps.layerTocActions.fitToDataTitle', {
           defaultMessage: 'Fit to data',
         }),
-        icon: (
-          <EuiIcon
-            type="search"
-            size="m"
-          />
-        ),
+        icon: <EuiIcon type="search" size="m" />,
         'data-test-subj': 'fitToBoundsButton',
-        toolTipContent: this.state.supportsFitToBounds ? null : i18n.translate('xpack.maps.layerTocActions.noFitSupportTooltip', {
-          defaultMessage: 'Layer does not support fit to data',
-        }),
+        toolTipContent: this.state.supportsFitToBounds
+          ? null
+          : i18n.translate('xpack.maps.layerTocActions.noFitSupportTooltip', {
+              defaultMessage: 'Layer does not support fit to data',
+            }),
         disabled: !this.state.supportsFitToBounds,
         onClick: () => {
           this._closePopover();
@@ -116,23 +112,20 @@ export class LayerTocActions extends Component {
         },
       },
       {
-        name: this.props.layer.isVisible() ? i18n.translate('xpack.maps.layerTocActions.hideLayerTitle', {
-          defaultMessage: 'Hide layer',
-        }) : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
-          defaultMessage: 'Show layer',
-        }),
-        icon: (
-          <EuiIcon
-            type={this.props.layer.isVisible() ? 'eye' : 'eyeClosed'}
-            size="m"
-          />
-        ),
+        name: this.props.layer.isVisible()
+          ? i18n.translate('xpack.maps.layerTocActions.hideLayerTitle', {
+              defaultMessage: 'Hide layer',
+            })
+          : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
+              defaultMessage: 'Show layer',
+            }),
+        icon: <EuiIcon type={this.props.layer.isVisible() ? 'eye' : 'eyeClosed'} size="m" />,
         'data-test-subj': 'layerVisibilityToggleButton',
         onClick: () => {
           this._closePopover();
           this.props.toggleVisible();
-        }
-      }
+        },
+      },
     ];
 
     if (!this.props.isReadOnly) {
@@ -140,33 +133,23 @@ export class LayerTocActions extends Component {
         name: i18n.translate('xpack.maps.layerTocActions.editLayerTitle', {
           defaultMessage: 'Edit layer',
         }),
-        icon: (
-          <EuiIcon
-            type="pencil"
-            size="m"
-          />
-        ),
+        icon: <EuiIcon type="pencil" size="m" />,
         'data-test-subj': 'editLayerButton',
         onClick: () => {
           this._closePopover();
           this.props.editLayer();
-        }
+        },
       });
       actionItems.push({
         name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
           defaultMessage: 'Clone layer',
         }),
-        icon: (
-          <EuiIcon
-            type="copy"
-            size="m"
-          />
-        ),
+        icon: <EuiIcon type="copy" size="m" />,
         'data-test-subj': 'cloneLayerButton',
         onClick: () => {
           this._closePopover();
           this.props.cloneLayer();
-        }
+        },
       });
     }
 
@@ -197,6 +180,7 @@ export class LayerTocActions extends Component {
           panels={[this._getActionsPanel()]}
           data-test-subj={`layerTocActionsPanel${this.props.escapedDisplayName}`}
         />
-      </EuiPopover>);
+      </EuiPopover>
+    );
   }
 }

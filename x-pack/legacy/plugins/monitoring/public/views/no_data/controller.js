@@ -10,7 +10,7 @@ import {
   ClusterSettingsChecker,
   NodeSettingsChecker,
   Enabler,
-  startChecks
+  startChecks,
 } from 'plugins/monitoring/lib/elasticsearch_settings';
 import { ModelUpdater } from './model_updater';
 import { NoData } from 'plugins/monitoring/components';
@@ -20,26 +20,23 @@ import { MonitoringViewBaseController } from '../base_controller';
 import { i18n } from '@kbn/i18n';
 
 export class NoDataController extends MonitoringViewBaseController {
-
   constructor($injector, $scope) {
     const monitoringClusters = $injector.get('monitoringClusters');
     const kbnUrl = $injector.get('kbnUrl');
     const $http = $injector.get('$http');
-    const checkers = [
-      new ClusterSettingsChecker($http),
-      new NodeSettingsChecker($http)
-    ];
+    const checkers = [new ClusterSettingsChecker($http), new NodeSettingsChecker($http)];
 
     const getData = async () => {
       let catchReason;
       try {
-        const monitoringClustersData = await monitoringClusters(undefined, undefined, [CODE_PATH_LICENSE]);
+        const monitoringClustersData = await monitoringClusters(undefined, undefined, [
+          CODE_PATH_LICENSE,
+        ]);
         if (monitoringClustersData && monitoringClustersData.length) {
           kbnUrl.redirect('/home');
           return monitoringClustersData;
         }
-      }
-      catch (err) {
+      } catch (err) {
         if (err && err.status === 503) {
           catchReason = {
             property: 'custom',
@@ -61,24 +58,28 @@ export class NoDataController extends MonitoringViewBaseController {
 
     super({
       title: i18n.translate('xpack.monitoring.noData.routeTitle', {
-        defaultMessage: 'Setup Monitoring'
+        defaultMessage: 'Setup Monitoring',
       }),
       getPageData: async () => await getData(),
       reactNodeId: 'noDataReact',
       $scope,
-      $injector
+      $injector,
     });
     Object.assign(this, this.getDefaultModel());
 
     //Need to set updateModel after super since there is no `this` otherwise
     const { updateModel } = new ModelUpdater($scope, this);
     const enabler = new Enabler($http, updateModel);
-    $scope.$watch(() => this, () => {
-      if (this.isCollectionEnabledUpdated && !this.reason) {
-        return;
-      }
-      this.render(enabler);
-    }, true);
+    $scope.$watch(
+      () => this,
+      () => {
+        if (this.isCollectionEnabledUpdated && !this.reason) {
+          return;
+        }
+        this.render(enabler);
+      },
+      true
+    );
 
     this.changePath = path => kbnUrl.changePath(path);
   }
@@ -91,7 +92,7 @@ export class NoDataController extends MonitoringViewBaseController {
       isCollectionEnabledUpdating: false, // flags to indicate whether to show a spinner while waiting for ajax
       isCollectionEnabledUpdated: false,
       isCollectionIntervalUpdating: false,
-      isCollectionIntervalUpdated: false
+      isCollectionIntervalUpdated: false,
     };
   }
 
@@ -109,5 +110,4 @@ export class NoDataController extends MonitoringViewBaseController {
       </I18nContext>
     );
   }
-
 }

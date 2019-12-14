@@ -17,20 +17,25 @@
  * under the License.
  */
 
-import { getDllEntries, cleanDllModuleFromEntryPath, writeEmptyFileForDllEntry } from './webpack_dll';
+import {
+  getDllEntries,
+  cleanDllModuleFromEntryPath,
+  writeEmptyFileForDllEntry,
+} from './webpack_dll';
 import { getDependencies } from './get_dependencies';
 import globby from 'globby';
 import normalizePosixPath from 'normalize-path';
 
 export const CleanClientModulesOnDLLTask = {
-  description:
-    'Cleaning client node_modules bundled into the DLL',
+  description: 'Cleaning client node_modules bundled into the DLL',
 
   async run(config, log, build) {
     const baseDir = normalizePosixPath(build.resolvePath('.'));
     const kbnPkg = config.getKibanaPkg();
     const kbnPkgDependencies = (kbnPkg && kbnPkg.dependencies) || {};
-    const kbnWebpackLoaders = Object.keys(kbnPkgDependencies).filter(dep => !!dep.includes('-loader'));
+    const kbnWebpackLoaders = Object.keys(kbnPkgDependencies).filter(
+      dep => !!dep.includes('-loader')
+    );
 
     // Define the entry points for the server code in order to
     // start here later looking for the server side dependencies
@@ -39,29 +44,30 @@ export const CleanClientModulesOnDLLTask = {
       `${baseDir}/src/cli_keystore`,
       `${baseDir}/src/cli_plugin`,
       `${baseDir}/x-pack`,
-      ...kbnWebpackLoaders.map(loader => `${baseDir}/node_modules/${loader}`)
+      ...kbnWebpackLoaders.map(loader => `${baseDir}/node_modules/${loader}`),
     ];
     const discoveredLegacyCorePluginEntries = await globby([
       `${baseDir}/src/legacy/core_plugins/*/index.js`,
-      `!${baseDir}/src/legacy/core_plugins/**/public`
+      `!${baseDir}/src/legacy/core_plugins/**/public`,
     ]);
     const discoveredPluginEntries = await globby([
       `${baseDir}/src/plugins/*/server/index.js`,
-      `!${baseDir}/src/plugins/**/public`
+      `!${baseDir}/src/plugins/**/public`,
     ]);
 
     // Compose all the needed entries
-    const serverEntries = [ ...mainCodeEntries, ...discoveredLegacyCorePluginEntries, ...discoveredPluginEntries];
+    const serverEntries = [
+      ...mainCodeEntries,
+      ...discoveredLegacyCorePluginEntries,
+      ...discoveredPluginEntries,
+    ];
 
     // Get the dependencies found searching through the server
     // side code entries that were provided
     const serverDependencies = await getDependencies(baseDir, serverEntries);
 
     // Consider this as our whiteList for the modules we can't delete
-    const whiteListedModules = [
-      ...serverDependencies,
-      ...kbnWebpackLoaders
-    ];
+    const whiteListedModules = [...serverDependencies, ...kbnWebpackLoaders];
 
     // Resolve the client vendors dll manifest path
     const dllManifestPath = `${baseDir}/built_assets/dlls/vendors.manifest.dll.json`;
@@ -83,5 +89,5 @@ export const CleanClientModulesOnDLLTask = {
       await cleanDllModuleFromEntryPath(log, entryPath);
       await writeEmptyFileForDllEntry(entryPath);
     }
-  }
+  },
 };

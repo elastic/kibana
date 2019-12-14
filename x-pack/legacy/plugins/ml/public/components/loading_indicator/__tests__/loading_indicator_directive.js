@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
@@ -16,13 +14,13 @@ describe('ML - <ml-loading-indicator>', () => {
 
   beforeEach(() => {
     ngMock.module('apps/ml');
-    ngMock.inject(function (_$compile_, $rootScope) {
+    ngMock.inject(function(_$compile_, $rootScope) {
       $compile = _$compile_;
       $scope = $rootScope.$new();
     });
   });
 
-  afterEach(function () {
+  afterEach(function() {
     $scope.$destroy();
   });
 

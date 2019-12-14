@@ -51,24 +51,18 @@ import gws from './angular/graph_client_workspace.js';
 import { SavedWorkspacesProvider } from './angular/services/saved_workspaces';
 import { getEditUrl, getNewPath, getEditPath, setBreadcrumbs } from './services/url';
 import { createCachedIndexPatternProvider } from './services/index_pattern_cache';
-import { urlTemplateRegex } from  './helpers/url_template';
-import {
-  asAngularSyncedObservable,
-} from './helpers/as_observable';
+import { urlTemplateRegex } from './helpers/url_template';
+import { asAngularSyncedObservable } from './helpers/as_observable';
 import { colorChoices } from './helpers/style_choices';
-import {
-  createGraphStore,
-  datasourceSelector,
-  hasFieldsSelector
-} from './state_management';
+import { createGraphStore, datasourceSelector, hasFieldsSelector } from './state_management';
 
 import './angular/directives/graph_inspect';
 
 const app = uiModules.get('app/graph');
 
 function checkLicense(kbnBaseUrl) {
-  const licenseAllowsToShowThisPage = xpackInfo.get('features.graph.showAppLink') &&
-    xpackInfo.get('features.graph.enableAppLink');
+  const licenseAllowsToShowThisPage =
+    xpackInfo.get('features.graph.showAppLink') && xpackInfo.get('features.graph.enableAppLink');
   if (!licenseAllowsToShowThisPage) {
     const message = xpackInfo.get('features.graph.message');
     const newUrl = addAppRedirectMessageToUrl(chrome.addBasePath(kbnBaseUrl), message);
@@ -77,11 +71,11 @@ function checkLicense(kbnBaseUrl) {
   }
 }
 
-app.directive('vennDiagram', function (reactDirective) {
+app.directive('vennDiagram', function(reactDirective) {
   return reactDirective(VennDiagram);
 });
 
-app.directive('graphListing', function (reactDirective) {
+app.directive('graphListing', function(reactDirective) {
   return reactDirective(Listing, [
     ['coreStart', { watchDepth: 'reference' }],
     ['createItem', { watchDepth: 'reference' }],
@@ -96,24 +90,28 @@ app.directive('graphListing', function (reactDirective) {
   ]);
 });
 
-app.directive('graphApp', function (reactDirective) {
-  return reactDirective(GraphApp, [
-    ['store', { watchDepth: 'reference' }],
-    ['isInitialized', { watchDepth: 'reference' }],
-    ['currentIndexPattern', { watchDepth: 'reference' }],
-    ['indexPatternProvider', { watchDepth: 'reference' }],
-    ['isLoading', { watchDepth: 'reference' }],
-    ['onQuerySubmit', { watchDepth: 'reference' }],
-    ['initialQuery', { watchDepth: 'reference' }],
-    ['confirmWipeWorkspace', { watchDepth: 'reference' }],
-    ['coreStart', { watchDepth: 'reference' }],
-    ['noIndexPatterns', { watchDepth: 'reference' }],
-    ['reduxStore', { watchDepth: 'reference' }],
-    ['pluginDataStart', { watchDepth: 'reference' }],
-  ], { restrict: 'A' });
+app.directive('graphApp', function(reactDirective) {
+  return reactDirective(
+    GraphApp,
+    [
+      ['store', { watchDepth: 'reference' }],
+      ['isInitialized', { watchDepth: 'reference' }],
+      ['currentIndexPattern', { watchDepth: 'reference' }],
+      ['indexPatternProvider', { watchDepth: 'reference' }],
+      ['isLoading', { watchDepth: 'reference' }],
+      ['onQuerySubmit', { watchDepth: 'reference' }],
+      ['initialQuery', { watchDepth: 'reference' }],
+      ['confirmWipeWorkspace', { watchDepth: 'reference' }],
+      ['coreStart', { watchDepth: 'reference' }],
+      ['noIndexPatterns', { watchDepth: 'reference' }],
+      ['reduxStore', { watchDepth: 'reference' }],
+      ['pluginDataStart', { watchDepth: 'reference' }],
+    ],
+    { restrict: 'A' }
+  );
 });
 
-app.directive('graphVisualization', function (reactDirective) {
+app.directive('graphVisualization', function(reactDirective) {
   return reactDirective(GraphVisualization, undefined, { restrict: 'A' });
 });
 
@@ -135,69 +133,62 @@ uiRoutes
       $scope.create = () => {
         kbnUrl.redirect(getNewPath());
       };
-      $scope.find = (search) => {
+      $scope.find = search => {
         return graphService.find(search, $scope.listingLimit);
       };
-      $scope.editItem = (workspace) => {
+      $scope.editItem = workspace => {
         kbnUrl.redirect(getEditPath(workspace));
       };
-      $scope.getViewUrl = (workspace) => getEditUrl(chrome, workspace);
-      $scope.delete = (workspaces) => {
+      $scope.getViewUrl = workspace => getEditUrl(chrome, workspace);
+      $scope.delete = workspaces => {
         return graphService.delete(workspaces.map(({ id }) => id));
       };
       $scope.capabilities = capabilities.get().graph;
-      $scope.initialFilter = ($location.search()).filter || '';
+      $scope.initialFilter = $location.search().filter || '';
       $scope.coreStart = npStart.core;
       setBreadcrumbs({ chrome });
-    }
+    },
   })
   .when('/workspace/:id?', {
     template: appTemplate,
     badge: getReadonlyBadge,
     resolve: {
-      savedWorkspace: function (savedGraphWorkspaces, $route) {
-        return $route.current.params.id ? savedGraphWorkspaces.get($route.current.params.id)
-          .catch(
-            function () {
+      savedWorkspace: function(savedGraphWorkspaces, $route) {
+        return $route.current.params.id
+          ? savedGraphWorkspaces.get($route.current.params.id).catch(function() {
               toastNotifications.addDanger(
                 i18n.translate('xpack.graph.missingWorkspaceErrorMessage', {
                   defaultMessage: 'Missing workspace',
                 })
               );
-            }
-          ) : savedGraphWorkspaces.get();
+            })
+          : savedGraphWorkspaces.get();
       },
-      indexPatterns: function (Private) {
+      indexPatterns: function(Private) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);
 
-        return savedObjectsClient.find({
-          type: 'index-pattern',
-          fields: ['title', 'type'],
-          perPage: 10000
-        }).then(response => response.savedObjects);
+        return savedObjectsClient
+          .find({
+            type: 'index-pattern',
+            fields: ['title', 'type'],
+            perPage: 10000,
+          })
+          .then(response => response.savedObjects);
       },
-      GetIndexPatternProvider: function (Private) {
+      GetIndexPatternProvider: function(Private) {
         return data.indexPatterns.indexPatterns;
       },
-      SavedWorkspacesProvider: function (Private) {
+      SavedWorkspacesProvider: function(Private) {
         return Private(SavedWorkspacesProvider);
-      }
-    }
+      },
+    },
   })
   .otherwise({
-    redirectTo: '/home'
+    redirectTo: '/home',
   });
 
-
 //========  Controller for basic UI ==================
-app.controller('graphuiPlugin', function (
-  $scope,
-  $route,
-  $http,
-  kbnUrl,
-  confirmModal,
-  kbnBaseUrl
-) {
+app.controller('graphuiPlugin', function($scope, $route, $http, kbnUrl, confirmModal, kbnBaseUrl) {
   checkLicense(kbnBaseUrl);
 
   function handleError(err) {
@@ -228,11 +219,12 @@ app.controller('graphuiPlugin', function (
   function callNodeProxy(indexName, query, responseHandler) {
     const request = {
       index: indexName,
-      query: query
+      query: query,
     };
     $scope.loading = true;
-    return $http.post('../api/graph/graphExplore', request)
-      .then(function (resp) {
+    return $http
+      .post('../api/graph/graphExplore', request)
+      .then(function(resp) {
         if (resp.data.resp.timed_out) {
           toastNotifications.addWarning(
             i18n.translate('xpack.graph.exploreGraph.timedOutWarningText', {
@@ -248,16 +240,16 @@ app.controller('graphuiPlugin', function (
       });
   }
 
-
   //Helper function for the graphClientWorkspace to perform a query
-  const callSearchNodeProxy = function (indexName, query, responseHandler) {
+  const callSearchNodeProxy = function(indexName, query, responseHandler) {
     const request = {
       index: indexName,
-      body: query
+      body: query,
     };
     $scope.loading = true;
-    $http.post('../api/graph/searchProxy', request)
-      .then(function (resp) {
+    $http
+      .post('../api/graph/searchProxy', request)
+      .then(function(resp) {
         responseHandler(resp.data.resp);
       })
       .catch(handleHttpError)
@@ -266,7 +258,9 @@ app.controller('graphuiPlugin', function (
       });
   };
 
-  $scope.indexPatternProvider = createCachedIndexPatternProvider($route.current.locals.GetIndexPatternProvider.get);
+  $scope.indexPatternProvider = createCachedIndexPatternProvider(
+    $route.current.locals.GetIndexPatternProvider.get
+  );
 
   const store = createGraphStore({
     basePath: chrome.getBasePath(),
@@ -277,10 +271,10 @@ app.controller('graphuiPlugin', function (
         indexName: indexPattern,
         vertex_fields: [],
         // Here we have the opportunity to look up labels for nodes...
-        nodeLabeller: function () {
+        nodeLabeller: function() {
           //   console.log(newNodes);
         },
-        changeHandler: function () {
+        changeHandler: function() {
           //Allows DOM to update with graph layout changes.
           $scope.$apply();
         },
@@ -290,10 +284,10 @@ app.controller('graphuiPlugin', function (
       };
       $scope.workspace = gws.createWorkspace(options);
     },
-    setLiveResponseFields: (fields) => {
+    setLiveResponseFields: fields => {
       $scope.liveResponseFields = fields;
     },
-    setUrlTemplates: (urlTemplates) => {
+    setUrlTemplates: urlTemplates => {
       $scope.urlTemplates = urlTemplates;
     },
     getWorkspace: () => {
@@ -309,7 +303,7 @@ app.controller('graphuiPlugin', function (
       $scope.workspaceInitialized = true;
     },
     savePolicy: chrome.getInjected('graphSavePolicy'),
-    changeUrl: (newUrl) => {
+    changeUrl: newUrl => {
       $scope.$evalAsync(() => {
         kbnUrl.change(newUrl, {});
       });
@@ -332,9 +326,8 @@ app.controller('graphuiPlugin', function (
   const allSavingDisabled = chrome.getInjected('graphSavePolicy') === 'none';
   $scope.spymode = 'request';
   $scope.colors = colorChoices;
-  $scope.isColorDark = (color) => isColorDark(...hexToRgb(color));
-  $scope.nodeClick = function (n, $event) {
-
+  $scope.isColorDark = color => isColorDark(...hexToRgb(color));
+  $scope.nodeClick = function(n, $event) {
     //Selection logic - shift key+click helps selects multiple nodes
     // Without the shift key we deselect all prior selections (perhaps not
     // a great idea for touch devices with no concept of shift key)
@@ -343,7 +336,6 @@ app.controller('graphuiPlugin', function (
       $scope.workspace.selectNone();
       n.isSelected = prevSelection;
     }
-
 
     if ($scope.workspace.toggleNodeSelection(n)) {
       $scope.selectSelected(n);
@@ -359,7 +351,7 @@ app.controller('graphuiPlugin', function (
     }
     const confirmModalOptions = {
       onConfirm: callback,
-      onCancel: (() => {}),
+      onCancel: () => {},
       confirmButtonText: i18n.translate('xpack.graph.leaveWorkspace.confirmButtonLabel', {
         defaultMessage: 'Leave anyway',
       }),
@@ -368,21 +360,28 @@ app.controller('graphuiPlugin', function (
       }),
       ...options,
     };
-    confirmModal(text || i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
-      defaultMessage: 'If you leave now, you will lose unsaved changes.',
-    }), confirmModalOptions);
+    confirmModal(
+      text ||
+        i18n.translate('xpack.graph.leaveWorkspace.confirmText', {
+          defaultMessage: 'If you leave now, you will lose unsaved changes.',
+        }),
+      confirmModalOptions
+    );
   }
   $scope.confirmWipeWorkspace = canWipeWorkspace;
 
-  $scope.clickEdge = function (edge) {
+  $scope.clickEdge = function(edge) {
     if (edge.inferred) {
-      $scope.setDetail ({ 'inferredEdge': edge });
-    }else {
-      $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [edge.topSrc, edge.topTarget]);
+      $scope.setDetail({ inferredEdge: edge });
+    } else {
+      $scope.workspace.getAllIntersections($scope.handleMergeCandidatesCallback, [
+        edge.topSrc,
+        edge.topTarget,
+      ]);
     }
   };
 
-  $scope.submit = function (searchTerm) {
+  $scope.submit = function(searchTerm) {
     $scope.workspaceInitialized = true;
     const numHops = 2;
     if (searchTerm.startsWith('{')) {
@@ -391,12 +390,11 @@ app.controller('graphuiPlugin', function (
         if (query.vertices) {
           // Is a graph explore request
           $scope.workspace.callElasticsearch(query);
-        }else {
+        } else {
           // Is a regular query DSL query
           $scope.workspace.search(query, $scope.liveResponseFields, numHops);
         }
-      }
-      catch (err) {
+      } catch (err) {
         handleError(err);
       }
       return;
@@ -404,38 +402,38 @@ app.controller('graphuiPlugin', function (
     $scope.workspace.simpleSearch(searchTerm, $scope.liveResponseFields, numHops);
   };
 
-  $scope.selectSelected = function (node) {
+  $scope.selectSelected = function(node) {
     $scope.detail = {
-      latestNodeSelection: node
+      latestNodeSelection: node,
     };
-    return $scope.selectedSelectedVertex = node;
+    return ($scope.selectedSelectedVertex = node);
   };
 
-  $scope.isSelectedSelected = function (node) {
+  $scope.isSelectedSelected = function(node) {
     return $scope.selectedSelectedVertex === node;
   };
 
-  $scope.openUrlTemplate = function (template) {
+  $scope.openUrlTemplate = function(template) {
     const url = template.url;
     const newUrl = url.replace(urlTemplateRegex, template.encoder.encode($scope.workspace));
     window.open(newUrl, '_blank');
   };
 
-  $scope.aceLoaded = (editor) => {
+  $scope.aceLoaded = editor => {
     editor.$blockScrolling = Infinity;
   };
 
-  $scope.setDetail = function (data) {
+  $scope.setDetail = function(data) {
     $scope.detail = data;
   };
 
-  $scope.performMerge = function (parentId, childId) {
+  $scope.performMerge = function(parentId, childId) {
     let found = true;
     while (found) {
       found = false;
       for (const i in $scope.detail.mergeCandidates) {
         const mc = $scope.detail.mergeCandidates[i];
-        if ((mc.id1 === childId) || (mc.id2 === childId)) {
+        if (mc.id1 === childId || mc.id2 === childId) {
           $scope.detail.mergeCandidates.splice(i, 1);
           found = true;
           break;
@@ -446,21 +444,19 @@ app.controller('graphuiPlugin', function (
     $scope.detail = null;
   };
 
-
-  $scope.handleMergeCandidatesCallback = function (termIntersects) {
+  $scope.handleMergeCandidatesCallback = function(termIntersects) {
     const mergeCandidates = [];
     for (const i in termIntersects) {
       const ti = termIntersects[i];
       mergeCandidates.push({
-        'id1': ti.id1,
-        'id2': ti.id2,
-        'term1': ti.term1,
-        'term2': ti.term2,
-        'v1': ti.v1,
-        'v2': ti.v2,
-        'overlap': ti.overlap
+        id1: ti.id1,
+        id2: ti.id2,
+        term1: ti.term1,
+        term2: ti.term2,
+        v1: ti.v1,
+        v2: ti.v2,
+        overlap: ti.overlap,
       });
-
     }
     $scope.detail = { mergeCandidates };
   };
@@ -478,10 +474,11 @@ app.controller('graphuiPlugin', function (
     tooltip: i18n.translate('xpack.graph.topNavMenu.newWorkspaceTooltip', {
       defaultMessage: 'Create a new workspace',
     }),
-    run: function () {
-      canWipeWorkspace(function () {
+    run: function() {
+      canWipeWorkspace(function() {
         kbnUrl.change('/workspace/', {});
-      });  },
+      });
+    },
     testId: 'graphNewButton',
   });
 
@@ -501,7 +498,8 @@ app.controller('graphuiPlugin', function (
       tooltip: () => {
         if (allSavingDisabled) {
           return i18n.translate('xpack.graph.topNavMenu.saveWorkspace.disabledTooltip', {
-            defaultMessage: 'No changes to saved workspaces are permitted by the current save policy',
+            defaultMessage:
+              'No changes to saved workspaces are permitted by the current save policy',
           });
         } else {
           return i18n.translate('xpack.graph.topNavMenu.saveWorkspace.enabledTooltip', {
@@ -509,7 +507,7 @@ app.controller('graphuiPlugin', function (
           });
         }
       },
-      disableButton: function () {
+      disableButton: function() {
         return allSavingDisabled || !hasFieldsSelector(store.getState());
       },
       run: () => {
@@ -523,7 +521,9 @@ app.controller('graphuiPlugin', function (
   }
   $scope.topNavMenu.push({
     key: 'inspect',
-    disableButton: function () { return $scope.workspace === null; },
+    disableButton: function() {
+      return $scope.workspace === null;
+    },
     label: i18n.translate('xpack.graph.topNavMenu.inspectLabel', {
       defaultMessage: 'Inspect',
     }),
@@ -541,7 +541,9 @@ app.controller('graphuiPlugin', function (
 
   $scope.topNavMenu.push({
     key: 'settings',
-    disableButton: function () { return datasourceSelector(store.getState()).type === 'none'; },
+    disableButton: function() {
+      return datasourceSelector(store.getState()).type === 'none';
+    },
     label: i18n.translate('xpack.graph.topNavMenu.settingsLabel', {
       defaultMessage: 'Settings',
     }),
@@ -549,22 +551,29 @@ app.controller('graphuiPlugin', function (
       defaultMessage: 'Settings',
     }),
     run: () => {
-      const settingsObservable = asAngularSyncedObservable(() => ({
-        blacklistedNodes: $scope.workspace ? [...$scope.workspace.blacklistedNodes] : undefined,
-        unblacklistNode: $scope.workspace ? $scope.workspace.unblacklist : undefined,
-        canEditDrillDownUrls: chrome.getInjected('canEditDrillDownUrls')
-      }), $scope.$digest.bind($scope));
+      const settingsObservable = asAngularSyncedObservable(
+        () => ({
+          blacklistedNodes: $scope.workspace ? [...$scope.workspace.blacklistedNodes] : undefined,
+          unblacklistNode: $scope.workspace ? $scope.workspace.unblacklist : undefined,
+          canEditDrillDownUrls: chrome.getInjected('canEditDrillDownUrls'),
+        }),
+        $scope.$digest.bind($scope)
+      );
       npStart.core.overlays.openFlyout(
         <Provider store={store}>
           <Settings observable={settingsObservable} />
-        </Provider>, {
+        </Provider>,
+        {
           size: 'm',
-          closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', { defaultMessage: 'Close' }),
+          closeButtonAriaLabel: i18n.translate('xpack.graph.settings.closeLabel', {
+            defaultMessage: 'Close',
+          }),
           'data-test-subj': 'graphSettingsFlyout',
           ownFocus: true,
           className: 'gphSettingsFlyout',
           maxWidth: 520,
-        });
+        }
+      );
     },
   });
 
@@ -573,7 +582,7 @@ app.controller('graphuiPlugin', function (
   };
 
   $scope.closeMenus = () => {
-    _.forOwn($scope.menus, function (_, key) {
+    _.forOwn($scope.menus, function(_, key) {
       $scope.menus[key] = false;
     });
   };
@@ -599,4 +608,3 @@ app.controller('graphuiPlugin', function (
     $scope.noIndexPatterns = $route.current.locals.indexPatterns.length === 0;
   }
 });
-

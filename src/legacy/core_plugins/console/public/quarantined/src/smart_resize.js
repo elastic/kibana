@@ -19,7 +19,7 @@
 
 import { get, throttle } from 'lodash';
 
-export default function (editor) {
+export default function(editor) {
   const resize = editor.resize;
 
   const throttledResize = throttle(() => {

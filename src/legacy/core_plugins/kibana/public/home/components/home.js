@@ -140,13 +140,9 @@ export class Home extends Component {
     return (
       <EuiPage restrictWidth={1200}>
         <EuiPageBody className="eui-displayBlock">
-
           <EuiScreenReaderOnly>
             <h1>
-              <FormattedMessage
-                id="kbn.home.welcomeHomePageHeader"
-                defaultMessage="Kibana home"
-              />
+              <FormattedMessage id="kbn.home.welcomeHomePageHeader" defaultMessage="Kibana home" />
             </h1>
           </EuiScreenReaderOnly>
 

@@ -20,64 +20,62 @@ export function ClusterStatus({ stats }) {
     totalShards,
     unassignedShards,
     documentCount,
-    status
+    status,
   } = stats;
 
   const metrics = [
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.nodesLabel', {
-        defaultMessage: 'Nodes'
+        defaultMessage: 'Nodes',
       }),
       value: nodesCount,
-      'data-test-subj': 'nodesCount'
+      'data-test-subj': 'nodesCount',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.indicesLabel', {
-        defaultMessage: 'Indices'
+        defaultMessage: 'Indices',
       }),
       value: indicesCount,
-      'data-test-subj': 'indicesCount'
+      'data-test-subj': 'indicesCount',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.memoryLabel', {
-        defaultMessage: 'Memory'
+        defaultMessage: 'Memory',
       }),
       value: formatMetric(memUsed, 'byte') + ' / ' + formatMetric(memMax, 'byte'),
-      'data-test-subj': 'memory'
+      'data-test-subj': 'memory',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.totalShardsLabel', {
-        defaultMessage: 'Total shards'
+        defaultMessage: 'Total shards',
       }),
       value: totalShards,
-      'data-test-subj': 'totalShards'
+      'data-test-subj': 'totalShards',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.unassignedShardsLabel', {
-        defaultMessage: 'Unassigned shards'
+        defaultMessage: 'Unassigned shards',
       }),
       value: unassignedShards,
-      'data-test-subj': 'unassignedShards'
+      'data-test-subj': 'unassignedShards',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.documentsLabel', {
-        defaultMessage: 'Documents'
+        defaultMessage: 'Documents',
       }),
       value: formatMetric(documentCount, 'int_commas'),
-      'data-test-subj': 'documentCount'
+      'data-test-subj': 'documentCount',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.clusterStatus.dataLabel', {
-        defaultMessage: 'Data'
+        defaultMessage: 'Data',
       }),
       value: formatMetric(dataSize, 'byte'),
-      'data-test-subj': 'dataSize'
-    }
+      'data-test-subj': 'dataSize',
+    },
   ];
 
-  const IconComponent = ({ status }) => (
-    <ElasticsearchStatusIcon status={status} />
-  );
+  const IconComponent = ({ status }) => <ElasticsearchStatusIcon status={status} />;
 
   return (
     <SummaryStatus

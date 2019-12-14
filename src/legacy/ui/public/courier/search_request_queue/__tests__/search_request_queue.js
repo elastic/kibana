@@ -23,7 +23,7 @@ import sinon from 'sinon';
 
 import { searchRequestQueue } from '../search_request_queue';
 
-describe('Courier Request Queue', function () {
+describe('Courier Request Queue', function() {
   beforeEach(ngMock.module('kibana'));
   beforeEach(() => searchRequestQueue.removeAll());
   after(() => searchRequestQueue.removeAll());
@@ -35,8 +35,8 @@ describe('Courier Request Queue', function () {
     }
   }
 
-  describe('#getStartable()', function () {
-    it('returns only startable requests', function () {
+  describe('#getStartable()', function() {
+    it('returns only startable requests', function() {
       searchRequestQueue.add(new MockReq(false));
       searchRequestQueue.add(new MockReq(true));
       expect(searchRequestQueue.getStartable()).to.have.length(1);
@@ -46,8 +46,8 @@ describe('Courier Request Queue', function () {
   // Note: I'm not convinced this discrepancy between how we calculate startable vs inactive requests makes any sense.
   // I'm only testing here that the current, (very old) code continues to behave how it always did, but it may turn out
   // that we can clean this up, or remove this.
-  describe('#getInactive()', function () {
-    it('returns only requests with started = false', function () {
+  describe('#getInactive()', function() {
+    it('returns only requests with started = false', function() {
       searchRequestQueue.add({ started: true });
       searchRequestQueue.add({ started: false });
       searchRequestQueue.add({ started: true });

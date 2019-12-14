@@ -24,30 +24,33 @@ export class Plugin {
     const config = core.config();
     const { collectorSet } = core.usage;
     /*
-    * Register collector objects for stats to show up in the APIs
-    */
-    collectorSet.register(getOpsStatsCollector({
-      elasticsearchPlugin: plugins.elasticsearch,
-      kbnServerConfig: kbnServer.config,
-      log: core.log,
-      config,
-      getOSInfo: core.getOSInfo,
-      hapiServer: core._hapi,
-      collectorSet: core.usage.collectorSet,
-    }));
+     * Register collector objects for stats to show up in the APIs
+     */
+    collectorSet.register(
+      getOpsStatsCollector({
+        elasticsearchPlugin: plugins.elasticsearch,
+        kbnServerConfig: kbnServer.config,
+        log: core.log,
+        config,
+        getOSInfo: core.getOSInfo,
+        hapiServer: core._hapi,
+        collectorSet: core.usage.collectorSet,
+      })
+    );
     collectorSet.register(getKibanaUsageCollector({ collectorSet, config }));
     collectorSet.register(getSettingsCollector({ collectorSet, config }));
     registerMonitoringCollection();
 
     /*
-    * Instantiate and start the internal background task that calls collector
-    * fetch methods and uploads to the ES monitoring bulk endpoint
-    */
+     * Instantiate and start the internal background task that calls collector
+     * fetch methods and uploads to the ES monitoring bulk endpoint
+     */
     const xpackMainPlugin = plugins.xpack_main;
-    xpackMainPlugin.status.once('green', async () => { // first time xpack_main turns green
+    xpackMainPlugin.status.once('green', async () => {
+      // first time xpack_main turns green
       /*
-      * End-user-facing services
-      */
+       * End-user-facing services
+       */
       const uiEnabled = config.get('xpack.monitoring.ui.enabled');
 
       if (uiEnabled) {
@@ -55,13 +58,13 @@ export class Plugin {
           log: core.log,
           events: core.events,
           config,
-          elasticsearchPlugin: plugins.elasticsearch
+          elasticsearchPlugin: plugins.elasticsearch,
         }); // Instantiate the dedicated ES client
         await initMonitoringXpackInfo({
           config,
           log: core.log,
           xpackMainPlugin: plugins.xpack_main,
-          expose: core.expose
+          expose: core.expose,
         }); // Route handlers depend on this for xpackInfo
         await requireUIRoutes(core);
       }
@@ -81,14 +84,14 @@ export class Plugin {
         privilege: {
           savedObject: {
             all: [],
-            read: []
+            read: [],
           },
           ui: [],
         },
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
-          defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'
-        })
-      }
+          defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
+        }),
+      },
     });
 
     const bulkUploader = initBulkUploader({
@@ -96,19 +99,20 @@ export class Plugin {
       config,
       log: core.log,
       kbnServerStatus: kbnServer.status,
-      kbnServerVersion: kbnServer.version
+      kbnServerVersion: kbnServer.version,
     });
     const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
     const { info: xpackMainInfo } = xpackMainPlugin;
 
     if (kibanaCollectionEnabled) {
       /*
-      * Bulk uploading of Kibana stats
-      */
+       * Bulk uploading of Kibana stats
+       */
       xpackMainInfo.onLicenseInfoChange(() => {
         // use updated xpack license info to start/stop bulk upload
         const mainMonitoring = xpackMainInfo.feature('monitoring');
-        const monitoringBulkEnabled = mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
+        const monitoringBulkEnabled =
+          mainMonitoring && mainMonitoring.isAvailable() && mainMonitoring.isEnabled();
         if (monitoringBulkEnabled) {
           bulkUploader.start(collectorSet);
         } else {
@@ -122,15 +126,17 @@ export class Plugin {
       );
     }
 
-    core.injectUiAppVars('monitoring', (core) => {
+    core.injectUiAppVars('monitoring', core => {
       const config = core.config();
       return {
         maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),
         minIntervalSeconds: config.get('xpack.monitoring.min_interval_seconds'),
         kbnIndex: config.get('kibana.index'),
         showLicenseExpiration: config.get('xpack.monitoring.show_license_expiration'),
-        showCgroupMetricsElasticsearch: config.get('xpack.monitoring.ui.container.elasticsearch.enabled'),
-        showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
+        showCgroupMetricsElasticsearch: config.get(
+          'xpack.monitoring.ui.container.elasticsearch.enabled'
+        ),
+        showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled'), // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2
       };
     });
   }

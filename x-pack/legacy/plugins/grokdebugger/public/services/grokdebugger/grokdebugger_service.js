@@ -15,7 +15,8 @@ export class GrokdebuggerService {
   }
 
   simulate(grokdebuggerRequest) {
-    return this.$http.post(`${this.basePath}/simulate`, grokdebuggerRequest.upstreamJSON)
+    return this.$http
+      .post(`${this.basePath}/simulate`, grokdebuggerRequest.upstreamJSON)
       .then(response => {
         return GrokdebuggerResponse.fromUpstreamJSON(response.data.grokdebuggerResponse);
       })

@@ -24,6 +24,9 @@ export function convertGeoPolygon(filter) {
     throw new Error(`Expected filter of type "geo_polygon", got "${filter.meta.type}"`);
   }
 
-  const { key, params: { points } } = filter.meta;
+  const {
+    key,
+    params: { points },
+  } = filter.meta;
   return nodeTypes.function.buildNode('geoPolygon', key, points);
 }

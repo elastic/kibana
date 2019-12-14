@@ -21,20 +21,23 @@ import {
   EuiPanel,
   EuiCallOut,
   EuiButton,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 
-const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
+const getSortHandler = type => item => _.get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
   const cols = [];
 
-  const cpuUsageColumnTitle = i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle', {
-    defaultMessage: 'CPU Usage',
-  });
+  const cpuUsageColumnTitle = i18n.translate(
+    'xpack.monitoring.elasticsearch.nodes.cpuUsageColumnTitle',
+    {
+      defaultMessage: 'CPU Usage',
+    }
+  );
 
   cols.push({
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.nameColumnTitle', {
@@ -59,7 +62,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         const status = list[node.resolver] || {};
         const instance = {
           uuid: node.resolver,
-          name: node.name
+          name: node.name,
         };
 
         setupModeStatus = (
@@ -82,25 +85,18 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         <div>
           <div className="monTableCell__name">
             <EuiText size="m">
-              <EuiToolTip
-                position="bottom"
-                content={node.nodeTypeLabel}
-              >
+              <EuiToolTip position="bottom" content={node.nodeTypeLabel}>
                 <span className={`fa ${node.nodeTypeClass}`} />
               </EuiToolTip>
               &nbsp;
-              <span data-test-subj="name">
-                {nameLink}
-              </span>
+              <span data-test-subj="name">{nameLink}</span>
             </EuiText>
           </div>
-          <div className="monTableCell__transportAddress">
-            {extractIp(node.transport_address)}
-          </div>
+          <div className="monTableCell__transportAddress">{extractIp(node.transport_address)}</div>
           {setupModeStatus}
         </div>
       );
-    }
+    },
   });
 
   cols.push({
@@ -110,21 +106,19 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     field: 'isOnline',
     sortable: true,
     render: value => {
-      const status = value ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
-        defaultMessage: 'Online',
-      }) : i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.offlineLabel', {
-        defaultMessage: 'Offline',
-      });
+      const status = value
+        ? i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.onlineLabel', {
+            defaultMessage: 'Online',
+          })
+        : i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumn.offlineLabel', {
+            defaultMessage: 'Offline',
+          });
       return (
         <div className="monTableCell__status">
-          <NodeStatusIcon
-            isOnline={value}
-            status={status}
-          />{' '}
-          {status}
+          <NodeStatusIcon isOnline={value} status={status} /> {status}
         </div>
       );
-    }
+    },
   });
 
   cols.push({
@@ -138,8 +132,10 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         <div className="monTableCell__number" data-test-subj="shards">
           {value}
         </div>
-      ) : <OfflineCell/>;
-    }
+      ) : (
+        <OfflineCell />
+      );
+    },
   });
 
   if (showCgroupMetricsElasticsearch) {
@@ -154,7 +150,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
           isPercent={true}
           data-test-subj="cpuQuota"
         />
-      )
+      ),
     });
 
     cols.push({
@@ -170,7 +166,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
           isPercent={false}
           data-test-subj="cpuThrottled"
         />
-      )
+      ),
     });
   } else {
     cols.push({
@@ -184,7 +180,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
           isPercent={true}
           data-test-subj="cpuUsage"
         />
-      )
+      ),
     });
 
     cols.push({
@@ -200,7 +196,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
           isPercent={false}
           data-test-subj="loadAverage"
         />
-      )
+      ),
     });
   }
 
@@ -208,8 +204,8 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.jvmMemoryColumnTitle', {
       defaultMessage: '{javaVirtualMachine} Memory',
       values: {
-        javaVirtualMachine: 'JVM'
-      }
+        javaVirtualMachine: 'JVM',
+      },
     }),
     field: 'node_jvm_mem_percent',
     sortable: getSortHandler('node_jvm_mem_percent'),
@@ -220,7 +216,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         isPercent={true}
         data-test-subj="jvmMemory"
       />
-    )
+    ),
   });
 
   cols.push({
@@ -236,7 +232,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid) => {
         isPercent={false}
         data-test-subj="diskFreeSpace"
       />
-    )
+    ),
   });
 
   return cols;
@@ -252,18 +248,22 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
     // We want to create a seamless experience for the user by merging in the setup data
     // and the node data from monitoring indices in the likely scenario where some nodes
     // are using MB collection and some are using no collection
-    const nodesByUuid = nodes.reduce((byUuid, node) => ({
-      ...byUuid,
-      [node.id || node.resolver]: node
-    }), {});
+    const nodesByUuid = nodes.reduce(
+      (byUuid, node) => ({
+        ...byUuid,
+        [node.id || node.resolver]: node,
+      }),
+      {}
+    );
 
-    nodes.push(...Object.entries(setupMode.data.byUuid)
-      .reduce((nodes, [nodeUuid, instance]) => {
+    nodes.push(
+      ...Object.entries(setupMode.data.byUuid).reduce((nodes, [nodeUuid, instance]) => {
         if (!nodesByUuid[nodeUuid] && instance.node) {
           nodes.push(instance.node);
         }
         return nodes;
-      }, []));
+      }, [])
+    );
   }
 
   let setupModeCallout = null;
@@ -276,64 +276,81 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
         customRenderer={() => {
           const customRenderResponse = {
             shouldRender: false,
-            componentToRender: null
+            componentToRender: null,
           };
 
           const isNetNewUser = setupMode.data.totalUniqueInstanceCount === 0;
-          const hasNoInstances = setupMode.data.totalUniqueInternallyCollectedCount === 0
-            && setupMode.data.totalUniqueFullyMigratedCount === 0
-            && setupMode.data.totalUniquePartiallyMigratedCount === 0;
+          const hasNoInstances =
+            setupMode.data.totalUniqueInternallyCollectedCount === 0 &&
+            setupMode.data.totalUniqueFullyMigratedCount === 0 &&
+            setupMode.data.totalUniquePartiallyMigratedCount === 0;
 
           if (isNetNewUser || hasNoInstances) {
             customRenderResponse.shouldRender = true;
             customRenderResponse.componentToRender = (
               <Fragment>
                 <EuiCallOut
-                  title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeTitle', {
-                    defaultMessage: 'Elasticsearch node detected',
-                  })}
+                  title={i18n.translate(
+                    'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeTitle',
+                    {
+                      defaultMessage: 'Elasticsearch node detected',
+                    }
+                  )}
                   color={setupMode.data.totalUniqueInstanceCount > 0 ? 'danger' : 'warning'}
                   iconType="flag"
                 >
                   <p>
-                    {i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeDescription', {
-                      defaultMessage: `The following nodes are not monitored. Click 'Monitor with Metricbeat' below to start monitoring.`,
-                    })}
+                    {i18n.translate(
+                      'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.detectedNodeDescription',
+                      {
+                        defaultMessage: `The following nodes are not monitored. Click 'Monitor with Metricbeat' below to start monitoring.`,
+                      }
+                    )}
                   </p>
                 </EuiCallOut>
-                <EuiSpacer size="m"/>
+                <EuiSpacer size="m" />
               </Fragment>
             );
-          }
-          else if (setupMode.data.totalUniquePartiallyMigratedCount === setupMode.data.totalUniqueInstanceCount) {
-            const finishMigrationAction = _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
-              ? setupMode.shortcutToFinishMigration
-              : setupMode.openFlyout;
+          } else if (
+            setupMode.data.totalUniquePartiallyMigratedCount ===
+            setupMode.data.totalUniqueInstanceCount
+          ) {
+            const finishMigrationAction =
+              _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
+                ? setupMode.shortcutToFinishMigration
+                : setupMode.openFlyout;
 
             customRenderResponse.shouldRender = true;
             customRenderResponse.componentToRender = (
               <Fragment>
                 <EuiCallOut
-                  title={i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionTitle', {
-                    defaultMessage: 'Metricbeat is now monitoring your Elasticsearch nodes',
-                  })}
+                  title={i18n.translate(
+                    'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionTitle',
+                    {
+                      defaultMessage: 'Metricbeat is now monitoring your Elasticsearch nodes',
+                    }
+                  )}
                   color="warning"
                   iconType="flag"
                 >
                   <p>
-                    {i18n.translate('xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionDescription', {
-                      defaultMessage: `Disable self monitoring to finish the migration.`
-                    })}
+                    {i18n.translate(
+                      'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionDescription',
+                      {
+                        defaultMessage: `Disable self monitoring to finish the migration.`,
+                      }
+                    )}
                   </p>
                   <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
                     {i18n.translate(
-                      'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionMigrationButtonLabel', {
-                        defaultMessage: 'Disable self monitoring'
+                      'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionMigrationButtonLabel',
+                      {
+                        defaultMessage: 'Disable self monitoring',
                       }
                     )}
                   </EuiButton>
                 </EuiCallOut>
-                <EuiSpacer size="m"/>
+                <EuiSpacer size="m" />
               </Fragment>
             );
           }
@@ -375,9 +392,12 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             search={{
               box: {
                 incremental: true,
-                placeholder: i18n.translate('xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder', {
-                  defaultMessage: 'Filter Nodes…'
-                }),
+                placeholder: i18n.translate(
+                  'xpack.monitoring.elasticsearch.nodes.monitoringTablePlaceholder',
+                  {
+                    defaultMessage: 'Filter Nodes…',
+                  }
+                ),
               },
             }}
             onTableChange={onTableChange}

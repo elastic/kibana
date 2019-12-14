@@ -20,24 +20,24 @@
 import path from 'path';
 import fs from 'fs';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
   // Find all folders in ./plugins since we treat all them as plugin folder
   const allFiles = fs.readdirSync(path.resolve(__dirname, 'plugins'));
-  const plugins = allFiles.filter(file => fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory());
+  const plugins = allFiles.filter(file =>
+    fs.statSync(path.resolve(__dirname, 'plugins', file)).isDirectory()
+  );
 
   return {
-    testFiles: [
-      require.resolve('./test_suites/run_pipeline'),
-    ],
+    testFiles: [require.resolve('./test_suites/run_pipeline')],
     services: functionalConfig.get('services'),
     pageObjects: functionalConfig.get('pageObjects'),
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
     esArchiver: {
-      directory: path.resolve(__dirname, '../es_archives')
+      directory: path.resolve(__dirname, '../es_archives'),
     },
     snapshots: {
       directory: path.resolve(__dirname, 'snapshots'),
@@ -49,7 +49,9 @@ export default async function ({ readConfigFile }) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        ...plugins.map(pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`),
+        ...plugins.map(
+          pluginDir => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
+        ),
       ],
     },
   };

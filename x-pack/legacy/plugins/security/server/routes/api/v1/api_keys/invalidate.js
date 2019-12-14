@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { wrapError } from '../../../../../../../../plugins/security/server';
-import { INTERNAL_API_BASE_PATH } from  '../../../../../common/constants';
+import { INTERNAL_API_BASE_PATH } from '../../../../../common/constants';
 
 export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({
@@ -19,7 +19,7 @@ export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckL
         const errors = [];
 
         // Send the request to invalidate the API key and return an error if it could not be deleted.
-        const sendRequestToInvalidateApiKey = async (id) => {
+        const sendRequestToInvalidateApiKey = async id => {
           try {
             const body = { id };
 
@@ -44,7 +44,7 @@ export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckL
         };
 
         // Invalidate all API keys in parallel.
-        await Promise.all(apiKeys.map((key) => invalidateApiKey(key)));
+        await Promise.all(apiKeys.map(key => invalidateApiKey(key)));
 
         return {
           itemsInvalidated,
@@ -58,13 +58,17 @@ export function initInvalidateApiKeysApi(server, callWithRequest, routePreCheckL
       pre: [routePreCheckLicenseFn],
       validate: {
         payload: Joi.object({
-          apiKeys: Joi.array().items(Joi.object({
-            id: Joi.string().required(),
-            name: Joi.string().required(),
-          })).required(),
+          apiKeys: Joi.array()
+            .items(
+              Joi.object({
+                id: Joi.string().required(),
+                name: Joi.string().required(),
+              })
+            )
+            .required(),
           isAdmin: Joi.bool().required(),
-        })
+        }),
       },
-    }
+    },
   });
 }

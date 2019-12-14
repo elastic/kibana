@@ -11,7 +11,7 @@ import { updateSourceProp } from '../../../actions/map_actions';
 
 function mapStateToProps(state = {}) {
   return {
-    layer: getSelectedLayer(state)
+    layer: getSelectedLayer(state),
   };
 }
 
@@ -21,5 +21,8 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedSourceSettings = connect(mapStateToProps, mapDispatchToProps)(SourceSettings);
+const connectedSourceSettings = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SourceSettings);
 export { connectedSourceSettings as SourceSettings };

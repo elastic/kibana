@@ -29,33 +29,39 @@ jest.mock('../../../../core_plugins/data/public/legacy', () => ({
     indexPatterns: {
       indexPatterns: {
         get: () => ({
-          fields: { getByName: name => {
-            const fields = { myField: { name: 'myField' } };
-            return fields[name];
-          } }
+          fields: {
+            getByName: name => {
+              const fields = { myField: { name: 'myField' } };
+              return fields[name];
+            },
+          },
         }),
-      }
+      },
     },
     filter: {
       filterManager: {
         fieldName: 'myNumberField',
         getIndexPattern: () => ({
-          fields: { getByName: name => {
-            const fields = { myField: { name: 'myField' } };
-            return fields[name];
-          } }
+          fields: {
+            getByName: name => {
+              const fields = { myField: { name: 'myField' } };
+              return fields[name];
+            },
+          },
         }),
-        getAppFilters: jest.fn().mockImplementation(() => ([])),
-        getGlobalFilters: jest.fn().mockImplementation(() => ([])),
-      }
-    }
-  }
+        getAppFilters: jest.fn().mockImplementation(() => []),
+        getGlobalFilters: jest.fn().mockImplementation(() => []),
+      },
+    },
+  },
 }));
 
-chrome.getInjected.mockImplementation((key) => {
-  switch(key) {
-    case 'autocompleteTimeout': return 1000;
-    case 'autocompleteTerminateAfter': return 100000;
+chrome.getInjected.mockImplementation(key => {
+  switch (key) {
+    case 'autocompleteTimeout':
+      return 1000;
+    case 'autocompleteTerminateAfter':
+      return 100000;
   }
 });
 
@@ -76,11 +82,11 @@ function MockSearchSource() {
                 key: 'Xi an Xianyang International Airport',
                 doc_count: 526,
               },
-            ]
-          }
-        }
+            ],
+          },
+        },
       };
-    }
+    },
   };
 }
 
@@ -92,7 +98,7 @@ describe('hasValue', () => {
   const controlParams = {
     id: '1',
     fieldName: 'myField',
-    options: {}
+    options: {},
   };
   const useTimeFilter = false;
 
@@ -120,7 +126,7 @@ describe('fetch', () => {
   const controlParams = {
     id: '1',
     fieldName: 'myField',
-    options: {}
+    options: {},
   };
   const useTimeFilter = false;
   let mockKbnApi;
@@ -135,13 +141,16 @@ describe('fetch', () => {
     await listControl.fetch();
     expect(mockKbnApi.SearchSource).toHaveBeenCalledWith({
       timeout: `1000ms`,
-      terminate_after: 100000
+      terminate_after: 100000,
     });
   });
 
   test('should set selectOptions to results of terms aggregation', async () => {
     await listControl.fetch();
-    expect(listControl.selectOptions).toEqual(['Zurich Airport', 'Xi an Xianyang International Airport']);
+    expect(listControl.selectOptions).toEqual([
+      'Zurich Airport',
+      'Xi an Xianyang International Airport',
+    ]);
   });
 });
 
@@ -152,7 +161,6 @@ describe('fetch with ancestors', () => {
     options: {},
   };
   const useTimeFilter = false;
-
 
   let listControl;
   let parentControl;
@@ -171,7 +179,6 @@ describe('fetch with ancestors', () => {
   });
 
   describe('ancestor does not have value', () => {
-
     test('should disable control', async () => {
       await listControl.fetch();
       expect(listControl.isEnabled()).toBe(false);

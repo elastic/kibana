@@ -54,7 +54,9 @@ uiModules.get('kibana/courier').service('courier', ($rootScope, Private) => {
         }
       };
 
-      const refreshIntervalSubscription = timefilter.getRefreshIntervalUpdate$().subscribe(updateRefreshInterval);
+      const refreshIntervalSubscription = timefilter
+        .getRefreshIntervalUpdate$()
+        .subscribe(updateRefreshInterval);
 
       const closeOnFatal = _.once(() => {
         // If there was a fatal error, then stop future searches. We want to use pause instead of

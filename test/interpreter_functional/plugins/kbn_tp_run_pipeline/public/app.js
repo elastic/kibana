@@ -54,21 +54,22 @@ app.config($locationProvider => {
     rewriteLinks: false,
   });
 });
-app.config(stateManagementConfigProvider =>
-  stateManagementConfigProvider.disable()
-);
+app.config(stateManagementConfigProvider => stateManagementConfigProvider.disable());
 
 function RootController($scope, $element) {
   const domNode = $element[0];
 
   // render react to DOM
-  render(<Main
-    RequestAdapter={RequestAdapter}
-    DataAdapter={DataAdapter}
-    runPipeline={runPipeline}
-    registries={registries}
-    visualizationLoader={visualizationLoader}
-  />, domNode);
+  render(
+    <Main
+      RequestAdapter={RequestAdapter}
+      DataAdapter={DataAdapter}
+      runPipeline={runPipeline}
+      registries={registries}
+      visualizationLoader={visualizationLoader}
+    />,
+    domNode
+  );
 
   // unmount react on controller destroy
   $scope.$on('$destroy', () => {

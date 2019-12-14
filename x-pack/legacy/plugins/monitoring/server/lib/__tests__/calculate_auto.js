@@ -18,16 +18,9 @@ describe('Calculating Time Intervals Based on Size of Buckets', () => {
   const duration = moment.duration(1456964549657 - 1456964538365, 'ms'); // about 11 seconds
 
   describe('Calculating Near Intervals with Ranging bucket sizes', () => {
-    const tuples = [
-      [10, 0],
-      [24, 470],
-      [40, 282],
-      [200, 56],
-      [800, 14],
-      [10000, 1]
-    ];
+    const tuples = [[10, 0], [24, 470], [40, 282], [200, 56], [800, 14], [10000, 1]];
 
-    _.each(tuples, (t) => {
+    _.each(tuples, t => {
       it(`Bucket Size: ${t[0]} - Time Interval: ${t[1]}`, () => {
         const result = calculateAuto(t[0], duration);
         expect(result.milliseconds()).to.be.eql(t[1]);

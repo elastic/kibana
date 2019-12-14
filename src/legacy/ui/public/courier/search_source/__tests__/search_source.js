@@ -31,7 +31,7 @@ function timeout() {
   });
 }
 
-describe('SearchSource', function () {
+describe('SearchSource', function() {
   require('test_utils/no_digest_promises').activateForSuite();
 
   let config;
@@ -40,19 +40,21 @@ describe('SearchSource', function () {
   let indexPattern2;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, _config_) {
-    config = _config_;
-    SearchSource = Private(SearchSourceProvider);
+  beforeEach(
+    ngMock.inject(function(Private, _config_) {
+      config = _config_;
+      SearchSource = Private(SearchSourceProvider);
 
-    indexPattern = new StubIndexPattern('test-*', cfg => cfg, null, []);
-    indexPattern2 = new StubIndexPattern('test2-*', cfg => cfg, null, []);
-    expect(indexPattern).to.not.be(indexPattern2);
-  }));
+      indexPattern = new StubIndexPattern('test-*', cfg => cfg, null, []);
+      indexPattern2 = new StubIndexPattern('test2-*', cfg => cfg, null, []);
+      expect(indexPattern).to.not.be(indexPattern2);
+    })
+  );
   beforeEach(() => searchRequestQueue.removeAll());
   after(() => searchRequestQueue.removeAll());
 
-  describe('#onResults()', function () {
-    it('adds a request to the searchRequestQueue', function () {
+  describe('#onResults()', function() {
+    it('adds a request to the searchRequestQueue', function() {
       const searchSource = new SearchSource();
 
       expect(searchRequestQueue.getCount()).to.be(0);
@@ -60,11 +62,11 @@ describe('SearchSource', function () {
       expect(searchRequestQueue.getCount()).to.be(1);
     });
 
-    it('returns a promise that is resolved with the results', function () {
+    it('returns a promise that is resolved with the results', function() {
       const searchSource = new SearchSource();
       const fakeResults = {};
 
-      const promise = searchSource.onResults().then((results) => {
+      const promise = searchSource.onResults().then(results => {
         expect(results).to.be(fakeResults);
       });
 
@@ -74,8 +76,8 @@ describe('SearchSource', function () {
     });
   });
 
-  describe('#destroy()', function () {
-    it('aborts all startable requests', function () {
+  describe('#destroy()', function() {
+    it('aborts all startable requests', function() {
       const searchSource = new SearchSource();
       searchSource.onResults();
       const searchRequest = searchRequestQueue.getSearchRequestAt(0);
@@ -84,7 +86,7 @@ describe('SearchSource', function () {
       expect(searchRequestQueue.getCount()).to.be(0);
     });
 
-    it('aborts all non-startable requests', function () {
+    it('aborts all non-startable requests', function() {
       const searchSource = new SearchSource();
       searchSource.onResults();
       const searchRequest = searchRequestQueue.getSearchRequestAt(0);
@@ -94,36 +96,36 @@ describe('SearchSource', function () {
     });
   });
 
-  describe('#setField()', function () {
-    it('sets the value for the property', function () {
+  describe('#setField()', function() {
+    it('sets the value for the property', function() {
       const searchSource = new SearchSource();
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).to.be(5);
     });
 
-    it('throws an error if the property is not accepted', function () {
+    it('throws an error if the property is not accepted', function() {
       const searchSource = new SearchSource();
       expect(() => searchSource.setField('index', 5)).to.throwError();
     });
   });
 
-  describe('#getField()', function () {
-    it('gets the value for the property', function () {
+  describe('#getField()', function() {
+    it('gets the value for the property', function() {
       const searchSource = new SearchSource();
       searchSource.setField('aggs', 5);
       expect(searchSource.getField('aggs')).to.be(5);
     });
 
-    it('throws an error if the property is not accepted', function () {
+    it('throws an error if the property is not accepted', function() {
       const searchSource = new SearchSource();
       expect(() => searchSource.getField('unacceptablePropName')).to.throwError();
     });
   });
 
-  describe(`#setField('index')`, function () {
-    describe('auto-sourceFiltering', function () {
-      describe('new index pattern assigned', function () {
-        it('generates a searchSource filter', function () {
+  describe(`#setField('index')`, function() {
+    describe('auto-sourceFiltering', function() {
+      describe('new index pattern assigned', function() {
+        it('generates a searchSource filter', function() {
           const searchSource = new SearchSource();
           expect(searchSource.getField('index')).to.be(undefined);
           expect(searchSource.getField('source')).to.be(undefined);
@@ -132,7 +134,7 @@ describe('SearchSource', function () {
           expect(searchSource.getField('source')).to.be.a('function');
         });
 
-        it('removes created searchSource filter on removal', function () {
+        it('removes created searchSource filter on removal', function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', null);
@@ -141,8 +143,8 @@ describe('SearchSource', function () {
         });
       });
 
-      describe('new index pattern assigned over another', function () {
-        it('replaces searchSource filter with new', function () {
+      describe('new index pattern assigned over another', function() {
+        it('replaces searchSource filter with new', function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           const searchSourceFilter1 = searchSource.getField('source');
@@ -152,7 +154,7 @@ describe('SearchSource', function () {
           expect(searchSource.getField('source')).to.not.be(searchSourceFilter1);
         });
 
-        it('removes created searchSource filter on removal', function () {
+        it('removes created searchSource filter on removal', function() {
           const searchSource = new SearchSource();
           searchSource.setField('index', indexPattern);
           searchSource.setField('index', indexPattern2);
@@ -162,8 +164,8 @@ describe('SearchSource', function () {
         });
       });
 
-      describe('ip assigned before custom searchSource filter', function () {
-        it('custom searchSource filter becomes new searchSource', function () {
+      describe('ip assigned before custom searchSource filter', function() {
+        it('custom searchSource filter becomes new searchSource', function() {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setField('index', indexPattern);
@@ -173,7 +175,7 @@ describe('SearchSource', function () {
           expect(searchSource.getField('source')).to.be(football);
         });
 
-        it('custom searchSource stays after removal', function () {
+        it('custom searchSource stays after removal', function() {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setField('index', indexPattern);
@@ -184,8 +186,8 @@ describe('SearchSource', function () {
         });
       });
 
-      describe('ip assigned after custom searchSource filter', function () {
-        it('leaves the custom filter in place', function () {
+      describe('ip assigned after custom searchSource filter', function() {
+        it('leaves the custom filter in place', function() {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setField('source', football);
@@ -194,7 +196,7 @@ describe('SearchSource', function () {
           expect(searchSource.getField('source')).to.be(football);
         });
 
-        it('custom searchSource stays after removal', function () {
+        it('custom searchSource stays after removal', function() {
           const searchSource = new SearchSource();
           const football = {};
           searchSource.setField('source', football);
@@ -249,101 +251,101 @@ describe('SearchSource', function () {
     });
   });
 
-  describe('#_mergeProp', function () {
-    describe('filter', function () {
+  describe('#_mergeProp', function() {
+    describe('filter', function() {
       let searchSource;
       let state;
 
-      beforeEach(function () {
+      beforeEach(function() {
         searchSource = new SearchSource();
         state = {};
       });
 
       [null, undefined].forEach(falsyValue => {
-        it(`ignores ${falsyValue} filter`, function () {
+        it(`ignores ${falsyValue} filter`, function() {
           searchSource._mergeProp(state, falsyValue, 'filter');
           expect(state.filters).to.be(undefined);
         });
       });
 
       [false, 0, '', NaN].forEach(falsyValue => {
-        it(`doesn't add ${falsyValue} filter`, function () {
+        it(`doesn't add ${falsyValue} filter`, function() {
           searchSource._mergeProp(state, falsyValue, 'filter');
           expect(state.filters).to.be.empty();
         });
       });
 
-      it('adds "meta.disabled: undefined" filter', function () {
+      it('adds "meta.disabled: undefined" filter', function() {
         const filter = {
-          meta: {}
+          meta: {},
         };
         searchSource._mergeProp(state, filter, 'filter');
         expect(state.filters).to.eql([filter]);
       });
 
-      it('adds "meta.disabled: false" filter', function () {
+      it('adds "meta.disabled: false" filter', function() {
         const filter = {
           meta: {
-            disabled: false
-          }
+            disabled: false,
+          },
         };
         searchSource._mergeProp(state, filter, 'filter');
         expect(state.filters).to.eql([filter]);
       });
 
-      it(`doesn't add "meta.disabled: true" filter`, function () {
+      it(`doesn't add "meta.disabled: true" filter`, function() {
         const filter = {
           meta: {
-            disabled: true
-          }
+            disabled: true,
+          },
         };
         searchSource._mergeProp(state, filter, 'filter');
         expect(state.filters).to.be.empty();
       });
 
-      describe('when courier:ignoreFilterIfFieldNotInIndex is false', function () {
-        it('adds filter for non-existent field', function () {
+      describe('when courier:ignoreFilterIfFieldNotInIndex is false', function() {
+        it('adds filter for non-existent field', function() {
           config.set('courier:ignoreFilterIfFieldNotInIndex', false);
           const filter = {
             meta: {
-              key: 'bar'
-            }
+              key: 'bar',
+            },
           };
           state.index = {
-            fields: []
+            fields: [],
           };
           searchSource._mergeProp(state, filter, 'filter');
-          expect(state.filters).to.eql([ filter ]);
+          expect(state.filters).to.eql([filter]);
         });
       });
 
-      describe('when courier:ignoreFilterIfFieldNotInIndex is true', function () {
-        it(`doesn't add filter for non-existent field`, function () {
+      describe('when courier:ignoreFilterIfFieldNotInIndex is true', function() {
+        it(`doesn't add filter for non-existent field`, function() {
           config.set('courier:ignoreFilterIfFieldNotInIndex', true);
           const filter = {
             meta: {
-              key: 'bar'
-            }
+              key: 'bar',
+            },
           };
           state.index = {
-            fields: []
+            fields: [],
           };
           searchSource._mergeProp(state, filter, 'filter');
           expect(state.filters).to.be.empty();
         });
 
-        it(`adds filter for existent field`, function () {
+        it(`adds filter for existent field`, function() {
           config.set('courier:ignoreFilterIfFieldNotInIndex', true);
           const filter = {
             meta: {
-              key: 'bar'
-            }
+              key: 'bar',
+            },
           };
           state.index = {
-            fields: [{ name: 'bar' }]
+            fields: [{ name: 'bar' }],
           };
           searchSource._mergeProp(state, filter, 'filter');
-          expect(state.filters).to.eql([ filter ]);
+          expect(state.filters).to.eql([filter]);
         });
       });
     });

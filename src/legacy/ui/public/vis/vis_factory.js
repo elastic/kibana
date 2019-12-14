@@ -20,10 +20,10 @@
 import { BaseVisType, ReactVisType } from './vis_types';
 
 export const visFactory = {
-  createBaseVisualization: (config) => {
+  createBaseVisualization: config => {
     return new BaseVisType(config);
   },
-  createReactVisualization: (config) => {
+  createReactVisualization: config => {
     return new ReactVisType(config);
   },
 };

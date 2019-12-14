@@ -38,11 +38,13 @@ module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
           <EuiCallOut
             iconType="help"
             color="warning"
-            title={<FormattedMessage
-              id="xpack.main.welcomeBanner.licenseIsExpiredTitle"
-              defaultMessage="Your {licenseType} license is expired"
-              values={{ licenseType: license.type }}
-            />}
+            title={
+              <FormattedMessage
+                id="xpack.main.welcomeBanner.licenseIsExpiredTitle"
+                defaultMessage="Your {licenseType} license is expired"
+                values={{ licenseType: license.type }}
+              />
+            }
           >
             <FormattedMessage
               id="xpack.main.welcomeBanner.licenseIsExpiredDescription"
@@ -55,7 +57,7 @@ module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
                       defaultMessage="update your license"
                     />
                   </a>
-                )
+                ),
               }}
             />
           </EuiCallOut>
@@ -87,21 +89,18 @@ module.factory('checkXPackInfoChange', ($q, Private, $injector) => {
       // cached info, so we need to refresh it.
       // Intentionally swallowing this error
       // because nothing catches it and it's an ugly console error.
-      xpackInfo.refresh($injector).then(
-        () => notifyIfLicenseIsExpired(),
-        () => {}
-      );
+      xpackInfo.refresh($injector).then(() => notifyIfLicenseIsExpired(), () => {});
     }
 
     return handleResponse(response);
   }
 
   return {
-    response: (response) => interceptor(response, identity),
-    responseError: (response) => interceptor(response, $q.reject)
+    response: response => interceptor(response, identity),
+    responseError: response => interceptor(response, $q.reject),
   };
 });
 
-module.config(($httpProvider) => {
+module.config($httpProvider => {
   $httpProvider.interceptors.push('checkXPackInfoChange');
 });

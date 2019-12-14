@@ -39,16 +39,20 @@ export function TileMapTooltipFormatterProvider($injector) {
     $tooltipScope.details = [
       {
         label: metricAgg.makeLabel(),
-        value: metricAgg.fieldFormatter()(feature.properties.value)
+        value: metricAgg.fieldFormatter()(feature.properties.value),
       },
       {
-        label: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', { defaultMessage: 'Latitude' }),
-        value: feature.geometry.coordinates[1]
+        label: i18n.translate('tileMap.tooltipFormatter.latitudeLabel', {
+          defaultMessage: 'Latitude',
+        }),
+        value: feature.geometry.coordinates[1],
       },
       {
-        label: i18n.translate('tileMap.tooltipFormatter.longitudeLabel', { defaultMessage: 'Longitude' }),
-        value: feature.geometry.coordinates[0]
-      }
+        label: i18n.translate('tileMap.tooltipFormatter.longitudeLabel', {
+          defaultMessage: 'Longitude',
+        }),
+        value: feature.geometry.coordinates[0],
+      },
     ];
 
     $tooltipScope.$apply();

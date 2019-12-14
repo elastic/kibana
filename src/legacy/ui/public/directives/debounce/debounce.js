@@ -24,51 +24,54 @@ import { uiModules } from '../../modules';
 
 const module = uiModules.get('kibana');
 
-module.service('debounce', ['$timeout', function ($timeout) {
-  return function (func, wait, options) {
-    let timeout;
-    let args;
-    let self;
-    let result;
-    options = _.defaults(options || {}, {
-      leading: false,
-      trailing: true,
-      invokeApply: true,
-    });
+module.service('debounce', [
+  '$timeout',
+  function($timeout) {
+    return function(func, wait, options) {
+      let timeout;
+      let args;
+      let self;
+      let result;
+      options = _.defaults(options || {}, {
+        leading: false,
+        trailing: true,
+        invokeApply: true,
+      });
 
-    function debounce() {
-      self = this;
-      args = arguments;
+      function debounce() {
+        self = this;
+        args = arguments;
 
-      const later = function () {
-        timeout = null;
-        if (!options.leading || options.trailing) {
+        const later = function() {
+          timeout = null;
+          if (!options.leading || options.trailing) {
+            result = func.apply(self, args);
+          }
+        };
+
+        const callNow = options.leading && !timeout;
+
+        if (timeout) {
+          $timeout.cancel(timeout);
+        }
+        timeout = $timeout(later, wait, options.invokeApply);
+
+        if (callNow) {
           result = func.apply(self, args);
         }
+
+        return result;
+      }
+
+      debounce.cancel = function() {
+        $timeout.cancel(timeout);
+        timeout = null;
       };
 
-      const callNow = options.leading && !timeout;
-
-      if (timeout) {
-        $timeout.cancel(timeout);
-      }
-      timeout = $timeout(later, wait, options.invokeApply);
-
-      if (callNow) {
-        result = func.apply(self, args);
-      }
-
-      return result;
-    }
-
-    debounce.cancel = function () {
-      $timeout.cancel(timeout);
-      timeout = null;
+      return debounce;
     };
-
-    return debounce;
-  };
-}]);
+  },
+]);
 
 export function DebounceProvider(debounce) {
   return debounce;

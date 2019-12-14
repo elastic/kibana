@@ -30,9 +30,12 @@ function mapDispatchToProps(dispatch) {
     },
     openSetView: () => {
       dispatch(openSetView());
-    }
+    },
   };
 }
 
-const connectedSetViewControl = connect(mapStateToProps, mapDispatchToProps)(SetViewControl);
+const connectedSetViewControl = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(SetViewControl);
 export { connectedSetViewControl as SetViewControl };

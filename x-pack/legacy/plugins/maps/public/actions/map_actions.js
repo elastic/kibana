@@ -14,13 +14,13 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
-  getTooltipState
+  getTooltipState,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
 import {
   cancelRequest,
   registerCancelCallback,
-  unregisterCancelCallback
+  unregisterCancelCallback,
 } from '../reducers/non_serializable_instances';
 import { updateFlyout } from '../actions/ui_actions';
 import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
@@ -64,13 +64,17 @@ export const SET_MAP_INIT_ERROR = 'SET_MAP_INIT_ERROR';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
-    startLoading: (dataId, requestToken, meta) => dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
-    stopLoading: (dataId, requestToken, data, meta) => dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
-    onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    updateSourceData: (newData) => {
+    startLoading: (dataId, requestToken, meta) =>
+      dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
+    stopLoading: (dataId, requestToken, data, meta) =>
+      dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
+    onLoadError: (dataId, requestToken, errorMessage) =>
+      dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
+    updateSourceData: newData => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
-    registerCancelCallback: (requestToken, callback) => dispatch(registerCancelCallback(requestToken, callback)),
+    registerCancelCallback: (requestToken, callback) =>
+      dispatch(registerCancelCallback(requestToken, callback)),
   };
 }
 
@@ -103,14 +107,14 @@ export function cancelAllInFlightRequests() {
 export function setMapInitError(errorMessage) {
   return {
     type: SET_MAP_INIT_ERROR,
-    errorMessage
+    errorMessage,
   };
 }
 
 export function trackCurrentLayerState(layerId) {
   return {
     type: TRACK_CURRENT_LAYER_STATE,
-    layerId: layerId
+    layerId: layerId,
   };
 }
 
@@ -119,7 +123,7 @@ export function rollbackToTrackedLayerStateForSelectedLayer() {
     const layerId = getSelectedLayerId(getState());
     await dispatch({
       type: ROLLBACK_TO_TRACKED_LAYER_STATE,
-      layerId: layerId
+      layerId: layerId,
     });
 
     // Ensure updateStyleMeta is triggered
@@ -135,7 +139,7 @@ export function removeTrackedLayerStateForSelectedLayer() {
     const layerId = getSelectedLayerId(getState());
     dispatch({
       type: REMOVE_TRACKED_LAYER_STATE,
-      layerId: layerId
+      layerId: layerId,
     });
   };
 }
@@ -198,7 +202,7 @@ function setLayerDataLoadErrorStatus(layerId, errorMessage) {
       type: SET_LAYER_ERROR_STATUS,
       isInErrorState: errorMessage !== null,
       layerId,
-      errorMessage
+      errorMessage,
     });
   };
 }
@@ -253,13 +257,12 @@ export function toggleLayerVisible(layerId) {
 
     await dispatch({
       type: TOGGLE_LAYER_VISIBLE,
-      layerId
+      layerId,
     });
     if (makeVisible) {
       dispatch(syncDataForLayer(layerId));
     }
   };
-
 }
 
 export function setSelectedLayer(layerId) {
@@ -273,7 +276,7 @@ export function setSelectedLayer(layerId) {
     }
     dispatch({
       type: SET_SELECTED_LAYER,
-      selectedLayerId: layerId
+      selectedLayerId: layerId,
     });
   };
 }
@@ -306,7 +309,7 @@ export function clearTransientLayerStateAndCloseFlyout() {
 export function updateLayerOrder(newLayerOrder) {
   return {
     type: UPDATE_LAYER_ORDER,
-    newLayerOrder
+    newLayerOrder,
   };
 }
 
@@ -328,7 +331,7 @@ export function mapReady() {
 
 export function mapDestroyed() {
   return {
-    type: MAP_DESTROYED
+    type: MAP_DESTROYED,
   };
 }
 
@@ -346,13 +349,13 @@ export function mapExtentChanged(newMapConstants) {
           buffer.minLon,
           buffer.minLat,
           buffer.maxLon,
-          buffer.maxLat
+          buffer.maxLat,
         ]);
         const extentGeometry = turf.bboxPolygon([
           extent.minLon,
           extent.minLat,
           extent.maxLon,
-          extent.maxLat
+          extent.maxLat,
         ]);
 
         doesBufferContainExtent = turfBooleanContains(bufferGeometry, extentGeometry);
@@ -366,7 +369,7 @@ export function mapExtentChanged(newMapConstants) {
           minLon: extent.minLon - width * scaleFactor,
           minLat: extent.minLat - height * scaleFactor,
           maxLon: extent.maxLon + width * scaleFactor,
-          maxLat: extent.maxLat + height * scaleFactor
+          maxLat: extent.maxLat + height * scaleFactor,
         };
       }
     }
@@ -375,8 +378,8 @@ export function mapExtentChanged(newMapConstants) {
       type: MAP_EXTENT_CHANGED,
       mapState: {
         ...dataFilters,
-        ...newMapConstants
-      }
+        ...newMapConstants,
+      },
     });
     const newDataFilters = { ...dataFilters, ...newMapConstants };
     await syncDataForAllLayers(getState, dispatch, newDataFilters);
@@ -386,7 +389,7 @@ export function mapExtentChanged(newMapConstants) {
 export function setTooltipState(tooltipState) {
   return {
     type: 'SET_TOOLTIP_STATE',
-    tooltipState: tooltipState
+    tooltipState: tooltipState,
   };
 }
 
@@ -416,7 +419,7 @@ export function disableScrollZoom() {
 }
 
 export function fitToLayerExtent(layerId) {
-  return async function (dispatch, getState) {
+  return async function(dispatch, getState) {
     const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
@@ -432,15 +435,14 @@ export function fitToLayerExtent(layerId) {
 export function setGotoWithBounds(bounds) {
   return {
     type: SET_GOTO,
-    bounds: bounds
+    bounds: bounds,
   };
 }
-
 
 export function setGotoWithCenter({ lat, lon, zoom }) {
   return {
     type: SET_GOTO,
-    center: { lat, lon, zoom }
+    center: { lat, lon, zoom },
   };
 }
 
@@ -460,18 +462,18 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
       type: LAYER_DATA_LOAD_STARTED,
       layerId,
       dataId,
-      requestToken
+      requestToken,
     });
   };
 }
 
 export function updateSourceDataRequest(layerId, newData) {
-  return (dispatch) => {
+  return dispatch => {
     dispatch({
       type: UPDATE_SOURCE_DATA_REQUEST,
       dataId: SOURCE_DATA_ID_ORIGIN,
       layerId,
-      newData
+      newData,
     });
 
     dispatch(updateStyleMeta(layerId));
@@ -479,7 +481,7 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return async (dispatch) => {
+  return async dispatch => {
     dispatch(unregisterCancelCallback(requestToken));
     const features = data ? data.features : [];
     dispatch(cleanTooltipStateForLayer(layerId, features));
@@ -489,7 +491,7 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
       dataId,
       data,
       meta,
-      requestToken
+      requestToken,
     });
 
     //Clear any data-load errors when there is a succesful data return.
@@ -502,7 +504,7 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
-  return async (dispatch) => {
+  return async dispatch => {
     dispatch(unregisterCancelCallback(requestToken));
     dispatch(cleanTooltipStateForLayer(layerId));
     dispatch({
@@ -518,7 +520,7 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
 }
 
 export function updateSourceProp(layerId, propName, value) {
-  return async (dispatch) => {
+  return async dispatch => {
     dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
@@ -538,7 +540,7 @@ export function syncDataForLayer(layerId) {
       const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
       await targetLayer.syncData({
         ...loadingFunctions,
-        dataFilters
+        dataFilters,
       });
     }
   };
@@ -581,7 +583,7 @@ export function updateLayerAlpha(id, alpha) {
 }
 
 export function setLayerQuery(id, query) {
-  return (dispatch) => {
+  return dispatch => {
     dispatch({
       type: UPDATE_LAYER_PROP,
       id,
@@ -594,7 +596,7 @@ export function setLayerQuery(id, query) {
 }
 
 export function setLayerApplyGlobalQuery(id, applyGlobalQuery) {
-  return (dispatch) => {
+  return dispatch => {
     dispatch({
       type: UPDATE_LAYER_PROP,
       id,
@@ -629,7 +631,7 @@ export function removeLayer(layerId) {
     layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,
-      id: layerId
+      id: layerId,
     });
   };
 }
@@ -642,7 +644,7 @@ export function setQuery({ query, timeFilters, filters = [] }) {
       query: {
         ...query,
         // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
-        queryLastTriggeredAt: (new Date()).toISOString(),
+        queryLastTriggeredAt: new Date().toISOString(),
       },
       filters,
     });
@@ -683,7 +685,9 @@ export function clearMissingStyleProperties(layerId) {
       return;
     }
     const ordinalFields = await targetLayer.getOrdinalFields();
-    const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(ordinalFields);
+    const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithMissingStylePropsRemoved(
+      ordinalFields
+    );
     if (hasChanges) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
     }
@@ -691,12 +695,12 @@ export function clearMissingStyleProperties(layerId) {
 }
 
 export function updateLayerStyle(layerId, styleDescriptor) {
-  return (dispatch) => {
+  return dispatch => {
     dispatch({
       type: UPDATE_LAYER_STYLE,
       layerId,
       style: {
-        ...styleDescriptor
+        ...styleDescriptor,
       },
     });
 
@@ -729,7 +733,6 @@ export function updateStyleMeta(layerId) {
   };
 }
 
-
 export function updateLayerStyleForSelectedLayer(styleDescriptor) {
   return (dispatch, getState) => {
     const selectedLayerId = getSelectedLayerId(getState());
@@ -741,11 +744,11 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor) {
 }
 
 export function setJoinsForLayer(layer, joins) {
-  return async (dispatch) => {
+  return async dispatch => {
     await dispatch({
       type: SET_JOINS,
       layer: layer,
-      joins: joins
+      joins: joins,
     });
 
     await dispatch(clearMissingStyleProperties(layer.getId()));
@@ -754,13 +757,13 @@ export function setJoinsForLayer(layer, joins) {
 }
 
 export function updateDrawState(drawState) {
-  return async (dispatch) => {
+  return async dispatch => {
     if (drawState !== null) {
-      await dispatch(setTooltipState(null));//tooltips just get in the way
+      await dispatch(setTooltipState(null)); //tooltips just get in the way
     }
     dispatch({
       type: UPDATE_DRAW_STATE,
-      drawState: drawState
+      drawState: drawState,
     });
   };
 }

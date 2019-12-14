@@ -26,13 +26,14 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
 import { i18n } from '@kbn/i18n';
 
-const routeDefinition = (action) => ({
+const routeDefinition = action => ({
   template,
-  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
-    action === 'edit' && $route.current.params.name
-      ? getEditRoleBreadcrumbs
-      : getCreateRoleBreadcrumbs
-  ),
+  k7Breadcrumbs: ($injector, $route) =>
+    $injector.invoke(
+      action === 'edit' && $route.current.params.name
+        ? getEditRoleBreadcrumbs
+        : getCreateRoleBreadcrumbs
+    ),
   resolve: {
     role($route, ShieldRole, Promise, kbnUrl) {
       const name = $route.current.params.name;
@@ -40,39 +41,38 @@ const routeDefinition = (action) => ({
       let role;
 
       if (name != null) {
-        role = ShieldRole.get({ name }).$promise
-          .catch((response) => {
-            if (response.status === 404) {
-              toastNotifications.addDanger({
-                title: i18n.translate('xpack.security.management.roles.roleNotFound',
-                  {
-                    defaultMessage: 'No "{roleName}" role found.',
-                    values: { roleName: name }
-                  }),
-              });
-              kbnUrl.redirect(ROLES_PATH);
-            } else {
-              return fatalError(response);
-            }
-          });
+        role = ShieldRole.get({ name }).$promise.catch(response => {
+          if (response.status === 404) {
+            toastNotifications.addDanger({
+              title: i18n.translate('xpack.security.management.roles.roleNotFound', {
+                defaultMessage: 'No "{roleName}" role found.',
+                values: { roleName: name },
+              }),
+            });
+            kbnUrl.redirect(ROLES_PATH);
+          } else {
+            return fatalError(response);
+          }
+        });
       } else {
-        role = Promise.resolve(new ShieldRole({
-          elasticsearch: {
-            cluster: [],
-            indices: [],
-            run_as: [],
-          },
-          kibana: [],
-          _unrecognized_applications: [],
-        }));
+        role = Promise.resolve(
+          new ShieldRole({
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
+            },
+            kibana: [],
+            _unrecognized_applications: [],
+          })
+        );
       }
 
       return role.then(res => res.toJSON());
     },
     users(ShieldUser) {
       // $promise is used here because the result is an ngResource, not a promise itself
-      return ShieldUser.query().$promise
-        .then(users => _.map(users, 'username'));
+      return ShieldUser.query().$promise.then(users => _.map(users, 'username'));
     },
     indexPatterns() {
       const { indexPatterns } = data.indexPatterns;
@@ -85,7 +85,11 @@ const routeDefinition = (action) => ({
       return [];
     },
     kibanaPrivileges() {
-      return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+      return kfetch({
+        method: 'get',
+        pathname: '/api/security/privileges',
+        query: { includeActions: true },
+      });
     },
     builtinESPrivileges() {
       return kfetch({ method: 'get', pathname: '/api/security/v1/esPrivileges/builtin' });
@@ -99,19 +103,21 @@ const routeDefinition = (action) => ({
         }
         throw e;
       });
-    }
+    },
   },
   controllerAs: 'editRole',
   controller($injector, $scope, $http, enableSpaceAwarePrivileges) {
     const $route = $injector.get('$route');
     const role = $route.current.locals.role;
 
-    const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
+    const allowDocumentLevelSecurity = xpackInfo.get(
+      'features.security.allowRoleDocumentLevelSecurity'
+    );
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
     if (role.elasticsearch.indices.length === 0) {
       const emptyOption = {
         names: [],
-        privileges: []
+        privileges: [],
       };
 
       if (allowFieldLevelSecurity) {
@@ -157,14 +163,16 @@ const routeDefinition = (action) => ({
             kibanaPrivileges={kibanaPrivileges}
             builtinESPrivileges={builtinESPrivileges}
           />
-        </I18nContext>, domNode);
+        </I18nContext>,
+        domNode
+      );
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {
         unmountComponentAtNode(domNode);
       });
     });
-  }
+  },
 });
 
 routes.when(`${CLONE_ROLES_PATH}/:name`, routeDefinition('clone'));

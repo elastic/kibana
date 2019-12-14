@@ -13,10 +13,10 @@ export function getDashboardBreadcrumbs() {
     MANAGEMENT_BREADCRUMB,
     {
       text: i18n.translate('xpack.licenseMgmt.dashboard.breadcrumb', {
-        defaultMessage: 'License management'
+        defaultMessage: 'License management',
       }),
-      href: `#${BASE_PATH}home`
-    }
+      href: `#${BASE_PATH}home`,
+    },
   ];
 }
 
@@ -25,8 +25,8 @@ export function getUploadBreadcrumbs() {
     ...getDashboardBreadcrumbs(),
     {
       text: i18n.translate('xpack.licenseMgmt.upload.breadcrumb', {
-        defaultMessage: 'Upload'
-      })
-    }
+        defaultMessage: 'Upload',
+      }),
+    },
   ];
 }

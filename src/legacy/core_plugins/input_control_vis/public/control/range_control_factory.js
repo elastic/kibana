@@ -18,38 +18,33 @@
  */
 
 import _ from 'lodash';
-import {
-  Control,
-  noValuesDisableMsg,
-  noIndexPatternMsg,
-} from './control';
+import { Control, noValuesDisableMsg, noIndexPatternMsg } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 import { createSearchSource } from './create_search_source';
 import { i18n } from '@kbn/i18n';
 import { start as data } from '../../../../core_plugins/data/public/legacy';
 
-const minMaxAgg = (field) => {
+const minMaxAgg = field => {
   const aggBody = {};
   if (field.scripted) {
     aggBody.script = {
       source: field.script,
-      lang: field.lang
+      lang: field.lang,
     };
   } else {
     aggBody.field = field.name;
   }
   return {
     maxAgg: {
-      max: aggBody
+      max: aggBody,
     },
     minAgg: {
-      min: aggBody
-    }
+      min: aggBody,
+    },
   };
 };
 
 class RangeControl extends Control {
-
   async fetch() {
     // Abort any in-progress fetch
     if (this.abortController) {
@@ -65,19 +60,27 @@ class RangeControl extends Control {
     const fieldName = this.filterManager.fieldName;
 
     const aggs = minMaxAgg(indexPattern.fields.getByName(fieldName));
-    const searchSource = createSearchSource(this.kbnApi, null, indexPattern, aggs, this.useTimeFilter);
+    const searchSource = createSearchSource(
+      this.kbnApi,
+      null,
+      indexPattern,
+      aggs,
+      this.useTimeFilter
+    );
     this.abortController.signal.addEventListener('abort', () => searchSource.cancelQueued());
 
     let resp;
     try {
       resp = await searchSource.fetch();
-    } catch(error) {
+    } catch (error) {
       // If the fetch was aborted then no need to surface this error in the UI
       if (error.name === 'AbortError') return;
-      this.disable(i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
-        defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
-        values: { errorMessage: error.message }
-      }));
+      this.disable(
+        i18n.translate('inputControl.rangeControl.unableToFetchTooltip', {
+          defaultMessage: 'Unable to fetch range min and max, error: {errorMessage}',
+          values: { errorMessage: error.message },
+        })
+      );
       return;
     }
 
@@ -108,7 +111,12 @@ export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) 
   }
   return new RangeControl(
     controlParams,
-    new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, data.filter.filterManager),
+    new RangeFilterManager(
+      controlParams.id,
+      controlParams.fieldName,
+      indexPattern,
+      data.filter.filterManager
+    ),
     kbnApi,
     useTimeFilter
   );

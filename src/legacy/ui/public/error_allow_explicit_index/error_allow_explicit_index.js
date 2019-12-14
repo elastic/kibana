@@ -25,11 +25,16 @@ import { KbnUrlProvider } from '../url';
 
 import template from './error_allow_explicit_index.html';
 
-uiRoutes
-  .when('/error/multi.allow_explicit_index', {
-    template,
-    k7Breadcrumbs: () => [{ text: i18n.translate('common.ui.errorAllowExplicitIndex.breadcrumbs.errorText', { defaultMessage: 'Error' }) }],
-  });
+uiRoutes.when('/error/multi.allow_explicit_index', {
+  template,
+  k7Breadcrumbs: () => [
+    {
+      text: i18n.translate('common.ui.errorAllowExplicitIndex.breadcrumbs.errorText', {
+        defaultMessage: 'Error',
+      }),
+    },
+  ],
+});
 
 export function ErrorAllowExplicitIndexProvider(Private, Promise) {
   const kbnUrl = Private(KbnUrlProvider);
@@ -43,15 +48,12 @@ export function ErrorAllowExplicitIndexProvider(Private, Promise) {
       const type = get(error, 'body.error.type');
       const reason = get(error, 'body.error.reason');
 
-      return (
-        type === 'illegal_argument_exception' &&
-        String(reason).includes('explicit index')
-      );
+      return type === 'illegal_argument_exception' && String(reason).includes('explicit index');
     }
 
     takeover() {
       kbnUrl.change('/error/multi.allow_explicit_index');
       return Promise.halt();
     }
-  });
+  })();
 }

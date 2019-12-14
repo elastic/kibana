@@ -24,7 +24,7 @@ import { Cluster } from './lib/cluster';
 import { createProxy } from './lib/create_proxy';
 import { handleESError } from './lib/handle_es_error';
 
-export default function (kibana) {
+export default function(kibana) {
   let defaultVars;
 
   return new kibana.Plugin({
@@ -40,14 +40,16 @@ export default function (kibana) {
         server.newPlatform.__internals.elasticsearch.legacy.config$,
         server.newPlatform.setup.core.elasticsearch.adminClient$,
         server.newPlatform.setup.core.elasticsearch.dataClient$
-      ).pipe(
-        first(),
-        map(([config, adminClusterClient, dataClusterClient]) => [
-          config,
-          new Cluster(adminClusterClient),
-          new Cluster(dataClusterClient)
-        ])
-      ).toPromise();
+      )
+        .pipe(
+          first(),
+          map(([config, adminClusterClient, dataClusterClient]) => [
+            config,
+            new Cluster(adminClusterClient),
+            new Cluster(dataClusterClient),
+          ])
+        )
+        .toPromise();
 
       defaultVars = {
         esRequestTimeout: esConfig.requestTimeout.asMilliseconds(),
@@ -56,7 +58,7 @@ export default function (kibana) {
       };
 
       const clusters = new Map();
-      server.expose('getCluster', (name) => {
+      server.expose('getCluster', name => {
         if (name === 'admin') {
           return adminCluster;
         }
@@ -78,7 +80,9 @@ export default function (kibana) {
           throw new Error(`cluster '${name}' already exists`);
         }
 
-        const cluster = new Cluster(server.newPlatform.setup.core.elasticsearch.createClient(name, clientConfig));
+        const cluster = new Cluster(
+          server.newPlatform.setup.core.elasticsearch.createClient(name, clientConfig)
+        );
 
         clusters.set(name, cluster);
 
@@ -98,10 +102,13 @@ export default function (kibana) {
       createProxy(server);
 
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server, esConfig.healthCheckDelay.asMilliseconds());
+      const { start, waitUntilReady } = healthCheck(
+        this,
+        server,
+        esConfig.healthCheckDelay.asMilliseconds()
+      );
       server.expose('waitUntilReady', waitUntilReady);
       start();
-    }
+    },
   });
-
 }

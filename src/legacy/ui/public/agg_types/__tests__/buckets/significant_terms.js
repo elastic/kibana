@@ -21,17 +21,14 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { aggTypes } from '../..';
 
-describe('Significant Terms Agg', function () {
-
-  describe('order agg editor UI', function () {
-
-    describe('convert include/exclude from old format', function () {
-
+describe('Significant Terms Agg', function() {
+  describe('order agg editor UI', function() {
+    describe('convert include/exclude from old format', function() {
       let $rootScope;
 
       function init({ aggParams = {} }) {
         ngMock.module('kibana');
-        ngMock.inject(function (_$rootScope_) {
+        ngMock.inject(function(_$rootScope_) {
           const significantTerms = aggTypes.buckets.find(agg => agg.name === 'significant_terms');
 
           $rootScope = _$rootScope_;
@@ -60,32 +57,33 @@ describe('Significant Terms Agg', function () {
         expect(output.params.exclude).to.equal('400');
       }
 
-      it('it doesnt do anything with string type', function () {
+      it('it doesnt do anything with string type', function() {
         init({
           aggParams: {
             include: '404',
             exclude: '400',
             field: {
-              type: 'string'
+              type: 'string',
             },
-          }
+          },
         });
 
         testSerializeAndWrite($rootScope.agg);
       });
 
-      it('converts object to string type', function () {
+      it('converts object to string type', function() {
         init({
           aggParams: {
             include: {
-              pattern: '404'
-            }, exclude: {
-              pattern: '400'
+              pattern: '404',
+            },
+            exclude: {
+              pattern: '400',
             },
             field: {
-              type: 'string'
+              type: 'string',
             },
-          }
+          },
         });
 
         testSerializeAndWrite($rootScope.agg);

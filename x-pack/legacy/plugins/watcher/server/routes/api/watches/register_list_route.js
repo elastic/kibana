@@ -11,7 +11,7 @@ import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { Watch } from '../../../models/watch';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchWatches(callWithRequest) {
   const params = {
@@ -20,11 +20,12 @@ function fetchWatches(callWithRequest) {
     body: {
       size: ES_SCROLL_SETTINGS.PAGE_SIZE,
     },
-    ignore: [404]
+    ignore: [404],
   };
 
-  return callWithRequest('search', params)
-    .then(response => fetchAllFromScroll(response, callWithRequest));
+  return callWithRequest('search', params).then(response =>
+    fetchAllFromScroll(response, callWithRequest)
+  );
 }
 
 export function registerListRoute(server) {
@@ -34,7 +35,7 @@ export function registerListRoute(server) {
   server.route({
     path: '/api/watcher/watches',
     method: 'GET',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       return fetchWatches(callWithRequest)
@@ -59,7 +60,7 @@ export function registerListRoute(server) {
           });
 
           return {
-            watches: watches.map(watch => watch.downstreamJson)
+            watches: watches.map(watch => watch.downstreamJson),
           };
         })
         .catch(err => {
@@ -73,7 +74,7 @@ export function registerListRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

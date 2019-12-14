@@ -13,7 +13,6 @@ import { EditConditionLink } from './edit_condition_link';
 import { APPLIES_TO } from '../../../../common/constants/detector_rule';
 
 function prepareTest(updateConditionValueFn, appliesTo) {
-
   const anomaly = {
     actual: [210],
     typical: [1.23],
@@ -32,15 +31,12 @@ function prepareTest(updateConditionValueFn, appliesTo) {
     updateConditionValue: updateConditionValueFn,
   };
 
-  const wrapper = shallowWithIntl(
-    <EditConditionLink.WrappedComponent {...props} />
-  );
+  const wrapper = shallowWithIntl(<EditConditionLink.WrappedComponent {...props} />);
 
   return wrapper;
 }
 
 describe('EditConditionLink', () => {
-
   const updateConditionValue = jest.fn(() => {});
 
   test(`renders for a condition using actual`, () => {

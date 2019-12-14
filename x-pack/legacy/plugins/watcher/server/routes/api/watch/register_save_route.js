@@ -9,12 +9,12 @@ import { serializeJsonWatch, serializeThresholdWatch } from '../../../../common/
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError, wrapCustomError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 import { i18n } from '@kbn/i18n';
 
 function fetchWatch(callWithRequest, watchId) {
   return callWithRequest('watcher.getWatch', {
-    id: watchId
+    id: watchId,
   });
 }
 
@@ -32,19 +32,21 @@ export function registerSaveRoute(server) {
   server.route({
     path: '/api/watcher/watch/{id}',
     method: 'PUT',
-    handler: async (request) => {
+    handler: async request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id, type, isNew, ...watchConfig } = request.payload;
 
       // For new watches, verify watch with the same ID doesn't already exist
       if (isNew) {
         const conflictError = wrapCustomError(
-          new Error(i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
-            defaultMessage: 'There is already a watch with ID \'{watchId}\'.',
-            values: {
-              watchId: id,
-            }
-          })),
+          new Error(
+            i18n.translate('xpack.watcher.saveRoute.duplicateWatchIdErrorMessage', {
+              defaultMessage: "There is already a watch with ID '{watchId}'.",
+              values: {
+                watchId: id,
+              },
+            })
+          ),
           409
         );
 
@@ -76,19 +78,18 @@ export function registerSaveRoute(server) {
       }
 
       // Create new watch
-      return saveWatch(callWithRequest, id, serializedWatch)
-        .catch(err => {
-          // Case: Error from Elasticsearch JS client
-          if (isEsError(err)) {
-            throw wrapEsError(err);
-          }
+      return saveWatch(callWithRequest, id, serializedWatch).catch(err => {
+        // Case: Error from Elasticsearch JS client
+        if (isEsError(err)) {
+          throw wrapEsError(err);
+        }
 
-          // Case: default
-          throw wrapUnknownError(err);
-        });
+        // Case: default
+        throw wrapUnknownError(err);
+      });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

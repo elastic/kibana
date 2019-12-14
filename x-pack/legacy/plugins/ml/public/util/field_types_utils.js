@@ -5,9 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ML_JOB_FIELD_TYPES,
-} from './../../common/constants/field_types';
+import { ML_JOB_FIELD_TYPES } from './../../common/constants/field_types';
 
 import { KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
 
@@ -53,8 +51,8 @@ export const mlJobTypeAriaLabels = {
   GEO_POINT: i18n.translate('xpack.ml.fieldTypeIcon.geoPointTypeAriaLabel', {
     defaultMessage: '{geoPointParam} type',
     values: {
-      geoPointParam: 'geo point'
-    }
+      geoPointParam: 'geo point',
+    },
   }),
   IP: i18n.translate('xpack.ml.fieldTypeIcon.ipTypeAriaLabel', {
     defaultMessage: 'ip type',
@@ -73,7 +71,9 @@ export const mlJobTypeAriaLabels = {
   }),
 };
 
-export const getMLJobTypeAriaLabel = (type) => {
-  const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(k => (ML_JOB_FIELD_TYPES[k] === type));
+export const getMLJobTypeAriaLabel = type => {
+  const requestedFieldType = Object.keys(ML_JOB_FIELD_TYPES).find(
+    k => ML_JOB_FIELD_TYPES[k] === type
+  );
   return mlJobTypeAriaLabels[requestedFieldType] || null;
 };

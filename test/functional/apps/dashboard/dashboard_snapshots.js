@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects, updateBaselines }) {
+export default function({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const browser = getService('browser');
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('dashboard snapshots', function describeIndexTests() {
-    before(async function () {
+    before(async function() {
       // We use a really small window to minimize differences across os's and browsers.
       await browser.setScreenshotSize(1000, 500);
       // adding this navigate adds the timestamp hash to the url which invalidates previous
@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.common.navigateToApp('dashboard');
     });
 
-    after(async function () {
+    after(async function() {
       await browser.setWindowSize(1300, 900);
     });
 
@@ -52,7 +52,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentDifference = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
+      const percentDifference = await screenshot.compareAgainstBaseline(
+        'tsvb_dashboard',
+        updateBaselines
+      );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
@@ -72,7 +75,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await dashboardPanelActions.clickExpandPanelToggle();
 
       await PageObjects.dashboard.waitForRenderComplete();
-      const percentDifference = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
+      const percentDifference = await screenshot.compareAgainstBaseline(
+        'area_chart',
+        updateBaselines
+      );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 

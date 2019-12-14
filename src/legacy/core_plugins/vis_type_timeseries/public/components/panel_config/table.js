@@ -147,7 +147,10 @@ export class TablePanelConfig extends Component {
                   <EuiFormRow
                     id={htmlId('pivotRowsInput')}
                     label={
-                      <FormattedMessage id="visTypeTimeseries.table.dataTab.rowsLabel" defaultMessage="Rows" />
+                      <FormattedMessage
+                        id="visTypeTimeseries.table.dataTab.rowsLabel"
+                        defaultMessage="Rows"
+                      />
                     }
                   >
                     {/*
@@ -180,7 +183,10 @@ export class TablePanelConfig extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage id="visTypeTimeseries.table.optionsTab.dataLabel" defaultMessage="Data" />
+                <FormattedMessage
+                  id="visTypeTimeseries.table.optionsTab.dataLabel"
+                  defaultMessage="Data"
+                />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -266,7 +272,10 @@ export class TablePanelConfig extends Component {
       <div>
         <EuiTabs size="s">
           <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
-            <FormattedMessage id="visTypeTimeseries.table.dataTab.columnsButtonLabel" defaultMessage="Columns" />
+            <FormattedMessage
+              id="visTypeTimeseries.table.dataTab.columnsButtonLabel"
+              defaultMessage="Columns"
+            />
           </EuiTab>
           <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
             <FormattedMessage

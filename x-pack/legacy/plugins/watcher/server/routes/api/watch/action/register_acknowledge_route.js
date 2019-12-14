@@ -9,17 +9,16 @@ import { callWithRequestFactory } from '../../../../lib/call_with_request_factor
 import { isEsErrorFactory } from '../../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../../lib/error_wrappers';
 import { WatchStatus } from '../../../../models/watch_status';
-import { licensePreRoutingFactory } from'../../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../../lib/license_pre_routing_factory';
 
 export function registerAcknowledgeRoute(server) {
-
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/watcher/watch/{watchId}/action/{actionId}/acknowledge',
     method: 'PUT',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { watchId, actionId } = request.params;
 
@@ -28,19 +27,19 @@ export function registerAcknowledgeRoute(server) {
           const watchStatusJson = get(hit, 'status');
           const json = {
             id: watchId,
-            watchStatusJson: watchStatusJson
+            watchStatusJson: watchStatusJson,
           };
 
           const watchStatus = WatchStatus.fromUpstreamJson(json);
           return {
-            watchStatus: watchStatus.downstreamJson
+            watchStatus: watchStatus.downstreamJson,
           };
         })
         .catch(err => {
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             const statusCodeToMessageMap = {
-              404: `Watch with id = ${watchId} not found`
+              404: `Watch with id = ${watchId} not found`,
             };
             throw wrapEsError(err, statusCodeToMessageMap);
           }
@@ -50,14 +49,14 @@ export function registerAcknowledgeRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }
 
 function acknowledgeAction(callWithRequest, watchId, actionId) {
   return callWithRequest('watcher.ackWatch', {
     id: watchId,
-    action: actionId
+    action: actionId,
   });
 }

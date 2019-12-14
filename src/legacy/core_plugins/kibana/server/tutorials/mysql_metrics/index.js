@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function mysqlMetricsSpecProvider(server, context) {
   const moduleName = 'mysql';
@@ -33,7 +37,8 @@ export function mysqlMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch internal metrics from MySQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.mysqlMetrics.longDescription', {
-      defaultMessage: 'The `mysql` Metricbeat module fetches internal metrics from the MySQL server. \
+      defaultMessage:
+        'The `mysql` Metricbeat module fetches internal metrics from the MySQL server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-mysql.html',
@@ -44,20 +49,23 @@ export function mysqlMetricsSpecProvider(server, context) {
       dashboards: [
         {
           id: '66881e90-0006-11e7-bf7f-c9acc3d3e306-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.mysqlMetrics.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'MySQL metrics dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.mysqlMetrics.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'MySQL metrics dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-mysql.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-mysql.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/mysql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

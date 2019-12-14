@@ -4,19 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import React from 'react';
 import { cleanup, fireEvent, render } from 'react-testing-library';
 import { JobSelectorTable } from './job_selector_table';
 
-
 jest.mock('../../../services/job_service', () => ({
   mlJobService: {
-    getJob: jest.fn()
-  }
+    getJob: jest.fn(),
+  },
 }));
-
 
 const props = {
   ganttBarWidth: 299,
@@ -27,8 +23,8 @@ const props = {
       timeRange: {
         fromPx: 15.1,
         label: 'Apr 20th 2019, 20: 39 to Jun 20th 2019, 17: 45',
-        widthPx: 283.89
-      }
+        widthPx: 283.89,
+      },
     },
     {
       id: 'ecommerce',
@@ -36,8 +32,8 @@ const props = {
       timeRange: {
         fromPx: 1,
         label: 'Apr 17th 2019, 20:04 to May 18th 2019, 19:45',
-        widthPx: 144.5
-      }
+        widthPx: 144.5,
+      },
     },
     {
       id: 'flights',
@@ -45,9 +41,9 @@ const props = {
       timeRange: {
         fromPx: 19.6,
         label: 'Apr 21st 2019, 20:00 to Jun 2nd 2019, 19:50',
-        widthPx: 195.8
-      }
-    }
+        widthPx: 195.8,
+      },
+    },
   ],
   jobs: [
     {
@@ -59,8 +55,8 @@ const props = {
       timeRange: {
         fromPx: 12.3,
         label: 'Apr 20th 2019, 20:39 to Jun 20th 2019, 17:45',
-        widthPx: 228.6
-      }
+        widthPx: 228.6,
+      },
     },
     {
       groups: ['logs'],
@@ -71,8 +67,8 @@ const props = {
       timeRange: {
         fromPx: 10,
         label: 'Apr 20th 2019, 20:39 to Jun 20th 2019, 17:45',
-        widthPx: 182.9
-      }
+        widthPx: 182.9,
+      },
     },
     {
       groups: ['ecommerce'],
@@ -83,7 +79,7 @@ const props = {
       timeRange: {
         fromPx: 1,
         label: 'Apr 17th 2019, 20:04 to May 18th 2019, 19:45',
-        widthPx: 93.1
+        widthPx: 93.1,
       },
     },
     {
@@ -95,9 +91,9 @@ const props = {
       timeRange: {
         fromPx: 1,
         label: 'Apr 17th 2019, 20:04 to May 18th 2019, 19:45',
-        widthPx: 93.1
+        widthPx: 93.1,
       },
-    }
+    },
   ],
   onSelection: jest.fn(),
   selectedIds: ['price-by-day'],
@@ -107,7 +103,6 @@ describe('JobSelectorTable', () => {
   afterEach(cleanup);
 
   describe('Single Selection', () => {
-
     test('Does not render tabs', () => {
       const singleSelectionProps = { ...props, singleSelection: true };
       const { queryByRole } = render(<JobSelectorTable {...singleSelectionProps} />);
@@ -128,11 +123,9 @@ describe('JobSelectorTable', () => {
       const radioButton = getByTestId('non-timeseries-job-radio-button');
       expect(radioButton.firstChild.disabled).toEqual(true);
     });
-
   });
 
   describe('Not Single Selection', () => {
-
     test('renders tabs when not singleSelection', () => {
       const { getByRole } = render(<JobSelectorTable {...props} />);
       const tabs = getByRole('tab');
@@ -160,7 +153,10 @@ describe('JobSelectorTable', () => {
     });
 
     test('incoming selectedIds are checked in the table when multiple ids', () => {
-      const multipleSelectedIdsProps = { ...props, selectedIds: ['price-by-day', 'bytes-by-geo-dest'] };
+      const multipleSelectedIdsProps = {
+        ...props,
+        selectedIds: ['price-by-day', 'bytes-by-geo-dest'],
+      };
       const { getByTestId } = render(<JobSelectorTable {...multipleSelectedIdsProps} />);
       const priceByDayCheckbox = getByTestId('price-by-day-checkbox');
       const bytesByGeoCheckbox = getByTestId('bytes-by-geo-dest-checkbox');
@@ -175,7 +171,5 @@ describe('JobSelectorTable', () => {
       const groupDropdownButton = getByText('Group');
       expect(groupDropdownButton).toBeDefined();
     });
-
   });
-
 });

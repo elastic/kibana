@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 const handler = async (request, callWithRequest, h) => {
   const indices = request.payload.indices || [];
   const params = {
     expandWildcards: 'none',
     format: 'json',
-    index: indices
+    index: indices,
   };
   await callWithRequest('indices.open', params);
   return h.response();
@@ -18,4 +17,3 @@ const handler = async (request, callWithRequest, h) => {
 export function registerOpenRoute(router) {
   router.post('indices/open', handler);
 }
-

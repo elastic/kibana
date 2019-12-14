@@ -29,7 +29,7 @@ export function setupVersionCheck(server, config) {
     if (versionRequested && versionRequested !== actualVersion) {
       throw badRequest('Browser client is out of date, please refresh the page', {
         expected: actualVersion,
-        got: versionRequested
+        got: versionRequested,
       });
     }
 

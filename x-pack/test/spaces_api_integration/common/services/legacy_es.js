@@ -16,6 +16,6 @@ export function LegacyEsProvider({ getService }) {
   return new legacyElasticsearch.Client({
     host: formatUrl(config.get('servers.elasticsearch')),
     requestTimeout: config.get('timeouts.esRequestTimeout'),
-    plugins: [shieldPlugin]
+    plugins: [shieldPlugin],
   });
 }

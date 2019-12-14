@@ -25,35 +25,30 @@ import * as transformDeprecationsNS from './transform_deprecations';
 import { transformDeprecations } from './transform_deprecations';
 /* eslint-enable import/no-duplicates */
 
-describe('server/config completeMixin()', function () {
+describe('server/config completeMixin()', function() {
   const sandbox = sinon.createSandbox();
   afterEach(() => sandbox.restore());
 
   const setup = (options = {}) => {
-    const {
-      settings = {},
-      configValues = {},
-      disabledPluginSpecs = [],
-      plugins = [],
-    } = options;
+    const { settings = {}, configValues = {}, disabledPluginSpecs = [], plugins = [] } = options;
 
     const server = {
-      decorate: sinon.stub()
+      decorate: sinon.stub(),
     };
 
     const config = {
-      get: sinon.stub().returns(configValues)
+      get: sinon.stub().returns(configValues),
     };
 
     const kbnServer = {
       newPlatform: {
-        params: { handledConfigPaths: [] }
+        params: { handledConfigPaths: [] },
       },
       settings,
       server,
       config,
       disabledPluginSpecs,
-      plugins
+      plugins,
     };
 
     const callCompleteMixin = () => completeMixin(kbnServer, server, config);
@@ -65,7 +60,7 @@ describe('server/config completeMixin()', function () {
     it('adds a config() function to the server', async () => {
       const { config, callCompleteMixin, server } = setup({
         settings: {},
-        configValues: {}
+        configValues: {},
       });
 
       await callCompleteMixin();
@@ -76,13 +71,13 @@ describe('server/config completeMixin()', function () {
   });
 
   describe('all settings used', () => {
-    it('should not throw', async function () {
+    it('should not throw', async function() {
       const { callCompleteMixin } = setup({
         settings: {
-          used: true
+          used: true,
         },
         configValues: {
-          used: true
+          used: true,
         },
       });
 
@@ -90,15 +85,15 @@ describe('server/config completeMixin()', function () {
     });
 
     describe('more config values than settings', () => {
-      it('should not throw', async function () {
+      it('should not throw', async function() {
         const { callCompleteMixin } = setup({
           settings: {
-            used: true
+            used: true,
           },
           configValues: {
             used: true,
-            foo: 'bar'
-          }
+            foo: 'bar',
+          },
         });
 
         await expect(callCompleteMixin()).resolves.toBe(undefined);
@@ -110,13 +105,13 @@ describe('server/config completeMixin()', function () {
     it('should not throw', async () => {
       const { callCompleteMixin } = setup({
         settings: {
-          env: 'development'
+          env: 'development',
         },
         configValues: {
           env: {
-            name: 'development'
-          }
-        }
+            name: 'development',
+          },
+        },
       });
 
       await expect(callCompleteMixin()).resolves.toBe(undefined);
@@ -127,14 +122,11 @@ describe('server/config completeMixin()', function () {
     it('should not throw', async () => {
       const { callCompleteMixin } = setup({
         settings: {
-          foo: [
-            'a',
-            'b'
-          ]
+          foo: ['a', 'b'],
         },
         configValues: {
-          foo: []
-        }
+          foo: [],
+        },
       });
 
       await expect(callCompleteMixin()).resolves.toBe(undefined);
@@ -142,19 +134,19 @@ describe('server/config completeMixin()', function () {
   });
 
   describe('some settings unused', () => {
-    it('should throw an error', async function () {
+    it('should throw an error', async function() {
       expect.assertions(1);
       const { callCompleteMixin } = setup({
         settings: {
-          unused: true
+          unused: true,
         },
         configValues: {
-          used: true
-        }
+          used: true,
+        },
       });
       try {
         await callCompleteMixin();
-      } catch(error) {
+      } catch (error) {
         expect(error.message).toMatch('"unused" setting was not applied');
       }
     });
@@ -170,11 +162,11 @@ describe('server/config completeMixin()', function () {
             namespace: {
               with: {
                 sub: {
-                  keys: true
-                }
-              }
-            }
-          }
+                  keys: true,
+                },
+              },
+            },
+          },
         });
 
         try {
@@ -189,18 +181,18 @@ describe('server/config completeMixin()', function () {
   });
 
   describe('deprecation support', () => {
-    it('should transform settings when determining what is unused', async function () {
+    it('should transform settings when determining what is unused', async function() {
       sandbox.spy(transformDeprecationsNS, 'transformDeprecations');
 
       const settings = {
-        foo: 1
+        foo: 1,
       };
 
       const { callCompleteMixin } = setup({
         settings,
         configValues: {
-          ...settings
-        }
+          ...settings,
+        },
       });
 
       await callCompleteMixin();
@@ -208,8 +200,8 @@ describe('server/config completeMixin()', function () {
       sinon.assert.calledWithExactly(transformDeprecations, settings);
     });
 
-    it('should use transformed settings when considering what is used', async function () {
-      sandbox.stub(transformDeprecationsNS, 'transformDeprecations').callsFake((settings) => {
+    it('should use transformed settings when considering what is used', async function() {
+      sandbox.stub(transformDeprecationsNS, 'transformDeprecations').callsFake(settings => {
         settings.bar = settings.foo;
         delete settings.foo;
         return settings;
@@ -217,11 +209,11 @@ describe('server/config completeMixin()', function () {
 
       const { callCompleteMixin } = setup({
         settings: {
-          foo: 1
+          foo: 1,
         },
         configValues: {
-          bar: 1
-        }
+          bar: 1,
+        },
       });
 
       await callCompleteMixin();
@@ -232,13 +224,13 @@ describe('server/config completeMixin()', function () {
       const { callCompleteMixin } = setup({
         settings: {
           foo: {
-            foo1: 'bar'
-          }
+            foo1: 'bar',
+          },
         },
         configValues: {
           foo: {
-            foo2: 'bar'
-          }
+            foo2: 'bar',
+          },
         },
         plugins: [
           {
@@ -246,9 +238,9 @@ describe('server/config completeMixin()', function () {
               getDeprecationsProvider() {
                 return async ({ rename }) => [rename('foo1', 'foo2')];
               },
-              getConfigPrefix: () => 'foo'
-            }
-          }
+              getConfigPrefix: () => 'foo',
+            },
+          },
         ],
       });
 
@@ -261,19 +253,19 @@ describe('server/config completeMixin()', function () {
           xpack: {
             monitoring: {
               elasticsearch: {
-                url: 'http://localhost:9200'
-              }
-            }
-          }
+                url: 'http://localhost:9200',
+              },
+            },
+          },
         },
         configValues: {
           xpack: {
             monitoring: {
               elasticsearch: {
-                hosts: 'http://localhost:9200'
-              }
-            }
-          }
+                hosts: 'http://localhost:9200',
+              },
+            },
+          },
         },
         plugins: [
           {
@@ -281,9 +273,9 @@ describe('server/config completeMixin()', function () {
               getDeprecationsProvider() {
                 return async ({ rename }) => [rename('elasticsearch.url', 'elasticsearch.hosts')];
               },
-              getConfigPrefix: () => 'xpack.monitoring'
-            }
-          }
+              getConfigPrefix: () => 'xpack.monitoring',
+            },
+          },
         ],
       });
 
@@ -297,17 +289,17 @@ describe('server/config completeMixin()', function () {
         settings: {
           foo: {
             bar: {
-              unused: true
-            }
-          }
+              unused: true,
+            },
+          },
         },
         disabledPluginSpecs: [
           {
             id: 'foo',
-            getConfigPrefix: () => 'foo.bar'
-          }
+            getConfigPrefix: () => 'foo.bar',
+          },
         ],
-        configValues: {}
+        configValues: {},
       });
 
       await expect(callCompleteMixin()).resolves.toBe(undefined);

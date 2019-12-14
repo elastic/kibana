@@ -24,7 +24,10 @@ import 'ui/collapsible_sidebar';
 import './components/field_chooser/field_chooser';
 import './controllers/discover';
 import './doc_table/components/table_row';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
@@ -38,6 +41,6 @@ FeatureCatalogueRegistryProvider.register(() => {
     icon: 'discoverApp',
     path: '/app/kibana#/discover',
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.DATA
+    category: FeatureCatalogueCategory.DATA,
   };
 });

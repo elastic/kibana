@@ -30,8 +30,14 @@ import dashboardTemplate from './dashboard_app.html';
 import dashboardListingTemplate from './listing/dashboard_listing_ng_wrapper.html';
 
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
-import { InvalidJSONProperty, SavedObjectNotFound } from '../../../../../plugins/kibana_utils/public';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  InvalidJSONProperty,
+  SavedObjectNotFound,
+} from '../../../../../plugins/kibana_utils/public';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
@@ -43,12 +49,9 @@ import { npStart } from 'ui/new_platform';
 // load directives
 import '../../../data/public';
 
-const app = uiModules.get('app/dashboard', [
-  'ngRoute',
-  'react',
-]);
+const app = uiModules.get('app/dashboard', ['ngRoute', 'react']);
 
-app.directive('dashboardListing', function (reactDirective) {
+app.directive('dashboardListing', function(reactDirective) {
   return reactDirective(wrapInI18nContext(DashboardListing));
 });
 
@@ -74,9 +77,9 @@ uiRoutes
         tooltip: i18n.translate('kbn.dashboard.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save dashboards',
         }),
-        iconType: 'glasses'
+        iconType: 'glasses',
       };
-    }
+    },
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
@@ -89,7 +92,7 @@ uiRoutes
       $scope.create = () => {
         kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
       };
-      $scope.find = (search) => {
+      $scope.find = search => {
         return services.dashboards.find(search, $scope.listingLimit);
       };
       $scope.editItem = ({ id }) => {
@@ -98,69 +101,83 @@ uiRoutes
       $scope.getViewUrl = ({ id }) => {
         return chrome.addBasePath(`#${createDashboardEditUrl(id)}`);
       };
-      $scope.delete = (dashboards) => {
+      $scope.delete = dashboards => {
         return services.dashboards.delete(dashboards.map(d => d.id));
       };
       $scope.hideWriteControls = dashboardConfig.getHideWriteControls();
-      $scope.initialFilter = ($location.search()).filter || EMPTY_FILTER;
-      chrome.breadcrumbs.set([{
-        text: i18n.translate('kbn.dashboard.dashboardBreadcrumbsTitle', {
-          defaultMessage: 'Dashboards',
-        }),
-      }]);
+      $scope.initialFilter = $location.search().filter || EMPTY_FILTER;
+      chrome.breadcrumbs.set([
+        {
+          text: i18n.translate('kbn.dashboard.dashboardBreadcrumbsTitle', {
+            defaultMessage: 'Dashboards',
+          }),
+        },
+      ]);
     },
     resolve: {
-      dash: function ($route, Private, redirectWhenMissing, kbnUrl) {
+      dash: function($route, Private, redirectWhenMissing, kbnUrl) {
         const savedObjectsClient = Private(SavedObjectsClientProvider);
         const title = $route.current.params.title;
         if (title) {
-          return savedObjectsClient.find({
-            search: `"${title}"`,
-            search_fields: 'title',
-            type: 'dashboard',
-          }).then(results => {
-            // The search isn't an exact match, lets see if we can find a single exact match to use
-            const matchingDashboards = results.savedObjects.filter(
-              dashboard => dashboard.attributes.title.toLowerCase() === title.toLowerCase());
-            if (matchingDashboards.length === 1) {
-              kbnUrl.redirect(createDashboardEditUrl(matchingDashboards[0].id));
-            } else {
-              kbnUrl.redirect(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
-            }
-            throw uiRoutes.WAIT_FOR_URL_CHANGE_TOKEN;
-          }).catch(redirectWhenMissing({
-            'dashboard': DashboardConstants.LANDING_PAGE_PATH
-          }));
+          return savedObjectsClient
+            .find({
+              search: `"${title}"`,
+              search_fields: 'title',
+              type: 'dashboard',
+            })
+            .then(results => {
+              // The search isn't an exact match, lets see if we can find a single exact match to use
+              const matchingDashboards = results.savedObjects.filter(
+                dashboard => dashboard.attributes.title.toLowerCase() === title.toLowerCase()
+              );
+              if (matchingDashboards.length === 1) {
+                kbnUrl.redirect(createDashboardEditUrl(matchingDashboards[0].id));
+              } else {
+                kbnUrl.redirect(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
+              }
+              throw uiRoutes.WAIT_FOR_URL_CHANGE_TOKEN;
+            })
+            .catch(
+              redirectWhenMissing({
+                dashboard: DashboardConstants.LANDING_PAGE_PATH,
+              })
+            );
         }
-      }
-    }
+      },
+    },
   })
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
     requireUICapability: 'dashboard.createNew',
     resolve: {
-      dash: function (savedDashboards, redirectWhenMissing) {
-        return savedDashboards.get()
-          .catch(redirectWhenMissing({
-            'dashboard': DashboardConstants.LANDING_PAGE_PATH
-          }));
-      }
-    }
+      dash: function(savedDashboards, redirectWhenMissing) {
+        return savedDashboards.get().catch(
+          redirectWhenMissing({
+            dashboard: DashboardConstants.LANDING_PAGE_PATH,
+          })
+        );
+      },
+    },
   })
   .when(createDashboardEditUrl(':id'), {
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
     resolve: {
-      dash: function (savedDashboards, $route, redirectWhenMissing, kbnUrl, AppState) {
+      dash: function(savedDashboards, $route, redirectWhenMissing, kbnUrl, AppState) {
         const id = $route.current.params.id;
 
-        return savedDashboards.get(id)
-          .then((savedDashboard) => {
-            npStart.core.chrome.recentlyAccessed.add(savedDashboard.getFullPath(), savedDashboard.title, id);
+        return savedDashboards
+          .get(id)
+          .then(savedDashboard => {
+            npStart.core.chrome.recentlyAccessed.add(
+              savedDashboard.getFullPath(),
+              savedDashboard.title,
+              id
+            );
             return savedDashboard;
           })
-          .catch((error) => {
+          .catch(error => {
             // A corrupt dashboard was detected (e.g. with invalid JSON properties)
             if (error instanceof InvalidJSONProperty) {
               toastNotifications.addDanger(error.message);
@@ -173,18 +190,23 @@ uiRoutes
             if (error instanceof SavedObjectNotFound && id === 'create') {
               // Note "new AppState" is necessary so the state in the url is preserved through the redirect.
               kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-              toastNotifications.addWarning(i18n.translate('kbn.dashboard.urlWasRemovedInSixZeroWarningMessage',
-                { defaultMessage: 'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.' }
-              ));
+              toastNotifications.addWarning(
+                i18n.translate('kbn.dashboard.urlWasRemovedInSixZeroWarningMessage', {
+                  defaultMessage:
+                    'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
+                })
+              );
             } else {
               throw error;
             }
           })
-          .catch(redirectWhenMissing({
-            'dashboard': DashboardConstants.LANDING_PAGE_PATH
-          }));
-      }
-    }
+          .catch(
+            redirectWhenMissing({
+              dashboard: DashboardConstants.LANDING_PAGE_PATH,
+            })
+          );
+      },
+    },
   });
 
 FeatureCatalogueRegistryProvider.register(() => {
@@ -199,6 +221,6 @@ FeatureCatalogueRegistryProvider.register(() => {
     icon: 'dashboardApp',
     path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.DATA
+    category: FeatureCatalogueCategory.DATA,
   };
 });

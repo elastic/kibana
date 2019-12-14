@@ -5,22 +5,18 @@
  */
 
 import React from 'react';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiCodeEditor
-} from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiCodeEditor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function EventOutput({ value }) {
   return (
     <EuiFormRow
-      label={(
+      label={
         <FormattedMessage
           id="xpack.grokDebugger.structuredDataLabel"
           defaultMessage="Structured Data"
         />
-      )}
+      }
       fullWidth
       data-test-subj="aceEventOutput"
     >

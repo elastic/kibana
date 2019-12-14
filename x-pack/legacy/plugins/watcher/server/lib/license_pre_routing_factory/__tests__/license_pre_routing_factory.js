@@ -6,7 +6,10 @@
 
 import expect from '@kbn/expect';
 import { licensePreRoutingFactory } from '../license_pre_routing_factory';
-import { LICENSE_STATUS_VALID, LICENSE_STATUS_EXPIRED } from '../../../../../../common/constants/license_status';
+import {
+  LICENSE_STATUS_VALID,
+  LICENSE_STATUS_EXPIRED,
+} from '../../../../../../common/constants/license_status';
 
 describe('license_pre_routing_factory', () => {
   describe('#reportingFeaturePreRoutingFactory', () => {
@@ -19,11 +22,11 @@ describe('license_pre_routing_factory', () => {
           xpack_main: {
             info: {
               feature: () => ({
-                getLicenseCheckResults: () => mockLicenseCheckResults
-              })
-            }
-          }
-        }
+                getLicenseCheckResults: () => mockLicenseCheckResults,
+              }),
+            },
+          },
+        },
       };
     });
 
@@ -37,14 +40,14 @@ describe('license_pre_routing_factory', () => {
     describe('status is not valid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          status: LICENSE_STATUS_EXPIRED
+          status: LICENSE_STATUS_EXPIRED,
         };
       });
 
-      it ('replies with 403', () => {
+      it('replies with 403', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
-        expect(() => licensePreRouting(stubRequest)).to.throwException((response) => {
+        expect(() => licensePreRouting(stubRequest)).to.throwException(response => {
           expect(response).to.be.an(Error);
           expect(response.isBoom).to.be(true);
           expect(response.output.statusCode).to.be(403);
@@ -55,11 +58,11 @@ describe('license_pre_routing_factory', () => {
     describe('status is valid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          status: LICENSE_STATUS_VALID
+          status: LICENSE_STATUS_VALID,
         };
       });
 
-      it ('replies with nothing', () => {
+      it('replies with nothing', () => {
         const licensePreRouting = licensePreRoutingFactory(mockServer);
         const stubRequest = {};
         const response = licensePreRouting(stubRequest);

@@ -17,10 +17,10 @@ export class App extends Component {
     router: PropTypes.shape({
       history: PropTypes.shape({
         push: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired
-      }).isRequired
-    }).isRequired
-  }
+        createHref: PropTypes.func.isRequired,
+      }).isRequired,
+    }).isRequired,
+  };
 
   constructor(...args) {
     super(...args);

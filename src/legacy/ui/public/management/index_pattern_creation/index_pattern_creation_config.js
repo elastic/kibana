@@ -19,14 +19,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-const indexPatternTypeName = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultTypeName',
-  { defaultMessage: 'index pattern' });
+const indexPatternTypeName = i18n.translate(
+  'common.ui.management.editIndexPattern.createIndex.defaultTypeName',
+  { defaultMessage: 'index pattern' }
+);
 
-const indexPatternButtonText = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultButtonText',
-  { defaultMessage: 'Standard index pattern' });
+const indexPatternButtonText = i18n.translate(
+  'common.ui.management.editIndexPattern.createIndex.defaultButtonText',
+  { defaultMessage: 'Standard index pattern' }
+);
 
-const indexPatternButtonDescription = i18n.translate('common.ui.management.editIndexPattern.createIndex.defaultButtonDescription',
-  { defaultMessage: 'Perform full aggregations against any data' });
+const indexPatternButtonDescription = i18n.translate(
+  'common.ui.management.editIndexPattern.createIndex.defaultButtonDescription',
+  { defaultMessage: 'Perform full aggregations against any data' }
+);
 
 export class IndexPatternCreationConfig {
   static key = 'default';
@@ -58,19 +64,19 @@ export class IndexPatternCreationConfig {
 
   getIndexPatternType = () => {
     return this.type;
-  }
+  };
 
   getIndexPatternName = () => {
     return this.name;
-  }
+  };
 
   getIsBeta = () => {
     return this.isBeta;
-  }
+  };
 
   getShowSystemIndices = () => {
     return this.showSystemIndices;
-  }
+  };
 
   getIndexTags() {
     return [];
@@ -78,17 +84,17 @@ export class IndexPatternCreationConfig {
 
   checkIndicesForErrors = () => {
     return undefined;
-  }
+  };
 
   getIndexPatternMappings = () => {
     return {};
-  }
+  };
 
   renderPrompt = () => {
     return null;
-  }
+  };
 
   getFetchForWildcardOptions = () => {
     return {};
-  }
+  };
 }

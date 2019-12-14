@@ -18,7 +18,7 @@
  */
 
 jest.mock('fs', () => ({
-  readFile: jest.fn()
+  readFile: jest.fn(),
 }));
 
 jest.mock('os', () => ({
@@ -26,11 +26,11 @@ jest.mock('os', () => ({
   totalmem: jest.fn(),
   uptime: jest.fn(),
   platform: jest.fn(),
-  release: jest.fn()
+  release: jest.fn(),
 }));
 
 jest.mock('process', () => ({
-  uptime: jest.fn()
+  uptime: jest.fn(),
 }));
 
 import fs from 'fs';
@@ -40,16 +40,16 @@ import sinon from 'sinon';
 import { cGroups as cGroupsFsStub, setMockFiles, readFileMock } from './__mocks__/_fs_stubs';
 import { Metrics } from './metrics';
 
-describe('Metrics', function () {
+describe('Metrics', function() {
   fs.readFile.mockImplementation(readFileMock);
 
   const sampleConfig = {
     ops: {
-      interval: 5000
+      interval: 5000,
     },
     server: {
-      port: 5603
-    }
+      port: 5603,
+    },
   };
   const config = { get: path => _.get(sampleConfig, path) };
 
@@ -65,19 +65,21 @@ describe('Metrics', function () {
     setMockFiles();
   });
 
-
   describe('capture', () => {
     it('merges all metrics', async () => {
       setMockFiles();
-      sinon.stub(metrics, 'captureEvent').returns({ 'a': [{ 'b': 2 }, { 'd': 4 }], process: { uptime_ms: 1980 } });
-      sinon.stub(metrics, 'captureCGroupsIfAvailable').returns({ 'a': [{ 'c': 3 }, { 'e': 5 }] });
+      sinon
+        .stub(metrics, 'captureEvent')
+        .returns({ a: [{ b: 2 }, { d: 4 }], process: { uptime_ms: 1980 } });
+      sinon.stub(metrics, 'captureCGroupsIfAvailable').returns({ a: [{ c: 3 }, { e: 5 }] });
       sinon.stub(Date.prototype, 'toISOString').returns('2017-04-14T18:35:41.534Z');
 
       const capturedMetrics = await metrics.capture();
       expect(capturedMetrics).toMatchObject({
         last_updated: '2017-04-14T18:35:41.534Z',
         collection_interval_in_millis: 5000,
-        a: [ { b: 2, c: 3 }, { d: 4, e: 5 } ], process: { uptime_ms: 1980 }
+        a: [{ b: 2, c: 3 }, { d: 4, e: 5 }],
+        process: { uptime_ms: 1980 },
       });
     });
   });
@@ -95,49 +97,49 @@ describe('Metrics', function () {
       Object.defineProperty(process, 'pid', { get: pidMock }); //
 
       const hapiEvent = {
-        'requests': { '5603': { 'total': 22, 'disconnects': 0, 'statusCodes': { '200': 22 } } },
-        'responseTimes': { '5603': { 'avg': 1.8636363636363635, 'max': 4 } },
-        'osload': [2.20751953125, 2.02294921875, 1.89794921875],
-        'osmem': { 'total': 17179869184, 'free': 102318080 },
-        'osup': 1008991,
-        'psup': 7.168,
-        'psmem': { 'rss': 193716224, 'heapTotal': 168194048, 'heapUsed': 130553400, 'external': 1779619 },
-        'concurrent_connections': 0,
-        'psdelay': 1.6091690063476562,
-        'host': 'blahblah.local'
+        requests: { '5603': { total: 22, disconnects: 0, statusCodes: { '200': 22 } } },
+        responseTimes: { '5603': { avg: 1.8636363636363635, max: 4 } },
+        osload: [2.20751953125, 2.02294921875, 1.89794921875],
+        osmem: { total: 17179869184, free: 102318080 },
+        osup: 1008991,
+        psup: 7.168,
+        psmem: { rss: 193716224, heapTotal: 168194048, heapUsed: 130553400, external: 1779619 },
+        concurrent_connections: 0,
+        psdelay: 1.6091690063476562,
+        host: 'blahblah.local',
       };
 
       expect(await metrics.captureEvent(hapiEvent)).toMatchObject({
-        'concurrent_connections': 0,
-        'os': {
-          'load': {
+        concurrent_connections: 0,
+        os: {
+          load: {
             '15m': 1.89794921875,
             '1m': 2.20751953125,
-            '5m': 2.02294921875
+            '5m': 2.02294921875,
           },
-          'memory': {
-            'free_in_bytes': 12,
-            'total_in_bytes': 24,
+          memory: {
+            free_in_bytes: 12,
+            total_in_bytes: 24,
           },
-          'uptime_in_millis': 12000000,
+          uptime_in_millis: 12000000,
         },
-        'process': {
-          'memory': {
-            'heap': {
-              'total_in_bytes': 168194048,
-              'used_in_bytes': 130553400,
+        process: {
+          memory: {
+            heap: {
+              total_in_bytes: 168194048,
+              used_in_bytes: 130553400,
             },
-            'resident_set_size_in_bytes': 193716224,
+            resident_set_size_in_bytes: 193716224,
           },
-          'pid': 8675309
+          pid: 8675309,
         },
-        'requests': {
-          'disconnects': 0,
-          'total': 22
+        requests: {
+          disconnects: 0,
+          total: 22,
         },
-        'response_times': {
-          'avg_in_millis': 1.8636363636363635,
-          'max_in_millis': 4
+        response_times: {
+          avg_in_millis: 1.8636363636363635,
+          max_in_millis: 4,
         },
       });
     });
@@ -196,11 +198,11 @@ describe('Metrics', function () {
               stat: {
                 number_of_elapsed_periods: 0,
                 number_of_times_throttled: 10,
-                time_throttled_nanos: 20
-              }
-            }
-          }
-        }
+                time_throttled_nanos: 20,
+              },
+            },
+          },
+        },
       });
     });
   });

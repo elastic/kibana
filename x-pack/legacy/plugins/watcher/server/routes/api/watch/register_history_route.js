@@ -11,7 +11,7 @@ import { INDEX_NAMES, ES_SCROLL_SETTINGS } from '../../../../common/constants';
 import { WatchHistoryItem } from '../../../models/watch_history_item';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchHistoryItems(callWithRequest, watchId, startTime) {
   const params = {
@@ -19,17 +19,13 @@ function fetchHistoryItems(callWithRequest, watchId, startTime) {
     scroll: ES_SCROLL_SETTINGS.KEEPALIVE,
     body: {
       size: ES_SCROLL_SETTINGS.PAGE_SIZE,
-      sort: [
-        { 'result.execution_time': 'desc' }
-      ],
+      sort: [{ 'result.execution_time': 'desc' }],
       query: {
         bool: {
-          must: [
-            { term: { 'watch_id': watchId } },
-          ]
-        }
-      }
-    }
+          must: [{ term: { watch_id: watchId } }],
+        },
+      },
+    },
   };
 
   // Add time range clause to query if startTime is specified
@@ -38,8 +34,9 @@ function fetchHistoryItems(callWithRequest, watchId, startTime) {
     params.body.query.bool.must.push(timeRangeQuery);
   }
 
-  return callWithRequest('search', params)
-    .then(response => fetchAllFromScroll(response, callWithRequest));
+  return callWithRequest('search', params).then(response =>
+    fetchAllFromScroll(response, callWithRequest)
+  );
 }
 
 export function registerHistoryRoute(server) {
@@ -49,7 +46,7 @@ export function registerHistoryRoute(server) {
   server.route({
     path: '/api/watcher/watch/{watchId}/history',
     method: 'GET',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { watchId } = request.params;
       const { startTime } = request.query;
@@ -61,15 +58,20 @@ export function registerHistoryRoute(server) {
             const watchHistoryItemJson = get(hit, '_source');
 
             const opts = { includeDetails: false };
-            return WatchHistoryItem.fromUpstreamJson({
-              id,
-              watchId,
-              watchHistoryItemJson
-            }, opts);
+            return WatchHistoryItem.fromUpstreamJson(
+              {
+                id,
+                watchId,
+                watchHistoryItemJson,
+              },
+              opts
+            );
           });
 
           return {
-            watchHistoryItems: watchHistoryItems.map(watchHistoryItem => watchHistoryItem.downstreamJson)
+            watchHistoryItems: watchHistoryItems.map(
+              watchHistoryItem => watchHistoryItem.downstreamJson
+            ),
           };
         })
         .catch(err => {
@@ -83,7 +85,7 @@ export function registerHistoryRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

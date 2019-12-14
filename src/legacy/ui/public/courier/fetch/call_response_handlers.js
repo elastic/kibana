@@ -30,7 +30,7 @@ export function CallResponseHandlersProvider(Promise) {
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
   function callResponseHandlers(searchRequests, responses) {
-    return Promise.map(searchRequests, function (searchRequest, index) {
+    return Promise.map(searchRequests, function(searchRequest, index) {
       if (searchRequest === ABORTED || searchRequest.aborted) {
         return ABORTED;
       }
@@ -53,14 +53,17 @@ export function CallResponseHandlersProvider(Promise) {
             shardsTotal: response._shards.total,
           },
         });
-        const description = i18n.translate('common.ui.courier.fetch.shardsFailedNotificationDescription', {
-          defaultMessage: 'The data you are seeing might be incomplete or wrong.',
-        });
+        const description = i18n.translate(
+          'common.ui.courier.fetch.shardsFailedNotificationDescription',
+          {
+            defaultMessage: 'The data you are seeing might be incomplete or wrong.',
+          }
+        );
 
         const text = (
           <>
             {description}
-            <EuiSpacer size="s"/>
+            <EuiSpacer size="s" />
             <ShardFailureOpenModalButton
               request={searchRequest.fetchParams.body}
               response={response}

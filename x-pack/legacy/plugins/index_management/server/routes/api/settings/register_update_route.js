@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 const handler = async (request, callWithRequest) => {
   const { indexName } = request.params;
   const params = {
@@ -12,7 +11,7 @@ const handler = async (request, callWithRequest) => {
     allowNoIndices: false,
     expandWildcards: 'none',
     index: indexName,
-    body: request.payload
+    body: request.payload,
   };
 
   return await callWithRequest('indices.putSettings', params);

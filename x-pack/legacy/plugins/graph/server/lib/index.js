@@ -6,12 +6,6 @@
 
 export { checkLicense } from './check_license';
 
-export {
-  callEsGraphExploreApi,
-  callEsSearchApi,
-} from './es';
+export { callEsGraphExploreApi, callEsSearchApi } from './es';
 
-export {
-  getCallClusterPre,
-  verifyApiAccessPre,
-} from './pre';
+export { getCallClusterPre, verifyApiAccessPre } from './pre';

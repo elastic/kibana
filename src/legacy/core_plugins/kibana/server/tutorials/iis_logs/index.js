@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function iisLogsSpecProvider(server, context) {
   const moduleName = 'iis';
@@ -34,7 +38,8 @@ export function iisLogsSpecProvider(server, context) {
       defaultMessage: 'Collect and parse access and error logs created by the IIS HTTP server.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.iisLogs.longDescription', {
-      defaultMessage: 'The `iis` Filebeat module parses access and error logs created by the IIS HTTP server. \
+      defaultMessage:
+        'The `iis` Filebeat module parses access and error logs created by the IIS HTTP server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-iis.html',
@@ -48,17 +53,17 @@ export function iisLogsSpecProvider(server, context) {
           linkLabel: i18n.translate('kbn.server.tutorials.iisLogs.artifacts.dashboards.linkLabel', {
             defaultMessage: 'IIS logs dashboard',
           }),
-          isOverview: true
-        }
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-iis.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-iis.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/iis_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

@@ -23,9 +23,9 @@ function getLineWidthIcons() {
     width: '12px',
   };
   return [
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '1px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '2px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, strokeWidth: '3px' }}/>,
+    <CircleIcon style={{ ...defaultStyle, strokeWidth: '1px' }} />,
+    <CircleIcon style={{ ...defaultStyle, strokeWidth: '2px' }} />,
+    <CircleIcon style={{ ...defaultStyle, strokeWidth: '3px' }} />,
   ];
 }
 
@@ -36,36 +36,32 @@ function getSymbolSizeIcons() {
     fill: 'grey',
   };
   return [
-    <CircleIcon style={{ ...defaultStyle, width: '4px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, width: '8px' }}/>,
-    <CircleIcon style={{ ...defaultStyle, width: '12px' }}/>,
+    <CircleIcon style={{ ...defaultStyle, width: '4px' }} />,
+    <CircleIcon style={{ ...defaultStyle, width: '8px' }} />,
+    <CircleIcon style={{ ...defaultStyle, width: '12px' }} />,
   ];
 }
 
 function renderHeaderWithIcons(icons) {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-      {
-        icons.map((icon, index) => {
-          const isLast = index === icons.length - 1;
-          let spacer;
-          if (!isLast) {
-            spacer = (
-              <EuiFlexItem>
-                <EuiHorizontalRule margin="xs" />
-              </EuiFlexItem>
-            );
-          }
-          return (
-            <Fragment key={index}>
-              <EuiFlexItem grow={false}>
-                {icon}
-              </EuiFlexItem>
-              {spacer}
-            </Fragment>
+      {icons.map((icon, index) => {
+        const isLast = index === icons.length - 1;
+        let spacer;
+        if (!isLast) {
+          spacer = (
+            <EuiFlexItem>
+              <EuiHorizontalRule margin="xs" />
+            </EuiFlexItem>
           );
-        })
-      }
+        }
+        return (
+          <Fragment key={index}>
+            <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+            {spacer}
+          </Fragment>
+        );
+      })}
     </EuiFlexGroup>
   );
 }
@@ -73,11 +69,10 @@ function renderHeaderWithIcons(icons) {
 const EMPTY_VALUE = '';
 
 export class StylePropertyLegendRow extends Component {
-
   state = {
     label: '',
     hasLoadedFieldFormatter: false,
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -118,20 +113,27 @@ export class StylePropertyLegendRow extends Component {
     if (this._isMounted) {
       this.setState({ label });
     }
-  }
+  };
 
   _isStatic() {
-    return this.props.type === VectorStyle.STYLE_TYPE.STATIC ||
-        !this.props.options.field || !this.props.options.field.name;
+    return (
+      this.props.type === VectorStyle.STYLE_TYPE.STATIC ||
+      !this.props.options.field ||
+      !this.props.options.field.name
+    );
   }
 
   _formatValue = value => {
-    if (!this.state.hasLoadedFieldFormatter || !this._fieldValueFormatter || value === EMPTY_VALUE) {
+    if (
+      !this.state.hasLoadedFieldFormatter ||
+      !this._fieldValueFormatter ||
+      value === EMPTY_VALUE
+    ) {
       return value;
     }
 
     return this._fieldValueFormatter(value);
-  }
+  };
 
   render() {
     const { name, options, range } = this.props;
@@ -141,7 +143,7 @@ export class StylePropertyLegendRow extends Component {
 
     let header;
     if (options.color) {
-      header = <ColorGradient colorRampName={options.color}/>;
+      header = <ColorGradient colorRampName={options.color} />;
     } else if (name === 'lineWidth') {
       header = renderHeaderWithIcons(getLineWidthIcons());
     } else if (name === 'iconSize') {

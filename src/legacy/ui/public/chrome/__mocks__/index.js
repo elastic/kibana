@@ -27,7 +27,7 @@ const uiSettingsClient = {
 };
 
 const chrome = {
-  addBasePath: path => path ? path : 'test/base/path',
+  addBasePath: path => (path ? path : 'test/base/path'),
   breadcrumbs: {
     set: () => ({}),
   },

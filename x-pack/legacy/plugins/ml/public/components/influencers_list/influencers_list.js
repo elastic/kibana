@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for rendering a list of Machine Learning influencers.
  */
@@ -12,20 +11,12 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiToolTip
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import { abbreviateWholeNumber } from 'plugins/ml/formatters/abbreviate_whole_number';
 import { getSeverity } from 'plugins/ml/../common/util/anomaly_utils';
 import { EntityCell } from '../entity_cell';
-
 
 function getTooltipContent(maxScoreLabel, totalScoreLabel) {
   return (
@@ -51,15 +42,15 @@ function getTooltipContent(maxScoreLabel, totalScoreLabel) {
 function Influencer({ influencerFieldName, influencerFilter, valueData }) {
   const maxScorePrecise = valueData.maxAnomalyScore;
   const maxScore = parseInt(maxScorePrecise);
-  const maxScoreLabel = (maxScore !== 0) ? maxScore : '< 1';
+  const maxScoreLabel = maxScore !== 0 ? maxScore : '< 1';
   const severity = getSeverity(maxScore);
   const totalScore = parseInt(valueData.sumAnomalyScore);
-  const totalScoreLabel = (totalScore !== 0) ? totalScore : '< 1';
+  const totalScoreLabel = totalScore !== 0 ? totalScore : '< 1';
 
   // Ensure the bar has some width for 0 scores.
-  const barScore = (maxScore !== 0) ? maxScore : 1;
+  const barScore = maxScore !== 0 ? maxScore : 1;
   const barStyle = {
-    width: `${barScore}%`
+    width: `${barScore}%`,
   };
 
   const tooltipContent = getTooltipContent(maxScoreLabel, totalScoreLabel);
@@ -67,7 +58,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
   return (
     <div>
       <div className="field-label">
-        {(influencerFieldName !== 'mlcategory') ? (
+        {influencerFieldName !== 'mlcategory' ? (
           <EntityCell
             entityName={influencerFieldName}
             entityValue={valueData.influencerFieldValue}
@@ -79,7 +70,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
       </div>
       <div className={`progress ${severity.id}`} value="{valueData.maxAnomalyScore}" max="100">
         <div className="progress-bar-holder">
-          <div className="progress-bar" style={barStyle}/>
+          <div className="progress-bar" style={barStyle} />
         </div>
         <div className="score-label">
           <EuiToolTip
@@ -99,7 +90,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
           title={`${influencerFieldName}: ${valueData.influencerFieldValue}`}
           content={tooltipContent}
         >
-          <span>{(totalScore > 0) ? abbreviateWholeNumber(totalScore, 4) : totalScoreLabel}</span>
+          <span>{totalScore > 0 ? abbreviateWholeNumber(totalScore, 4) : totalScoreLabel}</span>
         </EuiToolTip>
       </div>
     </div>
@@ -108,7 +99,7 @@ function Influencer({ influencerFieldName, influencerFilter, valueData }) {
 Influencer.propTypes = {
   influencerFieldName: PropTypes.string.isRequired,
   influencerFilter: PropTypes.func,
-  valueData: PropTypes.object.isRequired
+  valueData: PropTypes.object.isRequired,
 };
 
 function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues }) {
@@ -126,7 +117,7 @@ function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues 
       <EuiTitle size="xs">
         <h4>{influencerFieldName}</h4>
       </EuiTitle>
-      <EuiSpacer size="xs"/>
+      <EuiSpacer size="xs" />
       {influencerValues}
     </React.Fragment>
   );
@@ -134,11 +125,10 @@ function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues 
 InfluencersByName.propTypes = {
   influencerFieldName: PropTypes.string.isRequired,
   influencerFilter: PropTypes.func,
-  fieldValues: PropTypes.array.isRequired
+  fieldValues: PropTypes.array.isRequired,
 };
 
 export function InfluencersList({ influencers, influencerFilter }) {
-
   if (influencers === undefined || Object.keys(influencers).length === 0) {
     return (
       <EuiFlexGroup justifyContent="spaceAround">
@@ -166,11 +156,7 @@ export function InfluencersList({ influencers, influencerFilter }) {
     />
   ));
 
-  return (
-    <div className="ml-influencers-list">
-      {influencersByName}
-    </div>
-  );
+  return <div className="ml-influencers-list">{influencersByName}</div>;
 }
 InfluencersList.propTypes = {
   influencers: PropTypes.object,

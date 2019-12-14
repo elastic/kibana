@@ -8,7 +8,7 @@ import { ESTermSource, extractPropertiesMap } from './es_term_source';
 
 jest.mock('../vector_layer', () => {});
 jest.mock('ui/vis/editors/default/schemas', () => ({
-  Schemas: function () {}
+  Schemas: function() {},
 }));
 jest.mock('../../kibana_services', () => {});
 jest.mock('ui/agg_types', () => {});
@@ -21,7 +21,7 @@ const metricExamples = [
   {
     type: 'sum',
     field: sumFieldName,
-    label: 'my custom label'
+    label: 'my custom label',
   },
   {
     // metric config is invalid beause field is missing
@@ -30,12 +30,11 @@ const metricExamples = [
   {
     // metric config is valid because "count" metric does not need to provide field
     type: 'count',
-    label: '' // should ignore empty label fields
+    label: '', // should ignore empty label fields
   },
 ];
 
 describe('getMetricFields', () => {
-
   it('should add default "count" metric when no metrics are provided', () => {
     const source = new ESTermSource({
       indexPatternTitle: indexPatternTitle,
@@ -90,7 +89,7 @@ describe('_makeAggConfigs', () => {
         enabled: true,
         type: 'count',
         schema: 'metric',
-        params: {}
+        params: {},
       });
     });
 
@@ -103,8 +102,8 @@ describe('_makeAggConfigs', () => {
         schema: 'segment',
         params: {
           field: termFieldName,
-          size: 10000
-        }
+          size: 10000,
+        },
       });
     });
   });
@@ -115,7 +114,7 @@ describe('_makeAggConfigs', () => {
       const source = new ESTermSource({
         indexPatternTitle: indexPatternTitle,
         term: 'myTermField',
-        metrics: metricExamples
+        metrics: metricExamples,
       });
       aggConfigs = source._makeAggConfigs();
     });
@@ -131,15 +130,15 @@ describe('_makeAggConfigs', () => {
         type: 'sum',
         schema: 'metric',
         params: {
-          field: sumFieldName
-        }
+          field: sumFieldName,
+        },
       });
       expect(aggConfigs[1]).toEqual({
         id: '__kbnjoin__count_groupby_myIndex.myTermField',
         enabled: true,
         type: 'count',
         schema: 'metric',
-        params: {}
+        params: {},
       });
     });
   });
@@ -147,36 +146,33 @@ describe('_makeAggConfigs', () => {
 
 describe('extractPropertiesMap', () => {
   const responseWithNumberTypes = {
-    'aggregations': {
-      'join': {
-        'buckets': [
+    aggregations: {
+      join: {
+        buckets: [
           {
-            'key': 109,
-            'doc_count': 1130,
+            key: 109,
+            doc_count: 1130,
             '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr': {
-              'value': 36
-            }
+              value: 36,
+            },
           },
           {
-            'key': 62,
-            'doc_count': 448,
+            key: 62,
+            doc_count: 448,
             '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr': {
-              'value': 0
-            }
+              value: 0,
+            },
           },
-        ]
-      }
-    }
+        ],
+      },
+    },
   };
   const countPropName = '__kbnjoin__count_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
-  const minPropName = '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
+  const minPropName =
+    '__kbnjoin__min_of_avlAirTemp_groupby_kibana_sample_data_ky_avl.kytcCountyNmbr';
   let propertiesMap;
   beforeAll(() => {
-    propertiesMap = extractPropertiesMap(
-      responseWithNumberTypes,
-      [minPropName],
-      countPropName
-    );
+    propertiesMap = extractPropertiesMap(responseWithNumberTypes, [minPropName], countPropName);
   });
 
   it('should create key for each join term', () => {

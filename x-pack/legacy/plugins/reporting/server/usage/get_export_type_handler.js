@@ -27,8 +27,10 @@ export async function getExportTypesHandler(server) {
       const exportTypesAvailability = {};
       const xpackInfoAvailable = xpackInfo && xpackInfo.isAvailable();
       const licenseType = xpackInfo.license.getType();
-      for(const exportType of exportTypesRegistry.getAll()) {
-        exportTypesAvailability[exportType.jobType] = xpackInfoAvailable ? exportType.validLicenses.includes(licenseType) : false;
+      for (const exportType of exportTypesRegistry.getAll()) {
+        exportTypesAvailability[exportType.jobType] = xpackInfoAvailable
+          ? exportType.validLicenses.includes(licenseType)
+          : false;
       }
 
       return exportTypesAvailability;
@@ -39,6 +41,6 @@ export async function getExportTypesHandler(server) {
      */
     getNumExportTypes() {
       return exportTypesRegistry.getSize();
-    }
+    },
   };
 }

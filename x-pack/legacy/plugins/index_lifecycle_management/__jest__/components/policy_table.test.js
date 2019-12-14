@@ -24,9 +24,11 @@ const policies = [];
 for (let i = 0; i < 105; i++) {
   policies.push({
     version: i,
-    modified_date: moment().subtract(i, 'days').valueOf(),
+    modified_date: moment()
+      .subtract(i, 'days')
+      .valueOf(),
     linkedIndices: i % 2 === 0 ? [`index${i}`] : null,
-    name: `testy${i}`
+    name: `testy${i}`,
   });
 }
 jest.mock('');
@@ -45,12 +47,11 @@ const namesText = rendered => {
   return names(rendered).map(button => button.text());
 };
 
-const testSort = (headerName) => {
+const testSort = headerName => {
   const rendered = mountWithIntl(component);
-  const nameHeader = findTestSubject(
-    rendered,
-    `policyTableHeaderCell-${headerName}`
-  ).find('button');
+  const nameHeader = findTestSubject(rendered, `policyTableHeaderCell-${headerName}`).find(
+    'button'
+  );
   nameHeader.simulate('click');
   rendered.update();
   snapshot(namesText(rendered));
@@ -58,12 +59,9 @@ const testSort = (headerName) => {
   rendered.update();
   snapshot(namesText(rendered));
 };
-const openContextMenu = (buttonIndex) => {
+const openContextMenu = buttonIndex => {
   const rendered = mountWithIntl(component);
-  const actionsButton = findTestSubject(
-    rendered,
-    'policyActionsContextMenuButton'
-  );
+  const actionsButton = findTestSubject(rendered, 'policyActionsContextMenuButton');
   actionsButton.at(buttonIndex).simulate('click');
   rendered.update();
   return rendered;
@@ -82,7 +80,7 @@ describe('policy table', () => {
     server.respondWith('/api/index_lifecycle_management/policies', [
       200,
       { 'Content-Type': 'application/json' },
-      JSON.stringify(policies)
+      JSON.stringify(policies),
     ]);
   });
   test('should show spinner when policies are loading', () => {
@@ -94,7 +92,6 @@ describe('policy table', () => {
     );
     const rendered = mountWithIntl(component);
     expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
-
   });
   test('should show empty state when there are not any policies', () => {
     store.dispatch(fetchedPolicies([]));

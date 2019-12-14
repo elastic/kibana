@@ -32,9 +32,7 @@ export class LicenseStatus extends React.PureComponent {
             id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusDescription"
             defaultMessage="Your license expired on {expiryDate}"
             values={{
-              expiryDate: (
-                <strong>{expiryDate}</strong>
-              )
+              expiryDate: <strong>{expiryDate}</strong>,
             }}
           />
         </Fragment>
@@ -44,7 +42,7 @@ export class LicenseStatus extends React.PureComponent {
           id="xpack.licenseMgmt.licenseDashboard.licenseStatus.expiredLicenseStatusTitle"
           defaultMessage="Your {typeTitleCase} license has expired"
           values={{
-            typeTitleCase
+            typeTitleCase,
           }}
         />
       );
@@ -56,9 +54,7 @@ export class LicenseStatus extends React.PureComponent {
             id="xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusDescription"
             defaultMessage="Your license will expire on {expiryDate}"
             values={{
-              expiryDate: (
-                <strong>{expiryDate}</strong>
-              )
+              expiryDate: <strong>{expiryDate}</strong>,
             }}
           />
         </Fragment>
@@ -76,7 +72,7 @@ export class LicenseStatus extends React.PureComponent {
           defaultMessage="Your {typeTitleCase} license is {status}"
           values={{
             typeTitleCase,
-            status: status.toLowerCase()
+            status: status.toLowerCase(),
           }}
         />
       );

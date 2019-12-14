@@ -24,23 +24,24 @@ import { Explorer } from './explorer';
 import { EXPLORER_ACTION } from './explorer_constants';
 import { explorer$ } from './explorer_dashboard_service';
 
-module.directive('mlExplorerReactWrapper', function (config, globalState) {
+module.directive('mlExplorerReactWrapper', function(config, globalState) {
   function link(scope, element) {
     const { jobSelectService, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
     // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
     const tzConfig = config.get('dateFormat:tz');
-    const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+    const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
     ReactDOM.render(
       <I18nContext>
-        <Explorer {...{
-          appStateHandler: scope.appStateHandler,
-          config,
-          dateFormatTz,
-          globalState,
-          jobSelectService,
-          TimeBuckets: scope.TimeBuckets,
-        }}
+        <Explorer
+          {...{
+            appStateHandler: scope.appStateHandler,
+            config,
+            dateFormatTz,
+            globalState,
+            jobSelectService,
+            TimeBuckets: scope.TimeBuckets,
+          }}
         />
       </I18nContext>,
       element[0]

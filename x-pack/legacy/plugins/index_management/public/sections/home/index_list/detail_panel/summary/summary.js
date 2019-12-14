@@ -5,7 +5,7 @@
  */
 
 import React, { Fragment } from 'react';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { healthToColor } from '../../../../../services';
 import { getUrlService } from '../../../../../services/navigation';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -18,10 +18,10 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiSpacer,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import { getSummaryExtensions } from '../../../../../index_management_extensions';
-const getHeaders = () =>{
+const getHeaders = () => {
   return {
     health: i18n.translate('xpack.idxMgmt.summary.headers.healthHeader', {
       defaultMessage: 'Health',
@@ -48,8 +48,8 @@ const getHeaders = () =>{
       defaultMessage: 'Primary Storage Size',
     }),
     aliases: i18n.translate('xpack.idxMgmt.summary.headers.aliases', {
-      defaultMessage: 'Aliases'
-    })
+      defaultMessage: 'Aliases',
+    }),
   };
 };
 
@@ -61,7 +61,7 @@ export class Summary extends React.PureComponent {
       return (
         <Fragment key={`summaryExtension-${i}`}>
           <EuiHorizontalRule />
-          { summaryExtension(index, getUrlService()) }
+          {summaryExtension(index, getUrlService())}
         </Fragment>
       );
     });
@@ -71,15 +71,15 @@ export class Summary extends React.PureComponent {
     const headers = getHeaders();
     const rows = {
       left: [],
-      right: []
+      right: [],
     };
     Object.keys(headers).forEach((fieldName, arrayIndex) => {
       const value = index[fieldName];
       let content = value;
-      if(fieldName === 'health') {
+      if (fieldName === 'health') {
         content = <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
       }
-      if(Array.isArray(content)) {
+      if (Array.isArray(content)) {
         content = content.join(', ');
       }
       const cell = [
@@ -88,7 +88,7 @@ export class Summary extends React.PureComponent {
         </EuiDescriptionListTitle>,
         <EuiDescriptionListDescription key={fieldName + '_desc'}>
           {content}
-        </EuiDescriptionListDescription>
+        </EuiDescriptionListDescription>,
       ];
       if (arrayIndex % 2 === 0) {
         rows.left.push(cell);
@@ -106,26 +106,19 @@ export class Summary extends React.PureComponent {
       <Fragment>
         <EuiTitle size="s">
           <h3>
-            <FormattedMessage
-              id="xpack.idxMgmt.summary.summaryTitle"
-              defaultMessage="General"
-            />
+            <FormattedMessage id="xpack.idxMgmt.summary.summaryTitle" defaultMessage="General" />
           </h3>
         </EuiTitle>
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="s" />
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiDescriptionList  type="column">
-              {left}
-            </EuiDescriptionList>
+            <EuiDescriptionList type="column">{left}</EuiDescriptionList>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiDescriptionList  type="column">
-              {right}
-            </EuiDescriptionList>
+            <EuiDescriptionList type="column">{right}</EuiDescriptionList>
           </EuiFlexItem>
         </EuiFlexGroup>
-        { additionalContent }
+        {additionalContent}
       </Fragment>
     );
   }

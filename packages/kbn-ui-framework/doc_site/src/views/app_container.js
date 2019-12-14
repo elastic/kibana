@@ -20,22 +20,11 @@
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-import {
-  getIsCodeViewerOpen,
-  getIsSandbox,
-  getSections,
-  getSource,
-  getTitle,
-} from '../store';
+import { getIsCodeViewerOpen, getIsSandbox, getSections, getSource, getTitle } from '../store';
 
 import { AppView } from './app_view';
 
-import {
-  openCodeViewer,
-  closeCodeViewer,
-  registerSection,
-  unregisterSection,
-} from '../actions';
+import { openCodeViewer, closeCodeViewer, registerSection, unregisterSection } from '../actions';
 
 function mapStateToProps(state, ownProps) {
   return {
@@ -59,4 +48,7 @@ function mapDispatchToProps(dispatch) {
   return bindActionCreators(actions, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AppView);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AppView);

@@ -65,13 +65,18 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
        */
       runExpression: async (step, stepContext) => {
         log.debug(`running expression ${step || expression}`);
-        const promise = browser.executeAsync((expression, context, initialContext, done) => {
-          if (!context) context = {};
-          if (!context.type) context.type = 'null';
-          window.runPipeline(expression, context, initialContext).then(result => {
-            done(result);
-          });
-        }, step || expression, stepContext || context, initialContext);
+        const promise = browser.executeAsync(
+          (expression, context, initialContext, done) => {
+            if (!context) context = {};
+            if (!context.type) context.type = 'null';
+            window.runPipeline(expression, context, initialContext).then(result => {
+              done(result);
+            });
+          },
+          step || expression,
+          stepContext || context,
+          initialContext
+        );
         return await promise;
       },
       steps: {
@@ -84,7 +89,11 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
           for (let i = 0; i < steps.length; i++) {
             const step = steps[i];
             lastResponse = await handler.runExpression(step, lastResponse);
-            const diff = await snapshots.compareAgainstBaseline(name + i, lastResponse, updateBaselines);
+            const diff = await snapshots.compareAgainstBaseline(
+              name + i,
+              lastResponse,
+              updateBaselines
+            );
             expect(diff).to.be.lessThan(0.05);
           }
           if (!responsePromise) {
@@ -118,10 +127,14 @@ export const expectExpressionProvider = ({ getService, updateBaselines }) => {
         log.debug('response of rendering: ', result);
 
         const chartEl = await testSubjects.find('pluginChart');
-        const percentDifference = await screenshot.compareAgainstBaseline(name, updateBaselines, chartEl);
+        const percentDifference = await screenshot.compareAgainstBaseline(
+          name,
+          updateBaselines,
+          chartEl
+        );
         expect(percentDifference).to.be.lessThan(0.1);
         return handler;
-      }
+      },
     };
 
     return handler;

@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function postgresqlMetricsSpecProvider(server, context) {
   const moduleName = 'postgresql';
@@ -34,7 +38,8 @@ export function postgresqlMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch internal metrics from PostgreSQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.postgresqlMetrics.longDescription', {
-      defaultMessage: 'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server. \
+      defaultMessage:
+        'The `postgresql` Metricbeat module fetches internal metrics from the PostgreSQL server. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-postgresql.html',
@@ -43,7 +48,7 @@ export function postgresqlMetricsSpecProvider(server, context) {
     euiIconType: 'logoPostgres',
     artifacts: {
       dashboards: [
-      /*
+        /*
         {
           id: 'TODO',
           linkLabel: 'PostgreSQL metrics dashboard',
@@ -52,13 +57,13 @@ export function postgresqlMetricsSpecProvider(server, context) {
       */
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-postgresql.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-postgresql.html',
+      },
     },
     completionTimeMinutes: 10,
     //previewImagePath: '/plugins/kibana/home/tutorial_resources/postgresql_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

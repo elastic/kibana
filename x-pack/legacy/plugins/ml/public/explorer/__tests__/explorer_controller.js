@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
@@ -15,7 +13,7 @@ describe('ML - Explorer Controller', () => {
   });
 
   it('Initialize Explorer Controller', () => {
-    ngMock.inject(function ($rootScope, $controller) {
+    ngMock.inject(function($rootScope, $controller) {
       const scope = $rootScope.$new();
       $controller('MlExplorerController', { $scope: scope });
 

@@ -21,13 +21,10 @@ import expect from '@kbn/expect';
 import * as namedArg from '../named_arg';
 import { nodeTypes } from '../../node_types';
 
-describe('kuery node types', function () {
-
-  describe('named arg', function () {
-
-    describe('buildNode', function () {
-
-      it('should return a node representing a named argument with the given value', function () {
+describe('kuery node types', function() {
+  describe('named arg', function() {
+    describe('buildNode', function() {
+      it('should return a node representing a named argument with the given value', function() {
         const result = namedArg.buildNode('fieldName', 'foo');
         expect(result).to.have.property('type', 'namedArg');
         expect(result).to.have.property('name', 'fieldName');
@@ -38,25 +35,20 @@ describe('kuery node types', function () {
         expect(literalValue).to.have.property('value', 'foo');
       });
 
-      it('should support literal nodes as values', function () {
+      it('should support literal nodes as values', function() {
         const value = nodeTypes.literal.buildNode('foo');
         const result = namedArg.buildNode('fieldName', value);
         expect(result.value).to.be(value);
         expect(result.value).to.eql(value);
       });
-
     });
 
-    describe('toElasticsearchQuery', function () {
-
-      it('should return the argument value represented by the given node', function () {
+    describe('toElasticsearchQuery', function() {
+      it('should return the argument value represented by the given node', function() {
         const node = namedArg.buildNode('fieldName', 'foo');
         const result = namedArg.toElasticsearchQuery(node);
         expect(result).to.be('foo');
       });
-
     });
-
   });
-
 });

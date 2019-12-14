@@ -5,11 +5,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiCodeEditor
-} from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiCodeEditor } from '@elastic/eui';
 import { EDITOR } from '../../../../../common/constants';
 import { GrokMode } from '../../../../lib/ace';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -17,12 +13,9 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export function PatternInput({ value, onChange }) {
   return (
     <EuiFormRow
-      label={(
-        <FormattedMessage
-          id="xpack.grokDebugger.grokPatternLabel"
-          defaultMessage="Grok Pattern"
-        />
-      )}
+      label={
+        <FormattedMessage id="xpack.grokDebugger.grokPatternLabel" defaultMessage="Grok Pattern" />
+      }
       fullWidth
       data-test-subj="acePatternInput"
     >

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { KIBANA_STATS_TYPE } from '../constants';
 import { getKibanaInfoForStats } from '../lib';
 
@@ -42,7 +41,7 @@ export function getOpsStatsCollector(server, kbnServer) {
     fetch: () => {
       return {
         kibana: getKibanaInfoForStats(server, kbnServer),
-        ...kbnServer.metrics // latest metrics captured from the ops event listener in src/legacy/server/status/index
+        ...kbnServer.metrics, // latest metrics captured from the ops event listener in src/legacy/server/status/index
       };
     },
     isReady: () => true,

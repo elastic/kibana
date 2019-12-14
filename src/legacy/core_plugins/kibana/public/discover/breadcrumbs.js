@@ -23,10 +23,10 @@ export function getRootBreadcrumbs() {
   return [
     {
       text: i18n.translate('kbn.discover.rootBreadcrumb', {
-        defaultMessage: 'Discover'
+        defaultMessage: 'Discover',
       }),
-      href: '#/discover'
-    }
+      href: '#/discover',
+    },
   ];
 }
 
@@ -35,6 +35,6 @@ export function getSavedSearchBreadcrumbs($route) {
     ...getRootBreadcrumbs(),
     {
       text: $route.current.locals.savedSearch.id,
-    }
+    },
   ];
 }

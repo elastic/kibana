@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { filterMatchesIndex } from '../filter_matches_index';
 
-describe('filterMatchesIndex', function () {
+describe('filterMatchesIndex', function() {
   it('should return true if the filter has no meta', () => {
     const filter = {};
     const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] };

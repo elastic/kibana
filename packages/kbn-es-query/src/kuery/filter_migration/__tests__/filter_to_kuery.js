@@ -21,16 +21,14 @@ import _ from 'lodash';
 import expect from '@kbn/expect';
 import { filterToKueryAST } from '../filter_to_kuery';
 
-describe('filter to kuery migration', function () {
-
-  describe('filterToKueryAST', function () {
-
-    it('should hand off conversion of known filter types to the appropriate converter', function () {
+describe('filter to kuery migration', function() {
+  describe('filterToKueryAST', function() {
+    it('should hand off conversion of known filter types to the appropriate converter', function() {
       const filter = {
         meta: {
           type: 'exists',
           key: 'foo',
-        }
+        },
       };
       const result = filterToKueryAST(filter);
 
@@ -38,22 +36,24 @@ describe('filter to kuery migration', function () {
       expect(result).to.have.property('function', 'exists');
     });
 
-    it('should thrown an error when an unknown filter type is encountered', function () {
+    it('should thrown an error when an unknown filter type is encountered', function() {
       const filter = {
         meta: {
           type: 'foo',
-        }
+        },
       };
 
-      expect(filterToKueryAST).withArgs(filter).to.throwException(/Couldn't convert that filter to a kuery/);
+      expect(filterToKueryAST)
+        .withArgs(filter)
+        .to.throwException(/Couldn't convert that filter to a kuery/);
     });
 
-    it('should wrap the AST node of negated filters in a "not" function', function () {
+    it('should wrap the AST node of negated filters in a "not" function', function() {
       const filter = {
         meta: {
           type: 'exists',
           key: 'foo',
-        }
+        },
       };
       const negatedFilter = _.set(_.cloneDeep(filter), 'meta.negate', true);
 
@@ -64,7 +64,5 @@ describe('filter to kuery migration', function () {
       expect(negatedResult).to.have.property('function', 'not');
       expect(negatedResult.arguments[0]).to.eql(result);
     });
-
   });
-
 });

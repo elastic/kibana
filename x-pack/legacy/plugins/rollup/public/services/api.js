@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 let httpClient;
-export const setHttpClient = (client) => {
+export const setHttpClient = client => {
   httpClient = client;
 };
 const apiPrefix = chrome.addBasePath('/api/rollup');

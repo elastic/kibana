@@ -44,21 +44,17 @@ const _RE_NUMBER = '(\\-?(?:\\d+(?:\\.\\d+)?|Infinity))';
  *
  * @type {RegExp}
  */
-const RANGE_RE = new RegExp('^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$');
+const RANGE_RE = new RegExp(
+  '^\\s*([\\[|\\(])\\s*' + _RE_NUMBER + '\\s*,\\s*' + _RE_NUMBER + '\\s*([\\]|\\)])\\s*$'
+);
 
 export function parseRange(input) {
-
   const match = String(input).match(RANGE_RE);
   if (!match) {
     throw new TypeError('expected input to be in interval notation e.g., (100, 200]');
   }
 
-  return new Range(
-    match[1] === '[',
-    parseFloat(match[2]),
-    parseFloat(match[3]),
-    match[4] === ']'
-  );
+  return new Range(match[1] === '[', parseFloat(match[2]), parseFloat(match[3]), match[4] === ']');
 }
 
 function Range(/* minIncl, min, max, maxIncl */) {
@@ -71,7 +67,7 @@ function Range(/* minIncl, min, max, maxIncl */) {
   this.maxInclusive = args[3];
 }
 
-Range.prototype.within = function (n) {
+Range.prototype.within = function(n) {
   if (this.min === n && !this.minInclusive) return false;
   if (this.min > n) return false;
 
@@ -80,5 +76,3 @@ Range.prototype.within = function (n) {
 
   return true;
 };
-
-

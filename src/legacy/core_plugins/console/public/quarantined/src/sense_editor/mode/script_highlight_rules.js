@@ -17,67 +17,66 @@
  * under the License.
  */
 
-
 const ace = require('brace');
 const oop = ace.acequire('ace/lib/oop');
 const { TextHighlightRules } = ace.acequire('ace/mode/text_highlight_rules');
-const painlessKeywords = (
-  'def|int|long|byte|String|float|double|char|null|if|else|while|do|for|continue|break|new|try|catch|throw|this|instanceof|return|ctx'
-);
+const painlessKeywords =
+  'def|int|long|byte|String|float|double|char|null|if|else|while|do|for|continue|break|new|try|catch|throw|this|instanceof|return|ctx';
 
 export function ScriptHighlightRules() {
   this.name = 'ScriptHighlightRules';
   this.$rules = {
-    'start': [
+    start: [
       {
         token: 'script.comment',
-        regex: '\\/\\/.*$'
+        regex: '\\/\\/.*$',
       },
       {
         token: 'script.string.regexp',
-        regex: '[/](?:(?:\\[(?:\\\\]|[^\\]])+\\])|(?:\\\\/|[^\\]/]))*[/]\\w*\\s*(?=[).,;]|$)'
+        regex: '[/](?:(?:\\[(?:\\\\]|[^\\]])+\\])|(?:\\\\/|[^\\]/]))*[/]\\w*\\s*(?=[).,;]|$)',
       },
       {
         token: 'script.string', // single line
-        regex: '[\'](?:(?:\\\\.)|(?:[^\'\\\\]))*?[\']'
+        regex: "['](?:(?:\\\\.)|(?:[^'\\\\]))*?[']",
       },
       {
         token: 'script.constant.numeric', // hex
-        regex: '0[xX][0-9a-fA-F]+\\b'
+        regex: '0[xX][0-9a-fA-F]+\\b',
       },
       {
         token: 'script.constant.numeric', // float
-        regex: '[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b'
+        regex: '[+-]?\\d+(?:(?:\\.\\d*)?(?:[eE][+-]?\\d+)?)?\\b',
       },
       {
         token: 'script.constant.language.boolean',
-        regex: '(?:true|false)\\b'
+        regex: '(?:true|false)\\b',
       },
       {
         token: 'script.keyword',
-        regex: painlessKeywords
+        regex: painlessKeywords,
       },
       {
         token: 'script.text',
-        regex: '[a-zA-Z_$][a-zA-Z0-9_$]*\\b'
+        regex: '[a-zA-Z_$][a-zA-Z0-9_$]*\\b',
       },
       {
         token: 'script.keyword.operator',
-        regex: '\\?\\.|\\*\\.|=~|==~|!|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|->|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^=|\\b(?:in|instanceof|new|typeof|void)'
+        regex:
+          '\\?\\.|\\*\\.|=~|==~|!|%|&|\\*|\\-\\-|\\-|\\+\\+|\\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|->|!|&&|\\|\\||\\?\\:|\\*=|%=|\\+=|\\-=|&=|\\^=|\\b(?:in|instanceof|new|typeof|void)',
       },
       {
         token: 'script.lparen',
-        regex: '[[({]'
+        regex: '[[({]',
       },
       {
         token: 'script.rparen',
-        regex: '[\\])}]'
+        regex: '[\\])}]',
       },
       {
         token: 'script.text',
-        regex: '\\s+'
-      }
-    ]
+        regex: '\\s+',
+      },
+    ],
   };
 }
 

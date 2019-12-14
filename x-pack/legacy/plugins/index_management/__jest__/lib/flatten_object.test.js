@@ -10,10 +10,10 @@ describe('flatten_object', () => {
     const obj = {
       foo: {
         nested: {
-          field: 1
-        }
+          field: 1,
+        },
       },
-      bar: 3
+      bar: 3,
     };
     expect(flattenObject(obj)).toMatchSnapshot();
   });
@@ -21,12 +21,10 @@ describe('flatten_object', () => {
     const obj = {
       foo: {
         nested: {
-          field: [
-            1, 2, 3
-          ]
-        }
+          field: [1, 2, 3],
+        },
       },
-      bar: 3
+      bar: 3,
     };
     expect(flattenObject(obj)).toMatchSnapshot();
   });

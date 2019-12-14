@@ -27,13 +27,12 @@ import { vislibVisController } from './controller';
 import { visFactory } from '../../../ui/public/vis/vis_factory';
 
 export default function GoalVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'goal',
     title: i18n.translate('kbnVislibVisTypes.goal.goalTitle', { defaultMessage: 'Goal' }),
     icon: 'visGoal',
     description: i18n.translate('kbnVislibVisTypes.goal.goalDescription', {
-      defaultMessage: 'A goal chart indicates how close you are to your final goal.'
+      defaultMessage: 'A goal chart indicates how close you are to your final goal.',
     }),
     visualization: vislibVisController,
     visConfig: {
@@ -53,19 +52,17 @@ export default function GoalVisType() {
           useRanges: false,
           colorSchema: ColorSchemas.GreenToRed,
           gaugeColorMode: ColorModes.NONE,
-          colorsRange: [
-            { from: 0, to: 10000 }
-          ],
+          colorsRange: [{ from: 0, to: 10000 }],
           invertColors: false,
           labels: {
             show: true,
-            color: 'black'
+            color: 'black',
           },
           scale: {
             show: false,
             labels: false,
             color: 'rgba(105,112,125,0.2)',
-            width: 2
+            width: 2,
           },
           type: 'meter',
           style: {
@@ -74,8 +71,8 @@ export default function GoalVisType() {
             labelColor: false,
             subText: '',
             fontSize: 60,
-          }
-        }
+          },
+        },
       },
     },
     editorConfig: {
@@ -88,22 +85,30 @@ export default function GoalVisType() {
           title: i18n.translate('kbnVislibVisTypes.goal.metricTitle', { defaultMessage: 'Metric' }),
           min: 1,
           aggFilter: [
-            '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+            '!std_dev',
+            '!geo_centroid',
+            '!percentiles',
+            '!percentile_ranks',
+            '!derivative',
+            '!serial_diff',
+            '!moving_avg',
+            '!cumulative_sum',
+            '!geo_bounds',
+          ],
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'group',
-          title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', { defaultMessage: 'Split group' }),
+          title: i18n.translate('kbnVislibVisTypes.goal.groupTitle', {
+            defaultMessage: 'Split group',
+          }),
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        }
-      ])
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        },
+      ]),
     },
-    useCustomNoDataScreen: true
+    useCustomNoDataScreen: true,
   });
 }

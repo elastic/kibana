@@ -9,7 +9,7 @@ import { HelpMenu } from './components/help_menu';
 
 export function addHelpMenuToAppChrome(chrome) {
   chrome.helpExtension.set(domElement => {
-    render(<HelpMenu/>, domElement);
+    render(<HelpMenu />, domElement);
     return () => {
       unmountComponentAtNode(domElement);
     };

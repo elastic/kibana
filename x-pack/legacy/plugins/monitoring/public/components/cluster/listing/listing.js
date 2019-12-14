@@ -17,7 +17,7 @@ import {
   EuiToolTip,
   EuiCallOut,
   EuiSpacer,
-  EuiIcon
+  EuiIcon,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { EuiMonitoringTable } from 'plugins/monitoring/components/table';
@@ -33,26 +33,20 @@ const IsClusterSupported = ({ isSupported, children }) => {
 const STANDALONE_CLUSTER_STORAGE_KEY = 'viewedStandaloneCluster';
 
 /*
-  * This checks if alerts feature is supported via monitoring cluster
-  * license. If the alerts feature is not supported because the prod cluster
-  * license is basic, IsClusterSupported makes the status col hidden
-  * completely
-  */
-const IsAlertsSupported = (props) => {
-  const {
-    alertsMeta = { enabled: true },
-    clusterMeta = { enabled: true }
-  } = props.cluster.alerts;
+ * This checks if alerts feature is supported via monitoring cluster
+ * license. If the alerts feature is not supported because the prod cluster
+ * license is basic, IsClusterSupported makes the status col hidden
+ * completely
+ */
+const IsAlertsSupported = props => {
+  const { alertsMeta = { enabled: true }, clusterMeta = { enabled: true } } = props.cluster.alerts;
   if (alertsMeta.enabled && clusterMeta.enabled) {
-    return <span>{ props.children }</span>;
+    return <span>{props.children}</span>;
   }
 
   const message = alertsMeta.message || clusterMeta.message;
   return (
-    <EuiToolTip
-      content={message}
-      position="bottom"
-    >
+    <EuiToolTip content={message} position="bottom">
       <EuiHealth color="subdued" data-test-subj="alertIcon">
         N/A
       </EuiHealth>
@@ -80,7 +74,7 @@ const getColumns = (
               onClick={() => changeCluster(cluster.cluster_uuid, cluster.ccs)}
               data-test-subj="clusterLink"
             >
-              { value }
+              {value}
             </EuiLink>
           );
         }
@@ -92,7 +86,7 @@ const getColumns = (
               onClick={() => handleClickIncompatibleLicense(cluster.cluster_name)}
               data-test-subj="clusterLink"
             >
-              { value }
+              {value}
             </EuiLink>
           );
         }
@@ -103,10 +97,10 @@ const getColumns = (
             onClick={() => handleClickInvalidLicense(cluster.cluster_name)}
             data-test-subj="clusterLink"
           >
-            { value }
+            {value}
           </EuiLink>
         );
-      }
+      },
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.statusColumnTitle', {
@@ -121,7 +115,7 @@ const getColumns = (
             <AlertsIndicator alerts={cluster.alerts} />
           </IsAlertsSupported>
         </IsClusterSupported>
-      )
+      ),
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.nodesColumnTitle', {
@@ -131,10 +125,8 @@ const getColumns = (
       'data-test-subj': 'nodesCount',
       sortable: true,
       render: (total, cluster) => (
-        <IsClusterSupported {...cluster}>
-          { numeral(total).format('0,0') }
-        </IsClusterSupported>
-      )
+        <IsClusterSupported {...cluster}>{numeral(total).format('0,0')}</IsClusterSupported>
+      ),
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.indicesColumnTitle', {
@@ -144,10 +136,8 @@ const getColumns = (
       'data-test-subj': 'indicesCount',
       sortable: true,
       render: (count, cluster) => (
-        <IsClusterSupported {...cluster}>
-          { numeral(count).format('0,0') }
-        </IsClusterSupported>
-      )
+        <IsClusterSupported {...cluster}>{numeral(count).format('0,0')}</IsClusterSupported>
+      ),
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.dataColumnTitle', {
@@ -157,10 +147,8 @@ const getColumns = (
       'data-test-subj': 'dataSize',
       sortable: true,
       render: (size, cluster) => (
-        <IsClusterSupported {...cluster}>
-          { numeral(size).format('0,0[.]0 b')}
-        </IsClusterSupported>
-      )
+        <IsClusterSupported {...cluster}>{numeral(size).format('0,0[.]0 b')}</IsClusterSupported>
+      ),
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.logstashColumnTitle', {
@@ -170,10 +158,8 @@ const getColumns = (
       'data-test-subj': 'logstashCount',
       sortable: true,
       render: (count, cluster) => (
-        <IsClusterSupported {...cluster}>
-          { numeral(count).format('0,0') }
-        </IsClusterSupported>
-      )
+        <IsClusterSupported {...cluster}>{numeral(count).format('0,0')}</IsClusterSupported>
+      ),
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.kibanaColumnTitle', {
@@ -183,10 +169,8 @@ const getColumns = (
       'data-test-subj': 'kibanaCount',
       sortable: true,
       render: (count, cluster) => (
-        <IsClusterSupported {...cluster}>
-          { numeral(count).format('0,0') }
-        </IsClusterSupported>
-      )
+        <IsClusterSupported {...cluster}>{numeral(count).format('0,0')}</IsClusterSupported>
+      ),
     },
     {
       name: i18n.translate('xpack.monitoring.cluster.listing.licenseColumnTitle', {
@@ -201,9 +185,7 @@ const getColumns = (
         if (!licenseType) {
           return (
             <div>
-              <div className="monTableCell__clusterCellLiscense">
-                N/A
-              </div>
+              <div className="monTableCell__clusterCellLiscense">N/A</div>
             </div>
           );
         }
@@ -212,28 +194,18 @@ const getColumns = (
           const licenseExpiry = () => {
             if (license.expiry_date_in_millis < moment().valueOf()) {
               // license is expired
-              return (
-                <span className="monTableCell__clusterCellExpired">
-                  Expired
-                </span>
-              );
+              return <span className="monTableCell__clusterCellExpired">Expired</span>;
             }
 
             // license is fine
-            return (
-              <span>
-                Expires { moment(license.expiry_date_in_millis).format('D MMM YY') }
-              </span>
-            );
+            return <span>Expires {moment(license.expiry_date_in_millis).format('D MMM YY')}</span>;
           };
 
           return (
             <div>
-              <div className="monTableCell__clusterCellLiscense">
-                { capitalize(licenseType) }
-              </div>
+              <div className="monTableCell__clusterCellLiscense">{capitalize(licenseType)}</div>
               <div className="monTableCell__clusterCellExpiration">
-                { showLicenseExpiration ? licenseExpiry() : null }
+                {showLicenseExpiration ? licenseExpiry() : null}
               </div>
             </div>
           );
@@ -241,16 +213,14 @@ const getColumns = (
 
         // there is no license!
         return (
-          <EuiLink
-            onClick={() => handleClickInvalidLicense(cluster.cluster_name)}
-          >
+          <EuiLink onClick={() => handleClickInvalidLicense(cluster.cluster_name)}>
             <EuiHealth color="subdued" data-test-subj="alertIcon">
               N/A
             </EuiHealth>
           </EuiLink>
         );
-      }
-    }
+      },
+    },
   ];
 };
 
@@ -298,7 +268,7 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
                     defaultMessage="Get a license with full functionality"
                   />
                 </EuiLink>
-              )
+              ),
             }}
           />
         </p>
@@ -346,7 +316,7 @@ const handleClickInvalidLicense = (scope, clusterName) => {
                     defaultMessage="Get a license with full functionality"
                   />
                 </EuiLink>
-              )
+              ),
             }}
           />
         </p>
@@ -373,7 +343,8 @@ export class Listing extends Component {
         <EuiCallOut
           color="warning"
           title={i18n.translate('xpack.monitoring.cluster.listing.standaloneClusterCallOutTitle', {
-            defaultMessage: 'It looks like you have instances that aren\'t connected to an Elasticsearch cluster.'
+            defaultMessage:
+              "It looks like you have instances that aren't connected to an Elasticsearch cluster.",
           })}
           iconType="link"
         >
@@ -394,12 +365,13 @@ export class Listing extends Component {
             />
           </p>
           <p>
-            <EuiLink onClick={() => {
-              storage.set(STANDALONE_CLUSTER_STORAGE_KEY, true);
-              this.setState({ [STANDALONE_CLUSTER_STORAGE_KEY]: true });
-            }}
+            <EuiLink
+              onClick={() => {
+                storage.set(STANDALONE_CLUSTER_STORAGE_KEY, true);
+                this.setState({ [STANDALONE_CLUSTER_STORAGE_KEY]: true });
+              }}
             >
-              <EuiIcon type="cross"/>
+              <EuiIcon type="cross" />
               &nbsp;
               <FormattedMessage
                 id="xpack.monitoring.cluster.listing.standaloneClusterCallOutDismiss"
@@ -408,7 +380,7 @@ export class Listing extends Component {
             </EuiLink>
           </p>
         </EuiCallOut>
-        <EuiSpacer/>
+        <EuiSpacer />
       </div>
     );
   }
@@ -416,16 +388,25 @@ export class Listing extends Component {
   render() {
     const { angular, clusters, sorting, pagination, onTableChange } = this.props;
 
-    const _changeCluster = partial(changeCluster, angular.scope, angular.globalState, angular.kbnUrl);
+    const _changeCluster = partial(
+      changeCluster,
+      angular.scope,
+      angular.globalState,
+      angular.kbnUrl
+    );
     const _handleClickIncompatibleLicense = partial(handleClickIncompatibleLicense, angular.scope);
     const _handleClickInvalidLicense = partial(handleClickInvalidLicense, angular.scope);
-    const hasStandaloneCluster = !!clusters.find(cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID);
+    const hasStandaloneCluster = !!clusters.find(
+      cluster => cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID
+    );
 
     return (
       <EuiPage>
         <EuiPageBody>
           <EuiPageContent>
-            {hasStandaloneCluster ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage) : null}
+            {hasStandaloneCluster
+              ? this.renderStandaloneClusterCallout(_changeCluster, angular.storage)
+              : null}
             <EuiMonitoringTable
               className="clusterTable"
               rows={clusters}
@@ -437,26 +418,26 @@ export class Listing extends Component {
               )}
               rowProps={item => {
                 return {
-                  'data-test-subj': `clusterRow_${item.cluster_uuid}`
+                  'data-test-subj': `clusterRow_${item.cluster_uuid}`,
                 };
               }}
               sorting={{
                 ...sorting,
                 sort: {
                   ...sorting.sort,
-                  field: 'cluster_name'
-                }
+                  field: 'cluster_name',
+                },
               }}
               pagination={pagination}
               search={{
                 box: {
                   incremental: true,
-                  placeholder: angular.scope.filterText
+                  placeholder: angular.scope.filterText,
                 },
               }}
               onTableChange={onTableChange}
               executeQueryOptions={{
-                defaultFields: ['cluster_name']
+                defaultFields: ['cluster_name'],
               }}
             />
           </EuiPageContent>

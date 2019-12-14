@@ -19,7 +19,7 @@
 
 import pkg from '../../../../package.json';
 
-export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
+export const createTestEntryTemplate = defaultUiSettings => bundle => `
 /**
  * Test entry file
  *
@@ -92,7 +92,9 @@ const coreSystem = new CoreSystem({
       buildNum: 1234,
       devMode: true,
       uiSettings: {
-        defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
+        defaults: ${JSON.stringify(defaultUiSettings, null, 2)
+          .split('\n')
+          .join('\n    ')},
         user: {}
       },
       nav: []

@@ -24,7 +24,7 @@ import { VisProvider } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { start as visualizations } from '../../../../core_plugins/visualizations/public/np_ready/public/legacy';
 
-describe('Vis Class', function () {
+describe('Vis Class', function() {
   let indexPattern;
   let Vis;
   let visTypes;
@@ -35,24 +35,26 @@ describe('Vis Class', function () {
     aggs: [
       { type: 'avg', schema: 'metric', params: { field: 'bytes' } },
       { type: 'terms', schema: 'segment', params: { field: 'machine.os' } },
-      { type: 'terms', schema: 'segment', params: { field: 'geo.src' } }
+      { type: 'terms', schema: 'segment', params: { field: 'geo.src' } },
     ],
     params: { isDonut: true },
-    listeners: { click: _.noop }
+    listeners: { click: _.noop },
   };
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    visTypes = visualizations.types;
-  }));
+  beforeEach(
+    ngMock.inject(function(Private) {
+      Vis = Private(VisProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      visTypes = visualizations.types;
+    })
+  );
 
-  beforeEach(function () {
+  beforeEach(function() {
     vis = new Vis(indexPattern, stateFixture);
   });
 
-  const verifyVis = function (vis) {
+  const verifyVis = function(vis) {
     expect(vis).to.have.property('aggs');
     expect(vis.aggs.aggs).to.have.length(3);
 
@@ -64,14 +66,14 @@ describe('Vis Class', function () {
     expect(vis).to.have.property('indexPattern', indexPattern);
   };
 
-  describe('initialization', function () {
-    it('should set the state', function () {
+  describe('initialization', function() {
+    it('should set the state', function() {
       verifyVis(vis);
     });
   });
 
-  describe('getState()', function () {
-    it('should get a state that represents the... er... state', function () {
+  describe('getState()', function() {
+    it('should get a state that represents the... er... state', function() {
       const state = vis.getEnabledState();
       expect(state).to.have.property('type', 'pie');
 
@@ -83,8 +85,8 @@ describe('Vis Class', function () {
     });
   });
 
-  describe('setState()', function () {
-    it('should set the state to defaults', function () {
+  describe('setState()', function() {
+    it('should set the state to defaults', function() {
       const vis = new Vis(indexPattern);
       expect(vis).to.have.property('type');
       expect(vis.type).to.eql(visTypes.get('histogram'));
@@ -96,14 +98,13 @@ describe('Vis Class', function () {
     });
   });
 
-  describe('isHierarchical()', function () {
-    it('should return true for hierarchical vis (like pie)', function () {
+  describe('isHierarchical()', function() {
+    it('should return true for hierarchical vis (like pie)', function() {
       expect(vis.isHierarchical()).to.be(true);
     });
-    it('should return false for non-hierarchical vis (like histogram)', function () {
+    it('should return false for non-hierarchical vis (like histogram)', function() {
       const vis = new Vis(indexPattern);
       expect(vis.isHierarchical()).to.be(false);
     });
   });
-
 });

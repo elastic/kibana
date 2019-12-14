@@ -24,18 +24,12 @@ import { UrlTemplateFlyoutComponent } from './url_template_flyout';
 
 describe('UrlTemplateFlyout', () => {
   it('should render normally', async () => {
-    const component = shallowWithIntl(
-      <UrlTemplateFlyoutComponent
-        isVisible={true}
-      />
-    );
+    const component = shallowWithIntl(<UrlTemplateFlyoutComponent isVisible={true} />);
     expect(component).toMatchSnapshot();
   });
 
   it('should not render if not visible', async () => {
-    const component = shallowWithIntl(
-      <UrlTemplateFlyoutComponent />
-    );
+    const component = shallowWithIntl(<UrlTemplateFlyoutComponent />);
     expect(component).toMatchSnapshot();
   });
 });

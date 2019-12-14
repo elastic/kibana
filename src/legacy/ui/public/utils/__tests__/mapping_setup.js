@@ -22,32 +22,32 @@ import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import { expandShorthand } from '../mapping_setup';
 
-describe('ui/utils/mapping_setup', function () {
+describe('ui/utils/mapping_setup', function() {
   beforeEach(ngMock.module('kibana'));
 
-  describe('#expandShorthand()', function () {
-    it('allows shortcuts for field types by just setting the value to the type name', function () {
+  describe('#expandShorthand()', function() {
+    it('allows shortcuts for field types by just setting the value to the type name', function() {
       const mapping = expandShorthand({ foo: 'boolean' });
       expect(mapping.foo.type).to.be('boolean');
     });
 
-    it('can set type as an option', function () {
+    it('can set type as an option', function() {
       const mapping = expandShorthand({ foo: { type: 'integer' } });
       expect(mapping.foo.type).to.be('integer');
     });
 
-    describe('when type is json', function () {
-      it('returned object is type text', function () {
+    describe('when type is json', function() {
+      it('returned object is type text', function() {
         const mapping = expandShorthand({ foo: 'json' });
         expect(mapping.foo.type).to.be('text');
       });
 
-      it('returned object has _serialize function', function () {
+      it('returned object has _serialize function', function() {
         const mapping = expandShorthand({ foo: 'json' });
         expect(_.isFunction(mapping.foo._serialize)).to.be(true);
       });
 
-      it('returned object has _deserialize function', function () {
+      it('returned object has _deserialize function', function() {
         const mapping = expandShorthand({ foo: 'json' });
         expect(_.isFunction(mapping.foo._serialize)).to.be(true);
       });

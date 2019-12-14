@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard']);
@@ -45,7 +45,5 @@ export default function ({ getService, getPageObjects }) {
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
     });
-
   });
 }
-

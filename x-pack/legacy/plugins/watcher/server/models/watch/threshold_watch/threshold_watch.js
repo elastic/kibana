@@ -38,7 +38,9 @@ export class ThresholdWatch extends BaseWatch {
   }
 
   get termOrder() {
-    return this.thresholdComparator === COMPARATORS.GREATER_THAN ? SORT_ORDERS.DESCENDING : SORT_ORDERS.ASCENDING;
+    return this.thresholdComparator === COMPARATORS.GREATER_THAN
+      ? SORT_ORDERS.DESCENDING
+      : SORT_ORDERS.ASCENDING;
   }
 
   get watchJson() {
@@ -61,24 +63,20 @@ export class ThresholdWatch extends BaseWatch {
 
   // To Kibana
   get downstreamJson() {
-    const result = merge(
-      {},
-      super.downstreamJson,
-      {
-        index: this.index,
-        timeField: this.timeField,
-        triggerIntervalSize: this.triggerIntervalSize,
-        triggerIntervalUnit: this.triggerIntervalUnit,
-        aggType: this.aggType,
-        aggField: this.aggField,
-        termSize: this.termSize,
-        termField: this.termField,
-        thresholdComparator: this.thresholdComparator,
-        timeWindowSize: this.timeWindowSize,
-        timeWindowUnit: this.timeWindowUnit,
-        threshold: this.threshold
-      }
-    );
+    const result = merge({}, super.downstreamJson, {
+      index: this.index,
+      timeField: this.timeField,
+      triggerIntervalSize: this.triggerIntervalSize,
+      triggerIntervalUnit: this.triggerIntervalUnit,
+      aggType: this.aggType,
+      aggField: this.aggField,
+      termSize: this.termSize,
+      termField: this.termField,
+      thresholdComparator: this.thresholdComparator,
+      timeWindowSize: this.timeWindowSize,
+      timeWindowUnit: this.timeWindowUnit,
+      threshold: this.threshold,
+    });
 
     return result;
   }
@@ -87,25 +85,21 @@ export class ThresholdWatch extends BaseWatch {
   static fromUpstreamJson(json) {
     const metadata = json.watchJson.metadata.watcherui;
 
-    const props = merge(
-      {},
-      super.getPropsFromUpstreamJson(json),
-      {
-        type: WATCH_TYPES.THRESHOLD,
-        index: metadata.index,
-        timeField: metadata.time_field,
-        triggerIntervalSize: metadata.trigger_interval_size,
-        triggerIntervalUnit: metadata.trigger_interval_unit,
-        aggType: metadata.agg_type,
-        aggField: metadata.agg_field,
-        termSize: metadata.term_size,
-        termField: metadata.term_field,
-        thresholdComparator: metadata.threshold_comparator,
-        timeWindowSize: metadata.time_window_size,
-        timeWindowUnit: metadata.time_window_unit,
-        threshold: Array.isArray(metadata.threshold) ? metadata.threshold : [metadata.threshold]
-      }
-    );
+    const props = merge({}, super.getPropsFromUpstreamJson(json), {
+      type: WATCH_TYPES.THRESHOLD,
+      index: metadata.index,
+      timeField: metadata.time_field,
+      triggerIntervalSize: metadata.trigger_interval_size,
+      triggerIntervalUnit: metadata.trigger_interval_unit,
+      aggType: metadata.agg_type,
+      aggField: metadata.agg_field,
+      termSize: metadata.term_size,
+      termField: metadata.term_field,
+      thresholdComparator: metadata.threshold_comparator,
+      timeWindowSize: metadata.time_window_size,
+      timeWindowUnit: metadata.time_window_unit,
+      threshold: Array.isArray(metadata.threshold) ? metadata.threshold : [metadata.threshold],
+    });
 
     return new ThresholdWatch(props);
   }
@@ -149,5 +143,4 @@ export class ThresholdWatch extends BaseWatch {
 
     return new ThresholdWatch(props);
   }
-
 }

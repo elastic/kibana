@@ -48,14 +48,21 @@ export function _calculateTopLevelDependency(inputDep, outputDep = '') {
   return _calculateTopLevelDependency(depSplitPaths.join(pathSeparator), outputDep);
 }
 
-export async function dependenciesParseStrategy(cwd, parseSingleFile, mainEntry, wasParsed, results) {
+export async function dependenciesParseStrategy(
+  cwd,
+  parseSingleFile,
+  mainEntry,
+  wasParsed,
+  results
+) {
   // Retrieve native nodeJS modules
   const natives = process.binding('natives');
 
   // Get dependencies from a single file and filter
   // out node native modules from the result
-  const dependencies = (await parseSingleFile(mainEntry, dependenciesVisitorsGenerator))
-    .filter(dep => !natives[dep]);
+  const dependencies = (await parseSingleFile(mainEntry, dependenciesVisitorsGenerator)).filter(
+    dep => !natives[dep]
+  );
 
   // Return the list of all the new entries found into
   // the current mainEntry that we could use to look for

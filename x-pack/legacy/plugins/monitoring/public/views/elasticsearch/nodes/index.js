@@ -24,7 +24,7 @@ uiRoutes.when('/elasticsearch/nodes', {
     clusters(Private) {
       const routeInit = Private(routeInitProvider);
       return routeInit({ codePaths: [CODE_PATH_ELASTICSEARCH] });
-    }
+    },
   },
   controllerAs: 'elasticsearchNodes',
   controller: class ElasticsearchNodesController extends MonitoringViewBaseEuiTableController {
@@ -33,23 +33,24 @@ uiRoutes.when('/elasticsearch/nodes', {
       const globalState = $injector.get('globalState');
       const showCgroupMetricsElasticsearch = $injector.get('showCgroupMetricsElasticsearch');
 
-      $scope.cluster = find($route.current.locals.clusters, {
-        cluster_uuid: globalState.cluster_uuid
-      }) || {};
+      $scope.cluster =
+        find($route.current.locals.clusters, {
+          cluster_uuid: globalState.cluster_uuid,
+        }) || {};
 
       const getPageData = ($injector, _api = undefined, routeOptions = {}) => {
         const $http = $injector.get('$http');
         const globalState = $injector.get('globalState');
         const timeBounds = timefilter.getBounds();
 
-        const getNodes = (clusterUuid = globalState.cluster_uuid) => $http
-          .post(`../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`, {
+        const getNodes = (clusterUuid = globalState.cluster_uuid) =>
+          $http.post(`../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/nodes`, {
             ccs: globalState.ccs,
             timeRange: {
               min: timeBounds.min.toISOString(),
-              max: timeBounds.max.toISOString()
+              max: timeBounds.max.toISOString(),
             },
-            ...routeOptions
+            ...routeOptions,
           });
 
         const promise = globalState.cluster_uuid ? getNodes() : new Promise(resolve => resolve({}));
@@ -64,7 +65,7 @@ uiRoutes.when('/elasticsearch/nodes', {
 
       super({
         title: i18n.translate('xpack.monitoring.elasticsearch.nodes.routeTitle', {
-          defaultMessage: 'Elasticsearch - Nodes'
+          defaultMessage: 'Elasticsearch - Nodes',
         }),
         storageKey: 'elasticsearch.nodes',
         reactNodeId: 'elasticsearchNodesReact',
@@ -72,7 +73,7 @@ uiRoutes.when('/elasticsearch/nodes', {
         getPageData,
         $scope,
         $injector,
-        fetchDataImmediately: false // We want to apply pagination before sending the first request
+        fetchDataImmediately: false, // We want to apply pagination before sending the first request
       });
 
       this.isCcrEnabled = $scope.cluster.isCcrEnabled;
@@ -110,5 +111,5 @@ uiRoutes.when('/elasticsearch/nodes', {
         );
       };
     }
-  }
+  },
 });

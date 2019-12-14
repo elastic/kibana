@@ -15,37 +15,41 @@ describe('CheckXPackInfoChange Factory', () => {
   const sandbox = sinon.createSandbox();
 
   let mockSessionStorage;
-  beforeEach(ngMock.module('kibana', ($provide) => {
-    mockSessionStorage = sinon.stub({
-      setItem() {},
-      getItem() {},
-      removeItem() {}
-    });
+  beforeEach(
+    ngMock.module('kibana', $provide => {
+      mockSessionStorage = sinon.stub({
+        setItem() {},
+        getItem() {},
+        removeItem() {},
+      });
 
-    mockSessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('foo');
+      mockSessionStorage.getItem.withArgs(XPACK_INFO_SIG_KEY).returns('foo');
 
-    $provide.service('$window', () => ({
-      sessionStorage: mockSessionStorage,
-      location: { pathname: '' }
-    }));
-  }));
+      $provide.service('$window', () => ({
+        sessionStorage: mockSessionStorage,
+        location: { pathname: '' },
+      }));
+    })
+  );
 
   let $http;
   let $httpBackend;
   let $timeout;
-  beforeEach(ngMock.inject(($injector) => {
-    $http = $injector.get('$http');
-    $httpBackend = $injector.get('$httpBackend');
-    $timeout = $injector.get('$timeout');
+  beforeEach(
+    ngMock.inject($injector => {
+      $http = $injector.get('$http');
+      $httpBackend = $injector.get('$httpBackend');
+      $timeout = $injector.get('$timeout');
 
-    // We set 'kbn-system-api' to not trigger other unrelated toast notifications
-    // like the one related to the session expiration.
-    $http.defaults.headers.common['kbn-system-api'] = 'x';
+      // We set 'kbn-system-api' to not trigger other unrelated toast notifications
+      // like the one related to the session expiration.
+      $http.defaults.headers.common['kbn-system-api'] = 'x';
 
-    sandbox.stub(banners, 'add');
-  }));
+      sandbox.stub(banners, 'add');
+    })
+  );
 
-  afterEach(function () {
+  afterEach(function() {
     $httpBackend.verifyNoOutstandingRequest();
     $timeout.verifyNoPendingTasks();
 
@@ -56,13 +60,9 @@ describe('CheckXPackInfoChange Factory', () => {
     const license = { license: { isActive: true, type: 'x-license' } };
     mockSessionStorage.getItem.withArgs(XPACK_INFO_KEY).returns(JSON.stringify(license));
 
-    $httpBackend
-      .when('POST', '/api/test')
-      .respond('ok', { 'kbn-xpack-sig': 'foo' });
+    $httpBackend.when('POST', '/api/test').respond('ok', { 'kbn-xpack-sig': 'foo' });
 
-    $httpBackend
-      .when('GET', '/api/xpack/v1/info')
-      .respond(license, { 'kbn-xpack-sig': 'foo' });
+    $httpBackend.when('GET', '/api/xpack/v1/info').respond(license, { 'kbn-xpack-sig': 'foo' });
 
     $http.post('/api/test');
     $httpBackend.flush();
@@ -75,13 +75,9 @@ describe('CheckXPackInfoChange Factory', () => {
     const license = { license: { isActive: false, type: 'diamond' } };
     mockSessionStorage.getItem.withArgs(XPACK_INFO_KEY).returns(JSON.stringify(license));
 
-    $httpBackend
-      .when('POST', '/api/test')
-      .respond('ok', { 'kbn-xpack-sig': 'bar' });
+    $httpBackend.when('POST', '/api/test').respond('ok', { 'kbn-xpack-sig': 'bar' });
 
-    $httpBackend
-      .when('GET', '/api/xpack/v1/info')
-      .respond(license, { 'kbn-xpack-sig': 'bar' });
+    $httpBackend.when('GET', '/api/xpack/v1/info').respond(license, { 'kbn-xpack-sig': 'bar' });
 
     $http.post('/api/test');
     $httpBackend.flush();

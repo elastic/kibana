@@ -10,48 +10,49 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { ClusterView } from './components/cluster_view';
 
-export const ShardAllocation = ({
-  scope,
-  kbnUrl,
-  type,
-  shardStats,
-}) => {
+export const ShardAllocation = ({ scope, kbnUrl, type, shardStats }) => {
   const types = [
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.primaryLabel', {
-        defaultMessage: 'Primary'
+        defaultMessage: 'Primary',
       }),
-      color: 'primary'
+      color: 'primary',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.replicaLabel', {
-        defaultMessage: 'Replica'
+        defaultMessage: 'Replica',
       }),
-      color: 'secondary'
+      color: 'secondary',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.relocatingLabel', {
-        defaultMessage: 'Relocating'
+        defaultMessage: 'Relocating',
       }),
-      color: 'accent'
+      color: 'accent',
     },
     {
       label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.initializingLabel', {
-        defaultMessage: 'Initializing'
+        defaultMessage: 'Initializing',
       }),
-      color: 'default'
+      color: 'default',
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.unassignedPrimaryLabel', {
-        defaultMessage: 'Unassigned Primary'
-      }),
-      color: 'danger'
+      label: i18n.translate(
+        'xpack.monitoring.elasticsearch.shardAllocation.unassignedPrimaryLabel',
+        {
+          defaultMessage: 'Unassigned Primary',
+        }
+      ),
+      color: 'danger',
     },
     {
-      label: i18n.translate('xpack.monitoring.elasticsearch.shardAllocation.unassignedReplicaLabel', {
-        defaultMessage: 'Unassigned Replica'
-      }),
-      color: 'warning'
+      label: i18n.translate(
+        'xpack.monitoring.elasticsearch.shardAllocation.unassignedReplicaLabel',
+        {
+          defaultMessage: 'Unassigned Replica',
+        }
+      ),
+      color: 'warning',
     },
   ];
 
@@ -65,19 +66,15 @@ export const ShardAllocation = ({
           />
         </h1>
       </EuiTitle>
-      <EuiSpacer size="xs"/>
+      <EuiSpacer size="xs" />
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-        {
-          types.map(type => (
-            <EuiFlexItem grow={false} key={type.label}>
-              <EuiBadge color={type.color}>
-                {type.label}
-              </EuiBadge>
-            </EuiFlexItem>
-          ))
-        }
+        {types.map(type => (
+          <EuiFlexItem grow={false} key={type.label}>
+            <EuiBadge color={type.color}>{type.label}</EuiBadge>
+          </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
-      <EuiSpacer size="s"/>
+      <EuiSpacer size="s" />
       <ClusterView
         scope={scope}
         shardStats={shardStats}

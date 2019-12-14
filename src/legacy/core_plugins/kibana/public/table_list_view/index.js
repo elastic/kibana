@@ -18,4 +18,3 @@
  */
 
 export { TableListView } from './table_list_view';
-

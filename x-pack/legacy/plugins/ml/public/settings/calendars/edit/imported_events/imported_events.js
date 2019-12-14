@@ -6,15 +6,9 @@
 
 import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
-import {
-  EuiCheckbox,
-  EuiFlexItem,
-  EuiText,
-  EuiSpacer
-} from '@elastic/eui';
+import { EuiCheckbox, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 import { EventsTable } from '../events_table/';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 
 export function ImportedEvents({
   events,
@@ -25,7 +19,7 @@ export function ImportedEvents({
 }) {
   return (
     <Fragment>
-      <EuiSpacer size="s"/>
+      <EuiSpacer size="s" />
       <EuiFlexItem>
         <EuiText>
           <h4>
@@ -43,24 +37,23 @@ export function ImportedEvents({
                   defaultMessage="Recurring events not supported. Only the first event will be imported."
                 />
               </p>
-            </EuiText>)
-          }
+            </EuiText>
+          )}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EventsTable
-          eventsList={events}
-          onDeleteClick={onEventDelete}
-        />
+        <EventsTable eventsList={events} onDeleteClick={onEventDelete} />
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <EuiFlexItem grow={false}>
         <EuiCheckbox
           id="ml-include-past-events"
-          label={<FormattedMessage
-            id="xpack.ml.calendarsEdit.importedEvents.includePastEventsLabel"
-            defaultMessage="Include past events"
-          />}
+          label={
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.importedEvents.includePastEventsLabel"
+              defaultMessage="Include past events"
+            />
+          }
           checked={includePastEvents}
           onChange={onCheckboxToggle}
         />

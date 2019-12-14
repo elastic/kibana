@@ -48,11 +48,12 @@ export default function AggParamWriterHelper(Private) {
    * @param {string} opts.aggType - the name of the aggType we want to test. ('histogram', 'filter', etc.)
    */
   class AggParamWriter {
-
     constructor(opts) {
       this.aggType = opts.aggType;
       if (_.isString(this.aggType)) {
-        this.aggType = aggTypes.buckets.find(agg => agg.name === this.aggType) || aggTypes.metrics.find(agg => agg.name === this.aggType);
+        this.aggType =
+          aggTypes.buckets.find(agg => agg.name === this.aggType) ||
+          aggTypes.metrics.find(agg => agg.name === this.aggType);
       }
 
       // not configurable right now, but totally required
@@ -63,11 +64,13 @@ export default function AggParamWriterHelper(Private) {
 
       this.vis = new Vis(this.indexPattern, {
         type: 'histogram',
-        aggs: [{
-          id: 1,
-          type: this.aggType.name,
-          params: {}
-        }]
+        aggs: [
+          {
+            id: 1,
+            type: this.aggType.name,
+            params: {},
+          },
+        ],
       });
     }
 

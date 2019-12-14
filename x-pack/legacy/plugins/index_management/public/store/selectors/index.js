@@ -10,53 +10,56 @@ import { indexStatusLabels } from '../../lib/index_status_labels';
 import { sortTable } from '../../services';
 import { getToggleExtensions } from '../../index_management_extensions';
 
-export const getDetailPanelData = (state) => state.detailPanel.data;
-export const getDetailPanelError = (state) => state.detailPanel.error;
-export const getDetailPanelType = (state) => state.detailPanel.panelType;
-export const isDetailPanelOpen = (state) => !!getDetailPanelType(state);
-export const getDetailPanelIndexName = (state) => state.detailPanel.indexName;
-export const getIndices = (state) => state.indices.byId;
-export const indicesLoading = (state) => state.indices.loading;
-export const indicesError = (state) => state.indices.error;
-export const getIndicesAsArray = (state) => Object.values(state.indices.byId);
+export const getDetailPanelData = state => state.detailPanel.data;
+export const getDetailPanelError = state => state.detailPanel.error;
+export const getDetailPanelType = state => state.detailPanel.panelType;
+export const isDetailPanelOpen = state => !!getDetailPanelType(state);
+export const getDetailPanelIndexName = state => state.detailPanel.indexName;
+export const getIndices = state => state.indices.byId;
+export const indicesLoading = state => state.indices.loading;
+export const indicesError = state => state.indices.error;
+export const getIndicesAsArray = state => Object.values(state.indices.byId);
 export const getIndicesByName = (state, indexNames) => {
   const indices = getIndices(state);
-  return indexNames.map((indexName) => indices[indexName]);
+  return indexNames.map(indexName => indices[indexName]);
 };
 export const getIndexByIndexName = (state, name) => getIndices(state)[name];
-export const getFilteredIds = (state) => state.indices.filteredIds;
-export const getRowStatuses = (state) => state.rowStatus;
-export const getTableState = (state) => state.tableState;
-export const getAllIds = (state) => state.indices.allIds;
+export const getFilteredIds = state => state.indices.filteredIds;
+export const getRowStatuses = state => state.rowStatus;
+export const getTableState = state => state.tableState;
+export const getAllIds = state => state.indices.allIds;
 export const getIndexStatusByIndexName = (state, indexName) => {
   const indices = getIndices(state);
   const { status } = indices[indexName] || {};
   return status;
 };
-export const getIsSystemIndexByName = (indexNames) => {
+export const getIsSystemIndexByName = indexNames => {
   return indexNames.reduce((obj, indexName) => {
     obj[indexName] = indexName.startsWith('.');
     return obj;
   }, {});
 };
-export const hasSystemIndex = (indexNames) => {
+export const hasSystemIndex = indexNames => {
   return Boolean(indexNames.find(indexName => indexName.startsWith('.')));
 };
 
 const defaultFilterFields = ['name'];
 
 const filterByToggles = (indices, toggleNameToVisibleMap) => {
-  const togglesByName = getToggleExtensions().reduce((byName, toggle) => ({
-    ...byName,
-    [toggle.name]: toggle,
-  }), {});
+  const togglesByName = getToggleExtensions().reduce(
+    (byName, toggle) => ({
+      ...byName,
+      [toggle.name]: toggle,
+    }),
+    {}
+  );
 
   const toggleNames = Object.keys(togglesByName);
   if (!toggleNames.length) {
     return indices;
   }
   // An index is visible if ANY applicable toggle is visible.
-  return indices.filter((index) => {
+  return indices.filter(index => {
     return toggleNames.some(toggleName => {
       if (!togglesByName[toggleName].matchIndex(index)) {
         return true;
@@ -79,13 +82,14 @@ const getFilteredIndices = createSelector(
       ? indexArray
       : indexArray.filter(index => !(index.name + '').startsWith('.'));
     const filter = tableState.filter || EuiSearchBar.Query.MATCH_ALL;
-    return EuiSearchBar.Query.execute(filter, systemFilteredIndexes,
-      { defaultFields: defaultFilterFields });
+    return EuiSearchBar.Query.execute(filter, systemFilteredIndexes, {
+      defaultFields: defaultFilterFields,
+    });
   }
 );
 export const getTotalItems = createSelector(
   getFilteredIndices,
-  (filteredIndices) => {
+  filteredIndices => {
     return Object.keys(filteredIndices).length;
   }
 );
@@ -103,18 +107,22 @@ export const getPageOfIndices = createSelector(
   getRowStatuses,
   getPager,
   (filteredIndices, tableState, rowStatuses, pager) => {
-    const sortedIndexes = sortTable(filteredIndices, tableState.sortField, tableState.isSortAscending);
+    const sortedIndexes = sortTable(
+      filteredIndices,
+      tableState.sortField,
+      tableState.isSortAscending
+    );
     const { firstItemIndex, lastItemIndex } = pager;
     const pagedIndexes = sortedIndexes.slice(firstItemIndex, lastItemIndex + 1);
     return pagedIndexes.map(index => {
       const status =
         indexStatusLabels[rowStatuses[index.name]] || // user friendly version of row status
-        rowStatuses[index.name] ||                    // row status
-        indexStatusLabels[index.status] ||            // user friendly version of index status
-        index.status;                                 // index status
+        rowStatuses[index.name] || // row status
+        indexStatusLabels[index.status] || // user friendly version of index status
+        index.status; // index status
       return {
         ...index,
-        status
+        status,
       };
     });
   }
@@ -122,28 +130,28 @@ export const getPageOfIndices = createSelector(
 
 export const getIndexNamesForCurrentPage = createSelector(
   getPageOfIndices,
-  (pageOfIndices) => {
+  pageOfIndices => {
     return pageOfIndices.map(index => index.name);
   }
 );
 
 export const getHasNextPage = createSelector(
   getPager,
-  (pager) => {
+  pager => {
     return pager.hasNextPage;
   }
 );
 
 export const getHasPreviousPage = createSelector(
   getPager,
-  (pager) => {
+  pager => {
     return pager.hasPreviousPage;
   }
 );
 
 export const getCurrentPage = createSelector(
   getPager,
-  (pager) => {
+  pager => {
     return pager.currentPage;
   }
 );

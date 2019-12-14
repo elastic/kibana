@@ -10,7 +10,7 @@ import { WatchHistoryItem } from '../../../models/watch_history_item';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError, wrapCustomError } from '../../../lib/error_wrappers';
 import { INDEX_NAMES } from '../../../../common/constants';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function fetchHistoryItem(callWithRequest, watchHistoryItemId) {
   return callWithRequest('search', {
@@ -18,12 +18,10 @@ function fetchHistoryItem(callWithRequest, watchHistoryItemId) {
     body: {
       query: {
         bool: {
-          must: [
-            { term: { '_id': watchHistoryItemId } },
-          ]
-        }
-      }
-    }
+          must: [{ term: { _id: watchHistoryItemId } }],
+        },
+      },
+    },
   });
 }
 
@@ -34,17 +32,15 @@ export function registerLoadRoute(server) {
   server.route({
     path: '/api/watcher/history/{id}',
     method: 'GET',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const id = request.params.id;
 
       return fetchHistoryItem(callWithRequest, id)
-        .then((responseFromES) => {
+        .then(responseFromES => {
           const hit = get(responseFromES, 'hits.hits[0]');
           if (!hit) {
-            throw wrapCustomError(
-              new Error(`Watch History Item with id = ${id} not found`), 404
-            );
+            throw wrapCustomError(new Error(`Watch History Item with id = ${id} not found`), 404);
           }
 
           const watchHistoryItemJson = get(hit, '_source');
@@ -53,12 +49,12 @@ export function registerLoadRoute(server) {
             id,
             watchId,
             watchHistoryItemJson,
-            includeDetails: true
+            includeDetails: true,
           };
 
           const watchHistoryItem = WatchHistoryItem.fromUpstreamJson(json);
           return {
-            watchHistoryItem: watchHistoryItem.downstreamJson
+            watchHistoryItem: watchHistoryItem.downstreamJson,
           };
         })
         .catch(err => {
@@ -72,7 +68,7 @@ export function registerLoadRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

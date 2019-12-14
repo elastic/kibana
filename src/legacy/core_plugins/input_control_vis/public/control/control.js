@@ -24,16 +24,17 @@ import { i18n } from '@kbn/i18n';
 
 export function noValuesDisableMsg(fieldName, indexPatternName) {
   return i18n.translate('inputControl.control.noValuesDisableTooltip', {
-    defaultMessage: 'Filtering occurs on the "{fieldName}" field, which doesn\'t exist on any documents in the "{indexPatternName}" \
+    defaultMessage:
+      'Filtering occurs on the "{fieldName}" field, which doesn\'t exist on any documents in the "{indexPatternName}" \
 index pattern. Choose a different field or index documents that contain values for this field.',
-    values: { fieldName: fieldName, indexPatternName: indexPatternName }
+    values: { fieldName: fieldName, indexPatternName: indexPatternName },
   });
 }
 
 export function noIndexPatternMsg(indexPatternId) {
   return i18n.translate('inputControl.control.noIndexPatternTooltip', {
     defaultMessage: 'Could not locate index-pattern id: {indexPatternId}.',
-    values: { indexPatternId }
+    values: { indexPatternId },
   });
 }
 
@@ -51,9 +52,11 @@ export class Control {
     // restore state from kibana filter context
     this.reset();
     // disable until initialized
-    this.disable(i18n.translate('inputControl.control.notInitializedTooltip', {
-      defaultMessage: 'Control has not been initialized'
-    }));
+    this.disable(
+      i18n.translate('inputControl.control.notInitializedTooltip', {
+        defaultMessage: 'Control has not been initialized',
+      })
+    );
   }
 
   async fetch() {
@@ -64,14 +67,14 @@ export class Control {
     throw new Error('destroy method not defined, subclass are required to implement');
   }
 
-  format = (value) => {
+  format = value => {
     const field = this.filterManager.getField();
     if (field) {
       return field.format.convert(value);
     }
 
     return value;
-  }
+  };
 
   /**
    *

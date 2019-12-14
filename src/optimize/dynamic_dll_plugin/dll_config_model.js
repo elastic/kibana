@@ -36,13 +36,11 @@ function generateDLL(config) {
     dllStyleFilename,
     dllManifestPath,
     babelLoaderCacheDir,
-    threadLoaderPoolConfig
+    threadLoaderPoolConfig,
   } = config;
 
   const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
-  const BABEL_EXCLUDE_RE = [
-    /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
-  ];
+  const BABEL_EXCLUDE_RE = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
 
   return {
     entry: dllEntry,
@@ -51,20 +49,14 @@ function generateDLL(config) {
       filename: dllBundleFilename,
       path: dllOutputPath,
       publicPath: dllPublicPath,
-      library: dllBundleName
+      library: dllBundleName,
     },
     node: { fs: 'empty', child_process: 'empty', dns: 'empty', net: 'empty', tls: 'empty' },
     resolve: {
       extensions: ['.js', '.json'],
       mainFields: ['browser', 'browserify', 'main'],
       alias: dllAlias,
-      modules: [
-        'webpackShims',
-        fromRoot('webpackShims'),
-
-        'node_modules',
-        fromRoot('node_modules'),
-      ],
+      modules: ['webpackShims', fromRoot('webpackShims'), 'node_modules', fromRoot('node_modules')],
     },
     module: {
       rules: [
@@ -87,7 +79,7 @@ function generateDLL(config) {
               test: /\.js$/,
               include: /[\/\\]node_modules[\/\\]normalize-url[\/\\]/,
               exclude: /[\/\\]node_modules[\/\\]normalize-url[\/\\](.+?[\/\\])*node_modules[\/\\]/,
-            }
+            },
           ],
           // Self calling function with the equivalent logic
           // from maybeAddCacheLoader one from base optimizer
@@ -98,45 +90,40 @@ function generateDLL(config) {
                 options: {
                   cacheContext: fromRoot('.'),
                   cacheDirectory: babelLoaderCacheDirPath,
-                  readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
-                }
+                  readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE,
+                },
               },
-              ...loaders
+              ...loaders,
             ];
           })(babelLoaderCacheDir, [
             {
               loader: 'thread-loader',
-              options: threadLoaderPoolConfig
+              options: threadLoaderPoolConfig,
             },
             {
               loader: 'babel-loader',
               options: {
                 babelrc: false,
-                presets: [
-                  BABEL_PRESET_PATH,
-                ],
+                presets: [BABEL_PRESET_PATH],
               },
-            }
-          ])
+            },
+          ]),
         },
         {
           test: /\.(html|tmpl)$/,
-          loader: 'raw-loader'
+          loader: 'raw-loader',
         },
         {
           test: /\.css$/,
-          use: [
-            MiniCssExtractPlugin.loader,
-            'css-loader'
-          ],
+          use: [MiniCssExtractPlugin.loader, 'css-loader'],
         },
         {
           test: /\.png$/,
-          loader: 'url-loader'
+          loader: 'url-loader',
         },
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
-          loader: 'file-loader'
+          loader: 'file-loader',
         },
       ],
       noParse: dllNoParseRules,
@@ -145,18 +132,18 @@ function generateDLL(config) {
       new webpack.DllPlugin({
         context: dllContext,
         name: dllBundleName,
-        path: dllManifestPath
+        path: dllManifestPath,
       }),
       new MiniCssExtractPlugin({
-        filename: dllStyleFilename
+        filename: dllStyleFilename,
       }),
     ],
     performance: {
       // NOTE: we are disabling this as those hints
       // are more tailored for the final bundles result
       // and not for the webpack compilations performance itself
-      hints: false
-    }
+      hints: false,
+    },
   };
 }
 
@@ -184,9 +171,7 @@ function extendRawConfig(rawConfig) {
   const threadLoaderPoolConfig = rawConfig.threadLoaderPoolConfig;
 
   // Create webpack entry object key with the provided dllEntryName
-  dllEntry[dllEntryName] = [
-    `${dllOutputPath}/${dllEntryName}${dllEntryExt}`
-  ];
+  dllEntry[dllEntryName] = [`${dllOutputPath}/${dllEntryName}${dllEntryExt}`];
 
   // Export dll config map
   return {
@@ -202,76 +187,70 @@ function extendRawConfig(rawConfig) {
     dllStyleFilename,
     dllManifestPath,
     babelLoaderCacheDir,
-    threadLoaderPoolConfig
+    threadLoaderPoolConfig,
   };
 }
 
 function common(config) {
-  return webpackMerge(
-    generateDLL(config)
-  );
+  return webpackMerge(generateDLL(config));
 }
 
 function optimized(config) {
-  return webpackMerge(
-    {
-      mode: 'production',
-      optimization: {
-        minimizer: [
-          new TerserPlugin({
-            // Apply the same logic used to calculate the
-            // threadLoaderPool workers number to spawn
-            // the parallel processes on terser
-            parallel: config.threadLoaderPoolConfig.workers,
-            sourceMap: false,
-            cache: false,
-            extractComments: false,
-            terserOptions: {
-              compress: {
-                // The following is required for dead-code the removal
-                // check in React DevTools
-                //
-                // default
-                unused: true,
-                dead_code: true,
-                conditionals: true,
-                evaluate: true,
+  return webpackMerge({
+    mode: 'production',
+    optimization: {
+      minimizer: [
+        new TerserPlugin({
+          // Apply the same logic used to calculate the
+          // threadLoaderPool workers number to spawn
+          // the parallel processes on terser
+          parallel: config.threadLoaderPoolConfig.workers,
+          sourceMap: false,
+          cache: false,
+          extractComments: false,
+          terserOptions: {
+            compress: {
+              // The following is required for dead-code the removal
+              // check in React DevTools
+              //
+              // default
+              unused: true,
+              dead_code: true,
+              conditionals: true,
+              evaluate: true,
 
-                // changed
-                keep_fnames: true,
-                keep_infinity: true,
-                comparisons: false,
-                sequences: false,
-                properties: false,
-                drop_debugger: false,
-                booleans: false,
-                loops: false,
-                toplevel: false,
-                top_retain: false,
-                hoist_funs: false,
-                if_return: false,
-                join_vars: false,
-                collapse_vars: false,
-                reduce_vars: false,
-                warnings: false,
-                negate_iife: false,
-                side_effects: false
-              },
-              mangle: false
-            }
-          }),
-        ]
-      }
-    }
-  );
+              // changed
+              keep_fnames: true,
+              keep_infinity: true,
+              comparisons: false,
+              sequences: false,
+              properties: false,
+              drop_debugger: false,
+              booleans: false,
+              loops: false,
+              toplevel: false,
+              top_retain: false,
+              hoist_funs: false,
+              if_return: false,
+              join_vars: false,
+              collapse_vars: false,
+              reduce_vars: false,
+              warnings: false,
+              negate_iife: false,
+              side_effects: false,
+            },
+            mangle: false,
+          },
+        }),
+      ],
+    },
+  });
 }
 
 function unoptimized() {
-  return webpackMerge(
-    {
-      mode: 'development'
-    }
-  );
+  return webpackMerge({
+    mode: 'development',
+  });
 }
 
 export function configModel(rawConfig = {}) {

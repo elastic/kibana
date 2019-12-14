@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) { // eslint-disable-line no-undef
+(function(root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // eslint-disable-line no-undef
     define([], factory); // eslint-disable-line no-undef
   } else if (typeof exports === 'object') {
     module.exports = factory();
   } else {
     root.ElasticsearchShield = factory();
   }
-}(this, function () {
-  return function addShieldApi(Client, config, components) { // eslint-disable-line no-unused-vars
+})(this, function() {
+  return function addShieldApi(Client, config, components) {
+    // eslint-disable-line no-unused-vars
     const ca = components.clientAction.factory;
 
     Client.prototype.shield = components.clientAction.namespaceFactory();
@@ -27,8 +29,8 @@
     shield.authenticate = ca({
       params: {},
       url: {
-        fmt: '/_security/_authenticate'
-      }
+        fmt: '/_security/_authenticate',
+      },
     });
 
     /**
@@ -41,8 +43,8 @@
     shield.changePassword = ca({
       params: {
         refresh: {
-          type: 'boolean'
-        }
+          type: 'boolean',
+        },
       },
       urls: [
         {
@@ -50,16 +52,16 @@
           req: {
             username: {
               type: 'string',
-              required: false
-            }
-          }
+              required: false,
+            },
+          },
         },
         {
-          fmt: '/_security/user/_password'
-        }
+          fmt: '/_security/user/_password',
+        },
       ],
       needBody: true,
-      method: 'POST'
+      method: 'POST',
     });
 
     /**
@@ -73,19 +75,19 @@
       params: {
         usernames: {
           type: 'string',
-          required: false
-        }
+          required: false,
+        },
       },
       url: {
         fmt: '/_security/realm/<%=realms%>/_clear_cache',
         req: {
           realms: {
             type: 'string',
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       },
-      method: 'POST'
+      method: 'POST',
     });
 
     /**
@@ -101,11 +103,11 @@
         req: {
           name: {
             type: 'string',
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       },
-      method: 'POST'
+      method: 'POST',
     });
 
     /**
@@ -118,19 +120,19 @@
     shield.deleteRole = ca({
       params: {
         refresh: {
-          type: 'boolean'
-        }
+          type: 'boolean',
+        },
       },
       url: {
         fmt: '/_security/role/<%=name%>',
         req: {
           name: {
             type: 'string',
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       },
-      method: 'DELETE'
+      method: 'DELETE',
     });
 
     /**
@@ -143,19 +145,19 @@
     shield.deleteUser = ca({
       params: {
         refresh: {
-          type: 'boolean'
-        }
+          type: 'boolean',
+        },
       },
       url: {
         fmt: '/_security/user/<%=username%>',
         req: {
           username: {
             type: 'string',
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       },
-      method: 'DELETE'
+      method: 'DELETE',
     });
 
     /**
@@ -172,14 +174,14 @@
           req: {
             name: {
               type: 'string',
-              required: false
-            }
-          }
+              required: false,
+            },
+          },
         },
         {
-          fmt: '/_security/role'
-        }
-      ]
+          fmt: '/_security/role',
+        },
+      ],
     });
 
     /**
@@ -196,14 +198,14 @@
           req: {
             username: {
               type: 'list',
-              required: false
-            }
-          }
+              required: false,
+            },
+          },
         },
         {
-          fmt: '/_security/user'
-        }
-      ]
+          fmt: '/_security/user',
+        },
+      ],
     });
 
     /**
@@ -216,20 +218,20 @@
     shield.putRole = ca({
       params: {
         refresh: {
-          type: 'boolean'
-        }
+          type: 'boolean',
+        },
       },
       url: {
         fmt: '/_security/role/<%=name%>',
         req: {
           name: {
             type: 'string',
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       },
       needBody: true,
-      method: 'PUT'
+      method: 'PUT',
     });
 
     /**
@@ -242,20 +244,20 @@
     shield.putUser = ca({
       params: {
         refresh: {
-          type: 'boolean'
-        }
+          type: 'boolean',
+        },
       },
       url: {
         fmt: '/_security/user/<%=username%>',
         req: {
           username: {
             type: 'string',
-            required: true
-          }
-        }
+            required: true,
+          },
+        },
       },
       needBody: true,
-      method: 'PUT'
+      method: 'PUT',
     });
 
     /**
@@ -266,9 +268,9 @@
       params: {},
       urls: [
         {
-          fmt: '/_security/user/_privileges'
-        }
-      ]
+          fmt: '/_security/user/_privileges',
+        },
+      ],
     });
 
     /**
@@ -290,8 +292,8 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/saml/prepare'
-      }
+        fmt: '/_security/saml/prepare',
+      },
     });
 
     /**
@@ -311,8 +313,8 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/saml/authenticate'
-      }
+        fmt: '/_security/saml/authenticate',
+      },
     });
 
     /**
@@ -326,8 +328,8 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/saml/logout'
-      }
+        fmt: '/_security/saml/logout',
+      },
     });
 
     /**
@@ -345,8 +347,8 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/saml/invalidate'
-      }
+        fmt: '/_security/saml/invalidate',
+      },
     });
 
     /**
@@ -363,8 +365,8 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/oidc/prepare'
-      }
+        fmt: '/_security/oidc/prepare',
+      },
     });
 
     /**
@@ -386,8 +388,8 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/oidc/authenticate'
-      }
+        fmt: '/_security/oidc/authenticate',
+      },
     });
 
     /**
@@ -405,8 +407,8 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/oidc/logout'
-      }
+        fmt: '/_security/oidc/logout',
+      },
     });
 
     /**
@@ -421,8 +423,8 @@
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/oauth2/token'
-      }
+        fmt: '/_security/oauth2/token',
+      },
     });
 
     /**
@@ -437,88 +439,95 @@
       needBody: true,
       params: {
         token: {
-          type: 'string'
-        }
+          type: 'string',
+        },
       },
       url: {
-        fmt: '/_security/oauth2/token'
-      }
+        fmt: '/_security/oauth2/token',
+      },
     });
 
     shield.getPrivilege = ca({
       method: 'GET',
-      urls: [{
-        fmt: '/_security/privilege/<%=privilege%>',
-        req: {
-          privilege: {
-            type: 'string',
-            required: false
-          }
-        }
-      }, {
-        fmt: '/_security/privilege'
-      }]
+      urls: [
+        {
+          fmt: '/_security/privilege/<%=privilege%>',
+          req: {
+            privilege: {
+              type: 'string',
+              required: false,
+            },
+          },
+        },
+        {
+          fmt: '/_security/privilege',
+        },
+      ],
     });
 
     shield.deletePrivilege = ca({
       method: 'DELETE',
-      urls: [{
-        fmt: '/_security/privilege/<%=application%>/<%=privilege%>',
-        req: {
-          application: {
-            type: 'string',
-            required: true
+      urls: [
+        {
+          fmt: '/_security/privilege/<%=application%>/<%=privilege%>',
+          req: {
+            application: {
+              type: 'string',
+              required: true,
+            },
+            privilege: {
+              type: 'string',
+              required: true,
+            },
           },
-          privilege: {
-            type: 'string',
-            required: true
-          }
-        }
-      }]
+        },
+      ],
     });
 
     shield.postPrivileges = ca({
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/privilege'
-      }
+        fmt: '/_security/privilege',
+      },
     });
 
     shield.hasPrivileges = ca({
       method: 'POST',
       needBody: true,
       url: {
-        fmt: '/_security/user/_has_privileges'
-      }
+        fmt: '/_security/user/_has_privileges',
+      },
     });
 
     shield.getBuiltinPrivileges = ca({
       params: {},
       urls: [
         {
-          fmt: '/_security/privilege/_builtin'
-        }
-      ]
+          fmt: '/_security/privilege/_builtin',
+        },
+      ],
     });
 
     /**
-   * Gets API keys in Elasticsearch
-   * @param {boolean} owner A boolean flag that can be used to query API keys owned by the currently authenticated user.
-   * Defaults to false. The realm_name or username parameters cannot be specified when this parameter is set to true as
-   * they are assumed to be the currently authenticated ones.
-   */
+     * Gets API keys in Elasticsearch
+     * @param {boolean} owner A boolean flag that can be used to query API keys owned by the currently authenticated user.
+     * Defaults to false. The realm_name or username parameters cannot be specified when this parameter is set to true as
+     * they are assumed to be the currently authenticated ones.
+     */
     shield.getAPIKeys = ca({
       method: 'GET',
-      urls: [{
-        fmt: `/_security/api_key?owner=<%=owner%>`,
-        req: {
-          owner: {
-            type: 'boolean',
-            required: true
-          }
-        }
-      }]
+      urls: [
+        {
+          fmt: `/_security/api_key?owner=<%=owner%>`,
+          req: {
+            owner: {
+              type: 'boolean',
+              required: true,
+            },
+          },
+        },
+      ],
     });
 
     /**
@@ -531,7 +540,7 @@
      * is not provided then the API keys do not expire.
      *
      * @returns {{id: string, name: string, api_key: string, expiration?: number}}
-    */
+     */
     shield.createAPIKey = ca({
       method: 'POST',
       needBody: true,
@@ -576,4 +585,4 @@
       },
     });
   };
-}));
+});

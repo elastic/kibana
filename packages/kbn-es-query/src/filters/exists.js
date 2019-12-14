@@ -21,10 +21,10 @@
 export function buildExistsFilter(field, indexPattern) {
   return {
     meta: {
-      index: indexPattern.id
+      index: indexPattern.id,
     },
     exists: {
-      field: field.name
-    }
+      field: field.name,
+    },
   };
 }

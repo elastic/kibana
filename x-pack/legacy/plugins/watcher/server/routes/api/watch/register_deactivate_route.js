@@ -8,24 +8,23 @@ import { get } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 import { WatchStatus } from '../../../models/watch_status';
 
 function deactivateWatch(callWithRequest, watchId) {
   return callWithRequest('watcher.deactivateWatch', {
-    id: watchId
+    id: watchId,
   });
 }
 
 export function registerDeactivateRoute(server) {
-
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
   server.route({
     path: '/api/watcher/watch/{watchId}/deactivate',
     method: 'PUT',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
 
       const { watchId } = request.params;
@@ -35,19 +34,19 @@ export function registerDeactivateRoute(server) {
           const watchStatusJson = get(hit, 'status');
           const json = {
             id: watchId,
-            watchStatusJson: watchStatusJson
+            watchStatusJson: watchStatusJson,
           };
 
           const watchStatus = WatchStatus.fromUpstreamJson(json);
           return {
-            watchStatus: watchStatus.downstreamJson
+            watchStatus: watchStatus.downstreamJson,
           };
         })
         .catch(err => {
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             const statusCodeToMessageMap = {
-              404: `Watch with id = ${watchId} not found`
+              404: `Watch with id = ${watchId} not found`,
             };
             throw wrapEsError(err, statusCodeToMessageMap);
           }
@@ -57,7 +56,7 @@ export function registerDeactivateRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

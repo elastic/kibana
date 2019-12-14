@@ -19,13 +19,12 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard']);
 
-  describe('dashboard grid', function () {
-
+  describe('dashboard grid', function() {
     before(async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.loadSavedDashboard('few panels');

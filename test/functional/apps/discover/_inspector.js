@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }) {
   const STATS_ROW_NAME_INDEX = 0;
   const STATS_ROW_VALUE_INDEX = 1;
   function getHitCount(requestStats) {
-    const hitsCountStatsRow = requestStats.find((statsRow) => {
+    const hitsCountStatsRow = requestStats.find(statsRow => {
       return statsRow[STATS_ROW_NAME_INDEX] === 'Hits (total)';
     });
     return hitsCountStatsRow[STATS_ROW_VALUE_INDEX];
@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('discover');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'defaultIndex': 'logstash-*'
+        defaultIndex: 'logstash-*',
       });
 
       await PageObjects.common.navigateToApp('discover');
@@ -58,13 +58,15 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should display request stats with results', async () => {
-      await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+      await PageObjects.timePicker.setAbsoluteRange(
+        '2015-09-19 06:31:44.000',
+        '2015-09-23 18:31:44.000'
+      );
 
       await inspector.open();
       const requestStats = await inspector.getTableData();
 
       expect(getHitCount(requestStats)).to.be('14004');
     });
-
   });
 }

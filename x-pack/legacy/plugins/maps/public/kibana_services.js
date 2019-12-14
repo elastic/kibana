@@ -6,7 +6,10 @@
 
 import { uiModules } from 'ui/modules';
 import { SearchSourceProvider } from 'ui/courier';
-import { getRequestInspectorStats, getResponseInspectorStats } from 'ui/courier/utils/courier_inspector_utils';
+import {
+  getRequestInspectorStats,
+  getResponseInspectorStats,
+} from 'ui/courier/utils/courier_inspector_utils';
 export { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { start as data } from '../../../../../src/legacy/core_plugins/data/public/legacy';
 import { FILTERS } from '@kbn/es-query';
@@ -16,10 +19,17 @@ export const indexPatternService = data.indexPatterns.indexPatterns;
 
 export let SearchSource;
 
-export async function fetchSearchSourceAndRecordWithInspector({ searchSource, requestId, requestName, requestDesc, inspectorAdapters }) {
-  const inspectorRequest = inspectorAdapters.requests.start(
-    requestName,
-    { id: requestId, description: requestDesc });
+export async function fetchSearchSourceAndRecordWithInspector({
+  searchSource,
+  requestId,
+  requestName,
+  requestDesc,
+  inspectorAdapters,
+}) {
+  const inspectorRequest = inspectorAdapters.requests.start(requestName, {
+    id: requestId,
+    description: requestDesc,
+  });
   let resp;
   try {
     inspectorRequest.stats(getRequestInspectorStats(searchSource));
@@ -27,10 +37,8 @@ export async function fetchSearchSourceAndRecordWithInspector({ searchSource, re
       inspectorRequest.json(body);
     });
     resp = await searchSource.fetch();
-    inspectorRequest
-      .stats(getResponseInspectorStats(searchSource, resp))
-      .ok({ json: resp });
-  } catch(error) {
+    inspectorRequest.stats(getResponseInspectorStats(searchSource, resp)).ok({ json: resp });
+  } catch (error) {
     inspectorRequest.error({ error });
     throw error;
   }
@@ -38,7 +46,7 @@ export async function fetchSearchSourceAndRecordWithInspector({ searchSource, re
   return resp;
 }
 
-uiModules.get('app/maps').run(($injector) => {
+uiModules.get('app/maps').run($injector => {
   const Private = $injector.get('Private');
   SearchSource = Private(SearchSourceProvider);
 });

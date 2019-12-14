@@ -28,7 +28,7 @@ async function fetchRollupIndexPatterns(kibanaIndex, callCluster) {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
     ignoreUnavailable: true,
-    filterPath: [ 'hits.hits._id' ],
+    filterPath: ['hits.hits._id'],
     body: {
       query: {
         bool: {
@@ -55,7 +55,7 @@ async function fetchRollupSavedSearches(kibanaIndex, callCluster, rollupIndexPat
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
     ignoreUnavailable: true,
-    filterPath: [ 'hits.hits._id', 'hits.hits._source.search.kibanaSavedObjectMeta' ],
+    filterPath: ['hits.hits._id', 'hits.hits._source.search.kibanaSavedObjectMeta'],
     body: {
       query: {
         bool: {
@@ -78,9 +78,7 @@ async function fetchRollupSavedSearches(kibanaIndex, callCluster, rollupIndexPat
       _id: savedObjectId,
       _source: {
         search: {
-          kibanaSavedObjectMeta: {
-            searchSourceJSON,
-          },
+          kibanaSavedObjectMeta: { searchSourceJSON },
         },
       },
     } = savedSearch;
@@ -96,7 +94,12 @@ async function fetchRollupSavedSearches(kibanaIndex, callCluster, rollupIndexPat
   }, []);
 }
 
-async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap) {
+async function fetchRollupVisualizations(
+  kibanaIndex,
+  callCluster,
+  rollupIndexPatternToFlagMap,
+  rollupSavedSearchesToFlagMap
+) {
   const searchParams = {
     size: ES_MAX_RESULT_WINDOW_DEFAULT_VALUE,
     index: kibanaIndex,
@@ -130,9 +133,7 @@ async function fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPa
       _source: {
         visualization: {
           savedSearchRefName,
-          kibanaSavedObjectMeta: {
-            searchSourceJSON,
-          },
+          kibanaSavedObjectMeta: { searchSourceJSON },
         },
         references = [],
       },
@@ -173,13 +174,22 @@ export function registerRollupUsageCollector(server) {
       const rollupIndexPatterns = await fetchRollupIndexPatterns(kibanaIndex, callCluster);
       const rollupIndexPatternToFlagMap = createIdToFlagMap(rollupIndexPatterns);
 
-      const rollupSavedSearches = await fetchRollupSavedSearches(kibanaIndex, callCluster, rollupIndexPatternToFlagMap);
+      const rollupSavedSearches = await fetchRollupSavedSearches(
+        kibanaIndex,
+        callCluster,
+        rollupIndexPatternToFlagMap
+      );
       const rollupSavedSearchesToFlagMap = createIdToFlagMap(rollupSavedSearches);
 
       const {
         rollupVisualizations,
         rollupVisualizationsFromSavedSearches,
-      } = await fetchRollupVisualizations(kibanaIndex, callCluster, rollupIndexPatternToFlagMap, rollupSavedSearchesToFlagMap);
+      } = await fetchRollupVisualizations(
+        kibanaIndex,
+        callCluster,
+        rollupIndexPatternToFlagMap,
+        rollupSavedSearchesToFlagMap
+      );
 
       return {
         index_patterns: {

@@ -21,8 +21,7 @@ import { expectExpressionProvider } from './helpers';
 
 // this file showcases how to use testing utilities defined in helpers.js together with the kbn_tp_run_pipeline
 // test plugin to write autmated tests for interprete
-export default function ({ getService, updateBaselines }) {
-
+export default function({ getService, updateBaselines }) {
   let expectExpression;
   describe('tag cloud pipeline expression tests', () => {
     before(() => {
@@ -45,27 +44,48 @@ export default function ({ getService, updateBaselines }) {
 
       it.skip('with invalid data', async () => {
         const expression = 'tagcloud metric={visdimension 0}';
-        await (await expectExpression('tagcloud_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
+        await (await expectExpression(
+          'tagcloud_invalid_data',
+          expression
+        ).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with just metric data', async () => {
         const expression = 'tagcloud metric={visdimension 0}';
-        await (await expectExpression('tagcloud_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (await expectExpression(
+          'tagcloud_metric_data',
+          expression,
+          dataContext
+        ).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with metric and bucket data', async () => {
         const expression = 'tagcloud metric={visdimension 0} bucket={visdimension 1}';
-        await (await expectExpression('tagcloud_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (await expectExpression(
+          'tagcloud_all_data',
+          expression,
+          dataContext
+        ).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with font size options', async () => {
-        const expression = 'tagcloud metric={visdimension 0} bucket={visdimension 1} minFontSize=20 maxFontSize=40';
-        await (await expectExpression('tagcloud_fontsize', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        const expression =
+          'tagcloud metric={visdimension 0} bucket={visdimension 1} minFontSize=20 maxFontSize=40';
+        await (await expectExpression(
+          'tagcloud_fontsize',
+          expression,
+          dataContext
+        ).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with scale and orientation options', async () => {
-        const expression = 'tagcloud metric={visdimension 0} bucket={visdimension 1} scale="log" orientation="multiple"';
-        await (await expectExpression('tagcloud_options', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        const expression =
+          'tagcloud metric={visdimension 0} bucket={visdimension 1} scale="log" orientation="multiple"';
+        await (await expectExpression(
+          'tagcloud_options',
+          expression,
+          dataContext
+        ).toMatchSnapshot()).toMatchScreenshot();
       });
     });
   });

@@ -25,7 +25,7 @@ import data from 'fixtures/vislib/mock_data/terms/_seriesMultiple';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import '../../../persisted_state';
 
-describe('Vislib Gauge Chart Test Suite', function () {
+describe('Vislib Gauge Chart Test Suite', function() {
   let PersistedState;
   let vislibVis;
   let vis;
@@ -43,21 +43,17 @@ describe('Vislib Gauge Chart Test Suite', function () {
       backStyle: 'Full',
       orientation: 'vertical',
       colorSchema: 'Green to Red',
-      colorsRange: [
-        { from: 0, to: 1500 },
-        { from: 1500, to: 2500 },
-        { from: 2500, to: 3000 }
-      ],
+      colorsRange: [{ from: 0, to: 1500 }, { from: 1500, to: 2500 }, { from: 2500, to: 3000 }],
       invertColors: false,
       labels: {
         show: true,
-        color: 'black'
+        color: 'black',
       },
       scale: {
         show: true,
         labels: false,
         color: '#333',
-        width: 2
+        width: 2,
       },
       type: 'meter',
       style: {
@@ -68,9 +64,9 @@ describe('Vislib Gauge Chart Test Suite', function () {
         maskBars: 50,
         bgFill: '#eee',
         subText: '',
-        fontSize: 32
-      }
-    }
+        fontSize: 32,
+      },
+    },
   };
 
   function generateVis(opts = {}) {
@@ -87,78 +83,96 @@ describe('Vislib Gauge Chart Test Suite', function () {
   }
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private, $injector) {
-    vislibVis = Private(FixturesVislibVisFixtureProvider);
-    PersistedState = $injector.get('PersistedState');
-    generateVis();
-  }));
+  beforeEach(
+    ngMock.inject(function(Private, $injector) {
+      vislibVis = Private(FixturesVislibVisFixtureProvider);
+      PersistedState = $injector.get('PersistedState');
+      generateVis();
+    })
+  );
 
-  afterEach(function () {
+  afterEach(function() {
     vis.destroy();
     $('.visChart').remove();
   });
 
-  it('creates meter gauge', function () {
+  it('creates meter gauge', function() {
     expect($(chartEl).find('svg').length).to.equal(5);
-    expect($(chartEl).find('svg > g > g > text').text()).to.equal('2820231918357341352');
+    expect(
+      $(chartEl)
+        .find('svg > g > g > text')
+        .text()
+    ).to.equal('2820231918357341352');
   });
 
-  it('creates circle gauge', function () {
+  it('creates circle gauge', function() {
     generateVis({
       gauge: {
         minAngle: 0,
-        maxAngle: 2 * Math.PI
-      }
+        maxAngle: 2 * Math.PI,
+      },
     });
     expect($(chartEl).find('svg').length).to.equal(5);
   });
 
-  it('creates gauge with automatic mode', function () {
+  it('creates gauge with automatic mode', function() {
     generateVis({
       gauge: {
-        alignment: 'automatic'
-      }
+        alignment: 'automatic',
+      },
     });
-    expect($(chartEl).find('svg').width()).to.equal(197);
+    expect(
+      $(chartEl)
+        .find('svg')
+        .width()
+    ).to.equal(197);
   });
 
-  it('creates gauge with vertical mode', function () {
+  it('creates gauge with vertical mode', function() {
     generateVis({
       gauge: {
-        alignment: 'vertical'
-      }
+        alignment: 'vertical',
+      },
     });
-    expect($(chartEl).find('svg').width()).to.equal($(chartEl).width());
+    expect(
+      $(chartEl)
+        .find('svg')
+        .width()
+    ).to.equal($(chartEl).width());
   });
 
-  it('applies range settings correctly', function () {
+  it('applies range settings correctly', function() {
     const paths = $(chartEl).find('svg > g > g:nth-child(1) > path:nth-child(2)');
     const fills = [];
-    paths.each(function () { fills.push(this.style.fill); });
+    paths.each(function() {
+      fills.push(this.style.fill);
+    });
     expect(fills).to.eql([
       'rgb(165, 0, 38)',
       'rgb(255, 255, 190)',
       'rgb(255, 255, 190)',
       'rgb(0, 104, 55)',
-      'rgb(0, 104, 55)'
+      'rgb(0, 104, 55)',
     ]);
   });
 
-  it('applies color schema correctly', function () {
+  it('applies color schema correctly', function() {
     generateVis({
       gauge: {
-        colorSchema: 'Blues'
-      }
+        colorSchema: 'Blues',
+      },
     });
     const paths = $(chartEl).find('svg > g > g:nth-child(1) > path:nth-child(2)');
     const fills = [];
-    paths.each(function () { fills.push(this.style.fill); });
+    paths.each(function() {
+      fills.push(this.style.fill);
+    });
     expect(fills).to.eql([
       'rgb(8, 48, 107)',
       'rgb(107, 174, 214)',
       'rgb(107, 174, 214)',
       'rgb(247, 251, 255)',
-      'rgb(247, 251, 255)'
+      'rgb(247, 251, 255)',
     ]);
   });
 });

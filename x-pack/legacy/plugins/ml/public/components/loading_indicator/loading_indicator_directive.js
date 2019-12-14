@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import template from './loading_indicator.html';
 
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlLoadingIndicator', function () {
+module.directive('mlLoadingIndicator', function() {
   return {
     restrict: 'E',
     template,
@@ -18,10 +17,10 @@ module.directive('mlLoadingIndicator', function () {
     scope: {
       label: '@?',
       isLoading: '<',
-      height: '<?'
+      height: '<?',
     },
-    link: function (scope) {
+    link: function(scope) {
       scope.height = scope.height ? +scope.height : 100;
-    }
+    },
   };
 });

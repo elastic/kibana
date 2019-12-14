@@ -29,12 +29,13 @@ export let telemetryOptInProvider;
 export const trackUiMetric = createUiStatsReporter('Kibana_home');
 export { METRIC_TYPE };
 
-uiModules.get('kibana').run(($injector) => {
+uiModules.get('kibana').run($injector => {
   const telemetryEnabled = npStart.core.injectedMetadata.getInjectedVar('telemetryEnabled');
   const telemetryBanner = npStart.core.injectedMetadata.getInjectedVar('telemetryBanner');
   const Private = $injector.get('Private');
 
   telemetryOptInProvider = Private(TelemetryOptInProvider);
-  shouldShowTelemetryOptIn = telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
+  shouldShowTelemetryOptIn =
+    telemetryEnabled && telemetryBanner && !telemetryOptInProvider.getOptIn();
   indexPatternService = $injector.get('indexPatterns');
 });

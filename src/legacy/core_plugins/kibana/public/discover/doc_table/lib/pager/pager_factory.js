@@ -26,6 +26,6 @@ app.factory('pagerFactory', () => {
   return {
     create(...args) {
       return new Pager(...args);
-    }
+    },
   };
 });

@@ -7,16 +7,14 @@
 import expect from '@kbn/expect';
 import { xpackInfo } from '../../../../xpack_main/public/services/xpack_info';
 import { LICENSE_STATUS_VALID } from '../../../../../common/constants/license_status';
-import {
-  xpackFeatureAvailable,
-} from '../check_license';
+import { xpackFeatureAvailable } from '../check_license';
 
 const initialInfo = {
   features: {
     watcher: {
-      status: LICENSE_STATUS_VALID
-    }
-  }
+      status: LICENSE_STATUS_VALID,
+    },
+  },
 };
 
 describe('ML - check license', () => {

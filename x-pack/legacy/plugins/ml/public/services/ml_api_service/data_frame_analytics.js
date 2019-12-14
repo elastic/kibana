@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import chrome from 'ui/chrome';
 
 import { http } from '../../services/http_service';
@@ -17,34 +15,34 @@ export const dataFrameAnalytics = {
     const analyticsIdString = analyticsId !== undefined ? `/${analyticsId}` : '';
     return http({
       url: `${basePath}/data_frame/analytics${analyticsIdString}`,
-      method: 'GET'
+      method: 'GET',
     });
   },
   getDataFrameAnalyticsStats(analyticsId) {
     if (analyticsId !== undefined) {
       return http({
         url: `${basePath}/data_frame/analytics/${analyticsId}/_stats`,
-        method: 'GET'
+        method: 'GET',
       });
     }
 
     return http({
       url: `${basePath}/data_frame/analytics/_stats`,
-      method: 'GET'
+      method: 'GET',
     });
   },
   createDataFrameAnalytics(analyticsId, analyticsConfig) {
     return http({
       url: `${basePath}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
-      data: analyticsConfig
+      data: analyticsConfig,
     });
   },
   evaluateDataFrameAnalytics(evaluateConfig) {
     return http({
       url: `${basePath}/data_frame/_evaluate`,
       method: 'POST',
-      data: evaluateConfig
+      data: evaluateConfig,
     });
   },
   deleteDataFrameAnalytics(analyticsId) {

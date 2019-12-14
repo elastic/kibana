@@ -43,4 +43,3 @@ uiSettings.getUpdate$().subscribe(({ key }) => {
     updateStyleSheet();
   }
 });
-

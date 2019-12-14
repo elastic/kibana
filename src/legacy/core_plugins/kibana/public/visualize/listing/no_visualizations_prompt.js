@@ -35,7 +35,7 @@ function NoVisualizationsPromptUi({ onCreateVis, intl }) {
           <KuiButton
             onClick={onCreateVis}
             buttonType="primary"
-            icon={<KuiButtonIcon type="create"/>}
+            icon={<KuiButtonIcon type="create" />}
           >
             <FormattedMessage
               id="kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel"

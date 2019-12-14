@@ -21,7 +21,7 @@ import _ from 'lodash';
 
 const utils = {};
 
-utils.textFromRequest = function (request) {
+utils.textFromRequest = function(request) {
   let data = request.data;
   if (typeof data !== 'string') {
     data = data.join('\n');
@@ -29,24 +29,26 @@ utils.textFromRequest = function (request) {
   return request.method + ' ' + request.url + '\n' + data;
 };
 
-utils.jsonToString = function (data, indent) {
+utils.jsonToString = function(data, indent) {
   return JSON.stringify(data, null, indent ? 2 : 0);
 };
 
-utils.reformatData = function (data, indent) {
+utils.reformatData = function(data, indent) {
   let changed = false;
   const formattedData = [];
   for (let i = 0; i < data.length; i++) {
     const curDoc = data[i];
     try {
-      let newDoc = utils.jsonToString(JSON.parse(utils.collapseLiteralStrings(curDoc)), indent ? 2 : 0);
+      let newDoc = utils.jsonToString(
+        JSON.parse(utils.collapseLiteralStrings(curDoc)),
+        indent ? 2 : 0
+      );
       if (indent) {
         newDoc = utils.expandLiteralStrings(newDoc);
       }
       changed = changed || newDoc !== curDoc;
       formattedData.push(newDoc);
-    }
-    catch (e) {
+    } catch (e) {
       console.log(e);
       formattedData.push(curDoc);
     }
@@ -54,11 +56,11 @@ utils.reformatData = function (data, indent) {
 
   return {
     changed: changed,
-    data: formattedData
+    data: formattedData,
   };
 };
 
-utils.collapseLiteralStrings = function (data) {
+utils.collapseLiteralStrings = function(data) {
   const splitData = data.split(`"""`);
   for (let idx = 1; idx < splitData.length - 1; idx += 2) {
     splitData[idx] = JSON.stringify(splitData[idx]);
@@ -81,16 +83,16 @@ utils.collapseLiteralStrings = function (data) {
 
 const LITERAL_STRING_CANDIDATES = /((:[\s\r\n]*)([^\\])"(\\"|[^"\n])*\\?")/g;
 
-utils.expandLiteralStrings = function (data) {
-  return data.replace(LITERAL_STRING_CANDIDATES, function (match, string) {
+utils.expandLiteralStrings = function(data) {
+  return data.replace(LITERAL_STRING_CANDIDATES, function(match, string) {
     // Expand to triple quotes if there are _any_ slashes
     if (string.match(/\\./)) {
       const firstDoubleQuoteIdx = string.indexOf('"');
       const colonAndAnySpacing = string.slice(0, firstDoubleQuoteIdx);
       const rawStringifiedValue = string.slice(firstDoubleQuoteIdx, string.length);
       const jsonValue = JSON.parse(rawStringifiedValue)
-        .replace('^\s*\n', '')
-        .replace('\n\s*^', '');
+        .replace('^s*\n', '')
+        .replace('\ns*^', '');
       return `${colonAndAnySpacing}"""${jsonValue}"""`;
     } else {
       return string;
@@ -98,22 +100,22 @@ utils.expandLiteralStrings = function (data) {
   });
 };
 
-utils.extractDeprecationMessages = function (warnings) {
+utils.extractDeprecationMessages = function(warnings) {
   // pattern for valid warning header
   const re = /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")?/;
   // split on any comma that is followed by an even number of quotes
-  return _.map(utils.splitOnUnquotedCommaSpace(warnings), function (warning) {
+  return _.map(utils.splitOnUnquotedCommaSpace(warnings), function(warning) {
     const match = re.exec(warning);
     // extract the actual warning if there was a match
     return '#! Deprecation: ' + (match !== null ? utils.unescape(match[1]) : warning);
   });
 };
 
-utils.unescape = function (s) {
+utils.unescape = function(s) {
   return s.replace(/\\\\/g, '\\').replace(/\\"/g, '"');
 };
 
-utils.splitOnUnquotedCommaSpace = function (s) {
+utils.splitOnUnquotedCommaSpace = function(s) {
   let quoted = false;
   const arr = [];
   let buffer = '';

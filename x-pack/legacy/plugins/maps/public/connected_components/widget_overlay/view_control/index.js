@@ -15,5 +15,8 @@ function mapStateToProps(state = {}) {
   };
 }
 
-const connectedViewControl = connect(mapStateToProps, null)(ViewControl);
+const connectedViewControl = connect(
+  mapStateToProps,
+  null
+)(ViewControl);
 export { connectedViewControl as ViewControl };

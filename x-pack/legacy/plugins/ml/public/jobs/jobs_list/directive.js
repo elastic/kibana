@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import ReactDOM from 'react-dom';
 import React from 'react';
 
@@ -22,23 +21,22 @@ import uiRoutes from 'ui/routes';
 
 const template = `<jobs-page data-test-subj="mlPageJobManagement" />`;
 
-uiRoutes
-  .when('/jobs/?', {
-    template,
-    k7Breadcrumbs: getJobManagementBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      indexPatterns: loadIndexPatterns,
-      privileges: checkGetJobsPrivilege,
-      mlNodeCount: getMlNodeCount,
-      loadMlServerInfo,
-    }
-  });
+uiRoutes.when('/jobs/?', {
+  template,
+  k7Breadcrumbs: getJobManagementBreadcrumbs,
+  resolve: {
+    CheckLicense: checkFullLicense,
+    indexPatterns: loadIndexPatterns,
+    privileges: checkGetJobsPrivilege,
+    mlNodeCount: getMlNodeCount,
+    loadMlServerInfo,
+  },
+});
 
 import { JobsPage } from './jobs';
 import { I18nContext } from 'ui/i18n';
 
-module.directive('jobsPage', function () {
+module.directive('jobsPage', function() {
   return {
     scope: {},
     restrict: 'E',
@@ -54,6 +52,6 @@ module.directive('jobsPage', function () {
         ReactDOM.unmountComponentAtNode(element[0]);
         scope.$destroy();
       });
-    }
+    },
   };
 });

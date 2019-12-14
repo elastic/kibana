@@ -38,62 +38,62 @@ const idAutocompleteComponentFactory = (name, parent) => {
   return new IdAutocompleteComponent(name, parent);
 };
 const parametrizedComponentFactories = {
-  getComponent: function (name, parent, provideDefault) {
+  getComponent: function(name, parent, provideDefault) {
     if (this[name]) {
       return this[name];
     } else if (provideDefault) {
       return idAutocompleteComponentFactory;
     }
   },
-  index: function (name, parent) {
+  index: function(name, parent) {
     if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, false);
   },
-  indices: function (name, parent) {
+  indices: function(name, parent) {
     if (isNotAnIndexName(name)) return;
     return new IndexAutocompleteComponent(name, parent, true);
   },
-  type: function (name, parent) {
+  type: function(name, parent) {
     return new TypeAutocompleteComponent(name, parent, false);
   },
-  types: function (name, parent) {
+  types: function(name, parent) {
     return new TypeAutocompleteComponent(name, parent, true);
   },
-  id: function (name, parent) {
+  id: function(name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
-  transform_id: function (name, parent) {
+  transform_id: function(name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
-  username: function (name, parent) {
+  username: function(name, parent) {
     return new UsernameAutocompleteComponent(name, parent);
   },
-  user: function (name, parent) {
+  user: function(name, parent) {
     return new UsernameAutocompleteComponent(name, parent);
   },
-  template: function (name, parent) {
+  template: function(name, parent) {
     return new TemplateAutocompleteComponent(name, parent);
   },
-  task_id: function (name, parent) {
+  task_id: function(name, parent) {
     return idAutocompleteComponentFactory(name, parent);
   },
-  ids: function (name, parent) {
+  ids: function(name, parent) {
     return idAutocompleteComponentFactory(name, parent, true);
   },
-  fields: function (name, parent) {
+  fields: function(name, parent) {
     return new FieldAutocompleteComponent(name, parent, true);
   },
-  field: function (name, parent) {
+  field: function(name, parent) {
     return new FieldAutocompleteComponent(name, parent, false);
   },
-  nodes: function (name, parent) {
+  nodes: function(name, parent) {
     return new ListComponent(
       name,
       ['_local', '_master', 'data:true', 'data:false', 'master:true', 'master:false'],
       parent
     );
   },
-  node: function (name, parent) {
+  node: function(name, parent) {
     return new ListComponent(name, [], parent, false);
   },
 };
@@ -109,7 +109,7 @@ export function getEndpointDescriptionByEndpoint(endpoint) {
 export function getEndpointBodyCompleteComponents(endpoint) {
   const desc = getEndpointDescriptionByEndpoint(endpoint);
   if (!desc) {
-    throw new Error('failed to resolve endpoint [\'' + endpoint + '\']');
+    throw new Error("failed to resolve endpoint ['" + endpoint + "']");
   }
   return desc.bodyAutocompleteRootComponents;
 }
@@ -133,12 +133,12 @@ function loadApisFromJson(
     bodyParametrizedComponentFactories || urlParametrizedComponentFactories;
   const api = new Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactories);
   const names = [];
-  _.each(json, function (apiJson, name) {
+  _.each(json, function(apiJson, name) {
     names.unshift(name);
-    _.each(apiJson.globals || {}, function (globalJson, globalName) {
+    _.each(apiJson.globals || {}, function(globalJson, globalName) {
       api.addGlobalAutocompleteRules(globalName, globalJson);
     });
-    _.each(apiJson.endpoints || {}, function (endpointJson, endpointName) {
+    _.each(apiJson.endpoints || {}, function(endpointJson, endpointName) {
       api.addEndpointDescription(endpointName, endpointJson);
     });
   });
@@ -156,11 +156,11 @@ export function setActiveApi(api) {
         encodeURIComponent(api),
       dataType: 'json', // disable automatic guessing
     }).then(
-      function (data) {
+      function(data) {
         setActiveApi(loadApisFromJson(data));
       },
-      function (jqXHR) {
-        console.log('failed to load API \'' + api + '\': ' + jqXHR.responseText);
+      function(jqXHR) {
+        console.log("failed to load API '" + api + "': " + jqXHR.responseText);
       }
     );
     return;

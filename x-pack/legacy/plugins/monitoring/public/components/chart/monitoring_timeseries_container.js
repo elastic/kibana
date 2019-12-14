@@ -12,12 +12,18 @@ import { MonitoringTimeseries } from './monitoring_timeseries';
 import { InfoTooltip } from './info_tooltip';
 
 import {
-  EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiScreenReaderOnly, EuiTextAlign, EuiButtonEmpty
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiScreenReaderOnly,
+  EuiTextAlign,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-const zoomOutBtn = (zoomInfo) => {
+const zoomOutBtn = zoomInfo => {
   if (!zoomInfo || !zoomInfo.showZoomOutBtn()) {
     return null;
   }
@@ -25,12 +31,8 @@ const zoomOutBtn = (zoomInfo) => {
   return (
     <EuiFlexItem className="monRhythmChart__zoom">
       <EuiTextAlign textAlign="right">
-        <EuiButtonEmpty
-          color="primary"
-          size="s"
-          onClick={zoomInfo.zoomOutHandler}
-        >
-          <i className="fa fa-search-minus" /> {' '}
+        <EuiButtonEmpty color="primary" size="s" onClick={zoomInfo.zoomOutHandler}>
+          <i className="fa fa-search-minus" />{' '}
           <FormattedMessage
             id="xpack.monitoring.chart.timeSeries.zoomOut"
             defaultMessage="Zoom out"
@@ -55,11 +57,10 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
     i18n.translate('xpack.monitoring.chart.seriesScreenReaderListDescription', {
       defaultMessage: 'Interval: {bucketSize}',
       values: {
-        bucketSize
-      }
-    })
-  ]
-    .concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
+        bucketSize,
+      },
+    }),
+  ].concat(series.map(item => `${item.metric.label}: ${item.metric.description}`));
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" className="monRhythmChart__wrapper">
@@ -68,7 +69,8 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
           <EuiFlexItem grow={false}>
             <EuiTitle size="s" tabIndex="0">
               <h2>
-                { getTitle(series) }{ units ? ` (${units})` : '' }
+                {getTitle(series)}
+                {units ? ` (${units})` : ''}
                 <EuiScreenReaderOnly>
                   <span>
                     <FormattedMessage
@@ -86,7 +88,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
                 anchorClassName="eui-textRight eui-alignMiddle monChart__tooltipTrigger"
                 type="iInCircle"
                 position="right"
-                content={<InfoTooltip series={series} bucketSize={bucketSize}/>}
+                content={<InfoTooltip series={series} bucketSize={bucketSize} />}
               />
               <EuiScreenReaderOnly>
                 <span id={`monitoringChart${titleForAriaIds}`}>
@@ -95,14 +97,11 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
               </EuiScreenReaderOnly>
             </Fragment>
           </EuiFlexItem>
-          { zoomOutBtn(zoomInfo) }
+          {zoomOutBtn(zoomInfo)}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem style={{ minHeight: '200px' }}>
-        <MonitoringTimeseries
-          series={series}
-          onBrush={onBrush}
-        />
+        <MonitoringTimeseries series={series} onBrush={onBrush} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

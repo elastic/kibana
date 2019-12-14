@@ -43,14 +43,19 @@ export default function apmOss(kibana) {
     },
 
     init(server) {
-      server.expose('indexPatterns', _.uniq([
-        'sourcemapIndices',
-        'errorIndices',
-        'transactionIndices',
-        'spanIndices',
-        'metricsIndices',
-        'onboardingIndices',
-      ].map(type => server.config().get(`apm_oss.${type}`))));
-    }
+      server.expose(
+        'indexPatterns',
+        _.uniq(
+          [
+            'sourcemapIndices',
+            'errorIndices',
+            'transactionIndices',
+            'spanIndices',
+            'metricsIndices',
+            'onboardingIndices',
+          ].map(type => server.config().get(`apm_oss.${type}`))
+        )
+      );
+    },
   });
 }

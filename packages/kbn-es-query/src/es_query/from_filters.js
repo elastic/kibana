@@ -28,8 +28,8 @@ import { filterMatchesIndex } from './filter_matches_index';
  *                          through otherwise it will filter out
  * @returns {function}
  */
-const filterNegate = function (reverse) {
-  return function (filter) {
+const filterNegate = function(reverse) {
+  return function(filter) {
     if (_.isUndefined(filter.meta) || _.isUndefined(filter.meta.negate)) return !reverse;
     return filter.meta && filter.meta.negate === reverse;
   };
@@ -40,7 +40,7 @@ const filterNegate = function (reverse) {
  * @param  {Object} filter - The filter to translate
  * @return {Object} the query version of that filter
  */
-const translateToQuery = function (filter) {
+const translateToQuery = function(filter) {
   if (!filter) return;
 
   if (filter.query) {
@@ -55,7 +55,7 @@ const translateToQuery = function (filter) {
  * @param {object} filter The filter to clean
  * @returns {object}
  */
-const cleanFilter = function (filter) {
+const cleanFilter = function(filter) {
   return _.omit(filter, ['meta', '$state']);
 };
 

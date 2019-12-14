@@ -86,7 +86,7 @@ describe('metric_vis - createMetricVisTypeDefinition', () => {
 
     const $link = $(el)
       .find('a[href]')
-      .filter(function () {
+      .filter(function() {
         return this.href.includes('ip.info');
       });
 

@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { connect } from 'react-redux';
 import { ImportEditor } from './view';
 import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
 import { INDEXING_STAGE } from '../../../reducers/ui';
 import { updateIndexingStage } from '../../../actions/ui_actions';
 import { getIndexingStage } from '../../../selectors/ui_selectors';
-
 
 function mapStateToProps(state = {}) {
   return {
@@ -22,13 +19,14 @@ function mapStateToProps(state = {}) {
 }
 
 const mapDispatchToProps = {
-  onIndexReady: indexReady => indexReady
-    ? updateIndexingStage(INDEXING_STAGE.READY)
-    : updateIndexingStage(null),
+  onIndexReady: indexReady =>
+    indexReady ? updateIndexingStage(INDEXING_STAGE.READY) : updateIndexingStage(null),
   importSuccessHandler: () => updateIndexingStage(INDEXING_STAGE.SUCCESS),
   importErrorHandler: () => updateIndexingStage(INDEXING_STAGE.ERROR),
 };
 
-const connectedFlyOut = connect(mapStateToProps, mapDispatchToProps)(ImportEditor);
+const connectedFlyOut = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ImportEditor);
 export { connectedFlyOut as ImportEditor };
-

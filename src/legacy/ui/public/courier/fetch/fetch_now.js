@@ -45,17 +45,18 @@ export function FetchNowProvider(Private, Promise) {
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
   function fetchNow(searchRequests) {
-    return fetchSearchResults(searchRequests.map(function (searchRequest) {
-      if (!searchRequest.started) {
-        return searchRequest;
-      }
+    return fetchSearchResults(
+      searchRequests.map(function(searchRequest) {
+        if (!searchRequest.started) {
+          return searchRequest;
+        }
 
-      return searchRequest.retry();
-    }))
-      .catch(error => {
-        // If any errors occur after the search requests have resolved, then we kill Kibana.
-        fatalError(error, 'Courier fetch');
-      });
+        return searchRequest.retry();
+      })
+    ).catch(error => {
+      // If any errors occur after the search requests have resolved, then we kill Kibana.
+      fatalError(error, 'Courier fetch');
+    });
   }
 
   function fetchSearchResults(searchRequests) {
@@ -71,25 +72,24 @@ export function FetchNowProvider(Private, Promise) {
 
     replaceAbortedRequests();
     return startRequests(searchRequests)
-      .then(function () {
+      .then(function() {
         replaceAbortedRequests();
-        return callClient(searchRequests)
-          .catch(() => {
-            // Silently swallow errors that result from search requests so the consumer can surface
-            // them as notifications instead of courier forcing fatal errors.
-          });
+        return callClient(searchRequests).catch(() => {
+          // Silently swallow errors that result from search requests so the consumer can surface
+          // them as notifications instead of courier forcing fatal errors.
+        });
       })
-      .then(function (responses) {
+      .then(function(responses) {
         replaceAbortedRequests();
         return callResponseHandlers(searchRequests, responses);
       })
-      .then(function (responses) {
+      .then(function(responses) {
         replaceAbortedRequests();
         return continueIncomplete(searchRequests, responses, fetchSearchResults);
       })
-      .then(function (responses) {
+      .then(function(responses) {
         replaceAbortedRequests();
-        return responses.map(function (resp) {
+        return responses.map(function(resp) {
           switch (resp) {
             case ABORTED:
               return null;
@@ -107,16 +107,15 @@ export function FetchNowProvider(Private, Promise) {
   }
 
   function startRequests(searchRequests) {
-    return Promise.map(searchRequests, function (searchRequest) {
+    return Promise.map(searchRequests, function(searchRequest) {
       if (searchRequest === ABORTED) {
         return searchRequest;
       }
 
-      return new Promise(function (resolve) {
+      return new Promise(function(resolve) {
         const action = searchRequest.started ? searchRequest.continue : searchRequest.start;
         resolve(action.call(searchRequest));
-      })
-        .catch(err => searchRequest.handleFailure(err));
+      }).catch(err => searchRequest.handleFailure(err));
     });
   }
 

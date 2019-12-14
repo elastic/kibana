@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const getStartBasicPath = (acknowledge) => `/_license/start_basic${ acknowledge ? '?acknowledge=true' : ''}`;
-
+const getStartBasicPath = acknowledge =>
+  `/_license/start_basic${acknowledge ? '?acknowledge=true' : ''}`;
 
 export async function startBasic(req, xpackInfo) {
   const { acknowledge } = req.query;
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
   const options = {
     method: 'POST',
-    path: getStartBasicPath(acknowledge)
+    path: getStartBasicPath(acknowledge),
   };
   try {
     const response = await callWithRequest(req, 'transport.request', options);

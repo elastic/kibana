@@ -8,24 +8,26 @@ import { serializeThresholdWatch } from './serialize_threshold_watch';
 
 describe('serializeThresholdWatch', () => {
   it('serializes with name', () => {
-    expect(serializeThresholdWatch({
-      name: 'test',
-      triggerIntervalSize: 10,
-      triggerIntervalUnit: 's',
-      index: 'myIndex',
-      timeWindowSize: 20,
-      timeWindowUnit: 's',
-      timeField: 'myTimeField',
-      aggType: 'myAggType',
-      aggField: 'myAggField',
-      termField: 'myTermField',
-      termSize: 30,
-      termOrder: 40,
-      thresholdComparator: 'between',
-      hasTermsAgg: true,
-      threshold: 50,
-      actions: [],
-    })).toEqual({
+    expect(
+      serializeThresholdWatch({
+        name: 'test',
+        triggerIntervalSize: 10,
+        triggerIntervalUnit: 's',
+        index: 'myIndex',
+        timeWindowSize: 20,
+        timeWindowUnit: 's',
+        timeField: 'myTimeField',
+        aggType: 'myAggType',
+        aggField: 'myAggField',
+        termField: 'myTermField',
+        termSize: 30,
+        termOrder: 40,
+        thresholdComparator: 'between',
+        hasTermsAgg: true,
+        threshold: 50,
+        actions: [],
+      })
+    ).toEqual({
       trigger: {
         schedule: {
           interval: '10s',
@@ -68,15 +70,14 @@ describe('serializeThresholdWatch', () => {
                 },
               },
             },
-            indices: [
-              'myIndex',
-            ],
+            indices: ['myIndex'],
           },
         },
       },
       condition: {
         script: {
-          source: 'ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i][\'metricAgg\'].value >= params.threshold[0] && arr[i][\'metricAgg\'].value <= params.threshold[1]) { return true; } } return false;',
+          source:
+            "ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i]['metricAgg'].value >= params.threshold[0] && arr[i]['metricAgg'].value <= params.threshold[1]) { return true; } } return false;",
           params: {
             threshold: 50,
           },
@@ -84,7 +85,8 @@ describe('serializeThresholdWatch', () => {
       },
       transform: {
         script: {
-          source: 'HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i][\'metricAgg\'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;',
+          source:
+            "HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i]['metricAgg'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;",
           params: {
             threshold: 50,
           },
@@ -115,23 +117,25 @@ describe('serializeThresholdWatch', () => {
   });
 
   it('serializes without name', () => {
-    expect(serializeThresholdWatch({
-      triggerIntervalSize: 10,
-      triggerIntervalUnit: 's',
-      index: 'myIndex',
-      timeWindowSize: 20,
-      timeWindowUnit: 's',
-      timeField: 'myTimeField',
-      aggType: 'myAggType',
-      aggField: 'myAggField',
-      termField: 'myTermField',
-      termSize: 30,
-      termOrder: 40,
-      thresholdComparator: 'between',
-      hasTermsAgg: true,
-      threshold: 50,
-      actions: [],
-    })).toEqual({
+    expect(
+      serializeThresholdWatch({
+        triggerIntervalSize: 10,
+        triggerIntervalUnit: 's',
+        index: 'myIndex',
+        timeWindowSize: 20,
+        timeWindowUnit: 's',
+        timeField: 'myTimeField',
+        aggType: 'myAggType',
+        aggField: 'myAggField',
+        termField: 'myTermField',
+        termSize: 30,
+        termOrder: 40,
+        thresholdComparator: 'between',
+        hasTermsAgg: true,
+        threshold: 50,
+        actions: [],
+      })
+    ).toEqual({
       trigger: {
         schedule: {
           interval: '10s',
@@ -174,15 +178,14 @@ describe('serializeThresholdWatch', () => {
                 },
               },
             },
-            indices: [
-              'myIndex',
-            ],
+            indices: ['myIndex'],
           },
         },
       },
       condition: {
         script: {
-          source: 'ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i][\'metricAgg\'].value >= params.threshold[0] && arr[i][\'metricAgg\'].value <= params.threshold[1]) { return true; } } return false;',
+          source:
+            "ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i]['metricAgg'].value >= params.threshold[0] && arr[i]['metricAgg'].value <= params.threshold[1]) { return true; } } return false;",
           params: {
             threshold: 50,
           },
@@ -190,7 +193,8 @@ describe('serializeThresholdWatch', () => {
       },
       transform: {
         script: {
-          source: 'HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i][\'metricAgg\'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;',
+          source:
+            "HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i]['metricAgg'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;",
           params: {
             threshold: 50,
           },
@@ -220,24 +224,26 @@ describe('serializeThresholdWatch', () => {
   });
 
   it('excludes metadata when includeMetadata is false', () => {
-    expect(serializeThresholdWatch({
-      triggerIntervalSize: 10,
-      triggerIntervalUnit: 's',
-      index: 'myIndex',
-      timeWindowSize: 20,
-      timeWindowUnit: 's',
-      timeField: 'myTimeField',
-      aggType: 'myAggType',
-      aggField: 'myAggField',
-      termField: 'myTermField',
-      termSize: 30,
-      termOrder: 40,
-      thresholdComparator: 'between',
-      hasTermsAgg: true,
-      threshold: 50,
-      actions: [],
-      includeMetadata: false,
-    })).toEqual({
+    expect(
+      serializeThresholdWatch({
+        triggerIntervalSize: 10,
+        triggerIntervalUnit: 's',
+        index: 'myIndex',
+        timeWindowSize: 20,
+        timeWindowUnit: 's',
+        timeField: 'myTimeField',
+        aggType: 'myAggType',
+        aggField: 'myAggField',
+        termField: 'myTermField',
+        termSize: 30,
+        termOrder: 40,
+        thresholdComparator: 'between',
+        hasTermsAgg: true,
+        threshold: 50,
+        actions: [],
+        includeMetadata: false,
+      })
+    ).toEqual({
       trigger: {
         schedule: {
           interval: '10s',
@@ -280,15 +286,14 @@ describe('serializeThresholdWatch', () => {
                 },
               },
             },
-            indices: [
-              'myIndex',
-            ],
+            indices: ['myIndex'],
           },
         },
       },
       condition: {
         script: {
-          source: 'ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i][\'metricAgg\'].value >= params.threshold[0] && arr[i][\'metricAgg\'].value <= params.threshold[1]) { return true; } } return false;',
+          source:
+            "ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; for (int i = 0; i < arr.length; i++) { if (arr[i]['metricAgg'].value >= params.threshold[0] && arr[i]['metricAgg'].value <= params.threshold[1]) { return true; } } return false;",
           params: {
             threshold: 50,
           },
@@ -296,7 +301,8 @@ describe('serializeThresholdWatch', () => {
       },
       transform: {
         script: {
-          source: 'HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i][\'metricAgg\'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;',
+          source:
+            "HashMap result = new HashMap(); ArrayList arr = ctx.payload.aggregations.bucketAgg.buckets; ArrayList filteredHits = new ArrayList(); for (int i = 0; i < arr.length; i++) { HashMap filteredHit = new HashMap(); filteredHit.key = arr[i].key; filteredHit.value = arr[i]['metricAgg'].value; if (filteredHit.value >= params.threshold[0] && filteredHit.value <= params.threshold[1]) { filteredHits.add(filteredHit); } } result.results = filteredHits; return result;",
           params: {
             threshold: 50,
           },

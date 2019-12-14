@@ -45,7 +45,9 @@ export function statusMixin(kbnServer, server, config) {
 
       // captures (performs transforms on) the latest event data and stashes
       // the metrics for status/stats API payload
-      metrics.capture(event).then(data => { kbnServer.metrics = data; });
+      metrics.capture(event).then(data => {
+        kbnServer.metrics = data;
+      });
     });
   });
   oppsy.start(config.get('ops.interval'));

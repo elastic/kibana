@@ -23,18 +23,19 @@ import { stdDeviationMetricAgg } from '../../metrics/std_deviation';
 import { VisProvider } from '../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-describe('AggTypeMetricStandardDeviationProvider class', function () {
-
+describe('AggTypeMetricStandardDeviationProvider class', function() {
   let Vis;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
-    Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  }));
+  beforeEach(
+    ngMock.inject(function(Private) {
+      Vis = Private(VisProvider);
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    })
+  );
 
-  it('uses the custom label if it is set', function () {
+  it('uses the custom label if it is set', function() {
     const vis = new Vis(indexPattern, {});
 
     // Grab the aggConfig off the vis (we don't actually use the vis for
@@ -42,7 +43,7 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
     const aggConfig = vis.aggs.aggs[0];
     aggConfig.params.customLabel = 'custom label';
     aggConfig.params.field = {
-      displayName: 'memory'
+      displayName: 'memory',
     };
 
     const responseAggs = stdDeviationMetricAgg.getResponseAggs(aggConfig);
@@ -53,14 +54,14 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
     expect(upperStdDevLabel).to.be('Upper custom label');
   });
 
-  it('uses the default labels if custom label is not set', function () {
+  it('uses the default labels if custom label is not set', function() {
     const vis = new Vis(indexPattern, {});
 
     // Grab the aggConfig off the vis (we don't actually use the vis for
     // anything else)
     const aggConfig = vis.aggs.aggs[0];
     aggConfig.params.field = {
-      displayName: 'memory'
+      displayName: 'memory',
     };
 
     const responseAggs = stdDeviationMetricAgg.getResponseAggs(aggConfig);
@@ -70,5 +71,4 @@ describe('AggTypeMetricStandardDeviationProvider class', function () {
     expect(lowerStdDevLabel).to.be('Lower Standard Deviation of memory');
     expect(upperStdDevLabel).to.be('Upper Standard Deviation of memory');
   });
-
 });

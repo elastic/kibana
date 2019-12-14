@@ -20,12 +20,11 @@
 import { uiModules } from '../modules';
 const module = uiModules.get('kibana');
 
-module.directive('cssTruncate', function () {
+module.directive('cssTruncate', function() {
   return {
     restrict: 'A',
     scope: {},
-    link: function ($scope, $elem, attrs) {
-
+    link: function($scope, $elem, attrs) {
       $elem.css({
         overflow: 'hidden',
         'white-space': 'nowrap',
@@ -35,11 +34,13 @@ module.directive('cssTruncate', function () {
 
       if (attrs.cssTruncateExpandable != null) {
         $scope.$watch(
-          function () { return $elem.html(); },
-          function () {
+          function() {
+            return $elem.html();
+          },
+          function() {
             if ($elem[0].offsetWidth < $elem[0].scrollWidth) {
-              $elem.css({ 'cursor': 'pointer' });
-              $elem.bind('click', function () {
+              $elem.css({ cursor: 'pointer' });
+              $elem.bind('click', function() {
                 $scope.toggle();
               });
             }
@@ -47,7 +48,7 @@ module.directive('cssTruncate', function () {
         );
       }
 
-      $scope.toggle = function () {
+      $scope.toggle = function() {
         if ($elem.css('white-space') !== 'normal') {
           $elem.css({ 'white-space': 'normal' });
         } else {
@@ -55,10 +56,10 @@ module.directive('cssTruncate', function () {
         }
       };
 
-      $scope.$on('$destroy', function () {
+      $scope.$on('$destroy', function() {
         $elem.unbind('click');
         $elem.unbind('mouseenter');
       });
-    }
+    },
   };
 });

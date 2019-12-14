@@ -60,7 +60,6 @@ const getSearchStrategyForSearchRequest = searchRequest => {
   return noOpSearchStrategy;
 };
 
-
 /**
  * Build a structure like this:
  *

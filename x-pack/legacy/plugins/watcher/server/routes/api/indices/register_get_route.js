@@ -8,53 +8,55 @@ import { reduce, size } from 'lodash';
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function getIndexNamesFromAliasesResponse(json) {
-  return reduce(json, (list, { aliases }, indexName) => {
-    list.push(indexName);
-    if (size(aliases) > 0) {
-      list.push(...Object.keys(aliases));
-    }
-    return list;
-  }, []);
+  return reduce(
+    json,
+    (list, { aliases }, indexName) => {
+      list.push(indexName);
+      if (size(aliases) > 0) {
+        list.push(...Object.keys(aliases));
+      }
+      return list;
+    },
+    []
+  );
 }
 
 function getIndices(callWithRequest, pattern, limit = 10) {
   return callWithRequest('indices.getAlias', {
     index: pattern,
-    ignore: [404]
-  })
-    .then(aliasResult => {
-      if (aliasResult.status !== 404) {
-        const indicesFromAliasResponse = getIndexNamesFromAliasesResponse(aliasResult);
-        return indicesFromAliasResponse.slice(0, limit);
+    ignore: [404],
+  }).then(aliasResult => {
+    if (aliasResult.status !== 404) {
+      const indicesFromAliasResponse = getIndexNamesFromAliasesResponse(aliasResult);
+      return indicesFromAliasResponse.slice(0, limit);
+    }
+
+    const params = {
+      index: pattern,
+      ignore: [404],
+      body: {
+        size: 0, // no hits
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: limit,
+            },
+          },
+        },
+      },
+    };
+
+    return callWithRequest('search', params).then(response => {
+      if (response.status === 404 || !response.aggregations) {
+        return [];
       }
-
-      const params = {
-        index: pattern,
-        ignore: [404],
-        body: {
-          size: 0, // no hits
-          aggs: {
-            indices: {
-              terms: {
-                field: '_index',
-                size: limit,
-              }
-            }
-          }
-        }
-      };
-
-      return callWithRequest('search', params)
-        .then(response => {
-          if (response.status === 404 || !response.aggregations) {
-            return [];
-          }
-          return response.aggregations.indices.buckets.map(bucket => bucket.key);
-        });
+      return response.aggregations.indices.buckets.map(bucket => bucket.key);
     });
+  });
 }
 
 export function registerGetRoute(server) {
@@ -64,7 +66,7 @@ export function registerGetRoute(server) {
   server.route({
     path: '/api/watcher/indices',
     method: 'POST',
-    handler: (request) => {
+    handler: request => {
       const callWithRequest = callWithRequestFactory(server, request);
       const { pattern } = request.payload;
 
@@ -83,7 +85,7 @@ export function registerGetRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

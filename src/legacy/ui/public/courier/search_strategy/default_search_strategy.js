@@ -23,9 +23,9 @@ import { SearchError } from './search_error';
 import { getSearchParams, getMSearchParams } from '../fetch/get_search_params';
 
 function getAllFetchParams(searchRequests, Promise) {
-  return Promise.map(searchRequests, (searchRequest) => {
+  return Promise.map(searchRequests, searchRequest => {
     return Promise.try(searchRequest.getFetchParams, void 0, searchRequest)
-      .then((fetchParams) => {
+      .then(fetchParams => {
         return (searchRequest.fetchParams = fetchParams);
       })
       .then(value => ({ resolved: value }))
@@ -63,7 +63,7 @@ export const defaultSearchStrategy = {
     return config.get('courier:batchSearches') ? msearch(params) : search(params);
   },
 
-  isViable: (indexPattern) => {
+  isViable: indexPattern => {
     if (!indexPattern) {
       return false;
     }
@@ -78,10 +78,11 @@ async function msearch({ searchRequests, es, Promise, serializeFetchParams, conf
   const allFetchParams = await getAllFetchParams(searchRequests, Promise);
 
   // Serialize the fetch params into a format suitable for the body of an ES query.
-  const {
-    serializedFetchParams,
-    failedSearchRequests,
-  } = await serializeAllFetchParams(allFetchParams, searchRequests, serializeFetchParams);
+  const { serializedFetchParams, failedSearchRequests } = await serializeAllFetchParams(
+    allFetchParams,
+    searchRequests,
+    serializeFetchParams
+  );
 
   if (serializedFetchParams.trim() === '') {
     return {
@@ -99,21 +100,23 @@ async function msearch({ searchRequests, es, Promise, serializeFetchParams, conf
     // Munge data into shape expected by consumer.
     searching: new Promise((resolve, reject) => {
       // Unwrap the responses object returned by the ES client.
-      searching.then(({ responses }) => {
-        resolve(responses);
-      }).catch(error => {
-        // Format ES client error as a SearchError.
-        const { statusCode, displayName, message, path } = error;
+      searching
+        .then(({ responses }) => {
+          resolve(responses);
+        })
+        .catch(error => {
+          // Format ES client error as a SearchError.
+          const { statusCode, displayName, message, path } = error;
 
-        const searchError = new SearchError({
-          status: statusCode,
-          title: displayName,
-          message,
-          path,
+          const searchError = new SearchError({
+            status: statusCode,
+            title: displayName,
+            message,
+            path,
+          });
+
+          reject(searchError);
         });
-
-        reject(searchError);
-      });
     }),
     abort: searching.abort,
     failedSearchRequests,
@@ -125,16 +128,20 @@ function search({ searchRequests, es, Promise, config, sessionId, esShardTimeout
   const abortController = new AbortController();
   const searchParams = getSearchParams(config, sessionId, esShardTimeout);
   const promises = searchRequests.map(async searchRequest => {
-    return searchRequest.getFetchParams()
-      .then(fetchParams => {
-        const { index, body } = searchRequest.fetchParams = fetchParams;
-        const promise = es.search({ index: index.title || index, body, ...searchParams });
-        abortController.signal.addEventListener('abort', promise.abort);
-        return promise;
-      }, error => {
-        searchRequest.handleFailure(error);
-        failedSearchRequests.push(searchRequest);
-      })
+    return searchRequest
+      .getFetchParams()
+      .then(
+        fetchParams => {
+          const { index, body } = (searchRequest.fetchParams = fetchParams);
+          const promise = es.search({ index: index.title || index, body, ...searchParams });
+          abortController.signal.addEventListener('abort', promise.abort);
+          return promise;
+        },
+        error => {
+          searchRequest.handleFailure(error);
+          failedSearchRequests.push(searchRequest);
+        }
+      )
       .catch(({ response }) => {
         // Copying the _msearch behavior where the errors for individual requests are returned
         // instead of thrown
@@ -144,7 +151,7 @@ function search({ searchRequests, es, Promise, config, sessionId, esShardTimeout
   return {
     searching: Promise.all(promises),
     abort: () => abortController.abort(),
-    failedSearchRequests
+    failedSearchRequests,
   };
 }
 

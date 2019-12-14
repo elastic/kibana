@@ -7,12 +7,12 @@
 import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', function () {
+  describe('Elasticsearch nodes listing', function() {
     // FF issue: https://github.com/elastic/kibana/issues/35551
     this.tags(['skipFirefox']);
 
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe('skipCloud', function () {
+      describe('skipCloud', function() {
         // TODO: https://github.com/elastic/stack-monitoring/issues/31
         this.tags(['skipCloud']);
 
@@ -77,7 +77,8 @@ export default function ({ getService, getPageObjects }) {
             },
             { name: 'whatever-03', status: 'Status: Offline' },
           ];
-          nodesAll.forEach((obj, node) => { // eslint-disable-line no-unused-vars
+          nodesAll.forEach((obj, node) => {
+            // eslint-disable-line no-unused-vars
             expect(nodesAll[node].name).to.be(tableData[node].name);
             expect(nodesAll[node].status).to.be(tableData[node].status);
             expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
@@ -93,8 +94,13 @@ export default function ({ getService, getPageObjects }) {
           await nodesList.clickCpuCol();
 
           const nodesAll = await nodesList.getNodesAll();
-          const tableData = [{ cpu: '2% \n3% max\n0% min' }, { cpu: '0% \n3% max\n0% min' }, { cpu: undefined }];
-          nodesAll.forEach((obj, node) => { // eslint-disable-line no-unused-vars
+          const tableData = [
+            { cpu: '2% \n3% max\n0% min' },
+            { cpu: '0% \n3% max\n0% min' },
+            { cpu: undefined },
+          ];
+          nodesAll.forEach((obj, node) => {
+            // eslint-disable-line no-unused-vars
             expect(nodesAll[node].cpu).to.be(tableData[node].cpu);
           });
         });
@@ -109,7 +115,8 @@ export default function ({ getService, getPageObjects }) {
             { load: '3.28 \n3.73 max\n2.29 min' },
             { load: undefined },
           ];
-          nodesAll.forEach((obj, node) => { // eslint-disable-line no-unused-vars
+          nodesAll.forEach((obj, node) => {
+            // eslint-disable-line no-unused-vars
             expect(nodesAll[node].load).to.be(tableData[node].load);
           });
         });
@@ -125,7 +132,8 @@ export default function ({ getService, getPageObjects }) {
           { name: 'whatever-02' },
           { name: 'whatever-03' },
         ];
-        nodesAll.forEach((obj, node) => { // eslint-disable-line no-unused-vars
+        nodesAll.forEach((obj, node) => {
+          // eslint-disable-line no-unused-vars
           expect(nodesAll[node].name).to.be(tableData[node].name);
         });
       });
@@ -140,7 +148,8 @@ export default function ({ getService, getPageObjects }) {
           { status: 'Status: Online' },
           { status: 'Status: Offline' },
         ];
-        nodesAll.forEach((obj, node) => { // eslint-disable-line no-unused-vars
+        nodesAll.forEach((obj, node) => {
+          // eslint-disable-line no-unused-vars
           expect(nodesAll[node].status).to.be(tableData[node].status);
         });
       });
@@ -155,7 +164,8 @@ export default function ({ getService, getPageObjects }) {
           { memory: '25% \n49% max\n25% min' },
           { memory: undefined },
         ];
-        nodesAll.forEach((obj, node) => { // eslint-disable-line no-unused-vars
+        nodesAll.forEach((obj, node) => {
+          // eslint-disable-line no-unused-vars
           expect(nodesAll[node].memory).to.be(tableData[node].memory);
         });
       });
@@ -170,7 +180,8 @@ export default function ({ getService, getPageObjects }) {
           { disk: '173.9 GB \n173.9 GB max\n173.9 GB min' },
           { disk: undefined },
         ];
-        nodesAll.forEach((obj, node) => { // eslint-disable-line no-unused-vars
+        nodesAll.forEach((obj, node) => {
+          // eslint-disable-line no-unused-vars
           expect(nodesAll[node].disk).to.be(tableData[node].disk);
         });
       });
@@ -180,12 +191,9 @@ export default function ({ getService, getPageObjects }) {
         await nodesList.clickShardsCol();
 
         const nodesAll = await nodesList.getNodesAll();
-        const tableData = [
-          { shards: '38' },
-          { shards: '38' },
-          { shards: undefined },
-        ];
-        nodesAll.forEach((obj, node) => { // eslint-disable-line no-unused-vars
+        const tableData = [{ shards: '38' }, { shards: '38' }, { shards: undefined }];
+        nodesAll.forEach((obj, node) => {
+          // eslint-disable-line no-unused-vars
           expect(nodesAll[node].shards).to.be(tableData[node].shards);
         });
       });
@@ -236,5 +244,4 @@ export default function ({ getService, getPageObjects }) {
       });
     });
   });
-
 }

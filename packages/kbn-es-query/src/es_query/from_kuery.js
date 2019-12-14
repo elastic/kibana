@@ -17,13 +17,14 @@
  * under the License.
  */
 
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes,
-} from '../kuery';
+import { fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
 
-export function buildQueryFromKuery(indexPattern, queries = [], allowLeadingWildcards, dateFormatTZ = null) {
+export function buildQueryFromKuery(
+  indexPattern,
+  queries = [],
+  allowLeadingWildcards,
+  dateFormatTZ = null
+) {
   const queryASTs = queries.map(query => {
     return fromKueryExpression(query.query, { allowLeadingWildcards });
   });
@@ -38,6 +39,6 @@ function buildQuery(indexPattern, queryASTs, config = null) {
     filter: [],
     should: [],
     must_not: [],
-    ...kueryQuery.bool
+    ...kueryQuery.bool,
   };
 }

@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Produces a concise textual description of how the
  * actual value compares to the typical value for an anomaly.
@@ -36,9 +34,12 @@ export function getMetricChangeDescription(actualProp, typicalProp) {
       // e.g. 'Unusual location' if using a lat_long detector.
       return {
         iconType: 'alert',
-        message: i18n.translate('xpack.ml.formatters.metricChangeDescription.unusualValuesDescription', {
-          defaultMessage: 'Unusual values',
-        }),
+        message: i18n.translate(
+          'xpack.ml.formatters.metricChangeDescription.unusualValuesDescription',
+          {
+            defaultMessage: 'Unusual values',
+          }
+        ),
       };
     }
   }
@@ -51,9 +52,12 @@ export function getMetricChangeDescription(actualProp, typicalProp) {
 
   if (actual === typical) {
     // Very unlikely, but just in case.
-    message = i18n.translate('xpack.ml.formatters.metricChangeDescription.actualSameAsTypicalDescription', {
-      defaultMessage: 'actual same as typical',
-    });
+    message = i18n.translate(
+      'xpack.ml.formatters.metricChangeDescription.actualSameAsTypicalDescription',
+      {
+        defaultMessage: 'actual same as typical',
+      }
+    );
   } else {
     // For actual / typical gives output of the form:
     // 4 / 2        2x higher
@@ -69,45 +73,76 @@ export function getMetricChangeDescription(actualProp, typicalProp) {
       const factor = isHigher ? actual / typical : typical / actual;
       if (factor > 1.5) {
         if (factor <= 100) {
-          message = isHigher ? i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThanOneAndHalfxHigherDescription', {
-            defaultMessage: '{factor}x higher',
-            values: { factor: Math.round(factor) },
-          }) : i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThanOneAndHalfxLowerDescription', {
-            defaultMessage: '{factor}x lower',
-            values: { factor: Math.round(factor) },
-          });
+          message = isHigher
+            ? i18n.translate(
+                'xpack.ml.formatters.metricChangeDescription.moreThanOneAndHalfxHigherDescription',
+                {
+                  defaultMessage: '{factor}x higher',
+                  values: { factor: Math.round(factor) },
+                }
+              )
+            : i18n.translate(
+                'xpack.ml.formatters.metricChangeDescription.moreThanOneAndHalfxLowerDescription',
+                {
+                  defaultMessage: '{factor}x lower',
+                  values: { factor: Math.round(factor) },
+                }
+              );
         } else {
-          message = isHigher ? i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThan100xHigherDescription', {
-            defaultMessage: 'More than 100x higher',
-          }) : i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThan100xLowerDescription', {
-            defaultMessage: 'More than 100x lower',
-          });
+          message = isHigher
+            ? i18n.translate(
+                'xpack.ml.formatters.metricChangeDescription.moreThan100xHigherDescription',
+                {
+                  defaultMessage: 'More than 100x higher',
+                }
+              )
+            : i18n.translate(
+                'xpack.ml.formatters.metricChangeDescription.moreThan100xLowerDescription',
+                {
+                  defaultMessage: 'More than 100x lower',
+                }
+              );
         }
       } else if (factor >= 1.05) {
-        message = isHigher ? i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThanOneAndFiveHundredthsxHigherDescription', {
-          defaultMessage: '{factor}x higher',
-          values: { factor: factor.toPrecision(2) },
-        }) : i18n.translate('xpack.ml.formatters.metricChangeDescription.moreThanOneAndFiveHundredthsxLowerDescription', {
-          defaultMessage: '{factor}x lower',
-          values: { factor: factor.toPrecision(2) },
-        });
+        message = isHigher
+          ? i18n.translate(
+              'xpack.ml.formatters.metricChangeDescription.moreThanOneAndFiveHundredthsxHigherDescription',
+              {
+                defaultMessage: '{factor}x higher',
+                values: { factor: factor.toPrecision(2) },
+              }
+            )
+          : i18n.translate(
+              'xpack.ml.formatters.metricChangeDescription.moreThanOneAndFiveHundredthsxLowerDescription',
+              {
+                defaultMessage: '{factor}x lower',
+                values: { factor: factor.toPrecision(2) },
+              }
+            );
       } else {
-        message = isHigher ? i18n.translate('xpack.ml.formatters.metricChangeDescription.unusuallyHighDescription', {
-          defaultMessage: 'Unusually high',
-        }) : i18n.translate('xpack.ml.formatters.metricChangeDescription.unusuallyLowDescription', {
-          defaultMessage: 'Unusually low',
-        });
+        message = isHigher
+          ? i18n.translate('xpack.ml.formatters.metricChangeDescription.unusuallyHighDescription', {
+              defaultMessage: 'Unusually high',
+            })
+          : i18n.translate('xpack.ml.formatters.metricChangeDescription.unusuallyLowDescription', {
+              defaultMessage: 'Unusually low',
+            });
       }
-
     } else {
       if (actual === 0) {
-        message = i18n.translate('xpack.ml.formatters.metricChangeDescription.unexpectedZeroValueDescription', {
-          defaultMessage: 'Unexpected zero value',
-        });
+        message = i18n.translate(
+          'xpack.ml.formatters.metricChangeDescription.unexpectedZeroValueDescription',
+          {
+            defaultMessage: 'Unexpected zero value',
+          }
+        );
       } else {
-        message = i18n.translate('xpack.ml.formatters.metricChangeDescription.unexpectedNonZeroValueDescription', {
-          defaultMessage: 'Unexpected non-zero value',
-        });
+        message = i18n.translate(
+          'xpack.ml.formatters.metricChangeDescription.unexpectedNonZeroValueDescription',
+          {
+            defaultMessage: 'Unexpected non-zero value',
+          }
+        );
       }
     }
   }
@@ -116,13 +151,9 @@ export function getMetricChangeDescription(actualProp, typicalProp) {
 }
 
 // TODO - remove the filter once all uses of the metricChangeDescription Angular filter have been removed.
-module.filter('metricChangeDescription', function () {
-  return function (actual, typical) {
-
-    const {
-      iconType,
-      message
-    } = getMetricChangeDescription(actual, typical);
+module.filter('metricChangeDescription', function() {
+  return function(actual, typical) {
+    const { iconType, message } = getMetricChangeDescription(actual, typical);
 
     switch (iconType) {
       case 'sortUp':
@@ -136,4 +167,3 @@ module.filter('metricChangeDescription', function () {
     return message;
   };
 });
-

@@ -27,9 +27,9 @@ export function NormalizeSortRequestProvider(config) {
    * @param {query} query object
    * @returns {object}
    */
-  return function (sortObject, indexPattern) {
+  return function(sortObject, indexPattern) {
     // [].concat({}) -> [{}], [].concat([{}]) -> [{}]
-    return [].concat(sortObject).map(function (sortable) {
+    return [].concat(sortObject).map(function(sortable) {
       return normalize(sortable, indexPattern);
     });
   };
@@ -53,10 +53,10 @@ export function NormalizeSortRequestProvider(config) {
       sortValue = {
         script: {
           source: indexField.script,
-          lang: indexField.lang
+          lang: indexField.lang,
         },
         type: castSortType(indexField.type),
-        order: direction
+        order: direction,
       };
     } else {
       if (_.isString(sortValue)) {
@@ -80,7 +80,7 @@ function castSortType(type) {
     number: 'number',
     string: 'string',
     date: 'number',
-    boolean: 'string'
+    boolean: 'string',
   };
 
   const castedType = typeCastings[type];

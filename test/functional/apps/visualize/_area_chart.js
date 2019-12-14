@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const inspector = getService('inspector');
   const browser = getService('browser');
@@ -56,33 +56,63 @@ export default function ({ getService, getPageObjects }) {
 
     before(initAreaChart);
 
-    it('should save and load with special characters', async function () {
+    it('should save and load with special characters', async function() {
       const vizNamewithSpecialChars = vizName1 + '/?&=%';
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizNamewithSpecialChars);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
+        vizNamewithSpecialChars
+      );
     });
 
-    it('should save and load with non-ascii characters', async function () {
+    it('should save and load with non-ascii characters', async function() {
       const vizNamewithSpecialChars = `${vizName1} with Umlaut ä`;
-      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizNamewithSpecialChars);
+      await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(
+        vizNamewithSpecialChars
+      );
     });
 
-    it('should save and load', async function () {
+    it('should save and load', async function() {
       await PageObjects.visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
       await PageObjects.visualize.loadSavedVisualization(vizName1);
       await PageObjects.visualize.waitForVisualization();
     });
 
-    it('should have inspector enabled', async function () {
+    it('should have inspector enabled', async function() {
       await inspector.expectIsEnabled();
     });
 
-    it('should show correct chart', async function () {
-      const xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
-        '2015-09-22 00:00', '2015-09-23 00:00'
+    it('should show correct chart', async function() {
+      const xAxisLabels = [
+        '2015-09-20 00:00',
+        '2015-09-21 00:00',
+        '2015-09-22 00:00',
+        '2015-09-23 00:00',
       ];
       const yAxisLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'];
-      const expectedAreaChartData = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202,
-        683, 1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
+      const expectedAreaChartData = [
+        37,
+        202,
+        740,
+        1437,
+        1371,
+        751,
+        188,
+        31,
+        42,
+        202,
+        683,
+        1361,
+        1415,
+        707,
+        177,
+        27,
+        32,
+        175,
+        707,
+        1408,
+        1355,
+        726,
+        201,
+        29,
       ];
 
       await retry.try(async function tryingForTime() {
@@ -99,7 +129,7 @@ export default function ({ getService, getPageObjects }) {
       expect(paths).to.eql(expectedAreaChartData);
     });
 
-    it('should show correct data', async function () {
+    it('should show correct data', async function() {
       const expectedTableData = [
         ['2015-09-20 00:00', '37'],
         ['2015-09-20 03:00', '202'],
@@ -124,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
         ['2015-09-22 12:00', '1,355'],
         ['2015-09-22 15:00', '726'],
         ['2015-09-22 18:00', '201'],
-        ['2015-09-22 21:00', '29']
+        ['2015-09-22 21:00', '29'],
       ];
 
       await inspector.open();
@@ -136,26 +166,26 @@ export default function ({ getService, getPageObjects }) {
     describe('axis scaling', () => {
       it.skip('does not scale by default', async () => {
         const expectedTableData = [
-          [ '2015-09-20 00:00', '6' ],
-          [ '2015-09-20 01:00', '9' ],
-          [ '2015-09-20 02:00', '22' ],
-          [ '2015-09-20 03:00', '31' ],
-          [ '2015-09-20 04:00', '52' ],
-          [ '2015-09-20 05:00', '119' ],
-          [ '2015-09-20 06:00', '181' ],
-          [ '2015-09-20 07:00', '218' ],
-          [ '2015-09-20 08:00', '341' ],
-          [ '2015-09-20 09:00', '440' ],
-          [ '2015-09-20 10:00', '480' ],
-          [ '2015-09-20 11:00', '517' ],
-          [ '2015-09-20 12:00', '522' ],
-          [ '2015-09-20 13:00', '446' ],
-          [ '2015-09-20 14:00', '403' ],
-          [ '2015-09-20 15:00', '321' ],
-          [ '2015-09-20 16:00', '258' ],
-          [ '2015-09-20 17:00', '172' ],
-          [ '2015-09-20 18:00', '95' ],
-          [ '2015-09-20 19:00', '55' ],
+          ['2015-09-20 00:00', '6'],
+          ['2015-09-20 01:00', '9'],
+          ['2015-09-20 02:00', '22'],
+          ['2015-09-20 03:00', '31'],
+          ['2015-09-20 04:00', '52'],
+          ['2015-09-20 05:00', '119'],
+          ['2015-09-20 06:00', '181'],
+          ['2015-09-20 07:00', '218'],
+          ['2015-09-20 08:00', '341'],
+          ['2015-09-20 09:00', '440'],
+          ['2015-09-20 10:00', '480'],
+          ['2015-09-20 11:00', '517'],
+          ['2015-09-20 12:00', '522'],
+          ['2015-09-20 13:00', '446'],
+          ['2015-09-20 14:00', '403'],
+          ['2015-09-20 15:00', '321'],
+          ['2015-09-20 16:00', '258'],
+          ['2015-09-20 17:00', '172'],
+          ['2015-09-20 18:00', '95'],
+          ['2015-09-20 19:00', '55'],
         ];
 
         await PageObjects.visualize.toggleOpenEditor(2);
@@ -168,26 +198,26 @@ export default function ({ getService, getPageObjects }) {
 
       it.skip('scales when enabled count agg', async () => {
         const expectedTableData = [
-          [ '2015-09-20 00:00', '0.002' ],
-          [ '2015-09-20 01:00', '0.003' ],
-          [ '2015-09-20 02:00', '0.006' ],
-          [ '2015-09-20 03:00', '0.009' ],
-          [ '2015-09-20 04:00', '0.014' ],
-          [ '2015-09-20 05:00', '0.033' ],
-          [ '2015-09-20 06:00', '0.05' ],
-          [ '2015-09-20 07:00', '0.061' ],
-          [ '2015-09-20 08:00', '0.095' ],
-          [ '2015-09-20 09:00', '0.122' ],
-          [ '2015-09-20 10:00', '0.133' ],
-          [ '2015-09-20 11:00', '0.144' ],
-          [ '2015-09-20 12:00', '0.145' ],
-          [ '2015-09-20 13:00', '0.124' ],
-          [ '2015-09-20 14:00', '0.112' ],
-          [ '2015-09-20 15:00', '0.089' ],
-          [ '2015-09-20 16:00', '0.072' ],
-          [ '2015-09-20 17:00', '0.048' ],
-          [ '2015-09-20 18:00', '0.026' ],
-          [ '2015-09-20 19:00', '0.015' ],
+          ['2015-09-20 00:00', '0.002'],
+          ['2015-09-20 01:00', '0.003'],
+          ['2015-09-20 02:00', '0.006'],
+          ['2015-09-20 03:00', '0.009'],
+          ['2015-09-20 04:00', '0.014'],
+          ['2015-09-20 05:00', '0.033'],
+          ['2015-09-20 06:00', '0.05'],
+          ['2015-09-20 07:00', '0.061'],
+          ['2015-09-20 08:00', '0.095'],
+          ['2015-09-20 09:00', '0.122'],
+          ['2015-09-20 10:00', '0.133'],
+          ['2015-09-20 11:00', '0.144'],
+          ['2015-09-20 12:00', '0.145'],
+          ['2015-09-20 13:00', '0.124'],
+          ['2015-09-20 14:00', '0.112'],
+          ['2015-09-20 15:00', '0.089'],
+          ['2015-09-20 16:00', '0.072'],
+          ['2015-09-20 17:00', '0.048'],
+          ['2015-09-20 18:00', '0.026'],
+          ['2015-09-20 19:00', '0.015'],
         ];
 
         await PageObjects.visualize.toggleAdvancedParams('2');
@@ -200,26 +230,26 @@ export default function ({ getService, getPageObjects }) {
 
       it.skip('does not scale top hit agg', async () => {
         const expectedTableData = [
-          [ '2015-09-20 00:00', '6', '9.035KB' ],
-          [ '2015-09-20 01:00', '9', '5.854KB' ],
-          [ '2015-09-20 02:00', '22', '4.588KB' ],
-          [ '2015-09-20 03:00', '31', '8.349KB' ],
-          [ '2015-09-20 04:00', '52', '2.637KB' ],
-          [ '2015-09-20 05:00', '119', '1.712KB' ],
-          [ '2015-09-20 06:00', '181', '9.157KB' ],
-          [ '2015-09-20 07:00', '218', '8.192KB' ],
-          [ '2015-09-20 08:00', '341', '12.384KB' ],
-          [ '2015-09-20 09:00', '440', '4.482KB' ],
-          [ '2015-09-20 10:00', '480', '9.449KB' ],
-          [ '2015-09-20 11:00', '517', '213B' ],
-          [ '2015-09-20 12:00', '522', '638B' ],
-          [ '2015-09-20 13:00', '446', '7.421KB' ],
-          [ '2015-09-20 14:00', '403', '4.854KB' ],
-          [ '2015-09-20 15:00', '321', '4.132KB' ],
-          [ '2015-09-20 16:00', '258', '601B' ],
-          [ '2015-09-20 17:00', '172', '4.239KB' ],
-          [ '2015-09-20 18:00', '95', '6.272KB' ],
-          [ '2015-09-20 19:00', '55', '2.053KB' ]
+          ['2015-09-20 00:00', '6', '9.035KB'],
+          ['2015-09-20 01:00', '9', '5.854KB'],
+          ['2015-09-20 02:00', '22', '4.588KB'],
+          ['2015-09-20 03:00', '31', '8.349KB'],
+          ['2015-09-20 04:00', '52', '2.637KB'],
+          ['2015-09-20 05:00', '119', '1.712KB'],
+          ['2015-09-20 06:00', '181', '9.157KB'],
+          ['2015-09-20 07:00', '218', '8.192KB'],
+          ['2015-09-20 08:00', '341', '12.384KB'],
+          ['2015-09-20 09:00', '440', '4.482KB'],
+          ['2015-09-20 10:00', '480', '9.449KB'],
+          ['2015-09-20 11:00', '517', '213B'],
+          ['2015-09-20 12:00', '522', '638B'],
+          ['2015-09-20 13:00', '446', '7.421KB'],
+          ['2015-09-20 14:00', '403', '4.854KB'],
+          ['2015-09-20 15:00', '321', '4.132KB'],
+          ['2015-09-20 16:00', '258', '601B'],
+          ['2015-09-20 17:00', '172', '4.239KB'],
+          ['2015-09-20 18:00', '95', '6.272KB'],
+          ['2015-09-20 19:00', '55', '2.053KB'],
         ];
 
         await PageObjects.visualize.clickBucket('Y-axis', 'metrics');
@@ -236,7 +266,10 @@ export default function ({ getService, getPageObjects }) {
     describe('embedded mode', () => {
       it('should hide side editor if embed is set to true in url', async () => {
         const url = await browser.getCurrentUrl();
-        const embedUrl = url.split('/visualize/').pop().replace('?_g=', '?embed=true&_g=');
+        const embedUrl = url
+          .split('/visualize/')
+          .pop()
+          .replace('?_g=', '?embed=true&_g=');
         await PageObjects.common.navigateToUrl('visualize', embedUrl);
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
@@ -245,7 +278,10 @@ export default function ({ getService, getPageObjects }) {
 
       after(async () => {
         const url = await browser.getCurrentUrl();
-        const embedUrl = url.split('/visualize/').pop().replace('?embed=true&', '?');
+        const embedUrl = url
+          .split('/visualize/')
+          .pop()
+          .replace('?embed=true&', '?');
         await PageObjects.common.navigateToUrl('visualize', embedUrl);
       });
     });
@@ -263,8 +299,25 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
-          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
-          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+          '2',
+          '3',
+          '5',
+          '7',
+          '10',
+          '20',
+          '30',
+          '50',
+          '70',
+          '100',
+          '200',
+          '300',
+          '500',
+          '700',
+          '1,000',
+          '2,000',
+          '3,000',
+          '5,000',
+          '7,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -274,8 +327,25 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
-          '2', '3', '5', '7', '10', '20', '30', '50', '70', '100', '200',
-          '300', '500', '700', '1,000', '2,000', '3,000', '5,000', '7,000',
+          '2',
+          '3',
+          '5',
+          '7',
+          '10',
+          '20',
+          '30',
+          '50',
+          '70',
+          '100',
+          '200',
+          '300',
+          '500',
+          '700',
+          '1,000',
+          '2,000',
+          '3,000',
+          '5,000',
+          '7,000',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -286,7 +356,15 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
         const expectedLabels = [
-          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+          '0',
+          '200',
+          '400',
+          '600',
+          '800',
+          '1,000',
+          '1,200',
+          '1,400',
+          '1,600',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -295,9 +373,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
-        const expectedLabels = [
-          '200', '400', '600', '800', '1,000', '1,200', '1,400',
-        ];
+        const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -308,7 +384,15 @@ export default function ({ getService, getPageObjects }) {
         const labels = await PageObjects.visualize.getYAxisLabels();
         log.debug(labels);
         const expectedLabels = [
-          '0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600',
+          '0',
+          '200',
+          '400',
+          '600',
+          '800',
+          '1,000',
+          '1,200',
+          '1,400',
+          '1,600',
         ];
         expect(labels).to.eql(expectedLabels);
       });
@@ -317,9 +401,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visualize.clickGo();
         const labels = await PageObjects.visualize.getYAxisLabels();
-        const expectedLabels = [
-          '200', '400', '600', '800', '1,000', '1,200', '1,400',
-        ];
+        const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
         expect(labels).to.eql(expectedLabels);
       });
     });

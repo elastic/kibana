@@ -25,9 +25,12 @@ import { OptionedParamType } from '../../param_types/optioned';
 import { createLegacyClass } from '../../../utils/legacy_class';
 
 function ParamClassStub(parent, body) {
-  const stub = sinon.spy(body || function () {
-    stub.Super && stub.Super.call(this);
-  });
+  const stub = sinon.spy(
+    body ||
+      function() {
+        stub.Super && stub.Super.call(this);
+      }
+  );
   if (parent) createLegacyClass(stub).inherits(parent);
   return stub;
 }
@@ -50,18 +53,12 @@ function ParamClassStub(parent, body) {
 export default function stubParamClasses(Private) {
   const BaseAggParam = Private.stub(
     BaseParamType,
-    new ParamClassStub(null, function (config) {
+    new ParamClassStub(null, function(config) {
       _.assign(this, config);
     })
   );
 
-  Private.stub(
-    FieldParamType,
-    new ParamClassStub(BaseAggParam)
-  );
+  Private.stub(FieldParamType, new ParamClassStub(BaseAggParam));
 
-  Private.stub(
-    OptionedParamType,
-    new ParamClassStub(BaseAggParam)
-  );
+  Private.stub(OptionedParamType, new ParamClassStub(BaseAggParam));
 }

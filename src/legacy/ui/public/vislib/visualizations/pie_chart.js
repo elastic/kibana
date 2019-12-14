@@ -29,7 +29,7 @@ const defaults = {
   isDonut: false,
   showTooltip: true,
   color: undefined,
-  fillColor: undefined
+  fillColor: undefined,
 };
 /**
  * Pie Chart Visualization
@@ -49,13 +49,12 @@ export class PieChart extends Chart {
     this._attr = _.defaults(handler.visConfig.get('chart', {}), defaults);
   }
 
-
   /**
    * Checks whether pie slices have all zero values.
    * If so, an error is thrown.
    */
   _validatePieData(charts) {
-    const isAllZeros = charts.every((chart) => {
+    const isAllZeros = charts.every(chart => {
       return chart.slices.children.length === 0;
     });
 
@@ -88,11 +87,13 @@ export class PieChart extends Chart {
       const children = parent.children;
       const parentPercent = parent.percentOfParent;
 
-      const sum = parent.sumOfChildren = Math.abs(children.reduce(function (sum, child) {
-        return sum + Math.abs(child.size);
-      }, 0));
+      const sum = (parent.sumOfChildren = Math.abs(
+        children.reduce(function(sum, child) {
+          return sum + Math.abs(child.size);
+        }, 0)
+      ));
 
-      children.forEach(function (child) {
+      children.forEach(function(child) {
         child.percentOfGroup = Math.abs(child.size) / sum;
         child.percentOfParent = child.percentOfGroup;
 
@@ -104,7 +105,7 @@ export class PieChart extends Chart {
           assignPercentages(child);
         }
       });
-    }(slices));
+    })(slices);
   }
 
   /**
@@ -134,41 +135,44 @@ export class PieChart extends Chart {
     const truncateLabelLength = self._attr.labels.truncate;
     const showOnlyOnLastLevel = self._attr.labels.last_level;
 
-    const partition = d3.layout.partition()
+    const partition = d3.layout
+      .partition()
       .sort(null)
-      .value(function (d) {
+      .value(function(d) {
         return d.percentOfParent * 100;
       });
 
     const x = d3.scale.linear().range([0, 2 * Math.PI]);
     const y = d3.scale.sqrt().range([0, showLabels ? radius * 0.7 : radius]);
 
-    const startAngle = function (d) {
+    const startAngle = function(d) {
       return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
     };
 
-    const endAngle = function (d) {
+    const endAngle = function(d) {
       if (d.dx < 1e-8) return x(d.x);
       return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
     };
 
-    const arc = d3.svg.arc()
+    const arc = d3.svg
+      .arc()
       .startAngle(startAngle)
       .endAngle(endAngle)
-      .innerRadius(function (d) {
+      .innerRadius(function(d) {
         // option for a single layer, i.e pie chart
         if (d.depth === 1 && !isDonut) {
-        // return no inner radius
+          // return no inner radius
           return 0;
         }
 
         return Math.max(0, y(d.y));
       })
-      .outerRadius(function (d) {
+      .outerRadius(function(d) {
         return Math.max(0, y(d.y + d.dy));
       });
 
-    const outerArc = d3.svg.arc()
+    const outerArc = d3.svg
+      .arc()
       .startAngle(startAngle)
       .endAngle(endAngle)
       .innerRadius(radius * 0.8)
@@ -182,20 +186,20 @@ export class PieChart extends Chart {
       .enter()
       .append('path')
       .attr('d', arc)
-      .attr('class', function (d) {
+      .attr('class', function(d) {
         if (d.depth === 0) {
           return;
         }
         if (d.depth > maxDepth) maxDepth = d.depth;
         return 'slice';
       })
-      .attr('data-test-subj', function (d) {
+      .attr('data-test-subj', function(d) {
         if (d.name) {
           return `pieSlice-${d.name.split(' ').join('-')}`;
         }
       })
       .call(self._addIdentifier, 'name')
-      .style('fill', function (d) {
+      .style('fill', function(d) {
         if (d.depth === 0) {
           return 'none';
         }
@@ -213,21 +217,25 @@ export class PieChart extends Chart {
       const svgParentNode = svg.node().parentNode.parentNode;
       const svgBBox = {
         width: svgParentNode.clientWidth,
-        height: svgParentNode.clientHeight
+        height: svgParentNode.clientHeight,
       };
 
-      const labelLayout = d3.geom.quadtree()
-        .extent([[-svgBBox.width, -svgBBox.height], [svgBBox.width, svgBBox.height] ])
-        .x(function (d) { return d.position.x; })
-        .y(function (d) { return d.position.y; })
-        ([]);
+      const labelLayout = d3.geom
+        .quadtree()
+        .extent([[-svgBBox.width, -svgBBox.height], [svgBBox.width, svgBBox.height]])
+        .x(function(d) {
+          return d.position.x;
+        })
+        .y(function(d) {
+          return d.position.y;
+        })([]);
 
       labelGroups
         .enter()
         .append('g')
         .attr('class', 'label')
         .append('text')
-        .text(function (d) {
+        .text(function(d) {
           if (d.depth === 0) {
             d3.select(this.parentNode).remove();
             return;
@@ -237,11 +245,13 @@ export class PieChart extends Chart {
             return `${d.name} (${value})`;
           }
           return d.name;
-        }).text(function () {
+        })
+        .text(function() {
           return truncateLabel(this, truncateLabelLength);
-        }).attr('text-anchor', function (d) {
+        })
+        .attr('text-anchor', function(d) {
           const midAngle = startAngle(d) + (endAngle(d) - startAngle(d)) / 2;
-          return (midAngle < Math.PI) ? 'start' : 'end';
+          return midAngle < Math.PI ? 'start' : 'end';
         })
         .attr('class', 'label-text')
         .each(function resolveConflicts(d) {
@@ -268,16 +278,18 @@ export class PieChart extends Chart {
           };
 
           const conflicts = [];
-          labelLayout.visit(function (node) {
+          labelLayout.visit(function(node) {
             if (!node.point) return;
             if (conflicts.length) return true;
 
             const point = node.point.position;
             const current = d.position;
             if (point) {
-              const horizontalConflict = (point.left < 0 && current.left < 0) || (point.left > 0 && current.left > 0);
-              const verticalConflict = (point.top >= current.top && point.top <= current.bottom) ||
-                                        (point.top <= current.top && point.bottom >= current.top);
+              const horizontalConflict =
+                (point.left < 0 && current.left < 0) || (point.left > 0 && current.left > 0);
+              const verticalConflict =
+                (point.top >= current.top && point.top <= current.bottom) ||
+                (point.top <= current.top && point.bottom >= current.top);
 
               if (horizontalConflict && verticalConflict) {
                 point.point = node.point;
@@ -295,13 +307,13 @@ export class PieChart extends Chart {
 
           labelLayout.add(d);
         })
-        .attr('x', function (d) {
+        .attr('x', function(d) {
           if (d.depth === 0 || !d.position) {
             return;
           }
           return d.position.x;
         })
-        .attr('y', function (d) {
+        .attr('y', function(d) {
           if (d.depth === 0 || !d.position) {
             return;
           }
@@ -310,7 +322,7 @@ export class PieChart extends Chart {
 
       labelGroups
         .append('polyline')
-        .attr('points', function (d) {
+        .attr('points', function(d) {
           if (d.depth === 0 || !d.position) {
             return;
           }
@@ -321,7 +333,6 @@ export class PieChart extends Chart {
           return [arc.centroid(d), pos1, pos2];
         })
         .attr('class', 'label-line');
-
     }
 
     if (isTooltip) {
@@ -349,8 +360,8 @@ export class PieChart extends Chart {
   draw() {
     const self = this;
 
-    return function (selection) {
-      selection.each(function (data) {
+    return function(selection) {
+      selection.each(function(data) {
         const slices = data.slices;
         const div = d3.select(this);
         const width = $(this).width();
@@ -361,7 +372,8 @@ export class PieChart extends Chart {
         self.convertToPercentage(slices);
         self._validateContainerSize(width, height);
 
-        const svg = div.append('svg')
+        const svg = div
+          .append('svg')
           .attr('width', width)
           .attr('height', height)
           .attr('focusable', 'false')
@@ -372,7 +384,7 @@ export class PieChart extends Chart {
         self.addPathEvents(path);
 
         self.events.emit('rendered', {
-          chart: data
+          chart: data,
         });
 
         return svg;

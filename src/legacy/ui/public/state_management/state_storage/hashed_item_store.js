@@ -73,7 +73,6 @@
 import { pull, sortBy } from 'lodash';
 
 export class HashedItemStore {
-
   /**
    * HashedItemStore uses objects called indexed items to refer to items that have been persisted
    * in sessionStorage. An indexed item is shaped {hash, touched}. The touched date is when the item
@@ -153,7 +152,7 @@ export class HashedItemStore {
     const indexedItem = this._getIndexedItem(hash) || { hash };
 
     // set/update the touched time to now so that it's the "newest" item in the index
-    indexedItem.touched =  Date.now();
+    indexedItem.touched = Date.now();
 
     // ensure that the item is last in the index
     pull(this._indexedItems, indexedItem);

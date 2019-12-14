@@ -19,12 +19,7 @@
 
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 import { getUiSettingsServiceForRequest } from './ui_settings_service_for_request';
-import {
-  deleteRoute,
-  getRoute,
-  setManyRoute,
-  setRoute,
-} from './routes';
+import { deleteRoute, getRoute, setManyRoute, setRoute } from './routes';
 
 export function uiSettingsMixin(kbnServer, server) {
   const { uiSettingDefaults = {} } = kbnServer.uiExports;

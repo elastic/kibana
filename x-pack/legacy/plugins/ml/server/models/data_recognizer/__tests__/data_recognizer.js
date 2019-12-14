@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
 import { DataRecognizer } from '../data_recognizer';
 
@@ -36,10 +34,8 @@ describe('ML - data recognizer', () => {
     expect(ids.join()).to.equal(moduleIds.join());
   });
 
-
   it('getModule - load a single module', async () => {
     const module = await dr.getModule(moduleIds[0]);
     expect(module.id).to.equal(moduleIds[0]);
   });
-
 });

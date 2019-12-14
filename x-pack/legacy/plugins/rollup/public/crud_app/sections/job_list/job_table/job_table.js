@@ -6,7 +6,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
@@ -33,86 +33,92 @@ import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common';
 import { trackUiMetric, METRIC_TYPE } from '../../../services';
 import { JobActionMenu, JobStatus } from '../../components';
 
-const COLUMNS = [{
-  name: i18n.translate('xpack.rollupJobs.jobTable.headers.nameHeader', {
-    defaultMessage: 'ID',
-  }),
-  fieldName: 'id',
-  isSortable: true,
-}, {
-  name: i18n.translate('xpack.rollupJobs.jobTable.headers.statusHeader', {
-    defaultMessage: 'Status',
-  }),
-  fieldName: 'status',
-  isSortable: true,
-  render: ({ status, rollupCron }) => {
-    return (
-      <EuiToolTip placement="top" content={`Cron: ${rollupCron}`}>
-        <JobStatus status={status} />
-      </EuiToolTip>
-    );
+const COLUMNS = [
+  {
+    name: i18n.translate('xpack.rollupJobs.jobTable.headers.nameHeader', {
+      defaultMessage: 'ID',
+    }),
+    fieldName: 'id',
+    isSortable: true,
   },
-}, {
-  name: i18n.translate('xpack.rollupJobs.jobTable.headers.indexPatternHeader', {
-    defaultMessage: 'Index pattern',
-  }),
-  truncateText: true,
-  fieldName: 'indexPattern',
-  isSortable: true,
-}, {
-  name: i18n.translate('xpack.rollupJobs.jobTable.headers.rollupIndexHeader', {
-    defaultMessage: 'Rollup index',
-  }),
-  truncateText: true,
-  fieldName: 'rollupIndex',
-  isSortable: true,
-}, {
-  name: i18n.translate('xpack.rollupJobs.jobTable.headers.delayHeader', {
-    defaultMessage: 'Delay',
-  }),
-  fieldName: 'rollupDelay',
-  isSortable: true,
-  render: ({ rollupDelay }) => rollupDelay || 'None',
-}, {
-  name: i18n.translate('xpack.rollupJobs.jobTable.headers.intervalHeader', {
-    defaultMessage: 'Interval',
-  }),
-  fieldName: 'dateHistogramInterval',
-  isSortable: true,
-}, {
-  name: i18n.translate('xpack.rollupJobs.jobTable.headers.groupsHeader', {
-    defaultMessage: 'Groups',
-  }),
-  fieldName: 'groups',
-  isSortable: false,
-  truncateText: true,
-  render: job => (
-    ['histogram', 'terms'].reduce((text, field) => {
-      if (job[field].length) {
-        return text
-          ? `${text}, ${field}`
-          : field.replace(/^\w/, char => char.toUpperCase());
+  {
+    name: i18n.translate('xpack.rollupJobs.jobTable.headers.statusHeader', {
+      defaultMessage: 'Status',
+    }),
+    fieldName: 'status',
+    isSortable: true,
+    render: ({ status, rollupCron }) => {
+      return (
+        <EuiToolTip placement="top" content={`Cron: ${rollupCron}`}>
+          <JobStatus status={status} />
+        </EuiToolTip>
+      );
+    },
+  },
+  {
+    name: i18n.translate('xpack.rollupJobs.jobTable.headers.indexPatternHeader', {
+      defaultMessage: 'Index pattern',
+    }),
+    truncateText: true,
+    fieldName: 'indexPattern',
+    isSortable: true,
+  },
+  {
+    name: i18n.translate('xpack.rollupJobs.jobTable.headers.rollupIndexHeader', {
+      defaultMessage: 'Rollup index',
+    }),
+    truncateText: true,
+    fieldName: 'rollupIndex',
+    isSortable: true,
+  },
+  {
+    name: i18n.translate('xpack.rollupJobs.jobTable.headers.delayHeader', {
+      defaultMessage: 'Delay',
+    }),
+    fieldName: 'rollupDelay',
+    isSortable: true,
+    render: ({ rollupDelay }) => rollupDelay || 'None',
+  },
+  {
+    name: i18n.translate('xpack.rollupJobs.jobTable.headers.intervalHeader', {
+      defaultMessage: 'Interval',
+    }),
+    fieldName: 'dateHistogramInterval',
+    isSortable: true,
+  },
+  {
+    name: i18n.translate('xpack.rollupJobs.jobTable.headers.groupsHeader', {
+      defaultMessage: 'Groups',
+    }),
+    fieldName: 'groups',
+    isSortable: false,
+    truncateText: true,
+    render: job =>
+      ['histogram', 'terms'].reduce((text, field) => {
+        if (job[field].length) {
+          return text ? `${text}, ${field}` : field.replace(/^\w/, char => char.toUpperCase());
+        }
+        return text;
+      }, ''),
+  },
+  {
+    name: i18n.translate('xpack.rollupJobs.jobTable.headers.metricsHeader', {
+      defaultMessage: 'Metrics',
+    }),
+    fieldName: 'metrics',
+    isSortable: false,
+    truncateText: true,
+    render: job => {
+      const { metrics } = job;
+
+      if (metrics.length) {
+        return metrics.map(metric => metric.name).join(', ');
       }
-      return text;
-    }, '')
-  )
-}, {
-  name: i18n.translate('xpack.rollupJobs.jobTable.headers.metricsHeader', {
-    defaultMessage: 'Metrics',
-  }),
-  fieldName: 'metrics',
-  isSortable: false,
-  truncateText: true,
-  render: job => {
-    const { metrics } = job;
 
-    if (metrics.length) {
-      return metrics.map(metric => metric.name).join(', ');
-    }
-
-    return '';
+      return '';
+    },
   },
-}];
+];
 
 export class JobTableUi extends Component {
   static propTypes = {
@@ -127,11 +133,11 @@ export class JobTableUi extends Component {
     pageChanged: PropTypes.func.isRequired,
     pageSizeChanged: PropTypes.func.isRequired,
     sortChanged: PropTypes.func.isRequired,
-  }
+  };
 
   static defaultProps = {
     jobs: [],
-  }
+  };
 
   static getDerivedStateFromProps(props, state) {
     // Deselct any jobs which no longer exist, e.g. they've been deleted.
@@ -194,7 +200,7 @@ export class JobTableUi extends Component {
     this.setState({ idToSelectedJobMap: {} });
   };
 
-  deselectItems = (itemIds) => {
+  deselectItems = itemIds => {
     this.setState(({ idToSelectedJobMap }) => {
       const newMap = { ...idToSelectedJobMap };
       itemIds.forEach(id => delete newMap[id]);
@@ -204,9 +210,7 @@ export class JobTableUi extends Component {
 
   areAllItemsSelected = () => {
     const { jobs } = this.props;
-    const indexOfUnselectedItem = jobs.findIndex(
-      job => !this.isItemSelected(job.id)
-    );
+    const indexOfUnselectedItem = jobs.findIndex(job => !this.isItemSelected(job.id));
     return indexOfUnselectedItem === -1;
   };
 
@@ -276,12 +280,7 @@ export class JobTableUi extends Component {
           data-test-subj={`jobTableCell-${fieldName}`}
           truncateText={truncateText}
         >
-          {truncateText
-            ? (
-              <EuiToolTip content={value}>
-                {content}
-              </EuiToolTip>
-            ) : content }
+          {truncateText ? <EuiToolTip content={value}>{content}</EuiToolTip> : content}
         </EuiTableRowCell>
       );
     });
@@ -294,10 +293,7 @@ export class JobTableUi extends Component {
       const { id } = job;
 
       return (
-        <EuiTableRow
-          key={`${id}-row`}
-          data-test-subj="jobTableRow"
-        >
+        <EuiTableRow key={`${id}-row`} data-test-subj="jobTableRow">
           <EuiTableRowCellCheckbox key={`checkbox-${id}`}>
             <EuiCheckbox
               type="inList"
@@ -331,13 +327,7 @@ export class JobTableUi extends Component {
   }
 
   render() {
-    const {
-      filterChanged,
-      filter,
-      jobs,
-      intl,
-      closeDetailPanel,
-    } = this.props;
+    const { filterChanged, filter, jobs, intl, closeDetailPanel } = this.props;
 
     const { idToSelectedJobMap } = this.state;
 
@@ -364,12 +354,10 @@ export class JobTableUi extends Component {
                 filterChanged(event.target.value);
               }}
               data-test-subj="jobTableFilterInput"
-              placeholder={
-                intl.formatMessage({
-                  id: 'xpack.rollupJobs.jobTable.searchInputPlaceholder',
-                  defaultMessage: 'Search',
-                })
-              }
+              placeholder={intl.formatMessage({
+                id: 'xpack.rollupJobs.jobTable.searchInputPlaceholder',
+                defaultMessage: 'Search',
+              })}
               aria-label="Search jobs"
             />
           </EuiFlexItem>
@@ -391,9 +379,7 @@ export class JobTableUi extends Component {
               {this.buildHeader()}
             </EuiTableHeader>
 
-            <EuiTableBody>
-              {this.buildRows()}
-            </EuiTableBody>
+            <EuiTableBody>{this.buildRows()}</EuiTableBody>
           </EuiTable>
         ) : (
           <EuiText>

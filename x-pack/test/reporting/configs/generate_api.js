@@ -9,7 +9,7 @@ import { format as formatUrl } from 'url';
 import { getApiIntegrationConfig } from '../../api_integration/config';
 import { getReportingApiConfig } from './api';
 
-export default async function ({ readConfigFile }) {
+export default async function({ readConfigFile }) {
   const servers = {
     kibana: kbnTestConfig.getUrlParts(),
     elasticsearch: esTestConfig.getUrlParts(),
@@ -17,7 +17,9 @@ export default async function ({ readConfigFile }) {
 
   const apiTestConfig = await getApiIntegrationConfig({ readConfigFile });
   const reportingApiConfig = await getReportingApiConfig({ readConfigFile });
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../../functional/config.js'));
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../../functional/config.js')
+  );
 
   return {
     ...reportingApiConfig,

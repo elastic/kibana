@@ -42,7 +42,7 @@ export const styleOptionShapes = [
   staticOrientationShape,
   dynamicOrientationShape,
   staticSizeShape,
-  dynamicSizeShape
+  dynamicSizeShape,
 ];
 
 export const rangeShape = PropTypes.shape({

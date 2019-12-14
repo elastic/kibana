@@ -31,5 +31,4 @@ import { createRoot } from '../../../../../test_utils/kbn_server';
   } finally {
     await root.shutdown();
   }
-
-}());
+})();

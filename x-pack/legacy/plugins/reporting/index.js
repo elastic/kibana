@@ -26,11 +26,11 @@ import { logConfiguration } from './log_configuration';
 import { getReportingUsageCollector } from './server/usage';
 import { i18n } from '@kbn/i18n';
 
-const kbToBase64Length = (kb) => {
+const kbToBase64Length = kb => {
   return Math.floor((kb * 1024 * 8) / 6);
 };
 
-export const reporting = (kibana) => {
+export const reporting = kibana => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     configPrefix: 'xpack.reporting',
@@ -42,9 +42,7 @@ export const reporting = (kibana) => {
         'plugins/reporting/share_context_menu/register_csv_reporting',
         'plugins/reporting/share_context_menu/register_reporting',
       ],
-      embeddableActions: [
-        'plugins/reporting/panel_actions/get_csv_panel_action',
-      ],
+      embeddableActions: ['plugins/reporting/panel_actions/get_csv_panel_action'],
       hacks: ['plugins/reporting/hacks/job_completion_notifier'],
       home: ['plugins/reporting/register_feature'],
       managementSections: ['plugins/reporting/views/management'],
@@ -58,66 +56,92 @@ export const reporting = (kibana) => {
       uiSettingDefaults: {
         [UI_SETTINGS_CUSTOM_PDF_LOGO]: {
           name: i18n.translate('xpack.reporting.pdfFooterImageLabel', {
-            defaultMessage: 'PDF footer image'
+            defaultMessage: 'PDF footer image',
           }),
           value: null,
           description: i18n.translate('xpack.reporting.pdfFooterImageDescription', {
-            defaultMessage: `Custom image to use in the PDF's footer`
+            defaultMessage: `Custom image to use in the PDF's footer`,
           }),
           type: 'image',
           options: {
             maxSize: {
               length: kbToBase64Length(200),
               description: '200 kB',
-            }
+            },
           },
           category: [PLUGIN_ID],
-        }
-      }
+        },
+      },
     },
 
-    config: async function (Joi) {
+    config: async function(Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         kibanaServer: Joi.object({
           protocol: Joi.string().valid(['http', 'https']),
           hostname: Joi.string(),
-          port: Joi.number().integer()
+          port: Joi.number().integer(),
         }).default(),
         queue: Joi.object({
           indexInterval: Joi.string().default('week'),
           pollEnabled: Joi.boolean().default(true),
-          pollInterval: Joi.number().integer().default(3000),
-          pollIntervalErrorMultiplier: Joi.number().integer().default(10),
-          timeout: Joi.number().integer().default(120000),
+          pollInterval: Joi.number()
+            .integer()
+            .default(3000),
+          pollIntervalErrorMultiplier: Joi.number()
+            .integer()
+            .default(10),
+          timeout: Joi.number()
+            .integer()
+            .default(120000),
         }).default(),
         capture: Joi.object({
           networkPolicy: Joi.object({
             enabled: Joi.boolean().default(true),
-            rules: Joi.array().items(Joi.object({
-              allow: Joi.boolean().required(),
-              protocol: Joi.string(),
-              host: Joi.string(),
-            })).default([
-              { allow: true, protocol: 'http:' },
-              { allow: true, protocol: 'https:' },
-              { allow: true, protocol: 'ws:' },
-              { allow: true, protocol: 'wss:' },
-              { allow: true, protocol: 'data:' },
-              { allow: false }, // Default action is to deny!
-            ]),
+            rules: Joi.array()
+              .items(
+                Joi.object({
+                  allow: Joi.boolean().required(),
+                  protocol: Joi.string(),
+                  host: Joi.string(),
+                })
+              )
+              .default([
+                { allow: true, protocol: 'http:' },
+                { allow: true, protocol: 'https:' },
+                { allow: true, protocol: 'ws:' },
+                { allow: true, protocol: 'wss:' },
+                { allow: true, protocol: 'data:' },
+                { allow: false }, // Default action is to deny!
+              ]),
           }).default(),
-          zoom: Joi.number().integer().default(2),
+          zoom: Joi.number()
+            .integer()
+            .default(2),
           viewport: Joi.object({
-            width: Joi.number().integer().default(1950),
-            height: Joi.number().integer().default(1200)
+            width: Joi.number()
+              .integer()
+              .default(1950),
+            height: Joi.number()
+              .integer()
+              .default(1200),
           }).default(),
-          timeout: Joi.number().integer().default(20000), //deprecated
-          loadDelay: Joi.number().integer().default(3000),
-          settleTime: Joi.number().integer().default(1000), //deprecated
-          concurrency: Joi.number().integer().default(appConfig.concurrency), //deprecated
+          timeout: Joi.number()
+            .integer()
+            .default(20000), //deprecated
+          loadDelay: Joi.number()
+            .integer()
+            .default(3000),
+          settleTime: Joi.number()
+            .integer()
+            .default(1000), //deprecated
+          concurrency: Joi.number()
+            .integer()
+            .default(appConfig.concurrency), //deprecated
           browser: Joi.object({
-            type: Joi.any().valid(CHROMIUM).default(CHROMIUM),
+            type: Joi.any()
+              .valid(CHROMIUM)
+              .default(CHROMIUM),
             autoDownload: Joi.boolean().when('$dist', {
               is: true,
               then: Joi.default(false),
@@ -127,33 +151,49 @@ export const reporting = (kibana) => {
               disableSandbox: Joi.boolean().default(await getDefaultChromiumSandboxDisabled()),
               proxy: Joi.object({
                 enabled: Joi.boolean().default(false),
-                server: Joi.string().uri({ scheme: ['http', 'https'] }).when('enabled', {
-                  is: Joi.valid(false),
-                  then: Joi.valid(null),
-                  else: Joi.required()
-                }),
-                bypass: Joi.array().items(Joi.string().regex(/^[^\s]+$/)).when('enabled', {
-                  is: Joi.valid(false),
-                  then: Joi.valid(null),
-                  else: Joi.default([])
-                })
+                server: Joi.string()
+                  .uri({ scheme: ['http', 'https'] })
+                  .when('enabled', {
+                    is: Joi.valid(false),
+                    then: Joi.valid(null),
+                    else: Joi.required(),
+                  }),
+                bypass: Joi.array()
+                  .items(Joi.string().regex(/^[^\s]+$/))
+                  .when('enabled', {
+                    is: Joi.valid(false),
+                    then: Joi.valid(null),
+                    else: Joi.default([]),
+                  }),
               }).default(),
-              maxScreenshotDimension: Joi.number().integer().default(1950)
-            }).default()
+              maxScreenshotDimension: Joi.number()
+                .integer()
+                .default(1950),
+            }).default(),
           }).default(),
-          maxAttempts: Joi.number().integer().greater(0).when('$dist', {
-            is: true,
-            then: Joi.default(3),
-            otherwise: Joi.default(1),
-          }).default()
+          maxAttempts: Joi.number()
+            .integer()
+            .greater(0)
+            .when('$dist', {
+              is: true,
+              then: Joi.default(3),
+              otherwise: Joi.default(1),
+            })
+            .default(),
         }).default(),
         csv: Joi.object({
           checkForFormulas: Joi.boolean().default(true),
           enablePanelActionDownload: Joi.boolean().default(true),
-          maxSizeBytes: Joi.number().integer().default(1024 * 1024 * 10), // bytes in a kB * kB in a mB * 10
+          maxSizeBytes: Joi.number()
+            .integer()
+            .default(1024 * 1024 * 10), // bytes in a kB * kB in a mB * 10
           scroll: Joi.object({
-            duration: Joi.string().regex(/^[0-9]+(d|h|m|s|ms|micros|nanos)$/, { name: 'DurationString' }).default('30s'),
-            size: Joi.number().integer().default(500)
+            duration: Joi.string()
+              .regex(/^[0-9]+(d|h|m|s|ms|micros|nanos)$/, { name: 'DurationString' })
+              .default('30s'),
+            size: Joi.number()
+              .integer()
+              .default(500),
           }).default(),
         }).default(),
         encryptionKey: Joi.when(Joi.ref('$dist'), {
@@ -162,23 +202,33 @@ export const reporting = (kibana) => {
           otherwise: Joi.string().default('a'.repeat(32)),
         }),
         roles: Joi.object({
-          allow: Joi.array().items(Joi.string()).default(['reporting_user']),
+          allow: Joi.array()
+            .items(Joi.string())
+            .default(['reporting_user']),
         }).default(),
         index: Joi.string().default('.reporting'),
         poll: Joi.object({
           jobCompletionNotifier: Joi.object({
-            interval: Joi.number().integer().default(10000),
-            intervalErrorMultiplier: Joi.number().integer().default(5)
+            interval: Joi.number()
+              .integer()
+              .default(10000),
+            intervalErrorMultiplier: Joi.number()
+              .integer()
+              .default(5),
           }).default(),
           jobsRefresh: Joi.object({
-            interval: Joi.number().integer().default(5000),
-            intervalErrorMultiplier: Joi.number().integer().default(5)
+            interval: Joi.number()
+              .integer()
+              .default(5000),
+            intervalErrorMultiplier: Joi.number()
+              .integer()
+              .default(5),
           }).default(),
         }).default(),
       }).default();
     },
 
-    init: async function (server) {
+    init: async function(server) {
       let isCollectorReady = false;
       const isReady = () => isCollectorReady;
       // Register a function with server to manage the collection of usage stats
@@ -214,7 +264,7 @@ export const reporting = (kibana) => {
       registerRoutes(server, logger);
     },
 
-    deprecations: function ({ unused }) {
+    deprecations: function({ unused }) {
       return [
         unused('capture.concurrency'),
         unused('capture.timeout'),

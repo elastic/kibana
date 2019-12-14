@@ -49,7 +49,6 @@ export const EMPTY_FILTER = '';
 // This component does not try to tackle these problems (yet) and is just feature matching the legacy component
 // TODO support server side sorting/paging once title and description are sortable on the server.
 class TableListViewUi extends React.Component {
-
   constructor(props) {
     super(props);
 
@@ -70,7 +69,6 @@ class TableListViewUi extends React.Component {
       filter: this.props.initialFilter,
       selectedIds: [],
     };
-
   }
 
   componentWillMount() {
@@ -86,7 +84,7 @@ class TableListViewUi extends React.Component {
     this.fetchItems();
   }
 
-  debouncedFetch = _.debounce(async (filter) => {
+  debouncedFetch = _.debounce(async filter => {
     const response = await this.props.findItems(filter);
 
     if (!this._isMounted) {
@@ -100,7 +98,7 @@ class TableListViewUi extends React.Component {
       this.setState({
         hasInitialFetchReturned: true,
         isFetchingItems: false,
-        items: (!filter ? _.sortBy(response.hits, 'title') : response.hits),
+        items: !filter ? _.sortBy(response.hits, 'title') : response.hits,
         totalItems: response.total,
         showLimitError: response.total > this.props.listingLimit,
       });
@@ -108,17 +106,20 @@ class TableListViewUi extends React.Component {
   }, 300);
 
   fetchItems = () => {
-    this.setState({
-      isFetchingItems: true,
-    }, this.debouncedFetch.bind(null, this.state.filter));
-  }
+    this.setState(
+      {
+        isFetchingItems: true,
+      },
+      this.debouncedFetch.bind(null, this.state.filter)
+    );
+  };
 
   deleteSelectedItems = async () => {
     if (this.state.isDeletingItems) {
       return;
     }
     this.setState({
-      isDeletingItems: true
+      isDeletingItems: true,
     });
     try {
       const itemsById = _.indexBy(this.state.items, 'id');
@@ -138,25 +139,28 @@ class TableListViewUi extends React.Component {
     this.fetchItems();
     this.setState({
       isDeletingItems: false,
-      selectedIds: []
+      selectedIds: [],
     });
     this.closeDeleteModal();
-  }
+  };
 
   closeDeleteModal = () => {
     this.setState({ showDeleteModal: false });
-  }
+  };
 
   openDeleteModal = () => {
     this.setState({ showDeleteModal: true });
-  }
+  };
 
   setFilter(filter) {
     // If the user is searching, we want to clear the sort order so that
     // results are ordered by Elasticsearch's relevance.
-    this.setState({
-      filter: filter.queryText,
-    }, this.fetchItems);
+    this.setState(
+      {
+        filter: filter.queryText,
+      },
+      this.fetchItems
+    );
   }
 
   hasNoItems() {
@@ -192,7 +196,10 @@ class TableListViewUi extends React.Component {
               defaultMessage="Delete {itemCount} {entityName}?"
               values={{
                 itemCount: this.state.selectedIds.length,
-                entityName: (this.state.selectedIds.length === 1) ? this.props.entityName : this.props.entityNamePlural
+                entityName:
+                  this.state.selectedIds.length === 1
+                    ? this.props.entityName
+                    : this.props.entityNamePlural,
               }}
             />
           }
@@ -243,11 +250,7 @@ class TableListViewUi extends React.Component {
                   entityNamePlural: this.props.entityNamePlural,
                   totalItems: this.state.totalItems,
                   listingLimitValue: this.props.listingLimit,
-                  listingLimitText: (
-                    <strong>
-                      listingLimit
-                    </strong>
-                  ),
+                  listingLimitText: <strong>listingLimit</strong>,
                   advancedSettingsLink: (
                     <EuiLink href="#/management/kibana/settings">
                       <FormattedMessage
@@ -255,7 +258,7 @@ class TableListViewUi extends React.Component {
                         defaultMessage="Advanced Settings"
                       />
                     </EuiLink>
-                  )
+                  ),
                 }}
               />
             </p>
@@ -268,9 +271,7 @@ class TableListViewUi extends React.Component {
 
   renderNoItemsMessage() {
     if (this.props.noItemsFragment) {
-      return (
-        this.props.noItemsFragment
-      );
+      return this.props.noItemsFragment;
     } else {
       return (
         <FormattedMessage
@@ -279,7 +280,6 @@ class TableListViewUi extends React.Component {
           values={{ entityNamePlural: this.props.entityNamePlural }}
         />
       );
-
     }
   }
 
@@ -306,7 +306,8 @@ class TableListViewUi extends React.Component {
           defaultMessage="Delete {itemCount} {entityName}"
           values={{
             itemCount: selection.length,
-            entityName: (selection.length === 1) ? this.props.entityName : this.props.entityNamePlural
+            entityName:
+              selection.length === 1 ? this.props.entityName : this.props.entityNamePlural,
           }}
         />
       </EuiButton>
@@ -314,25 +315,31 @@ class TableListViewUi extends React.Component {
   }
 
   renderTable() {
-    const selection = this.props.deleteItems ? {
-      onSelectionChange: (selection) => {
-        this.setState({
-          selectedIds: selection.map(item => { return item.id; })
-        });
-      }
-    } : null;
+    const selection = this.props.deleteItems
+      ? {
+          onSelectionChange: selection => {
+            this.setState({
+              selectedIds: selection.map(item => {
+                return item.id;
+              }),
+            });
+          },
+        }
+      : null;
 
-    const actions = [{
-      name: i18n.translate('kbn.table_list_view.listing.table.editActionName', {
-        defaultMessage: 'Edit'
-      }),
-      description: i18n.translate('kbn.table_list_view.listing.table.editActionDescription', {
-        defaultMessage: 'Edit'
-      }),
-      icon: 'pencil',
-      type: 'icon',
-      onClick: this.props.editItem
-    }];
+    const actions = [
+      {
+        name: i18n.translate('kbn.table_list_view.listing.table.editActionName', {
+          defaultMessage: 'Edit',
+        }),
+        description: i18n.translate('kbn.table_list_view.listing.table.editActionDescription', {
+          defaultMessage: 'Edit',
+        }),
+        icon: 'pencil',
+        type: 'icon',
+        onClick: this.props.editItem,
+      },
+    ];
 
     const search = {
       onChange: this.setFilter.bind(this),
@@ -347,10 +354,10 @@ class TableListViewUi extends React.Component {
     if (this.props.editItem) {
       columns.push({
         name: i18n.translate('kbn.table_list_view.listing.table.actionTitle', {
-          defaultMessage: 'Actions'
+          defaultMessage: 'Actions',
         }),
         width: '100px',
-        actions
+        actions,
       });
     }
 
@@ -412,14 +419,11 @@ class TableListViewUi extends React.Component {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
             <EuiTitle size="l">
-              <h1>
-                {this.props.tableListTitle}
-              </h1>
+              <h1>{this.props.tableListTitle}</h1>
             </EuiTitle>
           </EuiFlexItem>
 
           {createButton}
-
         </EuiFlexGroup>
 
         <EuiSpacer size="m" />
@@ -450,9 +454,7 @@ class TableListViewUi extends React.Component {
         className="itemListing__page"
         restrictWidth
       >
-        <EuiPageBody>
-          {this.renderPageContent()}
-        </EuiPageBody>
+        <EuiPageBody>{this.renderPageContent()}</EuiPageBody>
       </EuiPage>
     );
   }

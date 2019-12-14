@@ -44,8 +44,10 @@ export async function installSampleDataSet(id, sampleDataDefaultIndex) {
 export async function uninstallSampleDataSet(id, sampleDataDefaultIndex) {
   await kfetch({ method: 'DELETE', pathname: `${sampleDataUrl}/${id}` });
 
-  if (!chrome.getUiSettingsClient().isDefault('defaultIndex')
-    && chrome.getUiSettingsClient().get('defaultIndex') === sampleDataDefaultIndex) {
+  if (
+    !chrome.getUiSettingsClient().isDefault('defaultIndex') &&
+    chrome.getUiSettingsClient().get('defaultIndex') === sampleDataDefaultIndex
+  ) {
     chrome.getUiSettingsClient().set('defaultIndex', null);
   }
 

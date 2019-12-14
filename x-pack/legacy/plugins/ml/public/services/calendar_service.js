@@ -4,16 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { ml } from 'plugins/ml/services/ml_api_service';
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar';
-
-
 
 const msgs = mlMessageBarService;
 
@@ -29,21 +25,21 @@ class CalendarService {
   loadCalendars(jobs) {
     return new Promise((resolve, reject) => {
       let calendars = [];
-      jobs.forEach((j) => {
+      jobs.forEach(j => {
         this.jobCalendars[j.job_id] = [];
       });
       const groups = {};
-      mlJobService.getJobGroups().forEach((g) => {
+      mlJobService.getJobGroups().forEach(g => {
         groups[g.id] = g;
       });
 
       ml.calendars()
-        .then((resp) => {
+        .then(resp => {
           calendars = resp;
           // loop through calendars and their job_ids and create jobCalendars
           // if a group is found, expand it out to its member jobs
-          calendars.forEach((cal) => {
-            cal.job_ids.forEach((id) => {
+          calendars.forEach(cal => {
+            cal.job_ids.forEach(id => {
               let isGroup = false;
               // the job_id could be either a job id or a group id
               if (this.jobCalendars[id] !== undefined) {
@@ -51,7 +47,7 @@ class CalendarService {
               } else if (groups[id] !== undefined) {
                 isGroup = true;
                 // expand out the group into its jobs and add each job
-                groups[id].jobs.forEach((j) => {
+                groups[id].jobs.forEach(j => {
                   this.jobCalendars[j.job_id].push(cal.calendar_id);
                 });
               } else {
@@ -78,10 +74,15 @@ class CalendarService {
           this.calendars = calendars;
           resolve({ calendars });
         })
-        .catch((err) => {
-          msgs.error(i18n.translate('xpack.ml.calendarService.calendarsListCouldNotBeRetrievedErrorMessage', {
-            defaultMessage: 'Calendars list could not be retrieved'
-          }));
+        .catch(err => {
+          msgs.error(
+            i18n.translate(
+              'xpack.ml.calendarService.calendarsListCouldNotBeRetrievedErrorMessage',
+              {
+                defaultMessage: 'Calendars list could not be retrieved',
+              }
+            )
+          );
           msgs.error('', err);
           reject({ calendars, err });
         });

@@ -11,14 +11,11 @@ import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 
 const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 
-export const createMockLicense = (
-  type,
-  expiryDateInMillis = highExpirationMillis
-) => {
+export const createMockLicense = (type, expiryDateInMillis = highExpirationMillis) => {
   return {
     type,
     expiryDateInMillis,
-    isActive: new Date().getTime() < expiryDateInMillis
+    isActive: new Date().getTime() < expiryDateInMillis,
   };
 };
 export const getComponent = (initialState, Component) => {

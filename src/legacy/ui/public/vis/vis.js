@@ -49,7 +49,7 @@ export function VisProvider(Private, getAppState) {
 
       if (_.isString(visState)) {
         visState = {
-          type: visState
+          type: visState,
         };
       }
       this.indexPattern = indexPattern;
@@ -83,7 +83,8 @@ export function VisProvider(Private, getAppState) {
         this.type = type;
       }
 
-      this.params = _.defaults({},
+      this.params = _.defaults(
+        {},
         _.cloneDeep(state.params || {}),
         _.cloneDeep(this.type.visConfig.defaults || {})
       );
@@ -91,7 +92,11 @@ export function VisProvider(Private, getAppState) {
       updateVisualizationConfig(state.params, this.params);
 
       if (state.aggs || !this.aggs) {
-        this.aggs = new AggConfigs(this.indexPattern, state.aggs ? state.aggs.aggs || state.aggs : [], this.type.schemas.all);
+        this.aggs = new AggConfigs(
+          this.indexPattern,
+          state.aggs ? state.aggs.aggs || state.aggs : [],
+          this.type.schemas.all
+        );
       }
     }
 
@@ -119,7 +124,7 @@ export function VisProvider(Private, getAppState) {
         aggs: this.aggs.aggs
           .map(agg => agg.toJSON())
           .filter(agg => includeDisabled || agg.enabled)
-          .filter(Boolean)
+          .filter(Boolean),
       };
     }
 
@@ -131,13 +136,17 @@ export function VisProvider(Private, getAppState) {
         aggs: state.aggs.aggs
           .map(agg => agg.toJSON())
           .filter(agg => agg.enabled)
-          .filter(Boolean)
+          .filter(Boolean),
       };
     }
 
     copyCurrentState(includeDisabled = false) {
       const state = this.getCurrentState(includeDisabled);
-      state.aggs = new AggConfigs(this.indexPattern, state.aggs.aggs || state.aggs, this.type.schemas.all);
+      state.aggs = new AggConfigs(
+        this.indexPattern,
+        state.aggs.aggs || state.aggs,
+        this.type.schemas.all
+      );
       return state;
     }
 
@@ -146,8 +155,7 @@ export function VisProvider(Private, getAppState) {
         title: this._state.title,
         type: this._state.type,
         params: this._state.params,
-        aggs: this._state.aggs
-          .filter(agg => includeDisabled || agg.enabled)
+        aggs: this._state.aggs.filter(agg => includeDisabled || agg.enabled),
       };
     }
 
@@ -173,7 +181,7 @@ export function VisProvider(Private, getAppState) {
 
     hasSchemaAgg(schemaName, aggTypeName) {
       const aggs = this.aggs.bySchemaName(schemaName) || [];
-      return aggs.some(function (agg) {
+      return aggs.some(function(agg) {
         if (!agg.type || !agg.type.name) return false;
         return agg.type.name === aggTypeName;
       });

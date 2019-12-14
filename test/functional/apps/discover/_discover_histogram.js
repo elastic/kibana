@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }) {
   };
 
   describe('discover histogram', function describeIndexTests() {
-    before(async function () {
+    before(async function() {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace(defaultSettings);
 

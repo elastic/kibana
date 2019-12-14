@@ -26,12 +26,13 @@ import { getPositions, Positions } from './utils/collections';
 import { vislibVisController } from './controller';
 
 export default function HistogramVisType() {
-
   return visFactory.createBaseVisualization({
     name: 'pie',
     title: i18n.translate('kbnVislibVisTypes.pie.pieTitle', { defaultMessage: 'Pie' }),
     icon: 'visPie',
-    description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', { defaultMessage: 'Compare parts of a whole' }),
+    description: i18n.translate('kbnVislibVisTypes.pie.pieDescription', {
+      defaultMessage: 'Compare parts of a whole',
+    }),
     visualization: vislibVisController,
     visConfig: {
       defaults: {
@@ -44,45 +45,49 @@ export default function HistogramVisType() {
           show: false,
           values: true,
           last_level: true,
-          truncate: 100
-        }
+          truncate: 100,
+        },
       },
     },
     editorConfig: {
       collections: {
-        legendPositions: getPositions()
+        legendPositions: getPositions(),
       },
       optionsTemplate: PieOptions,
       schemas: new Schemas([
         {
           group: AggGroupNames.Metrics,
           name: 'metric',
-          title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', { defaultMessage: 'Slice size' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.metricTitle', {
+            defaultMessage: 'Slice size',
+          }),
           min: 1,
           max: 1,
           aggFilter: ['sum', 'count', 'cardinality', 'top_hits'],
-          defaults: [
-            { schema: 'metric', type: 'count' }
-          ]
+          defaults: [{ schema: 'metric', type: 'count' }],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'segment',
-          title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', { defaultMessage: 'Split slices' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.segmentTitle', {
+            defaultMessage: 'Split slices',
+          }),
           min: 0,
           max: Infinity,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
         },
         {
           group: AggGroupNames.Buckets,
           name: 'split',
-          title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', { defaultMessage: 'Split chart' }),
+          title: i18n.translate('kbnVislibVisTypes.pie.splitTitle', {
+            defaultMessage: 'Split chart',
+          }),
           mustBeFirst: true,
           min: 0,
           max: 1,
-          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter']
-        }
-      ])
+          aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        },
+      ]),
     },
     hierarchicalData: true,
     responseHandler: 'vislib_slices',

@@ -19,19 +19,20 @@
 
 import expect from '@kbn/expect';
 import { fieldFormats } from 'ui/registry/field_formats';
-describe('Color Format', function () {
-
+describe('Color Format', function() {
   const ColorFormat = fieldFormats.getType('color');
 
   describe('field is a number', () => {
-    it('should add colors if the value is in range', function () {
+    it('should add colors if the value is in range', function() {
       const colorer = new ColorFormat({
         fieldType: 'number',
-        colors: [{
-          range: '100:150',
-          text: 'blue',
-          background: 'yellow'
-        }]
+        colors: [
+          {
+            range: '100:150',
+            text: 'blue',
+            background: 'yellow',
+          },
+        ],
       });
       expect(colorer.convert(99, 'html')).to.eql('<span ng-non-bindable>99</span>');
       expect(colorer.convert(100, 'html')).to.eql(
@@ -43,28 +44,32 @@ describe('Color Format', function () {
       expect(colorer.convert(151, 'html')).to.eql('<span ng-non-bindable>151</span>');
     });
 
-    it('should not convert invalid ranges', function () {
+    it('should not convert invalid ranges', function() {
       const colorer = new ColorFormat({
         fieldType: 'number',
-        colors: [{
-          range: '100150',
-          text: 'blue',
-          background: 'yellow'
-        }]
+        colors: [
+          {
+            range: '100150',
+            text: 'blue',
+            background: 'yellow',
+          },
+        ],
       });
       expect(colorer.convert(99, 'html')).to.eql('<span ng-non-bindable>99</span>');
     });
   });
 
   describe('field is a string', () => {
-    it('should add colors if the regex matches', function () {
+    it('should add colors if the regex matches', function() {
       const colorer = new ColorFormat({
         fieldType: 'string',
-        colors: [{
-          regex: 'A.*',
-          text: 'blue',
-          background: 'yellow'
-        }]
+        colors: [
+          {
+            regex: 'A.*',
+            text: 'blue',
+            background: 'yellow',
+          },
+        ],
       });
 
       const converter = colorer.getConverterFor('html');

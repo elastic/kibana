@@ -20,11 +20,7 @@
 import { connect } from 'react-redux';
 
 import { GuideSection } from './guide_section';
-import {
-  openCodeViewer,
-  registerSection,
-  unregisterSection,
-} from '../../actions';
+import { openCodeViewer, registerSection, unregisterSection } from '../../actions';
 
 export const GuideSectionContainer = connect(
   null,
@@ -32,5 +28,5 @@ export const GuideSectionContainer = connect(
     openCodeViewer,
     registerSection,
     unregisterSection,
-  },
+  }
 )(GuideSection);

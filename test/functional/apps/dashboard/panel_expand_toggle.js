@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header']);
@@ -46,7 +46,6 @@ export default function ({ getService, getPageObjects }) {
       await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickExpandPanelToggle();
 
-
       // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
       // being a CSS update is causing the UI to change slower than grabbing the panels?
       retry.try(async () => {
@@ -55,5 +54,4 @@ export default function ({ getService, getPageObjects }) {
       });
     });
   });
-
 }

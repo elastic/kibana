@@ -18,19 +18,18 @@ jest.mock('ui/new_platform', () => ({
           if (field.type === 'boolean') {
             res = [true, false];
           } else if (field.name === 'machine.os') {
-            res = ['Windo"ws', 'Mac\'', 'Linux'];
+            res = ['Windo"ws', "Mac'", 'Linux'];
           } else {
             res = [];
           }
           return Promise.resolve(res);
-        }
+        },
       },
-    }
-  }
+    },
+  },
 }));
 
-
-describe('Kuery value suggestions', function () {
+describe('Kuery value suggestions', function() {
   let indexPatterns;
   let getSuggestions;
 
@@ -40,7 +39,7 @@ describe('Kuery value suggestions', function () {
     jest.clearAllMocks();
   });
 
-  test('should return a function', function () {
+  test('should return a function', function() {
     expect(typeof getSuggestions).toBe('function');
   });
 
@@ -54,7 +53,6 @@ describe('Kuery value suggestions', function () {
     expect(spy).toHaveBeenCalledTimes(0);
   });
 
-
   test('should format suggestions', async () => {
     const fieldName = 'ssl'; // Has results with quotes in mock
     const prefix = '';
@@ -67,7 +65,7 @@ describe('Kuery value suggestions', function () {
     expect(suggestions[0].end).toEqual(end);
   });
 
-  describe('Boolean suggestions', function () {
+  describe('Boolean suggestions', function() {
     test('should stringify boolean fields', async () => {
       const fieldName = 'ssl';
       const prefix = '';
@@ -85,11 +83,9 @@ describe('Kuery value suggestions', function () {
       const suggestions = await getSuggestions({ fieldName, prefix, suffix });
       expect(suggestions.length).toEqual(1);
     });
-
   });
 
-
-  describe('String suggestions', function () {
+  describe('String suggestions', function() {
     test('should merge prefix and suffix', async () => {
       const fieldName = 'machine.os.raw';
       const prefix = 'he';
@@ -97,7 +93,12 @@ describe('Kuery value suggestions', function () {
       const spy = jest.spyOn(npStart.plugins.data, 'getSuggestions');
       await getSuggestions({ fieldName, prefix, suffix });
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toBeCalledWith(expect.any(String), expect.any(Object), prefix + suffix, undefined);
+      expect(spy).toBeCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        prefix + suffix,
+        undefined
+      );
     });
 
     test('should escape quotes in suggestions', async () => {
@@ -126,6 +127,4 @@ describe('Kuery value suggestions', function () {
       expect(suggestions.length).toEqual(1);
     });
   });
-
-
 });

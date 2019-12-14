@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -33,7 +32,7 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-    }
+    },
   })
   .when('/settings/calendars_list/edit_calendar/:calendarId', {
     template,
@@ -42,21 +41,21 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       checkMlNodesAvailable,
-    }
+    },
   });
 
 import { NewCalendar } from './new_calendar.js';
 
-module.directive('mlNewCalendar', function ($route) {
+module.directive('mlNewCalendar', function($route) {
   return {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link: function(scope, element) {
       const props = {
         calendarId: $route.current.params.calendarId,
         canCreateCalendar: checkPermission('canCreateCalendar'),
-        canDeleteCalendar: checkPermission('canDeleteCalendar')
+        canDeleteCalendar: checkPermission('canDeleteCalendar'),
       };
 
       ReactDOM.render(
@@ -65,6 +64,6 @@ module.directive('mlNewCalendar', function ($route) {
         </I18nContext>,
         element[0]
       );
-    }
+    },
   };
 });

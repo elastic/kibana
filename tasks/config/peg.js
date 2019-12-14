@@ -22,7 +22,7 @@ module.exports = {
     src: 'packages/kbn-es-query/src/kuery/ast/kuery.peg',
     dest: 'packages/kbn-es-query/src/kuery/ast/kuery.js',
     options: {
-      allowedStartRules: ['start', 'Literal']
-    }
-  }
+      allowedStartRules: ['start', 'Literal'],
+    },
+  },
 };

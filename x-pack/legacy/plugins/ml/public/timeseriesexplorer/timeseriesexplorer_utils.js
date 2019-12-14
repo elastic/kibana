@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Contains a number of utility functions used for processing
  * the data for exploring a time series in the Single Metric
@@ -17,12 +15,9 @@ import moment from 'moment-timezone';
 
 import {
   ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+  ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../common/constants/search';
-import {
-  isTimeSeriesViewJob,
-  mlFunctionToESAggregation,
-} from '../../common/util/job_utils';
+import { isTimeSeriesViewJob, mlFunctionToESAggregation } from '../../common/util/job_utils';
 import { parseInterval } from '../../common/util/parse_interval';
 
 import { ml } from '../services/ml_api_service';
@@ -51,7 +46,7 @@ export function createTimeSeriesJobData(jobs) {
     return {
       id: job.job_id,
       selected: false,
-      bucketSpanSeconds: bucketSpan.asSeconds()
+      bucketSpanSeconds: bucketSpan.asSeconds(),
     };
   });
 }
@@ -67,14 +62,14 @@ export function processMetricPlotResults(metricPlotData, modelPlotEnabled) {
         date: new Date(+time),
         lower: dataForTime.modelLower,
         value: dataForTime.actual,
-        upper: dataForTime.modelUpper
+        upper: dataForTime.modelUpper,
       });
     });
   } else {
     _.each(metricPlotData, (dataForTime, time) => {
       metricPlotChartData.push({
         date: new Date(+time),
-        value: dataForTime.actual
+        value: dataForTime.actual,
       });
     });
   }
@@ -93,7 +88,7 @@ export function processForecastResults(forecastData) {
       isForecast: true,
       lower: dataForTime.forecastLower,
       value: dataForTime.prediction,
-      upper: dataForTime.forecastUpper
+      upper: dataForTime.forecastUpper,
     });
   });
 
@@ -105,11 +100,10 @@ export function processForecastResults(forecastData) {
 export function processRecordScoreResults(scoreData) {
   const bucketScoreData = [];
   _.each(scoreData, (dataForTime, time) => {
-    bucketScoreData.push(
-      {
-        date: new Date(+time),
-        score: dataForTime.score,
-      });
+    bucketScoreData.push({
+      date: new Date(+time),
+      score: dataForTime.score,
+    });
   });
 
   return bucketScoreData;
@@ -122,8 +116,8 @@ export function processDataForFocusAnomalies(
   chartData,
   anomalyRecords,
   aggregationInterval,
-  modelPlotEnabled) {
-
+  modelPlotEnabled
+) {
   const timesToAddPointsFor = [];
 
   // Iterate through the anomaly records making sure we have chart points for each anomaly.
@@ -132,11 +126,11 @@ export function processDataForFocusAnomalies(
   if (chartData !== undefined && chartData.length > 0) {
     lastChartDataPointTime = chartData[chartData.length - 1].date.getTime();
   }
-  anomalyRecords.forEach((record) => {
+  anomalyRecords.forEach(record => {
     const recordTime = record[TIME_FIELD_NAME];
     const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint === undefined) {
-      const timeToAdd = (Math.floor(recordTime / intervalMs)) * intervalMs;
+      const timeToAdd = Math.floor(recordTime / intervalMs) * intervalMs;
       if (timesToAddPointsFor.indexOf(timeToAdd) === -1 && timeToAdd !== lastChartDataPointTime) {
         timesToAddPointsFor.push(timeToAdd);
       }
@@ -145,10 +139,10 @@ export function processDataForFocusAnomalies(
 
   timesToAddPointsFor.sort((a, b) => a - b);
 
-  timesToAddPointsFor.forEach((time) => {
+  timesToAddPointsFor.forEach(time => {
     const pointToAdd = {
       date: new Date(time),
-      value: null
+      value: null,
     };
 
     if (modelPlotEnabled === true) {
@@ -160,8 +154,7 @@ export function processDataForFocusAnomalies(
 
   // Iterate through the anomaly records adding the
   // various properties required for display.
-  anomalyRecords.forEach((record) => {
-
+  anomalyRecords.forEach(record => {
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
     const recordTime = record[TIME_FIELD_NAME];
@@ -198,7 +191,6 @@ export function processDataForFocusAnomalies(
         }
       }
     }
-
   });
 
   return chartData;
@@ -224,7 +216,7 @@ export function processScheduledEventsForChart(chartData, scheduledEvents) {
 // Finds the chart point which is closest in time to the specified time.
 export function findNearestChartPointToTime(chartData, time) {
   let chartPoint;
-  if(chartData === undefined) {
+  if (chartData === undefined) {
     return chartPoint;
   }
 
@@ -270,7 +262,7 @@ export function findNearestChartPointToTime(chartData, time) {
 // specified time.
 export function findChartPointForAnomalyTime(chartData, anomalyTime, aggregationInterval) {
   let chartPoint;
-  if(chartData === undefined) {
+  if (chartData === undefined) {
     return chartPoint;
   }
 
@@ -301,7 +293,7 @@ export function findChartPointForAnomalyTime(chartData, anomalyTime, aggregation
   return chartPoint;
 }
 
-export const getFocusData = function (
+export const getFocusData = function(
   criteriaFields,
   detectorIndex,
   focusAggregationInterval,
@@ -309,7 +301,7 @@ export const getFocusData = function (
   modelPlotEnabled,
   nonBlankEntities,
   searchBounds,
-  selectedJob,
+  selectedJob
 ) {
   return new Promise((resolve, reject) => {
     // Counter to keep track of the queries to populate the chart.
@@ -331,89 +323,104 @@ export const getFocusData = function (
           refreshFocusData.focusChartData,
           refreshFocusData.anomalyRecords,
           focusAggregationInterval,
-          modelPlotEnabled,
+          modelPlotEnabled
         );
 
         refreshFocusData.focusChartData = processScheduledEventsForChart(
           refreshFocusData.focusChartData,
-          refreshFocusData.scheduledEvents);
+          refreshFocusData.scheduledEvents
+        );
 
         resolve(refreshFocusData);
       }
     }
 
     // Query 1 - load metric data across selected time range.
-    mlTimeSeriesSearchService.getMetricData(
-      selectedJob,
-      detectorIndex,
-      nonBlankEntities,
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      focusAggregationInterval.expression
-    ).then((resp) => {
-      refreshFocusData.focusChartData = processMetricPlotResults(resp.results, modelPlotEnabled);
-      finish();
-    }).catch((resp) => {
-      console.log('Time series explorer - error getting metric data from elasticsearch:', resp);
-      reject();
-    });
+    mlTimeSeriesSearchService
+      .getMetricData(
+        selectedJob,
+        detectorIndex,
+        nonBlankEntities,
+        searchBounds.min.valueOf(),
+        searchBounds.max.valueOf(),
+        focusAggregationInterval.expression
+      )
+      .then(resp => {
+        refreshFocusData.focusChartData = processMetricPlotResults(resp.results, modelPlotEnabled);
+        finish();
+      })
+      .catch(resp => {
+        console.log('Time series explorer - error getting metric data from elasticsearch:', resp);
+        reject();
+      });
 
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
-    mlResultsService.getRecordsForCriteria(
-      [selectedJob.job_id],
-      criteriaFields,
-      0,
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
-    ).then((resp) => {
-      // Sort in descending time order before storing in scope.
-      refreshFocusData.anomalyRecords = _.chain(resp.records)
-        .sortBy(record => record[TIME_FIELD_NAME])
-        .reverse()
-        .value();
-      finish();
-    });
+    mlResultsService
+      .getRecordsForCriteria(
+        [selectedJob.job_id],
+        criteriaFields,
+        0,
+        searchBounds.min.valueOf(),
+        searchBounds.max.valueOf(),
+        ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+      )
+      .then(resp => {
+        // Sort in descending time order before storing in scope.
+        refreshFocusData.anomalyRecords = _.chain(resp.records)
+          .sortBy(record => record[TIME_FIELD_NAME])
+          .reverse()
+          .value();
+        finish();
+      });
 
     // Query 3 - load any scheduled events for the selected job.
-    mlResultsService.getScheduledEventsByBucket(
-      [selectedJob.job_id],
-      searchBounds.min.valueOf(),
-      searchBounds.max.valueOf(),
-      focusAggregationInterval.expression,
-      1,
-      MAX_SCHEDULED_EVENTS
-    ).then((resp) => {
-      refreshFocusData.scheduledEvents = resp.events[selectedJob.job_id];
-      finish();
-    }).catch((resp) => {
-      console.log('Time series explorer - error getting scheduled events from elasticsearch:', resp);
-      reject();
-    });
+    mlResultsService
+      .getScheduledEventsByBucket(
+        [selectedJob.job_id],
+        searchBounds.min.valueOf(),
+        searchBounds.max.valueOf(),
+        focusAggregationInterval.expression,
+        1,
+        MAX_SCHEDULED_EVENTS
+      )
+      .then(resp => {
+        refreshFocusData.scheduledEvents = resp.events[selectedJob.job_id];
+        finish();
+      })
+      .catch(resp => {
+        console.log(
+          'Time series explorer - error getting scheduled events from elasticsearch:',
+          resp
+        );
+        reject();
+      });
 
     // Query 4 - load any annotations for the selected job.
     if (mlAnnotationsEnabled) {
-      ml.annotations.getAnnotations({
-        jobIds: [selectedJob.job_id],
-        earliestMs: searchBounds.min.valueOf(),
-        latestMs: searchBounds.max.valueOf(),
-        maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE
-      }).then((resp) => {
-        refreshFocusData.focusAnnotationData = resp.annotations[selectedJob.job_id]
-          .sort((a, b) => {
-            return a.timestamp - b.timestamp;
-          })
-          .map((d, i) => {
-            d.key = String.fromCharCode(65 + i);
-            return d;
-          });
+      ml.annotations
+        .getAnnotations({
+          jobIds: [selectedJob.job_id],
+          earliestMs: searchBounds.min.valueOf(),
+          latestMs: searchBounds.max.valueOf(),
+          maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+        })
+        .then(resp => {
+          refreshFocusData.focusAnnotationData = resp.annotations[selectedJob.job_id]
+            .sort((a, b) => {
+              return a.timestamp - b.timestamp;
+            })
+            .map((d, i) => {
+              d.key = String.fromCharCode(65 + i);
+              return d;
+            });
 
-        finish();
-      }).catch(() => {
-        // silent fail
-        refreshFocusData.focusAnnotationData = [];
-        finish();
-      });
+          finish();
+        })
+        .catch(() => {
+          // silent fail
+          refreshFocusData.focusAnnotationData = [];
+          finish();
+        });
     } else {
       finish();
     }
@@ -428,36 +435,37 @@ export const getFocusData = function (
         aggType = { avg: 'sum', max: 'sum', min: 'sum' };
       }
 
-      mlForecastService.getForecastData(
-        selectedJob,
-        detectorIndex,
-        forecastId,
-        nonBlankEntities,
-        searchBounds.min.valueOf(),
-        searchBounds.max.valueOf(),
-        focusAggregationInterval.expression,
-        aggType)
-        .then((resp) => {
+      mlForecastService
+        .getForecastData(
+          selectedJob,
+          detectorIndex,
+          forecastId,
+          nonBlankEntities,
+          searchBounds.min.valueOf(),
+          searchBounds.max.valueOf(),
+          focusAggregationInterval.expression,
+          aggType
+        )
+        .then(resp => {
           refreshFocusData.focusForecastData = processForecastResults(resp.results);
-          refreshFocusData.showForecastCheckbox = (refreshFocusData.focusForecastData.length > 0);
+          refreshFocusData.showForecastCheckbox = refreshFocusData.focusForecastData.length > 0;
           finish();
-        }).catch((resp) => {
-          console.log(`Time series explorer - error loading data for forecast ID ${forecastId}`, resp);
+        })
+        .catch(resp => {
+          console.log(
+            `Time series explorer - error loading data for forecast ID ${forecastId}`,
+            resp
+          );
           reject();
         });
     }
   });
 };
 
-export function calculateAggregationInterval(
-  bounds,
-  bucketsTarget,
-  jobs,
-  selectedJob,
-) {
+export function calculateAggregationInterval(bounds, bucketsTarget, jobs, selectedJob) {
   // Aggregation interval used in queries should be a function of the time span of the chart
   // and the bucket span of the selected job(s).
-  const barTarget = (bucketsTarget !== undefined ? bucketsTarget : 100);
+  const barTarget = bucketsTarget !== undefined ? bucketsTarget : 100;
   // Use a maxBars of 10% greater than the target.
   const maxBars = Math.floor(1.1 * barTarget);
   const buckets = new TimeBuckets();
@@ -468,7 +476,7 @@ export function calculateAggregationInterval(
 
   // Ensure the aggregation interval is always a multiple of the bucket span to avoid strange
   // behaviour such as adjacent chart buckets holding different numbers of job results.
-  const bucketSpanSeconds =  _.find(jobs, { 'id': selectedJob.job_id }).bucketSpanSeconds;
+  const bucketSpanSeconds = _.find(jobs, { id: selectedJob.job_id }).bucketSpanSeconds;
   let aggInterval = buckets.getIntervalToNearestMultiple(bucketSpanSeconds);
 
   // Set the interval back to the job bucket span if the auto interval is smaller.
@@ -485,12 +493,12 @@ export function calculateDefaultFocusRange(
   autoZoomDuration,
   contextAggregationInterval,
   contextChartData,
-  contextForecastData,
+  contextForecastData
 ) {
   const isForecastData = contextForecastData !== undefined && contextForecastData.length > 0;
 
-  const combinedData = (isForecastData === false) ?
-    contextChartData : contextChartData.concat(contextForecastData);
+  const combinedData =
+    isForecastData === false ? contextChartData : contextChartData.concat(contextForecastData);
   const earliestDataDate = _.first(combinedData).date;
   const latestDataDate = _.last(combinedData).date;
 
@@ -503,7 +511,10 @@ export function calculateDefaultFocusRange(
     const earliestForecastDataDate = _.first(contextForecastData).date;
     const latestForecastDataDate = _.last(contextForecastData).date;
 
-    rangeLatestMs = Math.min(earliestForecastDataDate.getTime() + (autoZoomDuration / 2), latestForecastDataDate.getTime());
+    rangeLatestMs = Math.min(
+      earliestForecastDataDate.getTime() + autoZoomDuration / 2,
+      latestForecastDataDate.getTime()
+    );
     rangeEarliestMs = Math.max(rangeLatestMs - autoZoomDuration, earliestDataDate.getTime());
   } else {
     // Returns the range that shows the most recent data at bucket span granularity.
@@ -526,10 +537,13 @@ export function calculateInitialFocusRange(zoomState, contextAggregationInterval
     const earliest = searchBounds.min;
     const latest = searchBounds.max;
 
-    if (zoomFrom.isValid() && zoomTo.isValid &&
+    if (
+      zoomFrom.isValid() &&
+      zoomTo.isValid &&
       zoomTo.isAfter(zoomFrom) &&
       zoomFrom.isBetween(earliest, latest, null, '[]') &&
-      zoomTo.isBetween(earliest, latest, null, '[]')) {
+      zoomTo.isBetween(earliest, latest, null, '[]')
+    ) {
       return [zoomFrom.toDate(), zoomTo.toDate()];
     }
   }
@@ -541,12 +555,12 @@ export function getAutoZoomDuration(jobs, selectedJob) {
   // Calculate the 'auto' zoom duration which shows data at bucket span granularity.
   // Get the minimum bucket span of selected jobs.
   // TODO - only look at jobs for which data has been returned?
-  const bucketSpanSeconds =  _.find(jobs, { 'id': selectedJob.job_id }).bucketSpanSeconds;
+  const bucketSpanSeconds = _.find(jobs, { id: selectedJob.job_id }).bucketSpanSeconds;
 
   // In most cases the duration can be obtained by simply multiplying the points target
   // Check that this duration returns the bucket span when run back through the
   // TimeBucket interval calculation.
-  let autoZoomDuration = (bucketSpanSeconds * 1000) * (CHARTS_POINT_TARGET - 1);
+  let autoZoomDuration = bucketSpanSeconds * 1000 * (CHARTS_POINT_TARGET - 1);
 
   // Use a maxBars of 10% greater than the target.
   const maxBars = Math.floor(1.1 * CHARTS_POINT_TARGET);

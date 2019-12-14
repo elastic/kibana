@@ -21,44 +21,42 @@ import expect from '@kbn/expect';
 import _ from 'lodash';
 import { migrateFilter } from '../migrate_filter';
 
-describe('migrateFilter', function () {
-
+describe('migrateFilter', function() {
   const oldMatchPhraseFilter = {
     match: {
       fieldFoo: {
         query: 'foobar',
-        type: 'phrase'
-      }
-    }
+        type: 'phrase',
+      },
+    },
   };
 
   const newMatchPhraseFilter = {
     match_phrase: {
       fieldFoo: {
-        query: 'foobar'
-      }
-    }
+        query: 'foobar',
+      },
+    },
   };
 
   // https://github.com/elastic/elasticsearch/pull/17508
-  it('should migrate match filters of type phrase', function () {
+  it('should migrate match filters of type phrase', function() {
     const migratedFilter = migrateFilter(oldMatchPhraseFilter);
     expect(_.isEqual(migratedFilter, newMatchPhraseFilter)).to.be(true);
   });
 
-  it('should not modify the original filter', function () {
+  it('should not modify the original filter', function() {
     const oldMatchPhraseFilterCopy = _.clone(oldMatchPhraseFilter, true);
     migrateFilter(oldMatchPhraseFilter);
     expect(_.isEqual(oldMatchPhraseFilter, oldMatchPhraseFilterCopy)).to.be(true);
   });
 
-  it('should return the original filter if no migration is necessary', function () {
+  it('should return the original filter if no migration is necessary', function() {
     const originalFilter = {
-      match_all: {}
+      match_all: {},
     };
     const migratedFilter = migrateFilter(originalFilter);
     expect(migratedFilter).to.be(originalFilter);
     expect(_.isEqual(migratedFilter, originalFilter)).to.be(true);
   });
-
 });

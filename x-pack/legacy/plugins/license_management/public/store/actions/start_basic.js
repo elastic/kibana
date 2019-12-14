@@ -34,17 +34,21 @@ export const startBasicLicense = (currentLicenseType, ack) => async (
     }
   } else {
     //messages coming back in arrays
-    const messages = Object.values(acknowledge).slice(1).map((item) => {
-      return item[0];
-    });
-    const first = i18n.translate('xpack.licenseMgmt.replacingCurrentLicenseWithBasicLicenseWarningMessage', {
-      //eslint-disable-next-line
+    const messages = Object.values(acknowledge)
+      .slice(1)
+      .map(item => {
+        return item[0];
+      });
+    const first = i18n.translate(
+      'xpack.licenseMgmt.replacingCurrentLicenseWithBasicLicenseWarningMessage',
+      {
+        //eslint-disable-next-line
       defaultMessage: 'Some functionality will be lost if you replace your {currentLicenseType} license with a BASIC license. Review the list of features below.',
-      values: {
-        currentLicenseType: currentLicenseType.toUpperCase(),
+        values: {
+          currentLicenseType: currentLicenseType.toUpperCase(),
+        },
       }
-    });
-    dispatch(startBasicLicenseStatus({ acknowledge: true, messages: [ first, ...messages] }));
+    );
+    dispatch(startBasicLicenseStatus({ acknowledge: true, messages: [first, ...messages] }));
   }
-
 };

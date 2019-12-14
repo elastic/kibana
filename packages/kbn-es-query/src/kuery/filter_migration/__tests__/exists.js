@@ -20,16 +20,14 @@
 import expect from '@kbn/expect';
 import { convertExistsFilter } from '../exists';
 
-describe('filter to kuery migration', function () {
-
-  describe('exists filter', function () {
-
-    it('should return a kuery node equivalent to the given filter', function () {
+describe('filter to kuery migration', function() {
+  describe('exists filter', function() {
+    it('should return a kuery node equivalent to the given filter', function() {
       const filter = {
         meta: {
           type: 'exists',
           key: 'foo',
-        }
+        },
       };
       const result = convertExistsFilter(filter);
 
@@ -38,18 +36,16 @@ describe('filter to kuery migration', function () {
       expect(result.arguments[0].value).to.be('foo');
     });
 
-    it('should throw an exception if the given filter is not of type "exists"', function () {
+    it('should throw an exception if the given filter is not of type "exists"', function() {
       const filter = {
         meta: {
-          type: 'foo'
-        }
+          type: 'foo',
+        },
       };
 
-      expect(convertExistsFilter).withArgs(filter).to.throwException(
-        /Expected filter of type "exists", got "foo"/
-      );
+      expect(convertExistsFilter)
+        .withArgs(filter)
+        .to.throwException(/Expected filter of type "exists", got "foo"/);
     });
-
   });
-
 });

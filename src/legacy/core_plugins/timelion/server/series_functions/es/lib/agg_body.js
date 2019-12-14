@@ -17,9 +17,7 @@
  * under the License.
  */
 
-
 export function buildAggBody(fieldName, scriptedFields) {
-
   const scriptedField = scriptedFields.find(field => {
     return field.name === fieldName;
   });
@@ -28,12 +26,12 @@ export function buildAggBody(fieldName, scriptedFields) {
     return {
       script: {
         source: scriptedField.script,
-        lang: scriptedField.lang
-      }
+        lang: scriptedField.lang,
+      },
     };
   }
 
   return {
-    field: fieldName
+    field: fieldName,
   };
 }

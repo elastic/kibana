@@ -7,7 +7,6 @@
 import * as euiVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { stringHash } from './string_utils';
 
-
 const COLORS = [
   euiVars.euiColorVis0,
   euiVars.euiColorVis1,
@@ -20,7 +19,7 @@ const COLORS = [
   euiVars.euiColorVis8,
   euiVars.euiColorVis9,
   euiVars.euiColorDarkShade,
-  euiVars.euiColorPrimary
+  euiVars.euiColorPrimary,
 ];
 
 const colorMap = {};
@@ -28,7 +27,7 @@ const colorMap = {};
 export function tabColor(name) {
   if (colorMap[name] === undefined) {
     const n = stringHash(name);
-    const color = COLORS[(n % COLORS.length)];
+    const color = COLORS[n % COLORS.length];
     colorMap[name] = color;
     return color;
   } else {

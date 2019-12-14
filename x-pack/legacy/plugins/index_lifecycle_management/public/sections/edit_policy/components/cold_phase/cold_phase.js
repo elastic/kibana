@@ -23,7 +23,7 @@ import {
   PHASE_COLD,
   PHASE_ENABLED,
   PHASE_REPLICA_COUNT,
-  PHASE_FREEZE_ENABLED
+  PHASE_FREEZE_ENABLED,
 } from '../../../../constants';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';
 import { ErrableFormRow } from '../../form_errors';
@@ -46,11 +46,11 @@ export class ColdPhase extends PureComponent {
       phaseData,
       errors,
       isShowingErrors,
-      hotPhaseRolloverEnabled
+      hotPhaseRolloverEnabled,
     } = this.props;
 
     const freezeLabel = i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
-      defaultMessage: 'Freeze index'
+      defaultMessage: 'Freeze index',
     });
 
     return (
@@ -136,11 +136,12 @@ export class ColdPhase extends PureComponent {
                       errorKey={PHASE_REPLICA_COUNT}
                       isShowingErrors={isShowingErrors}
                       errors={errors}
-                      helpText={
-                        i18n.translate('xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText', {
-                          defaultMessage: 'By default, the number of replicas remains the same.'
-                        })
-                      }
+                      helpText={i18n.translate(
+                        'xpack.indexLifecycleMgmt.coldPhase.replicaCountHelpText',
+                        {
+                          defaultMessage: 'By default, the number of replicas remains the same.',
+                        }
+                      )}
                     >
                       <EuiFieldNumber
                         id={`${PHASE_COLD}-${PHASE_REPLICA_COUNT}`}
@@ -153,9 +154,10 @@ export class ColdPhase extends PureComponent {
                     </ErrableFormRow>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-
               </Fragment>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
           </Fragment>
         </EuiDescribedFormGroup>
         {phaseData[PHASE_ENABLED] ? (
@@ -200,7 +202,7 @@ export class ColdPhase extends PureComponent {
               setPhaseData={setPhaseData}
             />
           </Fragment>
-        ) : null }
+        ) : null}
       </div>
     );
   }

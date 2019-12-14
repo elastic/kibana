@@ -37,9 +37,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
-import {
-  Pager
-} from '@elastic/eui/lib/services';
+import { Pager } from '@elastic/eui/lib/services';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -47,7 +45,7 @@ export class IndicesList extends Component {
   static propTypes = {
     indices: PropTypes.array.isRequired,
     query: PropTypes.string.isRequired,
-  }
+  };
 
   constructor(props) {
     super(props);
@@ -73,22 +71,22 @@ export class IndicesList extends Component {
   onChangePage = page => {
     this.pager.goToPageIndex(page);
     this.setState({ page });
-  }
+  };
 
   onChangePerPage = perPage => {
     this.pager.setItemsPerPage(perPage);
     this.setState({ perPage });
     this.resetPageTo0();
     this.closePerPageControl();
-  }
+  };
 
   openPerPageControl = () => {
     this.setState({ isPerPageControlOpen: true });
-  }
+  };
 
   closePerPageControl = () => {
     this.setState({ isPerPageControlOpen: false });
-  }
+  };
 
   renderPagination() {
     const { perPage, page, isPerPageControlOpen } = this.state;
@@ -123,17 +121,12 @@ export class IndicesList extends Component {
 
     const pageCount = this.pager.getTotalPages();
 
-    const paginationControls = pageCount > 1
-      ? (
+    const paginationControls =
+      pageCount > 1 ? (
         <EuiFlexItem grow={false}>
-          <EuiPagination
-            pageCount={pageCount}
-            activePage={page}
-            onPageClick={this.onChangePage}
-          />
+          <EuiPagination pageCount={pageCount} activePage={page} onPageClick={this.onChangePage} />
         </EuiFlexItem>
-      )
-      : null;
+      ) : null;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -146,9 +139,7 @@ export class IndicesList extends Component {
             panelPaddingSize="none"
             withTitle
           >
-            <EuiContextMenuPanel
-              items={items}
-            />
+            <EuiContextMenuPanel items={items} />
           </EuiPopover>
         </EuiFlexItem>
         {paginationControls}
@@ -189,7 +180,9 @@ export class IndicesList extends Component {
           <EuiTableRowCell>
             {index.tags.map(tag => {
               return (
-                <EuiBadge key={`index_${key}_tag_${tag.key}`} color="primary">{tag.name}</EuiBadge>
+                <EuiBadge key={`index_${key}_tag_${tag.key}`} color="primary">
+                  {tag.name}
+                </EuiBadge>
               );
             })}
           </EuiTableRowCell>
@@ -200,11 +193,9 @@ export class IndicesList extends Component {
     return (
       <div {...rest}>
         <EuiTable>
-          <EuiTableBody>
-            {rows}
-          </EuiTableBody>
+          <EuiTableBody>{rows}</EuiTableBody>
         </EuiTable>
-        <EuiSpacer size="m"/>
+        <EuiSpacer size="m" />
         {this.renderPagination()}
       </div>
     );

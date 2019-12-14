@@ -6,7 +6,7 @@
 
 import request from 'request';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertestWithoutAuth');
 
   function extractSessionCookie(response) {
@@ -59,9 +59,7 @@ export default function ({ getService }) {
       const cookie = await createSessionCookie();
 
       // destroy it
-      await supertest
-        .get('/api/security/v1/logout')
-        .set('cookie', cookie.cookieString());
+      await supertest.get('/api/security/v1/logout').set('cookie', cookie.cookieString());
 
       // verify that the cookie no longer works
       await supertest

@@ -7,7 +7,6 @@
 import { checkIndexPatternValid } from './indexing_service';
 
 describe('indexing_service', () => {
-
   const validNames = [
     'lowercaseletters', // Lowercase only
     '123', // Cannot include \, /, *, ?, ", <, >, |, " " (space character), , (comma), #
@@ -16,7 +15,7 @@ describe('indexing_service', () => {
     'does+not+start+with+a+plus', // Cannot start with +
     'is..not..just..two..periods', // name can't be ..
     'is.not.just.one.period', // name can't be .
-    'x'.repeat(255) // Cannot be longer than 255 bytes
+    'x'.repeat(255), // Cannot be longer than 255 bytes
   ];
   validNames.forEach(validName => {
     it(`Should validate index pattern: "${validName}"`, () => {
@@ -44,7 +43,7 @@ describe('indexing_service', () => {
     '..', // name can't be ..
     '.', // name can't be .
     'x'.repeat(256), // Cannot be longer than 255 bytes
-    'ü'.repeat(128) // Cannot be longer than 255 bytes (using 2 byte char)
+    'ü'.repeat(128), // Cannot be longer than 255 bytes (using 2 byte char)
   ];
   inValidNames.forEach(inValidName => {
     it(`Should invalidate index pattern: "${inValidName}"`, () => {

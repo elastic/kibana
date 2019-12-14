@@ -10,7 +10,7 @@ import { NavigationMenu } from '../../components/navigation_menu';
 
 import { JobsListView } from './components/jobs_list_view';
 
-export const JobsPage = (props) => (
+export const JobsPage = props => (
   <Fragment>
     <NavigationMenu tabId="jobs" />
     <JobsListView {...props} />

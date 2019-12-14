@@ -7,7 +7,7 @@
 function formatHit(hit, indexName) {
   const mapping = hit[indexName].mappings;
   return {
-    mapping
+    mapping,
   };
 }
 const handler = async (request, callWithRequest) => {

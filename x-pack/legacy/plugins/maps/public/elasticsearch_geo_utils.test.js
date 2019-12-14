@@ -8,7 +8,7 @@ jest.mock('ui/new_platform');
 jest.mock('ui/index_patterns');
 jest.mock('./kibana_services', () => {
   return {
-    SPATIAL_FILTER_TYPE: 'spatial_filter'
+    SPATIAL_FILTER_TYPE: 'spatial_filter',
   };
 });
 
@@ -55,15 +55,15 @@ describe('hitsToGeoJson', () => {
         _id: 'doc1',
         _index: 'index1',
         fields: {
-          [geoFieldName]: '20,100'
-        }
+          [geoFieldName]: '20,100',
+        },
       },
       {
         _id: 'doc2',
         _index: 'index1',
         _source: {
-          [geoFieldName]: '30,110'
-        }
+          [geoFieldName]: '30,110',
+        },
       },
     ];
     const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
@@ -87,11 +87,11 @@ describe('hitsToGeoJson', () => {
     const hits = [
       {
         _source: {
-          [geoFieldName]: '20,100'
-        }
+          [geoFieldName]: '20,100',
+        },
       },
       {
-        _source: {}
+        _source: {},
       },
     ];
     const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
@@ -107,9 +107,9 @@ describe('hitsToGeoJson', () => {
           myField: 8,
         },
         fields: {
-          myScriptedField: 10
-        }
-      }
+          myScriptedField: 10,
+        },
+      },
     ];
     const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
     expect(geojson.features.length).toBe(1);
@@ -123,12 +123,9 @@ describe('hitsToGeoJson', () => {
         _id: 'doc1',
         _index: 'index1',
         _source: {
-          [geoFieldName]: [
-            '20,100',
-            '30,110'
-          ],
+          [geoFieldName]: ['20,100', '30,110'],
           myField: 8,
-        }
+        },
       },
     ];
     const geojson = hitsToGeoJson(hits, flattenHitMock, geoFieldName, 'geo_point');
@@ -143,7 +140,7 @@ describe('hitsToGeoJson', () => {
         __kbn__feature_id__: 'index1:doc1:0',
         _id: 'doc1',
         _index: 'index1',
-        myField: 8
+        myField: 8,
       },
       type: 'Feature',
     });
@@ -156,7 +153,7 @@ describe('hitsToGeoJson', () => {
         __kbn__feature_id__: 'index1:doc1:1',
         _id: 'doc1',
         _index: 'index1',
-        myField: 8
+        myField: 8,
       },
       type: 'Feature',
     });
@@ -168,12 +165,12 @@ describe('hitsToGeoJson', () => {
         getByName: name => {
           const fields = {
             ['my.location']: {
-              type: 'geo_point'
-            }
+              type: 'geo_point',
+            },
           };
           return fields[name];
-        }
-      }
+        },
+      },
     };
     const indexPatternFlattenHit = flattenHitWrapper(indexPatternMock);
 
@@ -183,9 +180,9 @@ describe('hitsToGeoJson', () => {
           _source: {
             my: {
               location: '20,100',
-            }
-          }
-        }
+            },
+          },
+        },
       ];
       const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
       expect(geojson.features[0].geometry).toEqual({
@@ -199,8 +196,8 @@ describe('hitsToGeoJson', () => {
         {
           _source: {
             ['my.location']: '20,100',
-          }
-        }
+          },
+        },
       ];
       const geojson = hitsToGeoJson(hits, indexPatternFlattenHit, 'my.location', 'geo_point');
       expect(geojson.features[0].geometry).toEqual({
@@ -227,10 +224,7 @@ describe('geoPointToGeometry', () => {
   it('Should convert multiple docvalue_fields', () => {
     const lat2 = 30;
     const lon2 = -60;
-    const value = [
-      `${lat},${lon}`,
-      `${lat2},${lon2}`
-    ];
+    const value = [`${lat},${lon}`, `${lat2},${lon2}`];
     const points = [];
     geoPointToGeometry(value, points);
     expect(points.length).toBe(2);
@@ -244,7 +238,7 @@ describe('geoShapeToGeometry', () => {
     const coordinates = [[-77.03653, 38.897676], [-77.009051, 38.889939]];
     const value = {
       type: 'linestring',
-      coordinates: coordinates
+      coordinates: coordinates,
     };
     const shapes = [];
     geoShapeToGeometry(value, shapes);
@@ -259,12 +253,12 @@ describe('geoShapeToGeometry', () => {
     const value = [
       {
         type: 'linestring',
-        coordinates: linestringCoordinates
+        coordinates: linestringCoordinates,
       },
       {
         type: 'point',
-        coordinates: pointCoordinates
-      }
+        coordinates: pointCoordinates,
+      },
     ];
     const shapes = [];
     geoShapeToGeometry(value, shapes);
@@ -275,12 +269,9 @@ describe('geoShapeToGeometry', () => {
     expect(shapes[1].coordinates).toEqual(pointCoordinates);
   });
 
-
   it('Should convert wkt shapes to geojson', () => {
-
     const pointWkt = 'POINT (32 40)';
     const linestringWkt = 'LINESTRING (50 60, 70 80)';
-
 
     const shapes = [];
     geoShapeToGeometry(pointWkt, shapes);
@@ -296,37 +287,33 @@ describe('geoShapeToGeometry', () => {
       type: 'LineString',
     });
   });
-
-
 });
 
 describe('createExtentFilter', () => {
   it('should return elasticsearch geo_bounding_box filter for geo_point field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_point');
     expect(filter).toEqual({
-      'geo_bounding_box': {
-        'location': {
-          'bottom_right': [-83, 35],
-          'top_left': [-89, 39]
-        }
-      }
+      geo_bounding_box: {
+        location: {
+          bottom_right: [-83, 35],
+          top_left: [-89, 39],
+        },
+      },
     });
   });
 
   it('should return elasticsearch geo_shape filter for geo_shape field', () => {
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      'geo_shape': {
-        'location': {
-          'relation': 'INTERSECTS',
-          'shape': {
-            'coordinates': [
-              [[-89, 39], [-89, 35], [-83, 35], [-83, 39], [-89, 39]]
-            ],
-            'type': 'Polygon'
-          }
-        }
-      }
+      geo_shape: {
+        location: {
+          relation: 'INTERSECTS',
+          shape: {
+            coordinates: [[[-89, 39], [-89, 35], [-83, 35], [-83, 39], [-89, 39]]],
+            type: 'Polygon',
+          },
+        },
+      },
     });
   });
 
@@ -339,17 +326,15 @@ describe('createExtentFilter', () => {
     };
     const filter = createExtentFilter(mapExtent, geoFieldName, 'geo_shape');
     expect(filter).toEqual({
-      'geo_shape': {
-        'location': {
-          'relation': 'INTERSECTS',
-          'shape': {
-            'coordinates': [
-              [[-180, 39], [-180, 35], [180, 35], [180, 39], [-180, 39]]
-            ],
-            'type': 'Polygon'
-          }
-        }
-      }
+      geo_shape: {
+        location: {
+          relation: 'INTERSECTS',
+          shape: {
+            coordinates: [[[-180, 39], [-180, 35], [180, 35], [180, 39], [-180, 39]]],
+            type: 'Polygon',
+          },
+        },
+      },
     });
   });
 });
@@ -363,10 +348,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: 90,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'Polygon',
-      'coordinates': [
-        [[90, 10], [90, -10], [100, -10], [100, 10], [90, 10]]
-      ]
+      type: 'Polygon',
+      coordinates: [[[90, 10], [90, -10], [100, -10], [100, 10], [90, 10]]],
     });
   });
 
@@ -378,10 +361,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -400,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'Polygon',
-      'coordinates': [
-        [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
-      ]
+      type: 'Polygon',
+      coordinates: [[[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]],
     });
   });
 
@@ -393,10 +374,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -400,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'Polygon',
-      'coordinates': [
-        [[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]
-      ]
+      type: 'Polygon',
+      coordinates: [[[-180, 10], [-180, -10], [180, -10], [180, 10], [-180, 10]]],
     });
   });
 
@@ -408,10 +387,8 @@ describe('convertMapExtentToPolygon', () => {
       minLon: 170,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'Polygon',
-      'coordinates': [
-        [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
-      ]
+      type: 'Polygon',
+      coordinates: [[[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]],
     });
   });
 
@@ -423,26 +400,24 @@ describe('convertMapExtentToPolygon', () => {
       minLon: -190,
     };
     expect(convertMapExtentToPolygon(bounds)).toEqual({
-      'type': 'Polygon',
-      'coordinates': [
-        [[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]
-      ]
+      type: 'Polygon',
+      coordinates: [[[170, 10], [170, -10], [-170, -10], [-170, 10], [170, 10]]],
     });
   });
 });
 
 describe('roundCoordinates', () => {
   it('should set coordinates precision', () => {
-    const coordinates  = [
+    const coordinates = [
       [110.21515290475513, 40.23193047044205],
       [-105.30620093073654, 40.23193047044205],
-      [-105.30620093073654, 30.647128842617803]
+      [-105.30620093073654, 30.647128842617803],
     ];
     roundCoordinates(coordinates);
     expect(coordinates).toEqual([
       [110.21515, 40.23193],
-      [-105.30620, 40.23193],
-      [-105.3062, 30.64713]
+      [-105.3062, 40.23193],
+      [-105.3062, 30.64713],
     ]);
   });
 });

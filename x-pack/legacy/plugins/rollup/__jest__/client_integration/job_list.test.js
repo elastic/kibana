@@ -15,7 +15,7 @@ jest.mock('../../public/crud_app/services', () => {
   const services = require.requireActual('../../public/crud_app/services');
   return {
     ...services,
-    getRouterLinkProps: (link) => ({ href: link }),
+    getRouterLinkProps: link => ({ href: link }),
   };
 });
 
@@ -66,9 +66,11 @@ describe('<JobList />', () => {
       button.simulate('click');
 
       const {
-        jobs: [{
-          config: { id: jobId },
-        }],
+        jobs: [
+          {
+            config: { id: jobId },
+          },
+        ],
       } = JOBS;
       expect(getRouter().history.location.search).toEqual(`?job=${jobId}`);
     });

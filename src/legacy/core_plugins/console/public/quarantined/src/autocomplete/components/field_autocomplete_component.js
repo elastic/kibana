@@ -21,7 +21,7 @@ import mappings from '../../mappings';
 import { ListComponent } from './list_component';
 
 function FieldGenerator(context) {
-  return _.map(mappings.getFields(context.indices, context.types), function (field) {
+  return _.map(mappings.getFields(context.indices, context.types), function(field) {
     return { name: field.name, meta: field.type };
   });
 }
@@ -35,7 +35,7 @@ export class FieldAutocompleteComponent extends ListComponent {
       return false;
     }
 
-    return !_.find(tokens, function (token) {
+    return !_.find(tokens, function(token) {
       return token.match(/[^\w.?*]/);
     });
   }

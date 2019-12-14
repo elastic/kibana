@@ -21,7 +21,6 @@ import _ from 'lodash';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 export function ArgValueSuggestionsProvider(Private, indexPatterns) {
-
   const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   async function getIndexPattern(functionArgs) {
@@ -39,7 +38,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
       fields: ['title'],
       search: `"${indexPatternTitle}"`,
       search_fields: ['title'],
-      perPage: 10
+      perPage: 10,
     });
     const indexPatternSavedObject = resp.savedObjects.find(savedObject => {
       return savedObject.attributes.title === indexPatternTitle;
@@ -63,14 +62,14 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
   // Could not put with function definition since functions are defined on server
   const customHandlers = {
     es: {
-      index: async function (partial) {
+      index: async function(partial) {
         const search = partial ? `${partial}*` : '*';
         const resp = await savedObjectsClient.find({
           type: 'index-pattern',
           fields: ['title', 'type'],
           search: `${search}`,
           search_fields: ['title'],
-          perPage: 25
+          perPage: 25,
         });
         return resp.savedObjects
           .filter(savedObject => !savedObject.get('type'))
@@ -78,7 +77,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
             return { name: savedObject.attributes.title };
           });
       },
-      metric: async function (partial, functionArgs) {
+      metric: async function(partial, functionArgs) {
         if (!partial || !partial.includes(':')) {
           return [
             { name: 'avg:' },
@@ -87,7 +86,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
             { name: 'max:' },
             { name: 'min:' },
             { name: 'percentiles:' },
-            { name: 'sum:' }
+            { name: 'sum:' },
           ];
         }
 
@@ -99,14 +98,17 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
         const valueSplit = partial.split(':');
         return indexPattern.fields
           .filter(field => {
-            return field.aggregatable && 'number' === field.type && containsFieldName(valueSplit[1], field);
+            return (
+              field.aggregatable &&
+              'number' === field.type &&
+              containsFieldName(valueSplit[1], field)
+            );
           })
           .map(field => {
             return { name: `${valueSplit[0]}:${field.name}`, help: field.type };
           });
-
       },
-      split: async function (partial, functionArgs) {
+      split: async function(partial, functionArgs) {
         const indexPattern = await getIndexPattern(functionArgs);
         if (!indexPattern) {
           return [];
@@ -114,15 +116,17 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
 
         return indexPattern.fields
           .filter(field => {
-            return field.aggregatable
-              && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
-              && containsFieldName(partial, field);
+            return (
+              field.aggregatable &&
+              ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type) &&
+              containsFieldName(partial, field)
+            );
           })
           .map(field => {
             return { name: field.name, help: field.type };
           });
       },
-      timefield: async function (partial, functionArgs) {
+      timefield: async function(partial, functionArgs) {
         const indexPattern = await getIndexPattern(functionArgs);
         if (!indexPattern) {
           return [];
@@ -135,8 +139,8 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
           .map(field => {
             return { name: field.name };
           });
-      }
-    }
+      },
+    },
   };
 
   return {
@@ -146,7 +150,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
      * @return {boolean} true when dynamic suggestion handler provided for function argument
      */
     hasDynamicSuggestionsForArgument: (functionName, argName) => {
-      return (customHandlers[functionName] && customHandlers[functionName][argName]);
+      return customHandlers[functionName] && customHandlers[functionName][argName];
     },
 
     /**
@@ -156,7 +160,12 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
      * @param {string} partial - user provided argument value
      * @return {array} array of dynamic suggestions matching partial
      */
-    getDynamicSuggestionsForArgument: async (functionName, argName, functionArgs, partialInput = '') => {
+    getDynamicSuggestionsForArgument: async (
+      functionName,
+      argName,
+      functionArgs,
+      partialInput = ''
+    ) => {
       return await customHandlers[functionName][argName](partialInput, functionArgs);
     },
 

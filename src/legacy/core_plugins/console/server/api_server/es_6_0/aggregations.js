@@ -519,7 +519,7 @@ const rules = {
   },
 };
 const { terms, histogram, date_histogram } = rules['*'];
-export default function (api) {
+export default function(api) {
   api.addGlobalAutocompleteRules('aggregations', rules);
   api.addGlobalAutocompleteRules('aggs', rules);
   api.addGlobalAutocompleteRules('groupByAggs', { '*': { terms, histogram, date_histogram } });

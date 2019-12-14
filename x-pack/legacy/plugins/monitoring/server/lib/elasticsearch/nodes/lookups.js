@@ -17,20 +17,26 @@ export const nodeTypeClass = {
   master: 'fa-star',
   master_only: 'fa-star-o',
   data: 'fa-database',
-  client: 'fa-binoculars'
+  client: 'fa-binoculars',
 };
 
 export const nodeTypeLabel = {
   invalid: i18n.translate('xpack.monitoring.es.nodeType.invalidNodeLabel', {
-    defaultMessage: 'Invalid Node' }),
+    defaultMessage: 'Invalid Node',
+  }),
   node: i18n.translate('xpack.monitoring.es.nodeType.nodeLabel', {
-    defaultMessage: 'Node' }),
+    defaultMessage: 'Node',
+  }),
   master: i18n.translate('xpack.monitoring.es.nodeType.masterNodeLabel', {
-    defaultMessage: 'Master Node' }),
+    defaultMessage: 'Master Node',
+  }),
   master_only: i18n.translate('xpack.monitoring.es.nodeType.masterOnlyNodeLabel', {
-    defaultMessage: 'Master Only Node' }),
+    defaultMessage: 'Master Only Node',
+  }),
   data: i18n.translate('xpack.monitoring.es.nodeType.dataOnlyNodeLabel', {
-    defaultMessage: 'Data Only Node' }),
+    defaultMessage: 'Data Only Node',
+  }),
   client: i18n.translate('xpack.monitoring.es.nodeType.clientNodeLabel', {
-    defaultMessage: 'Client Node' })
+    defaultMessage: 'Client Node',
+  }),
 };

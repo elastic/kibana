@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
@@ -12,7 +11,6 @@ import { ActionsSection } from './actions_section';
 import { ACTION } from '../../../common/constants/detector_rule';
 
 describe('ActionsSection', () => {
-
   const onSkipResultChange = jest.fn(() => {});
   const onSkipModelUpdateChange = jest.fn(() => {});
 
@@ -27,12 +25,9 @@ describe('ActionsSection', () => {
       actions: [],
     };
 
-    const component = shallowWithIntl(
-      <ActionsSection {...props} />
-    );
+    const component = shallowWithIntl(<ActionsSection {...props} />);
 
     expect(component).toMatchSnapshot();
-
   });
 
   test('renders with skip_result selected', () => {
@@ -41,17 +36,12 @@ describe('ActionsSection', () => {
       actions: [ACTION.SKIP_RESULT],
     };
 
-    const component = shallowWithIntl(
-      <ActionsSection {...props} />
-    );
+    const component = shallowWithIntl(<ActionsSection {...props} />);
 
     expect(component).toMatchSnapshot();
-
-
   });
 
   test('renders with skip_result and skip_model_update selected', () => {
-
     const component = shallowWithIntl(
       <ActionsSection
         actions={[ACTION.SKIP_RESULT, ACTION.SKIP_MODEL_UPDATE]}
@@ -61,7 +51,5 @@ describe('ActionsSection', () => {
     );
 
     expect(component).toMatchSnapshot();
-
   });
-
 });

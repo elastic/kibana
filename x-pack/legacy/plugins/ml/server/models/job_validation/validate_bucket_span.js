@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import { estimateBucketSpanFactory } from '../../models/bucket_span_estimator';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { SKIP_BUCKET_SPAN_ESTIMATION } from '../../../common/constants/validation';
@@ -15,11 +13,11 @@ import { validateJobObject } from './validate_job_object';
 
 const BUCKET_SPAN_HIGH_THRESHOLD = 1;
 
-const wrapQuery = (query) => ({
+const wrapQuery = query => ({
   bool: {
     must: [query],
-    must_not: []
-  }
+    must_not: [],
+  },
 });
 
 // Choosing a bucket from the set of recommendations which minimises
@@ -30,7 +28,7 @@ const wrapQuery = (query) => ({
 //   3 * (30 - 10) + 30 - 30 + 60 - 30 = 90,
 //   3 * (60 - 10) + 60 - 30 + 60 - 60 = 180]
 // 70 is the lowest so 10m would be picked
-const pickBucketSpan = (bucketSpans) => {
+const pickBucketSpan = bucketSpans => {
   if (bucketSpans.length === 1) {
     return bucketSpans[0];
   }
@@ -48,11 +46,21 @@ const pickBucketSpan = (bucketSpans) => {
   return bucketSpans[i];
 };
 
-export async function validateBucketSpan(callWithRequest, job, duration, elasticsearchPlugin, xpackMainPlugin) {
+export async function validateBucketSpan(
+  callWithRequest,
+  job,
+  duration,
+  elasticsearchPlugin,
+  xpackMainPlugin
+) {
   validateJobObject(job);
 
   // if there is no duration, do not run the estimate test
-  if (typeof duration === 'undefined' || typeof duration.start === 'undefined' || typeof duration.end === 'undefined') {
+  if (
+    typeof duration === 'undefined' ||
+    typeof duration.start === 'undefined' ||
+    typeof duration.end === 'undefined'
+  ) {
     return Promise.resolve([]);
   }
 
@@ -74,7 +82,7 @@ export async function validateBucketSpan(callWithRequest, job, duration, elastic
     if (messages.length === 0) {
       messages.push({
         id: 'success_bucket_span',
-        bucketSpan: job.analysis_config.bucket_span
+        bucketSpan: job.analysis_config.bucket_span,
       });
     }
     return messages;
@@ -91,17 +99,16 @@ export async function validateBucketSpan(callWithRequest, job, duration, elastic
       index: job.datafeed_config.indices.join(','),
       query: wrapQuery(job.datafeed_config.query),
       splitField: undefined,
-      timeField: job.data_description.time_field
+      timeField: job.data_description.time_field,
     };
-
   };
 
   const estimatorConfigs = [];
 
-  job.analysis_config.detectors.forEach((detector) => {
+  job.analysis_config.detectors.forEach(detector => {
     const data = getRequestData();
     const aggType = mlFunctionToESAggregation(detector.function);
-    const fieldName = (typeof detector.field_name === 'undefined') ? null : detector.field_name;
+    const fieldName = typeof detector.field_name === 'undefined' ? null : detector.field_name;
     data.aggTypes.push(aggType);
     data.fields.push(fieldName);
     if (typeof detector.partition_field_name !== 'undefined') {
@@ -112,18 +119,18 @@ export async function validateBucketSpan(callWithRequest, job, duration, elastic
 
   // do the actual bucket span estimation
   try {
-    const estimations = estimatorConfigs.map((data) => {
-      return new Promise((resolve) => {
+    const estimations = estimatorConfigs.map(data => {
+      return new Promise(resolve => {
         estimateBucketSpanFactory(callWithRequest, elasticsearchPlugin, xpackMainPlugin)(data)
           .then(resolve)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
           // this doesn't trigger a HTTP error but an object with an error message.
           // triggering a HTTP error would be too severe for this case.
-          .catch((resp) => {
+          .catch(resp => {
             resolve({
               error: true,
-              message: resp
+              message: resp,
             });
           });
       });
@@ -142,12 +149,12 @@ export async function validateBucketSpan(callWithRequest, job, duration, elastic
         messages.push({
           id: 'bucket_span_estimation_mismatch',
           currentBucketSpan: job.analysis_config.bucket_span,
-          estimateBucketSpan: bucketSpan.name
+          estimateBucketSpan: bucketSpan.name,
         });
       }
     }
-  // this catch gets triggered when an actual error gets thrown when running
-  // the estimation code, for example when the request payload is malformed
+    // this catch gets triggered when an actual error gets thrown when running
+    // the estimation code, for example when the request payload is malformed
   } catch (error) {
     throw new Error(error);
   }
@@ -155,7 +162,7 @@ export async function validateBucketSpan(callWithRequest, job, duration, elastic
   if (messages.length === 0) {
     messages.push({
       id: 'success_bucket_span',
-      bucketSpan: job.analysis_config.bucket_span
+      bucketSpan: job.analysis_config.bucket_span,
     });
   }
 

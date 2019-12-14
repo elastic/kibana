@@ -36,7 +36,7 @@ export const LAYER_TYPE = {
   TILE: 'TILE',
   VECTOR: 'VECTOR',
   VECTOR_TILE: 'VECTOR_TILE',
-  HEATMAP: 'HEATMAP'
+  HEATMAP: 'HEATMAP',
 };
 
 export const SORT_ORDER = {
@@ -52,7 +52,7 @@ export const ES_PEW_PEW = 'ES_PEW_PEW';
 
 export const FIELD_ORIGIN = {
   SOURCE: 'source',
-  JOIN: 'join'
+  JOIN: 'join',
 };
 
 export const SOURCE_DATA_ID_ORIGIN = 'source';
@@ -70,7 +70,7 @@ export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
 
 export const ES_GEO_FIELD_TYPE = {
   GEO_POINT: 'geo_point',
-  GEO_SHAPE: 'geo_shape'
+  GEO_SHAPE: 'geo_shape',
 };
 
 export const ES_SPATIAL_RELATIONS = {
@@ -95,10 +95,10 @@ export const LAT_INDEX = 1;
 
 export const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
-  features: []
+  features: [],
 };
 
 export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
-  POLYGON: 'POLYGON'
+  POLYGON: 'POLYGON',
 };

@@ -11,7 +11,6 @@ import { FieldTypeIcon } from './field_type_icon';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 
 describe('FieldTypeIcon', () => {
-
   test(`don't render component when type is undefined`, () => {
     const typeIconComponent = shallow(<FieldTypeIcon />);
     expect(typeIconComponent.isEmptyRender()).toBeTruthy();
@@ -28,7 +27,9 @@ describe('FieldTypeIcon', () => {
   });
 
   test(`render with tooltip and test hovering`, () => {
-    const typeIconComponent = mount(<FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />);
+    const typeIconComponent = mount(
+      <FieldTypeIcon type={ML_JOB_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
+    );
     const container = typeIconComponent.find({ className: 'field-type-icon-container' });
 
     expect(typeIconComponent.find('EuiToolTip').children()).toHaveLength(1);
@@ -41,10 +42,9 @@ describe('FieldTypeIcon', () => {
   });
 
   test(`update component`, () => {
-    const typeIconComponent = shallow(<FieldTypeIcon  />);
+    const typeIconComponent = shallow(<FieldTypeIcon />);
     expect(typeIconComponent.isEmptyRender()).toBeTruthy();
     typeIconComponent.setProps({ type: ML_JOB_FIELD_TYPES.IP });
     expect(typeIconComponent).toMatchSnapshot();
   });
-
 });

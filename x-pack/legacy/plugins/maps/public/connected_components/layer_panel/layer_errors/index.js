@@ -10,9 +10,12 @@ import { getSelectedLayer } from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
-    layer: getSelectedLayer(state)
+    layer: getSelectedLayer(state),
   };
 }
 
-const connectedLayerErrors = connect(mapStateToProps, null)(LayerErrors);
+const connectedLayerErrors = connect(
+  mapStateToProps,
+  null
+)(LayerErrors);
 export { connectedLayerErrors as LayerErrors };

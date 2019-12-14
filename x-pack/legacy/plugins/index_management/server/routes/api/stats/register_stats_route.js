@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 function formatHit(hit, indexName) {
   const { _shards, indices } = hit;
   const stats = indices[indexName];
   return {
     _shards,
-    stats
+    stats,
   };
 }
 
@@ -20,7 +19,7 @@ const handler = async (request, callWithRequest) => {
     expand_wildcards: 'none',
     index: indexName,
   };
-  const hit =  await callWithRequest('indices.stats', params);
+  const hit = await callWithRequest('indices.stats', params);
   const response = formatHit(hit, indexName);
 
   return response;

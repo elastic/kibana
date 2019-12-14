@@ -33,7 +33,7 @@ export function checkLicense(xPackInfo) {
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
-      layout: xPackInfo.isXpackUnavailable() ? 'error-xpack-unavailable' : 'error-es-unavailable'
+      layout: xPackInfo.isXpackUnavailable() ? 'error-xpack-unavailable' : 'error-es-unavailable',
     };
   }
 
@@ -46,7 +46,7 @@ export function checkLicense(xPackInfo) {
       allowRoleDocumentLevelSecurity: false,
       allowRoleFieldLevelSecurity: false,
       allowRbac: false,
-      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.'
+      linksMessage: 'Access is denied because Security is disabled in Elasticsearch.',
     };
   }
 

@@ -18,7 +18,7 @@ jest.mock('ui/timefilter', () => {
   const dataSetup = dataPluginMock.createSetup();
   const { timefilter } = dataSetup.timefilter;
   let _time = undefined;
-  timefilter.setTime.mockImplementation((time) => {
+  timefilter.setTime.mockImplementation(time => {
     _time = time;
   });
   timefilter.getActiveBounds.mockImplementation(() => {
@@ -36,36 +36,39 @@ import { timefilter } from 'ui/timefilter';
 // A copy of these mocks for ui/chrome and ui/timefilter are also
 // used in explorer_charts_container.test.js.
 // TODO: Refactor the involved tests to avoid this duplication
-jest.mock('ui/chrome',
+jest.mock(
+  'ui/chrome',
   () => ({
     getBasePath: () => {
       return '<basepath>';
     },
-  }), { virtual: true });
+  }),
+  { virtual: true }
+);
 
 import d3 from 'd3';
 import moment from 'moment';
 import { mount } from 'enzyme';
 import React from 'react';
 
-
 import {
   getExploreSeriesLink,
   getTickValues,
   isLabelLengthAboveThreshold,
   getXTransform,
-  removeLabelOverlap
+  removeLabelOverlap,
 } from './chart_utils';
 
 timefilter.setTime({
   from: moment(seriesConfig.selectedEarliest).toISOString(),
-  to: moment(seriesConfig.selectedLatest).toISOString()
+  to: moment(seriesConfig.selectedLatest).toISOString(),
 });
 
 describe('getExploreSeriesLink', () => {
   test('get timeseriesexplorer link', () => {
     const link = getExploreSeriesLink(seriesConfig);
-    const expectedLink = `<basepath>/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(population-03)),` +
+    const expectedLink =
+      `<basepath>/app/ml#/timeseriesexplorer?_g=(ml:(jobIds:!(population-03)),` +
       `refreshInterval:(display:Off,pause:!f,value:0),time:(from:'2017-02-23T00:00:00.000Z',mode:absolute,` +
       `to:'2017-02-23T23:59:59.999Z'))&_a=(mlTimeSeriesExplorer%3A(detectorIndex%3A0%2Centities%3A` +
       `(nginx.access.remote_ip%3A'72.57.0.53')%2Czoom%3A(from%3A'2017-02-19T20%3A00%3A00.000Z'%2Cto%3A'2017-02-27T04%3A00%3A00.000Z'))` +
@@ -87,7 +90,7 @@ describe('getTickValues', () => {
       1486670400000,
       1486684800000,
       1486699200000,
-      1486713600000
+      1486713600000,
     ]);
   });
 
@@ -125,16 +128,13 @@ describe('getTickValues', () => {
       1486267200000,
       1486281600000,
       1486296000000,
-      1486310400000
+      1486310400000,
     ]);
   });
 
   test('gallery sample data', () => {
     const tickValues = getTickValues(1518652800000, 604800000, 1518274800000, 1519635600000);
-    expect(tickValues).toEqual([
-      1518652800000,
-      1519257600000
-    ]);
+    expect(tickValues).toEqual([1518652800000, 1519257600000]);
   });
 
   test('invalid tickIntervals trigger an error', () => {
@@ -148,11 +148,10 @@ describe('getTickValues', () => {
 });
 
 describe('isLabelLengthAboveThreshold', () => {
-
   test('short label', () => {
     const isLongLabel = isLabelLengthAboveThreshold({
       detectorLabel: 'count',
-      entityFields: seriesConfig.entityFields
+      entityFields: seriesConfig.entityFields,
     });
     expect(isLongLabel).toBeFalsy();
   });
@@ -161,7 +160,6 @@ describe('isLabelLengthAboveThreshold', () => {
     const isLongLabel = isLabelLengthAboveThreshold(seriesConfig);
     expect(isLongLabel).toBeTruthy();
   });
-
 });
 
 describe('getXTransform', () => {
@@ -192,13 +190,7 @@ describe('removeLabelOverlap', () => {
   // This resembles how ExplorerChart renders its x axis.
   // We set up this boilerplate so we can then run removeLabelOverlap()
   // on some "real" structure.
-  function axisSetup({
-    interval,
-    plotEarliest,
-    plotLatest,
-    startTimeMs,
-    xAxisTickFormat
-  }) {
+  function axisSetup({ interval, plotEarliest, plotLatest, startTimeMs, xAxisTickFormat }) {
     const wrapper = mount(<div className="content-wrapper" />);
     const node = wrapper.getDOMNode();
 
@@ -210,11 +202,14 @@ describe('removeLabelOverlap', () => {
 
     const chartElement = d3.select(node);
 
-    const lineChartXScale = d3.time.scale()
+    const lineChartXScale = d3.time
+      .scale()
       .range([0, vizWidth])
       .domain([plotEarliest, plotLatest]);
 
-    const xAxis = d3.svg.axis().scale(lineChartXScale)
+    const xAxis = d3.svg
+      .axis()
+      .scale(lineChartXScale)
       .orient('bottom')
       .innerTickSize(-chartHeight)
       .outerTickSize(0)
@@ -224,13 +219,15 @@ describe('removeLabelOverlap', () => {
     const tickValues = getTickValues(startTimeMs, interval, plotEarliest, plotLatest);
     xAxis.tickValues(tickValues);
 
-    const svg = chartElement.append('svg')
+    const svg = chartElement
+      .append('svg')
       .attr('width', svgWidth)
       .attr('height', svgHeight);
 
     const axes = svg.append('g');
 
-    const gAxis = axes.append('g')
+    const gAxis = axes
+      .append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + chartHeight + ')')
       .call(xAxis);
@@ -238,7 +235,7 @@ describe('removeLabelOverlap', () => {
     return {
       gAxis,
       node,
-      vizWidth
+      vizWidth,
     };
   }
 
@@ -254,7 +251,7 @@ describe('removeLabelOverlap', () => {
       plotEarliest: 1486606500000,
       plotLatest: 1486719900000,
       startTimeMs,
-      xAxisTickFormat: 'HH:mm'
+      xAxisTickFormat: 'HH:mm',
     });
 
     expect(node.getElementsByTagName('text')).toHaveLength(8);
@@ -280,7 +277,7 @@ describe('removeLabelOverlap', () => {
       plotEarliest: 1485860400000,
       plotLatest: 1486314000000,
       startTimeMs,
-      xAxisTickFormat: 'YYYY-MM-DD HH:mm'
+      xAxisTickFormat: 'YYYY-MM-DD HH:mm',
     });
 
     expect(node.getElementsByTagName('text')).toHaveLength(32);

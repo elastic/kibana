@@ -31,41 +31,33 @@ jest.mock(
 );
 
 test('render', () => {
-  const component = shallowWithIntl(<AddData.WrappedComponent
-    apmUiEnabled={false}
-    mlEnabled={false}
-    isNewKibanaInstance={false}
-  />);
+  const component = shallowWithIntl(
+    <AddData.WrappedComponent apmUiEnabled={false} mlEnabled={false} isNewKibanaInstance={false} />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
   expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('mlEnabled', () => {
-  const component = shallowWithIntl(<AddData.WrappedComponent
-    apmUiEnabled={true}
-    mlEnabled={true}
-    isNewKibanaInstance={false}
-  />);
+  const component = shallowWithIntl(
+    <AddData.WrappedComponent apmUiEnabled={true} mlEnabled={true} isNewKibanaInstance={false} />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
   expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('apmUiEnabled', () => {
-  const component = shallowWithIntl(<AddData.WrappedComponent
-    apmUiEnabled={true}
-    mlEnabled={false}
-    isNewKibanaInstance={false}
-  />);
+  const component = shallowWithIntl(
+    <AddData.WrappedComponent apmUiEnabled={true} mlEnabled={false} isNewKibanaInstance={false} />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
   expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
 });
 
 test('isNewKibanaInstance', () => {
-  const component = shallowWithIntl(<AddData.WrappedComponent
-    apmUiEnabled={false}
-    mlEnabled={false}
-    isNewKibanaInstance={true}
-  />);
+  const component = shallowWithIntl(
+    <AddData.WrappedComponent apmUiEnabled={false} mlEnabled={false} isNewKibanaInstance={true} />
+  );
   expect(component).toMatchSnapshot(); // eslint-disable-line
   expect(chrome.getBasePath).toHaveBeenCalledTimes(1);
 });

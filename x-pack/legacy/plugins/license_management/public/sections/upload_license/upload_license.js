@@ -53,20 +53,26 @@ export class UploadLicense extends React.PureComponent {
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
-          title={<FormattedMessage
-            id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
-            defaultMessage="Confirm License Upload"
-          />}
+          title={
+            <FormattedMessage
+              id="xpack.licenseMgmt.uploadLicense.confirmModalTitle"
+              defaultMessage="Confirm License Upload"
+            />
+          }
           onCancel={this.cancel}
           onConfirm={() => this.send(true)}
-          cancelButtonText={<FormattedMessage
-            id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />}
-          confirmButtonText={<FormattedMessage
-            id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
-            defaultMessage="Confirm"
-          />}
+          cancelButtonText={
+            <FormattedMessage
+              id="xpack.licenseMgmt.uploadLicense.confirmModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          }
+          confirmButtonText={
+            <FormattedMessage
+              id="xpack.licenseMgmt.uploadLicense.confirmModal.confirmButtonLabel"
+              defaultMessage="Confirm"
+            />
+          }
         >
           <div>
             <EuiText>{firstLine}</EuiText>
@@ -139,9 +145,7 @@ export class UploadLicense extends React.PureComponent {
                   id="xpack.licenseMgmt.uploadLicense.replacingCurrentLicenseWarningMessage"
                   defaultMessage="Uploading a license will replace your current {currentLicenseType} license."
                   values={{
-                    currentLicenseType: (
-                      <strong>{currentLicenseType.toUpperCase()}</strong>
-                    )
+                    currentLicenseType: <strong>{currentLicenseType.toUpperCase()}</strong>,
                   }}
                 />
               </p>
@@ -151,10 +155,12 @@ export class UploadLicense extends React.PureComponent {
               <EuiText>
                 <EuiFilePicker
                   id="licenseFile"
-                  initialPromptText={<FormattedMessage
-                    id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
-                    defaultMessage="Select or drag your license file"
-                  />}
+                  initialPromptText={
+                    <FormattedMessage
+                      id="xpack.licenseMgmt.uploadLicense.selectLicenseFileDescription"
+                      defaultMessage="Select or drag your license file"
+                    />
+                  }
                   onChange={this.handleFile}
                 />
               </EuiText>
@@ -181,15 +187,17 @@ export class UploadLicense extends React.PureComponent {
                     isLoading={applying}
                     onClick={this.submit}
                   >
-                    {applying ?
+                    {applying ? (
                       <FormattedMessage
                         id="xpack.licenseMgmt.uploadLicense.uploadingButtonLabel"
                         defaultMessage="Uploading…"
                       />
-                      : <FormattedMessage
+                    ) : (
+                      <FormattedMessage
                         id="xpack.licenseMgmt.uploadLicense.uploadButtonLabel"
                         defaultMessage="Upload"
-                      />}
+                      />
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>

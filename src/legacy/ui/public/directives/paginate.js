@@ -22,19 +22,20 @@ import { i18n } from '@kbn/i18n';
 import { uiModules } from '../modules';
 import paginateControlsTemplate from './partials/paginate_controls.html';
 
-uiModules.get('kibana')
-  .directive('paginate', function ($parse, $compile) {
+uiModules
+  .get('kibana')
+  .directive('paginate', function($parse, $compile) {
     return {
       restrict: 'E',
       scope: true,
       link: {
-        pre: function ($scope, $el, attrs) {
+        pre: function($scope, $el, attrs) {
           if (_.isUndefined(attrs.bottomControls)) attrs.bottomControls = true;
           if ($el.find('paginate-controls.paginate-bottom').length === 0 && attrs.bottomControls) {
             $el.append($compile('<paginate-controls class="paginate-bottom">')($scope));
           }
         },
-        post: function ($scope, $el, attrs) {
+        post: function($scope, $el, attrs) {
           if (_.isUndefined(attrs.topControls)) attrs.topControls = false;
           if ($el.find('paginate-controls.paginate-top').length === 0 && attrs.topControls) {
             $el.prepend($compile('<paginate-controls class="paginate-top">')($scope));
@@ -56,62 +57,63 @@ uiModules.get('kibana')
           paginate.otherWidthGetter = $parse(attrs.otherWidth);
 
           paginate.init();
-        }
+        },
       },
       controllerAs: 'paginate',
-      controller: function ($scope, $document) {
+      controller: function($scope, $document) {
         const self = this;
         const ALL = 0;
-        const allSizeTitle = i18n.translate('common.ui.directives.paginate.size.allDropDownOptionLabel', {
-          defaultMessage: 'All',
-        });
+        const allSizeTitle = i18n.translate(
+          'common.ui.directives.paginate.size.allDropDownOptionLabel',
+          {
+            defaultMessage: 'All',
+          }
+        );
 
         self.sizeOptions = [
           { title: '10', value: 10 },
           { title: '25', value: 25 },
           { title: '100', value: 100 },
-          { title: allSizeTitle, value: ALL }
+          { title: allSizeTitle, value: ALL },
         ];
 
         // setup the watchers, called in the post-link function
-        self.init = function () {
-
+        self.init = function() {
           self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
 
-          $scope.$watchMulti([
-            'paginate.perPage',
-            self.perPageProp,
-            self.otherWidthGetter
-          ], function (vals, oldVals) {
-            const intChanges = vals[0] !== oldVals[0];
+          $scope.$watchMulti(
+            ['paginate.perPage', self.perPageProp, self.otherWidthGetter],
+            function(vals, oldVals) {
+              const intChanges = vals[0] !== oldVals[0];
 
-            if (intChanges) {
-              if (!setPerPage(self.perPage)) {
-              // if we are not able to set the external value,
-              // render now, otherwise wait for the external value
-              // to trigger the watcher again
-                self.renderList();
+              if (intChanges) {
+                if (!setPerPage(self.perPage)) {
+                  // if we are not able to set the external value,
+                  // render now, otherwise wait for the external value
+                  // to trigger the watcher again
+                  self.renderList();
+                }
+                return;
               }
-              return;
-            }
 
-            self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
-            if (self.perPage == null) {
-              self.perPage = ALL;
-              return;
-            }
+              self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
+              if (self.perPage == null) {
+                self.perPage = ALL;
+                return;
+              }
 
-            self.renderList();
-          });
+              self.renderList();
+            }
+          );
 
           $scope.$watch('page', self.changePage);
-          $scope.$watchCollection(self.getList, function (list) {
+          $scope.$watchCollection(self.getList, function(list) {
             $scope.list = list;
             self.renderList();
           });
         };
 
-        self.goToPage = function (number) {
+        self.goToPage = function(number) {
           if (number) {
             if (number.hasOwnProperty('number')) number = number.number;
             $scope.page = $scope.pages[number - 1] || $scope.pages[0];
@@ -122,14 +124,14 @@ uiModules.get('kibana')
           $document.scrollTop(0);
         };
 
-        self.renderList = function () {
+        self.renderList = function() {
           $scope.pages = [];
           if (!$scope.list) return;
 
           const perPage = _.parseInt(self.perPage);
           const count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
-          _.times(count, function (i) {
+          _.times(count, function(i) {
             let page;
 
             if (perPage) {
@@ -166,7 +168,7 @@ uiModules.get('kibana')
           }
         };
 
-        self.changePage = function (page) {
+        self.changePage = function(page) {
           if (!page) {
             $scope.otherPages = null;
             return;
@@ -218,13 +220,13 @@ uiModules.get('kibana')
             return true;
           }
         }
-      }
+      },
     };
   })
-  .directive('paginateControls', function () {
-  // this directive is automatically added by paginate if not found within it's $el
+  .directive('paginateControls', function() {
+    // this directive is automatically added by paginate if not found within it's $el
     return {
       restrict: 'E',
-      template: paginateControlsTemplate
+      template: paginateControlsTemplate,
     };
   });

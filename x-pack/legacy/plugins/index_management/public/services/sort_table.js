@@ -6,16 +6,16 @@
 
 import { sortBy } from 'lodash';
 
-const stringSort = (fieldName) => (item) => item[fieldName];
-const numericSort = (fieldName) => (item) => +item[fieldName];
+const stringSort = fieldName => item => item[fieldName];
+const numericSort = fieldName => item => +item[fieldName];
 const unitMagnitude = {
   kb: 1,
   mb: 2,
   gb: 3,
   tb: 4,
-  pb: 5
+  pb: 5,
 };
-const byteSort = (fieldName) => (item) => {
+const byteSort = fieldName => item => {
   const rawValue = item[fieldName];
   // raw value can be missing if index is closed
   if (!rawValue) {
@@ -25,7 +25,7 @@ const byteSort = (fieldName) => (item) => {
   if (!matchResult) {
     return 0;
   }
-  const [ , number, unit] = matchResult;
+  const [, number, unit] = matchResult;
   return +number * Math.pow(1024, unitMagnitude[unit]);
 };
 
@@ -41,7 +41,5 @@ const sorters = {
 };
 export const sortTable = (array = [], sortField, isSortAscending) => {
   const sorted = sortBy(array, sorters[sortField]);
-  return isSortAscending
-    ? sorted
-    : sorted.reverse();
+  return isSortAscending ? sorted : sorted.reverse();
 };

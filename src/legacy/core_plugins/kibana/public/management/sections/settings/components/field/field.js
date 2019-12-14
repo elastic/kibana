@@ -195,7 +195,7 @@ export class Field extends PureComponent {
     this.setState({
       unsavedValue: newUnsavedValue,
       isInvalid,
-      error
+      error,
     });
   };
 
@@ -232,11 +232,11 @@ export class Field extends PureComponent {
         isInvalid,
         error: isInvalid
           ? i18n.translate('kbn.management.settings.field.imageTooLargeErrorMessage', {
-            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-            values: {
-              maxSizeDescription: maxSize.description,
-            },
-          })
+              defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
+              values: {
+                maxSizeDescription: maxSize.description,
+              },
+            })
           : null,
         changeImage: true,
         unsavedValue: base64Image,

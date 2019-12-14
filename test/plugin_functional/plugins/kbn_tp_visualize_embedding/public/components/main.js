@@ -37,11 +37,10 @@ const VISUALIZATION_OPTIONS = [
   { value: '', text: '' },
   { value: 'timebased', text: 'Time based' },
   { value: 'timebased_with-filters', text: 'Time based (with filters)' },
-  { value: 'timebased_no-datehistogram', text: 'Time based data without date histogram' }
+  { value: 'timebased_no-datehistogram', text: 'Time based data without date histogram' },
 ];
 
 class Main extends React.Component {
-
   chartDiv = React.createRef();
   state = {
     loading: false,
@@ -68,18 +67,24 @@ class Main extends React.Component {
       await this.handler.whenFirstRenderComplete();
       this.setState({ loading: false });
     }
-  }
-
-  onChangeVisualization = async (ev) => {
-    this.setState({
-      selectedVis: ev.target.value,
-    }, this.embedVisualization);
   };
 
-  onSelectSample = async (ev) => {
-    this.setState({
-      selectedParams: ev.target.value,
-    }, this.embedVisualization);
+  onChangeVisualization = async ev => {
+    this.setState(
+      {
+        selectedVis: ev.target.value,
+      },
+      this.embedVisualization
+    );
+  };
+
+  onSelectSample = async ev => {
+    this.setState(
+      {
+        selectedParams: ev.target.value,
+      },
+      this.embedVisualization
+    );
   };
 
   render() {
@@ -88,7 +93,7 @@ class Main extends React.Component {
       ...embeddingSamples.map(({ id, title }) => ({
         value: id,
         text: title,
-      }))
+      })),
     ];
 
     return (
@@ -115,11 +120,11 @@ class Main extends React.Component {
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
-                { this.state.loading &&
+                {this.state.loading && (
                   <EuiFlexItem>
                     <EuiLoadingChart size="xl" data-test-subj="visLoadingIndicator" />
                   </EuiFlexItem>
-                }
+                )}
               </EuiFlexGroup>
             </EuiPageContentHeader>
             <EuiPageContentBody>

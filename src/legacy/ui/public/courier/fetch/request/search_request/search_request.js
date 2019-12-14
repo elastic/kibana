@@ -31,7 +31,7 @@ export function SearchRequestProvider(Promise) {
         throw new Error(
           i18n.translate('common.ui.courier.fetch.requireErrorHandlerErrorMessage', {
             defaultMessage: '{errorHandler} is required',
-            values: { errorHandler: 'errorHandler' }
+            values: { errorHandler: 'errorHandler' },
           })
         );
       }
@@ -148,7 +148,7 @@ export function SearchRequestProvider(Promise) {
       throw new Error(
         i18n.translate('common.ui.courier.fetch.unableContinueRequestErrorMessage', {
           defaultMessage: 'Unable to continue {type} request',
-          values: { type: this.type }
+          values: { type: this.type },
         })
       );
     }
@@ -192,7 +192,7 @@ export function SearchRequestProvider(Promise) {
     }
 
     getCompleteOrAbortedPromise() {
-      return Promise.race([ this.defer.promise, this.abortedDefer.promise ]);
+      return Promise.race([this.defer.promise, this.abortedDefer.promise]);
     }
 
     clone = () => {

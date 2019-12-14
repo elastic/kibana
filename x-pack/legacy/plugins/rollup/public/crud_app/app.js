@@ -18,10 +18,10 @@ class ShareRouter extends Component {
     router: PropTypes.shape({
       history: PropTypes.shape({
         push: PropTypes.func.isRequired,
-        createHref: PropTypes.func.isRequired
-      }).isRequired
-    }).isRequired
-  }
+        createHref: PropTypes.func.isRequired,
+      }).isRequired,
+    }).isRequired,
+  };
 
   constructor(...args) {
     super(...args);
@@ -39,7 +39,8 @@ class ShareRouter extends Component {
   }
 }
 
-export class App extends Component { // eslint-disable-line react/no-multi-comp
+export class App extends Component {
+  // eslint-disable-line react/no-multi-comp
   componentDidMount() {
     trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD);
   }

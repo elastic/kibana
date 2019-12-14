@@ -14,7 +14,7 @@ export function hFixture() {
     continue: 'continue value',
     redirect: stub().returns(h),
     unstate: stub().returns(h),
-    takeover: stub().returns(h)
+    takeover: stub().returns(h),
   });
 
   return h;

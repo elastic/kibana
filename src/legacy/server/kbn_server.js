@@ -19,7 +19,6 @@
 
 import { constant, once, compact, flatten } from 'lodash';
 
-
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import { Config } from './config';
@@ -81,63 +80,65 @@ export default class KbnServer {
     this.pluginSpecs = legacyPlugins.pluginSpecs;
     this.disabledPluginSpecs = legacyPlugins.disabledPluginSpecs;
 
-    this.ready = constant(this.mixin(
-      Plugins.waitForInitSetupMixin,
+    this.ready = constant(
+      this.mixin(
+        Plugins.waitForInitSetupMixin,
 
-      // Sets global HTTP behaviors
-      httpMixin,
+        // Sets global HTTP behaviors
+        httpMixin,
 
-      coreMixin,
+        coreMixin,
 
-      // adds methods for extending this.server
-      serverExtensionsMixin,
-      loggingMixin,
-      configDeprecationWarningsMixin,
-      warningsMixin,
-      usageMixin,
-      statusMixin,
+        // adds methods for extending this.server
+        serverExtensionsMixin,
+        loggingMixin,
+        configDeprecationWarningsMixin,
+        warningsMixin,
+        usageMixin,
+        statusMixin,
 
-      // writes pid file
-      pidMixin,
+        // writes pid file
+        pidMixin,
 
-      // scan translations dirs, register locale files and initialize i18n engine.
-      i18nMixin,
+        // scan translations dirs, register locale files and initialize i18n engine.
+        i18nMixin,
 
-      // find plugins and set this.plugins and this.pluginSpecs
-      Plugins.scanMixin,
+        // find plugins and set this.plugins and this.pluginSpecs
+        Plugins.scanMixin,
 
-      // tell the config we are done loading plugins
-      configCompleteMixin,
+        // tell the config we are done loading plugins
+        configCompleteMixin,
 
-      // setup this.uiBundles
-      uiMixin,
-      indexPatternsMixin,
+        // setup this.uiBundles
+        uiMixin,
+        indexPatternsMixin,
 
-      // setup saved object routes
-      savedObjectsMixin,
+        // setup saved object routes
+        savedObjectsMixin,
 
-      // setup capabilities routes
-      capabilitiesMixin,
+        // setup capabilities routes
+        capabilitiesMixin,
 
-      // setup routes for installing/uninstalling sample data sets
-      sampleDataMixin,
+        // setup routes for installing/uninstalling sample data sets
+        sampleDataMixin,
 
-      // setup routes for short urls
-      urlShorteningMixin,
+        // setup routes for short urls
+        urlShorteningMixin,
 
-      // ensure that all bundles are built, or that the
-      // watch bundle server is running
-      optimizeMixin,
+        // ensure that all bundles are built, or that the
+        // watch bundle server is running
+        optimizeMixin,
 
-      // transpiles SCSS into CSS
-      sassMixin,
+        // transpiles SCSS into CSS
+        sassMixin,
 
-      // initialize the plugins
-      Plugins.initializeMixin,
+        // initialize the plugins
+        Plugins.initializeMixin,
 
-      // notify any deferred setup logic that plugins have initialized
-      Plugins.waitForInitResolveMixin,
-    ));
+        // notify any deferred setup logic that plugins have initialized
+        Plugins.waitForInitResolveMixin
+      )
+    );
 
     this.listen = once(this.listen);
   }
@@ -174,11 +175,12 @@ export default class KbnServer {
       process.send(['WORKER_LISTENING']);
     }
 
-    server.log(['listening', 'info'], `Server running at ${server.info.uri}${
-      config.get('server.rewriteBasePath')
-        ? config.get('server.basePath')
-        : ''
-    }`);
+    server.log(
+      ['listening', 'info'],
+      `Server running at ${server.info.uri}${
+        config.get('server.rewriteBasePath') ? config.get('server.basePath') : ''
+      }`
+    );
 
     return server;
   }
@@ -200,10 +202,7 @@ export default class KbnServer {
   }
 
   applyLoggingConfiguration(settings) {
-    const config = new Config(
-      this.config.getSchema(),
-      transformDeprecations(settings)
-    );
+    const config = new Config(this.config.getSchema(), transformDeprecations(settings));
 
     const loggingOptions = loggingConfiguration(config);
     const subset = {

@@ -17,6 +17,6 @@ DevToolsRegistryProvider.register(() => {
     }),
     url: '#/dev_tools/grokdebugger',
     disabled: !xpackInfo.get('features.grokdebugger.enableLink', false),
-    tooltipContent: xpackInfo.get('features.grokdebugger.message')
+    tooltipContent: xpackInfo.get('features.grokdebugger.message'),
   };
 });

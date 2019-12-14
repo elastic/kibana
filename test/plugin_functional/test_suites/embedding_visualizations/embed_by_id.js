@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { delay } from 'bluebird';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const table = getService('table');
@@ -79,28 +79,19 @@ export default function ({ getService }) {
       it('should correctly embed specifying a query', async () => {
         await selectParams('query');
         const data = await getTableData();
-        expect(data).to.be.eql([
-          ['jpg', '9,109'],
-        ]);
+        expect(data).to.be.eql([['jpg', '9,109']]);
       });
 
       it('should correctly embed specifying filters', async () => {
         await selectParams('filters');
         const data = await getTableData();
-        expect(data).to.be.eql([
-          ['css', '2,159'],
-          ['gif', '918'],
-          ['php', '445'],
-        ]);
+        expect(data).to.be.eql([['css', '2,159'], ['gif', '918'], ['php', '445']]);
       });
 
       it('should correctly embed specifying filters and query and timeRange', async () => {
         await selectParams('filters_query_timerange');
         const data = await getTableData();
-        expect(data).to.be.eql([
-          ['css', '678'],
-          ['php', '110'],
-        ]);
+        expect(data).to.be.eql([['css', '678'], ['php', '110']]);
       });
     });
 
@@ -185,5 +176,4 @@ export default function ({ getService }) {
       });
     });
   });
-
 }

@@ -24,30 +24,33 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import { BaseParamType } from '../../param_types/base';
 import { FieldParamType } from '../../param_types/field';
 
-describe('Field', function () {
-
+describe('Field', function() {
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
-  beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-  }));
+  beforeEach(
+    ngMock.inject(function(Private) {
+      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    })
+  );
 
-  describe('constructor', function () {
-    it('it is an instance of BaseParamType', function () {
+  describe('constructor', function() {
+    it('it is an instance of BaseParamType', function() {
       const aggParam = new FieldParamType({
-        name: 'field', type: 'field'
+        name: 'field',
+        type: 'field',
       });
 
       expect(aggParam).to.be.a(BaseParamType);
     });
   });
 
-  describe('getAvailableFields', function () {
-    it('should return only aggregatable fields by default', function () {
+  describe('getAvailableFields', function() {
+    it('should return only aggregatable fields by default', function() {
       const aggParam = new FieldParamType({
-        name: 'field', type: 'field'
+        name: 'field',
+        type: 'field',
       });
 
       const fields = aggParam.getAvailableFields(indexPattern.fields);
@@ -57,9 +60,10 @@ describe('Field', function () {
       }
     });
 
-    it('should return all fields if onlyAggregatable is false', function () {
+    it('should return all fields if onlyAggregatable is false', function() {
       const aggParam = new FieldParamType({
-        name: 'field', type: 'field'
+        name: 'field',
+        type: 'field',
       });
 
       aggParam.onlyAggregatable = false;

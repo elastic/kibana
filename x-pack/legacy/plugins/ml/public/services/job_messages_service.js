@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-
 // Service for carrying out Elasticsearch queries to obtain data for the
 // Ml Results dashboards.
 import { ML_NOTIFICATION_INDEX_PATTERN } from 'plugins/ml/../common/constants/index_patterns';
@@ -20,21 +16,21 @@ const anomalyDetectorTypeFilter = {
     should: [
       {
         term: {
-          job_type: 'anomaly_detector'
-        }
+          job_type: 'anomaly_detector',
+        },
       },
       {
         bool: {
           must_not: {
             exists: {
-              field: 'job_type'
-            }
-          }
-        }
-      }
+              field: 'job_type',
+            },
+          },
+        },
+      },
     ],
-    minimum_should_match: 1
-  }
+    minimum_should_match: 1,
+  },
 };
 
 // search for audit messages, jobId is optional.
@@ -50,16 +46,16 @@ function getJobAuditMessages(fromRange, jobId) {
           should: [
             {
               term: {
-                job_id: '' // catch system messages
-              }
+                job_id: '', // catch system messages
+              },
             },
             {
               term: {
-                job_id: jobId // messages for specified jobId
-              }
-            }
-          ]
-        }
+                job_id: jobId, // messages for specified jobId
+              },
+            },
+          ],
+        },
       };
     }
 
@@ -69,9 +65,9 @@ function getJobAuditMessages(fromRange, jobId) {
         range: {
           timestamp: {
             gte: `now-${fromRange}`,
-            lte: 'now'
-          }
-        }
+            lte: 'now',
+          },
+        },
       };
     }
 
@@ -80,12 +76,8 @@ function getJobAuditMessages(fromRange, jobId) {
       ignore_unavailable: true,
       rest_total_hits_as_int: true,
       size: 1000,
-      body:
-      {
-        sort: [
-          { timestamp: { order: 'asc' } },
-          { job_id: { order: 'asc' } }
-        ],
+      body: {
+        sort: [{ timestamp: { order: 'asc' } }, { job_id: { order: 'asc' } }],
         query: {
           bool: {
             filter: [
@@ -93,27 +85,27 @@ function getJobAuditMessages(fromRange, jobId) {
                 bool: {
                   must_not: {
                     term: {
-                      level: 'activity'
-                    }
-                  }
-                }
+                      level: 'activity',
+                    },
+                  },
+                },
               },
               anomalyDetectorTypeFilter,
               jobFilter,
-              timeFilter
-            ]
-          }
-        }
-      }
+              timeFilter,
+            ],
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         let messages = [];
         if (resp.hits.total !== 0) {
           messages = resp.hits.hits.map(hit => hit._source);
         }
         resolve({ messages });
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -134,13 +126,13 @@ function getAuditMessagesSummary() {
               {
                 range: {
                   timestamp: {
-                    gte: 'now-1d'
-                  }
-                }
+                    gte: 'now-1d',
+                  },
+                },
               },
-              anomalyDetectorTypeFilter
-            ]
-          }
+              anomalyDetectorTypeFilter,
+            ],
+          },
         },
         aggs: {
           levelsPerJob: {
@@ -158,36 +150,38 @@ function getAuditMessagesSummary() {
                       field: 'message.raw',
                       size: 1,
                       order: {
-                        latestMessage: 'desc'
-                      }
+                        latestMessage: 'desc',
+                      },
                     },
                     aggs: {
                       latestMessage: {
                         max: {
-                          field: 'timestamp'
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+                          field: 'timestamp',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
-      .then((resp) => {
+      .then(resp => {
         let messagesPerJob = [];
-        if (resp.hits.total !== 0 &&
+        if (
+          resp.hits.total !== 0 &&
           resp.aggregations &&
           resp.aggregations.levelsPerJob &&
           resp.aggregations.levelsPerJob.buckets &&
-          resp.aggregations.levelsPerJob.buckets.length) {
+          resp.aggregations.levelsPerJob.buckets.length
+        ) {
           messagesPerJob = resp.aggregations.levelsPerJob.buckets;
         }
         resolve({ messagesPerJob });
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -195,6 +189,5 @@ function getAuditMessagesSummary() {
 
 export const jobMessagesService = {
   getJobAuditMessages,
-  getAuditMessagesSummary
+  getAuditMessagesSummary,
 };
-

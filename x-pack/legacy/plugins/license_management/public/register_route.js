@@ -8,7 +8,12 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { HashRouter } from 'react-router-dom';
-import { setTelemetryOptInService, setTelemetryEnabled, setHttpClient, TelemetryOptInProvider } from './lib/telemetry';
+import {
+  setTelemetryOptInService,
+  setTelemetryEnabled,
+  setHttpClient,
+  TelemetryOptInProvider,
+} from './lib/telemetry';
 import { I18nContext } from 'ui/i18n';
 import chrome from 'ui/chrome';
 
@@ -57,7 +62,7 @@ const manageAngularLifecycle = ($scope, $route, elem) => {
     elem && unmountComponentAtNode(elem);
   });
 };
-const initializeTelemetry = ($injector) => {
+const initializeTelemetry = $injector => {
   const telemetryEnabled = $injector.get('telemetryEnabled');
   const Private = $injector.get('Private');
   const telemetryOptInProvider = Private(TelemetryOptInProvider);
@@ -65,45 +70,43 @@ const initializeTelemetry = ($injector) => {
   setTelemetryEnabled(telemetryEnabled);
   setHttpClient($injector.get('$http'));
 };
-routes
-  .when(`${BASE_PATH}:view?`, {
-    template: template,
-    k7Breadcrumbs($route) {
-      switch ($route.current.params.view) {
-        case 'upload_license':
-          return getUploadBreadcrumbs();
-        default:
-          return getDashboardBreadcrumbs();
-      }
-    },
-    controllerAs: 'licenseManagement',
-    controller: class LicenseManagementController {
-
-      constructor($injector, $rootScope, $scope, $route, kbnUrl) {
-        initializeTelemetry($injector);
-        let autoLogout = null;
-        /* if security is disabled, there will be no autoLogout service,
-         so just substitute noop function in that case */
-        try {
-          autoLogout = $injector.get('autoLogout');
-        } catch (e) {
-          autoLogout = () => {};
-        }
-
-        $scope.$$postDigest(() => {
-          const elem = document.getElementById('licenseReactRoot');
-          const initialState = { license: xpackInfo.get('license') };
-          const kbnUrlWrapper = {
-            change(url) {
-              kbnUrl.change(url);
-              $rootScope.$digest();
-            }
-          };
-          const services = { autoLogout, xPackInfo: xpackInfo, kbnUrl: kbnUrlWrapper, $injector };
-          const store = licenseManagementStore(initialState, services);
-          renderReact(elem, store);
-          manageAngularLifecycle($scope, $route, elem);
-        });
-      }
+routes.when(`${BASE_PATH}:view?`, {
+  template: template,
+  k7Breadcrumbs($route) {
+    switch ($route.current.params.view) {
+      case 'upload_license':
+        return getUploadBreadcrumbs();
+      default:
+        return getDashboardBreadcrumbs();
     }
-  });
+  },
+  controllerAs: 'licenseManagement',
+  controller: class LicenseManagementController {
+    constructor($injector, $rootScope, $scope, $route, kbnUrl) {
+      initializeTelemetry($injector);
+      let autoLogout = null;
+      /* if security is disabled, there will be no autoLogout service,
+         so just substitute noop function in that case */
+      try {
+        autoLogout = $injector.get('autoLogout');
+      } catch (e) {
+        autoLogout = () => {};
+      }
+
+      $scope.$$postDigest(() => {
+        const elem = document.getElementById('licenseReactRoot');
+        const initialState = { license: xpackInfo.get('license') };
+        const kbnUrlWrapper = {
+          change(url) {
+            kbnUrl.change(url);
+            $rootScope.$digest();
+          },
+        };
+        const services = { autoLogout, xPackInfo: xpackInfo, kbnUrl: kbnUrlWrapper, $injector };
+        const store = licenseManagementStore(initialState, services);
+        renderReact(elem, store);
+        manageAngularLifecycle($scope, $route, elem);
+      });
+    }
+  },
+});

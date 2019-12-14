@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import 'ngreact';
 
 import { wrapInI18nContext } from 'ui/i18n';
@@ -27,23 +26,27 @@ const template = `
   <file-datavisualizer-page />
 `;
 
-uiRoutes
-  .when('/filedatavisualizer/?', {
-    template,
-    k7Breadcrumbs: getFileDataVisualizerBreadcrumbs,
-    resolve: {
-      CheckLicense: checkBasicLicense,
-      privileges: checkFindFileStructurePrivilege,
-      indexPatterns: loadIndexPatterns,
-      mlNodeCount: getMlNodeCount,
-      loadMlServerInfo,
-    }
-  });
+uiRoutes.when('/filedatavisualizer/?', {
+  template,
+  k7Breadcrumbs: getFileDataVisualizerBreadcrumbs,
+  resolve: {
+    CheckLicense: checkBasicLicense,
+    privileges: checkFindFileStructurePrivilege,
+    indexPatterns: loadIndexPatterns,
+    mlNodeCount: getMlNodeCount,
+    loadMlServerInfo,
+  },
+});
 
-module.directive('fileDatavisualizerPage', function ($injector) {
+module.directive('fileDatavisualizerPage', function($injector) {
   const reactDirective = $injector.get('reactDirective');
   const indexPatterns = $injector.get('indexPatterns');
   const kibanaConfig = $injector.get('config');
 
-  return reactDirective(wrapInI18nContext(FileDataVisualizerPage), undefined, { restrict: 'E' }, { indexPatterns, kibanaConfig });
+  return reactDirective(
+    wrapInI18nContext(FileDataVisualizerPage),
+    undefined,
+    { restrict: 'E' },
+    { indexPatterns, kibanaConfig }
+  );
 });

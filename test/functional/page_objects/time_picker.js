@@ -28,7 +28,6 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['header', 'common']);
 
   class TimePickerPage {
-
     async timePickerExists() {
       return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
     }
@@ -64,8 +63,8 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       } else if (browser.isInternetExplorer) {
         const input = await testSubjects.find(dataTestsubj);
         const currentValue = await input.getAttribute('value');
-        await input.type((browser.keys.ARROW_RIGHT).repeat(currentValue.length));
-        await input.type((browser.keys.BACK_SPACE).repeat(currentValue.length));
+        await input.type(browser.keys.ARROW_RIGHT.repeat(currentValue.length));
+        await input.type(browser.keys.BACK_SPACE.repeat(currentValue.length));
         await input.type(value);
         await input.click();
       } else {
@@ -97,7 +96,9 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('superDatePickerAbsoluteDateInput');
       await this.inputValue('superDatePickerAbsoluteDateInput', fromTime);
 
-      const superDatePickerApplyButtonExists = await testSubjects.exists('superDatePickerApplyTimeButton');
+      const superDatePickerApplyButtonExists = await testSubjects.exists(
+        'superDatePickerApplyTimeButton'
+      );
       if (superDatePickerApplyButtonExists) {
         // Timepicker is in top nav
         // Click super date picker apply button to apply time range
@@ -150,19 +151,26 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
     async getRefreshConfig(keepQuickSelectOpen = false) {
       await this.openQuickSelectTimeMenu();
-      const interval = await testSubjects.getAttribute('superDatePickerRefreshIntervalInput', 'value');
+      const interval = await testSubjects.getAttribute(
+        'superDatePickerRefreshIntervalInput',
+        'value'
+      );
 
       let selectedUnit;
       const select = await testSubjects.find('superDatePickerRefreshIntervalUnitsSelect');
       const options = await find.allDescendantDisplayedByCssSelector('option', select);
-      await Promise.all(options.map(async (optionElement) => {
-        const isSelected = await optionElement.isSelected();
-        if (isSelected) {
-          selectedUnit = await optionElement.getVisibleText();
-        }
-      }));
+      await Promise.all(
+        options.map(async optionElement => {
+          const isSelected = await optionElement.isSelected();
+          if (isSelected) {
+            selectedUnit = await optionElement.getVisibleText();
+          }
+        })
+      );
 
-      const toggleButtonText = await testSubjects.getVisibleText('superDatePickerToggleRefreshButton');
+      const toggleButtonText = await testSubjects.getVisibleText(
+        'superDatePickerToggleRefreshButton'
+      );
       if (!keepQuickSelectOpen) {
         await this.closeQuickSelectTimeMenu();
       }
@@ -170,7 +178,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       return {
         interval,
         units: selectedUnit,
-        isPaused: toggleButtonText === 'Start' ? true : false
+        isPaused: toggleButtonText === 'Start' ? true : false,
       };
     }
 
@@ -180,7 +188,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
       const end = await testSubjects.getVisibleText('superDatePickerendDatePopoverButton');
       return {
         start,
-        end
+        end,
       };
     }
 
@@ -201,7 +209,7 @@ export function TimePickerPageProvider({ getService, getPageObjects }) {
 
       return {
         start,
-        end
+        end,
       };
     }
 

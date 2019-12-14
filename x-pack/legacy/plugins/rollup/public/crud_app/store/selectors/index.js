@@ -9,24 +9,24 @@ import { Pager } from '@elastic/eui';
 import { createSelector } from 'reselect';
 import { filterItems, sortTable } from '../../services';
 
-export const getJobs = (state) => state.jobs.byId;
-export const getJobsList = (state) => state.jobs.allIds;
+export const getJobs = state => state.jobs.byId;
+export const getJobsList = state => state.jobs.allIds;
 export const getJobByJobId = (state, id) => getJobs(state)[id];
-export const getFilteredIds = (state) => state.jobs.filteredIds;
-export const getTableState = (state) => state.tableState;
+export const getFilteredIds = state => state.jobs.filteredIds;
+export const getTableState = state => state.tableState;
 
-export const getDetailPanelType = (state) => state.detailPanel.panelType;
-export const isDetailPanelOpen = (state) => state.detailPanel.isOpen;
-export const getDetailPanelJob = (state) => getJobByJobId(state, state.detailPanel.jobId);
-export const getDetailPanelJobId = (state) => state.detailPanel.jobId;
+export const getDetailPanelType = state => state.detailPanel.panelType;
+export const isDetailPanelOpen = state => state.detailPanel.isOpen;
+export const getDetailPanelJob = state => getJobByJobId(state, state.detailPanel.jobId);
+export const getDetailPanelJobId = state => state.detailPanel.jobId;
 
-export const isLoading = (state) => state.jobs.isLoading;
-export const jobLoadError = (state) => state.jobs.jobLoadError;
-export const isSaving = (state) => state.createJob.isSaving;
-export const getCreateJobError = (state) => state.createJob.error;
-export const isUpdating = (state) => state.updateJob.isUpdating;
+export const isLoading = state => state.jobs.isLoading;
+export const jobLoadError = state => state.jobs.jobLoadError;
+export const isSaving = state => state.createJob.isSaving;
+export const getCreateJobError = state => state.createJob.error;
+export const isUpdating = state => state.updateJob.isUpdating;
 
-export const getCloneJobConfig = (state) => state.cloneJob.job;
+export const getCloneJobConfig = state => state.cloneJob.job;
 
 export const getJobStatusByJobName = (state, jobName) => {
   const jobs = getJobs(state);
@@ -45,7 +45,7 @@ const getFilteredJobs = createSelector(
 
 export const getTotalItems = createSelector(
   getFilteredJobs,
-  (filteredJobs) => {
+  filteredJobs => {
     return Object.keys(filteredJobs).length;
   }
 );
@@ -72,21 +72,21 @@ export const getPageOfJobs = createSelector(
 
 export const getHasNextPage = createSelector(
   getPager,
-  (pager) => {
+  pager => {
     return pager.hasNextPage;
   }
 );
 
 export const getHasPreviousPage = createSelector(
   getPager,
-  (pager) => {
+  pager => {
     return pager.hasPreviousPage;
   }
 );
 
 export const getCurrentPage = createSelector(
   getPager,
-  (pager) => {
+  pager => {
     return pager.currentPage;
   }
 );

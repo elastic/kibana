@@ -22,7 +22,6 @@ const ALL_LAYERS = '_ALL_LAYERS_';
 const DEFAULT_PAGE_NUMBER = 0;
 
 export class TooltipHeader extends Component {
-
   state = {
     filteredFeatures: this.props.features,
     pageNumber: DEFAULT_PAGE_NUMBER,
@@ -71,19 +70,21 @@ export class TooltipHeader extends Component {
     const layerNames = await Promise.all(layerNamePromises);
 
     if (this._isMounted) {
-      this.setState({
-        filteredFeatures: this.props.features,
-        selectedLayerId: ALL_LAYERS,
-        layerOptions: layers.map((layer, index) => {
-          const displayName = layerNames[index];
-          const count = countByLayerId.get(layer.getId());
-          return {
-            value: layer.getId(),
-            text: `(${count}) ${displayName}`
-          };
-        })
-      },
-      () => this._onPageChange(DEFAULT_PAGE_NUMBER));
+      this.setState(
+        {
+          filteredFeatures: this.props.features,
+          selectedLayerId: ALL_LAYERS,
+          layerOptions: layers.map((layer, index) => {
+            const displayName = layerNames[index];
+            const count = countByLayerId.get(layer.getId());
+            return {
+              value: layer.getId(),
+              text: `(${count}) ${displayName}`,
+            };
+          }),
+        },
+        () => this._onPageChange(DEFAULT_PAGE_NUMBER)
+      );
     }
   };
 
@@ -98,17 +99,20 @@ export class TooltipHeader extends Component {
       return;
     }
 
-    const filteredFeatures = newLayerId === ALL_LAYERS
-      ? this.props.features
-      : this.props.features.filter((feature) => {
-        return feature.layerId === newLayerId;
-      });
+    const filteredFeatures =
+      newLayerId === ALL_LAYERS
+        ? this.props.features
+        : this.props.features.filter(feature => {
+            return feature.layerId === newLayerId;
+          });
 
-    this.setState({
-      filteredFeatures,
-      selectedLayerId: newLayerId
-    },
-    () => this._onPageChange(DEFAULT_PAGE_NUMBER));
+    this.setState(
+      {
+        filteredFeatures,
+        selectedLayerId: newLayerId,
+      },
+      () => this._onPageChange(DEFAULT_PAGE_NUMBER)
+    );
   };
 
   render() {
@@ -142,7 +146,7 @@ export class TooltipHeader extends Component {
               defaultMessage="{pageNumber} of {total}"
               values={{
                 pageNumber: pageNumber + 1,
-                total: filteredFeatures.length
+                total: filteredFeatures.length,
               }}
             />
           </EuiTextColor>
@@ -160,17 +164,17 @@ export class TooltipHeader extends Component {
                 {
                   value: ALL_LAYERS,
                   text: i18n.translate('xpack.maps.tooltip.allLayersLabel', {
-                    defaultMessage: 'All layers'
-                  })
+                    defaultMessage: 'All layers',
+                  }),
                 },
-                ...layerOptions
+                ...layerOptions,
               ]}
               onChange={this._onLayerChange}
               value={selectedLayerId}
               compressed
               fullWidth
               aria-label={i18n.translate('xpack.maps.tooltip.layerFilterLabel', {
-                defaultMessage: 'Filter results by layer'
+                defaultMessage: 'Filter results by layer',
               })}
             />
           </EuiFormRow>
@@ -182,7 +186,7 @@ export class TooltipHeader extends Component {
     if (isLocked) {
       // When close button is the only item, add empty FlexItem to push close button to right
       if (headerItems.length === 0) {
-        headerItems.push(<EuiFlexItem key="spacer"/>);
+        headerItems.push(<EuiFlexItem key="spacer" />);
       }
 
       headerItems.push(
@@ -191,7 +195,7 @@ export class TooltipHeader extends Component {
             onClick={this.props.onClose}
             iconType="cross"
             aria-label={i18n.translate('xpack.maps.tooltip.closeAriaLabel', {
-              defaultMessage: 'Close tooltip'
+              defaultMessage: 'Close tooltip',
             })}
             data-test-subj="mapTooltipCloseButton"
           />
@@ -209,7 +213,7 @@ export class TooltipHeader extends Component {
           {headerItems}
         </EuiFlexGroup>
 
-        <EuiHorizontalRule margin="xs"/>
+        <EuiHorizontalRule margin="xs" />
       </Fragment>
     );
   }

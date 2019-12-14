@@ -23,73 +23,73 @@ export const fieldMappings = {
     fields: {
       keyword: {
         type: 'keyword',
-      }
-    }
+      },
+    },
   },
   currency: {
-    type: 'keyword'
+    type: 'keyword',
   },
   customer_birth_date: {
-    type: 'date'
+    type: 'date',
   },
   customer_first_name: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   customer_full_name: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   customer_gender: {
-    type: 'keyword'
+    type: 'keyword',
   },
   customer_id: {
-    type: 'keyword'
+    type: 'keyword',
   },
   customer_last_name: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-        ignore_above: 256
-      }
-    }
+        ignore_above: 256,
+      },
+    },
   },
   customer_phone: {
-    type: 'keyword'
+    type: 'keyword',
   },
   day_of_week: {
-    type: 'keyword'
+    type: 'keyword',
   },
   day_of_week_i: {
-    type: 'integer'
+    type: 'integer',
   },
   email: {
-    type: 'keyword'
+    type: 'keyword',
   },
   manufacturer: {
     type: 'text',
     fields: {
       keyword: {
         type: 'keyword',
-      }
-    }
+      },
+    },
   },
   order_date: {
-    type: 'date'
+    type: 'date',
   },
   order_id: {
-    type: 'keyword'
+    type: 'keyword',
   },
   products: {
     properties: {
@@ -100,9 +100,9 @@ export const fieldMappings = {
         type: 'text',
         fields: {
           keyword: {
-            type: 'keyword'
-          }
-        }
+            type: 'keyword',
+          },
+        },
       },
       tax_amount: { type: 'half_float' },
       product_id: { type: 'long' },
@@ -110,9 +110,9 @@ export const fieldMappings = {
         type: 'text',
         fields: {
           keyword: {
-            type: 'keyword'
-          }
-        }
+            type: 'keyword',
+          },
+        },
       },
       sku: { type: 'keyword' },
       taxless_price: { type: 'half_float' },
@@ -123,9 +123,9 @@ export const fieldMappings = {
         fields: {
           keyword: {
             type: 'keyword',
-            ignore_above: 256
-          }
-        }
+            ignore_above: 256,
+          },
+        },
       },
       discount_amount: { type: 'half_float' },
       created_on: { type: 'date' },
@@ -134,35 +134,35 @@ export const fieldMappings = {
         analyzer: 'english',
         fields: {
           keyword: {
-            type: 'keyword'
-          }
-        }
+            type: 'keyword',
+          },
+        },
       },
       price: { type: 'half_float' },
       taxful_price: { type: 'half_float' },
       base_unit_price: { type: 'half_float' },
-    }
+    },
   },
   sku: {
-    type: 'keyword'
+    type: 'keyword',
   },
   taxful_total_price: {
-    type: 'half_float'
+    type: 'half_float',
   },
   taxless_total_price: {
-    type: 'half_float'
+    type: 'half_float',
   },
   total_quantity: {
-    type: 'integer'
+    type: 'integer',
   },
   total_unique_products: {
-    type: 'integer'
+    type: 'integer',
   },
   type: {
-    type: 'keyword'
+    type: 'keyword',
   },
   user: {
-    type: 'keyword'
+    type: 'keyword',
   },
   geoip: {
     properties: {
@@ -170,7 +170,7 @@ export const fieldMappings = {
       location: { type: 'geo_point' },
       region_name: { type: 'keyword' },
       continent_name: { type: 'keyword' },
-      city_name: { type: 'keyword' }
-    }
-  }
+      city_name: { type: 'keyword' },
+    },
+  },
 };

@@ -21,7 +21,7 @@ import { uiModules } from '../modules';
 import { wrapInI18nContext } from 'ui/i18n';
 const module = uiModules.get('kibana');
 
-module.directive('fieldName', function (config, reactDirective) {
+module.directive('fieldName', function(config, reactDirective) {
   return reactDirective(
     wrapInI18nContext(FieldName),
     [

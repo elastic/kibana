@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ getPageObjects, getService }) {
+export default function({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const visualTesting = getService('visualTesting');
 
@@ -19,7 +19,6 @@ export default function ({ getPageObjects, getService }) {
       it('should symbolize points as icons with expected color, size, and orientation', async () => {
         await visualTesting.snapshot();
       });
-
     });
 
     describe('dynamic coloring', () => {
@@ -32,7 +31,6 @@ export default function ({ getPageObjects, getService }) {
       it('should symbolize fill color with custom steps from join value and border color with dynamic color ramp from prop value', async () => {
         await visualTesting.snapshot();
       });
-
     });
 
     describe('dynamic line coloring', () => {
@@ -45,7 +43,6 @@ export default function ({ getPageObjects, getService }) {
       it('should symbolize pew pew lines', async () => {
         await visualTesting.snapshot();
       });
-
     });
   });
 }

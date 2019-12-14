@@ -65,74 +65,80 @@ uiRoutes
     template: editorTemplate,
     k7Breadcrumbs: getCreateBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
+      savedVis: function(savedVisualizations, redirectWhenMissing, $route) {
         const visTypes = visualizations.types.all();
         const visType = _.find(visTypes, { name: $route.current.params.type });
         const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
         const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
         if (shouldHaveIndex && !hasIndex) {
           throw new Error(
-            i18n.translate('kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage', {
-              defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
-            })
+            i18n.translate(
+              'kbn.visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage',
+              {
+                defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
+              }
+            )
           );
         }
 
-        return savedVisualizations.get($route.current.params)
+        return savedVisualizations
+          .get($route.current.params)
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
-              return savedVis.vis.type.setup(savedVis)
-                .catch(() => savedVis);
+              return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
             }
             return savedVis;
           })
-          .catch(redirectWhenMissing({
-            '*': '/visualize'
-          }));
-      }
-    }
+          .catch(
+            redirectWhenMissing({
+              '*': '/visualize',
+            })
+          );
+      },
+    },
   })
   .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
     template: editorTemplate,
     k7Breadcrumbs: getEditBreadcrumbs,
     resolve: {
-      savedVis: function (savedVisualizations, redirectWhenMissing, $route) {
-        return savedVisualizations.get($route.current.params.id)
-          .then((savedVis) => {
+      savedVis: function(savedVisualizations, redirectWhenMissing, $route) {
+        return savedVisualizations
+          .get($route.current.params.id)
+          .then(savedVis => {
             npStart.core.chrome.recentlyAccessed.add(
               savedVis.getFullPath(),
               savedVis.title,
-              savedVis.id);
+              savedVis.id
+            );
             return savedVis;
           })
           .then(savedVis => {
             if (savedVis.vis.type.setup) {
-              return savedVis.vis.type.setup(savedVis)
-                .catch(() => savedVis);
+              return savedVis.vis.type.setup(savedVis).catch(() => savedVis);
             }
             return savedVis;
           })
-          .catch(redirectWhenMissing({
-            'visualization': '/visualize',
-            'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-            'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-            'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
-          }));
-      }
-    }
+          .catch(
+            redirectWhenMissing({
+              visualization: '/visualize',
+              search: '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+              'index-pattern':
+                '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+              'index-pattern-field':
+                '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+            })
+          );
+      },
+    },
   });
 
-uiModules
-  .get('app/visualize', [
-    'kibana/url'
-  ])
-  .directive('visualizeApp', function () {
-    return {
-      restrict: 'E',
-      controllerAs: 'visualizeApp',
-      controller: VisEditor,
-    };
-  });
+uiModules.get('app/visualize', ['kibana/url']).directive('visualizeApp', function() {
+  return {
+    restrict: 'E',
+    controllerAs: 'visualizeApp',
+    controller: VisEditor,
+  };
+});
 
 function VisEditor(
   $scope,
@@ -151,7 +157,7 @@ function VisEditor(
   localStorage,
   // unused but required to initialize auto refresh :-\
   /* eslint-disable no-unused-vars */
-  courier,
+  courier
 ) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const getUnhashableStates = Private(getUnhashableStatesProvider);
@@ -165,125 +171,153 @@ function VisEditor(
 
   $scope.vis = vis;
 
-  const $appStatus = this.appStatus = {
-    dirty: !savedVis.id
-  };
+  const $appStatus = (this.appStatus = {
+    dirty: !savedVis.id,
+  });
 
-  $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
-    id: 'save',
-    label: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
-    description: i18n.translate('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
-      defaultMessage: 'Save Visualization',
-    }),
-    testId: 'visualizeSaveButton',
-    disableButton() {
-      return Boolean(vis.dirty);
-    },
-    tooltip() {
-      if (vis.dirty) {
-        return i18n.translate('kbn.visualize.topNavMenu.saveVisualizationDisabledButtonTooltip', {
-          defaultMessage: 'Apply or Discard your changes before saving'
-        });
-      }
-    },
-    run: async () => {
-      const onSave = ({ newTitle, newCopyOnSave, isTitleDuplicateConfirmed, onTitleDuplicate, newDescription }) => {
-        const currentTitle = savedVis.title;
-        savedVis.title = newTitle;
-        savedVis.copyOnSave = newCopyOnSave;
-        savedVis.description = newDescription;
-        const saveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        };
-        return doSave(saveOptions).then((response) => {
-          // If the save wasn't successful, put the original values back.
-          if (!response.id || response.error) {
-            savedVis.title = currentTitle;
-          }
-          return response;
-        });
-      };
+  $scope.topNavMenu = [
+    ...(capabilities.get().visualize.save
+      ? [
+          {
+            id: 'save',
+            label: i18n.translate('kbn.topNavMenu.saveVisualizationButtonLabel', {
+              defaultMessage: 'save',
+            }),
+            description: i18n.translate(
+              'kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Save Visualization',
+              }
+            ),
+            testId: 'visualizeSaveButton',
+            disableButton() {
+              return Boolean(vis.dirty);
+            },
+            tooltip() {
+              if (vis.dirty) {
+                return i18n.translate(
+                  'kbn.visualize.topNavMenu.saveVisualizationDisabledButtonTooltip',
+                  {
+                    defaultMessage: 'Apply or Discard your changes before saving',
+                  }
+                );
+              }
+            },
+            run: async () => {
+              const onSave = ({
+                newTitle,
+                newCopyOnSave,
+                isTitleDuplicateConfirmed,
+                onTitleDuplicate,
+                newDescription,
+              }) => {
+                const currentTitle = savedVis.title;
+                savedVis.title = newTitle;
+                savedVis.copyOnSave = newCopyOnSave;
+                savedVis.description = newDescription;
+                const saveOptions = {
+                  confirmOverwrite: false,
+                  isTitleDuplicateConfirmed,
+                  onTitleDuplicate,
+                };
+                return doSave(saveOptions).then(response => {
+                  // If the save wasn't successful, put the original values back.
+                  if (!response.id || response.error) {
+                    savedVis.title = currentTitle;
+                  }
+                  return response;
+                });
+              };
 
-      const confirmButtonLabel = $scope.isAddToDashMode() ? (
-        <FormattedMessage
-          id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
-          defaultMessage="Save and add to dashboard"
-        />
-      ) : null;
+              const confirmButtonLabel = $scope.isAddToDashMode() ? (
+                <FormattedMessage
+                  id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+                  defaultMessage="Save and add to dashboard"
+                />
+              ) : null;
 
-      const saveModal = (
-        <SavedObjectSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          title={savedVis.title}
-          showCopyOnSave={savedVis.id ? true : false}
-          objectType="visualization"
-          confirmButtonLabel={confirmButtonLabel}
-          description={savedVis.description}
-        />);
-      showSaveModal(saveModal);
-    }
-  }] : []), {
-    id: 'share',
-    label: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
-    description: i18n.translate('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
-      defaultMessage: 'Share Visualization',
-    }),
-    testId: 'shareTopNavButton',
-    run: (anchorElement) => {
-      const hasUnappliedChanges = vis.dirty;
-      const hasUnsavedChanges = $appStatus.dirty;
-      showShareContextMenu({
-        anchorElement,
-        allowEmbed: true,
-        allowShortUrl: capabilities.get().visualize.createShortUrl,
-        getUnhashableStates,
-        objectId: savedVis.id,
-        objectType: 'visualization',
-        shareContextMenuExtensions,
-        sharingData: {
-          title: savedVis.title,
-        },
-        isDirty: hasUnappliedChanges || hasUnsavedChanges,
-      });
-    }
-  }, {
-    id: 'inspector',
-    label: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', { defaultMessage: 'inspect' }),
-    description: i18n.translate('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
-      defaultMessage: 'Open Inspector for visualization',
-    }),
-    testId: 'openInspectorButton',
-    disableButton() {
-      return !vis.hasInspector || !vis.hasInspector();
-    },
-    run() {
-      const inspectorSession = vis.openInspector();
-      // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
-      const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
-      // Remove that watch in case the user closes the inspector session herself.
-      inspectorSession.onClose.finally(removeWatch);
-    },
-    tooltip() {
-      if (!vis.hasInspector || !vis.hasInspector()) {
-        return i18n.translate('kbn.visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
-          defaultMessage: `This visualization doesn't support any inspectors.`,
+              const saveModal = (
+                <SavedObjectSaveModal
+                  onSave={onSave}
+                  onClose={() => {}}
+                  title={savedVis.title}
+                  showCopyOnSave={savedVis.id ? true : false}
+                  objectType="visualization"
+                  confirmButtonLabel={confirmButtonLabel}
+                  description={savedVis.description}
+                />
+              );
+              showSaveModal(saveModal);
+            },
+          },
+        ]
+      : []),
+    {
+      id: 'share',
+      label: i18n.translate('kbn.topNavMenu.shareVisualizationButtonLabel', {
+        defaultMessage: 'share',
+      }),
+      description: i18n.translate('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
+        defaultMessage: 'Share Visualization',
+      }),
+      testId: 'shareTopNavButton',
+      run: anchorElement => {
+        const hasUnappliedChanges = vis.dirty;
+        const hasUnsavedChanges = $appStatus.dirty;
+        showShareContextMenu({
+          anchorElement,
+          allowEmbed: true,
+          allowShortUrl: capabilities.get().visualize.createShortUrl,
+          getUnhashableStates,
+          objectId: savedVis.id,
+          objectType: 'visualization',
+          shareContextMenuExtensions,
+          sharingData: {
+            title: savedVis.title,
+          },
+          isDirty: hasUnappliedChanges || hasUnsavedChanges,
         });
-      }
-    }
-  }, {
-    id: 'refresh',
-    label: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
-    description: i18n.translate('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
-      defaultMessage: 'Refresh',
-    }),
-    run: function () {
-      vis.forceReload();
+      },
     },
-    testId: 'visualizeRefreshButton',
-  }];
+    {
+      id: 'inspector',
+      label: i18n.translate('kbn.topNavMenu.openInspectorButtonLabel', {
+        defaultMessage: 'inspect',
+      }),
+      description: i18n.translate('kbn.visualize.topNavMenu.openInspectorButtonAriaLabel', {
+        defaultMessage: 'Open Inspector for visualization',
+      }),
+      testId: 'openInspectorButton',
+      disableButton() {
+        return !vis.hasInspector || !vis.hasInspector();
+      },
+      run() {
+        const inspectorSession = vis.openInspector();
+        // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+        const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
+        // Remove that watch in case the user closes the inspector session herself.
+        inspectorSession.onClose.finally(removeWatch);
+      },
+      tooltip() {
+        if (!vis.hasInspector || !vis.hasInspector()) {
+          return i18n.translate('kbn.visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
+            defaultMessage: `This visualization doesn't support any inspectors.`,
+          });
+        }
+      },
+    },
+    {
+      id: 'refresh',
+      label: i18n.translate('kbn.topNavMenu.refreshButtonLabel', { defaultMessage: 'refresh' }),
+      description: i18n.translate('kbn.visualize.topNavMenu.refreshButtonAriaLabel', {
+        defaultMessage: 'Refresh',
+      }),
+      run: function() {
+        vis.forceReload();
+      },
+      testId: 'visualizeRefreshButton',
+    },
+  ];
 
   let stateMonitor;
 
@@ -299,10 +333,10 @@ function VisEditor(
     linked: !!savedVis.savedSearchId,
     query: searchSource.getOwnField('query') || {
       query: '',
-      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
     },
     filters: searchSource.getOwnField('filter') || [],
-    vis: savedVisState
+    vis: savedVisState,
   };
 
   // Instance of app_state.js.
@@ -320,16 +354,17 @@ function VisEditor(
     // defaults applied. If the url was from a previous session which included modifications to the
     // appState then they won't be equal.
     if (!angular.equals(appState.vis, savedVisState)) {
-      Promise.try(function () {
+      Promise.try(function() {
         vis.setState(appState.vis);
-      })
-        .catch(redirectWhenMissing({
-          'index-pattern-field': '/visualize'
-        }));
+      }).catch(
+        redirectWhenMissing({
+          'index-pattern-field': '/visualize',
+        })
+      );
     }
 
     return appState;
-  }());
+  })();
 
   $scope.filters = queryFilter.getFilters();
 
@@ -343,7 +378,10 @@ function VisEditor(
   };
 
   $scope.onApplyFilters = filters => {
-    const { timeRangeFilter, restOfFilters } = extractTimeFilter($scope.indexPattern.timeFieldName, filters);
+    const { timeRangeFilter, restOfFilters } = extractTimeFilter(
+      $scope.indexPattern.timeFieldName,
+      filters
+    );
     queryFilter.addFilters(restOfFilters);
     if (timeRangeFilter) changeTimeFilter(timefilter, timeRangeFilter);
     $scope.state.$newFilters = [];
@@ -357,9 +395,12 @@ function VisEditor(
 
   $scope.showSaveQuery = capabilities.get().visualize.saveQuery;
 
-  $scope.$watch(() => capabilities.get().visualize.saveQuery, (newCapability) => {
-    $scope.showSaveQuery = newCapability;
-  });
+  $scope.$watch(
+    () => capabilities.get().visualize.saveQuery,
+    newCapability => {
+      $scope.showSaveQuery = newCapability;
+    }
+  );
 
   function init() {
     // export some objects
@@ -380,7 +421,8 @@ function VisEditor(
     $scope.uiState = $state.makeStateful('uiState');
     $scope.appStatus = $appStatus;
 
-    const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
+    const addToDashMode =
+      $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
     kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
     $scope.isAddToDashMode = () => addToDashMode;
@@ -401,11 +443,11 @@ function VisEditor(
     $scope.opts = _.pick($scope, 'savedVis', 'isAddToDashMode');
 
     stateMonitor = stateMonitorFactory.create($state, stateDefaults);
-    stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
+    stateMonitor.ignoreProps(['vis.listeners']).onChange(status => {
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', (newQuery) => {
+    $scope.$watch('state.query', newQuery => {
       const query = migrateLegacyQuery(newQuery);
       $scope.updateQueryAndFetch({ query });
     });
@@ -425,17 +467,21 @@ function VisEditor(
 
     const subscriptions = new Subscription();
 
-    subscriptions.add(subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
-      next: () => {
-        $scope.refreshInterval = timefilter.getRefreshInterval();
-      }
-    }));
-    subscriptions.add(subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
-      next: updateTimeRange
-    }));
+    subscriptions.add(
+      subscribeWithScope($scope, timefilter.getRefreshIntervalUpdate$(), {
+        next: () => {
+          $scope.refreshInterval = timefilter.getRefreshInterval();
+        },
+      })
+    );
+    subscriptions.add(
+      subscribeWithScope($scope, timefilter.getTimeUpdate$(), {
+        next: updateTimeRange,
+      })
+    );
 
     // update the searchSource when query updates
-    $scope.fetch = function () {
+    $scope.fetch = function() {
       $state.save();
       savedVis.searchSource.setField('query', $state.query);
       savedVis.searchSource.setField('filter', $state.filters);
@@ -443,17 +489,21 @@ function VisEditor(
     };
 
     // update the searchSource when filters update
-    subscriptions.add(subscribeWithScope($scope, queryFilter.getUpdates$(), {
-      next: () => {
-        $scope.filters = queryFilter.getFilters();
-        $scope.globalFilters = queryFilter.getGlobalFilters();
-      }
-    }));
-    subscriptions.add(subscribeWithScope($scope, queryFilter.getFetches$(), {
-      next: $scope.fetch
-    }));
+    subscriptions.add(
+      subscribeWithScope($scope, queryFilter.getUpdates$(), {
+        next: () => {
+          $scope.filters = queryFilter.getFilters();
+          $scope.globalFilters = queryFilter.getGlobalFilters();
+        },
+      })
+    );
+    subscriptions.add(
+      subscribeWithScope($scope, queryFilter.getFetches$(), {
+        next: $scope.fetch,
+      })
+    );
 
-    $scope.$on('$destroy', function () {
+    $scope.$on('$destroy', function() {
       if ($scope._handler) {
         $scope._handler.destroy();
       }
@@ -464,21 +514,24 @@ function VisEditor(
 
     if (!$scope.chrome.getVisible()) {
       getVisualizeLoader().then(loader => {
-        $scope._handler = loader.embedVisualizationWithSavedObject($element.find('.visualize')[0], savedVis, {
-          timeRange: $scope.timeRange,
-          uiState: $scope.uiState,
-          appState: $state,
-          listenOnChange: false
-        });
+        $scope._handler = loader.embedVisualizationWithSavedObject(
+          $element.find('.visualize')[0],
+          savedVis,
+          {
+            timeRange: $scope.timeRange,
+            uiState: $scope.uiState,
+            appState: $state,
+            listenOnChange: false,
+          }
+        );
       });
     }
   }
 
-  $scope.updateQueryAndFetch = function ({ query, dateRange }) {
-    const isUpdate = (
+  $scope.updateQueryAndFetch = function({ query, dateRange }) {
+    const isUpdate =
       (query && !_.isEqual(query, $state.query)) ||
-      (dateRange && !_.isEqual(dateRange, $scope.timeRange))
-    );
+      (dateRange && !_.isEqual(dateRange, $scope.timeRange));
 
     $state.query = query;
     timefilter.setTime(dateRange);
@@ -487,10 +540,10 @@ function VisEditor(
     if (!isUpdate) $scope.fetch();
   };
 
-  $scope.onRefreshChange = function ({ isPaused, refreshInterval }) {
+  $scope.onRefreshChange = function({ isPaused, refreshInterval }) {
     timefilter.setRefreshInterval({
       pause: isPaused,
-      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value
+      value: refreshInterval ? refreshInterval : $scope.refreshInterval.value,
     });
   };
 
@@ -507,14 +560,14 @@ function VisEditor(
     delete $state.savedQuery;
     $state.query = {
       query: '',
-      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage')
+      language: localStorage.get('kibana.userQueryLanguage') || config.get('search:queryLanguage'),
     };
     queryFilter.removeAll();
     $state.save();
     $scope.fetch();
   };
 
-  const updateStateFromSavedQuery = (savedQuery) => {
+  const updateStateFromSavedQuery = savedQuery => {
     $state.query = savedQuery.attributes.query;
     $state.save();
 
@@ -533,7 +586,7 @@ function VisEditor(
     $scope.fetch();
   };
 
-  $scope.$watch('savedQuery', (newSavedQuery) => {
+  $scope.$watch('savedQuery', newSavedQuery => {
     if (!newSavedQuery) return;
     $state.savedQuery = newSavedQuery.id;
     $state.save();
@@ -547,7 +600,7 @@ function VisEditor(
       return;
     }
     if (!$scope.savedQuery || newSavedQueryId !== $scope.savedQuery.id) {
-      savedQueryService.getSavedQuery(newSavedQueryId).then((savedQuery) => {
+      savedQueryService.getSavedQuery(newSavedQueryId).then(savedQuery => {
         $scope.$evalAsync(() => {
           $scope.savedQuery = savedQuery;
           updateStateFromSavedQuery(savedQuery);
@@ -566,19 +619,22 @@ function VisEditor(
     savedVis.visState = $state.vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
-    return savedVis.save(saveOptions)
-      .then(function (id) {
+    return savedVis.save(saveOptions).then(
+      function(id) {
         $scope.$evalAsync(() => {
           stateMonitor.setInitialState($state.toJSON());
 
           if (id) {
             toastNotifications.addSuccess({
-              title: i18n.translate('kbn.visualize.topNavMenu.saveVisualization.successNotificationText', {
-                defaultMessage: `Saved '{visTitle}'`,
-                values: {
-                  visTitle: savedVis.title,
-                },
-              }),
+              title: i18n.translate(
+                'kbn.visualize.topNavMenu.saveVisualization.successNotificationText',
+                {
+                  defaultMessage: `Saved '{visTitle}'`,
+                  values: {
+                    visTitle: savedVis.title,
+                  },
+                }
+              ),
               'data-test-subj': 'saveVisualizationSuccess',
             });
 
@@ -595,9 +651,16 @@ function VisEditor(
               // url, not the unsaved one.
               chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-              const lastDashboardAbsoluteUrl = npStart.core.chrome.navLinks.get('kibana:dashboard').url;
-              const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
-              dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
+              const lastDashboardAbsoluteUrl = npStart.core.chrome.navLinks.get('kibana:dashboard')
+                .url;
+              const dashboardParsedUrl = absoluteToParsedUrl(
+                lastDashboardAbsoluteUrl,
+                chrome.getBasePath()
+              );
+              dashboardParsedUrl.addQueryParameter(
+                DashboardConstants.NEW_VISUALIZATION_ID_PARAM,
+                savedVis.id
+              );
               kbnUrl.change(dashboardParsedUrl.appPath);
             } else if (savedVis.id === $route.current.params.id) {
               docTitle.change(savedVis.lastSavedTitle);
@@ -608,24 +671,29 @@ function VisEditor(
           }
         });
         return { id };
-      }, (error) => {
+      },
+      error => {
         // eslint-disable-next-line
         console.error(error);
         toastNotifications.addDanger({
-          title: i18n.translate('kbn.visualize.topNavMenu.saveVisualization.failureNotificationText', {
-            defaultMessage: `Error on saving '{visTitle}'`,
-            values: {
-              visTitle: savedVis.title,
-            },
-          }),
+          title: i18n.translate(
+            'kbn.visualize.topNavMenu.saveVisualization.failureNotificationText',
+            {
+              defaultMessage: `Error on saving '{visTitle}'`,
+              values: {
+                visTitle: savedVis.title,
+              },
+            }
+          ),
           text: error.message,
           'data-test-subj': 'saveVisualizationError',
         });
         return { error };
-      });
+      }
+    );
   }
 
-  $scope.unlink = function () {
+  $scope.unlink = function() {
     if (!$state.linked) return;
 
     $state.linked = false;
@@ -634,7 +702,10 @@ function VisEditor(
 
     delete savedVis.savedSearchId;
     delete vis.savedSearchId;
-    searchSourceParent.setField('filter', _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter')));
+    searchSourceParent.setField(
+      'filter',
+      _.union(searchSource.getOwnField('filter'), searchSourceParent.getOwnField('filter'))
+    );
 
     $state.query = searchSourceParent.getField('query');
     $state.filters = searchSourceParent.getField('filter');
@@ -645,20 +716,23 @@ function VisEditor(
       i18n.translate('kbn.visualize.linkedToSearch.unlinkSuccessNotificationText', {
         defaultMessage: `Unlinked from saved search '{searchTitle}'`,
         values: {
-          searchTitle: savedVis.savedSearch.title
-        }
+          searchTitle: savedVis.savedSearch.title,
+        },
       })
     );
 
     $scope.fetch();
   };
 
-
   $scope.getAdditionalMessage = () => {
-    return '<i class="kuiIcon fa-flask"></i>' +
-    i18n.translate('kbn.visualize.experimentalVisInfoText', { defaultMessage: 'This visualization is marked as experimental.' }) +
-    ' ' +
-    vis.type.feedbackMessage;
+    return (
+      '<i class="kuiIcon fa-flask"></i>' +
+      i18n.translate('kbn.visualize.experimentalVisInfoText', {
+        defaultMessage: 'This visualization is marked as experimental.',
+      }) +
+      ' ' +
+      vis.type.feedbackMessage
+    );
   };
 
   init();

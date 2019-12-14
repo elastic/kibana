@@ -23,18 +23,20 @@ import { VisProvider } from '../../../../vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { createFilterFilters } from '../../../buckets/create_filter/filters';
 
-describe('AggConfig Filters', function () {
-  describe('filters', function () {
+describe('AggConfig Filters', function() {
+  describe('filters', function() {
     let indexPattern;
     let Vis;
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      Vis = Private(VisProvider);
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    }));
+    beforeEach(
+      ngMock.inject(function(Private) {
+        Vis = Private(VisProvider);
+        indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      })
+    );
 
-    it('should return a filters filter', function () {
+    it('should return a filters filter', function() {
       const vis = new Vis(indexPattern, {
         type: 'histogram',
         aggs: [
@@ -44,11 +46,11 @@ describe('AggConfig Filters', function () {
             params: {
               filters: [
                 { input: { query: 'type:apache', language: 'lucene' } },
-                { input: { query: 'type:nginx', language: 'lucene' } }
-              ]
-            }
-          }
-        ]
+                { input: { query: 'type:nginx', language: 'lucene' } },
+              ],
+            },
+          },
+        ],
       });
 
       const aggConfig = vis.aggs.byName('filters')[0];

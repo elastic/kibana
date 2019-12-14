@@ -152,10 +152,16 @@ export class MarkdownEditor extends Component {
             <thead>
               <tr>
                 <th scope="col">
-                  <FormattedMessage id="visTypeTimeseries.markdownEditor.nameLabel" defaultMessage="Name" />
+                  <FormattedMessage
+                    id="visTypeTimeseries.markdownEditor.nameLabel"
+                    defaultMessage="Name"
+                  />
                 </th>
                 <th scope="col">
-                  <FormattedMessage id="visTypeTimeseries.markdownEditor.valueLabel" defaultMessage="Value" />
+                  <FormattedMessage
+                    id="visTypeTimeseries.markdownEditor.valueLabel"
+                    defaultMessage="Value"
+                  />
                 </th>
               </tr>
             </thead>

@@ -21,7 +21,7 @@ export function scrollSearchApi(server) {
   server.route({
     path: '/api/kibana/legacy_scroll_start',
     method: ['POST'],
-    handler: async (req) => {
+    handler: async req => {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const { index, size, body } = req.payload;
       const params = {
@@ -37,13 +37,13 @@ export function scrollSearchApi(server) {
       } catch (err) {
         throw server.plugins.elasticsearch.handleESError(err);
       }
-    }
+    },
   });
 
   server.route({
     path: '/api/kibana/legacy_scroll_continue',
     method: ['POST'],
-    handler: async (req) => {
+    handler: async req => {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const { scrollId } = req.payload;
       try {
@@ -51,6 +51,6 @@ export function scrollSearchApi(server) {
       } catch (err) {
         throw server.plugins.elasticsearch.handleESError(err);
       }
-    }
+    },
   });
 }

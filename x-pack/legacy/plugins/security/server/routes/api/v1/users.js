@@ -21,14 +21,11 @@ export function initUsersApi({ authc: { login }, config }, server) {
     method: 'GET',
     path: '/api/security/v1/users',
     handler(request) {
-      return callWithRequest(request, 'shield.getUser').then(
-        _.values,
-        wrapError
-      );
+      return callWithRequest(request, 'shield.getUser').then(_.values, wrapError);
     },
     config: {
-      pre: [routePreCheckLicenseFn]
-    }
+      pre: [routePreCheckLicenseFn],
+    },
   });
 
   server.route({
@@ -36,16 +33,14 @@ export function initUsersApi({ authc: { login }, config }, server) {
     path: '/api/security/v1/users/{username}',
     handler(request) {
       const username = request.params.username;
-      return callWithRequest(request, 'shield.getUser', { username }).then(
-        (response) => {
-          if (response[username]) return response[username];
-          throw Boom.notFound();
-        },
-        wrapError);
+      return callWithRequest(request, 'shield.getUser', { username }).then(response => {
+        if (response[username]) return response[username];
+        throw Boom.notFound();
+      }, wrapError);
     },
     config: {
-      pre: [routePreCheckLicenseFn]
-    }
+      pre: [routePreCheckLicenseFn],
+    },
   });
 
   server.route({
@@ -53,17 +48,20 @@ export function initUsersApi({ authc: { login }, config }, server) {
     path: '/api/security/v1/users/{username}',
     handler(request) {
       const username = request.params.username;
-      const body = _(request.payload).omit(['username', 'enabled']).omit(_.isNull);
+      const body = _(request.payload)
+        .omit(['username', 'enabled'])
+        .omit(_.isNull);
       return callWithRequest(request, 'shield.putUser', { username, body }).then(
         () => request.payload,
-        wrapError);
+        wrapError
+      );
     },
     config: {
       validate: {
-        payload: userSchema
+        payload: userSchema,
       },
-      pre: [routePreCheckLicenseFn]
-    }
+      pre: [routePreCheckLicenseFn],
+    },
   });
 
   server.route({
@@ -73,11 +71,12 @@ export function initUsersApi({ authc: { login }, config }, server) {
       const username = request.params.username;
       return callWithRequest(request, 'shield.deleteUser', { username }).then(
         () => h.response().code(204),
-        wrapError);
+        wrapError
+      );
     },
     config: {
-      pre: [routePreCheckLicenseFn]
-    }
+      pre: [routePreCheckLicenseFn],
+    },
   });
 
   server.route({
@@ -89,9 +88,7 @@ export function initUsersApi({ authc: { login }, config }, server) {
       const isCurrentUser = username === request.auth.credentials.username;
 
       // We should prefer `token` over `basic` if possible.
-      const providerToLoginWith = config.authc.providers.includes('token')
-        ? 'token'
-        : 'basic';
+      const providerToLoginWith = config.authc.providers.includes('token') ? 'token' : 'basic';
 
       // If user tries to change own password, let's check if old password is valid first by trying
       // to login.
@@ -107,7 +104,7 @@ export function initUsersApi({ authc: { login }, config }, server) {
           if (!authenticationResult.succeeded()) {
             return Boom.unauthorized(authenticationResult.error);
           }
-        } catch(err) {
+        } catch (err) {
           return Boom.unauthorized(err);
         }
       }
@@ -120,14 +117,14 @@ export function initUsersApi({ authc: { login }, config }, server) {
         if (isCurrentUser) {
           const authenticationResult = await login(KibanaRequest.from(request), {
             provider: providerToLoginWith,
-            value: { username, password: newPassword }
+            value: { username, password: newPassword },
           });
 
           if (!authenticationResult.succeeded()) {
-            return Boom.unauthorized((authenticationResult.error));
+            return Boom.unauthorized(authenticationResult.error);
           }
         }
-      } catch(err) {
+      } catch (err) {
         return wrapError(err);
       }
 
@@ -137,10 +134,10 @@ export function initUsersApi({ authc: { login }, config }, server) {
       validate: {
         payload: Joi.object({
           password: Joi.string(),
-          newPassword: Joi.string().required()
-        })
+          newPassword: Joi.string().required(),
+        }),
       },
-      pre: [routePreCheckLicenseFn]
-    }
+      pre: [routePreCheckLicenseFn],
+    },
   });
 }

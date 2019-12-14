@@ -63,10 +63,8 @@ import 'leaflet';
 
 routes.enable();
 
-
-routes
-  .otherwise({
-    redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
-  });
+routes.otherwise({
+  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`,
+});
 
 uiModules.get('kibana').run(showAppRedirectNotification);

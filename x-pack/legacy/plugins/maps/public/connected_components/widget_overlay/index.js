@@ -7,5 +7,8 @@
 import { connect } from 'react-redux';
 import { WidgetOverlay } from './widget_overlay';
 
-const connectedWidgetOverlay = connect(null, null)(WidgetOverlay);
+const connectedWidgetOverlay = connect(
+  null,
+  null
+)(WidgetOverlay);
 export { connectedWidgetOverlay as WidgetOverlay };

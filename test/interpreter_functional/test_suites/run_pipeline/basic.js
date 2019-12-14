@@ -22,8 +22,7 @@ import { expectExpressionProvider } from './helpers';
 
 // this file showcases how to use testing utilities defined in helpers.js together with the kbn_tp_run_pipeline
 // test plugin to write autmated tests for interprete
-export default function ({ getService, updateBaselines }) {
-
+export default function({ getService, updateBaselines }) {
   let expectExpression;
   describe('basic visualize loader pipeline expression tests', () => {
     before(() => {
@@ -39,7 +38,12 @@ export default function ({ getService, updateBaselines }) {
       });
 
       it('correctly sets timeRange', async () => {
-        const result = await expectExpression('correctly_sets_timerange', 'kibana', {}, { timeRange: 'test' }).getResponse();
+        const result = await expectExpression(
+          'correctly_sets_timerange',
+          'kibana',
+          {},
+          { timeRange: 'test' }
+        ).getResponse();
         expect(result).to.have.property('timeRange', 'test');
       });
     });
@@ -62,30 +66,33 @@ export default function ({ getService, updateBaselines }) {
 
       // we can also do snapshot comparison of result of our expression
       // to update the snapshots run the tests with --updateBaselines
-      it ('runs the expression and compares final output', async () => {
+      it('runs the expression and compares final output', async () => {
         await expectExpression('final_output_test', expression).toMatchSnapshot();
       });
 
       // its also possible to check snapshot at every step of expression (after execution of each function)
-      it ('runs the expression and compares output at every step', async () => {
+      it('runs the expression and compares output at every step', async () => {
         await expectExpression('step_output_test', expression).steps.toMatchSnapshot();
       });
 
       // and we can do screenshot comparison of the rendered output of expression (if expression returns renderable)
-      it ('runs the expression and compares screenshots', async () => {
+      it('runs the expression and compares screenshots', async () => {
         await expectExpression('final_screenshot_test', expression).toMatchScreenshot();
       });
 
       // it is also possible to combine different checks
-      it ('runs the expression and combines different checks', async () => {
-        await (await expectExpression('combined_test', expression).steps.toMatchSnapshot()).toMatchScreenshot();
+      it('runs the expression and combines different checks', async () => {
+        await (await expectExpression(
+          'combined_test',
+          expression
+        ).steps.toMatchSnapshot()).toMatchScreenshot();
       });
     });
 
     // if we want to do multiple different tests using the same data, or reusing a part of expression its
     // possible to retrieve the intermediate result and reuse it in later expressions
     describe.skip('reusing partial results', () => {
-      it ('does some screenshot comparisons', async () => {
+      it('does some screenshot comparisons', async () => {
         const expression = `kibana | kibana_context | esaggs index='logstash-*' aggConfigs='[
           {"id":"1","enabled":true,"type":"count","schema":"metric","params":{}},
           {"id":"2","enabled":true,"type":"terms","schema":"segment","params":
@@ -95,12 +102,10 @@ export default function ({ getService, updateBaselines }) {
         const context = await expectExpression('partial_test', expression).getResponse();
 
         // we reuse that response to render 3 different charts and compare screenshots with baselines
-        const tagCloudExpr =
-          `tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}`;
+        const tagCloudExpr = `tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await expectExpression('partial_test_1', tagCloudExpr, context).toMatchScreenshot();
 
-        const metricExpr =
-          `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
+        const metricExpr = `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await expectExpression('partial_test_2', metricExpr, context).toMatchScreenshot();
 
         // todo: regionmap doesn't correctly signal when its done rendering (base layer might not yet be loaded)

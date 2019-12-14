@@ -25,12 +25,12 @@ import { SelfChangingComponent } from './self_changing_components';
 import { setup as visualizations } from '../../../../../../src/legacy/core_plugins/visualizations/public/np_ready/public/legacy';
 
 function SelfChangingVisType() {
-
   return visFactory.createReactVisualization({
     name: 'self_changing_vis',
     title: 'Self Changing Vis',
     icon: 'visControls',
-    description: 'This visualization is able to change its own settings, that you could also set in the editor.',
+    description:
+      'This visualization is able to change its own settings, that you could also set in the editor.',
     visConfig: {
       component: SelfChangingComponent,
       defaults: {

@@ -26,14 +26,14 @@ jest.mock('ui/vis/map/convert_to_geojson', () => ({
   convertToGeoJson: jest.fn().mockReturnValue({
     featureCollection: {
       type: 'FeatureCollection',
-      features: []
+      features: [],
     },
     meta: {
       min: null,
       max: null,
       geohashPrecision: null,
-      geohashGridDimensionsAtEquator: null
-    }
+      geohashGridDimensionsAtEquator: null,
+    },
   }),
 }));
 
@@ -59,21 +59,21 @@ describe('interpreter/functions#tilemap', () => {
       enabled: false,
       options: {
         format: 'image/png',
-        transparent: true
-      }
+        transparent: true,
+      },
     },
     dimensions: {
       metric: {
         accessor: 0,
         format: {
-          id: 'number'
+          id: 'number',
         },
         params: {},
-        aggType: 'count'
+        aggType: 'count',
       },
       geohash: null,
-      geocentroid: null
-    }
+      geocentroid: null,
+    },
   };
 
   beforeEach(() => {

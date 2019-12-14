@@ -34,7 +34,9 @@ if (query && query.mocha) {
   try {
     window.mocha.setup(JSON.parse(query.mocha));
   } catch (error) {
-    throw new Error(`'?mocha=${query.mocha}' query string param provided but it could not be parsed as json`);
+    throw new Error(
+      `'?mocha=${query.mocha}' query string param provided but it could not be parsed as json`
+    );
   }
 }
 
@@ -55,7 +57,7 @@ function createStubUiSettings() {
     api: {
       async batchSet() {
         return { settings: stubUiSettings.getAll() };
-      }
+      },
     },
     onUpdateError: () => {},
     defaults: metadata.uiSettings.defaults,
@@ -66,7 +68,7 @@ function createStubUiSettings() {
 createStubUiSettings();
 sinon.stub(chrome, 'getUiSettingsClient').callsFake(() => stubUiSettings);
 
-afterEach(function () {
+afterEach(function() {
   createStubUiSettings();
 });
 

@@ -22,7 +22,7 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
 
-export const createMetricsRequestHandler = function (config) {
+export const createMetricsRequestHandler = function(config) {
   const timezone = timezoneProvider(config)();
 
   return async ({ uiState, timeRange, filters, query, visParams }) => {

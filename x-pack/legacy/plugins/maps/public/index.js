@@ -36,7 +36,7 @@ import { npStart } from 'ui/new_platform';
 
 const app = uiModules.get('app/maps', ['ngRoute', 'react']);
 
-app.directive('mapListing', function (reactDirective) {
+app.directive('mapListing', function(reactDirective) {
   return reactDirective(wrapInI18nContext(MapListing));
 });
 
@@ -56,65 +56,72 @@ routes
         tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save maps',
         }),
-        iconType: 'glasses'
+        iconType: 'glasses',
       };
-    }
+    },
   })
   .when('/', {
     template: listingTemplate,
     controller($scope, gisMapSavedObjectLoader, config) {
       $scope.listingLimit = config.get('savedObjects:listingLimit');
-      $scope.find = (search) => {
+      $scope.find = search => {
         return gisMapSavedObjectLoader.find(search, $scope.listingLimit);
       };
-      $scope.delete = (ids) => {
+      $scope.delete = ids => {
         return gisMapSavedObjectLoader.delete(ids);
       };
       $scope.readOnly = !capabilities.get().maps.save;
     },
     resolve: {
-      hasMaps: function (kbnUrl) {
-        chrome.getSavedObjectsClient().find({ type: 'map', perPage: 1 }).then(resp => {
-          // Do not show empty listing page, just redirect to a new map
-          if (resp.savedObjects.length === 0) {
-            kbnUrl.redirect('/map');
-          }
+      hasMaps: function(kbnUrl) {
+        chrome
+          .getSavedObjectsClient()
+          .find({ type: 'map', perPage: 1 })
+          .then(resp => {
+            // Do not show empty listing page, just redirect to a new map
+            if (resp.savedObjects.length === 0) {
+              kbnUrl.redirect('/map');
+            }
 
-          return true;
-        });
-      }
-    }
+            return true;
+          });
+      },
+    },
   })
   .when('/map', {
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function (gisMapSavedObjectLoader, redirectWhenMissing) {
-        return gisMapSavedObjectLoader.get()
-          .catch(redirectWhenMissing({
-            'map': '/'
-          }));
-      }
-    }
+      map: function(gisMapSavedObjectLoader, redirectWhenMissing) {
+        return gisMapSavedObjectLoader.get().catch(
+          redirectWhenMissing({
+            map: '/',
+          })
+        );
+      },
+    },
   })
   .when('/map/:id', {
     template: mapTemplate,
     controller: 'GisMapController',
     resolve: {
-      map: function (gisMapSavedObjectLoader, redirectWhenMissing, $route) {
+      map: function(gisMapSavedObjectLoader, redirectWhenMissing, $route) {
         const id = $route.current.params.id;
-        return gisMapSavedObjectLoader.get(id)
-          .then((savedMap) => {
+        return gisMapSavedObjectLoader
+          .get(id)
+          .then(savedMap => {
             npStart.core.chrome.recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, id);
             docTitle.change(savedMap.title);
             return savedMap;
           })
-          .catch(redirectWhenMissing({
-            'map': '/'
-          }));
-      }
-    }
+          .catch(
+            redirectWhenMissing({
+              map: '/',
+            })
+          );
+      },
+    },
   })
   .otherwise({
-    redirectTo: '/'
+    redirectTo: '/',
   });

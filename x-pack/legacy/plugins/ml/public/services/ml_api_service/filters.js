@@ -15,41 +15,33 @@ const basePath = chrome.addBasePath('/api/ml');
 
 export const filters = {
   filters(obj) {
-    const filterId = (obj && obj.filterId) ? `/${obj.filterId}` : '';
+    const filterId = obj && obj.filterId ? `/${obj.filterId}` : '';
     return http({
       url: `${basePath}/filters${filterId}`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
   filtersStats() {
     return http({
       url: `${basePath}/filters/_stats`,
-      method: 'GET'
+      method: 'GET',
     });
   },
 
-  addFilter(
-    filterId,
-    description,
-    items) {
+  addFilter(filterId, description, items) {
     return http({
       url: `${basePath}/filters`,
       method: 'PUT',
       data: {
         filterId,
         description,
-        items
-      }
+        items,
+      },
     });
   },
 
-  updateFilter(
-    filterId,
-    description,
-    addItems,
-    removeItems
-  ) {
+  updateFilter(filterId, description, addItems, removeItems) {
     const data = {};
     if (description !== undefined) {
       data.description = description;
@@ -64,16 +56,14 @@ export const filters = {
     return http({
       url: `${basePath}/filters/${filterId}`,
       method: 'PUT',
-      data
+      data,
     });
   },
 
   deleteFilter(filterId) {
     return http({
       url: `${basePath}/filters/${filterId}`,
-      method: 'DELETE'
+      method: 'DELETE',
     });
   },
-
-
 };

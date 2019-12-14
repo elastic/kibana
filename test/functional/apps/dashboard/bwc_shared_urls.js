@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
@@ -29,28 +29,29 @@ export default function ({ getService, getPageObjects }) {
 
   let kibanaBaseUrl;
 
-  const urlQuery = `` +
+  const urlQuery =
+    `` +
     `_g=(refreshInterval:(pause:!t,value:0),` +
-        `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
+    `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
     `_a=(description:'',filters:!(),` +
-        `fullScreenMode:!f,` +
-        `options:(),` +
-        `panels:!((col:1,id:Visualization-MetricChart,panelIndex:1,row:1,size_x:6,size_y:3,type:visualization),` +
-                 `(col:7,id:Visualization-PieChart,panelIndex:2,row:1,size_x:6,size_y:3,type:visualization)),` +
-        `query:(language:lucene,query:'memory:%3E220000'),` +
-        `timeRestore:!f,` +
-        `title:'New+Dashboard',` +
-        `uiState:(P-1:(vis:(defaultColors:('0+-+100':'rgb(0,104,55)'))),` +
-                 `P-2:(vis:(colors:('200,000':%23F9D9F9,` +
-                                   `'240,000':%23F9D9F9,` +
-                                   `'280,000':%23F9D9F9,` +
-                                   `'320,000':%23F9D9F9,` +
-                                   `'360,000':%23F9D9F9),` +
-                  `legendOpen:!t))),` +
-        `viewMode:edit)`;
+    `fullScreenMode:!f,` +
+    `options:(),` +
+    `panels:!((col:1,id:Visualization-MetricChart,panelIndex:1,row:1,size_x:6,size_y:3,type:visualization),` +
+    `(col:7,id:Visualization-PieChart,panelIndex:2,row:1,size_x:6,size_y:3,type:visualization)),` +
+    `query:(language:lucene,query:'memory:%3E220000'),` +
+    `timeRestore:!f,` +
+    `title:'New+Dashboard',` +
+    `uiState:(P-1:(vis:(defaultColors:('0+-+100':'rgb(0,104,55)'))),` +
+    `P-2:(vis:(colors:('200,000':%23F9D9F9,` +
+    `'240,000':%23F9D9F9,` +
+    `'280,000':%23F9D9F9,` +
+    `'320,000':%23F9D9F9,` +
+    `'360,000':%23F9D9F9),` +
+    `legendOpen:!t))),` +
+    `viewMode:edit)`;
 
   describe('bwc shared urls', function describeIndexTests() {
-    before(async function () {
+    before(async function() {
       await PageObjects.dashboard.initTests();
 
       const currentUrl = await browser.getCurrentUrl();
@@ -59,23 +60,24 @@ export default function ({ getService, getPageObjects }) {
 
     describe('5.6 urls', () => {
       it('url with filters and query', async () => {
-        const url56 = `` +
+        const url56 =
+          `` +
           `_g=(refreshInterval:(display:Off,pause:!f,value:0),` +
-              `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
+          `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
           `_a=(` +
-            `description:'',` +
-            `filters:!(('$state':(store:appState),` +
-                `meta:(alias:!n,disabled:!f,index:'logstash-*',key:bytes,negate:!f,type:phrase,value:'12345'),` +
-                `query:(match:(bytes:(query:12345,type:phrase))))),` +
-            `fullScreenMode:!f,` +
-            `options:(),` +
-            `panels:!((col:1,id:Visualization-MetricChart,panelIndex:1,row:1,size_x:6,size_y:3,type:visualization),` +
-                    `(col:7,id:Visualization-PieChart,panelIndex:2,row:1,size_x:6,size_y:3,type:visualization)),` +
-            `query:(query_string:(analyze_wildcard:!t,query:'memory:>220000')),` +
-            `timeRestore:!f,` +
-            `title:'New+Dashboard',` +
-            `uiState:(),` +
-            `viewMode:edit)`;
+          `description:'',` +
+          `filters:!(('$state':(store:appState),` +
+          `meta:(alias:!n,disabled:!f,index:'logstash-*',key:bytes,negate:!f,type:phrase,value:'12345'),` +
+          `query:(match:(bytes:(query:12345,type:phrase))))),` +
+          `fullScreenMode:!f,` +
+          `options:(),` +
+          `panels:!((col:1,id:Visualization-MetricChart,panelIndex:1,row:1,size_x:6,size_y:3,type:visualization),` +
+          `(col:7,id:Visualization-PieChart,panelIndex:2,row:1,size_x:6,size_y:3,type:visualization)),` +
+          `query:(query_string:(analyze_wildcard:!t,query:'memory:>220000')),` +
+          `timeRestore:!f,` +
+          `title:'New+Dashboard',` +
+          `uiState:(),` +
+          `viewMode:edit)`;
         const url = `${kibanaBaseUrl}#/dashboard?${url56}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
@@ -90,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('6.0 urls', () => {
-      it('loads an unsaved dashboard', async function () {
+      it('loads an unsaved dashboard', async function() {
         const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
         log.debug(`Navigating to ${url}`);
         await browser.get(url, true);
@@ -104,8 +106,10 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
-      it('loads a saved dashboard', async function () {
-        await PageObjects.dashboard.saveDashboard('saved with colors', { storeTimeWithDashboard: true });
+      it('loads a saved dashboard', async function() {
+        await PageObjects.dashboard.saveDashboard('saved with colors', {
+          storeTimeWithDashboard: true,
+        });
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const url = `${kibanaBaseUrl}#/dashboard/${id}`;
@@ -120,7 +124,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
-      it('uiState in url takes precedence over saved dashboard state', async function () {
+      it('uiState in url takes precedence over saved dashboard state', async function() {
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const updatedQuery = urlQuery.replace(/F9D9F9/g, '000000');
         const url = `${kibanaBaseUrl}#/dashboard/${id}?${updatedQuery}`;

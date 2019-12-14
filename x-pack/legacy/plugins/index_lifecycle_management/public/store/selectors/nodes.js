@@ -22,15 +22,14 @@ export const getNodeOptions = createSelector(
 
     options.sort((a, b) => a.value.localeCompare(b.value));
     if (options.length) {
-      return [{ text: 'Default allocation (don\'t use attributes)', value: '' }, ...options];
+      return [{ text: "Default allocation (don't use attributes)", value: '' }, ...options];
     } else {
       return options;
     }
   }
 );
 
-export const getSelectedPrimaryShardCount = state =>
-  state.nodes.selectedPrimaryShardCount;
+export const getSelectedPrimaryShardCount = state => state.nodes.selectedPrimaryShardCount;
 
 export const getSelectedReplicaCount = state =>
   state.nodes.selectedReplicaCount !== undefined ? state.nodes.selectedReplicaCount : 1;

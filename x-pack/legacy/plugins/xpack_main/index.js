@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import dedent from 'dedent';
 import {
   XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING,
-  XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
+  XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS,
 } from '../../server/lib/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
@@ -21,7 +21,7 @@ import { has } from 'lodash';
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 import { registerMonitoringCollection } from './server/telemetry_collection';
 
-export const xpackMain = (kibana) => {
+export const xpackMain = kibana => {
   return new kibana.Plugin({
     id: 'xpack_main',
     configPrefix: 'xpack.xpack_main',
@@ -36,7 +36,9 @@ export const xpackMain = (kibana) => {
           enabled: Joi.boolean().default(),
           url: Joi.string().default(),
         }).default(), // deprecated
-        xpack_api_polling_frequency_millis: Joi.number().default(XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS),
+        xpack_api_polling_frequency_millis: Joi.number().default(
+          XPACK_INFO_API_DEFAULT_POLL_FREQUENCY_IN_MILLIS
+        ),
       }).default();
     },
 
@@ -52,20 +54,18 @@ export const xpackMain = (kibana) => {
       uiSettingDefaults: {
         [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
           name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
-            defaultMessage: 'Admin email'
+            defaultMessage: 'Admin email',
           }),
           // TODO: change the description when email address is used for more things?
           description: i18n.translate('xpack.main.uiSettings.adminEmailDescription', {
             defaultMessage:
-              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.'
+              'Recipient email address for X-Pack admin operations, such as Cluster Alert email notifications from Monitoring.',
           }),
           type: 'string', // TODO: Any way of ensuring this is a valid email address?
-          value: null
-        }
+          value: null,
+        },
       },
-      hacks: [
-        'plugins/xpack_main/hacks/check_xpack_info_change',
-      ],
+      hacks: ['plugins/xpack_main/hacks/check_xpack_info_change'],
       replaceInjectedVars,
       injectDefaultVars(server) {
         const config = server.config();
@@ -97,7 +97,7 @@ export const xpackMain = (kibana) => {
 
       featuresPlugin.registerLegacyAPI({
         xpackInfo: setupXPackMain(server),
-        savedObjectTypes: server.savedObjects.types
+        savedObjectTypes: server.savedObjects.types,
       });
 
       // register routes
@@ -108,7 +108,9 @@ export const xpackMain = (kibana) => {
       function movedToTelemetry(configPath) {
         return (settings, log) => {
           if (has(settings, configPath)) {
-            log(`Config key "xpack.xpack_main.${configPath}" is deprecated. Use "telemetry.${configPath}" instead.`);
+            log(
+              `Config key "xpack.xpack_main.${configPath}" is deprecated. Use "telemetry.${configPath}" instead.`
+            );
           }
         };
       }

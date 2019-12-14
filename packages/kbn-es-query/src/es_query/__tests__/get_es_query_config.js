@@ -38,8 +38,8 @@ const config = {
   },
 };
 
-describe('getEsQueryConfig', function () {
-  it('should return the parameters of an Elasticsearch query config requested', function () {
+describe('getEsQueryConfig', function() {
+  it('should return the parameters of an Elasticsearch query config requested', function() {
     const result = getEsQueryConfig(config);
     const expected = {
       allowLeadingWildcards: {

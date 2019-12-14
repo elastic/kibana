@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getApmInstructionsForDisablingInternalCollection } from './disable_internal_collection_instructions';
+export {
+  getApmInstructionsForDisablingInternalCollection,
+} from './disable_internal_collection_instructions';
 export { getApmInstructionsForEnablingMetricbeat } from './enable_metricbeat_instructions';

@@ -26,8 +26,6 @@ const $ = require('jquery');
 const kb = require('../../src/kb');
 const mappings = require('../../src/mappings');
 
-
-
 describe('Integration', () => {
   let input;
   beforeEach(() => {
@@ -40,7 +38,7 @@ describe('Integration', () => {
       $('#ConAppEditorActions'),
       {},
       { applyCurrentSettings: () => {} },
-      null,
+      null
     );
     input.$el.show();
     input.autocomplete._test.removeChangeListener();
@@ -51,7 +49,7 @@ describe('Integration', () => {
   });
 
   function processContextTest(data, mapping, kbSchemes, requestLine, testToRun) {
-    test(testToRun.name, async function (done) {
+    test(testToRun.name, async function(done) {
       let rowOffset = 0; // add one for the extra method line
       let editorValue = data;
       if (requestLine != null) {
@@ -71,119 +69,113 @@ describe('Integration', () => {
       json[test.name] = kbSchemes || {};
       const testApi = kb._test.loadApisFromJson(json);
       if (kbSchemes) {
-      //  if (kbSchemes.globals) {
-      //    $.each(kbSchemes.globals, function (parent, rules) {
-      //      testApi.addGlobalAutocompleteRules(parent, rules);
-      //    });
-      //  }
+        //  if (kbSchemes.globals) {
+        //    $.each(kbSchemes.globals, function (parent, rules) {
+        //      testApi.addGlobalAutocompleteRules(parent, rules);
+        //    });
+        //  }
         if (kbSchemes.endpoints) {
-          $.each(kbSchemes.endpoints, function (endpoint, scheme) {
+          $.each(kbSchemes.endpoints, function(endpoint, scheme) {
             testApi.addEndpointDescription(endpoint, scheme);
           });
         }
       }
       kb.setActiveApi(testApi);
       const { cursor } = testToRun;
-      const { row, column } =   cursor;
-      input.update(editorValue, function () {
+      const { row, column } = cursor;
+      input.update(editorValue, function() {
         input.moveCursorTo(row, column);
 
         // allow ace rendering to move cursor so it will be seen during test - handy for debugging.
         //setTimeout(function () {
         input.completer = {
           base: {},
-          changeListener: function () {},
+          changeListener: function() {},
         }; // mimic auto complete
 
-        input.autocomplete._test.getCompletions(
-          input,
-          input.getSession(),
-          cursor,
-          '',
-          function (err, terms) {
-            if (testToRun.assertThrows) {
-              done();
-              return;
-            }
+        input.autocomplete._test.getCompletions(input, input.getSession(), cursor, '', function(
+          err,
+          terms
+        ) {
+          if (testToRun.assertThrows) {
+            done();
+            return;
+          }
 
-            if (err) {
-              done();
-              throw err;
-            }
+          if (err) {
+            done();
+            throw err;
+          }
 
-            if (testToRun.no_context) {
-              expect(!terms || terms.length === 0).toBeTruthy();
+          if (testToRun.no_context) {
+            expect(!terms || terms.length === 0).toBeTruthy();
+          } else {
+            expect(terms).not.toBeNull();
+            expect(terms.length).toBeGreaterThan(0);
+          }
+
+          if (!terms || terms.length === 0) {
+            done();
+            return;
+          }
+
+          if (testToRun.autoCompleteSet) {
+            const expectedTerms = _.map(testToRun.autoCompleteSet, function(t) {
+              if (typeof t !== 'object') {
+                t = { name: t };
+              }
+              return t;
+            });
+            if (terms.length !== expectedTerms.length) {
+              expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
             } else {
-              expect(terms).not.toBeNull();
-              expect(terms.length).toBeGreaterThan(0);
-            }
-
-            if (!terms || terms.length === 0) {
-              done();
-              return;
-            }
-
-            if (testToRun.autoCompleteSet) {
-              const expectedTerms = _.map(testToRun.autoCompleteSet, function (t) {
-                if (typeof t !== 'object') {
-                  t = { name: t };
-                }
-                return t;
-              });
-              if (terms.length !== expectedTerms.length) {
-                expect(_.pluck(terms, 'name')).toEqual(_.pluck(expectedTerms, 'name'));
-              } else {
-                const filteredActualTerms = _.map(terms, function (
-                  actualTerm,
-                  i
-                ) {
-                  const expectedTerm = expectedTerms[i];
-                  const filteredTerm = {};
-                  _.each(expectedTerm, function (v, p) {
-                    filteredTerm[p] = actualTerm[p];
-                  });
-                  return filteredTerm;
+              const filteredActualTerms = _.map(terms, function(actualTerm, i) {
+                const expectedTerm = expectedTerms[i];
+                const filteredTerm = {};
+                _.each(expectedTerm, function(v, p) {
+                  filteredTerm[p] = actualTerm[p];
                 });
-                expect(filteredActualTerms).toEqual(expectedTerms);
-              }
-              done();
+                return filteredTerm;
+              });
+              expect(filteredActualTerms).toEqual(expectedTerms);
             }
-
-            const context = terms[0].context;
-            input.autocomplete._test.addReplacementInfoToContext(
-              context,
-              testToRun.cursor,
-              terms[0].value
-            );
-
-            function ac(prop, propTest) {
-              if (typeof testToRun[prop] !== 'undefined') {
-                if (propTest) {
-                  propTest(context[prop], testToRun[prop], prop);
-                } else {
-                  expect(context[prop]).toEqual(testToRun[prop]);
-                }
-              }
-            }
-
-            function posCompare(actual, expected) {
-              expect(actual.row).toEqual(expected.row + rowOffset);
-              expect(actual.column).toEqual(expected.column);
-            }
-
-            function rangeCompare(actual, expected, name) {
-              posCompare(actual.start, expected.start, name + '.start');
-              posCompare(actual.end, expected.end, name + '.end');
-            }
-
-            ac('prefixToAdd');
-            ac('suffixToAdd');
-            ac('addTemplate');
-            ac('textBoxPosition', posCompare);
-            ac('rangeToReplace', rangeCompare);
             done();
           }
-        );
+
+          const context = terms[0].context;
+          input.autocomplete._test.addReplacementInfoToContext(
+            context,
+            testToRun.cursor,
+            terms[0].value
+          );
+
+          function ac(prop, propTest) {
+            if (typeof testToRun[prop] !== 'undefined') {
+              if (propTest) {
+                propTest(context[prop], testToRun[prop], prop);
+              } else {
+                expect(context[prop]).toEqual(testToRun[prop]);
+              }
+            }
+          }
+
+          function posCompare(actual, expected) {
+            expect(actual.row).toEqual(expected.row + rowOffset);
+            expect(actual.column).toEqual(expected.column);
+          }
+
+          function rangeCompare(actual, expected, name) {
+            posCompare(actual.start, expected.start, name + '.start');
+            posCompare(actual.end, expected.end, name + '.end');
+          }
+
+          ac('prefixToAdd');
+          ac('suffixToAdd');
+          ac('addTemplate');
+          ac('textBoxPosition', posCompare);
+          ac('rangeToReplace', rangeCompare);
+          done();
+        });
         //});
       });
     });
@@ -518,10 +510,7 @@ describe('Integration', () => {
       {
         name: '{index} matching',
         cursor: { row: 1, column: 15 },
-        autoCompleteSet: [
-          { name: 'index1', meta: 'index' },
-          { name: 'index2', meta: 'index' },
-        ],
+        autoCompleteSet: [{ name: 'index1', meta: 'index' }, { name: 'index2', meta: 'index' }],
       },
     ]
   );
@@ -757,7 +746,7 @@ describe('Integration', () => {
                 },
               ],
               g: {
-                __scope_link: function () {
+                __scope_link: function() {
                   return {
                     a: 1,
                     b: 2,
@@ -1041,13 +1030,7 @@ describe('Integration', () => {
     {
       name: 'Endpoints with slashes - no slash',
       cursor: { row: 0, column: 8 },
-      autoCompleteSet: [
-        '_cluster/nodes/stats',
-        '_cluster/stats',
-        '_search',
-        'index1',
-        'index2',
-      ],
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
       prefixToAdd: '',
       suffixToAdd: '',
     },
@@ -1057,26 +1040,14 @@ describe('Integration', () => {
     {
       name: 'Endpoints with slashes - before slash',
       cursor: { row: 0, column: 7 },
-      autoCompleteSet: [
-        '_cluster/nodes/stats',
-        '_cluster/stats',
-        '_search',
-        'index1',
-        'index2',
-      ],
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
       prefixToAdd: '',
       suffixToAdd: '',
     },
     {
       name: 'Endpoints with slashes - on slash',
       cursor: { row: 0, column: 12 },
-      autoCompleteSet: [
-        '_cluster/nodes/stats',
-        '_cluster/stats',
-        '_search',
-        'index1',
-        'index2',
-      ],
+      autoCompleteSet: ['_cluster/nodes/stats', '_cluster/stats', '_search', 'index1', 'index2'],
       prefixToAdd: '',
       suffixToAdd: '',
     },
@@ -1145,7 +1116,7 @@ describe('Integration', () => {
       prefixToAdd: '',
       suffixToAdd: '',
       initialValue: 'cl',
-      method: 'GET'
+      method: 'GET',
     },
   ]);
 
@@ -1180,10 +1151,7 @@ describe('Integration', () => {
     {
       name: 'Params values',
       cursor: { row: 0, column: 19 },
-      autoCompleteSet: [
-        { name: 'json', meta: 'format' },
-        { name: 'yaml', meta: 'format' },
-      ],
+      autoCompleteSet: [{ name: 'json', meta: 'format' }, { name: 'yaml', meta: 'format' }],
       prefixToAdd: '',
       suffixToAdd: '',
     },
@@ -1225,50 +1193,38 @@ describe('Integration', () => {
     },
   ]);
 
-  contextTests(
-    null,
-    MAPPING,
-    CLUSTER_KB,
-    'GET _search?format=yaml&search_type=cou',
-    [
-      {
-        name: 'Params on existing value',
-        cursor: { row: 0, column: 37 },
-        rangeToReplace: {
-          start: { row: 0, column: 36 },
-          end: { row: 0, column: 39 },
-        },
-        autoCompleteSet: [
-          { name: 'count', meta: 'search_type' },
-          { name: 'query_then_fetch', meta: 'search_type' },
-        ],
-        prefixToAdd: '',
-        suffixToAdd: '',
+  contextTests(null, MAPPING, CLUSTER_KB, 'GET _search?format=yaml&search_type=cou', [
+    {
+      name: 'Params on existing value',
+      cursor: { row: 0, column: 37 },
+      rangeToReplace: {
+        start: { row: 0, column: 36 },
+        end: { row: 0, column: 39 },
       },
-    ]
-  );
-  contextTests(
-    null,
-    MAPPING,
-    CLUSTER_KB,
-    'GET _search?format=yaml&search_type=cou',
-    [
-      {
-        name: 'Params on just after = with existing value',
-        cursor: { row: 0, column: 36 },
-        rangeToReplace: {
-          start: { row: 0, column: 36 },
-          end: { row: 0, column: 36 },
-        },
-        autoCompleteSet: [
-          { name: 'count', meta: 'search_type' },
-          { name: 'query_then_fetch', meta: 'search_type' },
-        ],
-        prefixToAdd: '',
-        suffixToAdd: '',
+      autoCompleteSet: [
+        { name: 'count', meta: 'search_type' },
+        { name: 'query_then_fetch', meta: 'search_type' },
+      ],
+      prefixToAdd: '',
+      suffixToAdd: '',
+    },
+  ]);
+  contextTests(null, MAPPING, CLUSTER_KB, 'GET _search?format=yaml&search_type=cou', [
+    {
+      name: 'Params on just after = with existing value',
+      cursor: { row: 0, column: 36 },
+      rangeToReplace: {
+        start: { row: 0, column: 36 },
+        end: { row: 0, column: 36 },
       },
-    ]
-  );
+      autoCompleteSet: [
+        { name: 'count', meta: 'search_type' },
+        { name: 'query_then_fetch', meta: 'search_type' },
+      ],
+      prefixToAdd: '',
+      suffixToAdd: '',
+    },
+  ]);
 
   contextTests(
     {

@@ -7,16 +7,15 @@
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../../lib/error_wrappers';
-import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
+import { licensePreRoutingFactory } from '../../../lib/license_pre_routing_factory';
 
 function deleteWatch(callWithRequest, watchId) {
   return callWithRequest('watcher.deleteWatch', {
-    id: watchId
+    id: watchId,
   });
 }
 
 export function registerDeleteRoute(server) {
-
   const isEsError = isEsErrorFactory(server);
   const licensePreRouting = licensePreRoutingFactory(server);
 
@@ -34,7 +33,7 @@ export function registerDeleteRoute(server) {
           // Case: Error from Elasticsearch JS client
           if (isEsError(err)) {
             const statusCodeToMessageMap = {
-              404: `Watch with id = ${watchId} not found`
+              404: `Watch with id = ${watchId} not found`,
             };
             throw wrapEsError(err, statusCodeToMessageMap);
           }
@@ -44,7 +43,7 @@ export function registerDeleteRoute(server) {
         });
     },
     config: {
-      pre: [ licensePreRouting ]
-    }
+      pre: [licensePreRouting],
+    },
   });
 }

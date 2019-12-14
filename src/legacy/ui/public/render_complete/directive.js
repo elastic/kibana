@@ -20,13 +20,11 @@
 import { uiModules } from '../modules';
 import { RenderCompleteHelper } from '../../../../plugins/kibana_utils/public';
 
-uiModules
-  .get('kibana')
-  .directive('renderComplete', () => ({
-    controller($scope, $element) {
-      const el = $element[0];
-      const renderCompleteHelper = new RenderCompleteHelper(el);
+uiModules.get('kibana').directive('renderComplete', () => ({
+  controller($scope, $element) {
+    const el = $element[0];
+    const renderCompleteHelper = new RenderCompleteHelper(el);
 
-      $scope.$on('$destroy', renderCompleteHelper.destroy);
-    }
-  }));
+    $scope.$on('$destroy', renderCompleteHelper.destroy);
+  },
+}));

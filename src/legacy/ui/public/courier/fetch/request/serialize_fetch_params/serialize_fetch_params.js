@@ -31,30 +31,29 @@ export function serializeFetchParams(
   Promise,
   sessionId,
   config,
-  esShardTimeout) {
-  const promises = requestsFetchParams.map(function (fetchParams) {
-    return Promise.resolve(fetchParams.index)
-      .then(function (indexPattern) {
-        const body = {
-          timeout: getTimeout(esShardTimeout),
-          ...fetchParams.body || {},
-        };
+  esShardTimeout
+) {
+  const promises = requestsFetchParams.map(function(fetchParams) {
+    return Promise.resolve(fetchParams.index).then(function(indexPattern) {
+      const body = {
+        timeout: getTimeout(esShardTimeout),
+        ...(fetchParams.body || {}),
+      };
 
-        const index = (indexPattern && indexPattern.getIndex) ? indexPattern.getIndex() : indexPattern;
+      const index = indexPattern && indexPattern.getIndex ? indexPattern.getIndex() : indexPattern;
 
-        const header = {
-          index,
-          search_type: fetchParams.search_type,
-          ignore_unavailable: true,
-          preference: getPreference(config, sessionId)
-        };
+      const header = {
+        index,
+        search_type: fetchParams.search_type,
+        ignore_unavailable: true,
+        preference: getPreference(config, sessionId),
+      };
 
-        return `${JSON.stringify(header)}\n${JSON.stringify(body)}`;
-      });
+      return `${JSON.stringify(header)}\n${JSON.stringify(body)}`;
+    });
   });
 
-  return Promise.all(promises).then(function (requests) {
+  return Promise.all(promises).then(function(requests) {
     return requests.join('\n') + '\n';
   });
 }
-

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import request from 'request';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
 
@@ -17,15 +17,13 @@ export default function ({ getService }) {
 
   describe('Basic authentication', () => {
     it('should redirect non-AJAX requests to the login page if not authenticated', async () => {
-      const response = await supertest.get('/abc/xyz')
-        .expect(302);
+      const response = await supertest.get('/abc/xyz').expect(302);
 
       expect(response.headers.location).to.be('/login?next=%2Fabc%2Fxyz');
     });
 
     it('should redirect non-AJAX New platform requests to the login page if not authenticated', async () => {
-      const response = await supertest.get('/core/')
-        .expect(302);
+      const response = await supertest.get('/core/').expect(302);
 
       expect(response.headers.location).to.be('/login?next=%2Fcore%2F');
     });
@@ -41,24 +39,28 @@ export default function ({ getService }) {
       const wrongUsername = `wrong-${validUsername}`;
       const wrongPassword = `wrong-${validPassword}`;
 
-      await supertest.post('/api/security/v1/login')
+      await supertest
+        .post('/api/security/v1/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: wrongUsername, password: wrongPassword })
         .expect(401);
 
-      await supertest.post('/api/security/v1/login')
+      await supertest
+        .post('/api/security/v1/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: wrongPassword })
         .expect(401);
 
-      await supertest.post('/api/security/v1/login')
+      await supertest
+        .post('/api/security/v1/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: wrongUsername, password: validPassword })
         .expect(401);
     });
 
     it('should set authentication cookie for login with valid credentials', async () => {
-      const loginResponse = await supertest.post('/api/security/v1/login')
+      const loginResponse = await supertest
+        .post('/api/security/v1/login')
         .set('kbn-xsrf', 'xxx')
         .send({ username: validUsername, password: validPassword })
         .expect(204);
@@ -77,19 +79,31 @@ export default function ({ getService }) {
       const wrongUsername = `wrong-${validUsername}`;
       const wrongPassword = `wrong-${validPassword}`;
 
-      await supertest.get('/api/security/v1/me')
+      await supertest
+        .get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Authorization', `Basic ${Buffer.from(`${wrongUsername}:${wrongPassword}`).toString('base64')}`)
+        .set(
+          'Authorization',
+          `Basic ${Buffer.from(`${wrongUsername}:${wrongPassword}`).toString('base64')}`
+        )
         .expect(401);
 
-      await supertest.get('/api/security/v1/me')
+      await supertest
+        .get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Authorization', `Basic ${Buffer.from(`${validUsername}:${wrongPassword}`).toString('base64')}`)
+        .set(
+          'Authorization',
+          `Basic ${Buffer.from(`${validUsername}:${wrongPassword}`).toString('base64')}`
+        )
         .expect(401);
 
-      await supertest.get('/api/security/v1/me')
+      await supertest
+        .get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Authorization', `Basic ${Buffer.from(`${wrongUsername}:${validPassword}`).toString('base64')}`)
+        .set(
+          'Authorization',
+          `Basic ${Buffer.from(`${wrongUsername}:${validPassword}`).toString('base64')}`
+        )
         .expect(401);
     });
 
@@ -97,7 +111,10 @@ export default function ({ getService }) {
       const apiResponse = await supertest
         .get('/api/security/v1/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Authorization', `Basic ${Buffer.from(`${validUsername}:${validPassword}`).toString('base64')}`)
+        .set(
+          'Authorization',
+          `Basic ${Buffer.from(`${validUsername}:${validPassword}`).toString('base64')}`
+        )
         .expect(200);
 
       expect(apiResponse.body).to.only.have.keys([
@@ -116,7 +133,8 @@ export default function ({ getService }) {
     describe('with session cookie', () => {
       let sessionCookie;
       beforeEach(async () => {
-        const loginResponse = await supertest.post('/api/security/v1/login')
+        const loginResponse = await supertest
+          .post('/api/security/v1/login')
           .set('kbn-xsrf', 'xxx')
           .send({ username: validUsername, password: validPassword })
           .expect(204);
@@ -199,8 +217,9 @@ export default function ({ getService }) {
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
 
-      it('should clear cookie on logout and redirect to login', async ()=> {
-        const logoutResponse = await supertest.get('/api/security/v1/logout?next=%2Fabc%2Fxyz&msg=test')
+      it('should clear cookie on logout and redirect to login', async () => {
+        const logoutResponse = await supertest
+          .get('/api/security/v1/logout?next=%2Fabc%2Fxyz&msg=test')
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
@@ -235,29 +254,27 @@ export default function ({ getService }) {
         expect(loginViewResponse.headers.location).to.be('/');
       });
 
-      it('should not render login page and redirect to the base path if `next` is network-path reference',
-        async () => {
-          // Try `//hack.you` that NodeJS URL parser with `slashesDenoteHost` option
-          let loginViewResponse = await supertest
-            .get('/login?next=%2F%2Fhack.you%2F%3Fone%3Dtwo')
-            .set('Cookie', sessionCookie.cookieString())
-            .expect(302);
-
-          expect(loginViewResponse.headers.location).to.be('/');
-
-          // Try link with 3 slashes, that is still valid redirect target for browsers (for bwc reasons),
-          // but is parsed in a different by NodeJS URL parser.
-          loginViewResponse = await supertest
-            .get('/login?next=%2F%2F%2Fhack.you%2F%3Fone%3Dtwo')
-            .set('Cookie', sessionCookie.cookieString())
-            .expect(302);
-
-          expect(loginViewResponse.headers.location).to.be('/');
-        });
-
-      it('should redirect to home page if cookie is not provided', async ()=> {
-        const logoutResponse = await supertest.get('/api/security/v1/logout')
+      it('should not render login page and redirect to the base path if `next` is network-path reference', async () => {
+        // Try `//hack.you` that NodeJS URL parser with `slashesDenoteHost` option
+        let loginViewResponse = await supertest
+          .get('/login?next=%2F%2Fhack.you%2F%3Fone%3Dtwo')
+          .set('Cookie', sessionCookie.cookieString())
           .expect(302);
+
+        expect(loginViewResponse.headers.location).to.be('/');
+
+        // Try link with 3 slashes, that is still valid redirect target for browsers (for bwc reasons),
+        // but is parsed in a different by NodeJS URL parser.
+        loginViewResponse = await supertest
+          .get('/login?next=%2F%2F%2Fhack.you%2F%3Fone%3Dtwo')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        expect(loginViewResponse.headers.location).to.be('/');
+      });
+
+      it('should redirect to home page if cookie is not provided', async () => {
+        const logoutResponse = await supertest.get('/api/security/v1/logout').expect(302);
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
         expect(logoutResponse.headers.location).to.be('/');

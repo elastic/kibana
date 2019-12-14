@@ -26,7 +26,10 @@ import 'ui/capabilities/route_setup';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import {
+  FeatureCatalogueRegistryProvider,
+  FeatureCatalogueCategory,
+} from 'ui/registry/feature_catalogue';
 import { getLandingBreadcrumbs, getWizardStep1Breadcrumbs } from './breadcrumbs';
 
 // load directives
@@ -48,9 +51,9 @@ uiRoutes
         tooltip: i18n.translate('kbn.visualize.badge.readOnly.tooltip', {
           defaultMessage: 'Unable to save visualizations',
         }),
-        iconType: 'glasses'
+        iconType: 'glasses',
       };
-    }
+    },
   })
   .when(VisualizeConstants.LANDING_PAGE_PATH, {
     template: visualizeListingTemplate,
@@ -75,15 +78,13 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'visualize',
     title: 'Visualize',
-    description: i18n.translate(
-      'kbn.visualize.visualizeDescription',
-      {
-        defaultMessage: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',
-      }
-    ),
+    description: i18n.translate('kbn.visualize.visualizeDescription', {
+      defaultMessage:
+        'Create visualizations and aggregate data stores in your Elasticsearch indices.',
+    }),
     icon: 'visualizeApp',
     path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,
-    category: FeatureCatalogueCategory.DATA
+    category: FeatureCatalogueCategory.DATA,
   };
 });

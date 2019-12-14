@@ -48,7 +48,9 @@ export function getMaxConcurrentShardRequests(config) {
 export function getPreference(config, sessionId) {
   const setRequestPreference = config.get('courier:setRequestPreference');
   if (setRequestPreference === 'sessionId') return sessionId;
-  return setRequestPreference === 'custom' ? config.get('courier:customRequestPreference') : undefined;
+  return setRequestPreference === 'custom'
+    ? config.get('courier:customRequestPreference')
+    : undefined;
 }
 
 export function getTimeout(esShardTimeout) {

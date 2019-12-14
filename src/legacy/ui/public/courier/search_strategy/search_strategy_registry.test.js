@@ -65,16 +65,21 @@ describe('SearchStrategyRegistry', () => {
         source: { getField: () => 'b', getPreferredSearchStrategyId: () => {} },
       };
 
-      const searchRequests = [ searchRequest0, searchRequest1, searchRequest2, searchRequest3];
-      const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(searchRequests);
+      const searchRequests = [searchRequest0, searchRequest1, searchRequest2, searchRequest3];
+      const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(
+        searchRequests
+      );
 
-      expect(searchStrategiesWithSearchRequests).toEqual([{
-        searchStrategy: searchStrategyB,
-        searchRequests: [ searchRequest0, searchRequest3 ],
-      }, {
-        searchStrategy: searchStrategyA,
-        searchRequests: [ searchRequest1, searchRequest2 ],
-      }]);
+      expect(searchStrategiesWithSearchRequests).toEqual([
+        {
+          searchStrategy: searchStrategyB,
+          searchRequests: [searchRequest0, searchRequest3],
+        },
+        {
+          searchStrategy: searchStrategyA,
+          searchRequests: [searchRequest1, searchRequest2],
+        },
+      ]);
     });
 
     test(`associates search requests with noOpSearchStrategy when a viable one can't be found`, () => {
@@ -83,13 +88,17 @@ describe('SearchStrategyRegistry', () => {
         source: { getField: () => {}, getPreferredSearchStrategyId: () => {} },
       };
 
-      const searchRequests = [ searchRequest0 ];
-      const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(searchRequests);
+      const searchRequests = [searchRequest0];
+      const searchStrategiesWithSearchRequests = assignSearchRequestsToSearchStrategies(
+        searchRequests
+      );
 
-      expect(searchStrategiesWithSearchRequests).toEqual([{
-        searchStrategy: noOpSearchStrategy,
-        searchRequests: [ searchRequest0 ],
-      }]);
+      expect(searchStrategiesWithSearchRequests).toEqual([
+        {
+          searchStrategy: noOpSearchStrategy,
+          searchRequests: [searchRequest0],
+        },
+      ]);
     });
   });
 });

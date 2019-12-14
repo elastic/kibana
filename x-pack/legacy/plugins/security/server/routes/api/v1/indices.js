@@ -19,9 +19,9 @@ export function initIndicesApi(server) {
         index: request.params.query,
         fields: '*',
         allowNoIndices: false,
-        includeDefaults: true
+        includeDefaults: true,
       })
-        .then((mappings) =>
+        .then(mappings =>
           _(mappings)
             .map('mappings')
             .flatten()
@@ -31,6 +31,6 @@ export function initIndicesApi(server) {
             .value()
         )
         .catch(wrapError);
-    }
+    },
   });
 }

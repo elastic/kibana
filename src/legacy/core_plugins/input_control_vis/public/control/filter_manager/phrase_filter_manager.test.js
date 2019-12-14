@@ -20,17 +20,18 @@
 import expect from '@kbn/expect';
 import { PhraseFilterManager } from './phrase_filter_manager';
 
-describe('PhraseFilterManager', function () {
-
+describe('PhraseFilterManager', function() {
   const controlId = 'control1';
 
-  describe('createFilter', function () {
+  describe('createFilter', function() {
     const indexPatternId = '1';
     const fieldMock = {
       name: 'field1',
       format: {
-        convert: (val) => { return val; }
-      }
+        convert: val => {
+          return val;
+        },
+      },
     };
     const indexPatternMock = {
       id: indexPatternId,
@@ -38,26 +39,33 @@ describe('PhraseFilterManager', function () {
         getByName: name => {
           const fields = { field1: fieldMock };
           return fields[name];
-        }
-      }
+        },
+      },
     };
     const queryFilterMock = {};
     let filterManager;
     beforeEach(() => {
-      filterManager = new PhraseFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
+      filterManager = new PhraseFilterManager(
+        controlId,
+        'field1',
+        indexPatternMock,
+        queryFilterMock
+      );
     });
 
-    test('should create match phrase filter from single value', function () {
+    test('should create match phrase filter from single value', function() {
       const newFilter = filterManager.createFilter(['ios']);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter.meta.controlledBy).to.be(controlId);
       expect(newFilter.meta.key).to.be('field1');
       expect(newFilter).to.have.property('query');
-      expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match":{"field1":{"query":"ios","type":"phrase"}}}');
+      expect(JSON.stringify(newFilter.query, null, '')).to.be(
+        '{"match":{"field1":{"query":"ios","type":"phrase"}}}'
+      );
     });
 
-    test('should create bool filter from multiple values', function () {
+    test('should create bool filter from multiple values', function() {
       const newFilter = filterManager.createFilter(['ios', 'win xp']);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
@@ -67,12 +75,16 @@ describe('PhraseFilterManager', function () {
       const query = newFilter.query;
       expect(query).to.have.property('bool');
       expect(query.bool.should.length).to.be(2);
-      expect(JSON.stringify(query.bool.should[0], null, '')).to.be('{"match_phrase":{"field1":"ios"}}');
-      expect(JSON.stringify(query.bool.should[1], null, '')).to.be('{"match_phrase":{"field1":"win xp"}}');
+      expect(JSON.stringify(query.bool.should[0], null, '')).to.be(
+        '{"match_phrase":{"field1":"ios"}}'
+      );
+      expect(JSON.stringify(query.bool.should[1], null, '')).to.be(
+        '{"match_phrase":{"field1":"win xp"}}'
+      );
     });
   });
 
-  describe('getValueFromFilterBar', function () {
+  describe('getValueFromFilterBar', function() {
     const indexPatternMock = {};
     const queryFilterMock = {};
     let filterManager;
@@ -89,52 +101,57 @@ describe('PhraseFilterManager', function () {
           this.mockFilters = mockFilters;
         }
       }
-      filterManager = new MockFindFiltersPhraseFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
+      filterManager = new MockFindFiltersPhraseFilterManager(
+        controlId,
+        'field1',
+        indexPatternMock,
+        queryFilterMock
+      );
     });
 
-    test('should extract value from match phrase filter', function () {
+    test('should extract value from match phrase filter', function() {
       filterManager.setMockFilters([
         {
           query: {
             match: {
               field1: {
                 query: 'ios',
-                type: 'phrase'
-              }
-            }
-          }
-        }
+                type: 'phrase',
+              },
+            },
+          },
+        },
       ]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios']);
     });
 
-    test('should extract value from multiple filters', function () {
+    test('should extract value from multiple filters', function() {
       filterManager.setMockFilters([
         {
           query: {
             match: {
               field1: {
                 query: 'ios',
-                type: 'phrase'
-              }
-            }
-          }
+                type: 'phrase',
+              },
+            },
+          },
         },
         {
           query: {
             match: {
               field1: {
                 query: 'win xp',
-                type: 'phrase'
-              }
-            }
-          }
+                type: 'phrase',
+              },
+            },
+          },
         },
       ]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
-    test('should extract value from bool filter', function () {
+    test('should extract value from bool filter', function() {
       filterManager.setMockFilters([
         {
           query: {
@@ -142,37 +159,36 @@ describe('PhraseFilterManager', function () {
               should: [
                 {
                   match_phrase: {
-                    field1: 'ios'
-                  }
+                    field1: 'ios',
+                  },
                 },
                 {
                   match_phrase: {
-                    field1: 'win xp'
-                  }
-                }
-              ]
-            }
-          }
-        }
+                    field1: 'win xp',
+                  },
+                },
+              ],
+            },
+          },
+        },
       ]);
       expect(filterManager.getValueFromFilterBar()).to.eql(['ios', 'win xp']);
     });
 
-    test('should return undefined when filter value can not be extracted from Kibana filter', function () {
+    test('should return undefined when filter value can not be extracted from Kibana filter', function() {
       filterManager.setMockFilters([
         {
           query: {
             match: {
               myFieldWhichIsNotField1: {
                 query: 'ios',
-                type: 'phrase'
-              }
-            }
-          }
-        }
+                type: 'phrase',
+              },
+            },
+          },
+        },
       ]);
       expect(filterManager.getValueFromFilterBar()).to.eql(undefined);
     });
   });
-
 });

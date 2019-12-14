@@ -24,10 +24,7 @@ import { mockGetClusterInfo } from './get_cluster_info';
 import { mockGetClusterStats } from './get_cluster_stats';
 
 import { omit } from 'lodash';
-import {
-  getLocalStats,
-  handleLocalStats,
-} from '../get_local_stats';
+import { getLocalStats, handleLocalStats } from '../get_local_stats';
 
 const getMockServer = (getCluster = sinon.stub(), kibanaUsage = {}) => ({
   log(tags, message) {
@@ -36,11 +33,13 @@ const getMockServer = (getCluster = sinon.stub(), kibanaUsage = {}) => ({
   config() {
     return {
       get(item) {
-        switch(item) {
-          case 'pkg.version': return  '8675309-snapshot';
-          default: throw Error(`unexpected config.get('${item}') received.`);
+        switch (item) {
+          case 'pkg.version':
+            return '8675309-snapshot';
+          default:
+            throw Error(`unexpected config.get('${item}') received.`);
         }
-      }
+      },
     };
   },
   usage: { collectorSet: { bulkFetch: () => kibanaUsage, toObject: data => data } },
@@ -62,20 +61,20 @@ describe('get_local_stats', () => {
     cluster_uuid: clusterUuid,
     cluster_name: clusterName,
     version: {
-      number: version
-    }
+      number: version,
+    },
   };
   const clusterStats = {
     _nodes: { failed: 123 },
     cluster_name: 'real-cool',
     indices: { totally: 456 },
     nodes: { yup: 'abc' },
-    random: 123
+    random: 123,
   };
   const kibana = {
     kibana: {
       great: 'googlymoogly',
-      versions: [{ version: '8675309', count: 1 }]
+      versions: [{ version: '8675309', count: 1 }],
     },
     kibana_stats: {
       os: {
@@ -86,7 +85,7 @@ describe('get_local_stats', () => {
     localization: {
       locale: 'en',
       labelsCount: 0,
-      integrities: {}
+      integrities: {},
     },
     sun: { chances: 5 },
     clouds: { chances: 95 },
@@ -107,22 +106,22 @@ describe('get_local_stats', () => {
         indices: 1,
         os: {
           platforms: [{ platform: 'rocky', count: 1 }],
-          platformReleases: [{ platformRelease: 'iv', count: 1 }]
+          platformReleases: [{ platformRelease: 'iv', count: 1 }],
         },
         versions: [{ version: '8675309', count: 1 }],
         plugins: {
           localization: {
             locale: 'en',
             labelsCount: 0,
-            integrities: {}
+            integrities: {},
           },
           sun: { chances: 5 },
           clouds: { chances: 95 },
           rain: { chances: 2 },
           snow: { chances: 0 },
-        }
+        },
       },
-    }
+    },
   };
 
   describe('handleLocalStats', () => {
@@ -159,7 +158,7 @@ describe('get_local_stats', () => {
       mockGetLocalStats(
         callClusterUsageFailed,
         Promise.resolve(clusterInfo),
-        Promise.resolve(clusterStats),
+        Promise.resolve(clusterStats)
       );
       const result = await getLocalStats({
         server: getMockServer(),
@@ -179,11 +178,7 @@ describe('get_local_stats', () => {
     it('returns expected object with xpack and kibana data', async () => {
       const callCluster = sinon.stub();
 
-      mockGetLocalStats(
-        callCluster,
-        Promise.resolve(clusterInfo),
-        Promise.resolve(clusterStats),
-      );
+      mockGetLocalStats(callCluster, Promise.resolve(clusterInfo), Promise.resolve(clusterStats));
 
       const result = await getLocalStats({
         server: getMockServer(callCluster, kibana),

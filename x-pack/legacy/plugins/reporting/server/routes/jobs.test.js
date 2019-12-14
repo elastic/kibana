@@ -10,15 +10,16 @@ import { registerJobs } from './jobs';
 import { ExportTypesRegistry } from '../../common/export_types_registry';
 jest.mock('./lib/authorized_user_pre_routing', () => {
   return {
-    authorizedUserPreRoutingFactory: () => () => ({})
+    authorizedUserPreRoutingFactory: () => () => ({}),
   };
 });
 jest.mock('./lib/reporting_feature_pre_routing', () => {
   return {
-    reportingFeaturePreRoutingFactory: () => () => () => ({ jobTypes: ['unencodedJobType', 'base64EncodedJobType'] })
+    reportingFeaturePreRoutingFactory: () => () => () => ({
+      jobTypes: ['unencodedJobType', 'base64EncodedJobType'],
+    }),
   };
 });
-
 
 let mockServer;
 
@@ -29,45 +30,46 @@ beforeEach(() => {
   exportTypesRegistry.register({
     id: 'unencoded',
     jobType: 'unencodedJobType',
-    jobContentExtension: 'csv'
+    jobContentExtension: 'csv',
   });
   exportTypesRegistry.register({
     id: 'base64Encoded',
     jobType: 'base64EncodedJobType',
     jobContentEncoding: 'base64',
-    jobContentExtension: 'pdf'
+    jobContentExtension: 'pdf',
   });
   mockServer.plugins = {
     elasticsearch: {
       getCluster: memoize(() => ({ callWithInternalUser: jest.fn() })),
-      createCluster: (() => ({
+      createCluster: () => ({
         callWithRequest: jest.fn(),
         callWithInternalUser: jest.fn(),
-      }))
+      }),
     },
     reporting: {
-      exportTypesRegistry
-    }
+      exportTypesRegistry,
+    },
   };
 });
 
 const getHits = (...sources) => {
   return {
     hits: {
-      hits: sources.map(source => ({ _source: source }))
-    }
+      hits: sources.map(source => ({ _source: source })),
+    },
   };
 };
 
 test(`returns 404 if job not found`, async () => {
-  mockServer.plugins.elasticsearch.getCluster('admin')
+  mockServer.plugins.elasticsearch
+    .getCluster('admin')
     .callWithInternalUser.mockReturnValue(Promise.resolve(getHits()));
 
   registerJobs(mockServer);
 
   const request = {
     method: 'GET',
-    url: '/api/reporting/jobs/download/1'
+    url: '/api/reporting/jobs/download/1',
   };
 
   const response = await mockServer.inject(request);
@@ -76,14 +78,15 @@ test(`returns 404 if job not found`, async () => {
 });
 
 test(`returns 401 if not valid job type`, async () => {
-  mockServer.plugins.elasticsearch.getCluster('admin')
+  mockServer.plugins.elasticsearch
+    .getCluster('admin')
     .callWithInternalUser.mockReturnValue(Promise.resolve(getHits({ jobtype: 'invalidJobType' })));
 
   registerJobs(mockServer);
 
   const request = {
     method: 'GET',
-    url: '/api/reporting/jobs/download/1'
+    url: '/api/reporting/jobs/download/1',
   };
 
   const { statusCode } = await mockServer.inject(request);
@@ -91,16 +94,18 @@ test(`returns 401 if not valid job type`, async () => {
 });
 
 describe(`when job is incomplete`, () => {
-
   const getIncompleteResponse = async () => {
-    mockServer.plugins.elasticsearch.getCluster('admin')
-      .callWithInternalUser.mockReturnValue(Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' })));
+    mockServer.plugins.elasticsearch
+      .getCluster('admin')
+      .callWithInternalUser.mockReturnValue(
+        Promise.resolve(getHits({ jobtype: 'unencodedJobType', status: 'pending' }))
+      );
 
     registerJobs(mockServer);
 
     const request = {
       method: 'GET',
-      url: '/api/reporting/jobs/download/1'
+      url: '/api/reporting/jobs/download/1',
     };
 
     return await mockServer.inject(request);
@@ -129,15 +134,20 @@ describe(`when job is incomplete`, () => {
 
 describe(`when job is failed`, () => {
   const getFailedResponse = async () => {
-    const hits = getHits({ jobtype: 'unencodedJobType', status: 'failed', output: { content: 'job failure message' } });
-    mockServer.plugins.elasticsearch.getCluster('admin')
+    const hits = getHits({
+      jobtype: 'unencodedJobType',
+      status: 'failed',
+      output: { content: 'job failure message' },
+    });
+    mockServer.plugins.elasticsearch
+      .getCluster('admin')
       .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
 
     registerJobs(mockServer);
 
     const request = {
       method: 'GET',
-      url: '/api/reporting/jobs/download/1'
+      url: '/api/reporting/jobs/download/1',
     };
 
     return await mockServer.inject(request);
@@ -160,29 +170,29 @@ describe(`when job is failed`, () => {
 });
 
 describe(`when job is completed`, () => {
-
   const getCompletedResponse = async ({
     jobType = 'unencodedJobType',
     outputContent = 'job output content',
     outputContentType = 'application/pdf',
-    title = ''
+    title = '',
   } = {}) => {
-
     const hits = getHits({
       jobtype: jobType,
       status: 'completed',
       output: { content: outputContent, content_type: outputContentType },
       payload: {
-        title
-      }
+        title,
+      },
     });
-    mockServer.plugins.elasticsearch.getCluster('admin').callWithInternalUser.mockReturnValue(Promise.resolve(hits));
+    mockServer.plugins.elasticsearch
+      .getCluster('admin')
+      .callWithInternalUser.mockReturnValue(Promise.resolve(hits));
 
     registerJobs(mockServer);
 
     const request = {
       method: 'GET',
-      url: '/api/reporting/jobs/download/1'
+      url: '/api/reporting/jobs/download/1',
     };
 
     return await mockServer.inject(request);
@@ -194,12 +204,18 @@ describe(`when job is completed`, () => {
   });
 
   test(`doesn't encode output content for not-specified jobTypes`, async () => {
-    const { payload } = await getCompletedResponse({ jobType: 'unencodedJobType', outputContent: 'test' });
+    const { payload } = await getCompletedResponse({
+      jobType: 'unencodedJobType',
+      outputContent: 'test',
+    });
     expect(payload).toBe('test');
   });
 
   test(`base64 encodes output content for configured jobTypes`, async () => {
-    const { payload } = await getCompletedResponse({ jobType: 'base64EncodedJobType', outputContent: 'test' });
+    const { payload } = await getCompletedResponse({
+      jobType: 'base64EncodedJobType',
+      outputContent: 'test',
+    });
     expect(payload).toBe(Buffer.from('test', 'base64').toString());
   });
 
@@ -209,7 +225,7 @@ describe(`when job is completed`, () => {
   });
 
   test(`specifies default filename in content-disposition header if no title`, async () => {
-    const { headers } = await getCompletedResponse({ });
+    const { headers } = await getCompletedResponse({});
     expect(headers['content-disposition']).toBe('inline; filename="report.csv"');
   });
 
@@ -240,8 +256,12 @@ describe(`when job is completed`, () => {
     });
 
     test(`logs error message about invalid content type`, async () => {
-      const { request: { logs } } = await getCompletedResponse({ outputContentType: 'application/html' });
-      const errorLogs = logs.filter(log => difference(['internal', 'implementation', 'error'], log.tags).length === 0);
+      const {
+        request: { logs },
+      } = await getCompletedResponse({ outputContentType: 'application/html' });
+      const errorLogs = logs.filter(
+        log => difference(['internal', 'implementation', 'error'], log.tags).length === 0
+      );
       expect(errorLogs).toHaveLength(1);
       expect(errorLogs[0].error).toBeInstanceOf(Error);
       expect(errorLogs[0].error.message).toMatch(/Unsupported content-type of application\/html/);

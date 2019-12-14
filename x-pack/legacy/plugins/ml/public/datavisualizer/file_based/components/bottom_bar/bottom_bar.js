@@ -4,17 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBottomBar,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiBottomBar } from '@elastic/eui';
 
 import { MODE as DATAVISUALIZER_MODE } from '../file_datavisualizer_view';
 
@@ -22,12 +15,12 @@ export function BottomBar({ showBar, mode, changeMode, onCancel, disableImport }
   if (showBar) {
     if (mode === DATAVISUALIZER_MODE.READ) {
       return (
-        <EuiBottomBar >
-          <EuiFlexGroup >
+        <EuiBottomBar>
+          <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                isDisabled={(disableImport === true)}
+                isDisabled={disableImport === true}
                 onClick={() => changeMode(DATAVISUALIZER_MODE.IMPORT)}
               >
                 <FormattedMessage
@@ -37,10 +30,7 @@ export function BottomBar({ showBar, mode, changeMode, onCancel, disableImport }
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="ghost"
-                onClick={() => onCancel()}
-              >
+              <EuiButtonEmpty color="ghost" onClick={() => onCancel()}>
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.bottomBar.readMode.cancelButtonLabel"
                   defaultMessage="Cancel"
@@ -48,18 +38,14 @@ export function BottomBar({ showBar, mode, changeMode, onCancel, disableImport }
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
-
         </EuiBottomBar>
       );
     } else {
       return (
-        <EuiBottomBar >
-          <EuiFlexGroup >
+        <EuiBottomBar>
+          <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                color="ghost"
-                onClick={() => changeMode(DATAVISUALIZER_MODE.READ)}
-              >
+              <EuiButton color="ghost" onClick={() => changeMode(DATAVISUALIZER_MODE.READ)}>
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.bottomBar.backButtonLabel"
                   defaultMessage="Back"
@@ -67,10 +53,7 @@ export function BottomBar({ showBar, mode, changeMode, onCancel, disableImport }
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                color="ghost"
-                onClick={() => onCancel()}
-              >
+              <EuiButtonEmpty color="ghost" onClick={() => onCancel()}>
                 <FormattedMessage
                   id="xpack.ml.fileDatavisualizer.bottomBar.cancelButtonLabel"
                   defaultMessage="Cancel"

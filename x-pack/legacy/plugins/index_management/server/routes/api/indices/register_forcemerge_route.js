@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 const handler = async (request, callWithRequest, h) => {
   const { maxNumSegments, indices = [] } = request.payload;
   const params = {

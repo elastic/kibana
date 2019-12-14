@@ -24,46 +24,44 @@ import * as AggConfigModule from '../../agg_config';
 import * as BucketAggTypeModule from '../../buckets/_bucket_agg_type';
 
 describe('Geohash Agg', () => {
-
   const initialZoom = 10;
   const initialMapBounds = {
     top_left: { lat: 1.0, lon: -1.0 },
-    bottom_right: { lat: -1.0, lon: 1.0 }
+    bottom_right: { lat: -1.0, lon: 1.0 },
   };
 
-  const BucketAggTypeMock = (aggOptions) => {
+  const BucketAggTypeMock = aggOptions => {
     return aggOptions;
   };
   const AggConfigMock = (parent, aggOptions) => {
     return aggOptions;
   };
-  const createAggregationMock = (aggOptions) => {
+  const createAggregationMock = aggOptions => {
     return new AggConfigMock(null, aggOptions);
   };
 
   const aggMock = {
     getField: () => {
       return {
-        name: 'location'
+        name: 'location',
       };
     },
     params: {
       isFilteredByCollar: true,
       useGeocentroid: true,
-      mapZoom: initialZoom
+      mapZoom: initialZoom,
     },
     aggConfigs: {},
     type: 'geohash_grid',
   };
   aggMock.aggConfigs.createAggConfig = createAggregationMock;
 
-
-  before(function () {
+  before(function() {
     sinon.stub(AggConfigModule, 'AggConfig').callsFake(AggConfigMock);
     sinon.stub(BucketAggTypeModule, 'BucketAggType').callsFake(BucketAggTypeMock);
   });
 
-  after(function () {
+  after(function() {
     AggConfigModule.AggConfig.restore();
     BucketAggTypeModule.BucketAggType.restore();
   });
@@ -88,12 +86,11 @@ describe('Geohash Agg', () => {
     aggMock.params.mapCollar = {
       top_left: { lat: 1.5, lon: -1.5 },
       bottom_right: { lat: -1.5, lon: 1.5 },
-      zoom: initialZoom
+      zoom: initialZoom,
     };
   }
 
   describe('precision parameter', () => {
-
     const PRECISION_PARAM_INDEX = 2;
     let precisionParam;
     beforeEach(() => {
@@ -105,7 +102,6 @@ describe('Geohash Agg', () => {
     });
 
     describe('precision parameter write', () => {
-
       const zoomToGeoHashPrecision = {
         0: 1,
         1: 2,
@@ -128,27 +124,28 @@ describe('Geohash Agg', () => {
         18: 7,
         19: 7,
         20: 7,
-        21: 7
+        21: 7,
       };
 
-      Object.keys(zoomToGeoHashPrecision).forEach((zoomLevel) => {
+      Object.keys(zoomToGeoHashPrecision).forEach(zoomLevel => {
         it(`zoom level ${zoomLevel} should correspond to correct geohash-precision`, () => {
           const output = { params: {} };
-          precisionParam.write({
-            params: {
-              autoPrecision: true,
-              mapZoom: zoomLevel
-            }
-          }, output);
+          precisionParam.write(
+            {
+              params: {
+                autoPrecision: true,
+                mapZoom: zoomLevel,
+              },
+            },
+            output
+          );
           expect(output.params.precision).to.equal(zoomToGeoHashPrecision[zoomLevel]);
         });
       });
     });
-
   });
 
   describe('getRequestAggs', () => {
-
     describe('initial aggregation creation', () => {
       let requestAggs;
       beforeEach(() => {
@@ -182,7 +179,6 @@ describe('Geohash Agg', () => {
     });
 
     describe('aggregation options', () => {
-
       beforeEach(() => {
         initAggParams();
       });
@@ -201,12 +197,10 @@ describe('Geohash Agg', () => {
         expect(requestAggs.length).to.equal(2);
         expect(requestAggs[0].type).to.equal('filter');
         expect(requestAggs[1].type).to.equal('geohash_grid');
-
       });
     });
 
     describe('aggregation creation after map interaction', () => {
-
       let origRequestAggs;
       let origMapCollar;
       beforeEach(() => {
@@ -219,11 +213,13 @@ describe('Geohash Agg', () => {
       it('should not change geo_bounding_box filter aggregation and vis session state when map movement is within map collar', () => {
         moveMap({
           top_left: { lat: 1.1, lon: -1.1 },
-          bottom_right: { lat: -0.9, lon: 0.9 }
+          bottom_right: { lat: -0.9, lon: 0.9 },
         });
 
         const newRequestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
-        expect(JSON.stringify(origRequestAggs[0].params, null, '')).to.equal(JSON.stringify(newRequestAggs[0].params, null, ''));
+        expect(JSON.stringify(origRequestAggs[0].params, null, '')).to.equal(
+          JSON.stringify(newRequestAggs[0].params, null, '')
+        );
 
         const newMapCollar = JSON.stringify(aggMock.lastMapCollar, null, '');
         expect(origMapCollar).to.equal(newMapCollar);
@@ -232,11 +228,13 @@ describe('Geohash Agg', () => {
       it('should change geo_bounding_box filter aggregation and vis session state when map movement is outside map collar', () => {
         moveMap({
           top_left: { lat: 10.0, lon: -10.0 },
-          bottom_right: { lat: 9.0, lon: -9.0 }
+          bottom_right: { lat: 9.0, lon: -9.0 },
         });
 
         const newRequestAggs = geoHashBucketAgg.getRequestAggs(aggMock);
-        expect(JSON.stringify(origRequestAggs[0].params, null, '')).not.to.equal(JSON.stringify(newRequestAggs[0].params, null, ''));
+        expect(JSON.stringify(origRequestAggs[0].params, null, '')).not.to.equal(
+          JSON.stringify(newRequestAggs[0].params, null, '')
+        );
 
         const newMapCollar = JSON.stringify(aggMock.lastMapCollar, null, '');
         expect(origMapCollar).not.to.equal(newMapCollar);
@@ -250,8 +248,6 @@ describe('Geohash Agg', () => {
         const newMapCollar = JSON.stringify(aggMock.lastMapCollar, null, '');
         expect(origMapCollar).not.to.equal(newMapCollar);
       });
-
     });
-
   });
 });

@@ -6,11 +6,7 @@
 
 import { connect } from 'react-redux';
 
-import {
-  isLoading,
-  jobLoadError,
-  getJobsList,
-} from '../../store/selectors';
+import { isLoading, jobLoadError, getJobsList } from '../../store/selectors';
 
 import {
   loadJobs,
@@ -22,7 +18,7 @@ import {
 
 import { JobList as JobListView } from './job_list';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     hasJobs: Boolean(getJobsList(state).length),
     isLoading: isLoading(state),
@@ -30,7 +26,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   return {
     loadJobs: () => {
       dispatch(loadJobs());
@@ -38,16 +34,19 @@ const mapDispatchToProps = (dispatch) => {
     refreshJobs: () => {
       dispatch(refreshJobs());
     },
-    openDetailPanel: (jobId) => {
+    openDetailPanel: jobId => {
       dispatch(openDetailPanel({ jobId: jobId }));
     },
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
     },
-    cloneJob: (jobConfig) => {
+    cloneJob: jobConfig => {
       dispatch(cloneJob(jobConfig));
-    }
+    },
   };
 };
 
-export const JobList = connect(mapStateToProps, mapDispatchToProps)(JobListView);
+export const JobList = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(JobListView);

@@ -13,11 +13,7 @@ import {
   TELEMETRY_COLLECTION_INTERVAL,
 } from '../../common/constants';
 
-import {
-  sendBulkPayload,
-  monitoringBulk,
-  getKibanaInfoForStats,
-} from './lib';
+import { sendBulkPayload, monitoringBulk, getKibanaInfoForStats } from './lib';
 
 const LOGGING_TAGS = [LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG];
 
@@ -51,19 +47,22 @@ export class BulkUploader {
     this._log = {
       debug: message => log(['debug', ...LOGGING_TAGS], message),
       info: message => log(['info', ...LOGGING_TAGS], message),
-      warn: message => log(['warning', ...LOGGING_TAGS], message)
+      warn: message => log(['warning', ...LOGGING_TAGS], message),
     };
 
     this._cluster = elasticsearchPlugin.createCluster('admin', {
       plugins: [monitoringBulk],
     });
 
-    this._callClusterWithInternalUser = callClusterFactory({ plugins: { elasticsearch: elasticsearchPlugin } }).getCallClusterInternal();
-    this._getKibanaInfoForStats = () => getKibanaInfoForStats({
-      kbnServerStatus,
-      kbnServerVersion,
-      config
-    });
+    this._callClusterWithInternalUser = callClusterFactory({
+      plugins: { elasticsearch: elasticsearchPlugin },
+    }).getCallClusterInternal();
+    this._getKibanaInfoForStats = () =>
+      getKibanaInfoForStats({
+        kbnServerStatus,
+        kbnServerVersion,
+        config,
+      });
   }
 
   /*
@@ -74,7 +73,8 @@ export class BulkUploader {
   start(collectorSet) {
     this._log.info('Starting monitoring stats collection');
     const filterCollectorSet = _collectorSet => {
-      const successfulUploadInLastDay = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
+      const successfulUploadInLastDay =
+        this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
 
       return _collectorSet.getFilteredCollectorSet(c => {
         // this is internal bulk upload, so filter out API-only collectors
@@ -146,7 +146,9 @@ export class BulkUploader {
         const sendSuccessful = !result.ignored && !result.errors;
         if (!sendSuccessful && hasUsageCollectors) {
           this._lastFetchUsageTime = null;
-          this._log.debug('Resetting lastFetchWithUsage because uploading to the cluster was not successful.');
+          this._log.debug(
+            'Resetting lastFetchWithUsage because uploading to the cluster was not successful.'
+          );
         }
         if (sendSuccessful && hasUsageCollectors) {
           this._lastFetchUsageTime = Date.now();
@@ -210,7 +212,9 @@ export class BulkUploader {
     // convert the raw data to a nested object by taking each payload through
     // its formatter, organizing it per-type
     const typesNested = rawData.reduce((accum, { type, result }) => {
-      const { type: uploadType, payload: uploadData } = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
+      const { type: uploadType, payload: uploadData } = collectorSet
+        .getCollectorByType(type)
+        .formatForBulkUpload(result);
       return defaultsDeep(accum, { [uploadType]: uploadData });
     }, {});
     // convert the nested object into a flat array, with each payload prefixed
@@ -222,7 +226,7 @@ export class BulkUploader {
         {
           kibana: this._getKibanaInfoForStats(),
           ...typesNested[type],
-        }
+        },
       ];
     }, []);
 

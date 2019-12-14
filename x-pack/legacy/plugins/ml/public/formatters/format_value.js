@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 /*
  * Formatter for 'typical' and 'actual' values from machine learning results.
  * For detectors which use the time_of_week or time_of_day
@@ -18,8 +16,7 @@ import moment from 'moment';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-
-const SIGFIGS_IF_ROUNDING = 3;  // Number of sigfigs to use for values < 10
+const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
 // Formats the value of an actual or typical field from a machine learning anomaly record.
 // mlFunction is the 'function' field from the ML record containing what the user entered e.g. 'high_count',
@@ -65,14 +62,26 @@ function formatSingleValue(value, mlFunction, fieldFormat, record) {
   // that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
   // revert back to configured timezone for formatting.
   if (mlFunction === 'time_of_week') {
-    const d = ((record !== undefined && record.timestamp !== undefined) ? new Date(record.timestamp) : new Date());
+    const d =
+      record !== undefined && record.timestamp !== undefined
+        ? new Date(record.timestamp)
+        : new Date();
     const i = parseInt(value);
-    const utcMoment = moment.utc(d).startOf('week').add(i, 's');
+    const utcMoment = moment
+      .utc(d)
+      .startOf('week')
+      .add(i, 's');
     return moment(utcMoment.valueOf()).format('ddd HH:mm');
   } else if (mlFunction === 'time_of_day') {
-    const d = ((record !== undefined && record.timestamp !== undefined) ? new Date(record.timestamp) : new Date());
+    const d =
+      record !== undefined && record.timestamp !== undefined
+        ? new Date(record.timestamp)
+        : new Date();
     const i = parseInt(value);
-    const utcMoment = moment.utc(d).startOf('day').add(i, 's');
+    const utcMoment = moment
+      .utc(d)
+      .startOf('day')
+      .add(i, 's');
     return moment(utcMoment.valueOf()).format('HH:mm');
   } else {
     if (fieldFormat !== undefined) {
@@ -81,27 +90,31 @@ function formatSingleValue(value, mlFunction, fieldFormat, record) {
       // If no Kibana FieldFormat object provided,
       // format the value depending on its magnitude.
       const absValue = Math.abs(value);
-      if (absValue >= 10000 ||  absValue === Math.floor(absValue)) {
+      if (absValue >= 10000 || absValue === Math.floor(absValue)) {
         // Output 0 decimal places if whole numbers or >= 10000
         if (fieldFormat !== undefined) {
           return fieldFormat.convert(value, 'text');
         } else {
           return Number(value.toFixed(0));
         }
-
       } else if (absValue >= 10) {
         // Output to 1 decimal place between 10 and 10000
         return Number(value.toFixed(1));
-      }
-      else {
+      } else {
         // For values < 10, output to 3 significant figures
         let multiple;
         if (value > 0) {
-          multiple = Math.pow(10, SIGFIGS_IF_ROUNDING - Math.floor(Math.log(value) / Math.LN10) - 1);
+          multiple = Math.pow(
+            10,
+            SIGFIGS_IF_ROUNDING - Math.floor(Math.log(value) / Math.LN10) - 1
+          );
         } else {
-          multiple = Math.pow(10, SIGFIGS_IF_ROUNDING - Math.floor(Math.log(-1 * value) / Math.LN10) - 1);
+          multiple = Math.pow(
+            10,
+            SIGFIGS_IF_ROUNDING - Math.floor(Math.log(-1 * value) / Math.LN10) - 1
+          );
         }
-        return (Math.round(value * multiple)) / multiple;
+        return Math.round(value * multiple) / multiple;
       }
     }
   }
@@ -109,4 +122,3 @@ function formatSingleValue(value, mlFunction, fieldFormat, record) {
 
 // TODO - remove the filter once all uses of the formatValue Angular filter have been removed.
 module.filter('formatValue', () => formatValue);
-

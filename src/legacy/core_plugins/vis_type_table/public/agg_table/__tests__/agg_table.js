@@ -33,7 +33,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { createTableVisTypeDefinition } from '../../table_vis_type';
 import { setup as visualizationsSetup } from '../../../../visualizations/public/np_ready/public/legacy';
 
-describe('Table Vis - AggTable Directive', function () {
+describe('Table Vis - AggTable Directive', function() {
   let $rootScope;
   let $compile;
   let Vis;
@@ -59,7 +59,7 @@ describe('Table Vis - AggTable Directive', function () {
         { type: 'terms', schema: 'bucket', params: { field: 'machine.os' } },
       ],
     });
-    vis2.aggs.aggs.forEach(function (agg, i) {
+    vis2.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
     tabifiedData.threeTermBuckets = tabifyAggResponse(vis2.aggs, fixtures.threeTermBuckets, {
@@ -89,7 +89,7 @@ describe('Table Vis - AggTable Directive', function () {
         },
       ],
     });
-    vis3.aggs.aggs.forEach(function (agg, i) {
+    vis3.aggs.aggs.forEach(function(agg, i) {
       agg.id = 'agg_' + (i + 1);
     });
 
@@ -99,18 +99,20 @@ describe('Table Vis - AggTable Directive', function () {
     );
   };
 
-  ngMock.inject(function (Private) {
+  ngMock.inject(function(Private) {
     legacyDependencies = {
       // eslint-disable-next-line new-cap
       createAngularVisualization: VisFactoryProvider(Private).createAngularVisualization,
     };
 
-    visualizationsSetup.types.registerVisualization(() => createTableVisTypeDefinition(legacyDependencies));
+    visualizationsSetup.types.registerVisualization(() =>
+      createTableVisTypeDefinition(legacyDependencies)
+    );
   });
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(
-    ngMock.inject(function ($injector, Private, config) {
+    ngMock.inject(function($injector, Private, config) {
       tableAggResponse = legacyResponseHandlerProvider().handler;
       indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
       Vis = Private(VisProvider);
@@ -124,14 +126,14 @@ describe('Table Vis - AggTable Directive', function () {
   );
 
   let $scope;
-  beforeEach(function () {
+  beforeEach(function() {
     $scope = $rootScope.$new();
   });
-  afterEach(function () {
+  afterEach(function() {
     $scope.$destroy();
   });
 
-  it('renders a simple response properly', async function () {
+  it('renders a simple response properly', async function() {
     $scope.dimensions = {
       metrics: [{ accessor: 0, format: { id: 'number' }, params: {} }],
       buckets: [],
@@ -148,7 +150,7 @@ describe('Table Vis - AggTable Directive', function () {
     expect($el.find('td').text()).to.eql('1,000');
   });
 
-  it('renders nothing if the table is empty', function () {
+  it('renders nothing if the table is empty', function() {
     $scope.dimensions = {};
     $scope.table = null;
     const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
@@ -159,7 +161,7 @@ describe('Table Vis - AggTable Directive', function () {
     expect($el.find('tbody').length).to.be(0);
   });
 
-  it('renders a complex response properly', async function () {
+  it('renders a complex response properly', async function() {
     $scope.dimensions = {
       buckets: [
         { accessor: 0, params: {} },
@@ -192,12 +194,12 @@ describe('Table Vis - AggTable Directive', function () {
       }
     }
 
-    $rows.each(function () {
+    $rows.each(function() {
       // 6 cells in every row
       const $cells = $(this).find('td');
       expect($cells.length).to.be(6);
 
-      const txts = $cells.map(function () {
+      const txts = $cells.map(function() {
         return $(this)
           .text()
           .trim();
@@ -217,7 +219,7 @@ describe('Table Vis - AggTable Directive', function () {
     });
   });
 
-  describe('renders totals row', function () {
+  describe('renders totals row', function() {
     async function totalsRowTest(totalFunc, expected) {
       function setDefaultTimezone() {
         moment.tz.setDefault(settings.get('dateFormat:tz'));
@@ -272,10 +274,10 @@ describe('Table Vis - AggTable Directive', function () {
       settings.set('dateFormat:tz', oldTimezoneSetting);
       off();
     }
-    it('as count', async function () {
+    it('as count', async function() {
       await totalsRowTest('count', ['18', '18', '18', '18', '18', '18']);
     });
-    it('as min', async function () {
+    it('as min', async function() {
       await totalsRowTest('min', [
         '',
         '2014-09-28',
@@ -285,7 +287,7 @@ describe('Table Vis - AggTable Directive', function () {
         '11',
       ]);
     });
-    it('as max', async function () {
+    it('as max', async function() {
       await totalsRowTest('max', [
         '',
         '2014-10-03',
@@ -295,16 +297,16 @@ describe('Table Vis - AggTable Directive', function () {
         '837',
       ]);
     });
-    it('as avg', async function () {
+    it('as avg', async function() {
       await totalsRowTest('avg', ['', '', '87,221.5', '', '64.667', '206.833']);
     });
-    it('as sum', async function () {
+    it('as sum', async function() {
       await totalsRowTest('sum', ['', '', '1,569,987', '', '1,164', '3,723']);
     });
   });
 
-  describe('aggTable.toCsv()', function () {
-    it('escapes rows and columns properly', function () {
+  describe('aggTable.toCsv()', function() {
+    it('escapes rows and columns properly', function() {
       const $el = $compile('<kbn-agg-table table="table" dimensions="dimensions"></kbn-agg-table>')(
         $scope
       );
@@ -326,7 +328,7 @@ describe('Table Vis - AggTable Directive', function () {
       );
     });
 
-    it('exports rows and columns properly', async function () {
+    it('exports rows and columns properly', async function() {
       $scope.dimensions = {
         buckets: [
           { accessor: 0, params: {} },
@@ -384,7 +386,7 @@ describe('Table Vis - AggTable Directive', function () {
       );
     });
 
-    it('exports formatted rows and columns properly', async function () {
+    it('exports formatted rows and columns properly', async function() {
       $scope.dimensions = {
         buckets: [
           { accessor: 0, params: {} },
@@ -446,7 +448,7 @@ describe('Table Vis - AggTable Directive', function () {
     });
   });
 
-  it('renders percentage columns', async function () {
+  it('renders percentage columns', async function() {
     $scope.dimensions = {
       buckets: [
         { accessor: 0, params: {} },
@@ -500,23 +502,23 @@ describe('Table Vis - AggTable Directive', function () {
     });
   });
 
-  describe('aggTable.exportAsCsv()', function () {
+  describe('aggTable.exportAsCsv()', function() {
     let origBlob;
     function FakeBlob(slices, opts) {
       this.slices = slices;
       this.opts = opts;
     }
 
-    beforeEach(function () {
+    beforeEach(function() {
       origBlob = window.Blob;
       window.Blob = FakeBlob;
     });
 
-    afterEach(function () {
+    afterEach(function() {
       window.Blob = origBlob;
     });
 
-    it('calls _saveAs properly', function () {
+    it('calls _saveAs properly', function() {
       const $el = $compile('<kbn-agg-table table="table"  dimensions="dimensions">')($scope);
       $scope.$digest();
 
@@ -548,7 +550,7 @@ describe('Table Vis - AggTable Directive', function () {
       expect(call.args[1]).to.be('somefilename.csv');
     });
 
-    it('should use the export-title attribute', function () {
+    it('should use the export-title attribute', function() {
       const expected = 'export file name';
       const $el = $compile(
         `<kbn-agg-table table="table"  dimensions="dimensions" export-title="exportTitle">`

@@ -21,8 +21,7 @@ import { expectExpressionProvider } from './helpers';
 
 // this file showcases how to use testing utilities defined in helpers.js together with the kbn_tp_run_pipeline
 // test plugin to write autmated tests for interprete
-export default function ({ getService, updateBaselines }) {
-
+export default function({ getService, updateBaselines }) {
   let expectExpression;
   describe('metricVis pipeline expression tests', () => {
     before(() => {
@@ -48,32 +47,48 @@ export default function ({ getService, updateBaselines }) {
 
       it.skip('with invalid data', async () => {
         const expression = 'metricVis metric={visdimension 0}';
-        await (await expectExpression('metric_invalid_data', expression).toMatchSnapshot()).toMatchScreenshot();
+        await (await expectExpression(
+          'metric_invalid_data',
+          expression
+        ).toMatchSnapshot()).toMatchScreenshot();
       });
 
       // Test fails on chromedriver 76
       // https://github.com/elastic/kibana/issues/42842
       it.skip('with single metric data', async () => {
         const expression = 'metricVis metric={visdimension 0}';
-        await (await expectExpression('metric_single_metric_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (await expectExpression(
+          'metric_single_metric_data',
+          expression,
+          dataContext
+        ).toMatchSnapshot()).toMatchScreenshot();
       });
 
       // Test fails on chromedriver 76
       // https://github.com/elastic/kibana/issues/42842
       it.skip('with multiple metric data', async () => {
         const expression = 'metricVis metric={visdimension 0} metric={visdimension 1}';
-        await expectExpression('metric_multi_metric_data', expression, dataContext).toMatchSnapshot();
+        await expectExpression(
+          'metric_multi_metric_data',
+          expression,
+          dataContext
+        ).toMatchSnapshot();
       });
 
       // Test fails on chromedriver 76
       // https://github.com/elastic/kibana/issues/42842
       it.skip('with metric and bucket data', async () => {
         const expression = 'metricVis metric={visdimension 0} bucket={visdimension 2}';
-        await (await expectExpression('metric_all_data', expression, dataContext).toMatchSnapshot()).toMatchScreenshot();
+        await (await expectExpression(
+          'metric_all_data',
+          expression,
+          dataContext
+        ).toMatchSnapshot()).toMatchScreenshot();
       });
 
       it('with percentage option', async () => {
-        const expression = 'metricVis metric={visdimension 0} percentage=true colorRange={range from=0 to=1000}';
+        const expression =
+          'metricVis metric={visdimension 0} percentage=true colorRange={range from=0 to=1000}';
         await expectExpression('metric_percentage', expression, dataContext).toMatchSnapshot();
       });
     });

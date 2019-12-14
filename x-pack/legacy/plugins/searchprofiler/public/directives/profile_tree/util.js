@@ -12,7 +12,7 @@ const comparator = (v1, v2) => {
   if (v1 < v2) {
     return 1;
   }
-  return (v1 > v2) ? -1 : 0;
+  return v1 > v2 ? -1 : 0;
 };
 
 function getToolTip(key) {
@@ -71,7 +71,7 @@ export function calcTimes(data, parentId) {
         child.childrenIds.push(c.id);
       }
     }
-    child.selfTime = (timeInMilliseconds(child) - childrenTime);
+    child.selfTime = timeInMilliseconds(child) - childrenTime;
   }
   return totalTime;
 }
@@ -84,19 +84,21 @@ export function normalizeBreakdown(breakdown) {
     }
     return partialTotal;
   }, 0);
-  Object.keys(breakdown).sort().forEach(key => {
-    let relative = 0;
-    if (key.indexOf('_count') === -1) {
-      relative = ((breakdown[key] / total) * 100).toFixed(1);
-    }
-    final.push({
-      key: key,
-      time: breakdown[key],
-      relative: relative,
-      color: tinycolor.mix('#F5F5F5', '#FFAFAF', relative).toHexString(),
-      tip: getToolTip(key)
+  Object.keys(breakdown)
+    .sort()
+    .forEach(key => {
+      let relative = 0;
+      if (key.indexOf('_count') === -1) {
+        relative = ((breakdown[key] / total) * 100).toFixed(1);
+      }
+      final.push({
+        key: key,
+        time: breakdown[key],
+        relative: relative,
+        color: tinycolor.mix('#F5F5F5', '#FFAFAF', relative).toHexString(),
+        tip: getToolTip(key),
+      });
     });
-  });
 
   // Sort by time descending and then key ascending
   return final.sort((a, b) => {
@@ -128,10 +130,10 @@ export function normalizeIndices(indices, visibility, target) {
   let sortQueryComponents;
   if (target === 'searches') {
     sortQueryComponents = (a, b) => {
-      const aTime = _.sum(a.searches, (search) => {
+      const aTime = _.sum(a.searches, search => {
         return search.flat[0].time;
       });
-      const bTime = _.sum(b.searches, (search) => {
+      const bTime = _.sum(b.searches, search => {
         return search.flat[0].time;
       });
 
@@ -139,10 +141,10 @@ export function normalizeIndices(indices, visibility, target) {
     };
   } else if (target === 'aggregations') {
     sortQueryComponents = (a, b) => {
-      const aTime = _.sum(a.aggregations, (agg) => {
+      const aTime = _.sum(a.aggregations, agg => {
         return agg.flat[0].time;
       });
-      const bTime = _.sum(b.aggregations, (agg) => {
+      const bTime = _.sum(b.aggregations, agg => {
         return agg.flat[0].time;
       });
 
@@ -154,7 +156,9 @@ export function normalizeIndices(indices, visibility, target) {
     index.shards.sort(sortQueryComponents);
     for (const shard of index.shards) {
       shard.relative[target] = ((shard.time[target] / index.time[target]) * 100).toFixed(2);
-      shard.color[target] = tinycolor.mix('#F5F5F5', '#FFAFAF', shard.relative[target]).toHexString();
+      shard.color[target] = tinycolor
+        .mix('#F5F5F5', '#FFAFAF', shard.relative[target])
+        .toHexString();
     }
     sortedIndices.push(index);
     visibility[key] = false;
@@ -171,7 +175,6 @@ export function flattenResults(data, accumulator, depth, visibleMap) {
   }
 
   for (const child of data) {
-
     // For bwc of older profile responses
     if (!child.description) {
       child.description = child.lucene;
@@ -192,12 +195,12 @@ export function flattenResults(data, accumulator, depth, visibleMap) {
       absoluteColor: child.absoluteColor,
       depth: depth,
       hasChildren: child.hasChildren,
-      breakdown: child.breakdown
+      breakdown: child.breakdown,
     });
 
     visibleMap[child.id] = {
       visible: child.timePercentage > 20,
-      children: child.children
+      children: child.children,
     };
 
     if (child.children != null && child.children.length !== 0) {

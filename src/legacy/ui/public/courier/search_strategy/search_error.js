@@ -41,7 +41,7 @@ export class SearchError extends Error {
 
 export function getSearchErrorType({ message }) {
   const msg = message.toLowerCase();
-  if(msg.indexOf('unsupported query') > -1) {
+  if (msg.indexOf('unsupported query') > -1) {
     return 'UNSUPPORTED_QUERY';
   }
 }

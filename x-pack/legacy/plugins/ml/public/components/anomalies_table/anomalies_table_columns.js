@@ -4,13 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import {
-  EuiButtonIcon,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiLink } from '@elastic/eui';
 
 import React from 'react';
 import _ from 'lodash';
@@ -20,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import {
   formatHumanReadableDate,
   formatHumanReadableDateTime,
-  formatHumanReadableDateTimeSeconds
+  formatHumanReadableDateTimeSeconds,
 } from '../../util/date_utils';
 
 import { DescriptionCell } from './description_cell';
@@ -32,10 +26,7 @@ import { checkPermission } from '../../privilege/check_privilege';
 import { mlFieldFormatService } from '../../services/field_format_service';
 import { isRuleSupported } from '../../../common/util/anomaly_utils';
 import { formatValue } from '../../formatters/format_value';
-import {
-  INFLUENCERS_LIMIT,
-  ANOMALIES_TABLE_TABS
-} from './anomalies_table_constants';
+import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS } from './anomalies_table_constants';
 import { SeverityCell } from './severity_cell';
 
 function renderTime(date, aggregationInterval) {
@@ -49,11 +40,13 @@ function renderTime(date, aggregationInterval) {
 }
 
 function showLinksMenuForItem(item, showViewSeriesLink) {
-  const canConfigureRules = (isRuleSupported(item.source) && checkPermission('canUpdateJob'));
-  return (canConfigureRules ||
+  const canConfigureRules = isRuleSupported(item.source) && checkPermission('canUpdateJob');
+  return (
+    canConfigureRules ||
     (showViewSeriesLink && item.isTimeSeriesViewRecord) ||
     item.entityName === 'mlcategory' ||
-    item.customUrls !== undefined);
+    item.customUrls !== undefined
+  );
 }
 
 export function getColumns(
@@ -68,23 +61,27 @@ export function getColumns(
   itemIdToExpandedRowMap,
   toggleRow,
   filter,
-  influencerFilter) {
-
+  influencerFilter
+) {
   const columns = [
     {
       name: '',
-      render: (item) => (
+      render: item => (
         <EuiButtonIcon
           onClick={() => toggleRow(item)}
           iconType={itemIdToExpandedRowMap[item.rowId] ? 'arrowDown' : 'arrowRight'}
-          aria-label={itemIdToExpandedRowMap[item.rowId] ? i18n.translate('xpack.ml.anomaliesTable.hideDetailsAriaLabel', {
-            defaultMessage: 'Hide details',
-          }) : i18n.translate('xpack.ml.anomaliesTable.showDetailsAriaLabel', {
-            defaultMessage: 'Show details',
-          })}
+          aria-label={
+            itemIdToExpandedRowMap[item.rowId]
+              ? i18n.translate('xpack.ml.anomaliesTable.hideDetailsAriaLabel', {
+                  defaultMessage: 'Hide details',
+                })
+              : i18n.translate('xpack.ml.anomaliesTable.showDetailsAriaLabel', {
+                  defaultMessage: 'Show details',
+                })
+          }
           data-row-id={item.rowId}
         />
-      )
+      ),
     },
     {
       field: 'time',
@@ -92,17 +89,19 @@ export function getColumns(
         defaultMessage: 'time',
       }),
       dataType: 'date',
-      render: (date) => renderTime(date, interval),
+      render: date => renderTime(date, interval),
       textOnly: true,
-      sortable: true
+      sortable: true,
     },
     {
       field: 'severity',
       name: i18n.translate('xpack.ml.anomaliesTable.severityColumnName', {
         defaultMessage: 'severity',
       }),
-      render: (score, item) => <SeverityCell score={score} multiBucketImpact={item.source.multi_bucket_impact} />,
-      sortable: true
+      render: (score, item) => (
+        <SeverityCell score={score} multiBucketImpact={item.source.multi_bucket_impact} />
+      ),
+      sortable: true,
     },
     {
       field: 'detector',
@@ -110,14 +109,11 @@ export function getColumns(
         defaultMessage: 'detector',
       }),
       render: (detectorDescription, item) => (
-        <DetectorCell
-          detectorDescription={detectorDescription}
-          numberOfRules={item.rulesLength}
-        />
+        <DetectorCell detectorDescription={detectorDescription} numberOfRules={item.rulesLength} />
       ),
       textOnly: true,
-      sortable: true
-    }
+      sortable: true,
+    },
   ];
 
   if (items.some(item => item.entityValue !== undefined)) {
@@ -135,7 +131,7 @@ export function getColumns(
         />
       ),
       textOnly: true,
-      sortable: true
+      sortable: true,
     });
   }
 
@@ -145,7 +141,7 @@ export function getColumns(
       name: i18n.translate('xpack.ml.anomaliesTable.influencersColumnName', {
         defaultMessage: 'influenced by',
       }),
-      render: (influencers) => (
+      render: influencers => (
         <InfluencersCell
           limit={INFLUENCERS_LIMIT}
           influencers={influencers}
@@ -153,7 +149,7 @@ export function getColumns(
         />
       ),
       textOnly: true,
-      sortable: true
+      sortable: true,
     });
   }
 
@@ -167,10 +163,13 @@ export function getColumns(
         defaultMessage: 'actual',
       }),
       render: (actual, item) => {
-        const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
+        const fieldFormat = mlFieldFormatService.getFieldFormat(
+          item.jobId,
+          item.source.detector_index
+        );
         return formatValue(item.actual, item.source.function, fieldFormat, item.source);
       },
-      sortable: true
+      sortable: true,
     });
   }
 
@@ -181,15 +180,18 @@ export function getColumns(
         defaultMessage: 'typical',
       }),
       render: (typical, item) => {
-        const fieldFormat = mlFieldFormatService.getFieldFormat(item.jobId, item.source.detector_index);
+        const fieldFormat = mlFieldFormatService.getFieldFormat(
+          item.jobId,
+          item.source.detector_index
+        );
         return formatValue(item.typical, item.source.function, fieldFormat, item.source);
       },
-      sortable: true
+      sortable: true,
     });
 
     // Assume that if we are showing typical, there will be an actual too,
     // so we can add a column to describe how actual compares to typical.
-    const nonTimeOfDayOrWeek = items.some((item) => {
+    const nonTimeOfDayOrWeek = items.some(item => {
       const summaryRecFunc = item.source.function;
       return summaryRecFunc !== 'time_of_day' && summaryRecFunc !== 'time_of_week';
     });
@@ -200,13 +202,10 @@ export function getColumns(
           defaultMessage: 'description',
         }),
         render: (metricDescriptionSort, item) => (
-          <DescriptionCell
-            actual={item.actual}
-            typical={item.typical}
-          />
+          <DescriptionCell actual={item.actual} typical={item.typical} />
         ),
         textOnly: true,
-        sortable: true
+        sortable: true,
       });
     }
   }
@@ -217,7 +216,7 @@ export function getColumns(
       name: i18n.translate('xpack.ml.anomaliesTable.jobIdColumnName', {
         defaultMessage: 'job ID',
       }),
-      sortable: true
+      sortable: true,
     });
   }
 
@@ -229,7 +228,7 @@ export function getColumns(
       }),
       sortable: false,
       truncateText: true,
-      render: (item) => {
+      render: item => {
         const examples = _.get(examplesByJobId, [item.jobId, item.entityValue], []);
         return (
           <EuiLink
@@ -237,14 +236,17 @@ export function getColumns(
             onClick={() => toggleRow(item, ANOMALIES_TABLE_TABS.CATEGORY_EXAMPLES)}
           >
             {examples.map((example, i) => {
-              return <span key={`example${i}`} className="category-example">{example}</span>;
-            }
-            )}
+              return (
+                <span key={`example${i}`} className="category-example">
+                  {example}
+                </span>
+              );
+            })}
           </EuiLink>
         );
       },
       textOnly: true,
-      width: '13%'
+      width: '13%',
     });
   }
 
@@ -255,7 +257,7 @@ export function getColumns(
       name: i18n.translate('xpack.ml.anomaliesTable.actionsColumnName', {
         defaultMessage: 'actions',
       }),
-      render: (item) => {
+      render: item => {
         if (showLinksMenuForItem(item) === true) {
           return (
             <LinksMenu
@@ -270,7 +272,7 @@ export function getColumns(
         } else {
           return null;
         }
-      }
+      },
     });
   }
 

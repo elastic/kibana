@@ -10,7 +10,10 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { Embeddable, APPLY_FILTER_TRIGGER } from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
+import {
+  Embeddable,
+  APPLY_FILTER_TRIGGER,
+} from '../../../../../../src/legacy/core_plugins/embeddable_api/public/np_ready/public';
 import { onlyDisabledFiltersChanged } from '../../../../../../src/legacy/core_plugins/data/public';
 
 import { I18nContext } from 'ui/i18n';
@@ -25,11 +28,7 @@ import {
   setRefreshConfig,
   disableScrollZoom,
 } from '../actions/map_actions';
-import {
-  setReadOnly,
-  setIsLayerTOCOpen,
-  setOpenTOCDetails,
-} from '../actions/ui_actions';
+import { setReadOnly, setIsLayerTOCOpen, setOpenTOCDetails } from '../actions/ui_actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import { getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
@@ -47,13 +46,14 @@ export class MapEmbeddable extends Embeddable {
         editable: config.editable,
         defaultTitle: config.title,
       },
-      parent);
+      parent
+    );
 
     this._renderTooltipContent = renderTooltipContent;
     this._layerList = config.layerList;
     this._store = createMapStore();
 
-    this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+    this._subscription = this.getInput$().subscribe(input => this.onContainerStateChanged(input));
   }
 
   getInspectorAdapters() {
@@ -61,9 +61,11 @@ export class MapEmbeddable extends Embeddable {
   }
 
   onContainerStateChanged(containerState) {
-    if (!_.isEqual(containerState.timeRange, this._prevTimeRange) ||
-        !_.isEqual(containerState.query, this._prevQuery) ||
-        !onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)) {
+    if (
+      !_.isEqual(containerState.timeRange, this._prevTimeRange) ||
+      !_.isEqual(containerState.query, this._prevQuery) ||
+      !onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
+    ) {
       this._dispatchSetQuery(containerState);
     }
 
@@ -76,19 +78,23 @@ export class MapEmbeddable extends Embeddable {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
-    this._store.dispatch(setQuery({
-      filters: filters.filter(filter => !filter.meta.disabled),
-      query,
-      timeFilters: timeRange,
-    }));
+    this._store.dispatch(
+      setQuery({
+        filters: filters.filter(filter => !filter.meta.disabled),
+        query,
+        timeFilters: timeRange,
+      })
+    );
   }
 
   _dispatchSetRefreshConfig({ refreshConfig }) {
     this._prevRefreshConfig = refreshConfig;
-    this._store.dispatch(setRefreshConfig({
-      isPaused: refreshConfig.pause,
-      interval: refreshConfig.value,
-    }));
+    this._store.dispatch(
+      setRefreshConfig({
+        isPaused: refreshConfig.pause,
+        interval: refreshConfig.value,
+      })
+    );
   }
 
   /**
@@ -109,11 +115,13 @@ export class MapEmbeddable extends Embeddable {
     }
 
     if (this.input.mapCenter) {
-      this._store.dispatch(setGotoWithCenter({
-        lat: this.input.mapCenter.lat,
-        lon: this.input.mapCenter.lon,
-        zoom: this.input.mapCenter.zoom,
-      }));
+      this._store.dispatch(
+        setGotoWithCenter({
+          lat: this.input.mapCenter.lat,
+          lon: this.input.mapCenter.lon,
+          zoom: this.input.mapCenter.zoom,
+        })
+      );
     }
 
     this._store.dispatch(replaceLayerList(this._layerList));
@@ -144,7 +152,7 @@ export class MapEmbeddable extends Embeddable {
       embeddable: this,
       filters,
     });
-  }
+  };
 
   destroy() {
     super.destroy();
@@ -165,41 +173,41 @@ export class MapEmbeddable extends Embeddable {
     this._dispatchSetQuery({
       query: this._prevQuery,
       timeRange: this._prevTimeRange,
-      filters: this._prevFilters
+      filters: this._prevFilters,
     });
   }
 
   _handleStoreChanges() {
-
     const center = getMapCenter(this._store.getState());
     const zoom = getMapZoom(this._store.getState());
 
-
     const mapCenter = this.input.mapCenter || {};
-    if (!mapCenter
-      || mapCenter.lat !== center.lat
-      || mapCenter.lon !== center.lon
-      || mapCenter.zoom !== zoom) {
+    if (
+      !mapCenter ||
+      mapCenter.lat !== center.lat ||
+      mapCenter.lon !== center.lon ||
+      mapCenter.zoom !== zoom
+    ) {
       this.updateInput({
         mapCenter: {
           lat: center.lat,
           lon: center.lon,
           zoom: zoom,
-        }
+        },
       });
     }
 
     const isLayerTOCOpen = getIsLayerTOCOpen(this._store.getState());
     if (this.input.isLayerTOCOpen !== isLayerTOCOpen) {
       this.updateInput({
-        isLayerTOCOpen
+        isLayerTOCOpen,
       });
     }
 
     const openTOCDetails = getOpenTOCDetails(this._store.getState());
     if (!_.isEqual(this.input.openTOCDetails, openTOCDetails)) {
       this.updateInput({
-        openTOCDetails
+        openTOCDetails,
       });
     }
   }

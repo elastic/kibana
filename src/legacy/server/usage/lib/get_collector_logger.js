@@ -26,6 +26,6 @@ export function getCollectorLogger(server) {
   return {
     debug: message => server.log(['debug', ...LOGGING_TAGS], message),
     info: message => server.log(['info', ...LOGGING_TAGS], message),
-    warn: message => server.log(['warning', ...LOGGING_TAGS], message)
+    warn: message => server.log(['warning', ...LOGGING_TAGS], message),
   };
 }

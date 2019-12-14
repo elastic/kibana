@@ -43,14 +43,14 @@ export function PaginatedTable($filter) {
       percentageCol: '=',
     },
     controllerAs: 'paginatedTable',
-    controller: function ($scope) {
+    controller: function($scope) {
       const self = this;
       self.sort = {
         columnIndex: null,
         direction: null,
       };
 
-      self.sortColumn = function (colIndex, sortDirection = 'asc') {
+      self.sortColumn = function(colIndex, sortDirection = 'asc') {
         const col = $scope.columns[colIndex];
 
         if (!col) return;
@@ -72,7 +72,7 @@ export function PaginatedTable($filter) {
         }
       };
 
-      self.rowsToShow = function (numRowsPerPage, actualNumRowsOnThisPage) {
+      self.rowsToShow = function(numRowsPerPage, actualNumRowsOnThisPage) {
         if ($scope.showBlankRows === false) {
           return actualNumRowsOnThisPage;
         } else {
@@ -112,12 +112,7 @@ export function PaginatedTable($filter) {
       }
 
       // update the sortedRows result
-      $scope.$watchMulti([
-        'rows',
-        'columns',
-        '[]sort',
-        '[]paginatedTable.sort',
-      ], resortRows);
+      $scope.$watchMulti(['rows', 'columns', '[]sort', '[]paginatedTable.sort'], resortRows);
     },
   };
 }

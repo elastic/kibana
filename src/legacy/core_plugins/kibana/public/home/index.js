@@ -23,14 +23,12 @@ import template from './home_ng_wrapper.html';
 import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
-import {
-  HomeApp
-} from './components/home_app';
+import { HomeApp } from './components/home_app';
 import { i18n } from '@kbn/i18n';
 import { npStart } from 'ui/new_platform';
 
 const app = uiModules.get('apps/home', []);
-app.directive('homeApp', function (reactDirective) {
+app.directive('homeApp', function(reactDirective) {
   return reactDirective(wrapInI18nContext(HomeApp));
 });
 
@@ -46,9 +44,7 @@ function getRoute() {
         return item;
       });
     },
-    k7Breadcrumbs: () => [
-      { text: homeTitle },
-    ]
+    k7Breadcrumbs: () => [{ text: homeTitle }],
   };
 }
 

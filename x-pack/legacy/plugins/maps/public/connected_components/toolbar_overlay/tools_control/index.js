@@ -17,14 +17,17 @@ function mapStateToProps(state = {}) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    initiateDraw: (options) => {
+    initiateDraw: options => {
       dispatch(updateDrawState(options));
     },
     cancelDraw: () => {
       dispatch(updateDrawState(null));
-    }
+    },
   };
 }
 
-const connectedToolsControl = connect(mapStateToProps, mapDispatchToProps)(ToolsControl);
+const connectedToolsControl = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ToolsControl);
 export { connectedToolsControl as ToolsControl };

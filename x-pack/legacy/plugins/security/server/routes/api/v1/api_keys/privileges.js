@@ -5,7 +5,7 @@
  */
 
 import { wrapError } from '../../../../../../../../plugins/security/server';
-import { INTERNAL_API_BASE_PATH } from  '../../../../../common/constants';
+import { INTERNAL_API_BASE_PATH } from '../../../../../common/constants';
 
 export function initCheckPrivilegesApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({
@@ -14,27 +14,16 @@ export function initCheckPrivilegesApi(server, callWithRequest, routePreCheckLic
     async handler(request) {
       try {
         const result = await Promise.all([
-          callWithRequest(
-            request,
-            'shield.hasPrivileges',
-            {
-              body: {
-                cluster: [
-                  'manage_security',
-                  'manage_api_key',
-                ],
-              },
-            }
-          ),
+          callWithRequest(request, 'shield.hasPrivileges', {
+            body: {
+              cluster: ['manage_security', 'manage_api_key'],
+            },
+          }),
           new Promise(async (resolve, reject) => {
             try {
-              const result = await callWithRequest(
-                request,
-                'shield.getAPIKeys',
-                {
-                  owner: true
-                }
-              );
+              const result = await callWithRequest(request, 'shield.getAPIKeys', {
+                owner: true,
+              });
               //  If the API returns a truthy result that means it's enabled.
               resolve({ areApiKeysEnabled: !!result });
             } catch (e) {
@@ -49,14 +38,12 @@ export function initCheckPrivilegesApi(server, callWithRequest, routePreCheckLic
           }),
         ]);
 
-        const [{
-          cluster: {
-            manage_security: manageSecurity,
-            manage_api_key: manageApiKey,
-          }
-        }, {
-          areApiKeysEnabled,
-        }] = result;
+        const [
+          {
+            cluster: { manage_security: manageSecurity, manage_api_key: manageApiKey },
+          },
+          { areApiKeysEnabled },
+        ] = result;
 
         const isAdmin = manageSecurity || manageApiKey;
 
@@ -69,7 +56,7 @@ export function initCheckPrivilegesApi(server, callWithRequest, routePreCheckLic
       }
     },
     config: {
-      pre: [routePreCheckLicenseFn]
-    }
+      pre: [routePreCheckLicenseFn],
+    },
   });
 }

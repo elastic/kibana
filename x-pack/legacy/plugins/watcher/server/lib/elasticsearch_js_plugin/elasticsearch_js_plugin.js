@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const elasticsearchJsPlugin = (Client, config, components) => { // eslint-disable-line no-unused-vars
+export const elasticsearchJsPlugin = (Client, config, components) => {
+  // eslint-disable-line no-unused-vars
   const ca = components.clientAction.factory;
 
   Client.prototype.watcher = components.clientAction.namespaceFactory();
@@ -21,19 +22,19 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
     params: {
       masterTimeout: {
         name: 'master_timeout',
-        type: 'duration'
-      }
+        type: 'duration',
+      },
     },
     url: {
       fmt: '/_watcher/watch/<%=id%>/_deactivate',
       req: {
         id: {
           type: 'string',
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     },
-    method: 'PUT'
+    method: 'PUT',
   });
 
   /**
@@ -47,19 +48,19 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
     params: {
       masterTimeout: {
         name: 'master_timeout',
-        type: 'duration'
-      }
+        type: 'duration',
+      },
     },
     url: {
       fmt: '/_watcher/watch/<%=id%>/_activate',
       req: {
         id: {
           type: 'string',
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     },
-    method: 'PUT'
+    method: 'PUT',
   });
 
   /**
@@ -74,23 +75,23 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
     params: {
       masterTimeout: {
         name: 'master_timeout',
-        type: 'duration'
-      }
+        type: 'duration',
+      },
     },
     url: {
       fmt: '/_watcher/watch/<%=id%>/_ack/<%=action%>',
       req: {
         id: {
           type: 'string',
-          required: true
+          required: true,
         },
         action: {
           type: 'string',
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     },
-    method: 'POST'
+    method: 'POST',
   });
 
   /**
@@ -105,22 +106,22 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
     params: {
       masterTimeout: {
         name: 'master_timeout',
-        type: 'duration'
+        type: 'duration',
       },
       force: {
-        type: 'boolean'
-      }
+        type: 'boolean',
+      },
     },
     url: {
       fmt: '/_watcher/watch/<%=id%>',
       req: {
         id: {
           type: 'string',
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     },
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   /**
@@ -132,14 +133,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
     params: {
       masterTimeout: {
         name: 'master_timeout',
-        type: 'duration'
-      }
+        type: 'duration',
+      },
     },
     url: {
-      fmt: '/_watcher/watch/_execute'
+      fmt: '/_watcher/watch/_execute',
     },
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   /**
@@ -155,10 +156,10 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
       req: {
         id: {
           type: 'string',
-          required: true
-        }
-      }
-    }
+          required: true,
+        },
+      },
+    },
   });
 
   /**
@@ -172,20 +173,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
     params: {
       masterTimeout: {
         name: 'master_timeout',
-        type: 'duration'
-      }
+        type: 'duration',
+      },
     },
     url: {
       fmt: '/_watcher/watch/<%=id%>',
       req: {
         id: {
           type: 'string',
-          required: true
-        }
-      }
+          required: true,
+        },
+      },
     },
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 
   /**
@@ -196,9 +197,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
   watcher.restart = ca({
     params: {},
     url: {
-      fmt: '/_watcher/_restart'
+      fmt: '/_watcher/_restart',
     },
-    method: 'PUT'
+    method: 'PUT',
   });
 
   /**
@@ -209,9 +210,9 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
   watcher.start = ca({
     params: {},
     url: {
-      fmt: '/_watcher/_start'
+      fmt: '/_watcher/_start',
     },
-    method: 'PUT'
+    method: 'PUT',
   });
 
   /**
@@ -222,8 +223,8 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
   watcher.stats = ca({
     params: {},
     url: {
-      fmt: '/_watcher/stats'
-    }
+      fmt: '/_watcher/stats',
+    },
   });
 
   /**
@@ -234,8 +235,8 @@ export const elasticsearchJsPlugin = (Client, config, components) => { // eslint
   watcher.stop = ca({
     params: {},
     url: {
-      fmt: '/_watcher/_stop'
+      fmt: '/_watcher/_stop',
     },
-    method: 'PUT'
+    method: 'PUT',
   });
 };

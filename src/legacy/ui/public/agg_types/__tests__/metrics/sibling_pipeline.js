@@ -34,17 +34,16 @@ const metrics = [
   { name: 'max_bucket', title: 'Overall Max', provider: bucketMaxMetricAgg },
 ];
 
-describe('sibling pipeline aggs', function () {
+describe('sibling pipeline aggs', function() {
   metrics.forEach(metric => {
-    describe(`${metric.title} metric`, function () {
-
+    describe(`${metric.title} metric`, function() {
       let aggDsl;
       let metricAgg;
       let aggConfig;
 
       function init(settings) {
         ngMock.module('kibana');
-        ngMock.inject(function (Private) {
+        ngMock.inject(function(Private) {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
           indexPattern.stubSetFieldFormat('bytes', 'bytes');
@@ -54,36 +53,36 @@ describe('sibling pipeline aggs', function () {
             customMetric: {
               id: '5',
               type: 'count',
-              schema: 'metric'
+              schema: 'metric',
             },
             customBucket: {
               id: '6',
               type: 'date_histogram',
               schema: 'bucket',
-              params: { field: '@timestamp', interval: '10s' }
-            }
+              params: { field: '@timestamp', interval: '10s' },
+            },
           };
 
           const vis = new Vis(indexPattern, {
             title: 'New Visualization',
             type: 'metric',
             params: {
-              fontSize: 60
+              fontSize: 60,
             },
             aggs: [
               {
                 id: '1',
                 type: 'count',
-                schema: 'metric'
+                schema: 'metric',
               },
               {
                 id: '2',
                 type: metric.name,
                 schema: 'metric',
-                params
-              }
+                params,
+              },
             ],
-            listeners: {}
+            listeners: {},
           });
 
           // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -92,38 +91,18 @@ describe('sibling pipeline aggs', function () {
         });
       }
 
-      it(`should return a label prefixed with ${metric.title} of`, function () {
+      it(`should return a label prefixed with ${metric.title} of`, function() {
         init();
         expect(metricAgg.makeLabel(aggConfig)).to.eql(`${metric.title} of Count`);
       });
 
-      it('should set parent aggs', function () {
+      it('should set parent aggs', function() {
         init();
         expect(aggDsl[metric.name].buckets_path).to.be('2-bucket>_count');
         expect(aggDsl.parentAggs['2-bucket'].date_histogram).to.not.be.undefined;
       });
 
-      it('should set nested parent aggs', function () {
-        init({
-          customMetric: {
-            id: '5',
-            type: 'avg',
-            schema: 'metric',
-            params: { field: 'bytes' },
-          },
-          customBucket: {
-            id: '6',
-            type: 'date_histogram',
-            schema: 'bucket',
-            params: { field: '@timestamp', interval: '10s', },
-          }
-        });
-        expect(aggDsl[metric.name].buckets_path).to.be('2-bucket>2-metric');
-        expect(aggDsl.parentAggs['2-bucket'].date_histogram).to.not.be.undefined;
-        expect(aggDsl.parentAggs['2-bucket'].aggs['2-metric'].avg.field).to.equal('bytes');
-      });
-
-      it('should have correct formatter', function () {
+      it('should set nested parent aggs', function() {
         init({
           customMetric: {
             id: '5',
@@ -136,12 +115,32 @@ describe('sibling pipeline aggs', function () {
             type: 'date_histogram',
             schema: 'bucket',
             params: { field: '@timestamp', interval: '10s' },
-          }
+          },
+        });
+        expect(aggDsl[metric.name].buckets_path).to.be('2-bucket>2-metric');
+        expect(aggDsl.parentAggs['2-bucket'].date_histogram).to.not.be.undefined;
+        expect(aggDsl.parentAggs['2-bucket'].aggs['2-metric'].avg.field).to.equal('bytes');
+      });
+
+      it('should have correct formatter', function() {
+        init({
+          customMetric: {
+            id: '5',
+            type: 'avg',
+            schema: 'metric',
+            params: { field: 'bytes' },
+          },
+          customBucket: {
+            id: '6',
+            type: 'date_histogram',
+            schema: 'bucket',
+            params: { field: '@timestamp', interval: '10s' },
+          },
         });
         expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');
       });
 
-      it('should call modifyAggConfigOnSearchRequestStart for nested aggs\' parameters', () => {
+      it("should call modifyAggConfigOnSearchRequestStart for nested aggs' parameters", () => {
         init();
 
         const searchSource = {};
@@ -160,8 +159,6 @@ describe('sibling pipeline aggs', function () {
         expect(customMetricSpy.calledWith(customMetric, searchSource, request)).to.be(true);
         expect(customBucketSpy.calledWith(customBucket, searchSource, request)).to.be(true);
       });
-
     });
   });
-
 });

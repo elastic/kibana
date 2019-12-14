@@ -18,7 +18,7 @@ describe('ML - Job Type Directive', () => {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(() => {
-    ngMock.inject(function ($injector) {
+    ngMock.inject(function($injector) {
       $compile = $injector.get('$compile');
       const $rootScope = $injector.get('$rootScope');
       $scope = $rootScope.$new();
@@ -31,7 +31,7 @@ describe('ML - Job Type Directive', () => {
 
   it('Initialize Job Type Directive', done => {
     sinon.stub(indexUtils, 'timeBasedIndexCheck').callsFake(() => false);
-    ngMock.inject(function () {
+    ngMock.inject(function() {
       expect(() => {
         $element = $compile('<ml-job-type-page />')($scope);
       }).to.not.throwError();

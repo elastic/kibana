@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 
@@ -26,7 +24,9 @@ const SUPPORT_ZERO_DURATION_UNITS = ['ms', 's', 'm', 'h'];
 // 3. Fractional intervals e.g. 1.5h or 4.5d are not allowed, in line with the behaviour
 // of the Elasticsearch date histogram aggregation.
 export function parseInterval(interval) {
-  const matches = String(interval).trim().match(INTERVAL_STRING_RE);
+  const matches = String(interval)
+    .trim()
+    .match(INTERVAL_STRING_RE);
   if (!Array.isArray(matches)) return null;
   if (matches.length < 3) return null;
 
@@ -36,7 +36,7 @@ export function parseInterval(interval) {
 
     // In line with moment.js, only allow zero value intervals when the unit is less than 'day'.
     // And check for isNaN as e.g. valueless 'm' will pass the regex test.
-    if (isNaN(value) || (value < 1 && SUPPORT_ZERO_DURATION_UNITS.indexOf(unit) === -1))  {
+    if (isNaN(value) || (value < 1 && SUPPORT_ZERO_DURATION_UNITS.indexOf(unit) === -1)) {
       return null;
     }
 

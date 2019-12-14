@@ -19,11 +19,11 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
   const browser = getService('browser');
 
-  describe('ui plugins', function () {
+  describe('ui plugins', function() {
     describe('loading', function describeIndexTests() {
       before(async () => {
         await PageObjects.common.navigateToApp('settings');
@@ -40,7 +40,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should attach string to window.corePluginB', async () => {
-        const hasAccessToInjectedMetadata = await browser.execute('return window.hasAccessToInjectedMetadata');
+        const hasAccessToInjectedMetadata = await browser.execute(
+          'return window.hasAccessToInjectedMetadata'
+        );
         expect(hasAccessToInjectedMetadata).to.equal(true);
       });
     });

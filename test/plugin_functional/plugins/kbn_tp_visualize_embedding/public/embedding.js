@@ -26,7 +26,6 @@ import { getVisualizeLoader } from 'ui/visualize';
 import chrome from 'ui/chrome';
 
 export const embeddingSamples = [
-
   {
     id: 'none',
     title: 'No parameters',
@@ -46,8 +45,9 @@ export const embeddingSamples = [
       // Note: If the visualization you want to embed contains date histograms with an auto interval, you need
       // to specify the timeRange parameter (see below).
       return loader.embedVisualizationWithId(domNode, id, {});
-    }
-  }, {
+    },
+  },
+  {
     id: 'timerange',
     title: 'timeRange',
     async run(domNode, id) {
@@ -61,10 +61,11 @@ export const embeddingSamples = [
         timeRange: {
           from: '2015-09-20 20:00:00.000',
           to: '2015-09-21 20:00:00.000',
-        }
+        },
       });
-    }
-  }, {
+    },
+  },
+  {
     id: 'query',
     title: 'query',
     async run(domNode, id) {
@@ -77,10 +78,11 @@ export const embeddingSamples = [
         query: {
           language: 'lucene',
           query: 'extension.raw:jpg',
-        }
+        },
       });
-    }
-  }, {
+    },
+  },
+  {
     id: 'filters',
     title: 'filters',
     async run(domNode, id) {
@@ -98,17 +100,18 @@ export const embeddingSamples = [
                 should: [
                   { match_phrase: { 'extension.raw': 'jpg' } },
                   { match_phrase: { 'extension.raw': 'png' } },
-                ]
-              }
+                ],
+              },
             },
             meta: {
-              negate: true
-            }
-          }
-        ]
+              negate: true,
+            },
+          },
+        ],
       });
-    }
-  }, {
+    },
+  },
+  {
     id: 'filters_query_timerange',
     title: 'filters & query & timeRange',
     async run(domNode, id) {
@@ -122,7 +125,7 @@ export const embeddingSamples = [
         },
         query: {
           language: 'lucene',
-          query: 'bytes:>2000'
+          query: 'bytes:>2000',
         },
         filters: [
           {
@@ -131,17 +134,18 @@ export const embeddingSamples = [
                 should: [
                   { match_phrase: { 'extension.raw': 'jpg' } },
                   { match_phrase: { 'extension.raw': 'png' } },
-                ]
-              }
+                ],
+              },
             },
             meta: {
-              negate: true
-            }
-          }
-        ]
+              negate: true,
+            },
+          },
+        ],
       });
-    }
-  }, {
+    },
+  },
+  {
     id: 'savedobject_filter_query_timerange',
     title: 'filters & query & time (use saved object)',
     async run(domNode, id) {
@@ -164,7 +168,7 @@ export const embeddingSamples = [
         },
         query: {
           language: 'lucene',
-          query: 'bytes:>2000'
+          query: 'bytes:>2000',
         },
         filters: [
           {
@@ -173,15 +177,15 @@ export const embeddingSamples = [
                 should: [
                   { match_phrase: { 'extension.raw': 'jpg' } },
                   { match_phrase: { 'extension.raw': 'png' } },
-                ]
-              }
+                ],
+              },
             },
             meta: {
-              negate: true
-            }
-          }
-        ]
+              negate: true,
+            },
+          },
+        ],
       });
-    }
-  }
+    },
+  },
 ];

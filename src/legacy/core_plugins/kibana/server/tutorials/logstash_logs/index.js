@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function logstashLogsSpecProvider(server, context) {
   const moduleName = 'logstash';
@@ -34,7 +38,8 @@ export function logstashLogsSpecProvider(server, context) {
       defaultMessage: 'Collect and parse debug and slow logs created by Logstash itself.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.logstashLogs.longDescription', {
-      defaultMessage: 'The `logstash` Filebeat module parses debug and slow logs created by Logstash itself. \
+      defaultMessage:
+        'The `logstash` Filebeat module parses debug and slow logs created by Logstash itself. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-logstash.html',
@@ -45,20 +50,23 @@ export function logstashLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'Filebeat-Logstash-Log-Dashboard-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.logstashLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Logstash logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.logstashLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Logstash logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-logstash.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-logstash.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/logstash_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

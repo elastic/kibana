@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from '../phrase';
 import expect from '@kbn/expect';
 import _ from 'lodash';
@@ -26,30 +25,30 @@ import filterSkeleton from '../../__fixtures__/filter_skeleton';
 
 let expected;
 
-describe('Filter Manager', function () {
-  describe('Phrase filter builder', function () {
+describe('Filter Manager', function() {
+  describe('Phrase filter builder', function() {
     beforeEach(() => {
       expected = _.cloneDeep(filterSkeleton);
     });
 
-    it('should be a function', function () {
+    it('should be a function', function() {
       expect(buildPhraseFilter).to.be.a(Function);
     });
 
-    it('should return a match query filter when passed a standard field', function () {
+    it('should return a match query filter when passed a standard field', function() {
       const field = getField(indexPattern, 'bytes');
       expected.query = {
         match: {
           bytes: {
             query: 5,
-            type: 'phrase'
-          }
-        }
+            type: 'phrase',
+          },
+        },
       };
       expect(buildPhraseFilter(field, 5, indexPattern)).to.eql(expected);
     });
 
-    it('should return a script filter when passed a scripted field', function () {
+    it('should return a script filter when passed a scripted field', function() {
       const field = getField(indexPattern, 'script number');
       expected.meta.field = 'script number';
       _.set(expected, 'script.script', {
@@ -57,27 +56,27 @@ describe('Filter Manager', function () {
         lang: 'expression',
         params: {
           value: 5,
-        }
+        },
       });
       expect(buildPhraseFilter(field, 5, indexPattern)).to.eql(expected);
     });
   });
 
-  describe('buildInlineScriptForPhraseFilter', function () {
-
-    it('should wrap painless scripts in a lambda', function () {
+  describe('buildInlineScriptForPhraseFilter', function() {
+    it('should wrap painless scripts in a lambda', function() {
       const field = {
         lang: 'painless',
         script: 'return foo;',
       };
 
-      const expected = `boolean compare(Supplier s, def v) {return s.get() == v;}` +
-                       `compare(() -> { return foo; }, params.value);`;
+      const expected =
+        `boolean compare(Supplier s, def v) {return s.get() == v;}` +
+        `compare(() -> { return foo; }, params.value);`;
 
       expect(buildInlineScriptForPhraseFilter(field)).to.be(expected);
     });
 
-    it('should create a simple comparison for other langs', function () {
+    it('should create a simple comparison for other langs', function() {
       const field = {
         lang: 'expression',
         script: 'doc[bytes].value',

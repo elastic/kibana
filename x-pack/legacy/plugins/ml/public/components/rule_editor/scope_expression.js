@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * React component for rendering a rule scope expression.
  */
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
 import {
   EuiCheckbox,
@@ -40,58 +37,42 @@ export class ScopeExpression extends Component {
     super(props);
 
     this.state = {
-      isFilterListOpen: false
+      isFilterListOpen: false,
     };
   }
 
   openFilterList = () => {
     this.setState({
-      isFilterListOpen: true
+      isFilterListOpen: true,
     });
-  }
+  };
 
   closeFilterList = () => {
     this.setState({
-      isFilterListOpen: false
+      isFilterListOpen: false,
     });
-  }
+  };
 
-  onChangeFilterType = (event) => {
-    const {
-      fieldName,
-      filterId,
-      enabled,
-      updateScope } = this.props;
+  onChangeFilterType = event => {
+    const { fieldName, filterId, enabled, updateScope } = this.props;
 
     updateScope(fieldName, filterId, event.target.value, enabled);
-  }
+  };
 
-  onChangeFilterId = (event) => {
-    const {
-      fieldName,
-      filterType,
-      enabled,
-      updateScope } = this.props;
+  onChangeFilterId = event => {
+    const { fieldName, filterType, enabled, updateScope } = this.props;
 
     updateScope(fieldName, event.target.value, filterType, enabled);
-  }
+  };
 
-  onEnableChange = (event) => {
-    const {
-      fieldName,
-      filterId,
-      filterType,
-      updateScope } = this.props;
+  onEnableChange = event => {
+    const { fieldName, filterId, filterType, updateScope } = this.props;
 
     updateScope(fieldName, filterId, filterType, event.target.checked);
-  }
+  };
 
   renderFilterListPopover() {
-    const {
-      filterId,
-      filterType,
-      filterListIds
-    } = this.props;
+    const { filterId, filterType, filterListIds } = this.props;
 
     return (
       <div style={POPOVER_STYLE}>
@@ -128,13 +109,7 @@ export class ScopeExpression extends Component {
   }
 
   render() {
-    const {
-      fieldName,
-      filterId,
-      filterType,
-      enabled,
-      filterListIds
-    } = this.props;
+    const { fieldName, filterId, filterType, enabled, filterListIds } = this.props;
 
     return (
       <EuiFlexGroup gutterSize="m">
@@ -148,32 +123,36 @@ export class ScopeExpression extends Component {
         <EuiFlexItem grow={false}>
           <EuiExpression
             className="scope-field-button"
-            description={<FormattedMessage
-              id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
-              defaultMessage="when"
-            />}
+            description={
+              <FormattedMessage
+                id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+                defaultMessage="when"
+              />
+            }
             value={fieldName}
             isActive={false}
-            onClick={(event) => event.preventDefault()}
+            onClick={event => event.preventDefault()}
           />
         </EuiFlexItem>
 
-        {filterListIds !== undefined && filterListIds.length > 0 &&
+        {filterListIds !== undefined && filterListIds.length > 0 && (
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="operatorValuePopover"
-              button={(
+              button={
                 <EuiExpression
-                  description={<FormattedMessage
-                    id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
-                    defaultMessage="is {filterType}"
-                    values={{ filterType: filterTypeToText(filterType) }}
-                  />}
+                  description={
+                    <FormattedMessage
+                      id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+                      defaultMessage="is {filterType}"
+                      values={{ filterType: filterTypeToText(filterType) }}
+                    />
+                  }
                   value={filterId || ''}
                   isActive={this.state.isFilterListOpen}
                   onClick={this.openFilterList}
                 />
-              )}
+              }
               isOpen={this.state.isFilterListOpen}
               closePopover={this.closeFilterList}
               panelPaddingSize="none"
@@ -184,7 +163,7 @@ export class ScopeExpression extends Component {
               {this.renderFilterListPopover()}
             </EuiPopover>
           </EuiFlexItem>
-        }
+        )}
       </EuiFlexGroup>
     );
   }
@@ -192,11 +171,8 @@ export class ScopeExpression extends Component {
 ScopeExpression.propTypes = {
   fieldName: PropTypes.string.isRequired,
   filterId: PropTypes.string,
-  filterType: PropTypes.oneOf([
-    FILTER_TYPE.INCLUDE,
-    FILTER_TYPE.EXCLUDE
-  ]),
+  filterType: PropTypes.oneOf([FILTER_TYPE.INCLUDE, FILTER_TYPE.EXCLUDE]),
   enabled: PropTypes.bool.isRequired,
   filterListIds: PropTypes.array.isRequired,
-  updateScope: PropTypes.func.isRequired
+  updateScope: PropTypes.func.isRequired,
 };

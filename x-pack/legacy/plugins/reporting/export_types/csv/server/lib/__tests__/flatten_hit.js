@@ -7,13 +7,14 @@
 import expect from '@kbn/expect';
 import { createFlattenHit } from '../flatten_hit';
 
-describe('flattenHit', function () {
+describe('flattenHit', function() {
   let flattenHit;
   let hit;
   let metaFields;
 
-  beforeEach(function () {
-    const fields = ['tags.text',
+  beforeEach(function() {
+    const fields = [
+      'tags.text',
       'tags.label',
       'message',
       'geo.coordinates',
@@ -40,16 +41,13 @@ describe('flattenHit', function () {
       _source: {
         message: 'Hello World',
         geo: {
-          coordinates: { lat: 33.4500, lon: 112.0667 },
+          coordinates: { lat: 33.45, lon: 112.0667 },
           dest: 'US',
-          src: 'IN'
+          src: 'IN',
         },
         bytes: 10039103,
-        '@timestamp': (new Date()).toString(),
-        tags: [
-          { text: 'foo', label: [ 'FOO1', 'FOO2' ] },
-          { text: 'bar', label: 'BAR' }
-        ],
+        '@timestamp': new Date().toString(),
+        tags: [{ text: 'foo', label: ['FOO1', 'FOO2'] }, { text: 'bar', label: 'BAR' }],
         groups: ['loners'],
         noMapping: true,
         team: [
@@ -57,16 +55,16 @@ describe('flattenHit', function () {
           { name: 'bar', role: 'follower' },
           { name: 'baz', role: 'party boy' },
         ],
-        user: { name: 'smith', id: 123 }
+        user: { name: 'smith', id: 123 },
       },
       fields: {
         delta: [42],
-        random: [0.12345]
-      }
+        random: [0.12345],
+      },
     };
   });
 
-  it('flattens keys as far down as the mapping goes', function () {
+  it('flattens keys as far down as the mapping goes', function() {
     const flat = flattenHit(hit);
 
     expect(flat).to.have.property('geo.coordinates', hit._source.geo.coordinates);
@@ -79,7 +77,7 @@ describe('flattenHit', function () {
     expect(flat).to.have.property('bytes', 10039103);
   });
 
-  it('flattens keys not in the mapping', function () {
+  it('flattens keys not in the mapping', function() {
     const flat = flattenHit(hit);
 
     expect(flat).to.have.property('noMapping', true);
@@ -87,7 +85,7 @@ describe('flattenHit', function () {
     expect(flat.groups).to.eql(['loners']);
   });
 
-  it('flattens conflicting types in the mapping', function () {
+  it('flattens conflicting types in the mapping', function() {
     const flat = flattenHit(hit);
 
     expect(flat).to.not.have.property('user');
@@ -95,13 +93,13 @@ describe('flattenHit', function () {
     expect(flat).to.have.property('user.id', hit._source.user.id);
   });
 
-  it('should preserve objects in arrays', function () {
+  it('should preserve objects in arrays', function() {
     const flat = flattenHit(hit);
 
     expect(flat).to.have.property('tags', hit._source.tags);
   });
 
-  it('does not enter into nested fields', function () {
+  it('does not enter into nested fields', function() {
     const flat = flattenHit(hit);
 
     expect(flat).to.have.property('team', hit._source.team);
@@ -111,36 +109,36 @@ describe('flattenHit', function () {
     expect(flat).to.not.have.property('team.0');
   });
 
-  it('unwraps script fields', function () {
+  it('unwraps script fields', function() {
     const flat = flattenHit(hit);
 
     expect(flat).to.have.property('delta', 42);
   });
 
-  it('assumes that all fields are "computed fields"', function () {
+  it('assumes that all fields are "computed fields"', function() {
     const flat = flattenHit(hit);
 
     expect(flat).to.have.property('random', 0.12345);
   });
 
-  describe('metaFields', function () {
-    beforeEach(function () {
+  describe('metaFields', function() {
+    beforeEach(function() {
       metaFields.push('_metaKey');
     });
 
-    it('ignores fields that start with an _ and are not in the metaFields', function () {
+    it('ignores fields that start with an _ and are not in the metaFields', function() {
       hit.fields._notMetaKey = [100];
       const flat = flattenHit(hit);
       expect(flat).to.not.have.property('_notMetaKey');
     });
 
-    it('includes underscore-prefixed keys that are in the metaFields', function () {
+    it('includes underscore-prefixed keys that are in the metaFields', function() {
       hit.fields._metaKey = [100];
       const flat = flattenHit(hit);
       expect(flat).to.have.property('_metaKey', 100);
     });
 
-    it('handles fields that are not arrays, like _timestamp', function () {
+    it('handles fields that are not arrays, like _timestamp', function() {
       hit.fields._metaKey = 20000;
       const flat = flattenHit(hit);
       expect(flat).to.have.property('_metaKey', 20000);

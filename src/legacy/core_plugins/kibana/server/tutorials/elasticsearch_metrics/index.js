@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/metricbeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/metricbeat_instructions';
 
 export function elasticsearchMetricsSpecProvider(server, context) {
   const moduleName = 'elasticsearch';
@@ -34,7 +38,8 @@ export function elasticsearchMetricsSpecProvider(server, context) {
       defaultMessage: 'Fetch internal metrics from Elasticsearch.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.longDescription', {
-      defaultMessage: 'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch. \
+      defaultMessage:
+        'The `elasticsearch` Metricbeat module fetches internal metrics from Elasticsearch. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-elasticsearch.html',
@@ -43,19 +48,22 @@ export function elasticsearchMetricsSpecProvider(server, context) {
     euiIconType: 'logoElasticsearch',
     artifacts: {
       application: {
-        label: i18n.translate('kbn.server.tutorials.elasticsearchMetrics.artifacts.application.label', {
-          defaultMessage: 'Discover',
-        }),
-        path: '/app/kibana#/discover'
+        label: i18n.translate(
+          'kbn.server.tutorials.elasticsearchMetrics.artifacts.application.label',
+          {
+            defaultMessage: 'Discover',
+          }
+        ),
+        path: '/app/kibana#/discover',
       },
       dashboards: [],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-elasticsearch.html'
-      }
+        documentationUrl: '{config.docs.beats.metricbeat}/exported-fields-elasticsearch.html',
+      },
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, null, null, null, context),
     elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName)
+    onPremElasticCloud: onPremCloudInstructions(moduleName),
   };
 }

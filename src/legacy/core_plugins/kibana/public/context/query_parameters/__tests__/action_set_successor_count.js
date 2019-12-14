@@ -23,18 +23,19 @@ import ngMock from 'ng_mock';
 import { createStateStub } from './_utils';
 import { QueryParameterActionsProvider } from '../actions';
 
-
-describe('context app', function () {
+describe('context app', function() {
   beforeEach(ngMock.module('kibana'));
 
-  describe('action setSuccessorCount', function () {
+  describe('action setSuccessorCount', function() {
     let setSuccessorCount;
 
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      setSuccessorCount = Private(QueryParameterActionsProvider).setSuccessorCount;
-    }));
+    beforeEach(
+      ngMock.inject(function createPrivateStubs(Private) {
+        setSuccessorCount = Private(QueryParameterActionsProvider).setSuccessorCount;
+      })
+    );
 
-    it('should set the successorCount to the given value', function () {
+    it('should set the successorCount to the given value', function() {
       const state = createStateStub();
 
       setSuccessorCount(state)(20);
@@ -42,7 +43,7 @@ describe('context app', function () {
       expect(state.queryParameters.successorCount).to.equal(20);
     });
 
-    it('should limit the successorCount to 0 as a lower bound', function () {
+    it('should limit the successorCount to 0 as a lower bound', function() {
       const state = createStateStub();
 
       setSuccessorCount(state)(-1);
@@ -50,7 +51,7 @@ describe('context app', function () {
       expect(state.queryParameters.successorCount).to.equal(0);
     });
 
-    it('should limit the successorCount to 10000 as an upper bound', function () {
+    it('should limit the successorCount to 10000 as an upper bound', function() {
       const state = createStateStub();
 
       setSuccessorCount(state)(20000);

@@ -8,7 +8,6 @@ import { removeOrphanedSourcesAndLayers, syncLayerOrderForSingleLayer } from './
 import _ from 'lodash';
 
 class MockMbMap {
-
   constructor(style) {
     this._style = _.cloneDeep(style);
   }
@@ -18,7 +17,6 @@ class MockMbMap {
   }
 
   moveLayer(mbLayerId, nextMbLayerId) {
-
     const indexOfLayerToMove = this._style.layers.findIndex(layer => {
       return layer.id === mbLayerId;
     });
@@ -31,7 +29,6 @@ class MockMbMap {
     });
 
     this._style.layers.splice(indexOfNextLayer, 0, layerToMove);
-
   }
 
   removeSource(sourceId) {
@@ -45,7 +42,6 @@ class MockMbMap {
     this._style.layers.splice(layerToRemove, 1);
   }
 }
-
 
 class MockLayer {
   constructor(layerId, mbSourceIds, mbLayerIdsToSource) {
@@ -76,32 +72,28 @@ class MockLayer {
   ownsMbSourceId(mbSourceId) {
     return this._mbSourceIds.some(id => mbSourceId === id);
   }
-
 }
 
-
 function getMockStyle(orderedMockLayerList) {
-
   const mockStyle = {
     sources: {},
-    layers: []
+    layers: [],
   };
 
   orderedMockLayerList.forEach(mockLayer => {
-    mockLayer.getMbSourceIds().forEach((mbSourceId) => {
+    mockLayer.getMbSourceIds().forEach(mbSourceId => {
       mockStyle.sources[mbSourceId] = {};
     });
     mockLayer.getMbLayersIdsToSource().forEach(({ id, source }) => {
       mockStyle.layers.push({
         id: id,
-        source: source
+        source: source,
       });
     });
   });
 
   return mockStyle;
 }
-
 
 function makeSingleSourceMockLayer(layerId) {
   return new MockLayer(
@@ -121,15 +113,13 @@ function makeMultiSourceMockLayer(layerId) {
       { id: source1 + '_fill', source: source1 },
       { id: source2 + '_line', source: source2 },
       { id: source1 + '_line', source: source1 },
-      { id: source1 + '_point', source: source1 }
+      { id: source1 + '_point', source: source1 },
     ]
   );
 }
 
 describe('mb/utils', () => {
-
   test('should remove foo and bar layer', async () => {
-
     const bazLayer = makeSingleSourceMockLayer('baz');
     const fooLayer = makeSingleSourceMockLayer('foo');
     const barLayer = makeSingleSourceMockLayer('bar');
@@ -143,15 +133,11 @@ describe('mb/utils', () => {
     removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList);
     const removedStyle = mockMbMap.getStyle();
 
-
     const nextStyle = getMockStyle(nextLayerList);
     expect(removedStyle).toEqual(nextStyle);
-
   });
 
-
   test('should remove foo and bar layer (multisource)', async () => {
-
     const bazLayer = makeMultiSourceMockLayer('baz');
     const fooLayer = makeMultiSourceMockLayer('foo');
     const barLayer = makeMultiSourceMockLayer('bar');
@@ -165,14 +151,11 @@ describe('mb/utils', () => {
     removeOrphanedSourcesAndLayers(mockMbMap, nextLayerList);
     const removedStyle = mockMbMap.getStyle();
 
-
     const nextStyle = getMockStyle(nextLayerList);
     expect(removedStyle).toEqual(nextStyle);
-
   });
 
   test('should not remove anything', async () => {
-
     const bazLayer = makeSingleSourceMockLayer('baz');
     const fooLayer = makeSingleSourceMockLayer('foo');
     const barLayer = makeSingleSourceMockLayer('bar');
@@ -188,11 +171,9 @@ describe('mb/utils', () => {
 
     const nextStyle = getMockStyle(nextLayerList);
     expect(removedStyle).toEqual(nextStyle);
-
   });
 
   test('should move bar layer in front of foo layer', async () => {
-
     const fooLayer = makeSingleSourceMockLayer('foo');
     const barLayer = makeSingleSourceMockLayer('bar');
 
@@ -206,13 +187,9 @@ describe('mb/utils', () => {
 
     const nextStyle = getMockStyle(nextLayerListOrder);
     expect(orderedStyle).toEqual(nextStyle);
-
   });
 
-
-
   test('should fail at moving multiple layers (this tests a limitation of the sync)', async () => {
-
     //This is a known limitation of the layer order syncing.
     //It assumes only a single layer will have moved.
     //In practice, the Maps app will likely not cause multiple layers to move at once:
@@ -236,12 +213,9 @@ describe('mb/utils', () => {
     const nextStyle = getMockStyle(nextLayerListOrder);
     const isSyncSuccesful = _.isEqual(orderedStyle, nextStyle);
     expect(isSyncSuccesful).toEqual(false);
-
   });
 
-
   test('should move bar layer in front of foo layer (multi source)', async () => {
-
     const fooLayer = makeSingleSourceMockLayer('foo');
     const barLayer = makeMultiSourceMockLayer('bar');
 
@@ -255,12 +229,9 @@ describe('mb/utils', () => {
 
     const nextStyle = getMockStyle(nextLayerListOrder);
     expect(orderedStyle).toEqual(nextStyle);
-
   });
 
   test('should move bar layer in front of foo layer, but after baz layer', async () => {
-
-
     const bazLayer = makeSingleSourceMockLayer('baz');
     const fooLayer = makeSingleSourceMockLayer('foo');
     const barLayer = makeSingleSourceMockLayer('bar');
@@ -268,7 +239,6 @@ describe('mb/utils', () => {
     const currentLayerOrder = [bazLayer, fooLayer, barLayer];
     const nextLayerListOrder = [bazLayer, barLayer, fooLayer];
 
-
     const currentStyle = getMockStyle(currentLayerOrder);
     const mockMbMap = new MockMbMap(currentStyle);
     syncLayerOrderForSingleLayer(mockMbMap, nextLayerListOrder);
@@ -276,12 +246,9 @@ describe('mb/utils', () => {
 
     const nextStyle = getMockStyle(nextLayerListOrder);
     expect(orderedStyle).toEqual(nextStyle);
-
   });
 
   test('should reorder foo and bar and remove baz', async () => {
-
-
     const bazLayer = makeSingleSourceMockLayer('baz');
     const fooLayer = makeSingleSourceMockLayer('foo');
     const barLayer = makeSingleSourceMockLayer('bar');
@@ -289,7 +256,6 @@ describe('mb/utils', () => {
     const currentLayerOrder = [bazLayer, fooLayer, barLayer];
     const nextLayerListOrder = [barLayer, fooLayer];
 
-
     const currentStyle = getMockStyle(currentLayerOrder);
     const mockMbMap = new MockMbMap(currentStyle);
     removeOrphanedSourcesAndLayers(mockMbMap, nextLayerListOrder);
@@ -298,12 +264,9 @@ describe('mb/utils', () => {
 
     const nextStyle = getMockStyle(nextLayerListOrder);
     expect(orderedStyle).toEqual(nextStyle);
-
   });
 
   test('should reorder foo and bar and remove baz, when having multi-source multi-layer data', async () => {
-
-
     const bazLayer = makeMultiSourceMockLayer('baz');
     const fooLayer = makeSingleSourceMockLayer('foo');
     const barLayer = makeMultiSourceMockLayer('bar');
@@ -311,7 +274,6 @@ describe('mb/utils', () => {
     const currentLayerOrder = [bazLayer, fooLayer, barLayer];
     const nextLayerListOrder = [barLayer, fooLayer];
 
-
     const currentStyle = getMockStyle(currentLayerOrder);
     const mockMbMap = new MockMbMap(currentStyle);
     removeOrphanedSourcesAndLayers(mockMbMap, nextLayerListOrder);
@@ -320,8 +282,5 @@ describe('mb/utils', () => {
 
     const nextStyle = getMockStyle(nextLayerListOrder);
     expect(orderedStyle).toEqual(nextStyle);
-
   });
-
-
 });

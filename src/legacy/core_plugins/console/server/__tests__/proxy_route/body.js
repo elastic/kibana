@@ -29,7 +29,6 @@ describe('Console Proxy Route', () => {
   const teardowns = [];
   let request;
 
-
   beforeEach(() => {
     request = async (method, path, response) => {
       sandbox.stub(requestModule, 'sendRequest').callsFake(createResponseStub(response));

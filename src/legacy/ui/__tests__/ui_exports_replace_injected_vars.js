@@ -28,7 +28,7 @@ import { noop } from 'lodash';
 import * as getUiSettingsServiceForRequestNS from '../ui_settings/ui_settings_service_for_request';
 import { createRoot, getKbnServer, request } from '../../../test_utils/kbn_server';
 
-const getInjectedVarsFromResponse = (resp) => {
+const getInjectedVarsFromResponse = resp => {
   expect(resp.statusCode).to.be(200);
   const $ = cheerio.load(resp.text);
   const data = $('kbn-injected-metadata').attr('data');
@@ -40,13 +40,10 @@ const injectReplacer = (kbnServer, replacer) => {
   // but that requires stubbing out an entire plugin directory for
   // each test, so we fake it and jam the replacer into uiExports
   const { injectedVarsReplacers = [] } = kbnServer.uiExports;
-  kbnServer.uiExports.injectedVarsReplacers = [
-    ...injectedVarsReplacers,
-    replacer
-  ];
+  kbnServer.uiExports.injectedVarsReplacers = [...injectedVarsReplacers, replacer];
 };
 
-describe('UiExports', function () {
+describe('UiExports', function() {
   const sandbox = sinon.createSandbox();
 
   let root;
@@ -66,12 +63,10 @@ describe('UiExports', function () {
     kbnServer = getKbnServer(root);
 
     // Mock out the ui settings which depends on ES
-    sandbox
-      .stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest')
-      .returns({
-        getDefaults: noop,
-        getUserProvided: noop
-      });
+    sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest').returns({
+      getDefaults: noop,
+      getUserProvided: noop,
+    });
   });
 
   after(async () => {
@@ -88,12 +83,11 @@ describe('UiExports', function () {
     kbnServer.uiExports.injectedVarsReplacers = originalInjectedVarsReplacers;
   });
 
-  describe('#replaceInjectedVars', function () {
+  describe('#replaceInjectedVars', function() {
     it('allows sync replacing of injected vars', async () => {
       injectReplacer(kbnServer, () => ({ a: 1 }));
 
-      const resp = await request.get(root, '/app/test_app')
-        .expect(200);
+      const resp = await request.get(root, '/app/test_app').expect(200);
       const injectedVars = getInjectedVarsFromResponse(resp);
 
       expect(injectedVars).to.eql({ a: 1 });
@@ -104,16 +98,15 @@ describe('UiExports', function () {
 
       injectReplacer(kbnServer, async () => {
         return {
-          hello: await asyncThing()
+          hello: await asyncThing(),
         };
       });
 
-      const resp = await request.get(root, '/app/test_app')
-        .expect(200);
+      const resp = await request.get(root, '/app/test_app').expect(200);
       const injectedVars = getInjectedVarsFromResponse(resp);
 
       expect(injectedVars).to.eql({
-        hello: 'world'
+        hello: 'world',
       });
     });
 
@@ -122,8 +115,7 @@ describe('UiExports', function () {
       injectReplacer(kbnServer, () => ({ foo: 'bar' }));
       injectReplacer(kbnServer, stub);
 
-      await await request.get(root, '/app/test_app')
-        .expect(200);
+      await await request.get(root, '/app/test_app').expect(200);
 
       sinon.assert.calledOnce(stub);
       expect(stub.firstCall.args[0]).to.eql({ foo: 'bar' }); // originalInjectedVars
@@ -138,8 +130,7 @@ describe('UiExports', function () {
       injectReplacer(kbnServer, orig => ({ name: orig.name + 'a' }));
       injectReplacer(kbnServer, orig => ({ name: orig.name + 'm' }));
 
-      const resp = await request.get(root, '/app/test_app')
-        .expect(200);
+      const resp = await request.get(root, '/app/test_app').expect(200);
       const injectedVars = getInjectedVarsFromResponse(resp);
 
       expect(injectedVars).to.eql({ name: 'sam' });
@@ -151,16 +142,14 @@ describe('UiExports', function () {
         throw new Error('replacer failed');
       });
 
-      await request.get(root, '/app/test_app')
-        .expect(500);
+      await request.get(root, '/app/test_app').expect(500);
     });
 
     it('starts off with the injected vars for the app merged with the default injected vars', async () => {
       const stub = sinon.stub();
       injectReplacer(kbnServer, stub);
 
-      await request.get(root, '/app/test_app')
-        .expect(200);
+      await request.get(root, '/app/test_app').expect(200);
 
       sinon.assert.calledOnce(stub);
       const args = stub.lastCall.args[0];

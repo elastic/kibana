@@ -20,18 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import {
-  histogramDetailsUrl,
-} from '../../../services';
+import { histogramDetailsUrl } from '../../../services';
 
-import {
-  FieldList,
-} from '../../components';
+import { FieldList } from '../../components';
 
-import {
-  FieldChooser,
-  StepError,
-} from './components';
+import { FieldChooser, StepError } from './components';
 
 export class StepHistogramUi extends Component {
   static propTypes = {
@@ -41,9 +34,9 @@ export class StepHistogramUi extends Component {
     hasErrors: PropTypes.bool.isRequired,
     areStepErrorsVisible: PropTypes.bool.isRequired,
     histogramFields: PropTypes.array.isRequired,
-  }
+  };
 
-  onSelectField = (field) => {
+  onSelectField = field => {
     const {
       fields: { histogram },
       onFieldsChange,
@@ -52,7 +45,7 @@ export class StepHistogramUi extends Component {
     onFieldsChange({ histogram: histogram.concat(field) });
   };
 
-  onRemoveField = (field) => {
+  onRemoveField = field => {
     const {
       fields: { histogram },
       onFieldsChange,
@@ -62,20 +55,17 @@ export class StepHistogramUi extends Component {
   };
 
   render() {
-    const {
-      fields,
-      histogramFields,
-    } = this.props;
+    const { fields, histogramFields } = this.props;
 
-    const {
-      histogram,
-    } = fields;
+    const { histogram } = fields;
 
-    const columns = [{
-      field: 'name',
-      name: 'Field',
-      sortable: true,
-    }];
+    const columns = [
+      {
+        field: 'name',
+        name: 'Field',
+        sortable: true,
+      },
+    ];
 
     return (
       <Fragment>
@@ -126,21 +116,21 @@ export class StepHistogramUi extends Component {
           fields={histogram}
           onRemoveField={this.onRemoveField}
           emptyMessage={<p>No histogram fields added</p>}
-          addButton={(
+          addButton={
             <FieldChooser
-              buttonLabel={(
+              buttonLabel={
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepHistogram.fieldsChooserLabel"
                   defaultMessage="Add histogram fields"
                 />
-              )}
+              }
               columns={columns}
               fields={histogramFields}
               selectedFields={histogram}
               onSelectField={this.onSelectField}
               dataTestSubj="rollupJobHistogramFieldChooser"
             />
-          )}
+          }
           dataTestSubj="rollupJobHistogramFieldList"
         />
 
@@ -152,21 +142,11 @@ export class StepHistogramUi extends Component {
   }
 
   renderInterval() {
-    const {
-      fields,
-      onFieldsChange,
-      areStepErrorsVisible,
-      fieldErrors,
-    } = this.props;
+    const { fields, onFieldsChange, areStepErrorsVisible, fieldErrors } = this.props;
 
-    const {
-      histogram,
-      histogramInterval,
-    } = fields;
+    const { histogram, histogramInterval } = fields;
 
-    const {
-      histogramInterval: errorHistogramInterval,
-    } = fieldErrors;
+    const { histogramInterval: errorHistogramInterval } = fieldErrors;
 
     if (!histogram.length) {
       return null;
@@ -177,7 +157,7 @@ export class StepHistogramUi extends Component {
         <EuiSpacer size="xl" />
 
         <EuiDescribedFormGroup
-          title={(
+          title={
             <EuiTitle size="s">
               <h4>
                 <FormattedMessage
@@ -186,8 +166,8 @@ export class StepHistogramUi extends Component {
                 />
               </h4>
             </EuiTitle>
-          )}
-          description={(
+          }
+          description={
             <FormattedMessage
               id="xpack.rollupJobs.create.stepHistogram.sectionHistogramIntervalDescription"
               defaultMessage="This is the interval of histogram buckets to be generated when rolling
@@ -195,22 +175,22 @@ export class StepHistogramUi extends Component {
                 only one interval can be specified in the histogram group, meaning that all fields
                 being grouped via the histogram must share the same interval."
             />
-          )}
+          }
           fullWidth
         >
           <EuiFormRow
-            label={(
+            label={
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepHistogram.fieldHistogramIntervalLabel"
                 defaultMessage="Interval"
               />
-            )}
+            }
             error={errorHistogramInterval}
             isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
             fullWidth
           >
             <EuiFieldNumber
-              value={(!histogramInterval && histogramInterval !== 0) ? '' : Number(histogramInterval)}
+              value={!histogramInterval && histogramInterval !== 0 ? '' : Number(histogramInterval)}
               onChange={e => onFieldsChange({ histogramInterval: e.target.value })}
               isInvalid={Boolean(areStepErrorsVisible && errorHistogramInterval)}
               fullWidth
@@ -230,7 +210,7 @@ export class StepHistogramUi extends Component {
     }
 
     return <StepError />;
-  }
+  };
 }
 
 export const StepHistogram = injectI18n(StepHistogramUi);

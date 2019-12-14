@@ -29,7 +29,7 @@ export function buildPhraseFilter(field, value, indexPattern) {
     filter.query = { match: {} };
     filter.query.match[field.name] = {
       query: convertedValue,
-      type: 'phrase'
+      type: 'phrase',
     };
   }
   return filter;
@@ -44,9 +44,9 @@ export function getPhraseScript(field, value) {
       source: script,
       lang: field.lang,
       params: {
-        value: convertedValue
-      }
-    }
+        value: convertedValue,
+      },
+    },
   };
 }
 
@@ -57,11 +57,9 @@ export function getConvertedValueForField(field, value) {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
     if ([1, 'true'].includes(value)) {
       return true;
-    }
-    else if ([0, 'false'].includes(value)) {
+    } else if ([0, 'false'].includes(value)) {
       return false;
-    }
-    else {
+    } else {
       throw new Error(`${value} is not a valid boolean value for boolean field ${field.name}`);
     }
   }
@@ -79,10 +77,11 @@ export function getConvertedValueForField(field, value) {
 export function buildInlineScriptForPhraseFilter(scriptedField) {
   // We must wrap painless scripts in a lambda in case they're more than a simple expression
   if (scriptedField.lang === 'painless') {
-    return `boolean compare(Supplier s, def v) {return s.get() == v;}` +
-           `compare(() -> { ${scriptedField.script} }, params.value);`;
-  }
-  else {
+    return (
+      `boolean compare(Supplier s, def v) {return s.get() == v;}` +
+      `compare(() -> { ${scriptedField.script} }, params.value);`
+    );
+  } else {
     return `(${scriptedField.script}) == value`;
   }
 }

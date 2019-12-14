@@ -7,7 +7,6 @@
 import { isString } from 'lodash';
 
 export class ExportTypesRegistry {
-
   constructor() {
     this._map = new Map();
   }
@@ -60,5 +59,4 @@ export class ExportTypesRegistry {
 
     return result;
   }
-
 }

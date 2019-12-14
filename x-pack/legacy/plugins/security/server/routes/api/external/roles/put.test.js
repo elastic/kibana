@@ -18,9 +18,9 @@ const createMockServer = () => {
     port: 8080,
     routes: {
       validate: {
-        failAction: defaultValidationErrorHandler
-      }
-    }
+        failAction: defaultValidationErrorHandler,
+      },
+    },
   });
   return mockServer;
 };
@@ -44,12 +44,12 @@ const privilegeMap = {
     bar: {
       'bar-privilege-1': [],
       'bar-privilege-2': [],
-    }
+    },
   },
   reserved: {
     customApplication1: [],
     customApplication2: [],
-  }
+  },
 };
 
 const putRoleTest = (
@@ -58,24 +58,22 @@ const putRoleTest = (
 ) => {
   test(description, async () => {
     const mockServer = createMockServer();
-    const mockPreCheckLicense = jest
-      .fn()
-      .mockImplementation(preCheckLicenseImpl);
+    const mockPreCheckLicense = jest.fn().mockImplementation(preCheckLicenseImpl);
     const mockCallWithRequest = jest.fn();
     for (const impl of callWithRequestImpls) {
       mockCallWithRequest.mockImplementationOnce(impl);
     }
     const mockAuthorization = {
       privileges: {
-        get: () => privilegeMap
-      }
+        get: () => privilegeMap,
+      },
     };
     initPutRolesApi(
       mockServer,
       mockCallWithRequest,
       mockPreCheckLicense,
       mockAuthorization,
-      application,
+      application
     );
     const headers = {
       authorization: 'foo',
@@ -152,10 +150,10 @@ describe('PUT role', () => {
         kibana: [
           {
             feature: {
-              '!foo': ['foo']
-            }
-          }
-        ]
+              '!foo': ['foo'],
+            },
+          },
+        ],
       },
       asserts: {
         statusCode: 400,
@@ -177,10 +175,10 @@ describe('PUT role', () => {
         kibana: [
           {
             feature: {
-              foo: ['!foo']
-            }
-          }
-        ]
+              foo: ['!foo'],
+            },
+          },
+        ],
       },
       asserts: {
         statusCode: 400,
@@ -203,10 +201,10 @@ describe('PUT role', () => {
           {
             base: ['all'],
             feature: {
-              foo: ['foo']
-            }
-          }
-        ]
+              foo: ['foo'],
+            },
+          },
+        ],
       },
       asserts: {
         statusCode: 400,
@@ -229,9 +227,9 @@ describe('PUT role', () => {
           kibana: [
             {
               base: ['foo'],
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         },
         asserts: {
           statusCode: 400,
@@ -253,9 +251,9 @@ describe('PUT role', () => {
           kibana: [
             {
               _reserved: ['customApplication1'],
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         },
         asserts: {
           statusCode: 400,
@@ -277,17 +275,17 @@ describe('PUT role', () => {
           kibana: [
             {
               feature: {
-                foo: ['foo-privilege-1']
+                foo: ['foo-privilege-1'],
               },
-              spaces: ['*']
+              spaces: ['*'],
             },
             {
               feature: {
-                bar: ['bar-privilege-1']
+                bar: ['bar-privilege-1'],
               },
-              spaces: ['*']
-            }
-          ]
+              spaces: ['*'],
+            },
+          ],
         },
         asserts: {
           statusCode: 400,
@@ -297,22 +295,21 @@ describe('PUT role', () => {
             statusCode: 400,
             validation: {
               keys: ['kibana.1'],
-              source: 'payload'
-            }
+              source: 'payload',
+            },
           },
         },
       });
     });
 
     describe('space', () => {
-
       putRoleTest(`doesn't allow * in a space ID`, {
         name: 'foo-role',
         payload: {
           kibana: [
             {
-              spaces: ['foo-*']
-            }
+              spaces: ['foo-*'],
+            },
           ],
         },
         asserts: {
@@ -334,8 +331,8 @@ describe('PUT role', () => {
         payload: {
           kibana: [
             {
-              spaces: ['*', 'foo-space']
-            }
+              spaces: ['*', 'foo-space'],
+            },
           ],
         },
         asserts: {
@@ -358,8 +355,8 @@ describe('PUT role', () => {
           kibana: [
             {
               base: ['foo'],
-              spaces: ['foo-space']
-            }
+              spaces: ['foo-space'],
+            },
           ],
         },
         asserts: {
@@ -382,17 +379,17 @@ describe('PUT role', () => {
           kibana: [
             {
               feature: {
-                foo: ['foo-privilege-1']
+                foo: ['foo-privilege-1'],
               },
-              spaces: ['marketing']
+              spaces: ['marketing'],
             },
             {
               feature: {
-                bar: ['bar-privilege-1']
+                bar: ['bar-privilege-1'],
               },
-              spaces: ['sales', 'marketing']
-            }
-          ]
+              spaces: ['sales', 'marketing'],
+            },
+          ],
         },
         asserts: {
           statusCode: 400,
@@ -402,8 +399,8 @@ describe('PUT role', () => {
             statusCode: 400,
             validation: {
               keys: ['kibana.1'],
-              source: 'payload'
-            }
+              source: 'payload',
+            },
           },
         },
       });
@@ -414,9 +411,9 @@ describe('PUT role', () => {
           kibana: [
             {
               _reserved: ['customApplication1'],
-              spaces: ['marketing']
+              spaces: ['marketing'],
             },
-          ]
+          ],
         },
         asserts: {
           statusCode: 400,
@@ -426,8 +423,8 @@ describe('PUT role', () => {
             statusCode: 400,
             validation: {
               keys: ['kibana.0._reserved'],
-              source: 'payload'
-            }
+              source: 'payload',
+            },
           },
         },
       });
@@ -453,7 +450,7 @@ describe('PUT role', () => {
       name: 'foo-role',
       payload: {},
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      callWithRequestImpls: [async () => ({}), async () => {}],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -481,11 +478,11 @@ describe('PUT role', () => {
         kibana: [
           {
             base: ['all'],
-          }
-        ]
+          },
+        ],
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      callWithRequestImpls: [async () => ({}), async () => {}],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -500,9 +497,7 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'all',
-                    ],
+                    privileges: ['all'],
                     resources: [GLOBAL_RESOURCE],
                   },
                 ],
@@ -522,13 +517,13 @@ describe('PUT role', () => {
           {
             base: [],
             feature: {
-              foo: ['foo']
-            }
-          }
-        ]
+              foo: ['foo'],
+            },
+          },
+        ],
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      callWithRequestImpls: [async () => ({}), async () => {}],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -543,9 +538,7 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'feature_foo.foo',
-                    ],
+                    privileges: ['feature_foo.foo'],
                     resources: [GLOBAL_RESOURCE],
                   },
                 ],
@@ -564,12 +557,12 @@ describe('PUT role', () => {
         kibana: [
           {
             base: ['all'],
-            feature: {}
-          }
-        ]
+            feature: {},
+          },
+        ],
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      callWithRequestImpls: [async () => ({}), async () => {}],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -584,9 +577,7 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'all',
-                    ],
+                    privileges: ['all'],
                     resources: [GLOBAL_RESOURCE],
                   },
                 ],
@@ -611,7 +602,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: ['test-field-security-except-1', 'test-field-security-except-2']
+                except: ['test-field-security-except-1', 'test-field-security-except-2'],
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -627,18 +618,18 @@ describe('PUT role', () => {
           },
           {
             base: ['all', 'read'],
-            spaces: ['test-space-1', 'test-space-2']
+            spaces: ['test-space-1', 'test-space-2'],
           },
           {
             feature: {
               foo: ['foo-privilege-1', 'foo-privilege-2'],
             },
-            spaces: ['test-space-3']
-          }
-        ]
+            spaces: ['test-space-3'],
+          },
+        ],
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-      callWithRequestImpls: [async () => ({}), async () => { }],
+      callWithRequestImpls: [async () => ({}), async () => {}],
       asserts: {
         callWithRequests: [
           ['shield.getRole', { name: 'foo-role', ignore: [404] }],
@@ -650,27 +641,18 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'all',
-                      'read',
-                    ],
+                    privileges: ['all', 'read'],
                     resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
-                    privileges: [
-                      'space_all',
-                      'space_read',
-                    ],
-                    resources: ['space:test-space-1', 'space:test-space-2']
+                    privileges: ['space_all', 'space_read'],
+                    resources: ['space:test-space-1', 'space:test-space-2'],
                   },
                   {
                     application,
-                    privileges: [
-                      'feature_foo.foo-privilege-1',
-                      'feature_foo.foo-privilege-2',
-                    ],
-                    resources: ['space:test-space-3']
+                    privileges: ['feature_foo.foo-privilege-1', 'feature_foo.foo-privilege-2'],
+                    resources: ['space:test-space-3'],
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -678,13 +660,10 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: ['test-field-security-except-1', 'test-field-security-except-2']
+                      except: ['test-field-security-except-1', 'test-field-security-except-2'],
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
-                    privileges: [
-                      'test-index-privilege-1',
-                      'test-index-privilege-2',
-                    ],
+                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
                     query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
@@ -711,7 +690,7 @@ describe('PUT role', () => {
             {
               field_security: {
                 grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                except: ['test-field-security-except-1', 'test-field-security-except-2']
+                except: ['test-field-security-except-1', 'test-field-security-except-2'],
               },
               names: ['test-index-name-1', 'test-index-name-2'],
               privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
@@ -724,20 +703,20 @@ describe('PUT role', () => {
           {
             feature: {
               foo: ['foo-privilege-1'],
-              bar: ['bar-privilege-1']
+              bar: ['bar-privilege-1'],
             },
-            spaces: ['*']
+            spaces: ['*'],
           },
           {
             base: ['all'],
-            spaces: ['test-space-1', 'test-space-2']
+            spaces: ['test-space-1', 'test-space-2'],
           },
           {
             feature: {
-              bar: ['bar-privilege-2']
+              bar: ['bar-privilege-2'],
             },
-            spaces: ['test-space-3']
-          }
+            spaces: ['test-space-3'],
+          },
         ],
       },
       preCheckLicenseImpl: defaultPreCheckLicenseImpl,
@@ -755,7 +734,7 @@ describe('PUT role', () => {
               {
                 field_security: {
                   grant: ['old-field-security-grant-1', 'old-field-security-grant-2'],
-                  except: ['old-field-security-except-1', 'old-field-security-except-2']
+                  except: ['old-field-security-except-1', 'old-field-security-except-2'],
                 },
                 names: ['old-index-name'],
                 privileges: ['old-privilege'],
@@ -772,7 +751,7 @@ describe('PUT role', () => {
             ],
           },
         }),
-        async () => { },
+        async () => {},
       ],
       asserts: {
         callWithRequests: [
@@ -785,25 +764,18 @@ describe('PUT role', () => {
                 applications: [
                   {
                     application,
-                    privileges: [
-                      'feature_foo.foo-privilege-1',
-                      'feature_bar.bar-privilege-1',
-                    ],
+                    privileges: ['feature_foo.foo-privilege-1', 'feature_bar.bar-privilege-1'],
                     resources: [GLOBAL_RESOURCE],
                   },
                   {
                     application,
-                    privileges: [
-                      'space_all',
-                    ],
-                    resources: ['space:test-space-1', 'space:test-space-2']
+                    privileges: ['space_all'],
+                    resources: ['space:test-space-1', 'space:test-space-2'],
                   },
                   {
                     application,
-                    privileges: [
-                      'feature_bar.bar-privilege-2',
-                    ],
-                    resources: ['space:test-space-3']
+                    privileges: ['feature_bar.bar-privilege-2'],
+                    resources: ['space:test-space-3'],
                   },
                 ],
                 cluster: ['test-cluster-privilege'],
@@ -811,13 +783,10 @@ describe('PUT role', () => {
                   {
                     field_security: {
                       grant: ['test-field-security-grant-1', 'test-field-security-grant-2'],
-                      except: ['test-field-security-except-1', 'test-field-security-except-2']
+                      except: ['test-field-security-except-1', 'test-field-security-except-2'],
                     },
                     names: ['test-index-name-1', 'test-index-name-2'],
-                    privileges: [
-                      'test-index-privilege-1',
-                      'test-index-privilege-2',
-                    ],
+                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
                     query: `{ "match": { "title": "foo" } }`,
                   },
                 ],
@@ -832,121 +801,109 @@ describe('PUT role', () => {
       },
     });
 
-    putRoleTest(
-      `updates role which has existing other application privileges`,
-      {
-        name: 'foo-role',
-        payload: {
-          metadata: {
-            foo: 'test-metadata',
+    putRoleTest(`updates role which has existing other application privileges`, {
+      name: 'foo-role',
+      payload: {
+        metadata: {
+          foo: 'test-metadata',
+        },
+        elasticsearch: {
+          cluster: ['test-cluster-privilege'],
+          indices: [
+            {
+              names: ['test-index-name-1', 'test-index-name-2'],
+              privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+            },
+          ],
+          run_as: ['test-run-as-1', 'test-run-as-2'],
+        },
+        kibana: [
+          {
+            base: ['all', 'read'],
+            spaces: ['*'],
           },
-          elasticsearch: {
-            cluster: ['test-cluster-privilege'],
+        ],
+      },
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [
+        async () => ({
+          'foo-role': {
+            metadata: {
+              bar: 'old-metadata',
+            },
+            transient_metadata: {
+              enabled: true,
+            },
+            cluster: ['old-cluster-privilege'],
             indices: [
               {
-                names: ['test-index-name-1', 'test-index-name-2'],
-                privileges: [
-                  'test-index-privilege-1',
-                  'test-index-privilege-2',
-                ],
+                names: ['old-index-name'],
+                privileges: ['old-privilege'],
               },
             ],
-            run_as: ['test-run-as-1', 'test-run-as-2'],
-          },
-          kibana: [
-            {
-              base: ['all', 'read'],
-              spaces: ['*']
-            }
-          ]
-        },
-        preCheckLicenseImpl: defaultPreCheckLicenseImpl,
-        callWithRequestImpls: [
-          async () => ({
-            'foo-role': {
-              metadata: {
-                bar: 'old-metadata',
-              },
-              transient_metadata: {
-                enabled: true,
-              },
-              cluster: ['old-cluster-privilege'],
-              indices: [
-                {
-                  names: ['old-index-name'],
-                  privileges: ['old-privilege'],
-                },
-              ],
-              run_as: ['old-run-as'],
-              applications: [
-                {
-                  application,
-                  privileges: ['old-kibana-privilege'],
-                  resources: ['old-resource'],
-                },
-                {
-                  application: 'logstash-foo',
-                  privileges: ['logstash-privilege'],
-                  resources: ['logstash-resource'],
-                },
-                {
-                  application: 'beats-foo',
-                  privileges: ['beats-privilege'],
-                  resources: ['beats-resource'],
-                },
-              ],
-            },
-          }),
-          async () => { },
-        ],
-        asserts: {
-          callWithRequests: [
-            ['shield.getRole', { name: 'foo-role', ignore: [404] }],
-            [
-              'shield.putRole',
+            run_as: ['old-run-as'],
+            applications: [
               {
-                name: 'foo-role',
-                body: {
-                  applications: [
-                    {
-                      application,
-                      privileges: [
-                        'all',
-                        'read',
-                      ],
-                      resources: [GLOBAL_RESOURCE],
-                    },
-                    {
-                      application: 'logstash-foo',
-                      privileges: ['logstash-privilege'],
-                      resources: ['logstash-resource'],
-                    },
-                    {
-                      application: 'beats-foo',
-                      privileges: ['beats-privilege'],
-                      resources: ['beats-resource'],
-                    },
-                  ],
-                  cluster: ['test-cluster-privilege'],
-                  indices: [
-                    {
-                      names: ['test-index-name-1', 'test-index-name-2'],
-                      privileges: [
-                        'test-index-privilege-1',
-                        'test-index-privilege-2',
-                      ],
-                    },
-                  ],
-                  metadata: { foo: 'test-metadata' },
-                  run_as: ['test-run-as-1', 'test-run-as-2'],
-                },
+                application,
+                privileges: ['old-kibana-privilege'],
+                resources: ['old-resource'],
+              },
+              {
+                application: 'logstash-foo',
+                privileges: ['logstash-privilege'],
+                resources: ['logstash-resource'],
+              },
+              {
+                application: 'beats-foo',
+                privileges: ['beats-privilege'],
+                resources: ['beats-resource'],
               },
             ],
+          },
+        }),
+        async () => {},
+      ],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                applications: [
+                  {
+                    application,
+                    privileges: ['all', 'read'],
+                    resources: [GLOBAL_RESOURCE],
+                  },
+                  {
+                    application: 'logstash-foo',
+                    privileges: ['logstash-privilege'],
+                    resources: ['logstash-resource'],
+                  },
+                  {
+                    application: 'beats-foo',
+                    privileges: ['beats-privilege'],
+                    resources: ['beats-resource'],
+                  },
+                ],
+                cluster: ['test-cluster-privilege'],
+                indices: [
+                  {
+                    names: ['test-index-name-1', 'test-index-name-2'],
+                    privileges: ['test-index-privilege-1', 'test-index-privilege-2'],
+                  },
+                ],
+                metadata: { foo: 'test-metadata' },
+                run_as: ['test-run-as-1', 'test-run-as-2'],
+              },
+            },
           ],
-          statusCode: 204,
-          result: null,
-        },
-      }
-    );
+        ],
+        statusCode: 204,
+        result: null,
+      },
+    });
   });
 });

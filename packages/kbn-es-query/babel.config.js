@@ -21,14 +21,10 @@
 module.exports = {
   env: {
     public: {
-      presets: [
-        '@kbn/babel-preset/webpack_preset'
-      ],
+      presets: ['@kbn/babel-preset/webpack_preset'],
     },
     server: {
-      presets: [
-        '@kbn/babel-preset/node_preset'
-      ],
+      presets: ['@kbn/babel-preset/node_preset'],
     },
   },
   ignore: ['**/__tests__/**/*', '**/*.test.ts', '**/*.test.tsx'],

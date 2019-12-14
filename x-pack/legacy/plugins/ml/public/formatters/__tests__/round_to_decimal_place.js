@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import expect from '@kbn/expect';
 import { roundToDecimalPlace } from '../round_to_decimal_place';
 
 describe('ML - roundToDecimalPlace formatter', () => {
-
   it('returns the correct format using default decimal place', () => {
     expect(roundToDecimalPlace(12)).to.be(12);
     expect(roundToDecimalPlace(12.3)).to.be(12.3);

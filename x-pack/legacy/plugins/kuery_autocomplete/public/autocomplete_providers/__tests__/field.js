@@ -9,7 +9,7 @@ import { getSuggestionsProvider } from '../field';
 import indexPatternResponse from '../__fixtures__/index_pattern_response.json';
 import { isFilterable } from 'ui/index_patterns';
 
-describe('Kuery field suggestions', function () {
+describe('Kuery field suggestions', function() {
   let indexPattern;
   let indexPatterns;
   let getSuggestions;
@@ -20,11 +20,11 @@ describe('Kuery field suggestions', function () {
     getSuggestions = getSuggestionsProvider({ indexPatterns });
   });
 
-  it('should return a function', function () {
+  it('should return a function', function() {
     expect(typeof getSuggestions).to.be('function');
   });
 
-  it('should return filterable fields', function () {
+  it('should return filterable fields', function() {
     const prefix = '';
     const suffix = '';
     const suggestions = getSuggestions({ prefix, suffix });
@@ -71,7 +71,7 @@ describe('Kuery field suggestions', function () {
     expect(keywordIndex).to.be.lessThan(analyzedIndex);
   });
 
-  it('should have descriptions', function () {
+  it('should have descriptions', function() {
     const prefix = '';
     const suffix = '';
     const suggestions = getSuggestions({ prefix, suffix });

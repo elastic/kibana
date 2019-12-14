@@ -26,7 +26,7 @@ export const pluginDefinition = {
     managementSections: ['plugins/watcher'],
     home: ['plugins/watcher/register_feature'],
   },
-  init: function (server) {
+  init: function(server) {
     // Register license checker
     registerLicenseChecker(
       server,

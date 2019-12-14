@@ -12,17 +12,12 @@ import { SourceSettings } from './source_settings';
 test('Should render source settings editor', () => {
   const mockLayer = {
     renderSourceSettingsEditor: () => {
-      return (<div>mockSourceEditor</div>);
+      return <div>mockSourceEditor</div>;
     },
   };
-  const component = shallow(
-    <SourceSettings
-      layer={mockLayer}
-    />
-  );
+  const component = shallow(<SourceSettings layer={mockLayer} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });
 
 test('should render nothing when source has no editor', () => {
@@ -31,12 +26,7 @@ test('should render nothing when source has no editor', () => {
       return null;
     },
   };
-  const component = shallow(
-    <SourceSettings
-      layer={mockLayer}
-    />
-  );
+  const component = shallow(<SourceSettings layer={mockLayer} />);
 
-  expect(component)
-    .toMatchSnapshot();
+  expect(component).toMatchSnapshot();
 });

@@ -13,9 +13,9 @@ describe('RequestTrialExtension component', () => {
     const rendered = getComponent(
       {
         trialStatus: {
-          canStartTrial: true
+          canStartTrial: true,
         },
-        license: createMockLicense('trial')
+        license: createMockLicense('trial'),
       },
       RequestTrialExtension
     );
@@ -25,9 +25,9 @@ describe('RequestTrialExtension component', () => {
     const rendered = getComponent(
       {
         trialStatus: {
-          canStartTrial: false
+          canStartTrial: false,
         },
-        license: createMockLicense('trial')
+        license: createMockLicense('trial'),
       },
       RequestTrialExtension
     );
@@ -39,9 +39,9 @@ describe('RequestTrialExtension component', () => {
     const rendered = getComponent(
       {
         trialStatus: {
-          canStartTrial: true
+          canStartTrial: true,
         },
-        license: createMockLicense('trial', 0)
+        license: createMockLicense('trial', 0),
       },
       RequestTrialExtension
     );
@@ -51,9 +51,9 @@ describe('RequestTrialExtension component', () => {
     const rendered = getComponent(
       {
         trialStatus: {
-          canStartTrial: false
+          canStartTrial: false,
         },
-        license: createMockLicense('trial', 0)
+        license: createMockLicense('trial', 0),
       },
       RequestTrialExtension
     );
@@ -65,9 +65,9 @@ describe('RequestTrialExtension component', () => {
     const rendered = getComponent(
       {
         trialStatus: {
-          canStartTrial: false
+          canStartTrial: false,
         },
-        license: createMockLicense('platinum', 0)
+        license: createMockLicense('platinum', 0),
       },
       RequestTrialExtension
     );
@@ -79,9 +79,9 @@ describe('RequestTrialExtension component', () => {
     const rendered = getComponent(
       {
         trialStatus: {
-          canStartTrial: false
+          canStartTrial: false,
         },
-        license: createMockLicense('platinum')
+        license: createMockLicense('platinum'),
       },
       RequestTrialExtension
     );

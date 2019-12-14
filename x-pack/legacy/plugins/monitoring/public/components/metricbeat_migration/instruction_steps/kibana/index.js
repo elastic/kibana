@@ -4,5 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getKibanaInstructionsForDisablingInternalCollection } from './disable_internal_collection_instructions';
+export {
+  getKibanaInstructionsForDisablingInternalCollection,
+} from './disable_internal_collection_instructions';
 export { getKibanaInstructionsForEnablingMetricbeat } from './enable_metricbeat_instructions';

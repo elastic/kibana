@@ -32,17 +32,18 @@ describe('visualization loader', () => {
   let vis;
 
   beforeEach(ngMock.module('kibana', 'kibana/directive'));
-  beforeEach(ngMock.inject((_$rootScope_, savedVisualizations, Private) => {
-    const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  beforeEach(
+    ngMock.inject((_$rootScope_, savedVisualizations, Private) => {
+      const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    // Create a new Vis object
-    const Vis = Private(VisProvider);
-    vis = new Vis(indexPattern, {
-      type: 'markdown',
-      params: { markdown: 'this is test' },
-    });
-
-  }));
+      // Create a new Vis object
+      const Vis = Private(VisProvider);
+      vis = new Vis(indexPattern, {
+        type: 'markdown',
+        params: { markdown: 'this is test' },
+      });
+    })
+  );
   setupAndTeardownInjectorStub();
 
   it('should render visualization', async () => {
@@ -51,6 +52,4 @@ describe('visualization loader', () => {
     visualizationLoader.render(element, vis, null, vis.params);
     expect($(element).find('.visualization').length).to.be(1);
   });
-
-
 });

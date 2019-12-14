@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 /*
  * Angular controller for the Machine Learning Explorer dashboard. The controller makes
  * multiple queries to Elasticsearch to obtain the data to populate all the components
@@ -17,9 +16,7 @@ import { Subscription } from 'rxjs';
 import '../components/controls';
 
 import uiRoutes from 'ui/routes';
-import {
-  createJobs,
-} from './explorer_utils';
+import { createJobs } from './explorer_utils';
 import { getAnomalyExplorerBreadcrumbs } from './breadcrumbs';
 import { checkFullLicense } from '../license/check_license';
 import { checkGetJobsPrivilege } from '../privilege/check_privilege';
@@ -29,7 +26,10 @@ import { explorer$ } from './explorer_dashboard_service';
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import { mlFieldFormatService } from 'plugins/ml/services/field_format_service';
 import { mlJobService } from '../services/job_service';
-import { getSelectedJobIds, jobSelectServiceFactory } from '../components/job_selector/job_select_service_utils';
+import {
+  getSelectedJobIds,
+  jobSelectServiceFactory,
+} from '../components/job_selector/job_select_service_utils';
 import { timefilter } from 'ui/timefilter';
 
 import { interval$ } from '../components/controls/select_interval';
@@ -41,29 +41,28 @@ import { APP_STATE_ACTION, EXPLORER_ACTION } from './explorer_constants';
 
 const template = `<ml-explorer-react-wrapper class="ml-explorer" data-test-subj="mlPageAnomalyExplorer" />`;
 
-uiRoutes
-  .when('/explorer/?', {
-    controller: 'MlExplorerController',
-    template,
-    k7Breadcrumbs: getAnomalyExplorerBreadcrumbs,
-    resolve: {
-      CheckLicense: checkFullLicense,
-      privileges: checkGetJobsPrivilege,
-      indexPatterns: loadIndexPatterns,
-      jobs: mlJobService.loadJobsWrapper
-    },
-  });
+uiRoutes.when('/explorer/?', {
+  controller: 'MlExplorerController',
+  template,
+  k7Breadcrumbs: getAnomalyExplorerBreadcrumbs,
+  resolve: {
+    CheckLicense: checkFullLicense,
+    privileges: checkGetJobsPrivilege,
+    indexPatterns: loadIndexPatterns,
+    jobs: mlJobService.loadJobsWrapper,
+  },
+});
 
 import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('apps/ml');
 
-module.controller('MlExplorerController', function (
+module.controller('MlExplorerController', function(
   $scope,
   $timeout,
   $rootScope,
   AppState,
-  globalState,
+  globalState
 ) {
   const { jobSelectService, unsubscribeFromGlobalState } = jobSelectServiceFactory(globalState);
   const subscriptions = new Subscription();
@@ -78,15 +77,12 @@ module.controller('MlExplorerController', function (
 
   let resizeTimeout = null;
 
-  function jobSelectionUpdate(action, {
-    fullJobs,
-    filterData,
-    selectedCells,
-    selectedJobIds,
-    swimlaneViewByFieldName
-  }) {
-    const jobs = createJobs(fullJobs).map((job) => {
-      job.selected = selectedJobIds.some((id) => job.id === id);
+  function jobSelectionUpdate(
+    action,
+    { fullJobs, filterData, selectedCells, selectedJobIds, swimlaneViewByFieldName }
+  ) {
+    const jobs = createJobs(fullJobs).map(job => {
+      job.selected = selectedJobIds.some(id => job.id === id);
       return job;
     });
 
@@ -96,7 +92,7 @@ module.controller('MlExplorerController', function (
       $scope.jobs = jobs;
       $scope.$applyAsync();
 
-      const noJobsFound = ($scope.jobs.length === 0);
+      const noJobsFound = $scope.jobs.length === 0;
 
       explorer$.next({
         action,
@@ -106,16 +102,17 @@ module.controller('MlExplorerController', function (
           selectedCells,
           selectedJobs,
           swimlaneViewByFieldName,
-          filterData
-        }
+          filterData,
+        },
       });
       $scope.jobSelectionUpdateInProgress = false;
       $scope.$applyAsync();
     }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
-    mlFieldFormatService.populateFormats(selectedJobIds, getIndexPatterns())
-      .catch((err) => {
+    mlFieldFormatService
+      .populateFormats(selectedJobIds, getIndexPatterns())
+      .catch(err => {
         console.log('Error populating field formats:', err);
       })
       .then(() => {
@@ -127,7 +124,7 @@ module.controller('MlExplorerController', function (
   // AppState is used to store state in the URL.
   $scope.appState = new AppState({
     mlExplorerSwimlane: {},
-    mlExplorerFilter: {}
+    mlExplorerFilter: {},
   });
 
   // Load the job info needed by the dashboard, then do the first load.
@@ -172,20 +169,24 @@ module.controller('MlExplorerController', function (
           swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
         });
 
-        subscriptions.add(jobSelectService.subscribe(({ selection }) => {
-          if (selection !== undefined) {
-            $scope.jobSelectionUpdateInProgress = true;
-            jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
-          }
-        }));
-
+        subscriptions.add(
+          jobSelectService.subscribe(({ selection }) => {
+            if (selection !== undefined) {
+              $scope.jobSelectionUpdateInProgress = true;
+              jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, {
+                fullJobs: mlJobService.jobs,
+                selectedJobIds: selection,
+              });
+            }
+          })
+        );
       } else {
         explorer$.next({
           action: EXPLORER_ACTION.RELOAD,
           payload: {
             loading: false,
             noJobsFound: true,
-          }
+          },
         });
       }
     }
@@ -196,22 +197,38 @@ module.controller('MlExplorerController', function (
   // Listen for changes to job selection.
   $scope.jobSelectionUpdateInProgress = false;
 
-  subscriptions.add(mlTimefilterRefresh$.subscribe(() => {
-    if ($scope.jobSelectionUpdateInProgress === false) {
-      explorer$.next({ action: EXPLORER_ACTION.REDRAW });
-    }
-  }));
+  subscriptions.add(
+    mlTimefilterRefresh$.subscribe(() => {
+      if ($scope.jobSelectionUpdateInProgress === false) {
+        explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+      }
+    })
+  );
 
   // Refresh all the data when the time range is altered.
-  subscriptions.add(timefilter.getFetch$().subscribe(() => {
-    if ($scope.jobSelectionUpdateInProgress === false) {
-      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
-    }
-  }));
+  subscriptions.add(
+    timefilter.getFetch$().subscribe(() => {
+      if ($scope.jobSelectionUpdateInProgress === false) {
+        explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+      }
+    })
+  );
 
-  subscriptions.add(subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () => $rootScope.$applyAsync()));
-  subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () => $rootScope.$applyAsync()));
-  subscriptions.add(subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () => $rootScope.$applyAsync()));
+  subscriptions.add(
+    subscribeAppStateToObservable(AppState, 'mlShowCharts', showCharts$, () =>
+      $rootScope.$applyAsync()
+    )
+  );
+  subscriptions.add(
+    subscribeAppStateToObservable(AppState, 'mlSelectInterval', interval$, () =>
+      $rootScope.$applyAsync()
+    )
+  );
+  subscriptions.add(
+    subscribeAppStateToObservable(AppState, 'mlSelectSeverity', severity$, () =>
+      $rootScope.$applyAsync()
+    )
+  );
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
   function jqueryRedrawOnResize() {
@@ -237,7 +254,7 @@ module.controller('MlExplorerController', function (
     }
   }
 
-  $scope.appStateHandler = ((action, payload) => {
+  $scope.appStateHandler = (action, payload) => {
     $scope.appState.fetch();
 
     if (action === APP_STATE_ACTION.CLEAR_SELECTION) {
@@ -252,9 +269,9 @@ module.controller('MlExplorerController', function (
       $scope.appState.mlExplorerSwimlane.selectedType = swimlaneSelectedCells.type;
       $scope.appState.mlExplorerSwimlane.selectedLanes = swimlaneSelectedCells.lanes;
       $scope.appState.mlExplorerSwimlane.selectedTimes = swimlaneSelectedCells.times;
-      $scope.appState.mlExplorerSwimlane.showTopFieldValues = swimlaneSelectedCells.showTopFieldValues;
+      $scope.appState.mlExplorerSwimlane.showTopFieldValues =
+        swimlaneSelectedCells.showTopFieldValues;
       $scope.appState.mlExplorerSwimlane.viewByFieldName = swimlaneSelectedCells.viewByFieldName;
-
     }
 
     if (action === APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME) {
@@ -277,7 +294,7 @@ module.controller('MlExplorerController', function (
 
     $scope.appState.save();
     $scope.$applyAsync();
-  });
+  };
 
   $scope.$on('$destroy', () => {
     subscriptions.unsubscribe();

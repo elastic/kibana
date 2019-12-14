@@ -16,5 +16,5 @@ DevToolsRegistryProvider.register(() => ({
     defaultMessage: 'Search Profiler',
   }),
 
-  url: '#/dev_tools/searchprofiler'
+  url: '#/dev_tools/searchprofiler',
 }));

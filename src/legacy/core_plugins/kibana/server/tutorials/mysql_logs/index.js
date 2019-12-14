@@ -17,9 +17,13 @@
  * under the License.
  */
 
-import { i18n }  from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
-import { onPremInstructions, cloudInstructions, onPremCloudInstructions } from '../../../common/tutorials/filebeat_instructions';
+import {
+  onPremInstructions,
+  cloudInstructions,
+  onPremCloudInstructions,
+} from '../../../common/tutorials/filebeat_instructions';
 
 export function mysqlLogsSpecProvider(server, context) {
   const moduleName = 'mysql';
@@ -34,7 +38,8 @@ export function mysqlLogsSpecProvider(server, context) {
       defaultMessage: 'Collect and parse error and slow logs created by MySQL.',
     }),
     longDescription: i18n.translate('kbn.server.tutorials.mysqlLogs.longDescription', {
-      defaultMessage: 'The `mysql` Filebeat module parses error and slow logs created by MySQL. \
+      defaultMessage:
+        'The `mysql` Filebeat module parses error and slow logs created by MySQL. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-mysql.html',
@@ -45,20 +50,23 @@ export function mysqlLogsSpecProvider(server, context) {
       dashboards: [
         {
           id: 'Filebeat-MySQL-Dashboard-ecs',
-          linkLabel: i18n.translate('kbn.server.tutorials.mysqlLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'MySQL logs dashboard',
-          }),
-          isOverview: true
-        }
+          linkLabel: i18n.translate(
+            'kbn.server.tutorials.mysqlLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'MySQL logs dashboard',
+            }
+          ),
+          isOverview: true,
+        },
       ],
       exportedFields: {
-        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-mysql.html'
-      }
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-mysql.html',
+      },
     },
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/mysql_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms)
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
   };
 }

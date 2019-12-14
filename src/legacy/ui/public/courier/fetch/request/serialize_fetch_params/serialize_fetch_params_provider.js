@@ -20,12 +20,6 @@
 import { serializeFetchParams } from './serialize_fetch_params';
 
 export function SerializeFetchParamsProvider(Promise, sessionId, config, esShardTimeout) {
-  return (fetchParams) => (
-    serializeFetchParams(
-      fetchParams,
-      Promise,
-      sessionId,
-      config,
-      esShardTimeout)
-  );
+  return fetchParams =>
+    serializeFetchParams(fetchParams, Promise, sessionId, config, esShardTimeout);
 }

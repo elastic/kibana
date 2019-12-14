@@ -17,16 +17,11 @@
  * under the License.
  */
 
-import {
-  parse as parseUrl,
-  format as formatUrl,
-} from 'url';
+import { parse as parseUrl, format as formatUrl } from 'url';
 
 import encodeUriQuery from 'encode-uri-query';
 
-import {
-  stringify as stringifyQueryString
-} from 'querystring';
+import { stringify as stringifyQueryString } from 'querystring';
 
 import { unhashQueryString } from './unhash_query_string';
 
@@ -37,8 +32,7 @@ export function unhashUrl(urlWithHashes, states) {
   if (!urlWithHashesParsed.hostname) {
     // passing a url like "localhost:5601" or "/app/kibana" should be prevented
     throw new TypeError(
-      'Only absolute urls should be passed to `unhashUrl()`. ' +
-      'Unable to detect url hostname.'
+      'Only absolute urls should be passed to `unhashUrl()`. ' + 'Unable to detect url hostname.'
     );
   }
 
@@ -55,7 +49,7 @@ export function unhashUrl(urlWithHashes, states) {
   // encodeUriQuery implements the less-aggressive encoding done naturally by
   // the browser. We use it to generate the same urls the browser would
   const appQueryStringWithoutHashes = stringifyQueryString(appQueryWithoutHashes, null, null, {
-    encodeURIComponent: encodeUriQuery
+    encodeURIComponent: encodeUriQuery,
   });
 
   return formatUrl({
@@ -63,6 +57,6 @@ export function unhashUrl(urlWithHashes, states) {
     hash: formatUrl({
       pathname: appUrlParsed.pathname,
       search: appQueryStringWithoutHashes,
-    })
+    }),
   });
 }

@@ -20,29 +20,27 @@
 import React from 'react';
 import { renderWithIntl } from 'test_utils/enzyme_helpers';
 
-import {
-  DiscoverNoResults,
-} from './no_results';
+import { DiscoverNoResults } from './no_results';
 
 describe('DiscoverNoResults', () => {
   describe('props', () => {
     describe('shardFailures', () => {
       test('renders failures list when there are failures', () => {
-        const shardFailures = [{
-          index: 'A',
-          shard: '1',
-          reason: { reason: 'Awful error' },
-        }, {
-          index: 'B',
-          shard: '2',
-          reason: { reason: 'Bad error' },
-        }];
+        const shardFailures = [
+          {
+            index: 'A',
+            shard: '1',
+            reason: { reason: 'Awful error' },
+          },
+          {
+            index: 'B',
+            shard: '2',
+            reason: { reason: 'Bad error' },
+          },
+        ];
 
         const component = renderWithIntl(
-          <DiscoverNoResults
-            shardFailures={shardFailures}
-            getDocLink={() => ''}
-          />
+          <DiscoverNoResults shardFailures={shardFailures} getDocLink={() => ''} />
         );
 
         expect(component).toMatchSnapshot();
@@ -52,10 +50,7 @@ describe('DiscoverNoResults', () => {
         const shardFailures = [];
 
         const component = renderWithIntl(
-          <DiscoverNoResults
-            shardFailures={shardFailures}
-            getDocLink={() => ''}
-          />
+          <DiscoverNoResults shardFailures={shardFailures} getDocLink={() => ''} />
         );
 
         expect(component).toMatchSnapshot();
@@ -65,10 +60,7 @@ describe('DiscoverNoResults', () => {
     describe('timeFieldName', () => {
       test('renders time range feedback', () => {
         const component = renderWithIntl(
-          <DiscoverNoResults
-            timeFieldName="awesome_time_field"
-            getDocLink={() => ''}
-          />
+          <DiscoverNoResults timeFieldName="awesome_time_field" getDocLink={() => ''} />
         );
 
         expect(component).toMatchSnapshot();
@@ -78,10 +70,7 @@ describe('DiscoverNoResults', () => {
     describe('queryLanguage', () => {
       test('supports lucene and renders doc link', () => {
         const component = renderWithIntl(
-          <DiscoverNoResults
-            queryLanguage="lucene"
-            getDocLink={() => 'documentation-link'}
-          />
+          <DiscoverNoResults queryLanguage="lucene" getDocLink={() => 'documentation-link'} />
         );
 
         expect(component).toMatchSnapshot();

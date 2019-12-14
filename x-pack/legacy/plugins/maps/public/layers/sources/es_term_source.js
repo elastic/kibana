@@ -23,9 +23,7 @@ const aggSchemas = new Schemas([
     min: 1,
     max: Infinity,
     aggFilter: ['avg', 'count', 'max', 'min', 'sum'],
-    defaults: [
-      { schema: 'metric', type: 'count' }
-    ]
+    defaults: [{ schema: 'metric', type: 'count' }],
   },
   {
     group: 'buckets',
@@ -33,8 +31,8 @@ const aggSchemas = new Schemas([
     title: 'Terms',
     aggFilter: 'terms',
     min: 1,
-    max: 1
-  }
+    max: 1,
+  },
 ]);
 
 export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName) {
@@ -49,15 +47,13 @@ export function extractPropertiesMap(rawEsData, propertyNames, countPropertyName
         properties[propertyName] = _.get(termBucket, [propertyName, 'value']);
       }
     });
-    propertiesMap.set((termBucket.key).toString(), properties);
+    propertiesMap.set(termBucket.key.toString(), properties);
   });
   return propertiesMap;
 }
 
 export class ESTermSource extends AbstractESSource {
-
   static type = 'ES_TERM_SOURCE';
-
 
   static renderEditor({}) {
     //no need to localize. this editor is never rendered.
@@ -65,11 +61,11 @@ export class ESTermSource extends AbstractESSource {
   }
 
   hasCompleteConfig() {
-    return (_.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term'));
+    return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
   }
 
   getIndexPatternIds() {
-    return  [this._descriptor.indexPatternId];
+    return [this._descriptor.indexPatternId];
   }
 
   getTerm() {
@@ -91,20 +87,24 @@ export class ESTermSource extends AbstractESSource {
   }
 
   async getPropertiesMap(searchFilters, leftSourceName, leftFieldName, registerCancelCallback) {
-
     if (!this.hasCompleteConfig()) {
       return [];
     }
 
     const indexPattern = await this._getIndexPattern();
-    const searchSource  = await this._makeSearchSource(searchFilters, 0);
+    const searchSource = await this._makeSearchSource(searchFilters, 0);
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
     searchSource.setField('aggs', aggConfigs.toDsl());
 
     const requestName = `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
     const requestDesc = this._getRequestDescription(leftSourceName, leftFieldName);
-    const rawEsData = await this._runEsQuery(requestName, searchSource, registerCancelCallback, requestDesc);
+    const rawEsData = await this._runEsQuery(
+      requestName,
+      searchSource,
+      registerCancelCallback,
+      requestDesc
+    );
 
     const metricPropertyNames = configStates
       .filter(configState => {
@@ -131,20 +131,24 @@ export class ESTermSource extends AbstractESSource {
       return metric.type !== 'count' ? `${metric.type} ${metric.field}` : 'count';
     });
     const joinStatement = [];
-    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
-      defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
-      values: { leftSourceName, leftFieldName }
-    }));
+    joinStatement.push(
+      i18n.translate('xpack.maps.source.esJoin.joinLeftDescription', {
+        defaultMessage: `Join {leftSourceName}:{leftFieldName} with`,
+        values: { leftSourceName, leftFieldName },
+      })
+    );
     joinStatement.push(`${this._descriptor.indexPatternTitle}:${this._descriptor.term}`);
-    joinStatement.push(i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
-      defaultMessage: `for metrics {metrics}`,
-      values: { metrics: metrics.join(',') }
-    }));
+    joinStatement.push(
+      i18n.translate('xpack.maps.source.esJoin.joinMetricsDescription', {
+        defaultMessage: `for metrics {metrics}`,
+        values: { metrics: metrics.join(',') },
+      })
+    );
     return i18n.translate('xpack.maps.source.esJoin.joinDescription', {
       defaultMessage: `Elasticsearch terms aggregation request for {description}`,
       values: {
-        description: joinStatement.join(' ')
-      }
+        description: joinStatement.join(' '),
+      },
     });
   }
 
@@ -155,7 +159,7 @@ export class ESTermSource extends AbstractESSource {
         enabled: true,
         type: metric.type,
         schema: 'metric',
-        params: {}
+        params: {},
       };
       if (metric.type !== 'count') {
         metricAggConfig.params = { field: metric.field };
@@ -172,9 +176,9 @@ export class ESTermSource extends AbstractESSource {
         schema: 'segment',
         params: {
           field: this._descriptor.term,
-          size: ES_SIZE_LIMIT
-        }
-      }
+          size: ES_SIZE_LIMIT,
+        },
+      },
     ];
   }
 

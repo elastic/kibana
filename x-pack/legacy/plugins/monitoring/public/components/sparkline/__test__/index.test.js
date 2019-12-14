@@ -21,13 +21,13 @@ describe('Sparkline component', () => {
         tooltip={{
           enabled: true,
           xValueFormatter: x => x,
-          yValueFormatter: y => y
+          yValueFormatter: y => y,
         }}
         options={{
           xaxis: {
             min: 1513814800,
-            max: 1513815200
-          }
+            max: 1513815200,
+          },
         }}
       />
     );
@@ -40,7 +40,7 @@ describe('Sparkline component', () => {
       plotTop: 40,
       plotLeft: 150,
       plotHeight: 30,
-      plotWidth: 100
+      plotWidth: 100,
     };
   });
 

@@ -7,10 +7,10 @@
 import { canStartTrial, startTrial } from '../../../lib/start_trial';
 
 export function registerStartTrialRoutes(router, xpackInfo) {
-  router.get('/start_trial', (request) => {
+  router.get('/start_trial', request => {
     return canStartTrial(request);
   });
-  router.post('/start_trial', (request) => {
+  router.post('/start_trial', request => {
     return startTrial(request, xpackInfo);
   });
 }

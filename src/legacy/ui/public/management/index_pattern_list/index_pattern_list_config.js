@@ -21,17 +21,21 @@ export class IndexPatternListConfig {
   static key = 'default';
 
   getIndexPatternTags = (indexPattern, isDefault) => {
-    return isDefault ? [{
-      key: 'default',
-      name: 'Default',
-    }] : [];
-  }
+    return isDefault
+      ? [
+          {
+            key: 'default',
+            name: 'Default',
+          },
+        ]
+      : [];
+  };
 
   getFieldInfo = () => {
     return [];
-  }
+  };
 
   areScriptedFieldsEnabled = () => {
     return true;
-  }
+  };
 }

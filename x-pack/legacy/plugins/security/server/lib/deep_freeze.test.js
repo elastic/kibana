@@ -33,20 +33,13 @@ test(`freezes top-level properties that are objects`, () => {
 test(`freezes child properties that are objects`, () => {
   const result = deepFreeze({
     object: {
-      object: {
-      },
+      object: {},
       array: [],
       fn: () => {},
       number: 1,
       string: '',
     },
-    array: [
-      {},
-      [],
-      () => {},
-      1,
-      '',
-    ],
+    array: [{}, [], () => {}, 1, ''],
   });
 
   Object.isFrozen(result.object.object);
@@ -65,23 +58,14 @@ test(`freezes grand-child properties that are objects`, () => {
   const result = deepFreeze({
     object: {
       object: {
-        object: {
-        },
+        object: {},
         array: [],
         fn: () => {},
         number: 1,
         string: '',
       },
     },
-    array: [
-      [
-        {},
-        [],
-        () => {},
-        1,
-        '',
-      ],
-    ],
+    array: [[{}, [], () => {}, 1, '']],
   });
 
   Object.isFrozen(result.object.object.object);

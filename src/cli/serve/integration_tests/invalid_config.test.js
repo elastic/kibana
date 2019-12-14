@@ -23,35 +23,42 @@ import { resolve } from 'path';
 const ROOT_DIR = resolve(__dirname, '../../../../');
 const INVALID_CONFIG_PATH = resolve(__dirname, '__fixtures__/invalid_config.yml');
 
-describe('cli invalid config support', function () {
-  it('exits with statusCode 64 and logs a single line when config is invalid', function () {
-    // Unused keys only throw once LegacyService starts, so disable migrations so that Core
-    // will finish the start lifecycle without a running Elasticsearch instance.
-    const { error, status, stdout } = spawnSync(process.execPath, [
-      'src/cli',
-      '--config', INVALID_CONFIG_PATH,
-      '--migrations.skip=true'
-    ], {
-      cwd: ROOT_DIR
-    });
+describe('cli invalid config support', function() {
+  it(
+    'exits with statusCode 64 and logs a single line when config is invalid',
+    function() {
+      // Unused keys only throw once LegacyService starts, so disable migrations so that Core
+      // will finish the start lifecycle without a running Elasticsearch instance.
+      const { error, status, stdout } = spawnSync(
+        process.execPath,
+        ['src/cli', '--config', INVALID_CONFIG_PATH, '--migrations.skip=true'],
+        {
+          cwd: ROOT_DIR,
+        }
+      );
 
-    const [fatalLogLine] = stdout.toString('utf8')
-      .split('\n')
-      .filter(Boolean)
-      .map(JSON.parse)
-      .filter(line => line.tags.includes('fatal'))
-      .map(obj => ({
-        ...obj,
-        pid: '## PID ##',
-        '@timestamp': '## @timestamp ##',
-        error: '## Error with stack trace ##',
-      }));
+      const [fatalLogLine] = stdout
+        .toString('utf8')
+        .split('\n')
+        .filter(Boolean)
+        .map(JSON.parse)
+        .filter(line => line.tags.includes('fatal'))
+        .map(obj => ({
+          ...obj,
+          pid: '## PID ##',
+          '@timestamp': '## @timestamp ##',
+          error: '## Error with stack trace ##',
+        }));
 
-    expect(error).toBe(undefined);
-    expect(status).toBe(64);
-    expect(fatalLogLine.message).toMatch('{ Error: "unknown.key", "other.unknown.key", "other.third", "some.flat.key", and "' +
-      'some.array" settings were not applied. Check for spelling errors and ensure that expected plugins are installed.');
-    expect(fatalLogLine.tags).toEqual(['fatal', 'root']);
-    expect(fatalLogLine.type).toEqual('log');
-  }, 20 * 1000);
+      expect(error).toBe(undefined);
+      expect(status).toBe(64);
+      expect(fatalLogLine.message).toMatch(
+        '{ Error: "unknown.key", "other.unknown.key", "other.third", "some.flat.key", and "' +
+          'some.array" settings were not applied. Check for spelling errors and ensure that expected plugins are installed.'
+      );
+      expect(fatalLogLine.tags).toEqual(['fatal', 'root']);
+      expect(fatalLogLine.type).toEqual('log');
+    },
+    20 * 1000
+  );
 });

@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
@@ -15,7 +15,7 @@ export default function ({ getService }) {
       const archive = 'monitoring/beats-with-restarted-instance';
       const timeRange = {
         min: '2018-02-09T20:49:00Z',
-        max: '2018-02-09T21:50:00Z'
+        max: '2018-02-09T21:50:00Z',
       };
 
       before('load clusters archive', () => {
@@ -28,9 +28,7 @@ export default function ({ getService }) {
 
       it('should load multiple clusters', async () => {
         const { body } = await supertest
-          .post(
-            '/api/monitoring/v1/clusters/fHJwISmKTFO8bj57oFBLUQ/beats/beats'
-          )
+          .post('/api/monitoring/v1/clusters/fHJwISmKTFO8bj57oFBLUQ/beats/beats')
           .set('kbn-xsrf', 'xxx')
           .send({ timeRange })
           .expect(200);
@@ -38,11 +36,8 @@ export default function ({ getService }) {
         const expected = {
           stats: {
             total: 2,
-            types: [
-              { type: 'Metricbeat', count: 1 },
-              { type: 'Filebeat', count: 1 }
-            ],
-            stats: { totalEvents: 12829, bytesSent: 2040312125 }
+            types: [{ type: 'Metricbeat', count: 1 }, { type: 'Filebeat', count: 1 }],
+            stats: { totalEvents: 12829, bytesSent: 2040312125 },
           },
           listing: [
             {
@@ -66,8 +61,8 @@ export default function ({ getService }) {
               errors: 0,
               memory: 7598304,
               version: '7.0.0-alpha1',
-            }
-          ]
+            },
+          ],
         };
         expect(body).to.eql(expected);
       });

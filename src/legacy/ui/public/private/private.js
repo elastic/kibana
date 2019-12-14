@@ -101,46 +101,51 @@ import { uiModules } from '../modules';
  * @param {[type]} prov [description]
  */
 
-
 const nextId = _.partial(_.uniqueId, 'privateProvider#');
 
 function name(fn) {
-  return fn.name || fn.toString().split('\n').shift();
+  return (
+    fn.name ||
+    fn
+      .toString()
+      .split('\n')
+      .shift()
+  );
 }
 
-uiModules.get('kibana/private')
-  .provider('Private', function () {
-    const provider = this;
+uiModules.get('kibana/private').provider('Private', function() {
+  const provider = this;
 
-    // one cache/swaps per Provider
-    const cache = {};
-    const swaps = {};
+  // one cache/swaps per Provider
+  const cache = {};
+  const swaps = {};
 
-    // return the uniq id for this function
-    function identify(fn) {
-      if (typeof fn !== 'function') {
-        throw new TypeError('Expected private module "' + fn + '" to be a function');
-      }
-
-      if (fn.$$id) return fn.$$id;
-      else return (fn.$$id = nextId());
+  // return the uniq id for this function
+  function identify(fn) {
+    if (typeof fn !== 'function') {
+      throw new TypeError('Expected private module "' + fn + '" to be a function');
     }
 
-    provider.stub = function (fn, instance) {
-      cache[identify(fn)] = instance;
-      return instance;
-    };
+    if (fn.$$id) return fn.$$id;
+    else return (fn.$$id = nextId());
+  }
 
-    provider.swap = function (fn, prov) {
-      const id = identify(fn);
-      swaps[id] = prov;
-    };
+  provider.stub = function(fn, instance) {
+    cache[identify(fn)] = instance;
+    return instance;
+  };
 
-    provider.$get = ['$injector', function PrivateFactory($injector) {
+  provider.swap = function(fn, prov) {
+    const id = identify(fn);
+    swaps[id] = prov;
+  };
 
+  provider.$get = [
+    '$injector',
+    function PrivateFactory($injector) {
       // prevent circular deps by tracking where we came from
       const privPath = [];
-      const pathToString = function () {
+      const pathToString = function() {
         return privPath.map(name).join(' -> ');
       };
 
@@ -148,8 +153,11 @@ uiModules.get('kibana/private')
       function instantiate(prov, locals) {
         if (~privPath.indexOf(prov)) {
           throw new Error(
-            'Circular reference to "' + name(prov) + '"' +
-          ' found while resolving private deps: ' + pathToString()
+            'Circular reference to "' +
+              name(prov) +
+              '"' +
+              ' found while resolving private deps: ' +
+              pathToString()
           );
         }
 
@@ -171,7 +179,7 @@ uiModules.get('kibana/private')
 
         if ($delegateId != null && $delegateProv != null) {
           instance = instantiate(prov, {
-            $decorate: _.partial(get, $delegateId, $delegateProv)
+            $decorate: _.partial(get, $delegateId, $delegateProv),
           });
         } else {
           instance = instantiate(prov);
@@ -201,5 +209,6 @@ uiModules.get('kibana/private')
       Private.swap = provider.swap;
 
       return Private;
-    }];
-  });
+    },
+  ];
+});

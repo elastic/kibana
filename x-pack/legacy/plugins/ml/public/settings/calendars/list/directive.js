@@ -36,12 +36,12 @@ uiRoutes.when('/settings/calendars_list', {
 
 import { CalendarsList } from './calendars_list';
 
-module.directive('mlCalendarsList', function () {
+module.directive('mlCalendarsList', function() {
   return {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link: function(scope, element) {
       const props = {
         canCreateCalendar: checkPermission('canCreateCalendar'),
         canDeleteCalendar: checkPermission('canDeleteCalendar'),

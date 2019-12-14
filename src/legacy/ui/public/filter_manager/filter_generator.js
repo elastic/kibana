@@ -30,12 +30,12 @@ export function getFilterGenerator(queryFilter) {
     const filters = _.flatten([queryFilter.getAppFilters()]);
     const newFilters = [];
 
-    const negate = (operation === '-');
+    const negate = operation === '-';
 
     // TODO: On array fields, negating does not negate the combination, rather all terms
-    _.each(values, function (value) {
+    _.each(values, function(value) {
       let filter;
-      const existing = _.find(filters, function (filter) {
+      const existing = _.find(filters, function(filter) {
         if (!filter) return;
 
         if (fieldName === '_exists_' && filter.exists) {
@@ -65,15 +65,15 @@ export function getFilterGenerator(queryFilter) {
           filter = {
             meta: { negate, index },
             exists: {
-              field: value
-            }
+              field: value,
+            },
           };
           break;
         default:
           if (field.scripted) {
             filter = {
               meta: { negate, index, field: fieldName },
-              script: getPhraseScript(field, value)
+              script: getPhraseScript(field, value),
             };
           } else {
             filter = { meta: { negate, index }, query: { match: {} } };
@@ -89,7 +89,7 @@ export function getFilterGenerator(queryFilter) {
     return newFilters;
   };
 
-  filterGen.add = function (field, values, operation, index) {
+  filterGen.add = function(field, values, operation, index) {
     const newFilters = this.generate(field, values, operation, index);
     return queryFilter.addFilters(newFilters);
   };

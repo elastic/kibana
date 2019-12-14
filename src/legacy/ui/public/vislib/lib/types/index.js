@@ -31,5 +31,5 @@ export const vislibTypesConfig = {
   heatmap: pointSeries.heatmap,
   gauge: vislibGaugeConfig,
   goal: vislibGaugeConfig,
-  metric: vislibGaugeConfig
+  metric: vislibGaugeConfig,
 };

@@ -39,7 +39,7 @@ module.exports = (_, options = {}) => {
           modules: 'cjs',
           corejs: 3,
 
-          ...(options['@babel/preset-env'] || {})
+          ...(options['@babel/preset-env'] || {}),
         },
       ],
       require('./common_preset'),
@@ -48,9 +48,9 @@ module.exports = (_, options = {}) => {
       [
         require.resolve('babel-plugin-transform-define'),
         {
-          'global.__BUILT_WITH_BABEL__': 'true'
-        }
-      ]
-    ]
+          'global.__BUILT_WITH_BABEL__': 'true',
+        },
+      ],
+    ],
   };
 };

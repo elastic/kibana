@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, {
-  Component,
-} from 'react';
+import React, { Component } from 'react';
 
-import {
-  EuiButton,
-  EuiSpacer,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiPanel, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { importerFactory } from './importer';
@@ -84,21 +76,15 @@ export class ImportView extends Component {
       this.loadIndexNames();
       this.loadIndexPatternNames();
     });
-  }
+  };
 
   clickImport = () => {
     this.import();
-  }
+  };
 
   // TODO - sort this function out. it's a mess
   async import() {
-    const {
-      fileContents,
-      results,
-      indexPatterns,
-      kibanaConfig,
-      showBottomBar,
-    } = this.props;
+    const { fileContents, results, indexPatterns, kibanaConfig, showBottomBar } = this.props;
 
     const { format } = results;
     let { timeFieldName } = this.state;
@@ -114,243 +100,273 @@ export class ImportView extends Component {
     const errors = [];
 
     if (index !== '') {
-      this.setState({
-        importing: true,
-        errors,
-      }, async () => {
-        // check to see if the user has permission to create and ingest data into the specified index
-        if (await hasImportPermission(index) === false) {
-          errors.push(i18n.translate('xpack.ml.fileDatavisualizer.importView.importPermissionError', {
-            defaultMessage: 'You do not have permission to create or import data into index {index}.',
-            values: {
-              index
-            }
-          }));
-          this.setState({
-            permissionCheckStatus: IMPORT_STATUS.FAILED,
-            importing: false,
-            imported: false,
-            errors
-          });
-          return;
-        }
-
-        this.setState({
+      this.setState(
+        {
           importing: true,
-          imported: false,
-          reading: true,
-          initialized: true,
-          permissionCheckStatus: IMPORT_STATUS.COMPLETE,
-        }, () => {
-          this.props.hideBottomBar();
-          setTimeout(async () => {
-            let success = true;
-            const createPipeline = (pipelineString !== '');
-
-            let settings = {};
-            let mappings = {};
-            let pipeline = {};
-
-            try {
-              settings = JSON.parse(indexSettingsString);
-            } catch (error) {
-              success = false;
-              const parseError = i18n.translate('xpack.ml.fileDatavisualizer.importView.parseSettingsError', {
-                defaultMessage: 'Error parsing settings:'
-              });
-              errors.push(`${parseError} ${error.message}`);
-            }
-
-            try {
-              mappings = JSON.parse(mappingsString);
-            } catch (error) {
-              success = false;
-              const parseError = i18n.translate('xpack.ml.fileDatavisualizer.importView.parseMappingsError', {
-                defaultMessage: 'Error parsing mappings:'
-              });
-              errors.push(`${parseError} ${error.message}`);
-            }
-
-            const indexCreationSettings = {
-              settings,
-              mappings,
-            };
-
-            try {
-              if (createPipeline) {
-                pipeline = JSON.parse(pipelineString);
-                indexCreationSettings.pipeline = pipeline;
-              }
-            } catch (error) {
-              success = false;
-              const parseError = i18n.translate('xpack.ml.fileDatavisualizer.importView.parsePipelineError', {
-                defaultMessage: 'Error parsing ingest pipeline:'
-              });
-              errors.push(`${parseError} ${error.message}`);
-            }
-
+          errors,
+        },
+        async () => {
+          // check to see if the user has permission to create and ingest data into the specified index
+          if ((await hasImportPermission(index)) === false) {
+            errors.push(
+              i18n.translate('xpack.ml.fileDatavisualizer.importView.importPermissionError', {
+                defaultMessage:
+                  'You do not have permission to create or import data into index {index}.',
+                values: {
+                  index,
+                },
+              })
+            );
             this.setState({
-              parseJSONStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+              permissionCheckStatus: IMPORT_STATUS.FAILED,
+              importing: false,
+              imported: false,
+              errors,
             });
+            return;
+          }
 
-            // if an @timestamp field has been added to the
-            // mappings, use this field as the time field.
-            // This relies on the field being populated by
-            // the ingest pipeline on ingest
-            if (mappings[DEFAULT_TIME_FIELD] !== undefined) {
-              timeFieldName = DEFAULT_TIME_FIELD;
-              this.setState({ timeFieldName });
-            }
+          this.setState(
+            {
+              importing: true,
+              imported: false,
+              reading: true,
+              initialized: true,
+              permissionCheckStatus: IMPORT_STATUS.COMPLETE,
+            },
+            () => {
+              this.props.hideBottomBar();
+              setTimeout(async () => {
+                let success = true;
+                const createPipeline = pipelineString !== '';
 
-            if (success) {
-              const importer = importerFactory(format, results, indexCreationSettings);
-              if (importer !== undefined) {
+                let settings = {};
+                let mappings = {};
+                let pipeline = {};
 
-                const readResp = await importer.read(fileContents, this.setReadProgress);
-                success = readResp.success;
+                try {
+                  settings = JSON.parse(indexSettingsString);
+                } catch (error) {
+                  success = false;
+                  const parseError = i18n.translate(
+                    'xpack.ml.fileDatavisualizer.importView.parseSettingsError',
+                    {
+                      defaultMessage: 'Error parsing settings:',
+                    }
+                  );
+                  errors.push(`${parseError} ${error.message}`);
+                }
+
+                try {
+                  mappings = JSON.parse(mappingsString);
+                } catch (error) {
+                  success = false;
+                  const parseError = i18n.translate(
+                    'xpack.ml.fileDatavisualizer.importView.parseMappingsError',
+                    {
+                      defaultMessage: 'Error parsing mappings:',
+                    }
+                  );
+                  errors.push(`${parseError} ${error.message}`);
+                }
+
+                const indexCreationSettings = {
+                  settings,
+                  mappings,
+                };
+
+                try {
+                  if (createPipeline) {
+                    pipeline = JSON.parse(pipelineString);
+                    indexCreationSettings.pipeline = pipeline;
+                  }
+                } catch (error) {
+                  success = false;
+                  const parseError = i18n.translate(
+                    'xpack.ml.fileDatavisualizer.importView.parsePipelineError',
+                    {
+                      defaultMessage: 'Error parsing ingest pipeline:',
+                    }
+                  );
+                  errors.push(`${parseError} ${error.message}`);
+                }
+
                 this.setState({
-                  readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                  reading: false,
+                  parseJSONStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
                 });
 
-                if (readResp.success === false) {
-                  console.error(readResp.error);
-                  errors.push(readResp.error);
+                // if an @timestamp field has been added to the
+                // mappings, use this field as the time field.
+                // This relies on the field being populated by
+                // the ingest pipeline on ingest
+                if (mappings[DEFAULT_TIME_FIELD] !== undefined) {
+                  timeFieldName = DEFAULT_TIME_FIELD;
+                  this.setState({ timeFieldName });
                 }
 
                 if (success) {
-                  const initializeImportResp = await importer.initializeImport(index);
-
-                  const indexCreated = (initializeImportResp.index !== undefined);
-                  this.setState({
-                    indexCreatedStatus: indexCreated ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                  });
-
-                  if (createPipeline) {
-                    const pipelineCreated = (initializeImportResp.pipelineId !== undefined);
-                    if (indexCreated) {
-                      this.setState({
-                        ingestPipelineCreatedStatus: pipelineCreated  ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                        ingestPipelineId: pipelineCreated ? initializeImportResp.pipelineId : '',
-                      });
-                    }
-                    success = (indexCreated && pipelineCreated);
-                  } else {
-                    success = indexCreated;
-                  }
-
-
-                  if (success) {
-                    const importId = initializeImportResp.id;
-                    const pipelineId = initializeImportResp.pipelineId;
-                    const importResp = await importer.import(importId, index, pipelineId, this.setImportProgress);
-                    success = importResp.success;
+                  const importer = importerFactory(format, results, indexCreationSettings);
+                  if (importer !== undefined) {
+                    const readResp = await importer.read(fileContents, this.setReadProgress);
+                    success = readResp.success;
                     this.setState({
-                      uploadStatus: importResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                      importFailures: importResp.failures,
-                      docCount: importResp.docCount,
+                      readStatus: success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
+                      reading: false,
                     });
 
-                    if (success) {
-                      if (createIndexPattern) {
-                        const indexPatternName = (indexPattern === '') ? index : indexPattern;
-                        const indexPatternResp = await createKibanaIndexPattern(
-                          indexPatternName,
-                          indexPatterns,
-                          timeFieldName,
-                          kibanaConfig,
-                        );
-                        success = indexPatternResp.success;
-                        this.setState({
-                          indexPatternCreatedStatus: indexPatternResp.success ? IMPORT_STATUS.COMPLETE : IMPORT_STATUS.FAILED,
-                          indexPatternId: indexPatternResp.id,
-                        });
-                        if (indexPatternResp.success === false) {
-                          errors.push(indexPatternResp.error);
-                        }
-                      }
-                    } else {
-                      errors.push(importResp.error);
+                    if (readResp.success === false) {
+                      console.error(readResp.error);
+                      errors.push(readResp.error);
                     }
-                  } else {
-                    errors.push(initializeImportResp.error);
+
+                    if (success) {
+                      const initializeImportResp = await importer.initializeImport(index);
+
+                      const indexCreated = initializeImportResp.index !== undefined;
+                      this.setState({
+                        indexCreatedStatus: indexCreated
+                          ? IMPORT_STATUS.COMPLETE
+                          : IMPORT_STATUS.FAILED,
+                      });
+
+                      if (createPipeline) {
+                        const pipelineCreated = initializeImportResp.pipelineId !== undefined;
+                        if (indexCreated) {
+                          this.setState({
+                            ingestPipelineCreatedStatus: pipelineCreated
+                              ? IMPORT_STATUS.COMPLETE
+                              : IMPORT_STATUS.FAILED,
+                            ingestPipelineId: pipelineCreated
+                              ? initializeImportResp.pipelineId
+                              : '',
+                          });
+                        }
+                        success = indexCreated && pipelineCreated;
+                      } else {
+                        success = indexCreated;
+                      }
+
+                      if (success) {
+                        const importId = initializeImportResp.id;
+                        const pipelineId = initializeImportResp.pipelineId;
+                        const importResp = await importer.import(
+                          importId,
+                          index,
+                          pipelineId,
+                          this.setImportProgress
+                        );
+                        success = importResp.success;
+                        this.setState({
+                          uploadStatus: importResp.success
+                            ? IMPORT_STATUS.COMPLETE
+                            : IMPORT_STATUS.FAILED,
+                          importFailures: importResp.failures,
+                          docCount: importResp.docCount,
+                        });
+
+                        if (success) {
+                          if (createIndexPattern) {
+                            const indexPatternName = indexPattern === '' ? index : indexPattern;
+                            const indexPatternResp = await createKibanaIndexPattern(
+                              indexPatternName,
+                              indexPatterns,
+                              timeFieldName,
+                              kibanaConfig
+                            );
+                            success = indexPatternResp.success;
+                            this.setState({
+                              indexPatternCreatedStatus: indexPatternResp.success
+                                ? IMPORT_STATUS.COMPLETE
+                                : IMPORT_STATUS.FAILED,
+                              indexPatternId: indexPatternResp.id,
+                            });
+                            if (indexPatternResp.success === false) {
+                              errors.push(indexPatternResp.error);
+                            }
+                          }
+                        } else {
+                          errors.push(importResp.error);
+                        }
+                      } else {
+                        errors.push(initializeImportResp.error);
+                      }
+                    }
                   }
                 }
-              }
+
+                showBottomBar();
+
+                this.setState({
+                  importing: false,
+                  imported: success,
+                  errors,
+                });
+              }, 500);
             }
-
-            showBottomBar();
-
-            this.setState({
-              importing: false,
-              imported: success,
-              errors,
-            });
-
-          }, 500);
-        });
-      });
+          );
+        }
+      );
     }
   }
 
-  onConfigModeChange = (configMode) => {
+  onConfigModeChange = configMode => {
     this.setState({
       configMode,
     });
-  }
+  };
 
-  onIndexChange = (e) => {
+  onIndexChange = e => {
     const name = e.target.value;
     this.setState({
       index: name,
       indexNameError: isIndexNameValid(name, this.state.indexNames),
     });
-  }
+  };
 
-  onIndexPatternChange = (e) => {
+  onIndexPatternChange = e => {
     const name = e.target.value;
     const { indexPatternNames, index } = this.state;
     this.setState({
       indexPattern: name,
       indexPatternNameError: isIndexPatternNameValid(name, indexPatternNames, index),
     });
-  }
+  };
 
-  onCreateIndexPatternChange = (e) => {
+  onCreateIndexPatternChange = e => {
     this.setState({
       createIndexPattern: e.target.checked,
     });
-  }
+  };
 
-  onIndexSettingsStringChange = (text) => {
+  onIndexSettingsStringChange = text => {
     this.setState({
       indexSettingsString: text,
     });
-  }
+  };
 
-  onMappingsStringChange = (text) => {
+  onMappingsStringChange = text => {
     this.setState({
       mappingsString: text,
     });
-  }
+  };
 
-  onPipelineStringChange = (text) => {
+  onPipelineStringChange = text => {
     this.setState({
       pipelineString: text,
     });
-  }
+  };
 
-  setImportProgress = (progress) => {
+  setImportProgress = progress => {
     this.setState({
       uploadProgress: progress,
     });
-  }
+  };
 
-  setReadProgress = (progress) => {
+  setReadProgress = progress => {
     this.setState({
       readProgress: progress,
     });
-  }
+  };
 
   async loadIndexNames() {
     const indices = await ml.getIndices();
@@ -394,7 +410,7 @@ export class ImportView extends Component {
       timeFieldName,
     } = this.state;
 
-    const createPipeline = (pipelineString !== '');
+    const createPipeline = pipelineString !== '';
 
     const statuses = {
       reading,
@@ -410,18 +426,15 @@ export class ImportView extends Component {
       createPipeline,
     };
 
-    const disableImport = (
+    const disableImport =
       index === '' ||
       indexNameError !== '' ||
       (createIndexPattern === true && indexPatternNameError !== '') ||
-      initialized === true
-    );
+      initialized === true;
 
     return (
       <React.Fragment>
-
         <EuiPanel>
-
           <EuiTitle size="s">
             <h3>
               <FormattedMessage
@@ -460,8 +473,7 @@ export class ImportView extends Component {
 
           <EuiSpacer size="m" />
 
-          {(initialized === false || importing === true) &&
-
+          {(initialized === false || importing === true) && (
             <EuiButton
               isDisabled={disableImport}
               onClick={this.clickImport}
@@ -474,39 +486,32 @@ export class ImportView extends Component {
                 defaultMessage="Import"
               />
             </EuiButton>
-          }
+          )}
 
-          {
-            (initialized === true && importing === false) &&
-
-            <EuiButton
-              onClick={this.clickReset}
-            >
+          {initialized === true && importing === false && (
+            <EuiButton onClick={this.clickReset}>
               <FormattedMessage
                 id="xpack.ml.fileDatavisualizer.importView.resetButtonLabel"
                 defaultMessage="Reset"
               />
             </EuiButton>
-          }
-
+          )}
         </EuiPanel>
 
-
-        {(initialized === true) &&
+        {initialized === true && (
           <React.Fragment>
             <EuiSpacer size="m" />
 
             <EuiPanel>
-
               <ImportProgress statuses={statuses} />
 
-              {(imported === true) &&
+              {imported === true && (
                 <React.Fragment>
                   <EuiSpacer size="m" />
 
                   <ImportSummary
                     index={index}
-                    indexPattern={((indexPattern === '') ? index : indexPattern)}
+                    indexPattern={indexPattern === '' ? index : indexPattern}
                     ingestPipelineId={ingestPipelineId}
                     docCount={docCount}
                     importFailures={importFailures}
@@ -523,30 +528,28 @@ export class ImportView extends Component {
                     createIndexPattern={createIndexPattern}
                   />
                 </React.Fragment>
-              }
-
+              )}
             </EuiPanel>
-
           </React.Fragment>
-        }
-        {
-          (errors.length > 0) &&
+        )}
+        {errors.length > 0 && (
           <React.Fragment>
             <EuiSpacer size="m" />
 
-            <ImportErrors
-              errors={errors}
-              statuses={statuses}
-            />
-
+            <ImportErrors errors={errors} statuses={statuses} />
           </React.Fragment>
-        }
+        )}
       </React.Fragment>
     );
   }
 }
 
-async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFieldName, kibanaConfig) {
+async function createKibanaIndexPattern(
+  indexPatternName,
+  indexPatterns,
+  timeFieldName,
+  kibanaConfig
+) {
   try {
     const emptyPattern = await indexPatterns.make();
 
@@ -578,19 +581,23 @@ async function createKibanaIndexPattern(indexPatternName, indexPatterns, timeFie
 }
 
 function getDefaultState(state, results) {
-  const indexSettingsString = (state.indexSettingsString === '') ?
-    JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2) : state.indexSettingsString;
+  const indexSettingsString =
+    state.indexSettingsString === ''
+      ? JSON.stringify(DEFAULT_INDEX_SETTINGS, null, 2)
+      : state.indexSettingsString;
 
-  const mappingsString = (state.mappingsString === '') ?
-    JSON.stringify(results.mappings, null, 2) : state.mappingsString;
+  const mappingsString =
+    state.mappingsString === '' ? JSON.stringify(results.mappings, null, 2) : state.mappingsString;
 
-  const pipelineString = (state.pipelineString === '' && results.ingest_pipeline !== undefined) ?
-    JSON.stringify(results.ingest_pipeline, null, 2) : state.pipelineString;
+  const pipelineString =
+    state.pipelineString === '' && results.ingest_pipeline !== undefined
+      ? JSON.stringify(results.ingest_pipeline, null, 2)
+      : state.pipelineString;
 
   const timeFieldName = results.timestamp_field;
 
   return {
-    ... DEFAULT_STATE,
+    ...DEFAULT_STATE,
     indexSettingsString,
     mappingsString,
     pipelineString,
@@ -608,11 +615,11 @@ function isIndexNameValid(name, indexNames) {
     );
   }
 
-  const reg = new RegExp('[\\\\/\*\?\"\<\>\|\\s\,\#]+');
+  const reg = new RegExp('[\\\\/*?"<>|\\s,#]+');
   if (
-    (name !== name.toLowerCase()) || // name should be lowercase
-    (name === '.' || name === '..')   || // name can't be . or ..
-    name.match(/^[-_+]/) !== null  || // name can't start with these chars
+    name !== name.toLowerCase() || // name should be lowercase
+    (name === '.' || name === '..') || // name can't be . or ..
+    name.match(/^[-_+]/) !== null || // name can't start with these chars
     name.match(reg) !== null // name can't contain these chars
   ) {
     return (
@@ -646,7 +653,8 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   // replace * with .* to make the wildcard match work.
   newName = newName.replace(/\*/g, '.*');
   const reg = new RegExp(`^${newName}$`);
-  if (index.match(reg) === null) { // name should match index
+  if (index.match(reg) === null) {
+    // name should match index
     return (
       <FormattedMessage
         id="xpack.ml.fileDatavisualizer.importView.indexPatternDoesNotMatchIndexNameErrorMessage"

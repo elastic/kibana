@@ -7,10 +7,7 @@
 import { uiModules } from 'ui/modules';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';
 import { i18n } from '@kbn/i18n';
-import {
-  extractReferences,
-  injectReferences,
-} from './saved_workspace_references';
+import { extractReferences, injectReferences } from './saved_workspace_references';
 
 const module = uiModules.get('app/dashboard');
 
@@ -21,7 +18,7 @@ export function SavedWorkspaceProvider(Private) {
   class SavedWorkspace extends SavedObject {
     constructor(id) {
       // Gives our SavedWorkspace the properties of a SavedObject
-      super ({
+      super({
         type: SavedWorkspace.type,
         mapping: SavedWorkspace.mapping,
         searchSource: SavedWorkspace.searchsource,
@@ -34,23 +31,21 @@ export function SavedWorkspaceProvider(Private) {
         // default values that will get assigned if the doc is new
         defaults: {
           title: i18n.translate('xpack.graph.savedWorkspace.workspaceNameTitle', {
-            defaultMessage: 'New Graph Workspace'
+            defaultMessage: 'New Graph Workspace',
           }),
           numLinks: 0,
           numVertices: 0,
           wsState: '{}',
-          version: 1
-        }
-
+          version: 1,
+        },
       });
 
       // Overwrite the default getDisplayName function which uses type and which is not very
       // user friendly for this object.
-      this.getDisplayName = function () {
+      this.getDisplayName = function() {
         return 'graph workspace';
       };
     }
-
   } //End of class
 
   SavedWorkspace.type = 'graph-workspace';
@@ -62,7 +57,7 @@ export function SavedWorkspaceProvider(Private) {
     numLinks: 'integer',
     numVertices: 'integer',
     version: 'integer',
-    wsState: 'json'
+    wsState: 'json',
   };
 
   SavedWorkspace.searchsource = false;
@@ -70,6 +65,6 @@ export function SavedWorkspaceProvider(Private) {
 }
 
 // Used only by the savedDashboards service, usually no reason to change this
-module.factory('SavedGraphWorkspace', function (Private) {
+module.factory('SavedGraphWorkspace', function(Private) {
   return Private(SavedWorkspaceProvider);
 });

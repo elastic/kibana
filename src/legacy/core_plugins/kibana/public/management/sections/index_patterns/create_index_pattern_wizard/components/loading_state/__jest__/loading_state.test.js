@@ -23,9 +23,7 @@ import { shallow } from 'enzyme';
 
 describe('LoadingState', () => {
   it('should render normally', () => {
-    const component = shallow(
-      <LoadingState/>
-    );
+    const component = shallow(<LoadingState />);
 
     expect(component).toMatchSnapshot();
   });

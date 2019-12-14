@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 import $ from 'jquery';
 import { CUSTOM_LEGEND_VIS_TYPES } from '../../../ui/public/vis/vis_types/vislib_vis_legend';
 import { VislibVisProvider } from '../../../ui/public/vislib/vis';
@@ -29,7 +28,6 @@ const legendClassName = {
   left: 'visLib--legend-left',
   right: 'visLib--legend-right',
 };
-
 
 export class vislibVisController {
   constructor(el, vis) {
@@ -51,7 +49,7 @@ export class vislibVisController {
       this.destroy();
     }
 
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       if (!this.vislib) {
         const $injector = await chrome.dangerouslyGetActiveInjector();
         const Private = $injector.get('Private');
@@ -72,9 +70,11 @@ export class vislibVisController {
       this.vis.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
 
       if (visParams.addLegend) {
-        $(this.container).attr('class', (i, cls) => {
-          return cls.replace(/visLib--legend-\S+/g, '');
-        }).addClass(legendClassName[visParams.legendPosition]);
+        $(this.container)
+          .attr('class', (i, cls) => {
+            return cls.replace(/visLib--legend-\S+/g, '');
+          })
+          .addClass(legendClassName[visParams.legendPosition]);
 
         this.$scope = this.$rootScope.$new();
         this.$scope.refreshLegend = 0;
@@ -92,7 +92,10 @@ export class vislibVisController {
       // refreshing the legend after the chart is rendered.
       // this is necessary because some visualizations
       // provide data necessary for the legend only after a render cycle.
-      if (visParams.addLegend && CUSTOM_LEGEND_VIS_TYPES.includes(this.vis.vislibVis.visConfigArgs.type)) {
+      if (
+        visParams.addLegend &&
+        CUSTOM_LEGEND_VIS_TYPES.includes(this.vis.vislibVis.visConfigArgs.type)
+      ) {
         this.$scope.refreshLegend++;
         this.$scope.$digest();
 
@@ -108,7 +111,9 @@ export class vislibVisController {
       this.vis.vislibVis.destroy();
       delete this.vis.vislibVis;
     }
-    $(this.container).find('vislib-legend').remove();
+    $(this.container)
+      .find('vislib-legend')
+      .remove();
     if (this.$scope) {
       this.$scope.$destroy();
       this.$scope = null;

@@ -28,11 +28,11 @@ export const FeatureCatalogueRegistryProvider = uiRegistry({
   filter: featureCatalogItem => {
     const isDisabledViaCapabilities = capabilities.get().catalogue[featureCatalogItem.id] === false;
     return !isDisabledViaCapabilities && Object.keys(featureCatalogItem).length > 0;
-  }
+  },
 });
 
 export const FeatureCatalogueCategory = {
   ADMIN: 'admin',
   DATA: 'data',
-  OTHER: 'other'
+  OTHER: 'other',
 };

@@ -32,7 +32,7 @@ describe('UiNavLink', () => {
         icon: 'plugins/kibana/assets/discover.svg',
         euiIconType: 'discoverApp',
         hidden: true,
-        disabled: true
+        disabled: true,
       };
 
       const link = new UiNavLink(spec);
@@ -49,7 +49,7 @@ describe('UiNavLink', () => {
 
         // defaults
         linkToLastSubUrl: true,
-        tooltip: ''
+        tooltip: '',
       });
     });
 
@@ -72,7 +72,7 @@ describe('UiNavLink', () => {
         order: -1003,
         url: '/app/kibana#/discover',
         icon: 'plugins/kibana/assets/discover.svg',
-        linkToLastSubUrl: false
+        linkToLastSubUrl: false,
       };
       const link = new UiNavLink(spec);
 

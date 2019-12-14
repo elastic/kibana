@@ -7,7 +7,11 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { schema } from '@kbn/config-schema';
-import { canRedirectRequest, wrapError, OIDCAuthenticationFlow } from '../../../../../../../plugins/security/server';
+import {
+  canRedirectRequest,
+  wrapError,
+  OIDCAuthenticationFlow,
+} from '../../../../../../../plugins/security/server';
 import { KibanaRequest } from '../../../../../../../../src/core/server';
 import { createCSPRuleString } from '../../../../../../../../src/legacy/server/csp';
 
@@ -27,24 +31,22 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
       validate: {
         payload: Joi.object({
           username: Joi.string().required(),
-          password: Joi.string().required()
-        })
+          password: Joi.string().required(),
+        }),
       },
       response: {
         emptyStatusCode: 204,
-      }
+      },
     },
     async handler(request, h) {
       const { username, password } = request.payload;
 
       try {
         // We should prefer `token` over `basic` if possible.
-        const providerToLoginWith = config.authc.providers.includes('token')
-          ? 'token'
-          : 'basic';
+        const providerToLoginWith = config.authc.providers.includes('token') ? 'token' : 'basic';
         const authenticationResult = await login(KibanaRequest.from(request), {
           provider: providerToLoginWith,
-          value: { username, password }
+          value: { username, password },
         });
 
         if (!authenticationResult.succeeded()) {
@@ -52,10 +54,10 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
         }
 
         return h.response();
-      } catch(err) {
+      } catch (err) {
         throw wrapError(err);
       }
-    }
+    },
   });
 
   /**
@@ -72,11 +74,13 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
         h.response(`
           <!DOCTYPE html>
           <title>Kibana OpenID Connect Login</title>
-          <script src="${server.config().get('server.basePath')}/api/security/v1/oidc/implicit.js"></script>
+          <script src="${server
+            .config()
+            .get('server.basePath')}/api/security/v1/oidc/implicit.js"></script>
         `),
         'text/html'
       );
-    }
+    },
   });
 
   /**
@@ -92,13 +96,15 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
       return prepareCustomResourceResponse(
         h.response(`
           window.location.replace(
-            '${server.config().get('server.basePath')}/api/security/v1/oidc?authenticationResponseURI=' + 
+            '${server
+              .config()
+              .get('server.basePath')}/api/security/v1/oidc?authenticationResponseURI=' + 
               encodeURIComponent(window.location.href)
           );
         `),
         'text/javascript'
       );
-    }
+    },
   });
 
   server.route({
@@ -109,18 +115,20 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
     config: {
       auth: false,
       validate: {
-        query: Joi.object().keys({
-          iss: Joi.string().uri({ scheme: 'https' }),
-          login_hint: Joi.string(),
-          target_link_uri: Joi.string().uri(),
-          code: Joi.string(),
-          error: Joi.string(),
-          error_description: Joi.string(),
-          error_uri: Joi.string().uri(),
-          state: Joi.string(),
-          authenticationResponseURI: Joi.string(),
-        }).unknown(),
-      }
+        query: Joi.object()
+          .keys({
+            iss: Joi.string().uri({ scheme: 'https' }),
+            login_hint: Joi.string(),
+            target_link_uri: Joi.string().uri(),
+            code: Joi.string(),
+            error: Joi.string(),
+            error_description: Joi.string(),
+            error_uri: Joi.string().uri(),
+            state: Joi.string(),
+            authenticationResponseURI: Joi.string(),
+          })
+          .unknown(),
+      },
     },
     async handler(request, h) {
       try {
@@ -165,12 +173,12 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
         // Return an error notifying the user they are already logged in.
         const authenticationResult = await login(KibanaRequest.from(request), {
           provider: 'oidc',
-          value: loginAttempt
+          value: loginAttempt,
         });
         if (authenticationResult.succeeded()) {
           return Boom.forbidden(
             'Sorry, you already have an active Kibana session. ' +
-            'If you want to start a new one, please logout from the existing session first.'
+              'If you want to start a new one, please logout from the existing session first.'
           );
         }
 
@@ -182,14 +190,14 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
       } catch (err) {
         throw wrapError(err);
       }
-    }
+    },
   });
 
   server.route({
     method: 'GET',
     path: '/api/security/v1/logout',
     config: {
-      auth: false
+      auth: false,
     },
     async handler(request, h) {
       if (!canRedirectRequest(KibanaRequest.from(request))) {
@@ -214,7 +222,7 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
       } catch (err) {
         throw wrapError(err);
       }
-    }
+    },
   });
 
   server.route({
@@ -222,6 +230,6 @@ export function initAuthenticateApi({ authc: { login, logout }, config }, server
     path: '/api/security/v1/me',
     handler(request) {
       return request.auth.credentials;
-    }
+    },
   });
 }

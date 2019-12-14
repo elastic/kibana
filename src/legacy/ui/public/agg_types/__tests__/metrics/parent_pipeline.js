@@ -34,17 +34,16 @@ const metrics = [
   { name: 'serial_diff', title: 'Serial Diff', agg: serialDiffMetricAgg },
 ];
 
-describe('parent pipeline aggs', function () {
+describe('parent pipeline aggs', function() {
   metrics.forEach(metric => {
-    describe(`${metric.title} metric`, function () {
-
+    describe(`${metric.title} metric`, function() {
       let aggDsl;
       let metricAgg;
       let aggConfig;
 
       function init(settings) {
         ngMock.module('kibana');
-        ngMock.inject(function (Private) {
+        ngMock.inject(function(Private) {
           const Vis = Private(VisProvider);
           const indexPattern = Private(StubbedIndexPattern);
           indexPattern.stubSetFieldFormat('bytes', 'bytes');
@@ -52,35 +51,35 @@ describe('parent pipeline aggs', function () {
 
           const params = settings || {
             metricAgg: '1',
-            customMetric: null
+            customMetric: null,
           };
 
           const vis = new Vis(indexPattern, {
             title: 'New Visualization',
             type: 'metric',
             params: {
-              fontSize: 60
+              fontSize: 60,
             },
             aggs: [
               {
                 id: '1',
                 type: 'count',
-                schema: 'metric'
+                schema: 'metric',
               },
               {
                 id: '2',
                 type: metric.name,
                 schema: 'metric',
-                params
+                params,
               },
               {
                 id: '3',
                 type: 'max',
                 params: { field: '@timestamp' },
-                schema: 'metric'
-              }
+                schema: 'metric',
+              },
             ],
-            listeners: {}
+            listeners: {},
           });
 
           // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
@@ -89,25 +88,25 @@ describe('parent pipeline aggs', function () {
         });
       }
 
-      it(`should return a label prefixed with ${metric.title} of`, function () {
+      it(`should return a label prefixed with ${metric.title} of`, function() {
         init();
         expect(metricAgg.makeLabel(aggConfig)).to.eql(`${metric.title} of Count`);
       });
 
-      it(`should return a label ${metric.title} of max bytes`, function () {
+      it(`should return a label ${metric.title} of max bytes`, function() {
         init({
           metricAgg: 'custom',
           customMetric: {
             id: '1-orderAgg',
             type: 'max',
             params: { field: 'bytes' },
-            schema: 'orderAgg'
-          }
+            schema: 'orderAgg',
+          },
         });
         expect(metricAgg.makeLabel(aggConfig)).to.eql(`${metric.title} of Max bytes`);
       });
 
-      it(`should return a label prefixed with number of ${metric.title.toLowerCase()}`, function () {
+      it(`should return a label prefixed with number of ${metric.title.toLowerCase()}`, function() {
         init({
           metricAgg: 'custom',
           customMetric: {
@@ -118,30 +117,30 @@ describe('parent pipeline aggs', function () {
               customMetric: {
                 id: '2-orderAgg-orderAgg',
                 type: 'count',
-                schema: 'orderAgg'
-              }
+                schema: 'orderAgg',
+              },
             },
-            schema: 'orderAgg'
-          }
+            schema: 'orderAgg',
+          },
         });
         expect(metricAgg.makeLabel(aggConfig)).to.eql(`2. ${metric.title.toLowerCase()} of Count`);
       });
 
-      it('should set parent aggs', function () {
+      it('should set parent aggs', function() {
         init({
           metricAgg: 'custom',
           customMetric: {
             id: '2-metric',
             type: 'max',
             params: { field: 'bytes' },
-            schema: 'orderAgg'
-          }
+            schema: 'orderAgg',
+          },
         });
         expect(aggDsl[metric.dslName || metric.name].buckets_path).to.be('2-metric');
         expect(aggDsl.parentAggs['2-metric'].max.field).to.be('bytes');
       });
 
-      it('should set nested parent aggs', function () {
+      it('should set nested parent aggs', function() {
         init({
           metricAgg: 'custom',
           customMetric: {
@@ -153,24 +152,26 @@ describe('parent pipeline aggs', function () {
                 id: '2-metric-metric',
                 type: 'max',
                 params: { field: 'bytes' },
-                schema: 'orderAgg'
-              }
+                schema: 'orderAgg',
+              },
             },
-            schema: 'orderAgg'
-          }
+            schema: 'orderAgg',
+          },
         });
         expect(aggDsl[metric.dslName || metric.name].buckets_path).to.be('2-metric');
-        expect(aggDsl.parentAggs['2-metric'][metric.dslName || metric.name].buckets_path).to.be('2-metric-metric');
+        expect(aggDsl.parentAggs['2-metric'][metric.dslName || metric.name].buckets_path).to.be(
+          '2-metric-metric'
+        );
       });
 
-      it('should have correct formatter', function () {
+      it('should have correct formatter', function() {
         init({
-          metricAgg: '3'
+          metricAgg: '3',
         });
         expect(metricAgg.getFormat(aggConfig).type.id).to.be('date');
       });
 
-      it('should have correct customMetric nested formatter', function () {
+      it('should have correct customMetric nested formatter', function() {
         init({
           metricAgg: 'custom',
           customMetric: {
@@ -182,24 +183,24 @@ describe('parent pipeline aggs', function () {
                 id: '2-metric-metric',
                 type: 'max',
                 params: { field: 'bytes' },
-                schema: 'orderAgg'
-              }
+                schema: 'orderAgg',
+              },
             },
-            schema: 'orderAgg'
-          }
+            schema: 'orderAgg',
+          },
         });
         expect(metricAgg.getFormat(aggConfig).type.id).to.be('bytes');
       });
 
-      it('should call modifyAggConfigOnSearchRequestStart for its customMetric\'s parameters', () => {
+      it("should call modifyAggConfigOnSearchRequestStart for its customMetric's parameters", () => {
         init({
           metricAgg: 'custom',
           customMetric: {
             id: '2-metric',
             type: 'max',
             params: { field: 'bytes' },
-            schema: 'orderAgg'
-          }
+            schema: 'orderAgg',
+          },
         });
 
         const searchSource = {};
@@ -217,5 +218,4 @@ describe('parent pipeline aggs', function () {
       });
     });
   });
-
 });

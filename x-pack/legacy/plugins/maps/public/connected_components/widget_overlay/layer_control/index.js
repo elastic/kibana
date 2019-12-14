@@ -33,5 +33,8 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedLayerControl = connect(mapStateToProps, mapDispatchToProps)(LayerControl);
+const connectedLayerControl = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LayerControl);
 export { connectedLayerControl as LayerControl };

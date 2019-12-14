@@ -6,7 +6,7 @@
 
 import Joi from 'joi';
 import { wrapError } from '../../../../../../../../plugins/security/server';
-import { INTERNAL_API_BASE_PATH } from  '../../../../../common/constants';
+import { INTERNAL_API_BASE_PATH } from '../../../../../common/constants';
 
 export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseFn) {
   server.route({
@@ -16,13 +16,9 @@ export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseF
       try {
         const { isAdmin } = request.query;
 
-        const result = await callWithRequest(
-          request,
-          'shield.getAPIKeys',
-          {
-            owner: !isAdmin
-          }
-        );
+        const result = await callWithRequest(request, 'shield.getAPIKeys', {
+          owner: !isAdmin,
+        });
 
         const validKeys = result.api_keys.filter(({ invalidated }) => !invalidated);
 
@@ -36,10 +32,12 @@ export function initGetApiKeysApi(server, callWithRequest, routePreCheckLicenseF
     config: {
       pre: [routePreCheckLicenseFn],
       validate: {
-        query: Joi.object().keys({
-          isAdmin: Joi.bool().required(),
-        }).required(),
+        query: Joi.object()
+          .keys({
+            isAdmin: Joi.bool().required(),
+          })
+          .required(),
       },
-    }
+    },
   });
 }

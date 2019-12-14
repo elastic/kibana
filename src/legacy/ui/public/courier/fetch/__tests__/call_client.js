@@ -45,13 +45,14 @@ describe('callClient', () => {
     const { source: overrideSource, ...rest } = overrides;
 
     const source = {
-      _flatten: () => Promise.resolve({
-        index: id
-      }),
+      _flatten: () =>
+        Promise.resolve({
+          index: id,
+        }),
       requestIsStopped: () => {},
       getField: () => 'indexPattern',
       getPreferredSearchStrategyId: () => undefined,
-      ...overrideSource
+      ...overrideSource,
     };
 
     const searchRequest = new SearchRequest({ source, errorHandler, ...rest });
@@ -61,46 +62,50 @@ describe('callClient', () => {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.module(function stubEs($provide) {
-    esRequestDelay = 0;
-    esShouldError = false;
+  beforeEach(
+    ngMock.module(function stubEs($provide) {
+      esRequestDelay = 0;
+      esShouldError = false;
 
-    $provide.service('es', (Promise) => {
-      fakeSearch = sinon.spy(({ index }) => {
-        const esPromise = new Promise((resolve, reject) => {
-          if (esShouldError) {
-            return reject('fake es error');
-          }
+      $provide.service('es', Promise => {
+        fakeSearch = sinon.spy(({ index }) => {
+          const esPromise = new Promise((resolve, reject) => {
+            if (esShouldError) {
+              return reject('fake es error');
+            }
 
-          setTimeout(() => {
-            resolve(index);
-          }, esRequestDelay);
+            setTimeout(() => {
+              resolve(index);
+            }, esRequestDelay);
+          });
+
+          esPromise.abort = esPromiseAbortSpy = sinon.spy();
+          return esPromise;
         });
 
-        esPromise.abort = esPromiseAbortSpy = sinon.spy();
-        return esPromise;
+        return {
+          search: fakeSearch,
+        };
       });
+    })
+  );
 
-      return {
-        search: fakeSearch
-      };
-    });
-  }));
-
-  beforeEach(ngMock.inject(Private => {
-    callClient = Private(CallClientProvider);
-    SearchRequest = Private(SearchRequestProvider);
-  }));
+  beforeEach(
+    ngMock.inject(Private => {
+      callClient = Private(CallClientProvider);
+      SearchRequest = Private(SearchRequestProvider);
+    })
+  );
 
   describe('basic contract', () => {
     it('returns a promise', () => {
-      searchRequests = [ createSearchRequest() ];
+      searchRequests = [createSearchRequest()];
       const callingClient = callClient(searchRequests);
       expect(callingClient.then).to.be.a('function');
     });
 
     it(`resolves the promise with the 'responses' property of the es.search() result`, () => {
-      searchRequests = [ createSearchRequest(1) ];
+      searchRequests = [createSearchRequest(1)];
 
       return callClient(searchRequests).then(results => {
         expect(results).to.eql([1]);
@@ -137,7 +142,7 @@ describe('callClient', () => {
           },
         });
 
-        searchRequests = [ searchRequestFail1, searchRequestFail2 ];
+        searchRequests = [searchRequestFail1, searchRequestFail2];
 
         return callClient(searchRequests).then(results => {
           expect(results).to.eql([
@@ -154,7 +159,7 @@ describe('callClient', () => {
       const whenAbortedSpy = sinon.spy();
       const searchRequest = createSearchRequest();
       searchRequest.whenAborted = whenAbortedSpy;
-      searchRequests = [ searchRequest ];
+      searchRequests = [searchRequest];
 
       return callClient(searchRequests).then(() => {
         expect(whenAbortedSpy.callCount).to.be(1);
@@ -177,7 +182,7 @@ describe('callClient', () => {
         },
       });
 
-      searchRequests = [ searchRequest ];
+      searchRequests = [searchRequest];
       const callingClient = callClient(searchRequests);
 
       // Abort the request while the search body is being formed.
@@ -194,7 +199,7 @@ describe('callClient', () => {
       esRequestDelay = 100;
 
       const searchRequest = createSearchRequest();
-      searchRequests = [ searchRequest ];
+      searchRequests = [searchRequest];
       const callingClient = callClient(searchRequests);
 
       // Abort the request while the search is in flight..
@@ -212,7 +217,7 @@ describe('callClient', () => {
     it(`aborting all searchRequests rejects with an AbortError`, () => {
       const searchRequest1 = createSearchRequest();
       const searchRequest2 = createSearchRequest();
-      searchRequests = [ searchRequest1, searchRequest2 ];
+      searchRequests = [searchRequest1, searchRequest2];
       const callingClient = callClient(searchRequests);
 
       searchRequest1.abort();
@@ -228,7 +233,7 @@ describe('callClient', () => {
 
       const searchRequest1 = createSearchRequest();
       const searchRequest2 = createSearchRequest();
-      searchRequests = [ searchRequest1, searchRequest2 ];
+      searchRequests = [searchRequest1, searchRequest2];
 
       const callingClient = callClient(searchRequests);
 
@@ -248,7 +253,7 @@ describe('callClient', () => {
     it('aborting some searchRequests rejects with an AbortError', () => {
       const searchRequest1 = createSearchRequest(1);
       const searchRequest2 = createSearchRequest(2);
-      searchRequests = [ searchRequest1, searchRequest2 ];
+      searchRequests = [searchRequest1, searchRequest2];
       const callingClient = callClient(searchRequests);
       searchRequest2.abort();
 
@@ -318,7 +323,7 @@ describe('callClient', () => {
 
     it('if the searchRequests are reordered by the searchStrategies', () => {
       // Add requests in an order which will be reordered by the strategies.
-      searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
+      searchRequests = [searchRequestA, searchRequestB, searchRequestA2];
       const callingClient = callClient(searchRequests);
 
       return callingClient.then(results => {
@@ -328,7 +333,7 @@ describe('callClient', () => {
 
     it('if one is aborted after being provided', () => {
       // Add requests in an order which will be reordered by the strategies.
-      searchRequests = [ searchRequestA, searchRequestB, searchRequestA2 ];
+      searchRequests = [searchRequestA, searchRequestB, searchRequestA2];
       const callingClient = callClient(searchRequests);
       searchRequestA2.abort();
 
@@ -338,7 +343,7 @@ describe('callClient', () => {
     });
 
     it(`if one is already aborted when it's provided`, () => {
-      searchRequests = [ searchRequestA, searchRequestB, ABORTED, searchRequestA2 ];
+      searchRequests = [searchRequestA, searchRequestB, ABORTED, searchRequestA2];
       const callingClient = callClient(searchRequests);
 
       return callingClient.then(results => {

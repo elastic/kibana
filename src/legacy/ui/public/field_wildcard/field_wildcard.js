@@ -23,7 +23,14 @@ export function FieldWildcardProvider(config) {
   const metaFields = config.get('metaFields');
 
   const makeRegEx = memoize(function makeRegEx(glob) {
-    return new RegExp('^' + glob.split('*').map(escapeRegExp).join('.*') + '$');
+    return new RegExp(
+      '^' +
+        glob
+          .split('*')
+          .map(escapeRegExp)
+          .join('.*') +
+        '$'
+    );
   });
 
   // Note that this will return an essentially noop function if globs is undefined.

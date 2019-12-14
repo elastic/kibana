@@ -39,18 +39,21 @@ import 'leaflet';
 import { npStart } from 'ui/new_platform';
 
 import { showAppRedirectNotification } from 'ui/notify';
-import { DashboardConstants, createDashboardEditUrl } from 'plugins/kibana/dashboard/dashboard_constants';
+import {
+  DashboardConstants,
+  createDashboardEditUrl,
+} from 'plugins/kibana/dashboard/dashboard_constants';
 
-uiModules.get('kibana')
+uiModules
+  .get('kibana')
   .config(dashboardConfigProvider => dashboardConfigProvider.turnHideWriteControlsOn());
 
 routes.enable();
 routes.otherwise({ redirectTo: defaultUrl() });
 
-chrome
-  .setRootController('kibana', function () {
-    npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
-  });
+chrome.setRootController('kibana', function() {
+  npStart.core.chrome.navLinks.showOnly('kibana:dashboard');
+});
 
 uiModules.get('kibana').run(showAppRedirectNotification);
 

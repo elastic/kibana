@@ -17,10 +17,7 @@
  * under the License.
  */
 
-import {
-  getUnhashableStatesProvider,
-  unhashUrl,
-} from '../../state_management/state_hashing';
+import { getUnhashableStatesProvider, unhashUrl } from '../../state_management/state_hashing';
 
 export function registerSubUrlHooks(angularModule, internals) {
   angularModule.run(($rootScope, Private) => {

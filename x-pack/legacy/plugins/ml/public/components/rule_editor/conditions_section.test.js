@@ -15,7 +15,6 @@ import { getNewConditionDefaults } from './utils';
 import { APPLIES_TO, OPERATOR } from '../../../common/constants/detector_rule';
 
 describe('ConditionsSectionExpression', () => {
-
   const addCondition = jest.fn(() => {});
   const updateCondition = jest.fn(() => {});
   const deleteCondition = jest.fn(() => {});
@@ -23,7 +22,7 @@ describe('ConditionsSectionExpression', () => {
   const testCondition = {
     applies_to: APPLIES_TO.TYPICAL,
     operator: OPERATOR.GREATER_THAN_OR_EQUAL,
-    value: 1.23
+    value: 1.23,
   };
 
   const requiredProps = {
@@ -38,9 +37,7 @@ describe('ConditionsSectionExpression', () => {
       isEnabled: false,
     };
 
-    const component = shallowWithIntl(
-      <ConditionsSection {...props} />
-    );
+    const component = shallowWithIntl(<ConditionsSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -51,9 +48,7 @@ describe('ConditionsSectionExpression', () => {
       isEnabled: true,
     };
 
-    const component = shallowWithIntl(
-      <ConditionsSection {...props} />
-    );
+    const component = shallowWithIntl(<ConditionsSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -65,9 +60,7 @@ describe('ConditionsSectionExpression', () => {
       conditions: [],
     };
 
-    const component = shallowWithIntl(
-      <ConditionsSection {...props} />
-    );
+    const component = shallowWithIntl(<ConditionsSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -79,9 +72,7 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults()],
     };
 
-    const component = shallowWithIntl(
-      <ConditionsSection {...props} />
-    );
+    const component = shallowWithIntl(<ConditionsSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -93,9 +84,7 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults(), testCondition],
     };
 
-    const component = shallowWithIntl(
-      <ConditionsSection {...props} />
-    );
+    const component = shallowWithIntl(<ConditionsSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -107,11 +96,8 @@ describe('ConditionsSectionExpression', () => {
       conditions: [getNewConditionDefaults(), testCondition],
     };
 
-    const component = shallowWithIntl(
-      <ConditionsSection {...props} />
-    );
+    const component = shallowWithIntl(<ConditionsSection {...props} />);
 
     expect(component).toMatchSnapshot();
   });
-
 });

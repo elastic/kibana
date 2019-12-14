@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 // K5 imports
 import { uiModules } from 'ui/modules';
 import { i18n } from '@kbn/i18n';
@@ -38,16 +37,22 @@ uiRoutes.when('/dev_tools/searchprofiler', {
   template: template,
   requireUICapability: 'dev_tools.show',
   controller: $scope => {
-    $scope.registerLicenseLinkLabel = i18n.translate('xpack.searchProfiler.registerLicenseLinkLabel',
-      { defaultMessage: 'register a license' });
-    $scope.trialLicense = i18n.translate('xpack.searchProfiler.trialLicenseTitle',
-      { defaultMessage: 'Trial' });
-    $scope.basicLicense = i18n.translate('xpack.searchProfiler.basicLicenseTitle',
-      { defaultMessage: 'Basic' });
-    $scope.goldLicense = i18n.translate('xpack.searchProfiler.goldLicenseTitle',
-      { defaultMessage: 'Gold' });
-    $scope.platinumLicense = i18n.translate('xpack.searchProfiler.platinumLicenseTitle',
-      { defaultMessage: 'Platinum' });
+    $scope.registerLicenseLinkLabel = i18n.translate(
+      'xpack.searchProfiler.registerLicenseLinkLabel',
+      { defaultMessage: 'register a license' }
+    );
+    $scope.trialLicense = i18n.translate('xpack.searchProfiler.trialLicenseTitle', {
+      defaultMessage: 'Trial',
+    });
+    $scope.basicLicense = i18n.translate('xpack.searchProfiler.basicLicenseTitle', {
+      defaultMessage: 'Basic',
+    });
+    $scope.goldLicense = i18n.translate('xpack.searchProfiler.goldLicenseTitle', {
+      defaultMessage: 'Gold',
+    });
+    $scope.platinumLicense = i18n.translate('xpack.searchProfiler.platinumLicenseTitle', {
+      defaultMessage: 'Platinum',
+    });
   },
 });
 
@@ -58,7 +63,7 @@ uiModules
   .filter('msToPretty', () => msToPretty)
   .factory('HighlightService', () => {
     const service = {
-      details: null
+      details: null,
     };
     return service;
   });
@@ -76,11 +81,10 @@ function profileVizController($scope, $timeout, $http, HighlightService) {
   // Instead we have to map the tab name to true/false, and make sure only one
   // state is active.  This should be refactored if possible, as it could be trappy!
   $scope.activeTab = {
-    search: true
+    search: true,
   };
   $scope.markers = [];
   $scope.licenseEnabled = xpackInfo.get('features.searchprofiler.enableAppLink');
-
 
   const editor = initializeEditor({
     el: $('#SearchProfilerInput')[0],
@@ -99,7 +103,7 @@ function profileVizController($scope, $timeout, $http, HighlightService) {
   $scope.hasQuery = () => Boolean($scope.query);
 
   $scope.profile = () => {
-    const  { query } = $scope;
+    const { query } = $scope;
     if (!$scope.licenseEnabled) {
       return;
     }
@@ -136,25 +140,33 @@ function profileVizController($scope, $timeout, $http, HighlightService) {
   };
 
   $scope.executeRemoteQuery = requestBody => {
-    $http.post('../api/searchprofiler/profile', requestBody).then(resp => {
-      if (!resp.data.ok) {
-        toastNotifications.addDanger(resp.data.err.msg);
+    $http
+      .post('../api/searchprofiler/profile', requestBody)
+      .then(resp => {
+        if (!resp.data.ok) {
+          toastNotifications.addDanger(resp.data.err.msg);
 
-        try {
-          const regex = /line=([0-9]+) col=([0-9]+)/g;
-          const [ , row, column ] = regex.exec(resp.data.err.msg);
+          try {
+            const regex = /line=([0-9]+) col=([0-9]+)/g;
+            const [, row, column] = regex.exec(resp.data.err.msg);
 
-          $scope.markers.push($scope.ace.session.addMarker(
-            new Range(row - 1, 0, row - 1, column), 'errorMarker', 'fullLine'));
-        } catch (e) {
-          // Best attempt, not a big deal if we can't highlight the line
+            $scope.markers.push(
+              $scope.ace.session.addMarker(
+                new Range(row - 1, 0, row - 1, column),
+                'errorMarker',
+                'fullLine'
+              )
+            );
+          } catch (e) {
+            // Best attempt, not a big deal if we can't highlight the line
+          }
+
+          return;
         }
 
-        return;
-      }
-
-      $scope.renderProfile(resp.data.resp.profile.shards);
-    }).catch(reason => toastNotifications.addDanger(formatAngularHttpError(reason)));
+        $scope.renderProfile(resp.data.resp.profile.shards);
+      })
+      .catch(reason => toastNotifications.addDanger(formatAngularHttpError(reason)));
   };
 
   $scope.renderProfile = data => {
@@ -189,5 +201,4 @@ function profileVizController($scope, $timeout, $http, HighlightService) {
   $scope.resetHighlightPanel = () => {
     $scope.highlight.details = null;
   };
-
 }

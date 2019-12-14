@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
@@ -21,7 +20,6 @@ import {
 import { ExperimentalBadge } from '../experimental_badge';
 
 export function WelcomeContent() {
-
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -132,13 +130,10 @@ export function WelcomeContent() {
               defaultMessage="This feature is experimental. Got feedback? Please create an issue in&nbsp;{githubLink}."
               values={{
                 githubLink: (
-                  <EuiLink
-                    href="https://github.com/elastic/kibana/issues/new"
-                    target="_blank"
-                  >
+                  <EuiLink href="https://github.com/elastic/kibana/issues/new" target="_blank">
                     GitHub
                   </EuiLink>
-                )
+                ),
               }}
             />
           </p>

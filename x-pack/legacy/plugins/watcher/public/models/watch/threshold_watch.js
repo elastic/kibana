@@ -125,18 +125,16 @@ export class ThresholdWatch extends BaseWatch {
         )
       );
     }
-    if (this.index !== undefined
-        && this.index.length > 0
-        && this.timeFields !== undefined
-        && this.timeFields.length === 1 // first option will have empty value
+    if (
+      this.index !== undefined &&
+      this.index.length > 0 &&
+      this.timeFields !== undefined &&
+      this.timeFields.length === 1 // first option will have empty value
     ) {
       errors.index.push(
-        i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.invalidIndexValidationMessage',
-          {
-            defaultMessage: 'Index does not have a time field.',
-          }
-        )
+        i18n.translate('xpack.watcher.sections.watchEdit.threshold.invalidIndexValidationMessage', {
+          defaultMessage: 'Index does not have a time field.',
+        })
       );
     }
     if (!this.timeField) {
@@ -207,24 +205,33 @@ export class ThresholdWatch extends BaseWatch {
       const key = `threshold${i}`;
       errors[key] = [];
       if (this.threshold[i] == null || this.threshold[i] === '') {
-        errors[key].push(i18n.translate(
-          'xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage',
-          {
-            defaultMessage: 'A value is required.',
-          }
-        ));
+        errors[key].push(
+          i18n.translate(
+            'xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage',
+            {
+              defaultMessage: 'A value is required.',
+            }
+          )
+        );
       }
     });
-    if (this.thresholdComparator === BETWEEN && this.threshold[0] && this.threshold[1] && !(this.threshold[1] > this.threshold[0])) {
-      errors.threshold1.push(i18n.translate(
-        'xpack.watcher.thresholdWatchExpression.thresholdLevel.secondValueMustBeGreaterMessage',
-        {
-          defaultMessage: 'Value must be greater than {lowerBound}.',
-          values: {
-            lowerBound: this.threshold[0]
+    if (
+      this.thresholdComparator === BETWEEN &&
+      this.threshold[0] &&
+      this.threshold[1] &&
+      !(this.threshold[1] > this.threshold[0])
+    ) {
+      errors.threshold1.push(
+        i18n.translate(
+          'xpack.watcher.thresholdWatchExpression.thresholdLevel.secondValueMustBeGreaterMessage',
+          {
+            defaultMessage: 'Value must be greater than {lowerBound}.',
+            values: {
+              lowerBound: this.threshold[0],
+            },
           }
-        }
-      ));
+        )
+      );
     }
     if (!this.timeWindowSize) {
       errors.timeWindowSize.push(
@@ -252,7 +259,10 @@ export class ThresholdWatch extends BaseWatch {
       thresholdComparator: this.thresholdComparator,
       timeWindowSize: this.timeWindowSize,
       timeWindowUnit: this.timeWindowUnit,
-      threshold: comparators[this.thresholdComparator].requiredValues > 1 ? this.threshold : this.threshold[0],
+      threshold:
+        comparators[this.thresholdComparator].requiredValues > 1
+          ? this.threshold
+          : this.threshold[0],
     });
 
     return result;

@@ -29,12 +29,17 @@ describe('unhashUrl', () => {
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject(Private => {
-    const State = Private(StateProvider);
-    const unhashableState = new State('testParam');
-    sinon.stub(unhashableState, 'translateHashToRison').withArgs('hash').returns('replacement');
-    unhashableStates = [unhashableState];
-  }));
+  beforeEach(
+    ngMock.inject(Private => {
+      const State = Private(StateProvider);
+      const unhashableState = new State('testParam');
+      sinon
+        .stub(unhashableState, 'translateHashToRison')
+        .withArgs('hash')
+        .returns('replacement');
+      unhashableStates = [unhashableState];
+    })
+  );
 
   describe('does nothing', () => {
     it('if missing input', () => {

@@ -32,14 +32,19 @@ function mockRequest() {
     started: true,
     aborted: false,
     handleFailure: sinon.spy(),
-    retry: sinon.spy(function () { return this; }),
-    continue: sinon.spy(function () { return this; }),
-    start: sinon.spy(function () { return this; })
+    retry: sinon.spy(function() {
+      return this;
+    }),
+    continue: sinon.spy(function() {
+      return this;
+    }),
+    start: sinon.spy(function() {
+      return this;
+    }),
   };
 }
 
 describe('FetchNowProvider', () => {
-
   let Promise;
   let $rootScope;
   let fetchNow;
@@ -47,31 +52,35 @@ describe('FetchNowProvider', () => {
   let requests;
   let fakeResponses;
 
-  beforeEach(ngMock.module('kibana', (PrivateProvider) => {
-    function FakeResponsesProvider(Promise) {
-      fakeResponses = sinon.spy(function () {
-        return Promise.map(requests, mockRequest => {
-          return { mockRequest };
+  beforeEach(
+    ngMock.module('kibana', PrivateProvider => {
+      function FakeResponsesProvider(Promise) {
+        fakeResponses = sinon.spy(function() {
+          return Promise.map(requests, mockRequest => {
+            return { mockRequest };
+          });
         });
-      });
-      return fakeResponses;
-    }
+        return fakeResponses;
+      }
 
-    PrivateProvider.swap(CallClientProvider, FakeResponsesProvider);
-    PrivateProvider.swap(CallResponseHandlersProvider, FakeResponsesProvider);
-    PrivateProvider.swap(ContinueIncompleteProvider, FakeResponsesProvider);
-  }));
+      PrivateProvider.swap(CallClientProvider, FakeResponsesProvider);
+      PrivateProvider.swap(CallResponseHandlersProvider, FakeResponsesProvider);
+      PrivateProvider.swap(ContinueIncompleteProvider, FakeResponsesProvider);
+    })
+  );
 
-  beforeEach(ngMock.inject((Private, $injector) => {
-    $rootScope = $injector.get('$rootScope');
-    Promise = $injector.get('Promise');
-    fetchNow = Private(FetchNowProvider);
-    request = mockRequest();
-    requests = [ request ];
-  }));
+  beforeEach(
+    ngMock.inject((Private, $injector) => {
+      $rootScope = $injector.get('$rootScope');
+      Promise = $injector.get('Promise');
+      fetchNow = Private(FetchNowProvider);
+      request = mockRequest();
+      requests = [request];
+    })
+  );
 
   describe('when request has not started', () => {
-    beforeEach(() => requests.forEach(req => req.started = false));
+    beforeEach(() => requests.forEach(req => (req.started = false)));
 
     it('starts request', () => {
       fetchNow(requests);

@@ -23,7 +23,7 @@ import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 export const createGotoRoute = ({ server, shortUrlLookup }) => ({
   method: 'GET',
   path: '/goto/{urlId}',
-  handler: async function (request, h) {
+  handler: async function(request, h) {
     try {
       const url = await shortUrlLookup.getUrl(request.params.urlId, request);
       shortUrlAssertValid(url);
@@ -41,5 +41,5 @@ export const createGotoRoute = ({ server, shortUrlLookup }) => ({
     } catch (err) {
       throw handleShortUrlError(err);
     }
-  }
+  },
 });

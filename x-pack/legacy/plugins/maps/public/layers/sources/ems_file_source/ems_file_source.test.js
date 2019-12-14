@@ -11,28 +11,29 @@ jest.mock('../../vector_layer', () => {});
 
 function makeEMSFileSource(tooltipProperties) {
   const emsFileSource = new EMSFileSource({
-    tooltipProperties: tooltipProperties
+    tooltipProperties: tooltipProperties,
   });
   emsFileSource._getEMSFileLayer = () => {
     return {
       getFieldsInLanguage() {
-        return [{
-          name: 'iso2',
-          description: 'ISO 2 CODE'
-        }];
-      }
+        return [
+          {
+            name: 'iso2',
+            description: 'ISO 2 CODE',
+          },
+        ];
+      },
     };
   };
   return emsFileSource;
 }
 
 describe('EMS file source', () => {
-
   describe('filterAndFormatPropertiesToHtml', () => {
     it('should create tooltip-properties with human readable label', async () => {
       const mockEMSFileSource = makeEMSFileSource(['iso2']);
       const out = await mockEMSFileSource.filterAndFormatPropertiesToHtml({
-        'iso2': 'US'
+        iso2: 'US',
       });
 
       expect(out.length).toEqual(1);
@@ -45,9 +46,9 @@ describe('EMS file source', () => {
       const tooltipProperties = ['iso3', 'iso2', 'name'];
       const mockEMSFileSource = makeEMSFileSource(tooltipProperties);
       const out = await mockEMSFileSource.filterAndFormatPropertiesToHtml({
-        'name': 'United States',
-        'iso3': 'USA',
-        'iso2': 'US',
+        name: 'United States',
+        iso3: 'USA',
+        iso2: 'US',
       });
 
       expect(out.length).toEqual(3);

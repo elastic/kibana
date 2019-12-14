@@ -41,24 +41,24 @@ export class UrlPatternMatcher {
     // We'll group endpoints by the methods which are attached to them,
     //to avoid suggesting endpoints that are incompatible with the
     //method that the user has entered.
-    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach((method) => {
+    ['HEAD', 'GET', 'PUT', 'POST', 'DELETE'].forEach(method => {
       this[method] = {
         rootComponent: new SharedComponent('ROOT'),
         parametrizedComponentFactories: parametrizedComponentFactories || {
-          getComponent: () => {}
-        }
+          getComponent: () => {},
+        },
       };
     });
   }
   addEndpoint(pattern, endpoint) {
-    endpoint.methods.forEach((method) => {
+    endpoint.methods.forEach(method => {
       let c;
       let activeComponent = this[method].rootComponent;
       const endpointComponents = endpoint.url_components || {};
       const partList = pattern.split('/');
       _.each(
         partList,
-        function (part, partIndex) {
+        function(part, partIndex) {
           if (part.search(/^{.+}$/) >= 0) {
             part = part.substr(1, part.length - 2);
             if (activeComponent.getComponent(part)) {
@@ -128,7 +128,7 @@ export class UrlPatternMatcher {
     });
   }
 
-  getTopLevelComponents = function (method) {
+  getTopLevelComponents = function(method) {
     const methodRoot = this[method];
     if (!methodRoot) {
       return [];

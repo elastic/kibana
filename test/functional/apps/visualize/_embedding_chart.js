@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const log = getService('log');
   const renderable = getService('renderable');
@@ -30,9 +30,8 @@ export default function ({ getService, getPageObjects }) {
   const toTime = '2015-09-23 18:31:44.000';
 
   describe('embedding', () => {
-
     describe('a data table', () => {
-      before(async function () {
+      before(async function() {
         await PageObjects.visualize.navigateToNewVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch();
@@ -44,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickBucket('Split rows');
         await PageObjects.visualize.selectAggregation('Histogram');
         await PageObjects.visualize.selectField('bytes');
-        await PageObjects.visualize.setNumericInterval('2000',  undefined, 3);
+        await PageObjects.visualize.setNumericInterval('2000', undefined, 3);
         await PageObjects.visualize.clickGo();
       });
 
@@ -55,16 +54,36 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.be.eql([
-          '2015-09-20 00:00', '0B', '5',
-          '2015-09-20 00:00', '1.953KB', '5',
-          '2015-09-20 00:00', '3.906KB', '9',
-          '2015-09-20 00:00', '5.859KB', '4',
-          '2015-09-20 00:00', '7.813KB', '14',
-          '2015-09-20 03:00', '0B', '32',
-          '2015-09-20 03:00', '1.953KB', '33',
-          '2015-09-20 03:00', '3.906KB', '45',
-          '2015-09-20 03:00', '5.859KB', '31',
-          '2015-09-20 03:00', '7.813KB', '48'
+          '2015-09-20 00:00',
+          '0B',
+          '5',
+          '2015-09-20 00:00',
+          '1.953KB',
+          '5',
+          '2015-09-20 00:00',
+          '3.906KB',
+          '9',
+          '2015-09-20 00:00',
+          '5.859KB',
+          '4',
+          '2015-09-20 00:00',
+          '7.813KB',
+          '14',
+          '2015-09-20 03:00',
+          '0B',
+          '32',
+          '2015-09-20 03:00',
+          '1.953KB',
+          '33',
+          '2015-09-20 03:00',
+          '3.906KB',
+          '45',
+          '2015-09-20 03:00',
+          '5.859KB',
+          '31',
+          '2015-09-20 03:00',
+          '7.813KB',
+          '48',
         ]);
       });
 
@@ -76,16 +95,36 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.be.eql([
-          '2015-09-21 00:00', '0B', '7',
-          '2015-09-21 00:00', '1.953KB', '9',
-          '2015-09-21 00:00', '3.906KB', '9',
-          '2015-09-21 00:00', '5.859KB', '6',
-          '2015-09-21 00:00', '7.813KB', '10',
-          '2015-09-21 00:00', '11.719KB', '1',
-          '2015-09-21 03:00', '0B', '28',
-          '2015-09-21 03:00', '1.953KB', '39',
-          '2015-09-21 03:00', '3.906KB', '36',
-          '2015-09-21 03:00', '5.859KB', '43',
+          '2015-09-21 00:00',
+          '0B',
+          '7',
+          '2015-09-21 00:00',
+          '1.953KB',
+          '9',
+          '2015-09-21 00:00',
+          '3.906KB',
+          '9',
+          '2015-09-21 00:00',
+          '5.859KB',
+          '6',
+          '2015-09-21 00:00',
+          '7.813KB',
+          '10',
+          '2015-09-21 00:00',
+          '11.719KB',
+          '1',
+          '2015-09-21 03:00',
+          '0B',
+          '28',
+          '2015-09-21 03:00',
+          '1.953KB',
+          '39',
+          '2015-09-21 03:00',
+          '3.906KB',
+          '36',
+          '2015-09-21 03:00',
+          '5.859KB',
+          '43',
         ]);
       });
 
@@ -97,16 +136,36 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visualize.getTableVisData();
         log.debug(data.split('\n'));
         expect(data.trim().split('\n')).to.be.eql([
-          '03:00', '0B', '1',
-          '03:00', '1.953KB', '1',
-          '03:00', '3.906KB', '1',
-          '03:00', '5.859KB', '2',
-          '03:10', '0B', '1',
-          '03:10', '5.859KB', '1',
-          '03:10', '7.813KB', '1',
-          '03:15', '0B', '1',
-          '03:15', '1.953KB', '1',
-          '03:20', '1.953KB', '1',
+          '03:00',
+          '0B',
+          '1',
+          '03:00',
+          '1.953KB',
+          '1',
+          '03:00',
+          '3.906KB',
+          '1',
+          '03:00',
+          '5.859KB',
+          '2',
+          '03:10',
+          '0B',
+          '1',
+          '03:10',
+          '5.859KB',
+          '1',
+          '03:10',
+          '7.813KB',
+          '1',
+          '03:15',
+          '0B',
+          '1',
+          '03:15',
+          '1.953KB',
+          '1',
+          '03:20',
+          '1.953KB',
+          '1',
         ]);
       });
     });

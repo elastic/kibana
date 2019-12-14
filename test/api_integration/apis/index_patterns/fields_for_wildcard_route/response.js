@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 

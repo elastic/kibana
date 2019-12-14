@@ -19,7 +19,7 @@
 import url from 'url';
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common']);
 
   const browser = getService('browser');
@@ -29,16 +29,16 @@ export default function ({ getService, getPageObjects }) {
   const loadingScreenNotShown = async () =>
     expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
 
-  const loadingScreenShown = () =>
-    testSubjects.existOrFail('kbnLoadingMessage');
+  const loadingScreenShown = () => testSubjects.existOrFail('kbnLoadingMessage');
 
-  const getKibanaUrl = (pathname, search) => url.format({
-    protocol: 'http:',
-    hostname: process.env.TEST_KIBANA_HOST || 'localhost',
-    port: process.env.TEST_KIBANA_PORT || '5620',
-    pathname,
-    search,
-  });
+  const getKibanaUrl = (pathname, search) =>
+    url.format({
+      protocol: 'http:',
+      hostname: process.env.TEST_KIBANA_HOST || 'localhost',
+      port: process.env.TEST_KIBANA_PORT || '5620',
+      pathname,
+      search,
+    });
 
   describe('ui applications', function describeIndexTests() {
     before(async () => {

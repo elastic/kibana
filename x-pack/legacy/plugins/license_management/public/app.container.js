@@ -8,7 +8,11 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
 import { App as PresentationComponent } from './app';
-import { getPermission, isPermissionsLoading, getPermissionsError } from './store/reducers/licenseManagement';
+import {
+  getPermission,
+  isPermissionsLoading,
+  getPermissionsError,
+} from './store/reducers/licenseManagement';
 import { loadPermissions } from './store/actions/permissions';
 
 const mapStateToProps = state => {
@@ -23,6 +27,9 @@ const mapDispatchToProps = {
   loadPermissions,
 };
 
-export const App = withRouter(connect(mapStateToProps, mapDispatchToProps)(
-  PresentationComponent
-));
+export const App = withRouter(
+  connect(
+    mapStateToProps,
+    mapDispatchToProps
+  )(PresentationComponent)
+);

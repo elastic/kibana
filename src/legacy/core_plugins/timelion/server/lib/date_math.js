@@ -65,7 +65,7 @@ export default function parse(text, roundUp) {
 function parseDateMath(mathString, time, roundUp) {
   const dateTime = time;
 
-  for (let i = 0; i < mathString.length;) {
+  for (let i = 0; i < mathString.length; ) {
     const c = mathString.charAt(i++);
     let type;
     let num;

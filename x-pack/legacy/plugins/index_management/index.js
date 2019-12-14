@@ -15,7 +15,7 @@ import { registerLicenseChecker } from '../../server/lib/register_license_checke
 import { PLUGIN } from './common/constants';
 import { addIndexManagementDataEnricher } from './index_management_data';
 
-export function indexManagement(kibana)  {
+export function indexManagement(kibana) {
   return new kibana.Plugin({
     id: PLUGIN.ID,
     configPrefix: 'xpack.index_management',
@@ -23,11 +23,9 @@ export function indexManagement(kibana)  {
     require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-      managementSections: [
-        'plugins/index_management',
-      ]
+      managementSections: ['plugins/index_management'],
     },
-    init: function (server) {
+    init: function(server) {
       const router = createRouter(server, PLUGIN.ID, '/api/index_management/');
       server.expose('addIndexManagementDataEnricher', addIndexManagementDataEnricher);
       registerLicenseChecker(server, PLUGIN.ID, PLUGIN.NAME, PLUGIN.MINIMUM_LICENSE_REQUIRED);
@@ -36,6 +34,6 @@ export function indexManagement(kibana)  {
       registerSettingsRoutes(router);
       registerStatsRoute(router);
       registerMappingRoute(router);
-    }
+    },
   });
 }

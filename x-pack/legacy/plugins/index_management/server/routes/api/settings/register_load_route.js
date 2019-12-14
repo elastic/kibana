@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 // response comes back as { [indexName]: { ... }}
 // so plucking out the embedded object
 function formatHit(hit) {
@@ -22,7 +21,7 @@ const handler = async (request, callWithRequest) => {
     index: indexName,
   };
 
-  const hit =  await callWithRequest('indices.getSettings', params);
+  const hit = await callWithRequest('indices.getSettings', params);
   return formatHit(hit);
 };
 export function registerLoadRoute(router) {

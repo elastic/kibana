@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import numeral from '@elastic/numeral';
 import { formatDate } from '@elastic/eui/lib/services/format';
 import { toLocaleString } from 'plugins/ml/util/string_utils';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 const DATA_FORMAT = '0.0 b';
-
 
 function formatData(txt) {
   return numeral(txt).format(DATA_FORMAT);
@@ -69,14 +67,16 @@ export function formatValues([key, value]) {
 // used to remove lists or nested objects from the job config when displaying it in the expanded row
 export function filterObjects(obj, allowArrays, allowObjects) {
   return Object.keys(obj)
-    .filter(k => (allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))))
-    .map((k) => {
+    .filter(
+      k => allowObjects || typeof obj[k] !== 'object' || (allowArrays && Array.isArray(obj[k]))
+    )
+    .map(k => {
       let item = obj[k];
       if (Array.isArray(item)) {
         item = item.join(', ');
       } else if (typeof obj[k] === 'object') {
         item = JSON.stringify(item);
       }
-      return ([k, item]);
+      return [k, item];
     });
 }

@@ -25,15 +25,12 @@ import {
   isEsIndexNotFoundError,
   createNoMatchingIndicesError,
   isNoMatchingIndicesError,
-  convertEsError
+  convertEsError,
 } from '../../../../../src/legacy/server/index_patterns/service/lib/errors';
 
-import {
-  getIndexNotFoundError,
-  getDocNotFoundError
-} from './lib';
+import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 
-export default function ({ getService }) {
+export default function({ getService }) {
   const es = getService('legacyEs');
   const esArchiver = getService('esArchiver');
 
@@ -80,7 +77,9 @@ export default function ({ getService }) {
     describe('isNoMatchingIndicesError()', () => {
       it('returns true for errors from createNoMatchingIndicesError()', () => {
         if (!isNoMatchingIndicesError(createNoMatchingIndicesError())) {
-          throw new Error('Expected isNoMatchingIndicesError(createNoMatchingIndicesError()) to be true');
+          throw new Error(
+            'Expected isNoMatchingIndicesError(createNoMatchingIndicesError()) to be true'
+          );
         }
       });
 
@@ -103,23 +102,28 @@ export default function ({ getService }) {
       it('converts indexNotFoundErrors into NoMatchingIndices errors', async () => {
         const converted = convertEsError(indices, indexNotFoundError);
         if (!isNoMatchingIndicesError(converted)) {
-          throw new Error('expected convertEsError(indexNotFoundError) to return NoMatchingIndices error');
+          throw new Error(
+            'expected convertEsError(indexNotFoundError) to return NoMatchingIndices error'
+          );
         }
       });
 
       it('wraps other errors in Boom', async () => {
-        const error = new esErrors.AuthenticationException({
-          root_cause: [
-            {
-              type: 'security_exception',
-              reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
-            }
-          ],
-          type: 'security_exception',
-          reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]'
-        }, {
-          statusCode: 403
-        });
+        const error = new esErrors.AuthenticationException(
+          {
+            root_cause: [
+              {
+                type: 'security_exception',
+                reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]',
+              },
+            ],
+            type: 'security_exception',
+            reason: 'action [indices:data/read/field_caps] is unauthorized for user [standard]',
+          },
+          {
+            statusCode: 403,
+          }
+        );
 
         expect(error).to.not.have.property('isBoom');
         const converted = convertEsError(indices, error);

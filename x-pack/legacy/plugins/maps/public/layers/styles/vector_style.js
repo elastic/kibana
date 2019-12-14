@@ -20,13 +20,12 @@ import {
   getMakiSymbolAnchor,
   LARGE_MAKI_ICON_SIZE,
   SMALL_MAKI_ICON_SIZE,
-  HALF_LARGE_MAKI_ICON_SIZE
+  HALF_LARGE_MAKI_ICON_SIZE,
 } from './symbol_utils';
 
 export class VectorStyle extends AbstractStyle {
-
   static type = 'VECTOR';
-  static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
+  static STYLE_TYPE = { DYNAMIC: 'DYNAMIC', STATIC: 'STATIC' };
 
   static getComputedFieldName(styleName, fieldName) {
     return `${VectorStyle.getComputedFieldNamePrefix(fieldName)}__${styleName}`;
@@ -48,7 +47,7 @@ export class VectorStyle extends AbstractStyle {
   static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,
-      properties: { ...getDefaultProperties(), ...properties }
+      properties: { ...getDefaultProperties(), ...properties },
     };
   }
 
@@ -58,7 +57,7 @@ export class VectorStyle extends AbstractStyle {
 
   static getDisplayName() {
     return i18n.translate('xpack.maps.style.vector.displayNameLabel', {
-      defaultMessage: 'Vector style'
+      defaultMessage: 'Vector style',
     });
   }
 
@@ -67,7 +66,7 @@ export class VectorStyle extends AbstractStyle {
   renderEditor({ layer, onStyleDescriptorChange }) {
     const styleProperties = { ...this.getProperties() };
     const handlePropertyChange = (propertyName, settings) => {
-      styleProperties[propertyName] = settings;//override single property, but preserve the rest
+      styleProperties[propertyName] = settings; //override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(styleProperties);
       onStyleDescriptorChange(vectorStyleDescriptor);
     };
@@ -118,8 +117,8 @@ export class VectorStyle extends AbstractStyle {
       updatedProperties[propertyName] = {
         type: VectorStyle.STYLE_TYPE.DYNAMIC,
         options: {
-          ...originalProperties[propertyName].options
-        }
+          ...originalProperties[propertyName].options,
+        },
       };
       delete updatedProperties[propertyName].options.field;
     });
@@ -136,7 +135,7 @@ export class VectorStyle extends AbstractStyle {
       nextStyleDescriptor: VectorStyle.createDescriptor({
         ...originalProperties,
         ...updatedProperties,
-      })
+      }),
     };
   }
 
@@ -146,14 +145,13 @@ export class VectorStyle extends AbstractStyle {
       return {};
     }
 
-    const scaledFields = this.getDynamicPropertiesArray()
-      .map(({ options }) => {
-        return {
-          name: options.field.name,
-          min: Infinity,
-          max: -Infinity
-        };
-      });
+    const scaledFields = this.getDynamicPropertiesArray().map(({ options }) => {
+      return {
+        name: options.field.name,
+        min: Infinity,
+        max: -Infinity,
+      };
+    });
 
     const supportedFeatures = await this._source.getSupportedShapeTypes();
     const isSingleFeatureType = supportedFeatures.length === 1;
@@ -168,13 +166,22 @@ export class VectorStyle extends AbstractStyle {
     let hasPolygons = false;
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
-      if (!hasPoints && [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT].includes(feature.geometry.type)) {
+      if (
+        !hasPoints &&
+        [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT].includes(feature.geometry.type)
+      ) {
         hasPoints = true;
       }
-      if (!hasLines && [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING].includes(feature.geometry.type)) {
+      if (
+        !hasLines &&
+        [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING].includes(feature.geometry.type)
+      ) {
         hasLines = true;
       }
-      if (!hasPolygons && [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON].includes(feature.geometry.type)) {
+      if (
+        !hasPolygons &&
+        [GEO_JSON_TYPE.POLYGON, GEO_JSON_TYPE.MULTI_POLYGON].includes(feature.geometry.type)
+      ) {
         hasPolygons = true;
       }
 
@@ -192,8 +199,8 @@ export class VectorStyle extends AbstractStyle {
       hasFeatureType: {
         [VECTOR_SHAPE_TYPES.POINT]: hasPoints,
         [VECTOR_SHAPE_TYPES.LINE]: hasLines,
-        [VECTOR_SHAPE_TYPES.POLYGON]: hasPolygons
-      }
+        [VECTOR_SHAPE_TYPES.POLYGON]: hasPolygons,
+      },
     };
 
     scaledFields.forEach(({ min, max, name }) => {
@@ -238,7 +245,7 @@ export class VectorStyle extends AbstractStyle {
         return {
           styleName,
           type,
-          options
+          options,
         };
       })
       .filter(({ styleName }) => {
@@ -251,7 +258,7 @@ export class VectorStyle extends AbstractStyle {
     return type === VectorStyle.STYLE_TYPE.DYNAMIC && options.field && options.field.name;
   }
 
-  _checkIfOnlyFeatureType = async (featureType) => {
+  _checkIfOnlyFeatureType = async featureType => {
     const supportedFeatures = await this._source.getSupportedShapeTypes();
 
     if (supportedFeatures.length === 1) {
@@ -269,23 +276,23 @@ export class VectorStyle extends AbstractStyle {
         ? isOnlySingleFeatureType && hasFeature
         : isOnlySingleFeatureType && !hasFeature;
     }, true);
-  }
+  };
 
   _getIsPointsOnly = async () => {
     return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POINT);
-  }
+  };
 
   _getIsLinesOnly = async () => {
     return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.LINE);
-  }
+  };
 
   _getIsPolygonsOnly = async () => {
     return this._checkIfOnlyFeatureType(VECTOR_SHAPE_TYPES.POLYGON);
-  }
+  };
 
-  _getFieldRange = (fieldName) => {
+  _getFieldRange = fieldName => {
     return _.get(this._descriptor, ['__styleMeta', fieldName]);
-  }
+  };
 
   getIcon = () => {
     const styles = this.getProperties();
@@ -301,7 +308,7 @@ export class VectorStyle extends AbstractStyle {
         symbolId={symbolId}
       />
     );
-  }
+  };
 
   getLegendDetails(getFieldLabel, getFieldFormatter) {
     const styles = this.getProperties();
@@ -311,7 +318,10 @@ export class VectorStyle extends AbstractStyle {
         name: styleName,
         type,
         options,
-        range: options && options.field && options.field.name ? this._getFieldRange(options.field.name) : null,
+        range:
+          options && options.field && options.field.name
+            ? this._getFieldRange(options.field.name)
+            : null,
       };
     });
 
@@ -325,44 +335,47 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getStyleFields() {
-    return this.getDynamicPropertiesArray()
-      .map(({ styleName, options }) => {
-        const name = options.field.name;
+    return this.getDynamicPropertiesArray().map(({ styleName, options }) => {
+      const name = options.field.name;
 
-        // "feature-state" data expressions are not supported with layout properties.
-        // To work around this limitation, some styling values must fall back to geojson property values.
-        let supportsFeatureState;
-        let isScaled;
-        if (styleName === 'iconSize'
-          && this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON) {
-          supportsFeatureState = false;
-          isScaled = true;
-        } else if (styleName === 'iconOrientation') {
-          supportsFeatureState = false;
-          isScaled = false;
-        } else if ((styleName === vectorStyles.FILL_COLOR || styleName === vectorStyles.LINE_COLOR)
-          && options.useCustomColorRamp) {
-          supportsFeatureState = true;
-          isScaled = false;
-        } else {
-          supportsFeatureState = true;
-          isScaled = true;
-        }
+      // "feature-state" data expressions are not supported with layout properties.
+      // To work around this limitation, some styling values must fall back to geojson property values.
+      let supportsFeatureState;
+      let isScaled;
+      if (
+        styleName === 'iconSize' &&
+        this._descriptor.properties.symbol.options.symbolizeAs === SYMBOLIZE_AS_ICON
+      ) {
+        supportsFeatureState = false;
+        isScaled = true;
+      } else if (styleName === 'iconOrientation') {
+        supportsFeatureState = false;
+        isScaled = false;
+      } else if (
+        (styleName === vectorStyles.FILL_COLOR || styleName === vectorStyles.LINE_COLOR) &&
+        options.useCustomColorRamp
+      ) {
+        supportsFeatureState = true;
+        isScaled = false;
+      } else {
+        supportsFeatureState = true;
+        isScaled = true;
+      }
 
-        return {
-          supportsFeatureState,
-          isScaled,
-          name,
-          range: this._getFieldRange(name),
-          computedName: VectorStyle.getComputedFieldName(styleName, name),
-        };
-      });
+      return {
+        supportsFeatureState,
+        isScaled,
+        name,
+        range: this._getFieldRange(name),
+        computedName: VectorStyle.getComputedFieldName(styleName, name),
+      };
+    });
   }
 
   clearFeatureState(featureCollection, mbMap, sourceId) {
     const tmpFeatureIdentifier = {
       source: null,
-      id: null
+      id: null,
     };
     for (let i = 0; i < featureCollection.features.length; i++) {
       const feature = featureCollection.features[i];
@@ -373,19 +386,18 @@ export class VectorStyle extends AbstractStyle {
   }
 
   setFeatureState(featureCollection, mbMap, sourceId) {
-
     if (!featureCollection) {
       return;
     }
 
-    const styleFields  = this._getStyleFields();
+    const styleFields = this._getStyleFields();
     if (styleFields.length === 0) {
       return;
     }
 
     const tmpFeatureIdentifier = {
       source: null,
-      id: null
+      id: null,
     };
     const tmpFeatureState = {};
 
@@ -398,10 +410,12 @@ export class VectorStyle extends AbstractStyle {
         const value = parseFloat(feature.properties[name]);
         let styleValue;
         if (isScaled) {
-          if (isNaN(value) || !range) {//cannot scale
-            styleValue = -1;//put outside range
-          } else if (range.delta === 0) {//values are identical
-            styleValue = 1;//snap to end of color range
+          if (isNaN(value) || !range) {
+            //cannot scale
+            styleValue = -1; //put outside range
+          } else if (range.delta === 0) {
+            //values are identical
+            styleValue = 1; //snap to end of color range
           } else {
             styleValue = (value - range.min) / range.delta;
           }
@@ -438,7 +452,7 @@ export class VectorStyle extends AbstractStyle {
         'step',
         ['coalesce', ['feature-state', targetName], lessThenFirstStopValue],
         'rgba(0,0,0,0)', // MB will assign the base value to any features that is below the first stop value
-        ...colorStops
+        ...colorStops,
       ];
     }
 
@@ -446,18 +460,21 @@ export class VectorStyle extends AbstractStyle {
       'interpolate',
       ['linear'],
       ['coalesce', ['feature-state', targetName], -1],
-      -1, 'rgba(0,0,0,0)',
-      ...colorStops
+      -1,
+      'rgba(0,0,0,0)',
+      ...colorStops,
     ];
   }
 
   _getMbDataDrivenSize({ targetName, minSize, maxSize }) {
-    return   [
+    return [
       'interpolate',
       ['linear'],
       ['coalesce', ['feature-state', targetName], 0],
-      0, minSize,
-      1, maxSize
+      0,
+      minSize,
+      1,
+      maxSize,
     ];
   }
 
@@ -467,15 +484,16 @@ export class VectorStyle extends AbstractStyle {
       return _.get(styleDescriptor, 'options.color', null);
     }
 
-    const isDynamicConfigComplete = _.has(styleDescriptor, 'options.field.name')
-      && _.has(styleDescriptor, 'options.color');
+    const isDynamicConfigComplete =
+      _.has(styleDescriptor, 'options.field.name') && _.has(styleDescriptor, 'options.color');
     if (!isDynamicConfigComplete) {
       return null;
     }
 
-    if (styleDescriptor.options.useCustomColorRamp &&
-      (!styleDescriptor.options.customColorRamp ||
-      !styleDescriptor.options.customColorRamp.length)) {
+    if (
+      styleDescriptor.options.useCustomColorRamp &&
+      (!styleDescriptor.options.customColorRamp || !styleDescriptor.options.customColorRamp.length)
+    ) {
       return null;
     }
 
@@ -497,9 +515,11 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _isSizeDynamicConfigComplete(styleDescriptor) {
-    return _.has(styleDescriptor, 'options.field.name')
-      && _.has(styleDescriptor, 'options.minSize')
-      && _.has(styleDescriptor, 'options.maxSize');
+    return (
+      _.has(styleDescriptor, 'options.field.name') &&
+      _.has(styleDescriptor, 'options.minSize') &&
+      _.has(styleDescriptor, 'options.maxSize')
+    );
   }
 
   _getMbSize(styleName, styleDescriptor) {
@@ -520,7 +540,10 @@ export class VectorStyle extends AbstractStyle {
 
   setMBPaintProperties({ alpha, mbMap, fillLayerId, lineLayerId }) {
     if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
+      const color = this._getMBColor(
+        vectorStyles.FILL_COLOR,
+        this._descriptor.properties.fillColor
+      );
       mbMap.setPaintProperty(fillLayerId, 'fill-color', color);
       mbMap.setPaintProperty(fillLayerId, 'fill-opacity', alpha);
     } else {
@@ -529,17 +552,22 @@ export class VectorStyle extends AbstractStyle {
     }
 
     if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
+      const color = this._getMBColor(
+        vectorStyles.LINE_COLOR,
+        this._descriptor.properties.lineColor
+      );
       mbMap.setPaintProperty(lineLayerId, 'line-color', color);
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', alpha);
-
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-color', null);
       mbMap.setPaintProperty(lineLayerId, 'line-opacity', 0);
     }
 
     if (this._descriptor.properties.lineWidth) {
-      const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
+      const lineWidth = this._getMbSize(
+        vectorStyles.LINE_WIDTH,
+        this._descriptor.properties.lineWidth
+      );
       mbMap.setPaintProperty(lineLayerId, 'line-width', lineWidth);
     } else {
       mbMap.setPaintProperty(lineLayerId, 'line-width', 0);
@@ -548,7 +576,10 @@ export class VectorStyle extends AbstractStyle {
 
   setMBPaintPropertiesForPoints({ alpha, mbMap, pointLayerId }) {
     if (this._descriptor.properties.fillColor) {
-      const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
+      const color = this._getMBColor(
+        vectorStyles.FILL_COLOR,
+        this._descriptor.properties.fillColor
+      );
       mbMap.setPaintProperty(pointLayerId, 'circle-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', alpha);
     } else {
@@ -556,22 +587,30 @@ export class VectorStyle extends AbstractStyle {
       mbMap.setPaintProperty(pointLayerId, 'circle-opacity', 0);
     }
     if (this._descriptor.properties.lineColor) {
-      const color = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
+      const color = this._getMBColor(
+        vectorStyles.LINE_COLOR,
+        this._descriptor.properties.lineColor
+      );
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', color);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', alpha);
-
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-color', null);
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-opacity', 0);
     }
     if (this._descriptor.properties.lineWidth) {
-      const lineWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
+      const lineWidth = this._getMbSize(
+        vectorStyles.LINE_WIDTH,
+        this._descriptor.properties.lineWidth
+      );
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', lineWidth);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-stroke-width', 0);
     }
     if (this._descriptor.properties.iconSize) {
-      const iconSize = this._getMbSize(vectorStyles.ICON_SIZE, this._descriptor.properties.iconSize);
+      const iconSize = this._getMbSize(
+        vectorStyles.ICON_SIZE,
+        this._descriptor.properties.iconSize
+      );
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', iconSize);
     } else {
       mbMap.setPaintProperty(pointLayerId, 'circle-radius', 0);
@@ -584,8 +623,14 @@ export class VectorStyle extends AbstractStyle {
     const symbolId = this._descriptor.properties.symbol.options.symbolId;
     mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', getMakiSymbolAnchor(symbolId));
     const color = this._getMBColor(vectorStyles.FILL_COLOR, this._descriptor.properties.fillColor);
-    const haloColor = this._getMBColor(vectorStyles.LINE_COLOR, this._descriptor.properties.lineColor);
-    const haloWidth = this._getMbSize(vectorStyles.LINE_WIDTH, this._descriptor.properties.lineWidth);
+    const haloColor = this._getMBColor(
+      vectorStyles.LINE_COLOR,
+      this._descriptor.properties.lineColor
+    );
+    const haloWidth = this._getMbSize(
+      vectorStyles.LINE_WIDTH,
+      this._descriptor.properties.lineWidth
+    );
     // icon-color is only supported on SDF icons.
     mbMap.setPaintProperty(symbolLayerId, 'icon-color', color);
     mbMap.setPaintProperty(symbolLayerId, 'icon-halo-color', haloColor);
@@ -596,28 +641,35 @@ export class VectorStyle extends AbstractStyle {
     // to make icons be similiar in size to circles then have to deal with icon in half width measurements
     const iconSize = this._descriptor.properties.iconSize;
     if (iconSize.type === VectorStyle.STYLE_TYPE.STATIC) {
-      const iconPixels = iconSize.options.size >= HALF_LARGE_MAKI_ICON_SIZE
-        ? LARGE_MAKI_ICON_SIZE
-        : SMALL_MAKI_ICON_SIZE;
+      const iconPixels =
+        iconSize.options.size >= HALF_LARGE_MAKI_ICON_SIZE
+          ? LARGE_MAKI_ICON_SIZE
+          : SMALL_MAKI_ICON_SIZE;
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
 
       const halfIconPixels = iconPixels / 2;
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', iconSize.options.size / halfIconPixels);
     } else if (this._isSizeDynamicConfigComplete(iconSize)) {
-      const iconPixels = iconSize.options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
-        ? LARGE_MAKI_ICON_SIZE
-        : SMALL_MAKI_ICON_SIZE;
+      const iconPixels =
+        iconSize.options.maxSize >= HALF_LARGE_MAKI_ICON_SIZE
+          ? LARGE_MAKI_ICON_SIZE
+          : SMALL_MAKI_ICON_SIZE;
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', `${symbolId}-${iconPixels}`);
 
       const halfIconPixels = iconPixels / 2;
-      const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_SIZE, iconSize.options.field.name);
+      const targetName = VectorStyle.getComputedFieldName(
+        vectorStyles.ICON_SIZE,
+        iconSize.options.field.name
+      );
       // Using property state instead of feature-state because layout properties do not support feature-state
       mbMap.setLayoutProperty(symbolLayerId, 'icon-size', [
         'interpolate',
         ['linear'],
         ['coalesce', ['get', targetName], 0],
-        0, iconSize.options.minSize / halfIconPixels,
-        1, iconSize.options.maxSize / halfIconPixels
+        0,
+        iconSize.options.minSize / halfIconPixels,
+        1,
+        iconSize.options.maxSize / halfIconPixels,
       ]);
     }
 
@@ -625,11 +677,12 @@ export class VectorStyle extends AbstractStyle {
     if (iconOrientation.type === VectorStyle.STYLE_TYPE.STATIC) {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', iconOrientation.options.orientation);
     } else if (_.has(iconOrientation, 'options.field.name')) {
-      const targetName = VectorStyle.getComputedFieldName(vectorStyles.ICON_ORIENTATION, iconOrientation.options.field.name);
+      const targetName = VectorStyle.getComputedFieldName(
+        vectorStyles.ICON_ORIENTATION,
+        iconOrientation.options.field.name
+      );
       // Using property state instead of feature-state because layout properties do not support feature-state
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', [
-        'coalesce', ['get', targetName], 0
-      ]);
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-rotate', ['coalesce', ['get', targetName], 0]);
     }
   }
 

@@ -22,17 +22,10 @@ import React from 'react';
 import { injectI18n } from '@kbn/i18n/react';
 import { IndexPatternSelect } from 'ui/index_patterns';
 
-import {
-  EuiFormRow,
-} from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 
 function IndexPatternSelectFormRowUi(props) {
-  const {
-    controlIndex,
-    indexPatternId,
-    intl,
-    onChange,
-  } = props;
+  const { controlIndex, indexPatternId, intl, onChange } = props;
   const selectId = `indexPatternSelect-${controlIndex}`;
 
   return (
@@ -40,13 +33,13 @@ function IndexPatternSelectFormRowUi(props) {
       id={selectId}
       label={intl.formatMessage({
         id: 'inputControl.editor.indexPatternSelect.patternLabel',
-        defaultMessage: 'Index Pattern'
+        defaultMessage: 'Index Pattern',
       })}
     >
       <IndexPatternSelect
         placeholder={intl.formatMessage({
           id: 'inputControl.editor.indexPatternSelect.patternPlaceholder',
-          defaultMessage: 'Select index pattern...'
+          defaultMessage: 'Select index pattern...',
         })}
         indexPatternId={indexPatternId}
         onChange={onChange}

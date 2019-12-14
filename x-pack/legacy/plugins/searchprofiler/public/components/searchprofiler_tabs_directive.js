@@ -12,10 +12,6 @@ const module = uiModules.get('apps/searchprofiler', ['react']);
 
 import { SearchProfilerTabs } from './searchprofiler_tabs';
 
-module.directive('searchProfilerTabs', function (reactDirective) {
-  return reactDirective(
-    wrapInI18nContext(SearchProfilerTabs),
-    undefined,
-    { restrict: 'E' }
-  );
+module.directive('searchProfilerTabs', function(reactDirective) {
+  return reactDirective(wrapInI18nContext(SearchProfilerTabs), undefined, { restrict: 'E' });
 });

@@ -25,15 +25,20 @@ import { parse as parseUrl } from 'url';
 import { StateProvider } from '../../state';
 import { hashUrl } from '..';
 
-describe('hashUrl', function () {
+describe('hashUrl', function() {
   let State;
 
   beforeEach(ngMock.module('kibana'));
 
-  beforeEach(ngMock.inject((Private, config) => {
-    State = Private(StateProvider);
-    sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(true);
-  }));
+  beforeEach(
+    ngMock.inject((Private, config) => {
+      State = Private(StateProvider);
+      sinon
+        .stub(config, 'get')
+        .withArgs('state:storeInSessionStorage')
+        .returns(true);
+    })
+  );
 
   describe('throws error', () => {
     it('if states parameter is null', () => {
@@ -106,7 +111,7 @@ describe('hashUrl', function () {
   });
 
   describe('replaces querystring value with hash', () => {
-    const getAppQuery = (url) => {
+    const getAppQuery = url => {
       const parsedUrl = parseUrl(url);
       const parsedAppUrl = parseUrl(parsedUrl.hash.slice(1), true);
 
@@ -118,7 +123,7 @@ describe('hashUrl', function () {
       const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey}=(yes:!t)`;
       const mockHashedItemStore = {
         getItem: () => null,
-        setItem: sinon.stub().returns(true)
+        setItem: sinon.stub().returns(true),
       };
       const state = new State(stateParamKey, {}, mockHashedItemStore);
 
@@ -138,7 +143,7 @@ describe('hashUrl', function () {
       const url = `https://localhost:5601/app/kibana#/discover?foo=bar&${stateParamKey1}=(yes:!t)&${stateParamKey2}=(yes:!f)`;
       const mockHashedItemStore = {
         getItem: () => null,
-        setItem: sinon.stub().returns(true)
+        setItem: sinon.stub().returns(true),
       };
       const state1 = new State(stateParamKey1, {}, mockHashedItemStore);
       const state2 = new State(stateParamKey2, {}, mockHashedItemStore);

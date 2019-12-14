@@ -36,126 +36,172 @@ function checkAddFilters(length, comps, idx) {
 
   expect(filters.length).to.be(length);
   if (!Array.isArray(comps)) return;
-  comps.forEach(function (comp, i) {
+  comps.forEach(function(comp, i) {
     expect(filters[i]).to.eql(comp);
   });
 }
 
-describe('Filter Manager', function () {
-  beforeEach(ngMock.module(
-    'kibana',
-    'kibana/courier',
-    'kibana/global_state',
-    function ($provide) {
+describe('Filter Manager', function() {
+  beforeEach(
+    ngMock.module('kibana', 'kibana/courier', 'kibana/global_state', function($provide) {
       $provide.service('indexPatterns', require('fixtures/mock_index_patterns'));
 
       appState = new MockState({ filters: [] });
-      $provide.service('getAppState', function () {
-        return function () { return appState; };
+      $provide.service('getAppState', function() {
+        return function() {
+          return appState;
+        };
       });
-    }
-  ));
+    })
+  );
 
-  beforeEach(ngMock.inject(function (_$rootScope_, Private) {
+  beforeEach(
+    ngMock.inject(function(_$rootScope_, Private) {
+      // mock required queryFilter methods, used in the manager
+      queryFilter = Private(FilterBarQueryFilterProvider);
+      filterGen = getFilterGenerator(queryFilter);
+      sinon.stub(queryFilter, 'getAppFilters').callsFake(() => appState.filters);
+      sinon.stub(queryFilter, 'addFilters').callsFake(filters => {
+        if (!Array.isArray(filters)) filters = [filters];
+        appState.filters = uniqFilters(appState.filters.concat(filters));
+      });
+    })
+  );
 
-    // mock required queryFilter methods, used in the manager
-    queryFilter = Private(FilterBarQueryFilterProvider);
-    filterGen = getFilterGenerator(queryFilter);
-    sinon.stub(queryFilter, 'getAppFilters').callsFake(() => appState.filters);
-    sinon.stub(queryFilter, 'addFilters').callsFake((filters) => {
-      if (!Array.isArray(filters)) filters = [filters];
-      appState.filters = uniqFilters(appState.filters.concat(filters));
-    });
-  }));
-
-  it('should have an `add` function', function () {
+  it('should have an `add` function', function() {
     expect(filterGen.add).to.be.a(Function);
   });
 
-  it('should add a filter', function () {
+  it('should add a filter', function() {
     filterGen.add('myField', 1, '+', 'myIndex');
     expect(queryFilter.addFilters.callCount).to.be(1);
-    checkAddFilters(1, [{
-      meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
-    }]);
+    checkAddFilters(1, [
+      {
+        meta: { index: 'myIndex', negate: false },
+        query: { match: { myField: { query: 1, type: 'phrase' } } },
+      },
+    ]);
   });
 
-  it('should add multiple filters if passed an array of values', function () {
+  it('should add multiple filters if passed an array of values', function() {
     filterGen.add('myField', [1, 2, 3], '+', 'myIndex');
     expect(queryFilter.addFilters.callCount).to.be(1);
-    checkAddFilters(3, [{
-      meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
-    }, {
-      meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 2, type: 'phrase' } } }
-    }, {
-      meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 3, type: 'phrase' } } }
-    }]);
+    checkAddFilters(3, [
+      {
+        meta: { index: 'myIndex', negate: false },
+        query: { match: { myField: { query: 1, type: 'phrase' } } },
+      },
+      {
+        meta: { index: 'myIndex', negate: false },
+        query: { match: { myField: { query: 2, type: 'phrase' } } },
+      },
+      {
+        meta: { index: 'myIndex', negate: false },
+        query: { match: { myField: { query: 3, type: 'phrase' } } },
+      },
+    ]);
   });
 
-  it('should add an exists filter if _exists_ is used as the field', function () {
+  it('should add an exists filter if _exists_ is used as the field', function() {
     filterGen.add('_exists_', 'myField', '+', 'myIndex');
-    checkAddFilters(1, [{
-      meta: { index: 'myIndex', negate: false },
-      exists: { field: 'myField' }
-    }]);
+    checkAddFilters(1, [
+      {
+        meta: { index: 'myIndex', negate: false },
+        exists: { field: 'myField' },
+      },
+    ]);
   });
 
-  it('should negate existing filter instead of added a conflicting filter', function () {
+  it('should negate existing filter instead of added a conflicting filter', function() {
     filterGen.add('myField', 1, '+', 'myIndex');
-    checkAddFilters(1, [{
-      meta: { index: 'myIndex', negate: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
-    }], 0);
+    checkAddFilters(
+      1,
+      [
+        {
+          meta: { index: 'myIndex', negate: false },
+          query: { match: { myField: { query: 1, type: 'phrase' } } },
+        },
+      ],
+      0
+    );
     expect(appState.filters).to.have.length(1);
 
     // NOTE: negating exists filters also forces disabled to false
     filterGen.add('myField', 1, '-', 'myIndex');
-    checkAddFilters(1, [{
-      meta: { index: 'myIndex', negate: true, disabled: false },
-      query: { match: { myField: { query: 1, type: 'phrase' } } }
-    }], 1);
+    checkAddFilters(
+      1,
+      [
+        {
+          meta: { index: 'myIndex', negate: true, disabled: false },
+          query: { match: { myField: { query: 1, type: 'phrase' } } },
+        },
+      ],
+      1
+    );
     expect(appState.filters).to.have.length(1);
 
     filterGen.add('_exists_', 'myField', '+', 'myIndex');
-    checkAddFilters(1, [{
-      meta: { index: 'myIndex', negate: false },
-      exists: { field: 'myField' }
-    }], 2);
+    checkAddFilters(
+      1,
+      [
+        {
+          meta: { index: 'myIndex', negate: false },
+          exists: { field: 'myField' },
+        },
+      ],
+      2
+    );
     expect(appState.filters).to.have.length(2);
 
     filterGen.add('_exists_', 'myField', '-', 'myIndex');
-    checkAddFilters(1, [{
-      meta: { index: 'myIndex', negate: true, disabled: false },
-      exists: { field: 'myField' }
-    }], 3);
+    checkAddFilters(
+      1,
+      [
+        {
+          meta: { index: 'myIndex', negate: true, disabled: false },
+          exists: { field: 'myField' },
+        },
+      ],
+      3
+    );
     expect(appState.filters).to.have.length(2);
 
     const scriptedField = { name: 'scriptedField', scripted: true, script: 1, lang: 'painless' };
     filterGen.add(scriptedField, 1, '+', 'myIndex');
-    checkAddFilters(1, [{
-      meta: { index: 'myIndex', negate: false, field: 'scriptedField' },
-      script: getPhraseScript(scriptedField, 1)
-    }], 4);
+    checkAddFilters(
+      1,
+      [
+        {
+          meta: { index: 'myIndex', negate: false, field: 'scriptedField' },
+          script: getPhraseScript(scriptedField, 1),
+        },
+      ],
+      4
+    );
     expect(appState.filters).to.have.length(3);
 
     filterGen.add(scriptedField, 1, '-', 'myIndex');
-    checkAddFilters(1, [{
-      meta: { index: 'myIndex', negate: true, disabled: false, field: 'scriptedField' },
-      script: getPhraseScript(scriptedField, 1)
-    }], 5);
+    checkAddFilters(
+      1,
+      [
+        {
+          meta: { index: 'myIndex', negate: true, disabled: false, field: 'scriptedField' },
+          script: getPhraseScript(scriptedField, 1),
+        },
+      ],
+      5
+    );
     expect(appState.filters).to.have.length(3);
   });
 
-  it('should enable matching filters being changed', function () {
-    _.each([true, false], function (negate) {
-      appState.filters = [{
-        query: { match: { myField: { query: 1 } } },
-        meta: { disabled: true, negate: negate }
-      }];
+  it('should enable matching filters being changed', function() {
+    _.each([true, false], function(negate) {
+      appState.filters = [
+        {
+          query: { match: { myField: { query: 1 } } },
+          meta: { disabled: true, negate: negate },
+        },
+      ];
       expect(appState.filters.length).to.be(1);
       expect(appState.filters[0].meta.disabled).to.be(true);
 

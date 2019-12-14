@@ -6,5 +6,5 @@
 
 export const metadata = {
   id: 'png',
-  name: 'PNG'
+  name: 'PNG',
 };

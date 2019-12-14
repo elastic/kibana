@@ -20,16 +20,16 @@
 import { mapValues } from 'lodash';
 
 const json = {
-  _serialize: function (val) {
+  _serialize: function(val) {
     if (val != null) return JSON.stringify(val);
   },
-  _deserialize: function (val) {
+  _deserialize: function(val) {
     if (val != null) return JSON.parse(val);
-  }
+  },
 };
 
-export const expandShorthand = function (sh) {
-  return mapValues(sh || {}, function (val) {
+export const expandShorthand = function(sh) {
+  return mapValues(sh || {}, function(val) {
     // allow shortcuts for the field types, by just setting the value
     // to the type name
     if (typeof val === 'string') val = { type: val };

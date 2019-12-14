@@ -37,7 +37,7 @@ import { VisEditorTypesRegistryProvider } from '../../../registry/vis_editor_typ
 import { getVisualizeLoader } from '../../../visualize/loader/visualize_loader';
 import { AggGroupNames } from './agg_groups';
 
-const defaultEditor = function ($rootScope, $compile) {
+const defaultEditor = function($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
@@ -50,9 +50,11 @@ const defaultEditor = function ($rootScope, $compile) {
         this.vis.type.editorConfig.optionTabs = [
           {
             name: 'options',
-            title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', { defaultMessage: 'Options' }),
+            title: i18n.translate('common.ui.vis.editors.sidebar.tabs.optionsLabel', {
+              defaultMessage: 'Options',
+            }),
             editor: this.vis.type.editorConfig.optionsTemplate,
-          }
+          },
         ];
       }
     }
@@ -98,13 +100,16 @@ const defaultEditor = function ($rootScope, $compile) {
               $scope.autoApplyEnabled = !$scope.autoApplyEnabled;
             };
 
-            $scope.$watch('vis.dirty', _.debounce(() => {
-              if (!$scope.autoApplyEnabled || !$scope.vis.dirty) return;
-              $scope.stageEditableVis();
-            }, 800));
+            $scope.$watch(
+              'vis.dirty',
+              _.debounce(() => {
+                if (!$scope.autoApplyEnabled || !$scope.vis.dirty) return;
+                $scope.stageEditableVis();
+              }, 800)
+            );
           }
 
-          $scope.submitEditorWithKeyboard = (event) => {
+          $scope.submitEditorWithKeyboard = event => {
             if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
               event.preventDefault();
               event.stopPropagation();
@@ -122,27 +127,40 @@ const defaultEditor = function ($rootScope, $compile) {
             }
           };
 
-          $scope.$watch(() => {
-            return $scope.vis.getSerializableState($scope.state);
-          }, function (newState) {
-            $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
-            const responseAggs = $scope.state.aggs.getResponseAggs();
-            $scope.hasHistogramAgg = responseAggs.some(agg => agg.type.name === 'histogram');
-            $scope.metricAggs = responseAggs.filter(agg =>
-              _.get(agg, 'schema.group') === AggGroupNames.Metrics);
-            const lastParentPipelineAgg = _.findLast($scope.metricAggs, ({ type }) => type.subtype === parentPipelineAggHelper.subtype);
-            $scope.lastParentPipelineAggTitle = lastParentPipelineAgg && lastParentPipelineAgg.type.title;
-          }, true);
+          $scope.$watch(
+            () => {
+              return $scope.vis.getSerializableState($scope.state);
+            },
+            function(newState) {
+              $scope.vis.dirty = !angular.equals(newState, $scope.oldState);
+              const responseAggs = $scope.state.aggs.getResponseAggs();
+              $scope.hasHistogramAgg = responseAggs.some(agg => agg.type.name === 'histogram');
+              $scope.metricAggs = responseAggs.filter(
+                agg => _.get(agg, 'schema.group') === AggGroupNames.Metrics
+              );
+              const lastParentPipelineAgg = _.findLast(
+                $scope.metricAggs,
+                ({ type }) => type.subtype === parentPipelineAggHelper.subtype
+              );
+              $scope.lastParentPipelineAggTitle =
+                lastParentPipelineAgg && lastParentPipelineAgg.type.title;
+            },
+            true
+          );
 
           // fires when visualization state changes, and we need to copy changes to editorState
-          $scope.$watch(() => {
-            return $scope.vis.getCurrentState(false);
-          }, (newState) => {
-            if (!_.isEqual(newState, $scope.oldState)) {
-              $scope.state = $scope.vis.copyCurrentState(true);
-              $scope.oldState = newState;
-            }
-          }, true);
+          $scope.$watch(
+            () => {
+              return $scope.vis.getCurrentState(false);
+            },
+            newState => {
+              if (!_.isEqual(newState, $scope.oldState)) {
+                $scope.state = $scope.vis.copyCurrentState(true);
+                $scope.oldState = newState;
+              }
+            },
+            true
+          );
 
           // Load the default editor template, attach it to the DOM and compile it.
           // It should be added to the DOM before compiling, to prevent some resize
@@ -162,13 +180,17 @@ const defaultEditor = function ($rootScope, $compile) {
               return;
             }
             this._loader = loader;
-            this._handler = this._loader.embedVisualizationWithSavedObject(visualizationEl, this.savedObj, {
-              uiState: uiState,
-              listenOnChange: false,
-              timeRange: timeRange,
-              filters: filters,
-              appState: appState,
-            });
+            this._handler = this._loader.embedVisualizationWithSavedObject(
+              visualizationEl,
+              this.savedObj,
+              {
+                uiState: uiState,
+                listenOnChange: false,
+                timeRange: timeRange,
+                filters: filters,
+                appState: appState,
+              }
+            );
           });
         } else {
           this._handler.update({
@@ -176,13 +198,10 @@ const defaultEditor = function ($rootScope, $compile) {
             filters: filters,
           });
         }
-
       });
     }
 
-    resize() {
-
-    }
+    resize() {}
 
     destroy() {
       if (this.$scope) {

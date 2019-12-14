@@ -12,8 +12,7 @@ import Boom from 'boom';
 import { checkLicense } from './server/lib/check_license';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 
-
-export const searchprofiler = (kibana) => {
+export const searchprofiler = kibana => {
   return new kibana.Plugin({
     require: ['elasticsearch', 'xpack_main'],
     id: 'searchprofiler',
@@ -26,31 +25,34 @@ export const searchprofiler = (kibana) => {
       home: ['plugins/searchprofiler/register_feature'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
-    init: function (server) {
+    init: function(server) {
       const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
       mirrorPluginStatus(xpackMainPlugin, thisPlugin);
       xpackMainPlugin.status.once('green', () => {
         // Register a function that is called whenever the xpack info changes,
         // to re-compute the license check results for this plugin
-        xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
+        xpackMainPlugin.info
+          .feature(thisPlugin.id)
+          .registerLicenseCheckResultsGenerator(checkLicense);
       });
 
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
           function forbidApiAccess() {
-            const licenseCheckResults = xpackMainPlugin.info.feature(thisPlugin.id).getLicenseCheckResults();
+            const licenseCheckResults = xpackMainPlugin.info
+              .feature(thisPlugin.id)
+              .getLicenseCheckResults();
             if (licenseCheckResults.showAppLink && licenseCheckResults.enableAppLink) {
               return null;
             } else {
               throw Boom.forbidden(licenseCheckResults.message);
             }
-          }
-        ]
+          },
+        ],
       };
       profileRoute(server, commonRouteConfig);
-    }
-
+    },
   });
 };

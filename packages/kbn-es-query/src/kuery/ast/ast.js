@@ -76,6 +76,6 @@ export function doesKueryExpressionHaveLuceneSyntaxError(expression) {
     fromExpression(expression, { errorOnLuceneSyntax: true }, parseKuery);
     return false;
   } catch (e) {
-    return (e.message.startsWith('Lucene'));
+    return e.message.startsWith('Lucene');
   }
 }

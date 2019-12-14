@@ -20,7 +20,7 @@
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import expect from '@kbn/expect';
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const pieChart = getService('pieChart');
   const dashboardVisualizations = getService('dashboardVisualizations');
@@ -28,12 +28,12 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
 
   describe('dashboard time picker', function describeIndexTests() {
-    before(async function () {
+    before(async function() {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
     });
 
-    after(async function () {
+    after(async function() {
       // avoids any 'Object with id x not found' errors when switching tests.
       await PageObjects.header.clickVisualize();
       await PageObjects.visualize.gotoLandingPage();
@@ -53,21 +53,31 @@ export default function ({ getService, getPageObjects }) {
     it('Saved search updated when time picker changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
+      await dashboardVisualizations.createAndAddSavedSearch({
+        name: 'saved search',
+        fields: ['bytes', 'agent'],
+      });
       await dashboardExpect.docTableFieldCount(150);
 
       // Set to time range with no data
-      await PageObjects.timePicker.setAbsoluteRange('2000-01-01 00:00:00.000', '2000-01-01 01:00:00.000');
+      await PageObjects.timePicker.setAbsoluteRange(
+        '2000-01-01 00:00:00.000',
+        '2000-01-01 01:00:00.000'
+      );
       await dashboardExpect.docTableFieldCount(0);
     });
 
     it('Timepicker start, end, interval values are set by url', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await dashboardVisualizations.createAndAddSavedSearch({ name: 'saved search', fields: ['bytes', 'agent'] });
+      await dashboardVisualizations.createAndAddSavedSearch({
+        name: 'saved search',
+        fields: ['bytes', 'agent'],
+      });
       const currentUrl = await browser.getCurrentUrl();
       const kibanaBaseUrl = currentUrl.substring(0, currentUrl.indexOf('#'));
-      const urlQuery = `/dashboard?` +
+      const urlQuery =
+        `/dashboard?` +
         `_g=(refreshInterval:(pause:!t,value:2000),` +
         `time:(from:'2012-11-17T00:00:00.000Z',mode:absolute,to:'2015-11-17T18:01:36.621Z'))&` +
         `_a=(description:'',filters:!()` +
@@ -75,11 +85,10 @@ export default function ({ getService, getPageObjects }) {
       await browser.get(`${kibanaBaseUrl}#${urlQuery}`, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       const time = await PageObjects.timePicker.getTimeConfig();
-      const refresh =  await PageObjects.timePicker.getRefreshConfig();
+      const refresh = await PageObjects.timePicker.getRefreshConfig();
       expect(time.start).to.be('Nov 17, 2012 @ 00:00:00.000');
       expect(time.end).to.be('Nov 17, 2015 @ 18:01:36.621');
       expect(refresh.interval).to.be('2');
-
     });
   });
 }

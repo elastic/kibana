@@ -20,14 +20,9 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import {
-  OpenSearchPanel,
-} from './open_search_panel';
+import { OpenSearchPanel } from './open_search_panel';
 
 test('render', () => {
-  const component = shallow(<OpenSearchPanel
-    onClose={() => {}}
-    makeUrl={() => {}}
-  />);
+  const component = shallow(<OpenSearchPanel onClose={() => {}} makeUrl={() => {}} />);
   expect(component).toMatchSnapshot();
 });

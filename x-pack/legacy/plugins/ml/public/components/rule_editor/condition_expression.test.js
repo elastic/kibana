@@ -14,7 +14,6 @@ import { ConditionExpression } from './condition_expression';
 import { APPLIES_TO, OPERATOR } from '../../../common/constants/detector_rule';
 
 describe('ConditionExpression', () => {
-
   const updateCondition = jest.fn(() => {});
   const deleteCondition = jest.fn(() => {});
 
@@ -30,9 +29,7 @@ describe('ConditionExpression', () => {
       value: 123,
     };
 
-    const component = shallowWithIntl(
-      <ConditionExpression.WrappedComponent {...props} />
-    );
+    const component = shallowWithIntl(<ConditionExpression.WrappedComponent {...props} />);
 
     expect(component).toMatchSnapshot();
   });
@@ -45,12 +42,8 @@ describe('ConditionExpression', () => {
       value: 123,
     };
 
-    const component = shallowWithIntl(
-      <ConditionExpression.WrappedComponent {...props} />
-    );
+    const component = shallowWithIntl(<ConditionExpression.WrappedComponent {...props} />);
 
     expect(component).toMatchSnapshot();
   });
-
-
 });

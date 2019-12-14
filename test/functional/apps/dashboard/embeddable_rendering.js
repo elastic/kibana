@@ -27,13 +27,20 @@ import expect from '@kbn/expect';
  * broke?).  The upside is that this offers very good coverage with a minimal time investment.
  */
 
-export default function ({ getService, getPageObjects }) {
+export default function({ getService, getPageObjects }) {
   const find = getService('find');
   const browser = getService('browser');
   const pieChart = getService('pieChart');
   const dashboardExpect = getService('dashboardExpect');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'visualize',
+    'discover',
+    'timePicker',
+  ]);
   let visNames = [];
 
   const expectAllDataRenders = async () => {
@@ -43,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
     expect(tsvbGuageExists).to.be(true);
     await dashboardExpect.timelionLegendCount(0);
-    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
     await dashboardExpect.vegaTextsExist(['5,000']);
     await dashboardExpect.goalAndGuageLabelsExist(['62.925%', '55.625%', '11.915 GB']);
     await dashboardExpect.dataTableRowCount(5);
@@ -73,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.savedSearchRowCount(0);
     await dashboardExpect.inputControlItemCount(5);
     await dashboardExpect.metricValuesExist(['0']);
-    await dashboardExpect.markdownWithValuesExists(['I\'m a markdown!']);
+    await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
 
     // Three instead of 0 because there is a visualization based off a non time based index that
     // should still show data.
@@ -119,14 +126,18 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('adding saved searches', async () => {
-      const visAndSearchNames = visNames.concat(await dashboardAddPanel.addEverySavedSearch('"Rendering Test"'));
+      const visAndSearchNames = visNames.concat(
+        await dashboardAddPanel.addEverySavedSearch('"Rendering Test"')
+      );
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
       expect(visAndSearchNames.length).to.be.equal(28);
       await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.dashboard.saveDashboard('embeddable rendering test', { storeTimeWithDashboard: true });
+      await PageObjects.dashboard.saveDashboard('embeddable rendering test', {
+        storeTimeWithDashboard: true,
+      });
     });
 
     it('initial render test', async () => {

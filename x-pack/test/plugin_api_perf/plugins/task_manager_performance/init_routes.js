@@ -18,7 +18,9 @@ export function initRoutes(server, performanceState) {
         payload: Joi.object({
           tasksToSpawn: Joi.number().required(),
           durationInSeconds: Joi.number().required(),
-          trackExecutionTimeline: Joi.boolean().default(false).required(),
+          trackExecutionTimeline: Joi.boolean()
+            .default(false)
+            .required(),
         }),
       },
     },

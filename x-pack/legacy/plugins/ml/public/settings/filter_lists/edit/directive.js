@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import 'ngreact';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -34,7 +33,7 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-    }
+    },
   })
   .when('/settings/filter_lists/edit_filter_list/:filterId', {
     template,
@@ -43,15 +42,15 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       mlNodeCount: getMlNodeCount,
-    }
+    },
   });
 
-module.directive('mlEditFilterList', function ($route) {
+module.directive('mlEditFilterList', function($route) {
   return {
     restrict: 'E',
     replace: false,
     scope: {},
-    link: function (scope, element) {
+    link: function(scope, element) {
       const props = {
         filterId: $route.current.params.filterId,
         canCreateFilter: checkPermission('canCreateFilter'),
@@ -64,6 +63,6 @@ module.directive('mlEditFilterList', function ($route) {
         </I18nContext>,
         element[0]
       );
-    }
+    },
   };
 });

@@ -26,7 +26,7 @@ import { subscribeAppStateToObservable } from '../util/app_state_utils';
 import { TimeSeriesExplorer } from './timeseriesexplorer';
 import { APP_STATE_ACTION } from './timeseriesexplorer_constants';
 
-module.directive('mlTimeSeriesExplorer', function ($injector) {
+module.directive('mlTimeSeriesExplorer', function($injector) {
   function link($scope, $element) {
     const globalState = $injector.get('globalState');
     const AppState = $injector.get('AppState');
@@ -81,16 +81,17 @@ module.directive('mlTimeSeriesExplorer', function ($injector) {
     function updateComponent() {
       // Pass the timezone to the server for use when aggregating anomalies (by day / hour) for the table.
       const tzConfig = config.get('dateFormat:tz');
-      const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
+      const dateFormatTz = tzConfig !== 'Browser' ? tzConfig : moment.tz.guess();
 
       ReactDOM.render(
         <I18nContext>
-          <TimeSeriesExplorer {...{
-            appStateHandler,
-            dateFormatTz,
-            globalState,
-            timefilter,
-          }}
+          <TimeSeriesExplorer
+            {...{
+              appStateHandler,
+              dateFormatTz,
+              globalState,
+              timefilter,
+            }}
           />
         </I18nContext>,
         $element[0]

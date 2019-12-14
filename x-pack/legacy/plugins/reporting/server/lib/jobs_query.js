@@ -11,7 +11,9 @@ const defaultSize = 10;
 
 function jobsQueryFn(server) {
   const index = server.config().get('xpack.reporting.index');
-  const { callWithInternalUser, errors: esErrors } = server.plugins.elasticsearch.getCluster('admin');
+  const { callWithInternalUser, errors: esErrors } = server.plugins.elasticsearch.getCluster(
+    'admin'
+  );
 
   function getUsername(user) {
     return get(user, 'username', false);
@@ -21,31 +23,28 @@ function jobsQueryFn(server) {
     const defaultBody = {
       search: {
         _source: {
-          excludes: [ 'output.content' ]
+          excludes: ['output.content'],
         },
-        sort: [
-          { created_at: { order: 'desc' } }
-        ],
+        sort: [{ created_at: { order: 'desc' } }],
         size: defaultSize,
-      }
+      },
     };
 
     const query = {
       index: `${index}-*`,
-      body: Object.assign(defaultBody[queryType] || {}, body)
+      body: Object.assign(defaultBody[queryType] || {}, body),
     };
 
-    return callWithInternalUser(queryType, query)
-      .catch((err) => {
-        if (err instanceof esErrors['401']) return;
-        if (err instanceof esErrors['403']) return;
-        if (err instanceof esErrors['404']) return;
-        throw err;
-      });
+    return callWithInternalUser(queryType, query).catch(err => {
+      if (err instanceof esErrors['401']) return;
+      if (err instanceof esErrors['403']) return;
+      if (err instanceof esErrors['404']) return;
+      throw err;
+    });
   }
 
   function getHits(query) {
-    return query.then((res) => get(res, 'hits.hits', []));
+    return query.then(res => get(res, 'hits.hits', []));
   }
 
   return {
@@ -59,19 +58,16 @@ function jobsQueryFn(server) {
           constant_score: {
             filter: {
               bool: {
-                must: [
-                  { terms: { jobtype: jobTypes } },
-                  { term: { created_by: username } },
-                ]
-              }
-            }
-          }
+                must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
+              },
+            },
+          },
         },
       };
 
       if (jobIds) {
         body.query.constant_score.filter.bool.must.push({
-          ids: { values: jobIds }
+          ids: { values: jobIds },
         });
       }
 
@@ -86,21 +82,17 @@ function jobsQueryFn(server) {
           constant_score: {
             filter: {
               bool: {
-                must: [
-                  { terms: { jobtype: jobTypes } },
-                  { term: { created_by: username } },
-                ]
-              }
-            }
-          }
-        }
+                must: [{ terms: { jobtype: jobTypes } }, { term: { created_by: username } }],
+              },
+            },
+          },
+        },
       };
 
-      return execQuery('count', body)
-        .then((doc) => {
-          if (!doc) return 0;
-          return doc.count;
-        });
+      return execQuery('count', body).then(doc => {
+        if (!doc) return 0;
+        return doc.count;
+      });
     },
 
     get(user, id, opts = {}) {
@@ -113,29 +105,25 @@ function jobsQueryFn(server) {
           constant_score: {
             filter: {
               bool: {
-                must: [
-                  { term: { _id: id } },
-                  { term: { created_by: username } }
-                ],
-              }
-            }
-          }
+                must: [{ term: { _id: id } }, { term: { created_by: username } }],
+              },
+            },
+          },
         },
         size: 1,
       };
 
       if (opts.includeContent) {
         body._source = {
-          excludes: []
+          excludes: [],
         };
       }
 
-      return getHits(execQuery('search', body))
-        .then((hits) => {
-          if (hits.length !== 1) return;
-          return hits[0];
-        });
-    }
+      return getHits(execQuery('search', body)).then(hits => {
+        if (hits.length !== 1) return;
+        return hits[0];
+      });
+    },
   };
 }
 

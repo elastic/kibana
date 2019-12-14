@@ -56,7 +56,7 @@ function reduceCloudForCluster(cloudMap, cloud) {
       unique: new Set(),
       vm_type: new Map(),
       region: new Map(),
-      zone: new Map()
+      zone: new Map(),
     };
 
     cloudMap.set(cloud.name, cloudByName);
@@ -104,7 +104,7 @@ function groupInstancesByCluster(instances, product) {
             platformReleases: new Map(),
             distros: new Map(),
             distroReleases: new Map(),
-          }
+          },
         };
         clusterMap.set(clusterUuid, cluster);
       }
@@ -179,16 +179,15 @@ function getIndexPatternForStackProduct(product) {
  * @return {Promise} Object keyed by the cluster UUIDs to make grouping easier.
  */
 export function getHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
-  return fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product)
-    .then(response => handleHighLevelStatsResponse(response, product));
+  return fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product).then(
+    response => handleHighLevelStatsResponse(response, product)
+  );
 }
 
 export async function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
   const config = server.config();
   const isKibanaIndex = product === KIBANA_SYSTEM_ID;
-  const filters = [
-    { terms: { cluster_uuid: clusterUuids } },
-  ];
+  const filters = [{ terms: { cluster_uuid: clusterUuids } }];
 
   // we should supply this from a parameter in the future so that this remains generic
   if (isKibanaIndex) {
@@ -201,11 +200,11 @@ export async function fetchHighLevelStats(server, callCluster, clusterUuids, sta
               should: [
                 { range: { 'kibana_stats.kibana.version': { lt: '6.7.2' } } },
                 { term: { 'kibana_stats.kibana.version': '7.0.0' } },
-              ]
-            }
-          }
+              ],
+            },
+          },
         ],
-      }
+      },
     };
 
     filters.push(kibanaFilter);
@@ -228,7 +227,7 @@ export async function fetchHighLevelStats(server, callCluster, clusterUuids, sta
       `hits.hits._source.${product}_stats.cloud.id`,
       `hits.hits._source.${product}_stats.cloud.vm_type`,
       `hits.hits._source.${product}_stats.cloud.region`,
-      `hits.hits._source.${product}_stats.cloud.zone`
+      `hits.hits._source.${product}_stats.cloud.zone`,
     ],
     body: {
       query: createQuery({
@@ -239,12 +238,10 @@ export async function fetchHighLevelStats(server, callCluster, clusterUuids, sta
       }),
       collapse: {
         // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
-        field: `${product}_stats.${product}.uuid`
+        field: `${product}_stats.${product}.uuid`,
       },
-      sort: [
-        { 'timestamp': 'desc' }
-      ]
-    }
+      sort: [{ timestamp: 'desc' }],
+    },
   };
 
   return callCluster('search', params);
@@ -275,7 +272,7 @@ export function handleHighLevelStatsResponse(response, product) {
         vms: cloud.unique.size,
         regions: mapToList(cloud.region, 'region'),
         vm_types: mapToList(cloud.vm_type, 'vm_type'),
-        zones: mapToList(cloud.zone, 'zone')
+        zones: mapToList(cloud.zone, 'zone'),
       });
     }
 
@@ -290,7 +287,7 @@ export function handleHighLevelStatsResponse(response, product) {
         distros: mapToList(cluster.os.distros, 'distro'),
         distroReleases: mapToList(cluster.os.distroReleases, 'distroRelease'),
       },
-      cloud: clouds.length > 0 ? clouds : undefined
+      cloud: clouds.length > 0 ? clouds : undefined,
     };
   }
 

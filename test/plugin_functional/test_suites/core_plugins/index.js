@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('core plugins', () => {
     loadTestFile(require.resolve('./applications'));
     loadTestFile(require.resolve('./legacy_plugins'));

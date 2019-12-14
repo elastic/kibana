@@ -19,9 +19,12 @@ function mapDispatchToProps(dispatch) {
   return {
     setLayerQuery: (layerId, query) => {
       dispatch(setLayerQuery(layerId, query));
-    }
+    },
   };
 }
 
-const connectedFilterEditor = connect(mapStateToProps, mapDispatchToProps)(FilterEditor);
+const connectedFilterEditor = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FilterEditor);
 export { connectedFilterEditor as FilterEditor };

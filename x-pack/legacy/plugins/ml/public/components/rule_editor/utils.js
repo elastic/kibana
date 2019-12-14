@@ -16,21 +16,21 @@ export function getNewConditionDefaults() {
   return {
     applies_to: APPLIES_TO.ACTUAL,
     operator: OPERATOR.LESS_THAN,
-    value: 1
+    value: 1,
   };
 }
 
 export function getNewRuleDefaults() {
   return {
     actions: [ACTION.SKIP_RESULT],
-    conditions: []
+    conditions: [],
   };
 }
 
 export function getScopeFieldDefaults(filterListIds) {
   const defaults = {
     filter_type: FILTER_TYPE.INCLUDE,
-    enabled: false,   // UI-only property to show field as enabled in Scope section.
+    enabled: false, // UI-only property to show field as enabled in Scope section.
   };
 
   if (filterListIds !== undefined && filterListIds.length > 0) {
@@ -55,7 +55,7 @@ export function isValidRule(rule) {
     } else {
       const scope = rule.scope;
       if (scope !== undefined) {
-        isValid = Object.keys(scope).some(field => (scope[field].enabled === true));
+        isValid = Object.keys(scope).some(field => scope[field].enabled === true);
       }
     }
   }
@@ -71,7 +71,7 @@ export function saveJobRule(job, detectorIndex, ruleIndex, editedRule) {
   const clonedRule = cloneDeep(editedRule);
   const scope = clonedRule.scope;
   if (scope !== undefined) {
-    Object.keys(scope).forEach((field) => {
+    Object.keys(scope).forEach(field => {
       if (scope[field].enabled === false) {
         delete scope[field];
       } else {
@@ -107,18 +107,19 @@ export function deleteJobRule(job, detectorIndex, ruleIndex) {
     customRules.splice(ruleIndex, 1);
     return updateJobRules(job, detectorIndex, customRules);
   } else {
-    return Promise.reject(new Error(
-      i18n.translate('xpack.ml.ruleEditor.deleteJobRule.ruleNoLongerExistsErrorMessage', {
-        defaultMessage: 'Rule no longer exists for detector index {detectorIndex} in job {jobId}',
-        values: {
-          detectorIndex,
-          jobId: job.job_id
-        }
-      })
-    ));
+    return Promise.reject(
+      new Error(
+        i18n.translate('xpack.ml.ruleEditor.deleteJobRule.ruleNoLongerExistsErrorMessage', {
+          defaultMessage: 'Rule no longer exists for detector index {detectorIndex} in job {jobId}',
+          values: {
+            detectorIndex,
+            jobId: job.job_id,
+          },
+        })
+      )
+    );
   }
 }
-
 
 export function updateJobRules(job, detectorIndex, rules) {
   // Pass just the detector with the edited rule to the updateJob endpoint.
@@ -127,9 +128,9 @@ export function updateJobRules(job, detectorIndex, rules) {
     detectors: [
       {
         detector_index: detectorIndex,
-        custom_rules: rules
-      }
-    ]
+        custom_rules: rules,
+      },
+    ],
   };
 
   let customSettings = {};
@@ -140,22 +141,24 @@ export function updateJobRules(job, detectorIndex, rules) {
   }
 
   return new Promise((resolve, reject) => {
-    mlJobService.updateJob(jobId, jobData)
-      .then((resp) => {
+    mlJobService
+      .updateJob(jobId, jobData)
+      .then(resp => {
         if (resp.success) {
           // Refresh the job data in the job service before resolving.
-          mlJobService.refreshJob(jobId)
+          mlJobService
+            .refreshJob(jobId)
             .then(() => {
               resolve({ success: true });
             })
-            .catch((refreshResp) => {
+            .catch(refreshResp => {
               reject(refreshResp);
             });
         } else {
           reject(resp);
         }
       })
-      .catch((resp) => {
+      .catch(resp => {
         reject(resp);
       });
   });
@@ -165,16 +168,12 @@ export function updateJobRules(job, detectorIndex, rules) {
 // adding an item to the filter with the specified ID.
 export function addItemToFilter(item, filterId) {
   return new Promise((resolve, reject) => {
-    ml.filters.updateFilter(
-      filterId,
-      undefined,
-      [item],
-      undefined
-    )
-      .then((updatedFilter) => {
+    ml.filters
+      .updateFilter(filterId, undefined, [item], undefined)
+      .then(updatedFilter => {
         resolve(updatedFilter);
       })
-      .catch((error) => {
+      .catch(error => {
         reject(error);
       });
   });
@@ -194,16 +193,21 @@ export function buildRuleDescription(rule) {
       case ACTION.SKIP_RESULT:
         actionsText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.resultActionTypeText', {
           defaultMessage: 'result',
-          description: 'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText +' +
-            'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText'
+          description:
+            'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText +' +
+            'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText',
         });
         break;
       case ACTION.SKIP_MODEL_UPDATE:
-        actionsText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.modelUpdateActionTypeText', {
-          defaultMessage: 'model update',
-          description: 'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
-            'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText'
-        });
+        actionsText += i18n.translate(
+          'xpack.ml.ruleEditor.ruleDescription.modelUpdateActionTypeText',
+          {
+            defaultMessage: 'model update',
+            description:
+              'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
+              'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText',
+          }
+        );
         break;
     }
   });
@@ -215,9 +219,14 @@ export function buildRuleDescription(rule) {
       }
       conditionsText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.conditionsText', {
         defaultMessage: '{appliesTo} is {operator} {value}',
-        values: { appliesTo: appliesToText(condition.applies_to), operator: operatorToText(condition.operator), value: condition.value },
-        description: 'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
-          'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText'
+        values: {
+          appliesTo: appliesToText(condition.applies_to),
+          operator: operatorToText(condition.operator),
+          value: condition.value,
+        },
+        description:
+          'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
+          'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText',
       });
     });
   }
@@ -235,9 +244,14 @@ export function buildRuleDescription(rule) {
       const filter = scope[fieldName];
       filtersText += i18n.translate('xpack.ml.ruleEditor.ruleDescription.filtersText', {
         defaultMessage: '{fieldName} is {filterType} {filterId}',
-        values: { fieldName, filterType: filterTypeToText(filter.filter_type), filterId: filter.filter_id },
-        description: 'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
-          'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText'
+        values: {
+          fieldName,
+          filterType: filterTypeToText(filter.filter_type),
+          filterId: filter.filter_id,
+        },
+        description:
+          'Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
+          'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText',
       });
     });
   }
@@ -247,11 +261,12 @@ export function buildRuleDescription(rule) {
     values: {
       actions: actionsText,
       conditions: conditionsText,
-      filters: filtersText
+      filters: filtersText,
     },
-    description: 'Composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
+    description:
+      'Composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + ' +
       'xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText.' +
-      ' (Example: skip model update when actual is less than 1 AND ip is in xxx)'
+      ' (Example: skip model update when actual is less than 1 AND ip is in xxx)',
   });
 }
 
@@ -260,44 +275,60 @@ export function filterTypeToText(filterType) {
     case FILTER_TYPE.INCLUDE:
       return i18n.translate('xpack.ml.ruleEditor.includeFilterTypeText', { defaultMessage: 'in' });
     case FILTER_TYPE.EXCLUDE:
-      return i18n.translate('xpack.ml.ruleEditor.excludeFilterTypeText', { defaultMessage: 'not in' });
+      return i18n.translate('xpack.ml.ruleEditor.excludeFilterTypeText', {
+        defaultMessage: 'not in',
+      });
 
     default:
-      return (filterType !== undefined) ? filterType : '';
+      return filterType !== undefined ? filterType : '';
   }
 }
 
 export function appliesToText(appliesTo) {
   switch (appliesTo) {
     case APPLIES_TO.ACTUAL:
-      return i18n.translate('xpack.ml.ruleEditor.actualAppliesTypeText', { defaultMessage: 'actual' });
+      return i18n.translate('xpack.ml.ruleEditor.actualAppliesTypeText', {
+        defaultMessage: 'actual',
+      });
     case APPLIES_TO.TYPICAL:
-      return i18n.translate('xpack.ml.ruleEditor.typicalAppliesTypeText', { defaultMessage: 'typical' });
+      return i18n.translate('xpack.ml.ruleEditor.typicalAppliesTypeText', {
+        defaultMessage: 'typical',
+      });
 
     case APPLIES_TO.DIFF_FROM_TYPICAL:
-      return i18n.translate('xpack.ml.ruleEditor.diffFromTypicalAppliesTypeText', { defaultMessage: 'diff from typical' });
+      return i18n.translate('xpack.ml.ruleEditor.diffFromTypicalAppliesTypeText', {
+        defaultMessage: 'diff from typical',
+      });
 
     default:
-      return (appliesTo !== undefined) ? appliesTo : '';
+      return appliesTo !== undefined ? appliesTo : '';
   }
 }
 
 export function operatorToText(operator) {
   switch (operator) {
     case OPERATOR.LESS_THAN:
-      return i18n.translate('xpack.ml.ruleEditor.lessThanOperatorTypeText', { defaultMessage: 'less than' });
+      return i18n.translate('xpack.ml.ruleEditor.lessThanOperatorTypeText', {
+        defaultMessage: 'less than',
+      });
 
     case OPERATOR.LESS_THAN_OR_EQUAL:
-      return i18n.translate('xpack.ml.ruleEditor.lessThanOrEqualToOperatorTypeText', { defaultMessage: 'less than or equal to' });
+      return i18n.translate('xpack.ml.ruleEditor.lessThanOrEqualToOperatorTypeText', {
+        defaultMessage: 'less than or equal to',
+      });
 
     case OPERATOR.GREATER_THAN:
-      return i18n.translate('xpack.ml.ruleEditor.greaterThanOperatorTypeText', { defaultMessage: 'greater than' });
+      return i18n.translate('xpack.ml.ruleEditor.greaterThanOperatorTypeText', {
+        defaultMessage: 'greater than',
+      });
 
     case OPERATOR.GREATER_THAN_OR_EQUAL:
-      return i18n.translate('xpack.ml.ruleEditor.greaterThanOrEqualToOperatorTypeText', { defaultMessage: 'greater than or equal to' });
+      return i18n.translate('xpack.ml.ruleEditor.greaterThanOrEqualToOperatorTypeText', {
+        defaultMessage: 'greater than or equal to',
+      });
 
     default:
-      return (operator !== undefined) ? operator : '';
+      return operator !== undefined ? operator : '';
   }
 }
 

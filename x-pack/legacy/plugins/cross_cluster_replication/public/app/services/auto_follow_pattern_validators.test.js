@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { validateAutoFollowPattern } from './auto_follow_pattern_validators';
 
 jest.mock('ui/new_platform');
@@ -20,10 +19,10 @@ describe('Auto-follow pattern validators', () => {
     it('should validate all props from auto-follow patten', () => {
       const autoFollowPattern = {
         name: '_wrong-name',
-        leaderIndexPatterns: ['wrong\pattern'],
+        leaderIndexPatterns: ['wrongpattern'],
         followIndexPatternPrefix: 'pre?fix_',
         followIndexPatternSuffix: '_suf?fix',
-        otherProp: 'foo'
+        otherProp: 'foo',
       };
       const errors = validateAutoFollowPattern(autoFollowPattern);
       expect(errors).toMatchSnapshot();

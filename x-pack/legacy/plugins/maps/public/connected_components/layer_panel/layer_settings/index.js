@@ -24,7 +24,7 @@ function mapStateToProps(state = {}) {
     layerId: selectedLayer.getId(),
     maxZoom: selectedLayer.getMaxZoom(),
     minZoom: selectedLayer.getMinZoom(),
-    layer: selectedLayer
+    layer: selectedLayer,
   };
 }
 
@@ -36,9 +36,12 @@ function mapDispatchToProps(dispatch) {
     updateAlpha: (id, alpha) => dispatch(updateLayerAlpha(id, alpha)),
     setLayerApplyGlobalQuery: (layerId, applyGlobalQuery) => {
       dispatch(setLayerApplyGlobalQuery(layerId, applyGlobalQuery));
-    }
+    },
   };
 }
 
-const connectedLayerSettings = connect(mapStateToProps, mapDispatchToProps)(LayerSettings);
+const connectedLayerSettings = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(LayerSettings);
 export { connectedLayerSettings as LayerSettings };

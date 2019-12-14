@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 // import the uiExports that we want to "use"
 import 'uiExports/fieldFormats';
 import 'uiExports/savedObjectTypes';
@@ -33,7 +32,6 @@ if (typeof uiRoutes.enable === 'function') {
   uiRoutes.enable();
 }
 
-uiRoutes
-  .otherwise({
-    redirectTo: '/overview'
-  });
+uiRoutes.otherwise({
+  redirectTo: '/overview',
+});

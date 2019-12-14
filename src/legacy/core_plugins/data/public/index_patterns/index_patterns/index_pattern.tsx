@@ -535,13 +535,10 @@ export class IndexPattern implements StaticIndexPattern {
             }
 
             if (unresolvedCollision) {
-              const message = i18n.translate(
-                'data.indexPatterns.unableWriteLabel',
-                {
-                  defaultMessage:
-                    'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-                }
-              );
+              const message = i18n.translate('data.indexPatterns.unableWriteLabel', {
+                defaultMessage:
+                  'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
+              });
               this.notifications.toasts.addDanger(message);
               throw err;
             }

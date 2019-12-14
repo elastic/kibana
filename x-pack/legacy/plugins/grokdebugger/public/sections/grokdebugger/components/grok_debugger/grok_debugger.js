@@ -29,22 +29,22 @@ export class GrokDebugger extends React.Component {
       rawEvent: '',
       pattern: '',
       customPatterns: '',
-      structuredEvent: {}
+      structuredEvent: {},
     };
     this.grokdebuggerRequest = new GrokdebuggerRequest();
   }
 
-  onRawEventChange = (rawEvent) => {
+  onRawEventChange = rawEvent => {
     this.setState({ rawEvent });
     this.grokdebuggerRequest.rawEvent = rawEvent.trimEnd();
-  }
+  };
 
-  onPatternChange = (pattern) => {
+  onPatternChange = pattern => {
     this.setState({ pattern });
     this.grokdebuggerRequest.pattern = pattern.trimEnd();
-  }
+  };
 
-  onCustomPatternsChange = (customPatterns) => {
+  onCustomPatternsChange = customPatterns => {
     this.setState({ customPatterns });
 
     customPatterns = customPatterns.trim();
@@ -60,20 +60,22 @@ export class GrokDebugger extends React.Component {
       // patternName patternDefinition
       // For example:
       // POSTGRESQL %{DATESTAMP:timestamp} %{TZ} %{DATA:user_id} %{GREEDYDATA:connection_id} %{POSINT:pid}
-      const [ , patternName, patternDefinition ] = customPattern.match(/(\S+)\s+(.+)/) || [];
+      const [, patternName, patternDefinition] = customPattern.match(/(\S+)\s+(.+)/) || [];
       if (patternName && patternDefinition) {
         customPatternsObj[patternName] = patternDefinition;
       }
     });
 
     this.grokdebuggerRequest.customPatterns = customPatternsObj;
-  }
+  };
 
   simulateGrok = async () => {
     try {
-      const simulateResponse = await this.props.grokdebuggerService.simulate(this.grokdebuggerRequest);
+      const simulateResponse = await this.props.grokdebuggerService.simulate(
+        this.grokdebuggerRequest
+      );
       this.setState({
-        structuredEvent: simulateResponse.structuredEvent
+        structuredEvent: simulateResponse.structuredEvent,
       });
 
       if (!isEmpty(simulateResponse.error)) {
@@ -82,18 +84,20 @@ export class GrokDebugger extends React.Component {
     } catch (e) {
       toastNotifications.addDanger(e);
     }
-  }
+  };
 
   onSimulateClick = () => {
-    this.setState({
-      structuredEvent: {}
-    }, this.simulateGrok);
-  }
+    this.setState(
+      {
+        structuredEvent: {},
+      },
+      this.simulateGrok
+    );
+  };
 
   isSimulateDisabled = () => {
-    return this.state.rawEvent.trim() === ''
-      || this.state.pattern.trim() === '';
-  }
+    return this.state.rawEvent.trim() === '' || this.state.pattern.trim() === '';
+  };
 
   render() {
     return (
@@ -101,18 +105,9 @@ export class GrokDebugger extends React.Component {
         <EuiPageBody>
           <EuiPageContent>
             <EuiPageContentBody>
-              <EuiForm
-                className="grokdebugger-container"
-                data-test-subj="grokDebugger"
-              >
-                <EventInput
-                  value={this.state.rawEvent}
-                  onChange={this.onRawEventChange}
-                />
-                <PatternInput
-                  value={this.state.pattern}
-                  onChange={this.onPatternChange}
-                />
+              <EuiForm className="grokdebugger-container" data-test-subj="grokDebugger">
+                <EventInput value={this.state.rawEvent} onChange={this.onRawEventChange} />
+                <PatternInput value={this.state.pattern} onChange={this.onPatternChange} />
                 <EuiSpacer />
                 <CustomPatternsInput
                   value={this.state.customPatterns}

@@ -22,15 +22,10 @@ import sinon from 'sinon';
 // because it is one of the few places that we need to access the IndexPattern class itself, rather
 // than just the type. Doing this as a temporary measure; it will be left behind when migrating to NP.
 import { IndexPattern } from '../../legacy/core_plugins/data/public/index_patterns/index_patterns';
-import {
-  FieldList,
-  getRoutes,
-  formatHitProvider,
-  flattenHitWrapper,
-} from 'ui/index_patterns';
+import { FieldList, getRoutes, formatHitProvider, flattenHitWrapper } from 'ui/index_patterns';
 import { fieldFormats } from 'ui/registry/field_formats';
 
-export default  function StubIndexPattern(pattern, getConfig, timeField, fields) {
+export default function StubIndexPattern(pattern, getConfig, timeField, fields) {
   this.id = pattern;
   this.title = pattern;
   this.popularizeField = sinon.stub();
@@ -52,11 +47,11 @@ export default  function StubIndexPattern(pattern, getConfig, timeField, fields)
   this.fieldsFetcher = { apiClient: { baseUrl: '' } };
   this.formatField = this.formatHit.formatField;
 
-  this._reindexFields = function () {
+  this._reindexFields = function() {
     this.fields = new FieldList(this, this.fields || fields);
   };
 
-  this.stubSetFieldFormat = function (fieldName, id, params) {
+  this.stubSetFieldFormat = function(fieldName, id, params) {
     const FieldFormat = fieldFormats.getType(id);
     this.fieldFormatMap[fieldName] = new FieldFormat(params);
     this._reindexFields();

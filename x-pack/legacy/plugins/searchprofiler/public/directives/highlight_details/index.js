@@ -13,11 +13,10 @@ uiModule.directive('highlightdetails', HighlightService => {
   return {
     restrict: 'E',
     scope: {
-      data: '@'
+      data: '@',
     },
     template: template,
     link: $scope => {
-
       function render(data) {
         if (!data) {
           return;
@@ -29,7 +28,6 @@ uiModule.directive('highlightdetails', HighlightService => {
       $scope.$watch(() => {
         return HighlightService.details;
       }, render);
-
-    }
+    },
   };
 });

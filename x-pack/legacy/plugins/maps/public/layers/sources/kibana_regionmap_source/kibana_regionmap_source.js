@@ -13,48 +13,43 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { FEATURE_ID_PROPERTY_NAME } from '../../../../common/constants';
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
-
   static type = 'REGIONMAP_FILE';
   static title = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
-    defaultMessage: 'Configured GeoJSON'
+    defaultMessage: 'Configured GeoJSON',
   });
   static description = i18n.translate('xpack.maps.source.kbnRegionMapDescription', {
-    defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml'
-  })
-  ;
+    defaultMessage: 'Vector data from hosted GeoJSON configured in kibana.yml',
+  });
   static icon = 'logoKibana';
 
   static createDescriptor({ name }) {
     return {
       type: KibanaRegionmapSource.type,
-      name: name
+      name: name,
     };
   }
 
   static renderEditor = ({ onPreviewSource, inspectorAdapters }) => {
-    const onSourceConfigChange = (sourceConfig) => {
+    const onSourceConfigChange = sourceConfig => {
       const sourceDescriptor = KibanaRegionmapSource.createDescriptor(sourceConfig);
       const source = new KibanaRegionmapSource(sourceDescriptor, inspectorAdapters);
       onPreviewSource(source);
     };
 
-    return (
-      <CreateSourceEditor
-        onSourceConfigChange={onSourceConfigChange}
-      />
-    );
+    return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;
   };
 
   async getImmutableProperties() {
     return [
       {
         label: getDataSourceLabel(),
-        value: KibanaRegionmapSource.title },
+        value: KibanaRegionmapSource.title,
+      },
       {
         label: i18n.translate('xpack.maps.source.kbnRegionMap.vectorLayerLabel', {
-          defaultMessage: 'Vector layer'
+          defaultMessage: 'Vector layer',
         }),
-        value: this._descriptor.name
+        value: this._descriptor.name,
       },
     ];
   }
@@ -63,12 +58,13 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     const regionList = getKibanaRegionList();
     const meta = regionList.find(source => source.name === this._descriptor.name);
     if (!meta) {
-      throw new Error(i18n.translate('xpack.maps.source.kbnRegionMap.noConfigErrorMessage', {
-        defaultMessage: `Unable to find map.regionmap configuration for {name}`,
-        values: {
-          name: this._descriptor.name
-        }
-      })
+      throw new Error(
+        i18n.translate('xpack.maps.source.kbnRegionMap.noConfigErrorMessage', {
+          defaultMessage: `Unable to find map.regionmap configuration for {name}`,
+          values: {
+            name: this._descriptor.name,
+          },
+        })
       );
     }
     return meta;
@@ -79,13 +75,13 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     const featureCollection = await AbstractVectorSource.getGeoJson({
       format: vectorFileMeta.format.type,
       featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
-      fetchUrl: vectorFileMeta.url
+      fetchUrl: vectorFileMeta.url,
     });
     featureCollection.features.forEach((feature, index) => {
       feature.properties[FEATURE_ID_PROPERTY_NAME] = index;
     });
     return {
-      data: featureCollection
+      data: featureCollection,
     };
   }
 

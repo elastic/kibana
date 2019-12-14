@@ -24,10 +24,9 @@ import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
 import { luceneStringToDsl } from '../lucene_string_to_dsl';
 import { decorateQuery } from '../decorate_query';
 
-describe('build query', function () {
-  describe('buildEsQuery', function () {
-
-    it('should return the parameters of an Elasticsearch bool query', function () {
+describe('build query', function() {
+  describe('buildEsQuery', function() {
+    it('should return the parameters of an Elasticsearch bool query', function() {
       const result = buildEsQuery();
       const expected = {
         bool: {
@@ -35,12 +34,12 @@ describe('build query', function () {
           filter: [],
           should: [],
           must_not: [],
-        }
+        },
       };
       expect(result).to.eql(expected);
     });
 
-    it('should combine queries and filters from multiple query languages into a single ES bool query', function () {
+    it('should combine queries and filters from multiple query languages into a single ES bool query', function() {
       const queries = [
         { query: 'extension:jpg', language: 'kuery' },
         { query: 'bar:baz', language: 'lucene' },
@@ -58,16 +57,14 @@ describe('build query', function () {
 
       const expectedResult = {
         bool: {
-          must: [
-            decorateQuery(luceneStringToDsl('bar:baz'), config.queryStringOptions),
-          ],
+          must: [decorateQuery(luceneStringToDsl('bar:baz'), config.queryStringOptions)],
           filter: [
             toElasticsearchQuery(fromKueryExpression('extension:jpg'), indexPattern),
             { match_all: {} },
           ],
           should: [],
           must_not: [],
-        }
+        },
       };
 
       const result = buildEsQuery(indexPattern, queries, filters, config);
@@ -75,7 +72,7 @@ describe('build query', function () {
       expect(result).to.eql(expectedResult);
     });
 
-    it('should accept queries and filters as either single objects or arrays', function () {
+    it('should accept queries and filters as either single objects or arrays', function() {
       const queries = { query: 'extension:jpg', language: 'lucene' };
       const filters = {
         match_all: {},
@@ -88,13 +85,11 @@ describe('build query', function () {
 
       const expectedResult = {
         bool: {
-          must: [
-            decorateQuery(luceneStringToDsl('extension:jpg'), config.queryStringOptions),
-          ],
+          must: [decorateQuery(luceneStringToDsl('extension:jpg'), config.queryStringOptions)],
           filter: [{ match_all: {} }],
           should: [],
           must_not: [],
-        }
+        },
       };
 
       const result = buildEsQuery(indexPattern, queries, filters, config);
@@ -102,14 +97,12 @@ describe('build query', function () {
       expect(result).to.eql(expectedResult);
     });
 
-    it('should use the default time zone set in the Advanced Settings in queries and filters', function () {
+    it('should use the default time zone set in the Advanced Settings in queries and filters', function() {
       const queries = [
         { query: '@timestamp:"2019-03-23T13:18:00"', language: 'kuery' },
-        { query: '@timestamp:"2019-03-23T13:18:00"', language: 'lucene' }
+        { query: '@timestamp:"2019-03-23T13:18:00"', language: 'lucene' },
       ];
-      const filters = [
-        { match_all: {}, meta: { type: 'match_all' } }
-      ];
+      const filters = [{ match_all: {}, meta: { type: 'match_all' } }];
       const config = {
         allowLeadingWildcards: true,
         queryStringOptions: {},
@@ -120,20 +113,26 @@ describe('build query', function () {
       const expectedResult = {
         bool: {
           must: [
-            decorateQuery(luceneStringToDsl('@timestamp:"2019-03-23T13:18:00"'), config.queryStringOptions, config.dateFormatTZ),
+            decorateQuery(
+              luceneStringToDsl('@timestamp:"2019-03-23T13:18:00"'),
+              config.queryStringOptions,
+              config.dateFormatTZ
+            ),
           ],
           filter: [
-            toElasticsearchQuery(fromKueryExpression('@timestamp:"2019-03-23T13:18:00"'), indexPattern, config),
-            { match_all: {} }
+            toElasticsearchQuery(
+              fromKueryExpression('@timestamp:"2019-03-23T13:18:00"'),
+              indexPattern,
+              config
+            ),
+            { match_all: {} },
           ],
           should: [],
           must_not: [],
-        }
+        },
       };
       const result = buildEsQuery(indexPattern, queries, filters, config);
       expect(result).to.eql(expectedResult);
     });
-
   });
-
 });

@@ -29,7 +29,7 @@ import { renderCreateIndexPatternWizard, destroyCreateIndexPatternWizard } from 
 uiRoutes.when('/management/kibana/index_pattern', {
   template: angularTemplate,
   k7Breadcrumbs: getCreateBreadcrumbs,
-  controller: function ($scope, $injector) {
+  controller: function($scope, $injector) {
     // Wait for the directives to execute
     const kbnUrl = $injector.get('kbnUrl');
     const Private = $injector.get('Private');
@@ -52,12 +52,9 @@ uiRoutes.when('/management/kibana/index_pattern', {
 
       const initialQuery = $routeParams.id ? decodeURIComponent($routeParams.id) : undefined;
 
-      renderCreateIndexPatternWizard(
-        initialQuery,
-        services
-      );
+      renderCreateIndexPatternWizard(initialQuery, services);
     });
 
     $scope.$on('$destroy', destroyCreateIndexPatternWizard);
-  }
+  },
 });

@@ -25,7 +25,7 @@ function TypeGenerator(context) {
 function nonValidIndexType(token) {
   return !(token === '_all' || token[0] !== '_');
 }
-export class  TypeAutocompleteComponent extends ListComponent {
+export class TypeAutocompleteComponent extends ListComponent {
   constructor(name, parent, multiValued) {
     super(name, TypeGenerator, parent, multiValued);
   }
