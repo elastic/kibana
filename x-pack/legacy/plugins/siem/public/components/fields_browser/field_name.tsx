@@ -30,24 +30,16 @@ import * as i18n from './translations';
  * The name of a (draggable) field
  */
 export const FieldNameContainer = styled.span`
-  padding: 5px;
-  {
+  ${({ theme }) => `
     border-radius: 4px;
     padding: 0 4px 0 8px;
     position: relative;
 
     &::before {
-      background-image: linear-gradient(
-          135deg,
-          ${({ theme }) => theme.eui.euiColorMediumShade} 25%,
-          transparent 25%
-        ),
-        linear-gradient(-135deg, ${({ theme }) =>
-          theme.eui.euiColorMediumShade} 25%, transparent 25%),
-        linear-gradient(135deg, transparent 75%, ${({ theme }) =>
-          theme.eui.euiColorMediumShade} 75%),
-        linear-gradient(-135deg, transparent 75%, ${({ theme }) =>
-          theme.eui.euiColorMediumShade} 75%);
+      background-image: linear-gradient(135deg, ${theme.eui.euiColorMediumShade} 25%, transparent 25%),
+        linear-gradient(-135deg, ${theme.eui.euiColorMediumShade} 25%, transparent 25%),
+        linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%),
+        linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorMediumShade} 75%);
       background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
       background-size: 2px 2px;
       bottom: 2px;
@@ -66,19 +58,13 @@ export const FieldNameContainer = styled.span`
       color: #fff;
 
       &::before {
-        background-image: linear-gradient(
-            135deg,
-            #fff 25%,
-            transparent 25%
-          ),
-          linear-gradient(-135deg, ${({ theme }) =>
-            theme.eui.euiColorLightestShade} 25%, transparent 25%),
-          linear-gradient(135deg, transparent 75%, ${({ theme }) =>
-            theme.eui.euiColorLightestShade} 75%),
-          linear-gradient(-135deg, transparent 75%, ${({ theme }) =>
-            theme.eui.euiColorLightestShade} 75%);
+        background-image: linear-gradient(135deg, #fff 25%, transparent 25%),
+          linear-gradient(-135deg, ${theme.eui.euiColorLightestShade} 25%, transparent 25%),
+          linear-gradient(135deg, transparent 75%, ${theme.eui.euiColorLightestShade} 75%),
+          linear-gradient(-135deg, transparent 75%, ${theme.eui.euiColorLightestShade} 75%);
       }
     }
+  `}
 `;
 
 FieldNameContainer.displayName = 'FieldNameContainer';

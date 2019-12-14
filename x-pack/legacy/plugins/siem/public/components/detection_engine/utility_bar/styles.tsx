@@ -17,9 +17,9 @@ export interface BarProps {
 export const Bar = styled.aside.attrs({
   className: 'siemUtilityBar',
 })<BarProps>`
-  ${({ border, theme }) => css`
+  ${({ border, theme }) => `
     ${border &&
-      css`
+      `
         border-bottom: ${theme.eui.euiBorderThin};
         padding-bottom: ${theme.eui.paddingSizes.s};
       `}
