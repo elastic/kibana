@@ -25,7 +25,6 @@ import { PARAMETERS_DEFINITION } from '../../../../constants';
 const getDefaultToggleValue = (param: string, field: FieldType) => {
   switch (param) {
     case 'copy_to':
-    case 'coerce':
     case 'boost':
     case 'ignore_malformed': {
       return field[param] !== undefined && field[param] !== getFieldConfig(param).defaultValue;
