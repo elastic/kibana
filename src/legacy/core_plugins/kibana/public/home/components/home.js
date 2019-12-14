@@ -51,7 +51,7 @@ export class Home extends Component {
       getServices().getInjected('disableWelcomeScreen') ||
       props.localStorage.getItem(KEY_ENABLE_WELCOME) === 'false'
     );
-    const currentOptInStatus = getServices().getInjected('telemetryOptedIn');
+    const currentOptInStatus = getServices().getInjected('telemetryOptedIn'); // this returns false if optIn isn't specified in the kiubana.yml. It doesn't respond to a change in the optIn status in Advanced settings
     this.state = {
       // If welcome is enabled, we wait for loading to complete
       // before rendering. This prevents an annoying flickering

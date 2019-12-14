@@ -64,7 +64,7 @@ test('fires opt-in seen when mounted', () => {
 
   shallow(
     // @ts-ignore
-    <Welcome urlBase="/" onSkip={() => {}} showTelemetryDisclaimer={true} onOptInSeen={seen} />
+    <Welcome urlBase="/" onSkip={() => {}} currentOptInStatus={true} onOptInSeen={seen} />
   );
 
   expect(seen).toHaveBeenCalled();
