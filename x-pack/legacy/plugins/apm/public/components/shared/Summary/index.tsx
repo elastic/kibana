@@ -18,7 +18,6 @@ interface Props {
 const theme = euiLightVars;
 
 const Item = styled(EuiFlexItem)`
-  flex-wrap: nowrap;
   border-right: 1px solid ${theme.euiColorLightShade};
   padding-right: ${px(units.half)};
   flex-flow: row nowrap;

@@ -5,6 +5,13 @@
     "no-empty-source": null,
     "no-descending-specificity": null,
     "declaration-empty-line-before": null,
-    "declaration-block-trailing-semicolon": null
+    "declaration-block-trailing-semicolon": null,
+    "function-name-case": null,
+    "function-whitespace-after": null,
+    "declaration-bang-space-before": null,
+    "declaration-bang-space-after": null,
+    "media-feature-range-operator-space-before": null,
+    "media-feature-range-operator-space-after": null,
+    "length-zero-no-unit": null
   }
 }

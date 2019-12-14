@@ -10,8 +10,8 @@ import styled from 'styled-components';
 
 const EuiFlexItemReducedMargin = styled(EuiFlexItem)`
   && {
-    margin-left: 0;
-    margin-right: 0;
+    margin-left: 0px;
+    margin-right: 0px;
   }
 `;
 

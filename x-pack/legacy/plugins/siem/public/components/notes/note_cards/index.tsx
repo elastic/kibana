@@ -13,9 +13,7 @@ import { AddNote } from '../add_note';
 import { AssociateNote, GetNewNoteId, UpdateNote } from '../helpers';
 import { NoteCard } from '../note_card';
 
-const AddNoteContainer = styled.div`
-  /* stylelint-disable no-empty-block */
-`;
+const AddNoteContainer = styled.div``;
 AddNoteContainer.displayName = 'AddNoteContainer';
 
 const NoteContainer = styled.div`

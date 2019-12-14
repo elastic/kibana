@@ -59,9 +59,7 @@ TimelineBody.displayName = 'TimelineBody';
 export const EventsTable = styled.div.attrs(({ className }) => ({
   className: `siemEventsTable ${className}`,
   role: 'table',
-}))`
-  /* stylelint-disable no-empty-block */
-`;
+}))``;
 EventsTable.displayName = 'EventsTable';
 
 /* EVENTS HEAD */
@@ -114,14 +112,14 @@ export const EventsTh = styled.div.attrs(({ className }) => ({
   min-width: 0;
   position: ${({ position }) => position};
 
+  .siemEventsTable__thGroupActions &:first-child:last-child {
+    flex: 1;
+  }
+
   .siemEventsTable__thGroupData &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
     cursor: move; /* Fallback for IE11 */
     cursor: grab;
-  }
-
-  .siemEventsTable__thGroupActions &:first-child:last-child {
-    flex: 1;
   }
 `;
 EventsTh.displayName = 'EventsTh';
@@ -299,14 +297,14 @@ export const EventsHeadingHandle = styled.div.attrs(({ className }) => ({
   visibility: hidden;
   width: ${({ theme }) => theme.eui.euiBorderWidthThick};
 
-  &:hover {
-    background-color: ${({ theme }) => theme.eui.euiColorPrimary};
-    cursor: col-resize;
-  }
-
   .siemEventsTable__thead:hover & {
     opacity: 1;
     visibility: visible;
+  }
+
+  &:hover {
+    background-color: ${({ theme }) => theme.eui.euiColorPrimary};
+    cursor: col-resize;
   }
 `;
 EventsHeadingHandle.displayName = 'EventsHeadingHandle';
