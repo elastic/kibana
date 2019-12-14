@@ -1,0 +1,16 @@
+{
+  "rule_id": "3bba2ac1-132f-4fe4-97c8-e4815760ca66",
+  "risk_score": 50,
+  "description": "PAN-OS Flows [Filebeat PANW] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "PAN-OS Flows [Filebeat PANW] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "panw.panos:* and event.category: \"network_traffic\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

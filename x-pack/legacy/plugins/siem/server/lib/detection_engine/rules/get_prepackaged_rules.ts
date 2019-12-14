@@ -40,8 +40,9 @@ export const validateAllPrepackagedRules = (
       // if you do not have valid rules or try to startup with invalid pre-packaged rules.
       throw new TypeError(
         `name: "${rule.name}", rule_id: "${rule.rule_id}" within the folder rules/prepackaged_rules ` +
-          `is not a valid detection engine rule ${validatedRule.error.message}. Expect the system ` +
-          `to not work with pre-packaged rules until this rule is fixed or the file is removed.`
+          `is not a valid detection engine rule. Expect the system ` +
+          `to not work with pre-packaged rules until this rule is fixed ` +
+          `or the file is removed. Error is: ${validatedRule.error.message}`
       );
     } else {
       return validatedRule.value;

@@ -1,0 +1,42 @@
+{
+  "rule_id": "c24c5ac2-eda9-4f1c-8414-564baf515a4a",
+  "risk_score": 50,
+  "description": "Windows nmap scan activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows nmap scan activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:nmap.exe",
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "alias": null,
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "Network connection detected (rule: NetworkConnect)",
+        "params": {
+          "query": "Network connection detected (rule: NetworkConnect)"
+        },
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "Network connection detected (rule: NetworkConnect)",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

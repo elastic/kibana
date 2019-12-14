@@ -1,0 +1,16 @@
+{
+  "rule_id": "ff223e24-f5cc-4a87-8731-f479e3c76d41",
+  "risk_score": 50,
+  "description": "Linux: Shell Activity By Web Server",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Shell Activity By Web Server",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: bash and (user.name: apache or www)",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

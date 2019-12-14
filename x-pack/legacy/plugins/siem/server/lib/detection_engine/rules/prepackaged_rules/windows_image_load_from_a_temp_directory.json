@@ -1,0 +1,42 @@
+{
+  "rule_id": "ce124a91-4a21-46be-95f9-fb24783169a5",
+  "risk_score": 50,
+  "description": "Windows image load from a temp directory",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows image load from a temp directory",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "file.path:Temp",
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "alias": null,
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "Image loaded (rule: ImageLoad)",
+        "params": {
+          "query": "Image loaded (rule: ImageLoad)"
+        },
+        "disabled": false,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "Image loaded (rule: ImageLoad)",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

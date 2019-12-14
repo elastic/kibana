@@ -1,0 +1,67 @@
+{
+  "rule_id": "df648647-6fbf-4f7a-a0b3-8c14d6bc6059",
+  "risk_score": 50,
+  "description": "Linux: Whoami Commmand",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Whoami Commmand",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: whoami",
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "process_started",
+        "params": {
+          "query": "process_started"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    },
+    {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.dataset",
+        "value": "process",
+        "params": {
+          "query": "process"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

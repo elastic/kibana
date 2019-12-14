@@ -1,0 +1,16 @@
+{
+  "rule_id": "db438892-1781-4edc-bf9e-f7d229c8f3d8",
+  "risk_score": 50,
+  "description": "Nginx logs [Filebeat Nginx] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Nginx logs [Filebeat Nginx] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module:nginx",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

@@ -1,0 +1,69 @@
+{
+  "rule_id": "b8e756f9-07f1-44a0-ac23-a1ee74454d55",
+  "risk_score": 50,
+  "description": "All logs [Filebeat Kafka] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "All logs [Filebeat Kafka] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.module": {
+            "query": "kafka",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "kafka",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "kafka",
+          "type": "phrase"
+        },
+        "key": "event.module",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "fileset.name": {
+            "query": "log",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "log",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "log",
+          "type": "phrase"
+        },
+        "key": "fileset.name",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

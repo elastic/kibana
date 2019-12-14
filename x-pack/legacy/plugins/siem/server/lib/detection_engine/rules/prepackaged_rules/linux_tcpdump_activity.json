@@ -1,0 +1,42 @@
+{
+  "rule_id": "27b5259e-687f-47b3-8e94-eaa5129511b9",
+  "risk_score": 50,
+  "description": "Linux: Tcpdump Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Tcpdump Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: tcpdump",
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "process_started",
+        "params": {
+          "query": "process_started"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

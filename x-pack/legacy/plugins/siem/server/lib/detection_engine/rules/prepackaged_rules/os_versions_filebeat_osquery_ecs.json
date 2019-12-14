@@ -1,0 +1,43 @@
+{
+  "rule_id": "2d922dcf-6eb7-4f80-8388-fc3ea69c6146",
+  "risk_score": 50,
+  "description": "OS versions [Filebeat Osquery] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "OS versions [Filebeat Osquery] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "osquery.result.name": {
+            "query": "pack_it-compliance_os_version",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "pack_it-compliance_os_version",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "pack_it-compliance_os_version",
+          "type": "phrase"
+        },
+        "key": "osquery.result.name",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

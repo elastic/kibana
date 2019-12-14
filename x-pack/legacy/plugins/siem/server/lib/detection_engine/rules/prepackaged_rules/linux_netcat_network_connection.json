@@ -1,0 +1,92 @@
+{
+  "rule_id": "3ff87f0c-9bfc-487e-a391-08b82b409155",
+  "risk_score": 50,
+  "description": "Linux: Netcat Network Connection",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Netcat Network Connection",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: (nc or ncat or netcat or netcat.openbsd or netcat.traditional)",
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "socket_opened",
+        "params": {
+          "query": "socket_opened"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "socket_opened",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    },
+    {
+      "meta": {
+        "negate": true,
+        "type": "phrase",
+        "key": "destination.ip",
+        "value": "127.0.0.1",
+        "params": {
+          "query": "127.0.0.1"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
+      "query": {
+        "match": {
+          "destination.ip": {
+            "query": "127.0.0.1",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    },
+    {
+      "meta": {
+        "negate": true,
+        "type": "phrase",
+        "key": "destination.ip",
+        "value": "::1",
+        "params": {
+          "query": "::1"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index"
+      },
+      "query": {
+        "match": {
+          "destination.ip": {
+            "query": "::1",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

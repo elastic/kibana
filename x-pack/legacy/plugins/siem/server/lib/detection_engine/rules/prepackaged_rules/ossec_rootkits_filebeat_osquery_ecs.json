@@ -1,0 +1,88 @@
+{
+  "rule_id": "8dbe9de0-8773-4dc9-a36b-35c6a827721a",
+  "risk_score": 50,
+  "description": "OSSEC Rootkits [Filebeat Osquery] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "OSSEC Rootkits [Filebeat Osquery] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "prefix": {
+          "osquery.result.name": "pack_ossec-rootkit"
+        }
+      },
+      "meta": {
+        "value": "{\"prefix\":{\"osquery.result.name\":\"pack_ossec-rootkit\"}}",
+        "disabled": false,
+        "alias": null,
+        "key": "query",
+        "negate": false,
+        "type": "custom",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "event.module": {
+            "query": "osquery",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "osquery",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "osquery",
+          "type": "phrase"
+        },
+        "key": "event.module",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "fileset.name": {
+            "query": "result",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "result",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "result",
+          "type": "phrase"
+        },
+        "key": "fileset.name",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[2].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

@@ -1,0 +1,16 @@
+{
+  "rule_id": "a1be2120-c4fa-40df-84de-4bb3b50c31e0",
+  "risk_score": 50,
+  "description": "Sudo commands [Filebeat System] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Sudo commands [Filebeat System] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "system.auth.sudo:*",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

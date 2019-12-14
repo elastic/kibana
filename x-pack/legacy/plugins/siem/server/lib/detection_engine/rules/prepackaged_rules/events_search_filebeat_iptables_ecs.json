@@ -1,0 +1,16 @@
+{
+  "rule_id": "79f571d4-f6d5-42ea-ac6a-6958dbe99c01",
+  "risk_score": 50,
+  "description": "Events Search [Filebeat Iptables] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Events Search [Filebeat Iptables] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "iptables.length :*",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

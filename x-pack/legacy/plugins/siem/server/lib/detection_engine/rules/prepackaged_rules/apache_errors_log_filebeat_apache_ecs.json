@@ -1,0 +1,16 @@
+{
+  "rule_id": "83e41913-5c88-4c24-8492-ae11499ecbd7",
+  "risk_score": 50,
+  "description": "Apache errors log [Filebeat Apache] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Apache errors log [Filebeat Apache] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.dataset:apache.error",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

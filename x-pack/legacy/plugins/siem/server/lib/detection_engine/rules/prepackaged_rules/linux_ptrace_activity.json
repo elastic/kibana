@@ -1,0 +1,42 @@
+{
+  "rule_id": "26f47392-c717-4c88-8296-72ac92de45c3",
+  "risk_score": 50,
+  "description": "Linux: Ptrace Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Ptrace Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: ptrace",
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "process_started",
+        "params": {
+          "query": "process_started"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

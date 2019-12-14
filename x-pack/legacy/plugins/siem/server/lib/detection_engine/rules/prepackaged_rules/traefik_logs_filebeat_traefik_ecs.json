@@ -1,0 +1,16 @@
+{
+  "rule_id": "93429d51-fd91-49eb-a21f-cf4e67f8fb98",
+  "risk_score": 50,
+  "description": "Traefik logs [Filebeat Traefik] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Traefik logs [Filebeat Traefik] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.module:traefik",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

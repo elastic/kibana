@@ -1,0 +1,16 @@
+{
+  "rule_id": "d4d671cf-80b4-4a73-bd43-70c2e634fe10",
+  "risk_score": 50,
+  "description": "Audit Events [Filebeat Auditd] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Audit Events [Filebeat Auditd] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.dataset:auditd.log",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

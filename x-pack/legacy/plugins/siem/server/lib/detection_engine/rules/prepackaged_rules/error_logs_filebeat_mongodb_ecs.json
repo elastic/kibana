@@ -1,0 +1,16 @@
+{
+  "rule_id": "966766e8-aae3-4016-8b95-7b3e0d841a0b",
+  "risk_score": 50,
+  "description": "Error logs [Filebeat MongoDB] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Error logs [Filebeat MongoDB] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "log.level: F or log.level: W",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

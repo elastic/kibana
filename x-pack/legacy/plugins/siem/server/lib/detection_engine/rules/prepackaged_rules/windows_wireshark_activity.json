@@ -1,0 +1,16 @@
+{
+  "rule_id": "dc450707-de8a-4ae9-97ef-1c483149eb04",
+  "risk_score": 50,
+  "description": "Windows Wireshark activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Windows Wireshark activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name:wireshark.exe",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

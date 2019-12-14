@@ -1,0 +1,43 @@
+{
+  "rule_id": "8361da33-88ab-468e-84b7-c179efd41135",
+  "risk_score": 50,
+  "description": "Network Flow Search [Filebeat]",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Network Flow Search [Filebeat]",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "netflow_flow",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "netflow_flow",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "netflow_flow",
+          "type": "phrase"
+        },
+        "key": "event.action",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

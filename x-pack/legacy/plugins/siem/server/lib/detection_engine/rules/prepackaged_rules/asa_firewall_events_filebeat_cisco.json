@@ -1,0 +1,16 @@
+{
+  "rule_id": "baf1200b-c901-4260-baa8-769eeb2813ec",
+  "risk_score": 50,
+  "description": "ASA Firewall Events [Filebeat Cisco]",
+  "immutable": true,
+  "interval": "5m",
+  "name": "ASA Firewall Events [Filebeat Cisco]",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "cisco.asa.message_id:* and event.action:\"firewall-rule\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

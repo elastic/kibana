@@ -1,0 +1,43 @@
+{
+  "rule_id": "b5cba53e-dc4b-4169-9c8f-8588044b002b",
+  "risk_score": 50,
+  "description": "All Logs [Filebeat PostgreSQL] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "All Logs [Filebeat PostgreSQL] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.module": {
+            "query": "postgresql",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "postgresql",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "postgresql",
+          "type": "phrase"
+        },
+        "key": "event.module",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

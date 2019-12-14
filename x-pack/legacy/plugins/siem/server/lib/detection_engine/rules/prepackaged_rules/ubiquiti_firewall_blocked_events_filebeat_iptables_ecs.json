@@ -1,0 +1,16 @@
+{
+  "rule_id": "59a32888-c495-40a5-82ca-f69792e4dfc0",
+  "risk_score": 50,
+  "description": "Ubiquiti Firewall Blocked Events [Filebeat Iptables] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Ubiquiti Firewall Blocked Events [Filebeat Iptables] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "iptables.ubiquiti.rule_set :* and event.outcome : \"deny\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

@@ -1,0 +1,16 @@
+{
+  "rule_id": "edfe5e7b-3ed8-4825-a9af-8da44fe94e43",
+  "risk_score": 50,
+  "description": "PAN-OS Threats [Filebeat PANW] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "PAN-OS Threats [Filebeat PANW] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "panw.panos:* and event.category: \"security_threat\"",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

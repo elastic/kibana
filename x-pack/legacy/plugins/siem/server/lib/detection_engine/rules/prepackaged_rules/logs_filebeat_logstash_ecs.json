@@ -1,0 +1,69 @@
+{
+  "rule_id": "fb0de6bf-3872-4ff2-a07b-ef385acd14fb",
+  "risk_score": 50,
+  "description": "logs [Filebeat Logstash] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "logs [Filebeat Logstash] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "kuery",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.module": {
+            "query": "logstash",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "logstash",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "logstash",
+          "type": "phrase"
+        },
+        "key": "event.module",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    },
+    {
+      "query": {
+        "match": {
+          "fileset.name": {
+            "query": "log",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "value": "log",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "log",
+          "type": "phrase"
+        },
+        "key": "fileset.name",
+        "negate": false,
+        "type": "phrase",
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

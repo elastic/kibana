@@ -1,0 +1,42 @@
+{
+  "rule_id": "6ab2d805-ecc9-4310-8bce-fb79f503cb83",
+  "risk_score": 50,
+  "description": "Errorlogs [Filebeat IBM MQ]",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Errorlogs [Filebeat IBM MQ]",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "",
+  "language": "lucene",
+  "filters": [
+    {
+      "query": {
+        "match": {
+          "event.module": {
+            "query": "ibmmq",
+            "type": "phrase"
+          }
+        }
+      },
+      "meta": {
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+        "value": "ibmmq",
+        "disabled": false,
+        "alias": null,
+        "params": {
+          "query": "ibmmq"
+        },
+        "key": "event.module",
+        "negate": false,
+        "type": "phrase"
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

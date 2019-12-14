@@ -1,0 +1,16 @@
+{
+  "rule_id": "d7cb3446-6ce3-435a-b9d8-380fc91af7e7",
+  "risk_score": 50,
+  "description": "Query Durations [Filebeat PostgreSQL] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Query Durations [Filebeat PostgreSQL] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "event.duration:*",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

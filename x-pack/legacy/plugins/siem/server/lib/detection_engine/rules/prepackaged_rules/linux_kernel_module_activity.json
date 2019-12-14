@@ -1,0 +1,67 @@
+{
+  "rule_id": "7fd04369-a7f2-471a-9ae6-ff72e391ee66",
+  "risk_score": 50,
+  "description": "Linux: Kernel Module Activity",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Linux: Kernel Module Activity",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "process.name: (insmod or kmod or modprobe or rmod)",
+  "language": "kuery",
+  "filters": [
+    {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.dataset",
+        "value": "process",
+        "params": {
+          "query": "process"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.dataset": {
+            "query": "process",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    },
+    {
+      "meta": {
+        "negate": false,
+        "type": "phrase",
+        "key": "event.action",
+        "value": "process_started",
+        "params": {
+          "query": "process_started"
+        },
+        "disabled": false,
+        "alias": null,
+        "indexRefName": "kibanaSavedObjectMeta.searchSourceJSON.filter[1].meta.index"
+      },
+      "query": {
+        "match": {
+          "event.action": {
+            "query": "process_started",
+            "type": "phrase"
+          }
+        }
+      },
+      "$state": {
+        "store": "appState"
+      }
+    }
+  ],
+  "enabled": false
+}

@@ -1,0 +1,16 @@
+{
+  "rule_id": "8fd978ce-ca2c-488e-b171-a62b3be82ca5",
+  "risk_score": 50,
+  "description": "groupadd logs [Filebeat System] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "groupadd logs [Filebeat System] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "system.auth.groupadd:*",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

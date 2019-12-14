@@ -1,0 +1,16 @@
+{
+  "rule_id": "347e2159-eb21-4d50-a894-c7cfa5044dde",
+  "risk_score": 50,
+  "description": "Stacktraces [Filebeat Kafka] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Stacktraces [Filebeat Kafka] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "kafka.log.trace.class:*",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}

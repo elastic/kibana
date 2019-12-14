@@ -1,0 +1,16 @@
+{
+  "rule_id": "3a6e3d49-879c-4ba3-9f8b-930a3697f22c",
+  "risk_score": 50,
+  "description": "Startup Errors [Filebeat Icinga] ECS",
+  "immutable": true,
+  "interval": "5m",
+  "name": "Startup Errors [Filebeat Icinga] ECS",
+  "severity": "low",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "log.level:critical",
+  "language": "kuery",
+  "filters": [],
+  "enabled": false
+}
