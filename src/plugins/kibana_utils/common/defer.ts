@@ -17,15 +17,25 @@
  * under the License.
  */
 
-export { defer } from '../common';
-export * from './core';
-export * from './errors';
-export * from './field_mapping';
-export * from './parse';
-export * from './render_complete';
-export * from './resize_checker';
-export * from './state_containers';
-export * from './storage';
-export * from './storage/hashed_item_store';
-export * from './state_management/state_hash';
-export * from './state_management/url';
+/**
+ * An externally resolvable/rejectable "promise". Use it to resolve/reject
+ * promise at any time.
+ *
+ * ```ts
+ * const future = new Defer();
+ *
+ * future.promise.then(value => console.log(value));
+ *
+ * future.resolve(123);
+ * ```
+ */
+export class Defer<T> {
+  public readonly resolve!: (data: T) => void;
+  public readonly reject!: (error: any) => void;
+  public readonly promise: Promise<T> = new Promise<T>((resolve, reject) => {
+    (this as any).resolve = resolve;
+    (this as any).reject = reject;
+  });
+}
+
+export const defer = <T>() => new Defer<T>();
