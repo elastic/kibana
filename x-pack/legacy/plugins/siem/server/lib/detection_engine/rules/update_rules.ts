@@ -107,11 +107,14 @@ export const updateRules = async ({
     }
   );
 
-  if (rule.enabled && !enabled) {
+  if (rule.enabled && enabled === false) {
     await alertsClient.disable({ id: rule.id });
-  } else if (!rule.enabled && enabled) {
+  } else if (!rule.enabled && enabled === true) {
     await alertsClient.enable({ id: rule.id });
+  } else {
+    // enabled is null or undefined and we do not touch the rule
   }
+
   return alertsClient.update({
     id: rule.id,
     data: {

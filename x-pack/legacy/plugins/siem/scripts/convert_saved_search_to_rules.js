@@ -89,22 +89,20 @@ async function main() {
   const savedSearchesParsed = savedSearchesJson.reduce((accum, json) => {
     const jsonFile = fs.readFileSync(json, 'utf8');
     const jsonLines = jsonFile.split(/\r{0,1}\n/);
-    const parsedLines = jsonLines.reduce((accum, line, index) => {
+    const parsedLines = jsonLines.reduce((accum, line) => {
       try {
         const parsedLine = JSON.parse(line);
-        if (index !== 0) {
-          parsedLine._file = `${json.substring(0, json.length - '.ndjson'.length)}_${String(
-            index
-          )}.ndjson`;
-        } else {
-          parsedLine._file = json;
+        // export the exportedCount
+        if (parsedLine.exportedCount != null) {
+          return accum;
         }
+        parsedLine._file = parsedLine.attributes.title;
         parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.parse(
           parsedLine.attributes.kibanaSavedObjectMeta.searchSourceJSON
         );
         return [...accum, parsedLine];
       } catch (err) {
-        console.log('error parsing a line in this file:', json);
+        console.log('error parsing a line in this file:', json, line);
         return accum;
       }
     }, []);

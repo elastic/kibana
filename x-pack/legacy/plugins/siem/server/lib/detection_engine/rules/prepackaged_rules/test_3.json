@@ -1,0 +1,14 @@
+{
+  "name": "Query with a rule id test 2",
+  "description": "Query with a rule_id that acts like an external id",
+  "rule_id": "query-rule-id-3",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "query",
+  "from": "now-6m",
+  "to": "now",
+  "query": "user.name: root or user.name: admin",
+  "immutable": true,
+  "tags": ["SIEM"],
+  "enabled": false
+}
