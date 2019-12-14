@@ -7,5 +7,5 @@ export { useDebounce } from './use_debounce';
 export { useInput } from './use_input';
 export { useLibs, LibsContext } from './use_libs';
 export { usePagination } from './use_pagination';
-export { useRequest } from './use_request';
+export { useRequest, sendRequest } from './use_request';
 export { WithUrlState, URLStateProps } from './with_url_state';

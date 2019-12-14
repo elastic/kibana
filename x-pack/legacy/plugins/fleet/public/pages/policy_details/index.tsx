@@ -16,7 +16,9 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHealth,
+  EuiButton,
   EuiButtonEmpty,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { RouteComponentProps } from 'react-router-dom';
 import { Loading, ConnectedLink } from '../../components';
@@ -26,7 +28,12 @@ import {
   useGetAgentStatus,
   AgentStatusRefreshContext,
 } from './hooks';
-import { DatasourcesTable, DonutChart, EditPolicyFlyout } from './components';
+import {
+  DatasourcesTable,
+  DonutChart,
+  EditPolicyFlyout,
+  AssignDatasourcesFlyout,
+} from './components';
 
 export const Layout: React.FC = ({ children }) => (
   <EuiPageBody>
@@ -51,8 +58,9 @@ export const PolicyDetailsPage: React.FC<Props> = ({
     refreshAgentStatus,
   } = useGetAgentStatus(policyId);
 
-  // Edit policy flyout state
+  // Flyout states
   const [isEditPolicyFlyoutOpen, setIsEditPolicyFlyoutOpen] = useState<boolean>(false);
+  const [isDatasourcesFlyoutOpen, setIsDatasourcesFlyoutOpen] = useState<boolean>(false);
 
   const refreshData = () => {
     refreshPolicy();
@@ -106,6 +114,16 @@ export const PolicyDetailsPage: React.FC<Props> = ({
                 refreshData();
               }}
               policy={policy}
+            />
+          ) : null}
+          {isDatasourcesFlyoutOpen ? (
+            <AssignDatasourcesFlyout
+              policyId={policy.id}
+              existingDatasources={(policy.datasources || []).map(ds => ds.id)}
+              onClose={() => {
+                setIsDatasourcesFlyoutOpen(false);
+                refreshData();
+              }}
             />
           ) : null}
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -276,7 +294,53 @@ export const PolicyDetailsPage: React.FC<Props> = ({
             </h3>
           </EuiTitle>
           <EuiSpacer size="l" />
-          <DatasourcesTable datasources={policy.datasources} />
+          <DatasourcesTable
+            datasources={policy.datasources}
+            message={
+              !policy.datasources || policy.datasources.length === 0 ? (
+                <EuiEmptyPrompt
+                  title={
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.noDatasourcesPrompt"
+                        defaultMessage="Policy has no data sources"
+                      />
+                    </h2>
+                  }
+                  actions={
+                    <EuiButton
+                      fill
+                      iconType="plusInCircle"
+                      onClick={() => setIsDatasourcesFlyoutOpen(true)}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.policyDetails.assignDatasourcesButtonText"
+                        defaultMessage="Assign data sources"
+                      />
+                    </EuiButton>
+                  }
+                />
+              ) : null
+            }
+            search={{
+              toolsRight: [
+                <EuiButton
+                  fill
+                  iconType="plusInCircle"
+                  onClick={() => setIsDatasourcesFlyoutOpen(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.policyDetails.assignDatasourcesButtonText"
+                    defaultMessage="Assign data sources"
+                  />
+                </EuiButton>,
+              ],
+              box: {
+                incremental: true,
+                schema: true,
+              },
+            }}
+          />
         </Layout>
       </AgentStatusRefreshContext.Provider>
     </PolicyRefreshContext.Provider>

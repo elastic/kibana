@@ -21,12 +21,12 @@ import { Policy } from '../../../../common/types/domain_data';
 import { PolicyForm } from '../../../components';
 import { useLibs } from '../../../hooks';
 
-interface RouterProps {
+interface Props {
   policy: Policy;
   onClose: () => void;
 }
 
-export const EditPolicyFlyout: React.FC<RouterProps> = ({ policy: originalPolicy, onClose }) => {
+export const EditPolicyFlyout: React.FC<Props> = ({ policy: originalPolicy, onClose }) => {
   const libs = useLibs();
 
   const [policy, setPolicy] = useState<Partial<Policy>>({

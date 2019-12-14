@@ -101,7 +101,7 @@ export const AgentUnenrollProvider: React.FunctionComponent<Props> = ({ children
     } catch (e) {
       libs.framework.notifications.addDanger(
         i18n.translate('xpack.fleet.unenrollAgents.fatalErrorNotificationTitle', {
-          defaultMessage: 'Fatal error unenrolling agents',
+          defaultMessage: 'Error unenrolling agents',
         })
       );
     }
