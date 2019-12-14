@@ -21,7 +21,7 @@ import { mount } from 'enzyme';
 import { IndexPattern } from 'ui/index_patterns';
 // @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { flattenHitWrapper } from '../../../../data/public/index_patterns/index_patterns/flatten_hit';
+import { flattenHitWrapper } from '../../../../data/public/';
 import { DocViewTable } from './table';
 
 // @ts-ignore

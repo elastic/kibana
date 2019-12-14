@@ -8,7 +8,7 @@
 
 import chrome from 'ui/chrome';
 
-import { http } from '../http_service';
+import { http, http$ } from '../http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -24,12 +24,11 @@ export const results = {
     dateFormatTz,
     maxRecords,
     maxExamples,
-    influencersFilterQuery) {
-
-    return http({
-      url: `${basePath}/results/anomalies_table_data`,
+    influencersFilterQuery
+  ) {
+    return http$(`${basePath}/results/anomalies_table_data`, {
       method: 'POST',
-      data: {
+      body: {
         jobIds,
         criteriaFields,
         influencers,
@@ -40,25 +39,20 @@ export const results = {
         dateFormatTz,
         maxRecords,
         maxExamples,
-        influencersFilterQuery
-      }
+        influencersFilterQuery,
+      },
     });
   },
 
-  getMaxAnomalyScore(
-    jobIds,
-    earliestMs,
-    latestMs
-  ) {
-
+  getMaxAnomalyScore(jobIds, earliestMs, latestMs) {
     return http({
       url: `${basePath}/results/max_anomaly_score`,
       method: 'POST',
       data: {
         jobIds,
         earliestMs,
-        latestMs
-      }
+        latestMs,
+      },
     });
   },
 
@@ -66,24 +60,19 @@ export const results = {
     return http({
       url: `${basePath}/results/category_definition`,
       method: 'POST',
-      data: { jobId, categoryId }
+      data: { jobId, categoryId },
     });
   },
 
-  getCategoryExamples(
-    jobId,
-    categoryIds,
-    maxExamples
-  ) {
-
+  getCategoryExamples(jobId, categoryIds, maxExamples) {
     return http({
       url: `${basePath}/results/category_examples`,
       method: 'POST',
       data: {
         jobId,
         categoryIds,
-        maxExamples
-      }
+        maxExamples,
+      },
     });
-  }
+  },
 };

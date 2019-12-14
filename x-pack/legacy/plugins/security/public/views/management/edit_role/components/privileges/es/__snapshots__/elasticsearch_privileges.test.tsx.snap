@@ -15,7 +15,7 @@ exports[`it renders without crashing 1`] = `
         />
         <ForwardRef
           className="editRole__learnMore"
-          href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-cluster"
+          href="undefinedguide/en/elasticsearch/reference/undefined/security-privileges.html#privileges-list-cluster"
           target="_blank"
         >
           <FormattedMessage
@@ -81,7 +81,7 @@ exports[`it renders without crashing 1`] = `
         />
         <ForwardRef
           className="editRole__learnMore"
-          href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#_run_as_privilege"
+          href="undefinedguide/en/elasticsearch/reference/undefined/security-privileges.html#_run_as_privilege"
           target="_blank"
         >
           <FormattedMessage
@@ -154,7 +154,7 @@ exports[`it renders without crashing 1`] = `
       />
       <EuiLink
         className="editRole__learnMore"
-        href="undefinedguide/en/elastic-stack-overview/undefined/security-privileges.html#privileges-list-indices"
+        href="undefinedguide/en/elasticsearch/reference/undefined/security-privileges.html#privileges-list-indices"
         target="_blank"
       >
         <FormattedMessage

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fromKueryExpression, toElasticsearchQuery, JsonObject } from '@kbn/es-query';
 import { isEmpty, isString, flow } from 'lodash/fp';
 import {
   Query,
   esFilters,
   esQuery,
+  esKuery,
   IIndexPattern,
 } from '../../../../../../../src/plugins/data/public';
 
@@ -21,7 +21,9 @@ export const convertKueryToElasticSearchQuery = (
 ) => {
   try {
     return kueryExpression
-      ? JSON.stringify(toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern))
+      ? JSON.stringify(
+          esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
+        )
       : '';
   } catch (err) {
     return '';
@@ -31,10 +33,10 @@ export const convertKueryToElasticSearchQuery = (
 export const convertKueryToDslFilter = (
   kueryExpression: string,
   indexPattern: IIndexPattern
-): JsonObject => {
+): esKuery.JsonObject => {
   try {
     return kueryExpression
-      ? toElasticsearchQuery(fromKueryExpression(kueryExpression), indexPattern)
+      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(kueryExpression), indexPattern)
       : {};
   } catch (err) {
     return {};
@@ -55,7 +57,7 @@ export const escapeQueryValue = (val: number | string = ''): string | number => 
 export const isFromKueryExpressionValid = (kqlFilterQuery: KueryFilterQuery | null): boolean => {
   if (kqlFilterQuery && kqlFilterQuery.kind === 'kuery') {
     try {
-      fromKueryExpression(kqlFilterQuery.expression);
+      esKuery.fromKueryExpression(kqlFilterQuery.expression);
     } catch (err) {
       return false;
     }

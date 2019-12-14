@@ -30,12 +30,10 @@ import { uiModules } from '../modules';
  * handling keyboard events for `ngClick` directives. Kibana uses `kbnAccessibleClick` to handle
  * those cases where you need an `ngClick` non button element to have keyboard access.
  */
-uiModules
-  .get('kibana', ['ngAria'])
-  .config(($ariaProvider) => {
-    $ariaProvider.config({
-      bindKeydown: false,
-      bindRoleForClick: false,
-      tabindex: false,
-    });
+uiModules.get('kibana', ['ngAria']).config($ariaProvider => {
+  $ariaProvider.config({
+    bindKeydown: false,
+    bindRoleForClick: false,
+    tabindex: false,
   });
+});

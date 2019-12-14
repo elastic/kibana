@@ -10,7 +10,8 @@ import {
 } from '../../../../../server/lib/create_router/error_wrappers';
 import { SlmPolicyEs, SlmPolicy, SlmPolicyPayload } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
-import { Plugins } from '../../../shim';
+import { Plugins } from '../../shim';
+import { getManagedPolicyNames } from '../../lib';
 
 let callWithInternalUser: any;
 
@@ -34,6 +35,8 @@ export const getAllHandler: RouterRouteHandler = async (
 ): Promise<{
   policies: SlmPolicy[];
 }> => {
+  const managedPolicies = await getManagedPolicyNames(callWithInternalUser);
+
   // Get policies
   const policiesByName: {
     [key: string]: SlmPolicyEs;
@@ -43,9 +46,9 @@ export const getAllHandler: RouterRouteHandler = async (
 
   // Deserialize policies
   return {
-    policies: Object.entries(policiesByName).map(([name, policy]) =>
-      deserializePolicy(name, policy)
-    ),
+    policies: Object.entries(policiesByName).map(([name, policy]) => {
+      return deserializePolicy(name, policy, managedPolicies);
+    }),
   };
 };
 
@@ -69,9 +72,11 @@ export const getOneHandler: RouterRouteHandler = async (
     throw wrapCustomError(new Error('Policy not found'), 404);
   }
 
+  const managedPolicies = await getManagedPolicyNames(callWithInternalUser);
+
   // Deserialize policy
   return {
-    policy: deserializePolicy(name, policiesByName[name]),
+    policy: deserializePolicy(name, policiesByName[name], managedPolicies),
   };
 };
 

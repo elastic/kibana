@@ -22,7 +22,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { KBN_FIELD_TYPES, esQuery } from '../../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES, esQuery, esKuery } from '../../../../../../../../src/plugins/data/public';
 import { NavigationMenu } from '../../components/navigation_menu';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -31,7 +31,7 @@ import { FullTimeRangeSelector } from '../../components/full_time_range_selector
 import { mlTimefilterRefresh$ } from '../../services/timefilter_refresh_service';
 import { useKibanaContext, SavedSearchQuery } from '../../contexts/kibana';
 import { kbnTypeToMLJobType } from '../../util/field_types_utils';
-import { timeBasedIndexCheck } from '../../util/index_utils';
+import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { TimeBuckets } from '../../util/time_buckets';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
@@ -173,19 +173,14 @@ export const Page: FC = () => {
 
   useEffect(() => {
     // Check for a saved search being passed in.
-    const searchSource = currentSavedSearch.searchSource;
-    const query = searchSource.getField('query');
-    if (query !== undefined) {
-      const queryLanguage = query.language;
+    if (currentSavedSearch !== null) {
+      const { query } = getQueryFromSavedSearch(currentSavedSearch);
+      const queryLanguage = query.language as SEARCH_QUERY_LANGUAGE;
       const qryString = query.query;
       let qry;
       if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-        qry = {
-          query_string: {
-            query: qryString,
-            default_operator: 'AND',
-          },
-        };
+        const ast = esKuery.fromKueryExpression(qryString);
+        qry = esKuery.toElasticsearchQuery(ast, currentIndexPattern);
       } else {
         qry = esQuery.luceneStringToDsl(qryString);
         esQuery.decorateQuery(qry, kibanaConfig.get('query:queryString:options'));
@@ -589,7 +584,7 @@ export const Page: FC = () => {
   return (
     <Fragment>
       <NavigationMenu tabId="datavisualizer" />
-      <EuiPage data-test-subj="mlPageDataVisualizer">
+      <EuiPage data-test-subj="mlPageIndexDataVisualizer">
         <EuiPageBody>
           <EuiPageContentHeader>
             <EuiPageContentHeaderSection>

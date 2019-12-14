@@ -19,28 +19,32 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { getServices } from '../../../../kibana_services';
 import { createStateStub } from './_utils';
-import { QueryParameterActionsProvider } from '../actions';
+import { getQueryParameterActions } from '../actions';
 import { createIndexPatternsStub } from '../../api/__tests__/_stubs';
+import { pluginInstance } from 'plugins/kibana/discover/index';
 import { npStart } from 'ui/new_platform';
 
-describe('context app', function () {
-  beforeEach(ngMock.module('kibana'));
+describe('context app', function() {
+  beforeEach(() => pluginInstance.initializeInnerAngular());
+  beforeEach(() => pluginInstance.initializeServices());
+  beforeEach(ngMock.module('app/discover'));
+  beforeEach(
+    ngMock.module(function createServiceStubs($provide) {
+      $provide.value('indexPatterns', createIndexPatternsStub());
+    })
+  );
 
-  beforeEach(ngMock.module(function createServiceStubs($provide) {
-    $provide.value('indexPatterns', createIndexPatternsStub());
-  }));
-
-  describe('action addFilter', function () {
+  describe('action addFilter', function() {
     let addFilter;
 
-    beforeEach(ngMock.inject(function createPrivateStubs(Private) {
-      Private.stub(getServices().FilterBarQueryFilterProvider);
-      addFilter = Private(QueryParameterActionsProvider).addFilter;
-    }));
+    beforeEach(
+      ngMock.inject(function createPrivateStubs() {
+        addFilter = getQueryParameterActions().addFilter;
+      })
+    );
 
-    it('should pass the given arguments to the filterManager', function () {
+    it('should pass the given arguments to the filterManager', function() {
       const state = createStateStub();
       const filterManagerAddStub = npStart.plugins.data.query.filterManager.addFilters;
 
@@ -54,7 +58,7 @@ describe('context app', function () {
       expect(generatedFilter.query.match_phrase[queryKeys[0]]).to.eql('FIELD_VALUE');
     });
 
-    it('should pass the index pattern id to the filterManager', function () {
+    it('should pass the index pattern id to the filterManager', function() {
       const state = createStateStub();
       const filterManagerAddStub = npStart.plugins.data.query.filterManager.addFilters;
 

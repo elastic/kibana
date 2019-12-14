@@ -20,6 +20,7 @@
 import { ExpressionInterpret } from '../interpreter_provider';
 import { TimeRange, Query, esFilters } from '../../../data/public';
 import { Adapters } from '../../../inspector/public';
+import { ExpressionRenderDefinition } from '../registries';
 
 export type ExpressionInterpretWithHandlers = (
   ast: Parameters<ExpressionInterpret>[0],
@@ -58,6 +59,7 @@ export interface IExpressionLoaderParams {
   customRenderers?: [];
   extraHandlers?: Record<string, any>;
   inspectorAdapters?: Adapters;
+  onRenderError?: RenderErrorHandlerFnType;
 }
 
 export interface IInterpreterHandlers {
@@ -99,3 +101,15 @@ export interface IInterpreterSuccessResult {
 }
 
 export type IInterpreterResult = IInterpreterSuccessResult & IInterpreterErrorResult;
+
+export { ExpressionRenderDefinition };
+
+export interface RenderError extends Error {
+  type?: string;
+}
+
+export type RenderErrorHandlerFnType = (
+  domNode: HTMLElement,
+  error: RenderError,
+  handlers: IInterpreterRenderHandlers
+) => void;

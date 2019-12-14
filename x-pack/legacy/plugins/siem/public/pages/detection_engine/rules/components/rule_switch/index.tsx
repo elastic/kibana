@@ -27,29 +27,32 @@ export interface RuleSwitchProps {
 /**
  * Basic switch component for displaying loader when enabled/disabled
  */
-export const RuleSwitch = React.memo<RuleSwitchProps>(
-  ({ id, enabled, isLoading, onRuleStateChange }) => {
-    return (
-      <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
-        <EuiFlexItem grow={false}>
-          {isLoading ? (
-            <EuiLoadingSpinner size="m" data-test-subj="rule-switch-loader" />
-          ) : (
-            <StaticSwitch
-              data-test-subj="rule-switch"
-              label="rule-switch"
-              showLabel={false}
-              disabled={false}
-              checked={enabled ?? false}
-              onChange={e => {
-                onRuleStateChange(e.target.checked!, id);
-              }}
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+export const RuleSwitchComponent = ({
+  id,
+  enabled,
+  isLoading,
+  onRuleStateChange,
+}: RuleSwitchProps) => (
+  <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
+    <EuiFlexItem grow={false}>
+      {isLoading ? (
+        <EuiLoadingSpinner size="m" data-test-subj="rule-switch-loader" />
+      ) : (
+        <StaticSwitch
+          data-test-subj="rule-switch"
+          label="rule-switch"
+          showLabel={false}
+          disabled={false}
+          checked={enabled ?? false}
+          onChange={e => {
+            onRuleStateChange(e.target.checked!, id);
+          }}
+        />
+      )}
+    </EuiFlexItem>
+  </EuiFlexGroup>
 );
+
+export const RuleSwitch = React.memo(RuleSwitchComponent);
 
 RuleSwitch.displayName = 'RuleSwitch';

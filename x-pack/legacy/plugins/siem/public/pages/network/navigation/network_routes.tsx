@@ -14,7 +14,8 @@ import { scoreIntervalToDateTime } from '../../../components/ml/score/score_inte
 import { IPsQueryTabBody } from './ips_query_tab_body';
 import { CountriesQueryTabBody } from './countries_query_tab_body';
 import { HttpQueryTabBody } from './http_query_tab_body';
-import { AnomaliesQueryTabBody } from './anomalies_query_tab_body';
+import { AnomaliesQueryTabBody } from '../../../containers/anomalies/anomalies_query_tab_body';
+import { AnomaliesNetworkTable } from '../../../components/ml/tables/anomalies_network_table';
 import { DnsQueryTabBody } from './dns_query_tab_body';
 import { ConditionalFlexGroup } from './conditional_flex_group';
 import { NetworkRoutesProps, NetworkRouteType } from './types';
@@ -50,24 +51,44 @@ export const NetworkRoutes = ({
     [from, to]
   );
 
-  const tabProps = {
-    networkPagePath,
+  const networkAnomaliesFilterQuery = {
+    bool: {
+      should: [
+        {
+          exists: {
+            field: 'source.ip',
+          },
+        },
+        {
+          exists: {
+            field: 'destination.ip',
+          },
+        },
+      ],
+      minimum_should_match: 1,
+    },
+  };
+
+  const commonProps = {
+    startDate: from,
+    endDate: to,
+    skip: isInitializing,
     type,
-    to,
-    filterQuery,
-    isInitializing,
-    from,
-    indexPattern,
+    narrowDateRange,
     setQuery,
+    filterQuery,
+  };
+
+  const tabProps = {
+    ...commonProps,
+    indexPattern,
     updateDateRange,
   };
 
   const anomaliesProps = {
-    from,
-    to,
-    isInitializing,
-    type,
-    narrowDateRange,
+    ...commonProps,
+    anomaliesFilterQuery: networkAnomaliesFilterQuery,
+    AnomaliesTableComponent: AnomaliesNetworkTable,
   };
 
   return (
@@ -115,7 +136,12 @@ export const NetworkRoutes = ({
       />
       <Route
         path={`${networkPagePath}/:tabName(${NetworkRouteType.anomalies})`}
-        render={() => <AnomaliesQueryTabBody {...anomaliesProps} />}
+        render={() => (
+          <AnomaliesQueryTabBody
+            {...anomaliesProps}
+            AnomaliesTableComponent={AnomaliesNetworkTable}
+          />
+        )}
       />
     </Switch>
   );

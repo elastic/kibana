@@ -28,7 +28,7 @@
     "intl-messageformat": "^2.2.0",
     "intl-relativeformat": "^2.1.0",
     "prop-types": "^15.6.2",
-    "react": "^16.8.0",
+    "react": "^16.12.0",
     "react-intl": "^2.8.0"
   }
 }

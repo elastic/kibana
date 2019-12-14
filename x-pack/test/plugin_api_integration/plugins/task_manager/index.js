@@ -4,9 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+const { EventEmitter } = require('events');
+
 import { initRoutes } from './init_routes';
 
+const once = function(emitter, event) {
+  return new Promise(resolve => {
+    emitter.once(event, resolve);
+  });
+};
+
 export default function TaskTestingAPI(kibana) {
+  const taskTestingEvents = new EventEmitter();
+
   return new kibana.Plugin({
     name: 'sampleTask',
     require: ['elasticsearch', 'task_manager'],
@@ -39,7 +49,8 @@ export default function TaskTestingAPI(kibana) {
                 throw new Error(params.failWith);
               }
 
-              const callCluster = server.plugins.elasticsearch.getCluster('admin').callWithInternalUser;
+              const callCluster = server.plugins.elasticsearch.getCluster('admin')
+                .callWithInternalUser;
               await callCluster('index', {
                 index: '.kibana_task_manager_test_result',
                 body: {
@@ -51,6 +62,10 @@ export default function TaskTestingAPI(kibana) {
                 },
                 refresh: true,
               });
+
+              if (params.waitForEvent) {
+                await once(taskTestingEvents, params.waitForEvent);
+              }
 
               return {
                 state: { count: (prevState.count || 0) + 1 },
@@ -88,7 +103,7 @@ export default function TaskTestingAPI(kibana) {
         },
       });
 
-      initRoutes(server);
+      initRoutes(server, taskTestingEvents);
     },
   });
 }

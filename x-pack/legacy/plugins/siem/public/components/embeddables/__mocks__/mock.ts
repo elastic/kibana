@@ -147,6 +147,10 @@ export const mockLineLayer = {
           },
           minSize: 1,
           maxSize: 8,
+          fieldMetaOptions: {
+            isEnabled: true,
+            sigma: 3,
+          },
         },
       },
       iconSize: { type: 'STATIC', options: { size: 10 } },

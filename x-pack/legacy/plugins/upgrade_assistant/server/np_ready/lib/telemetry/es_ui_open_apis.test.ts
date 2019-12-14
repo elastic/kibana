@@ -15,12 +15,6 @@ import { upsertUIOpenOption } from './es_ui_open_apis';
 describe('Upgrade Assistant Telemetry SavedObject UIOpen', () => {
   const mockIncrementCounter = jest.fn();
   const server = jest.fn().mockReturnValue({
-    usage: {
-      collectorSet: {
-        makeUsageCollector: {},
-        register: {},
-      },
-    },
     savedObjects: {
       getSavedObjectsRepository: jest.fn().mockImplementation(() => {
         return {

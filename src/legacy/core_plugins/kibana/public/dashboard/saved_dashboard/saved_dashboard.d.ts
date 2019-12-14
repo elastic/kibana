@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SearchSource } from 'ui/courier';
-import { SavedObject } from 'ui/saved_objects/saved_object';
+import { SavedObject } from 'ui/saved_objects/types';
+import { SearchSourceContract } from '../../../../../ui/public/courier';
 import { esFilters, Query, RefreshInterval } from '../../../../../../plugins/data/public';
 
 export interface SavedObjectDashboard extends SavedObject {
@@ -34,7 +34,7 @@ export interface SavedObjectDashboard extends SavedObject {
   // TODO: write a migration to rid of this, it's only around for bwc.
   uiStateJSON?: string;
   lastSavedTitle: string;
-  searchSource: SearchSource;
+  searchSource: SearchSourceContract;
   destroy: () => void;
   refreshInterval?: RefreshInterval;
   getQuery(): Query;

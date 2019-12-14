@@ -8,32 +8,28 @@ exports[`is rendered 1`] = `
   >
     In full screen mode, press ESC to exit.
   </p>
-  <div
-    class="dshExitFullScreenButton"
-  >
+  <div>
     <button
       aria-label="Exit full screen mode"
-      class="kuiButton dshExitFullScreenButton__mode"
-      type="hollow"
+      class="dshExitFullScreenButton"
     >
       <span
-        class="kuiButton__inner"
+        class="dshExitFullScreenButton__logo"
+        data-test-subj="exitFullScreenModeLogo"
+      />
+      <span
+        class="dshExitFullScreenButton__text"
+        data-test-subj="exitFullScreenModeText"
       >
-        <span>
-          <span
-            class="dshExitFullScreenButton__logo"
-            data-test-subj="exitFullScreenModeLogo"
-          />
-          <span
-            class="dshExitFullScreenButton__text"
-            data-test-subj="exitFullScreenModeText"
-          >
-            Exit full screen
-            <span
-              class="kuiIcon fa fa-angle-left"
-            />
-          </span>
-        </span>
+        Exit full screen
+        <svg
+          class="euiIcon euiIcon--small euiIcon-isLoading"
+          focusable="false"
+          height="16"
+          viewBox="0 0 16 16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        />
       </span>
     </button>
   </div>

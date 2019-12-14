@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 export const elasticsearchJsPlugin = (Client, config, components) => {
   const ca = components.clientAction.factory;
 
@@ -23,15 +21,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>',
         req: {
           jobId: {
-            type: 'list'
-          }
-        }
+            type: 'list',
+          },
+        },
       },
       {
         fmt: '/_ml/anomaly_detectors/',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.jobStats = ca({
@@ -40,15 +38,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>/_stats',
         req: {
           jobId: {
-            type: 'list'
-          }
-        }
+            type: 'list',
+          },
+        },
       },
       {
         fmt: '/_ml/anomaly_detectors/_stats',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.addJob = ca({
@@ -57,13 +55,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>',
         req: {
           jobId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 
   ml.openJob = ca({
@@ -72,12 +70,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>/_open',
         req: {
           jobId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.closeJob = ca({
@@ -86,23 +84,23 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close?force=<%=force%>',
         req: {
           jobId: {
-            type: 'string'
+            type: 'string',
           },
           force: {
-            type: 'boolean'
-          }
-        }
+            type: 'boolean',
+          },
+        },
       },
       {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>/_close',
         req: {
           jobId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   // Currently the endpoint uses a default size of 100 unless a size is supplied.
@@ -114,15 +112,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
         req: {
           analyticsId: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         fmt: '/_ml/data_frame/analytics/_all?size=1000',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.getDataFrameAnalyticsStats = ca({
@@ -131,18 +129,18 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_stats',
         req: {
           analyticsId: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         // Currently the endpoint uses a default size of 100 unless a size is supplied.
         // So until paging is supported in the UI, explicitly supply a size of 1000
         // to match the max number of docs that the endpoint can return.
         fmt: '/_ml/data_frame/analytics/_all/_stats?size=1000',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.createDataFrameAnalytics = ca({
@@ -151,33 +149,33 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
         req: {
           analyticsId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 
   ml.evaluateDataFrameAnalytics = ca({
     urls: [
       {
         fmt: '/_ml/data_frame/_evaluate',
-      }
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.estimateDataFrameAnalyticsMemoryUsage = ca({
     urls: [
       {
-        fmt: '/_ml/data_frame/analytics/_estimate_memory_usage',
-      }
+        fmt: '/_ml/data_frame/analytics/_explain',
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.deleteDataFrameAnalytics = ca({
@@ -186,12 +184,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/data_frame/analytics/<%=analyticsId%>',
         req: {
           analyticsId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   ml.startDataFrameAnalytics = ca({
@@ -200,12 +198,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_start',
         req: {
           analyticsId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.stopDataFrameAnalytics = ca({
@@ -214,15 +212,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/data_frame/analytics/<%=analyticsId%>/_stop?&force=<%=force%>',
         req: {
           analyticsId: {
-            type: 'string'
+            type: 'string',
           },
           force: {
-            type: 'boolean'
+            type: 'boolean',
           },
-        }
-      }
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.deleteJob = ca({
@@ -231,23 +229,23 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>?&force=<%=force%>&wait_for_completion=false',
         req: {
           jobId: {
-            type: 'string'
+            type: 'string',
           },
           force: {
-            type: 'boolean'
-          }
-        }
+            type: 'boolean',
+          },
+        },
       },
       {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>?&wait_for_completion=false',
         req: {
           jobId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   ml.updateJob = ca({
@@ -256,13 +254,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>/_update',
         req: {
           jobId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.datafeeds = ca({
@@ -271,15 +269,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/datafeeds/<%=datafeedId%>',
         req: {
           datafeedId: {
-            type: 'list'
-          }
-        }
+            type: 'list',
+          },
+        },
       },
       {
         fmt: '/_ml/datafeeds/',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.datafeedStats = ca({
@@ -288,15 +286,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/datafeeds/<%=datafeedId%>/_stats',
         req: {
           datafeedId: {
-            type: 'list'
-          }
-        }
+            type: 'list',
+          },
+        },
       },
       {
         fmt: '/_ml/datafeeds/_stats',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.addDatafeed = ca({
@@ -305,13 +303,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/datafeeds/<%=datafeedId%>',
         req: {
           datafeedId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 
   ml.updateDatafeed = ca({
@@ -320,13 +318,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/datafeeds/<%=datafeedId%>/_update',
         req: {
           datafeedId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.deleteDatafeed = ca({
@@ -335,23 +333,23 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/datafeeds/<%=datafeedId%>?force=<%=force%>',
         req: {
           datafeedId: {
-            type: 'string'
+            type: 'string',
           },
           force: {
-            type: 'boolean'
-          }
-        }
+            type: 'boolean',
+          },
+        },
       },
       {
         fmt: '/_ml/datafeeds/<%=datafeedId%>',
         req: {
           datafeedId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   ml.startDatafeed = ca({
@@ -360,37 +358,37 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/datafeeds/<%=datafeedId%>/_start?&start=<%=start%>&end=<%=end%>',
         req: {
           datafeedId: {
-            type: 'string'
+            type: 'string',
           },
           start: {
-            type: 'string'
+            type: 'string',
           },
           end: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         fmt: '/_ml/datafeeds/<%=datafeedId%>/_start?&start=<%=start%>',
         req: {
           datafeedId: {
-            type: 'string'
+            type: 'string',
           },
           start: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         fmt: '/_ml/datafeeds/<%=datafeedId%>/_start',
         req: {
           datafeedId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.stopDatafeed = ca({
@@ -399,20 +397,20 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/datafeeds/<%=datafeedId%>/_stop',
         req: {
           datafeedId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.validateDetector = ca({
     url: {
-      fmt: '/_ml/anomaly_detectors/_validate/detector'
+      fmt: '/_ml/anomaly_detectors/_validate/detector',
     },
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.datafeedPreview = ca({
@@ -420,11 +418,11 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/datafeeds/<%=datafeedId%>/_preview',
       req: {
         datafeedId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.forecast = ca({
@@ -433,23 +431,23 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>/_forecast?&duration=<%=duration%>',
         req: {
           jobId: {
-            type: 'string'
+            type: 'string',
           },
           duration: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         fmt: '/_ml/anomaly_detectors/<%=jobId%>/_forecast',
         req: {
           jobId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.overallBuckets = ca({
@@ -457,19 +455,19 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/anomaly_detectors/<%=jobId%>/results/overall_buckets',
       req: {
         jobId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.privilegeCheck = ca({
     url: {
-      fmt: '/_security/user/_has_privileges'
+      fmt: '/_security/user/_has_privileges',
     },
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.calendars = ca({
@@ -478,15 +476,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/calendars/<%=calendarId%>',
         req: {
           calendarId: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         fmt: '/_ml/calendars/',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.deleteCalendar = ca({
@@ -494,11 +492,11 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/calendars/<%=calendarId%>',
       req: {
         calendarId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   ml.addCalendar = ca({
@@ -506,12 +504,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/calendars/<%=calendarId%>',
       req: {
         calendarId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 
   ml.addJobToCalendar = ca({
@@ -519,14 +517,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/calendars/<%=calendarId%>/jobs/<%=jobId%>',
       req: {
         calendarId: {
-          type: 'string'
+          type: 'string',
         },
         jobId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
-    method: 'PUT'
+    method: 'PUT',
   });
 
   ml.removeJobFromCalendar = ca({
@@ -534,14 +532,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/calendars/<%=calendarId%>/jobs/<%=jobId%>',
       req: {
         calendarId: {
-          type: 'string'
+          type: 'string',
         },
         jobId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   ml.events = ca({
@@ -550,54 +548,55 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/calendars/<%=calendarId%>/events',
         req: {
           calendarId: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         fmt: '/_ml/calendars/<%=calendarId%>/events?&job_id=<%=jobId%>',
         req: {
           calendarId: {
-            type: 'string'
+            type: 'string',
           },
           jobId: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         fmt: '/_ml/calendars/<%=calendarId%>/events?&after=<%=start%>&before=<%=end%>',
         req: {
           calendarId: {
-            type: 'string'
+            type: 'string',
           },
           start: {
-            type: 'string'
+            type: 'string',
           },
           end: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
-        fmt: '/_ml/calendars/<%=calendarId%>/events?&after=<%=start%>&before=<%=end%>&job_id=<%=jobId%>',
+        fmt:
+          '/_ml/calendars/<%=calendarId%>/events?&after=<%=start%>&before=<%=end%>&job_id=<%=jobId%>',
         req: {
           calendarId: {
-            type: 'string'
+            type: 'string',
           },
           start: {
-            type: 'string'
+            type: 'string',
           },
           end: {
-            type: 'string'
+            type: 'string',
           },
           jobId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.addEvent = ca({
@@ -605,12 +604,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/calendars/<%=calendarId%>/events',
       req: {
         calendarId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.deleteEvent = ca({
@@ -618,14 +617,14 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/calendars/<%=calendarId%>/events/<%=eventId%>',
       req: {
         calendarId: {
-          type: 'string'
+          type: 'string',
         },
         eventId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   ml.filters = ca({
@@ -634,15 +633,15 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/filters/<%=filterId%>',
         req: {
           filterId: {
-            type: 'string'
-          }
-        }
+            type: 'string',
+          },
+        },
       },
       {
         fmt: '/_ml/filters/',
-      }
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.addFilter = ca({
@@ -650,12 +649,12 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/filters/<%=filterId%>',
       req: {
         filterId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
     needBody: true,
-    method: 'PUT'
+    method: 'PUT',
   });
 
   ml.updateFilter = ca({
@@ -664,13 +663,13 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/_ml/filters/<%=filterId%>/_update',
         req: {
           filterId: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.deleteFilter = ca({
@@ -678,67 +677,68 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
       fmt: '/_ml/filters/<%=filterId%>',
       req: {
         filterId: {
-          type: 'string'
-        }
-      }
+          type: 'string',
+        },
+      },
     },
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   ml.info = ca({
     url: {
-      fmt: '/_ml/info'
+      fmt: '/_ml/info',
     },
-    method: 'GET'
+    method: 'GET',
   });
 
   ml.fileStructure = ca({
     urls: [
       {
         // eslint-disable-next-line max-len
-        fmt: '/_ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>&lines_to_sample=<%=lines_to_sample%>',
+        fmt:
+          '/_ml/find_file_structure?&charset=<%=charset%>&format=<%=format%>&has_header_row=<%=has_header_row%>&column_names=<%=column_names%>&delimiter=<%=delimiter%>&quote=<%=quote%>&should_trim_fields=<%=should_trim_fields%>&grok_pattern=<%=grok_pattern%>&timestamp_field=<%=timestamp_field%>&timestamp_format=<%=timestamp_format%>&lines_to_sample=<%=lines_to_sample%>',
         req: {
           charset: {
-            type: 'string'
+            type: 'string',
           },
           format: {
-            type: 'string'
+            type: 'string',
           },
           has_header_row: {
-            type: 'string'
+            type: 'string',
           },
           column_names: {
-            type: 'string'
+            type: 'string',
           },
           delimiter: {
-            type: 'string'
+            type: 'string',
           },
           quote: {
-            type: 'string'
+            type: 'string',
           },
           should_trim_fields: {
-            type: 'string'
+            type: 'string',
           },
           grok_pattern: {
-            type: 'string'
+            type: 'string',
           },
           timestamp_field: {
-            type: 'string'
+            type: 'string',
           },
           timestamp_format: {
-            type: 'string'
+            type: 'string',
           },
           lines_to_sample: {
-            type: 'string'
+            type: 'string',
           },
-        }
+        },
       },
       {
-        fmt: '/_ml/find_file_structure'
-      }
+        fmt: '/_ml/find_file_structure',
+      },
     ],
     needBody: true,
-    method: 'POST'
+    method: 'POST',
   });
 
   ml.rollupIndexCapabilities = ca({
@@ -747,12 +747,11 @@ export const elasticsearchJsPlugin = (Client, config, components) => {
         fmt: '/<%=indexPattern%>/_rollup/data',
         req: {
           indexPattern: {
-            type: 'string'
-          }
-        }
-      }
+            type: 'string',
+          },
+        },
+      },
     ],
-    method: 'GET'
+    method: 'GET',
   });
-
 };

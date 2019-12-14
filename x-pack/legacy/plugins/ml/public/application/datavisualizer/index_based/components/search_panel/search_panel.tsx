@@ -122,7 +122,9 @@ export const SearchPanel: FC<Props> = ({
               id="xpack.ml.datavisualizer.searchPanel.documentsPerShardLabel"
               defaultMessage="documents per shard from a total of {wrappedTotalCount} {totalCount, plural, one {document} other {documents}}"
               values={{
-                wrappedTotalCount: <b>{totalCount}</b>,
+                wrappedTotalCount: (
+                  <b data-test-subj="mlDataVisualizerTotalDocCount">{totalCount}</b>
+                ),
                 totalCount,
               }}
             />

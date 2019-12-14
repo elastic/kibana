@@ -7,7 +7,7 @@
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { render } from 'react-testing-library';
+import { render, act } from '@testing-library/react';
 
 import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';
 import { wait } from '../../../../lib/helpers';
@@ -18,31 +18,19 @@ import { FirstLastSeenHost, FirstLastSeenHostType } from '.';
 
 jest.mock('../../../../lib/settings/use_kibana_ui_setting');
 
-describe('FirstLastSeen Component', () => {
-  // this is just a little hack to silence a warning that we'll get until react
-  // fixes this: https://github.com/facebook/react/pull/14853
-  // For us that mean we need to upgrade to 16.9.0
-  // and we will be able to do that when we are in master
+// Suppress warnings about "react-apollo" until we migrate to apollo@3
+/* eslint-disable no-console */
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+});
 
+describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
   const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
-
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = (...args: string[]) => {
-      if (/Warning.*not wrapped in act/.test(args[0])) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
-  afterAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = originalError;
-  });
 
   test('Loading', async () => {
     const { container } = render(
@@ -66,7 +54,7 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
 
     expect(container.innerHTML).toBe(
       `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
@@ -81,7 +69,7 @@ describe('FirstLastSeen Component', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
+    await act(() => wait());
     expect(container.innerHTML).toBe(
       `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
     );
@@ -98,7 +86,7 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
 
     expect(container.innerHTML).toBe(
       `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
@@ -116,7 +104,7 @@ describe('FirstLastSeen Component', () => {
       </TestProviders>
     );
 
-    await wait();
+    await act(() => wait());
 
     expect(container.innerHTML).toBe(
       `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
@@ -133,7 +121,7 @@ describe('FirstLastSeen Component', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
+    await act(() => wait());
     expect(container.textContent).toBe('something-invalid');
   });
 
@@ -147,7 +135,7 @@ describe('FirstLastSeen Component', () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
+    await act(() => wait());
     expect(container.textContent).toBe('something-invalid');
   });
 });

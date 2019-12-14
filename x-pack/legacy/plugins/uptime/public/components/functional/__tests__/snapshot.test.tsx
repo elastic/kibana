@@ -6,21 +6,19 @@
 
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { Snapshot as SnapshotType } from '../../../../common/graphql/types';
-import { SnapshotComponent } from '../snapshot';
+import { Snapshot } from '../../../../common/runtime_types';
+import { PresentationalComponent } from '../snapshot';
 
 describe('Snapshot component', () => {
-  const snapshot: SnapshotType = {
-    counts: {
-      up: 8,
-      down: 2,
-      mixed: 0,
-      total: 10,
-    },
+  const snapshot: Snapshot = {
+    up: 8,
+    down: 2,
+    mixed: 0,
+    total: 10,
   };
 
   it('renders without errors', () => {
-    const wrapper = shallowWithIntl(<SnapshotComponent data={{ snapshot }} loading={false} />);
+    const wrapper = shallowWithIntl(<PresentationalComponent count={snapshot} loading={false} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

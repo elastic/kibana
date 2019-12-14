@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { UiSettingsClientContract } from 'kibana/public';
+import { IUiSettingsClient } from 'kibana/public';
 
 import {
   FieldFormatRegisty,
@@ -37,7 +37,7 @@ import {
   UrlFormat,
 } from '../../plugins/data/public/';
 
-export const getFieldFormatsRegistry = (uiSettings: UiSettingsClientContract) => {
+export const getFieldFormatsRegistry = (uiSettings: IUiSettingsClient) => {
   const fieldFormats = new FieldFormatRegisty();
 
   fieldFormats.register([

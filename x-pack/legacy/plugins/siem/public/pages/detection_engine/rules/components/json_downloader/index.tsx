@@ -24,30 +24,36 @@ export interface JSONDownloaderProps {
  * @param payload JSON string to write to file
  *
  */
-export const JSONDownloader = React.memo<JSONDownloaderProps>(
-  ({ filename, payload, onExportComplete }) => {
-    const anchorRef = useRef<HTMLAnchorElement>(null);
+export const JSONDownloaderComponent = ({
+  filename,
+  payload,
+  onExportComplete,
+}: JSONDownloaderProps) => {
+  const anchorRef = useRef<HTMLAnchorElement>(null);
 
-    useEffect(() => {
-      if (anchorRef && anchorRef.current && payload != null) {
-        const blob = new Blob([jsonToNDJSON(payload)], { type: 'application/json' });
-        // @ts-ignore function is not always defined -- this is for supporting IE
-        if (window.navigator.msSaveOrOpenBlob) {
-          window.navigator.msSaveBlob(blob);
-        } else {
-          const objectURL = window.URL.createObjectURL(blob);
-          anchorRef.current.href = objectURL;
-          anchorRef.current.download = filename;
-          anchorRef.current.click();
-          window.URL.revokeObjectURL(objectURL);
-        }
-        onExportComplete(payload.length);
+  useEffect(() => {
+    if (anchorRef && anchorRef.current && payload != null) {
+      const blob = new Blob([jsonToNDJSON(payload)], { type: 'application/json' });
+      // @ts-ignore function is not always defined -- this is for supporting IE
+      if (window.navigator.msSaveOrOpenBlob) {
+        window.navigator.msSaveBlob(blob);
+      } else {
+        const objectURL = window.URL.createObjectURL(blob);
+        anchorRef.current.href = objectURL;
+        anchorRef.current.download = filename;
+        anchorRef.current.click();
+        window.URL.revokeObjectURL(objectURL);
       }
-    }, [payload]);
+      onExportComplete(payload.length);
+    }
+  }, [payload]);
 
-    return <InvisibleAnchor ref={anchorRef} />;
-  }
-);
+  return <InvisibleAnchor ref={anchorRef} />;
+};
+
+JSONDownloaderComponent.displayName = 'JSONDownloaderComponent';
+
+export const JSONDownloader = React.memo(JSONDownloaderComponent);
 
 JSONDownloader.displayName = 'JSONDownloader';
 

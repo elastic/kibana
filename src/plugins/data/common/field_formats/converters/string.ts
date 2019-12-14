@@ -22,8 +22,7 @@ import { asPrettyString } from '../index';
 import { KBN_FIELD_TYPES } from '../../kbn_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
-// @ts-ignore
-import { shortenDottedString } from '../../../../../legacy/core_plugins/kibana/common/utils/shorten_dotted_string';
+import { shortenDottedString } from '../../utils';
 
 const TRANSFORM_OPTIONS = [
   {

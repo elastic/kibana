@@ -20,8 +20,12 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 
-import { ConfigPath, EnvironmentMode, PackageInfo } from '../config';
+import { RecursiveReadonly } from 'kibana/public';
+import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
+import { KibanaConfigType } from '../kibana_config';
+import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
+import { PathConfigType } from '../path';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -32,7 +36,7 @@ import { CoreSetup, CoreStart } from '..';
 export type PluginConfigSchema<T> = Type<T>;
 
 /**
- * Describes a plugin configuration schema and capabilities.
+ * Describes a plugin configuration properties.
  *
  * @example
  * ```typescript
@@ -52,12 +56,20 @@ export type PluginConfigSchema<T> = Type<T>;
  *     uiProp: true,
  *   },
  *   schema: configSchema,
+ *   deprecations: ({ rename, unused }) => [
+ *     rename('securityKey', 'secret'),
+ *     unused('deprecatedProperty'),
+ *   ],
  * };
  * ```
  *
  * @public
  */
 export interface PluginConfigDescriptor<T = any> {
+  /**
+   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
+   */
+  deprecations?: ConfigDeprecationProvider;
   /**
    * List of configuration properties that will be available on the client-side plugin.
    */
@@ -169,15 +181,14 @@ export interface DiscoveredPlugin {
 }
 
 /**
- * An extended `DiscoveredPlugin` that exposes more sensitive information. Should never
- * be exposed to client-side code.
  * @internal
  */
-export interface DiscoveredPluginInternal extends DiscoveredPlugin {
+export interface InternalPluginInfo {
   /**
-   * Path on the filesystem where plugin was loaded from.
+   * Path to the client-side entrypoint file to be used to build the client-side
+   * bundle for a plugin.
    */
-  readonly path: string;
+  readonly entryPointPath: string;
 }
 
 /**
@@ -196,6 +207,22 @@ export interface Plugin<
   stop?(): void;
 }
 
+export const SharedGlobalConfigKeys = {
+  // We can add more if really needed
+  kibana: ['defaultAppId', 'index'] as const,
+  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
+  path: ['data'] as const,
+};
+
+/**
+ * @public
+ */
+export type SharedGlobalConfig = RecursiveReadonly<{
+  kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
+  elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
+  path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+}>;
+
 /**
  * Context that's available to plugins during initialization stage.
  *
@@ -209,6 +236,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   };
   logger: LoggerFactory;
   config: {
+    legacy: { globalConfig$: Observable<SharedGlobalConfig> };
     create: <T = ConfigSchema>() => Observable<T>;
     createIfExists: <T = ConfigSchema>() => Observable<T | undefined>;
   };

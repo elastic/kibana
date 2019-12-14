@@ -26,4 +26,6 @@ if (args.length > 0) {
   opts = args.map(el => `x-pack/plugins/${el}/**/*.tsx`).join(' ');
 }
 
+opts += ' --syntax=css-in-js';
+
 require('stylelint/lib/cli')(opts);

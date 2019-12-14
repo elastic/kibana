@@ -5,12 +5,11 @@
  */
 
 import * as React from 'react';
-import { pure } from 'recompose';
 
 import { NoteCard } from './note_card';
 import * as i18n from './translations';
 
-const Column = pure<{ text: string }>(({ text }) => <span>{text}</span>);
+const Column = React.memo<{ text: string }>(({ text }) => <span>{text}</span>);
 Column.displayName = 'Column';
 
 interface Item {

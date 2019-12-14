@@ -42,7 +42,7 @@ describe('KpiNetwork Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('KpiNetworkComponent'))).toMatchSnapshot();
     });
 
     test('it renders the default widget', () => {
@@ -59,7 +59,7 @@ describe('KpiNetwork Component', () => {
         </ReduxStoreProvider>
       );
 
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('KpiNetworkComponent'))).toMatchSnapshot();
     });
   });
 });

@@ -12,7 +12,6 @@ import { OnHighlightChangeArgs } from '../components/profile_tree';
 import { ShardSerialized, Targets } from '../types';
 
 export type Action =
-  | { type: 'setPristine'; value: boolean }
   | { type: 'setProfiling'; value: boolean }
   | { type: 'setHighlightDetails'; value: OnHighlightChangeArgs | null }
   | { type: 'setActiveTab'; value: Targets | null }
@@ -20,12 +19,8 @@ export type Action =
 
 export const reducer: Reducer<State, Action> = (state, action) =>
   produce<State>(state, draft => {
-    if (action.type === 'setPristine') {
-      draft.pristine = action.value;
-      return;
-    }
-
     if (action.type === 'setProfiling') {
+      draft.pristine = false;
       draft.profiling = action.value;
       if (draft.profiling) {
         draft.currentResponse = null;

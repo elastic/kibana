@@ -22,10 +22,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
-import {
-  EuiFormRow,
-  EuiComboBox,
-} from '@elastic/eui';
+import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 
 class FieldSelectUi extends Component {
   constructor(props) {
@@ -38,7 +35,9 @@ class FieldSelectUi extends Component {
       fields: [],
       indexPatternId: props.indexPatternId,
     };
-    this.filterField = _.get(props, 'filterField', () => { return true; });
+    this.filterField = _.get(props, 'filterField', () => {
+      return true;
+    });
   }
 
   componentWillUnmount() {
@@ -49,21 +48,24 @@ class FieldSelectUi extends Component {
     this.loadFields(this.state.indexPatternId);
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.indexPatternId !== nextProps.indexPatternId) {
       this.loadFields(nextProps.indexPatternId);
     }
   }
 
-  loadFields = (indexPatternId) => {
-    this.setState({
-      isLoading: true,
-      fields: [],
-      indexPatternId
-    }, this.debouncedLoad.bind(null, indexPatternId));
-  }
+  loadFields = indexPatternId => {
+    this.setState(
+      {
+        isLoading: true,
+        fields: [],
+        indexPatternId,
+      },
+      this.debouncedLoad.bind(null, indexPatternId)
+    );
+  };
 
-  debouncedLoad = _.debounce(async (indexPatternId) => {
+  debouncedLoad = _.debounce(async indexPatternId => {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
@@ -88,24 +90,22 @@ class FieldSelectUi extends Component {
 
     const fieldsByTypeMap = new Map();
     const fields = [];
-    indexPattern.fields
-      .filter(this.filterField)
-      .forEach(field => {
-        if (fieldsByTypeMap.has(field.type)) {
-          const fieldsList = fieldsByTypeMap.get(field.type);
-          fieldsList.push(field.name);
-          fieldsByTypeMap.set(field.type, fieldsList);
-        } else {
-          fieldsByTypeMap.set(field.type, [field.name]);
-        }
-      });
+    indexPattern.fields.filter(this.filterField).forEach(field => {
+      if (fieldsByTypeMap.has(field.type)) {
+        const fieldsList = fieldsByTypeMap.get(field.type);
+        fieldsList.push(field.name);
+        fieldsByTypeMap.set(field.type, fieldsList);
+      } else {
+        fieldsByTypeMap.set(field.type, [field.name]);
+      }
+    });
 
     fieldsByTypeMap.forEach((fieldsList, fieldType) => {
       fields.push({
         label: fieldType,
         options: fieldsList.sort().map(fieldName => {
           return { value: fieldName, label: fieldName };
-        })
+        }),
       });
     });
 
@@ -117,13 +117,13 @@ class FieldSelectUi extends Component {
 
     this.setState({
       isLoading: false,
-      fields: fields
+      fields: fields,
     });
   }, 300);
 
-  onChange = (selectedOptions) => {
+  onChange = selectedOptions => {
     this.props.onChange(_.get(selectedOptions, '0.value'));
-  }
+  };
 
   render() {
     if (!this.props.indexPatternId || this.props.indexPatternId.trim().length === 0) {
@@ -141,12 +141,17 @@ class FieldSelectUi extends Component {
     return (
       <EuiFormRow
         id={selectId}
-        label={<FormattedMessage id="inputControl.editor.fieldSelect.fieldLabel" defaultMessage="Field" />}
+        label={
+          <FormattedMessage
+            id="inputControl.editor.fieldSelect.fieldLabel"
+            defaultMessage="Field"
+          />
+        }
       >
         <EuiComboBox
           placeholder={intl.formatMessage({
             id: 'inputControl.editor.fieldSelect.selectFieldPlaceholder',
-            defaultMessage: 'Select field...'
+            defaultMessage: 'Select field...',
           })}
           singleSelection={true}
           isLoading={this.state.isLoading}

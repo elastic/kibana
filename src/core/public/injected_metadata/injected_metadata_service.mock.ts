@@ -23,7 +23,6 @@ const createSetupContractMock = () => {
     getBasePath: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBranch: jest.fn(),
-    getCapabilities: jest.fn(),
     getCspConfig: jest.fn(),
     getLegacyMode: jest.fn(),
     getLegacyMetadata: jest.fn(),
@@ -32,7 +31,6 @@ const createSetupContractMock = () => {
     getInjectedVars: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
   };
-  setupContract.getCapabilities.mockReturnValue({} as any);
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
   setupContract.getLegacyMode.mockReturnValue(true);

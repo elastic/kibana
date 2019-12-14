@@ -6,17 +6,18 @@
 import * as t from 'io-ts';
 
 // IO type for validation
-export const ErrorType = t.partial({
+export const MonitorErrorType = t.partial({
   code: t.number,
   message: t.string,
   type: t.string,
 });
 
 // Typescript type for type checking
-export type Error = t.TypeOf<typeof ErrorType>;
+export type MonitorError = t.TypeOf<typeof MonitorErrorType>;
 
 export const MonitorDetailsType = t.intersection([
   t.type({ monitorId: t.string }),
-  t.partial({ error: ErrorType }),
+  t.partial({ error: MonitorErrorType }),
+  t.partial({ timestamp: t.string }),
 ]);
 export type MonitorDetails = t.TypeOf<typeof MonitorDetailsType>;

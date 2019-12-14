@@ -12,28 +12,28 @@ import { NetworkDnsTable } from '../../../components/page/network/network_dns_ta
 import { NetworkDnsQuery, NetworkDnsHistogramQuery } from '../../../containers/network_dns';
 import { manageQuery } from '../../../components/page/manage_query';
 
-import { DnsQueryTabBodyProps } from './types';
+import { NetworkComponentQueryProps } from './types';
 import { NetworkDnsHistogram } from '../../../components/page/network/dns_histogram';
 
 const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const NetworkDnsHistogramManage = manageQuery(NetworkDnsHistogram);
 
 export const DnsQueryTabBody = ({
-  to,
+  endDate,
   filterQuery,
-  isInitializing,
-  from,
+  skip,
+  startDate,
   setQuery,
   type,
   updateDateRange = () => {},
-}: DnsQueryTabBodyProps) => (
+}: NetworkComponentQueryProps) => (
   <>
     <NetworkDnsHistogramQuery
-      endDate={to}
+      endDate={endDate}
       filterQuery={filterQuery}
-      skip={isInitializing}
+      skip={skip}
       sourceId="default"
-      startDate={from}
+      startDate={startDate}
       type={type}
     >
       {({ totalCount, loading, id, inspect, refetch, histogram }) => (
@@ -41,8 +41,8 @@ export const DnsQueryTabBody = ({
           id={id}
           loading={loading}
           data={histogram}
-          endDate={to}
-          startDate={from}
+          endDate={endDate}
+          startDate={startDate}
           inspect={inspect}
           refetch={refetch}
           setQuery={setQuery}
@@ -53,11 +53,11 @@ export const DnsQueryTabBody = ({
     </NetworkDnsHistogramQuery>
     <EuiSpacer />
     <NetworkDnsQuery
-      endDate={to}
+      endDate={endDate}
       filterQuery={filterQuery}
-      skip={isInitializing}
+      skip={skip}
       sourceId="default"
-      startDate={from}
+      startDate={startDate}
       type={type}
     >
       {({

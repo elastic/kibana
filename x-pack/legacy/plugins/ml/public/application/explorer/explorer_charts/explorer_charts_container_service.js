@@ -14,13 +14,13 @@
 import _ from 'lodash';
 
 import { buildConfig } from './explorer_chart_config_builder';
-import {
-  chartLimits,
-  getChartType
-} from '../../util/chart_utils';
+import { chartLimits, getChartType } from '../../util/chart_utils';
 
 import { getEntityFieldList } from '../../../../common/util/anomaly_utils';
-import { isSourceDataChartableForDetector, isModelPlotEnabled } from '../../../../common/util/job_utils';
+import {
+  isSourceDataChartableForDetector,
+  isModelPlotEnabled,
+} from '../../../../common/util/job_utils';
 import { mlResultsService } from '../../services/results_service';
 import { mlJobService } from '../../services/job_service';
 import { severity$ } from '../../components/controls/select_severity/select_severity';
@@ -34,7 +34,7 @@ export function getDefaultChartsData() {
     seriesToPlot: [],
     // default values, will update on every re-render
     tooManyBuckets: false,
-    timeFieldName: 'timestamp'
+    timeFieldName: 'timestamp',
   };
 }
 
@@ -48,22 +48,21 @@ export function explorerChartsContainerServiceFactory(callback) {
 
   callback(getDefaultChartsData());
 
-  let requestCount = 0;
-  const anomalyDataChange = function (anomalyRecords, earliestMs, latestMs) {
-    const newRequestCount = ++requestCount;
-    requestCount = newRequestCount;
-
+  const anomalyDataChange = function(anomalyRecords, earliestMs, latestMs) {
     const data = getDefaultChartsData();
 
     const threshold = severity$.getValue();
 
-    const filteredRecords = anomalyRecords.filter((record) => {
+    const filteredRecords = anomalyRecords.filter(record => {
       return Number(record.record_score) >= threshold.val;
     });
     const allSeriesRecords = processRecordsForDisplay(filteredRecords);
     // Calculate the number of charts per row, depending on the width available, to a max of 4.
     const chartsContainerWidth = getChartContainerWidth();
-    let chartsPerRow = Math.min(Math.max(Math.floor(chartsContainerWidth / 550), 1), MAX_CHARTS_PER_ROW);
+    let chartsPerRow = Math.min(
+      Math.max(Math.floor(chartsContainerWidth / 550), 1),
+      MAX_CHARTS_PER_ROW
+    );
     if (allSeriesRecords.length === 1) {
       chartsPerRow = 1;
     }
@@ -94,19 +93,14 @@ export function explorerChartsContainerServiceFactory(callback) {
     data.seriesToPlot = seriesConfigs.map(config => ({
       ...config,
       loading: true,
-      chartData: null
+      chartData: null,
     }));
 
     callback(data);
 
     // Query 1 - load the raw metric data.
     function getMetricData(config, range) {
-      const {
-        jobId,
-        detectorIndex,
-        entityFields,
-        interval
-      } = config;
+      const { jobId, detectorIndex, entityFields, interval } = config;
 
       const job = mlJobService.getJob(jobId);
 
@@ -114,77 +108,84 @@ export function explorerChartsContainerServiceFactory(callback) {
       const useSourceData = isSourceDataChartableForDetector(job, detectorIndex);
       if (useSourceData === true) {
         const datafeedQuery = _.get(config, 'datafeedConfig.query', null);
-        return mlResultsService.getMetricData(
-          config.datafeedConfig.indices,
-          config.entityFields,
-          datafeedQuery,
-          config.metricFunction,
-          config.metricFieldName,
-          config.timeField,
-          range.min,
-          range.max,
-          config.interval
-        );
+        return mlResultsService
+          .getMetricData(
+            config.datafeedConfig.indices,
+            config.entityFields,
+            datafeedQuery,
+            config.metricFunction,
+            config.metricFieldName,
+            config.timeField,
+            range.min,
+            range.max,
+            config.interval
+          )
+          .toPromise();
       } else {
         // Extract the partition, by, over fields on which to filter.
         const criteriaFields = [];
         const detector = job.analysis_config.detectors[detectorIndex];
         if (_.has(detector, 'partition_field_name')) {
-          const partitionEntity = _.find(entityFields, { 'fieldName': detector.partition_field_name });
+          const partitionEntity = _.find(entityFields, {
+            fieldName: detector.partition_field_name,
+          });
           if (partitionEntity !== undefined) {
             criteriaFields.push(
               { fieldName: 'partition_field_name', fieldValue: partitionEntity.fieldName },
-              { fieldName: 'partition_field_value', fieldValue: partitionEntity.fieldValue });
+              { fieldName: 'partition_field_value', fieldValue: partitionEntity.fieldValue }
+            );
           }
         }
 
         if (_.has(detector, 'over_field_name')) {
-          const overEntity = _.find(entityFields, { 'fieldName': detector.over_field_name });
+          const overEntity = _.find(entityFields, { fieldName: detector.over_field_name });
           if (overEntity !== undefined) {
             criteriaFields.push(
               { fieldName: 'over_field_name', fieldValue: overEntity.fieldName },
-              { fieldName: 'over_field_value', fieldValue: overEntity.fieldValue });
+              { fieldName: 'over_field_value', fieldValue: overEntity.fieldValue }
+            );
           }
         }
 
         if (_.has(detector, 'by_field_name')) {
-          const byEntity = _.find(entityFields, { 'fieldName': detector.by_field_name });
+          const byEntity = _.find(entityFields, { fieldName: detector.by_field_name });
           if (byEntity !== undefined) {
             criteriaFields.push(
               { fieldName: 'by_field_name', fieldValue: byEntity.fieldName },
-              { fieldName: 'by_field_value', fieldValue: byEntity.fieldValue });
+              { fieldName: 'by_field_value', fieldValue: byEntity.fieldValue }
+            );
           }
         }
 
         return new Promise((resolve, reject) => {
           const obj = {
             success: true,
-            results: {}
+            results: {},
           };
 
-          return mlResultsService.getModelPlotOutput(
-            jobId,
-            detectorIndex,
-            criteriaFields,
-            range.min,
-            range.max,
-            interval
-          )
-            .then((resp) => {
+          return mlResultsService
+            .getModelPlotOutput(
+              jobId,
+              detectorIndex,
+              criteriaFields,
+              range.min,
+              range.max,
+              interval
+            )
+            .toPromise()
+            .then(resp => {
               // Return data in format required by the explorer charts.
               const results = resp.results;
-              Object.keys(results).forEach((time) => {
+              Object.keys(results).forEach(time => {
                 obj.results[time] = results[time].actual;
               });
               resolve(obj);
             })
-            .catch((resp) => {
+            .catch(resp => {
               reject(resp);
             });
-
         });
       }
-
     }
 
     // Query 2 - load the anomalies.
@@ -194,26 +195,30 @@ export function explorerChartsContainerServiceFactory(callback) {
       let criteria = [];
       criteria.push({ fieldName: 'detector_index', fieldValue: config.detectorIndex });
       criteria = criteria.concat(config.entityFields);
-      return mlResultsService.getRecordsForCriteria(
-        [config.jobId],
-        criteria,
-        0,
-        range.min,
-        range.max,
-        ANOMALIES_MAX_RESULTS
-      );
+      return mlResultsService
+        .getRecordsForCriteria(
+          [config.jobId],
+          criteria,
+          0,
+          range.min,
+          range.max,
+          ANOMALIES_MAX_RESULTS
+        )
+        .toPromise();
     }
 
     // Query 3 - load any scheduled events for the job.
     function getScheduledEvents(config, range) {
-      return mlResultsService.getScheduledEventsByBucket(
-        [config.jobId],
-        range.min,
-        range.max,
-        config.interval,
-        1,
-        MAX_SCHEDULED_EVENTS
-      );
+      return mlResultsService
+        .getScheduledEventsByBucket(
+          [config.jobId],
+          range.min,
+          range.max,
+          config.interval,
+          1,
+          MAX_SCHEDULED_EVENTS
+        )
+        .toPromise();
     }
 
     // Query 4 - load context data distribution
@@ -251,12 +256,14 @@ export function explorerChartsContainerServiceFactory(callback) {
     // only after that trigger data processing and page render.
     // TODO - if query returns no results e.g. source data has been deleted,
     // display a message saying 'No data between earliest/latest'.
-    const seriesPromises = seriesConfigs.map(seriesConfig => Promise.all([
-      getMetricData(seriesConfig, chartRange),
-      getRecordsForCriteria(seriesConfig, chartRange),
-      getScheduledEvents(seriesConfig, chartRange),
-      getEventDistribution(seriesConfig, chartRange)
-    ]));
+    const seriesPromises = seriesConfigs.map(seriesConfig =>
+      Promise.all([
+        getMetricData(seriesConfig, chartRange),
+        getRecordsForCriteria(seriesConfig, chartRange),
+        getScheduledEvents(seriesConfig, chartRange),
+        getEventDistribution(seriesConfig, chartRange),
+      ])
+    );
 
     function processChartData(response, seriesIndex) {
       const metricData = response[0].results;
@@ -271,7 +278,6 @@ export function explorerChartsContainerServiceFactory(callback) {
         return recordA[ML_TIME_FIELD_NAME] - recordB[ML_TIME_FIELD_NAME];
       });
 
-
       // Return dataset in format used by the chart.
       // i.e. array of Objects with keys date (timestamp), value,
       //    plus anomalyScore for points with anomaly markers.
@@ -279,7 +285,7 @@ export function explorerChartsContainerServiceFactory(callback) {
       if (metricData !== undefined) {
         if (eventDistribution.length > 0 && records.length > 0) {
           const filterField = records[0].by_field_value || records[0].over_field_value;
-          chartData = eventDistribution.filter(d => (d.entity !== filterField));
+          chartData = eventDistribution.filter(d => d.entity !== filterField);
           _.map(metricData, (value, time) => {
             // The filtering for rare/event_distribution charts needs to be handled
             // differently because of how the source data is structured.
@@ -294,29 +300,28 @@ export function explorerChartsContainerServiceFactory(callback) {
               chartData.push({
                 date: +time,
                 value: value,
-                entity: filterField
+                entity: filterField,
               });
             }
           });
         } else {
           chartData = _.map(metricData, (value, time) => ({
             date: +time,
-            value: value
+            value: value,
           }));
         }
       }
 
-
       // Iterate through the anomaly records, adding anomalyScore properties
       // to the chartData entries for anomalous buckets.
       const chartDataForPointSearch = getChartDataForPointSearch(chartData, records[0], chartType);
-      _.each(records, (record) => {
+      _.each(records, record => {
         // Look for a chart point with the same time as the record.
         // If none found, insert a point for anomalies due to a gap in the data.
         const recordTime = record[ML_TIME_FIELD_NAME];
         let chartPoint = findChartPointForTime(chartDataForPointSearch, recordTime);
         if (chartPoint === undefined) {
-          chartPoint = { date: new Date(recordTime),  value: null };
+          chartPoint = { date: new Date(recordTime), value: null };
           chartData.push(chartPoint);
         }
 
@@ -342,7 +347,6 @@ export function explorerChartsContainerServiceFactory(callback) {
         if (record.multi_bucket_impact !== undefined) {
           chartPoint.multiBucketImpact = record.multi_bucket_impact;
         }
-
       });
 
       // Add a scheduledEvents property to any points in the chart data set
@@ -366,7 +370,7 @@ export function explorerChartsContainerServiceFactory(callback) {
         chartType === CHART_TYPE.EVENT_DISTRIBUTION ||
         chartType === CHART_TYPE.POPULATION_DISTRIBUTION
       ) {
-        return chartData.filter((d) => {
+        return chartData.filter(d => {
           return d.entity === (record && (record.by_field_value || record.over_field_value));
         });
       }
@@ -380,17 +384,16 @@ export function explorerChartsContainerServiceFactory(callback) {
 
     Promise.all(seriesPromises)
       .then(response => {
-        // TODO: Add test to prevent this regression.
-        // Ignore this response if it's returned by an out of date promise
-        if (newRequestCount < requestCount) {
-          return;
-        }
         // calculate an overall min/max for all series
         const processedData = response.map(processChartData);
-        const allDataPoints = _.reduce(processedData, (datapoints, series) => {
-          _.each(series, d => datapoints.push(d));
-          return datapoints;
-        }, []);
+        const allDataPoints = _.reduce(
+          processedData,
+          (datapoints, series) => {
+            _.each(series, d => datapoints.push(d));
+            return datapoints;
+          },
+          []
+        );
         const overallChartLimits = chartLimits(allDataPoints);
 
         data.seriesToPlot = response.map((d, i) => ({
@@ -401,7 +404,9 @@ export function explorerChartsContainerServiceFactory(callback) {
           plotLatest: chartRange.max,
           selectedEarliest: earliestMs,
           selectedLatest: latestMs,
-          chartLimits: USE_OVERALL_CHART_LIMITS ? overallChartLimits : chartLimits(processedData[i])
+          chartLimits: USE_OVERALL_CHART_LIMITS
+            ? overallChartLimits
+            : chartLimits(processedData[i]),
         }));
         callback(data);
       })
@@ -418,7 +423,7 @@ export function explorerChartsContainerServiceFactory(callback) {
 
     // Aggregate by job, detector, and analysis fields (partition, by, over).
     const aggregatedData = {};
-    _.each(anomalyRecords, (record) => {
+    _.each(anomalyRecords, record => {
       // Check if we can plot a chart for this record, depending on whether the source data
       // is chartable, and if model plot is enabled for the job.
       const job = mlJobService.getJob(record.job_id);
@@ -445,8 +450,10 @@ export function explorerChartsContainerServiceFactory(callback) {
       }
 
       // TODO - work out how best to display results from detectors with just an over field.
-      const firstFieldName = record.partition_field_name || record.by_field_name || record.over_field_name;
-      const firstFieldValue = record.partition_field_value || record.by_field_value || record.over_field_value;
+      const firstFieldName =
+        record.partition_field_name || record.by_field_name || record.over_field_name;
+      const firstFieldValue =
+        record.partition_field_value || record.by_field_value || record.over_field_value;
       if (firstFieldName !== undefined) {
         const groupsForDetector = detectorsForJob[detectorIndex];
 
@@ -516,26 +523,25 @@ export function explorerChartsContainerServiceFactory(callback) {
           }
         }
       }
-
     });
 
     console.log('explorer charts aggregatedData is:', aggregatedData);
     let recordsForSeries = [];
     // Convert to an array of the records with the highest record_score per unique series.
-    _.each(aggregatedData, (detectorsForJob) => {
-      _.each(detectorsForJob, (groupsForDetector) => {
+    _.each(aggregatedData, detectorsForJob => {
+      _.each(detectorsForJob, groupsForDetector => {
         if (groupsForDetector.maxScoreRecord !== undefined) {
           // Detector with no partition / by field.
           recordsForSeries.push(groupsForDetector.maxScoreRecord);
         } else {
-          _.each(groupsForDetector, (valuesForGroup) => {
-            _.each(valuesForGroup, (dataForGroupValue) => {
+          _.each(groupsForDetector, valuesForGroup => {
+            _.each(valuesForGroup, dataForGroupValue => {
               if (dataForGroupValue.maxScoreRecord !== undefined) {
                 recordsForSeries.push(dataForGroupValue.maxScoreRecord);
               } else {
                 // Second level of aggregation for partition and by/over.
-                _.each(dataForGroupValue, (splitsForGroup) => {
-                  _.each(splitsForGroup, (dataForSplitValue) => {
+                _.each(dataForGroupValue, splitsForGroup => {
+                  _.each(splitsForGroup, dataForSplitValue => {
                     recordsForSeries.push(dataForSplitValue.maxScoreRecord);
                   });
                 });
@@ -545,17 +551,25 @@ export function explorerChartsContainerServiceFactory(callback) {
         }
       });
     });
-    recordsForSeries = (_.sortBy(recordsForSeries, 'record_score')).reverse();
+    recordsForSeries = _.sortBy(recordsForSeries, 'record_score').reverse();
 
     return recordsForSeries;
   }
 
-  function calculateChartRange(seriesConfigs, earliestMs, latestMs, chartWidth, recordsToPlot, timeFieldName) {
+  function calculateChartRange(
+    seriesConfigs,
+    earliestMs,
+    latestMs,
+    chartWidth,
+    recordsToPlot,
+    timeFieldName
+  ) {
     let tooManyBuckets = false;
     // Calculate the time range for the charts.
     // Fit in as many points in the available container width plotted at the job bucket span.
     const midpointMs = Math.ceil((earliestMs + latestMs) / 2);
-    const maxBucketSpanMs = Math.max.apply(null, _.pluck(seriesConfigs, 'bucketSpanSeconds')) * 1000;
+    const maxBucketSpanMs =
+      Math.max.apply(null, _.pluck(seriesConfigs, 'bucketSpanSeconds')) * 1000;
 
     const pointsToPlotFullSelection = Math.ceil((latestMs - earliestMs) / maxBucketSpanMs);
 
@@ -568,8 +582,8 @@ export function explorerChartsContainerServiceFactory(callback) {
     const plotPoints = Math.max(optimumNumPoints, pointsToPlotFullSelection);
     const halfPoints = Math.ceil(plotPoints / 2);
     let chartRange = {
-      min: midpointMs - (halfPoints * maxBucketSpanMs),
-      max: midpointMs + (halfPoints * maxBucketSpanMs)
+      min: midpointMs - halfPoints * maxBucketSpanMs,
+      max: midpointMs + halfPoints * maxBucketSpanMs,
     };
 
     if (plotPoints > CHART_MAX_POINTS) {
@@ -579,7 +593,7 @@ export function explorerChartsContainerServiceFactory(callback) {
       let minMs = recordsToPlot[0][timeFieldName];
       let maxMs = recordsToPlot[0][timeFieldName];
 
-      _.each(recordsToPlot, (record) => {
+      _.each(recordsToPlot, record => {
         const diffMs = maxMs - minMs;
         if (diffMs < maxTimeSpan) {
           const recordTime = record[timeFieldName];
@@ -597,7 +611,7 @@ export function explorerChartsContainerServiceFactory(callback) {
         }
       });
 
-      if ((maxMs - minMs) < maxTimeSpan) {
+      if (maxMs - minMs < maxTimeSpan) {
         // Expand out to cover as much as the requested time span as possible.
         minMs = Math.max(earliestMs, minMs - maxTimeSpan);
         maxMs = Math.min(latestMs, maxMs + maxTimeSpan);
@@ -608,10 +622,9 @@ export function explorerChartsContainerServiceFactory(callback) {
 
     return {
       chartRange,
-      tooManyBuckets
+      tooManyBuckets,
     };
   }
 
   return anomalyDataChange;
-
 }

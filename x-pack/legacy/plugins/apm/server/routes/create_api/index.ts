@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { isLeft } from 'fp-ts/lib/Either';
-import { KibanaResponseFactory } from 'src/core/server';
+import { KibanaResponseFactory, RouteRegistrar } from 'src/core/server';
 import { APMConfig } from '../../../../../../plugins/apm/server';
 import {
   ServerAPI,
@@ -18,8 +18,9 @@ import {
   Route,
   Params
 } from '../typings';
+import { jsonRt } from '../../../common/runtime_types/json_rt';
 
-const debugRt = t.partial({ _debug: t.boolean });
+const debugRt = t.partial({ _debug: jsonRt.pipe(t.boolean) });
 
 export function createApi() {
   const factoryFns: Array<RouteFactoryFn<any, any, any, any>> = [];
@@ -53,28 +54,37 @@ export function createApi() {
           | 'get'
           | 'delete';
 
-        const bodyRt = params.body;
-        const fallbackBodyRt = bodyRt || t.strict({});
+        // For all runtime types with props, we create an exact
+        // version that will strip all keys that are unvalidated.
+
+        const bodyRt =
+          params.body && 'props' in params.body
+            ? t.exact(params.body)
+            : params.body;
 
         const rts = {
-          // add _debug query parameter to all routes
+          // Add _debug query parameter to all routes
           query: params.query
             ? t.exact(t.intersection([params.query, debugRt]))
             : t.exact(debugRt),
           path: params.path ? t.exact(params.path) : t.strict({}),
-          body: bodyRt && 'props' in bodyRt ? t.exact(bodyRt) : fallbackBodyRt
+          body: bodyRt || t.null
         };
 
-        router[routerMethod](
+        const anyObject = schema.object({}, { allowUnknowns: true });
+
+        (router[routerMethod] as RouteRegistrar<typeof routerMethod>)(
           {
             path,
             options,
             validate: {
-              ...(routerMethod === 'get'
-                ? {}
-                : { body: schema.object({}, { allowUnknowns: true }) }),
-              params: schema.object({}, { allowUnknowns: true }),
-              query: schema.object({}, { allowUnknowns: true })
+              // `body` can be null, but `validate` expects non-nullable types
+              // if any validation is defined. Not having validation currently
+              // means we don't get the payload. See
+              // https://github.com/elastic/kibana/issues/50179
+              body: schema.nullable(anyObject) as typeof anyObject,
+              params: anyObject,
+              query: anyObject
             }
           },
           async (context, request, response) => {
@@ -83,7 +93,7 @@ export function createApi() {
                 path: request.params,
                 body: request.body,
                 query: {
-                  _debug: false,
+                  _debug: 'false',
                   ...request.query
                 }
               };
@@ -100,6 +110,9 @@ export function createApi() {
                   throw Boom.badRequest(PathReporter.report(result)[0]);
                 }
 
+                // `io-ts` has stripped unvalidated keys, so we can compare
+                // the output with the input to see if all object keys are
+                // known and validated.
                 const strippedKeys = difference(
                   Object.keys(value || {}),
                   Object.keys(result.right || {})
@@ -124,7 +137,9 @@ export function createApi() {
                 context: {
                   ...context,
                   __LEGACY,
-                  // only return values for parameters that have runtime types
+                  // Only return values for parameters that have runtime types,
+                  // but always include query as _debug is always set even if
+                  // it's not defined in the route.
                   params: pick(parsedParams, ...Object.keys(params), 'query'),
                   config,
                   logger

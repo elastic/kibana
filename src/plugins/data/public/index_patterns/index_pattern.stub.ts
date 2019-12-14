@@ -26,3 +26,18 @@ export const stubIndexPattern: IIndexPattern = {
   title: 'logstash-*',
   timeFieldName: '@timestamp',
 };
+
+export const stubIndexPatternWithFields: IIndexPattern = {
+  id: '1234',
+  title: 'logstash-*',
+  fields: [
+    {
+      name: 'response',
+      type: 'number',
+      esTypes: ['integer'],
+      aggregatable: true,
+      filterable: true,
+      searchable: true,
+    },
+  ],
+};

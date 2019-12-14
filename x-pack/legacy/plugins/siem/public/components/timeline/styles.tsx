@@ -6,7 +6,9 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
+
+import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../drag_and_drop/helpers';
 
 /**
  * OFFSET PIXEL VALUES
@@ -17,6 +19,13 @@ export const OFFSET_SCROLLBAR = 17;
 /**
  * TIMELINE BODY
  */
+
+// SIDE EFFECT: the following creates a global class selector
+export const TimelineBodyGlobalStyle = createGlobalStyle`
+  body.${IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME} .siemTimeline__body {
+    overflow: hidden;
+  }
+`;
 
 export const TimelineBody = styled.div.attrs(({ className }) => ({
   className: `siemTimeline__body ${className}`,
@@ -50,7 +59,9 @@ TimelineBody.displayName = 'TimelineBody';
 export const EventsTable = styled.div.attrs(({ className }) => ({
   className: `siemEventsTable ${className}`,
   role: 'table',
-}))``;
+}))`
+  /* stylelint-disable no-empty-block */
+`;
 EventsTable.displayName = 'EventsTable';
 
 /* EVENTS HEAD */
@@ -103,14 +114,14 @@ export const EventsTh = styled.div.attrs(({ className }) => ({
   min-width: 0;
   position: ${({ position }) => position};
 
-  .siemEventsTable__thGroupActions &:first-child:last-child {
-    flex: 1;
-  }
-
   .siemEventsTable__thGroupData &:hover {
     background-color: ${({ theme }) => theme.eui.euiTableHoverColor};
-    cursor: move; //Fallback for IE11
+    cursor: move; /* Fallback for IE11 */
     cursor: grab;
+  }
+
+  .siemEventsTable__thGroupActions &:first-child:last-child {
+    flex: 1;
   }
 `;
 EventsTh.displayName = 'EventsTh';
@@ -120,11 +131,11 @@ export const EventsThContent = styled.div.attrs(({ className }) => ({
 }))<{ textAlign?: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  line-height: $({ theme }) =>theme.eui.euiLineHeight};
+  line-height: ${({ theme }) => theme.eui.euiLineHeight};
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
-  width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
+  width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 `;
 EventsThContent.displayName = 'EventsThContent';
 
@@ -208,7 +219,7 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
   min-width: 0;
   padding: ${({ theme }) => theme.eui.paddingSizes.xs};
   text-align: ${({ textAlign }) => textAlign};
-  width: 100%; //Using width: 100% instead of flex: 1 and max-width: 100% for IE11
+  width: 100%; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
 `;
 EventsTdContent.displayName = 'EventsTdContent';
 
@@ -288,14 +299,14 @@ export const EventsHeadingHandle = styled.div.attrs(({ className }) => ({
   visibility: hidden;
   width: ${({ theme }) => theme.eui.euiBorderWidthThick};
 
-  .siemEventsTable__thead:hover & {
-    opacity: 1;
-    visibility: visible;
-  }
-
   &:hover {
     background-color: ${({ theme }) => theme.eui.euiColorPrimary};
     cursor: col-resize;
+  }
+
+  .siemEventsTable__thead:hover & {
+    opacity: 1;
+    visibility: visible;
   }
 `;
 EventsHeadingHandle.displayName = 'EventsHeadingHandle';

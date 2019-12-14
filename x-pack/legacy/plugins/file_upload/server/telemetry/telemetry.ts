@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
 import _ from 'lodash';
 import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
 
@@ -18,9 +17,11 @@ export interface TelemetrySavedObject {
   attributes: Telemetry;
 }
 
-export function getInternalRepository(server: Server): any {
-  const { getSavedObjectsRepository } = server.savedObjects;
-  const callWithInternalUser = callWithInternalUserFactory(server);
+export function getInternalRepository(
+  elasticsearchPlugin: any,
+  getSavedObjectsRepository: any
+): any {
+  const callWithInternalUser = callWithInternalUserFactory(elasticsearchPlugin);
   return getSavedObjectsRepository(callWithInternalUser);
 }
 
@@ -30,8 +31,13 @@ export function initTelemetry(): Telemetry {
   };
 }
 
-export async function getTelemetry(server: Server, internalRepo?: object): Promise<Telemetry> {
-  const internalRepository = internalRepo || getInternalRepository(server);
+export async function getTelemetry(
+  elasticsearchPlugin: any,
+  getSavedObjectsRepository: any,
+  internalRepo?: object
+): Promise<Telemetry> {
+  const internalRepository =
+    internalRepo || getInternalRepository(elasticsearchPlugin, getSavedObjectsRepository);
   let telemetrySavedObject;
 
   try {
@@ -44,14 +50,21 @@ export async function getTelemetry(server: Server, internalRepo?: object): Promi
 }
 
 export async function updateTelemetry({
-  server,
+  elasticsearchPlugin,
+  getSavedObjectsRepository,
   internalRepo,
 }: {
-  server: any;
+  elasticsearchPlugin: any;
+  getSavedObjectsRepository: any;
   internalRepo?: any;
 }) {
-  const internalRepository = internalRepo || getInternalRepository(server);
-  let telemetry = await getTelemetry(server, internalRepository);
+  const internalRepository =
+    internalRepo || getInternalRepository(elasticsearchPlugin, getSavedObjectsRepository);
+  let telemetry = await getTelemetry(
+    elasticsearchPlugin,
+    getSavedObjectsRepository,
+    internalRepository
+  );
   // Create if doesn't exist
   if (!telemetry || _.isEmpty(telemetry)) {
     const newTelemetrySavedObject = await internalRepository.create(

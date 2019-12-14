@@ -12,21 +12,20 @@ import { LayerTocActions } from '../../../../../components/layer_toc_actions';
 import { i18n } from '@kbn/i18n';
 
 function escapeLayerName(name) {
-  return name
-    ? name.split(' ').join('_')
-    : '';
+  return name ? name.split(' ').join('_') : '';
 }
 
 export class TOCEntry extends React.Component {
-
   state = {
     displayName: null,
-    shouldShowModal: false
+    hasLegendDetails: false,
+    shouldShowModal: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
     this._updateDisplayName();
+    this._loadHasLegendDetails();
   }
 
   componentWillUnmount() {
@@ -35,6 +34,7 @@ export class TOCEntry extends React.Component {
 
   componentDidUpdate() {
     this._updateDisplayName();
+    this._loadHasLegendDetails();
   }
 
   _toggleLayerDetailsVisibility = () => {
@@ -43,6 +43,13 @@ export class TOCEntry extends React.Component {
     } else {
       this.props.showTOCDetails(this.props.layer.getId());
     }
+  };
+
+  async _loadHasLegendDetails() {
+    const hasLegendDetails = await this.props.layer.hasLegendDetails();
+    if (this._isMounted && hasLegendDetails !== this.state.hasLegendDetails) {
+      this.setState({ hasLegendDetails });
+    }
   }
 
   async _updateDisplayName() {
@@ -50,7 +57,7 @@ export class TOCEntry extends React.Component {
     if (this._isMounted) {
       if (label !== this.state.displayName) {
         this.setState({
-          displayName: label
+          displayName: label,
         });
       }
     }
@@ -64,13 +71,13 @@ export class TOCEntry extends React.Component {
 
     if (hasDirtyStateSelector) {
       this.setState({
-        shouldShowModal: true
+        shouldShowModal: true,
       });
       return;
     }
 
     this.props.openLayerPanel(this.props.layer.getId());
-  }
+  };
 
   _renderCancelModal() {
     if (!this.state.shouldShowModal) {
@@ -79,7 +86,7 @@ export class TOCEntry extends React.Component {
 
     const closeModal = () => {
       this.setState({
-        shouldShowModal: false
+        shouldShowModal: false,
       });
     };
 
@@ -113,14 +120,13 @@ export class TOCEntry extends React.Component {
 
     return (
       <div className="mapTocEntry__layerIcons">
-
         <EuiButtonIcon
           iconType="pencil"
           aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonAriaLabel', {
-            defaultMessage: 'Edit layer'
+            defaultMessage: 'Edit layer',
           })}
           title={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonTitle', {
-            defaultMessage: 'Edit layer'
+            defaultMessage: 'Edit layer',
           })}
           onClick={this._openLayerPanelWithCheck}
         />
@@ -129,21 +135,20 @@ export class TOCEntry extends React.Component {
           iconType="grab"
           color="subdued"
           title={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
-            defaultMessage: 'Reorder layer'
+            defaultMessage: 'Reorder layer',
           })}
           aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonAriaLabel', {
-            defaultMessage: 'Reorder layer'
+            defaultMessage: 'Reorder layer',
           })}
           className="mapTocEntry__grab"
           {...this.props.dragHandleProps}
         />
-
       </div>
     );
   }
 
   _renderDetailsToggle() {
-    if (!this.props.layer.hasLegendDetails()) {
+    if (!this.state.hasLegendDetails) {
       return null;
     }
 
@@ -152,25 +157,31 @@ export class TOCEntry extends React.Component {
       <span className="mapTocEntry__detailsToggle">
         <button
           className="mapTocEntry__detailsToggleButton"
-          aria-label={isLegendDetailsOpen
-            ? i18n.translate('xpack.maps.layerControl.tocEntry.hideDetailsButtonAriaLabel', {
-              defaultMessage: 'Hide layer details'
-            })
-            : i18n.translate('xpack.maps.layerControl.tocEntry.showDetailsButtonAriaLabel', {
-              defaultMessage: 'Show layer details'
-            })
+          aria-label={
+            isLegendDetailsOpen
+              ? i18n.translate('xpack.maps.layerControl.tocEntry.hideDetailsButtonAriaLabel', {
+                  defaultMessage: 'Hide layer details',
+                })
+              : i18n.translate('xpack.maps.layerControl.tocEntry.showDetailsButtonAriaLabel', {
+                  defaultMessage: 'Show layer details',
+                })
           }
-          title={isLegendDetailsOpen
-            ? i18n.translate('xpack.maps.layerControl.tocEntry.hideDetailsButtonTitle', {
-              defaultMessage: 'Hide layer details'
-            })
-            : i18n.translate('xpack.maps.layerControl.tocEntry.showDetailsButtonTitle', {
-              defaultMessage: 'Show layer details'
-            })
+          title={
+            isLegendDetailsOpen
+              ? i18n.translate('xpack.maps.layerControl.tocEntry.hideDetailsButtonTitle', {
+                  defaultMessage: 'Hide layer details',
+                })
+              : i18n.translate('xpack.maps.layerControl.tocEntry.showDetailsButtonTitle', {
+                  defaultMessage: 'Show layer details',
+                })
           }
           onClick={this._toggleLayerDetailsVisibility}
         >
-          <EuiIcon className="eui-alignBaseline" type={isLegendDetailsOpen ? 'arrowUp' : 'arrowDown'} size="s" />
+          <EuiIcon
+            className="eui-alignBaseline"
+            type={isLegendDetailsOpen ? 'arrowUp' : 'arrowDown'}
+            size="s"
+          />
         </button>
       </span>
     );
@@ -185,14 +196,15 @@ export class TOCEntry extends React.Component {
       zoom,
       toggleVisible,
       fitToBounds,
-      isUsingSearch
+      isUsingSearch,
     } = this.props;
 
     return (
       <div
         className={
-          layer.isVisible() && layer.showAtZoomLevel(zoom)
-            && !layer.hasErrors() ? 'mapTocEntry-visible' : 'mapTocEntry-notVisible'
+          layer.isVisible() && layer.showAtZoomLevel(zoom) && !layer.hasErrors()
+            ? 'mapTocEntry-visible'
+            : 'mapTocEntry-notVisible'
         }
       >
         <LayerTocActions
@@ -223,7 +235,7 @@ export class TOCEntry extends React.Component {
   }
 
   _renderLegendDetails = () => {
-    if (!this.props.isLegendDetailsOpen || !this.props.layer.hasLegendDetails()) {
+    if (!this.props.isLegendDetailsOpen || !this.state.hasLegendDetails) {
       return null;
     }
 
@@ -240,16 +252,13 @@ export class TOCEntry extends React.Component {
         {tocDetails}
       </div>
     );
-  }
+  };
 
   render() {
-    const classes = classNames(
-      'mapTocEntry',
-      {
-        'mapTocEntry-isDragging': this.props.isDragging,
-        'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
-      },
-    );
+    const classes = classNames('mapTocEntry', {
+      'mapTocEntry-isDragging': this.props.isDragging,
+      'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
+    });
 
     return (
       <div

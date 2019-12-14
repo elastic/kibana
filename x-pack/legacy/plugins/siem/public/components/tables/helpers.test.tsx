@@ -8,16 +8,18 @@ import {
   getRowItemDraggables,
   getRowItemOverflow,
   getRowItemDraggable,
-  OverflowField,
+  OverflowFieldComponent,
 } from './helpers';
 import * as React from 'react';
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
+  const mount = useMountAppended();
 
   describe('#getRowItemDraggable', () => {
     test('it returns correctly against snapshot', () => {
@@ -27,7 +29,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = shallow(<TestProviders>{rowItem}</TestProviders>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('DraggableWrapper'))).toMatchSnapshot();
     });
 
     test('it returns empty value when rowItem is undefined', () => {
@@ -38,7 +40,7 @@ describe('Table Helpers', () => {
         displayCount: 0,
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.text()).toBe(getEmptyValue());
+      expect(wrapper.find('DragDropContext').text()).toBe(getEmptyValue());
     });
 
     test('it returns empty string value when rowItem is empty', () => {
@@ -95,7 +97,7 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
-      expect(toJson(wrapper)).toMatchSnapshot();
+      expect(toJson(wrapper.find('DragDropContext'))).toMatchSnapshot();
     });
 
     test('it returns empty value when rowItems is undefined', () => {
@@ -210,19 +212,21 @@ describe('Table Helpers', () => {
   describe('OverflowField', () => {
     test('it returns correctly against snapshot', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = shallow(<OverflowField value={overflowString} showToolTip={false} />);
+      const wrapper = shallow(
+        <OverflowFieldComponent value={overflowString} showToolTip={false} />
+      );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it does not truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is short';
-      const wrapper = mount(<OverflowField value={overflowString} overflowLength={20} />);
+      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
       expect(wrapper.text()).toBe('This string is short');
     });
 
     test('it truncates as per custom overflowLength value', () => {
       const overflowString = 'This string is exactly fifty-one chars in length!!!';
-      const wrapper = mount(<OverflowField value={overflowString} overflowLength={20} />);
+      const wrapper = mount(<OverflowFieldComponent value={overflowString} overflowLength={20} />);
       expect(wrapper.text()).toBe('This string is exact');
     });
   });

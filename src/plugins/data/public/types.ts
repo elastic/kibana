@@ -19,11 +19,23 @@
 
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { IUiActionsSetup, IUiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompletePublicPluginSetup, AutocompletePublicPluginStart } from '.';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats_provider';
 import { ISearchSetup, ISearchStart } from './search';
 import { IGetSuggestions } from './suggestions_provider/types';
 import { QuerySetup, QueryStart } from './query';
+import { IndexPatternSelectProps } from './ui/index_pattern_select';
+import { IndexPatternsContract } from './index_patterns';
+import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+
+export interface DataSetupDependencies {
+  uiActions: IUiActionsSetup;
+}
+
+export interface DataStartDependencies {
+  uiActions: IUiActionsStart;
+}
 
 export interface DataPublicPluginSetup {
   autocomplete: AutocompletePublicPluginSetup;
@@ -35,9 +47,14 @@ export interface DataPublicPluginSetup {
 export interface DataPublicPluginStart {
   autocomplete: AutocompletePublicPluginStart;
   getSuggestions: IGetSuggestions;
+  indexPatterns: IndexPatternsContract;
   search: ISearchStart;
   fieldFormats: FieldFormatsStart;
   query: QueryStart;
+  ui: {
+    IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+    SearchBar: React.ComponentType<StatefulSearchBarProps>;
+  };
 }
 
 export * from './autocomplete_provider/types';

@@ -8,7 +8,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 
 import chrome from 'ui/chrome';
 import { DEFAULT_INDEX_KEY } from '../../../common/constants';
@@ -39,7 +38,7 @@ export interface IpOverviewProps extends QueryTemplateProps {
   ip: string;
 }
 
-const IpOverviewComponentQuery = pure<IpOverviewProps & IpOverviewReduxProps>(
+const IpOverviewComponentQuery = React.memo<IpOverviewProps & IpOverviewReduxProps>(
   ({ id = ID, isInspected, children, filterQuery, skip, sourceId, ip }) => (
     <Query<GetIpOverviewQuery.Query, GetIpOverviewQuery.Variables>
       query={ipOverviewQuery}

@@ -131,7 +131,7 @@ describe('createApi', () => {
             // stub default values
             params: {},
             query: {},
-            body: {},
+            body: null,
             ...requestMock
           },
           responseMock
@@ -144,7 +144,7 @@ describe('createApi', () => {
     it('adds a _debug query parameter by default', async () => {
       const { simulate, handlerMock, responseMock } = initApi({});
 
-      await simulate({ query: { _debug: true } });
+      await simulate({ query: { _debug: 'true' } });
 
       expect(handlerMock).toHaveBeenCalledTimes(1);
 
@@ -288,7 +288,7 @@ describe('createApi', () => {
       await simulate({
         query: {
           bar: '',
-          _debug: true
+          _debug: 'true'
         }
       });
 

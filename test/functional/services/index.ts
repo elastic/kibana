@@ -31,6 +31,7 @@ import {
   // @ts-ignore not TS yet
 } from './dashboard';
 import { DocTableProvider } from './doc_table';
+import { ElasticChartProvider } from './elastic_chart';
 import { EmbeddingProvider } from './embedding';
 import { FailureDebuggingProvider } from './failure_debugging';
 import { FilterBarProvider } from './filter_bar';
@@ -81,4 +82,5 @@ export const services = {
   globalNav: GlobalNavProvider,
   toasts: ToastsProvider,
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
+  elasticChart: ElasticChartProvider,
 };

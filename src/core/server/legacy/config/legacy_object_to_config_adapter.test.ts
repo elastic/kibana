@@ -45,6 +45,22 @@ describe('#get', () => {
     expect(configAdapter.get('container')).toEqual({ value: 'some' });
   });
 
+  test('correctly handles csp config.', () => {
+    const configAdapter = new LegacyObjectToConfigAdapter({
+      csp: {
+        rules: ['strict'],
+      },
+    });
+
+    expect(configAdapter.get('csp')).toMatchInlineSnapshot(`
+      Object {
+        "rules": Array [
+          "strict",
+        ],
+      }
+    `);
+  });
+
   test('correctly handles silent logging config.', () => {
     const configAdapter = new LegacyObjectToConfigAdapter({
       logging: { silent: true },
@@ -74,6 +90,7 @@ describe('#get', () => {
         port: 1234,
         rewriteBasePath: false,
         ssl: { enabled: true, keyPassphrase: 'some-phrase', someNewValue: 'new' },
+        compression: { enabled: true },
         someNotSupportedValue: 'val',
       },
     });
@@ -90,6 +107,7 @@ describe('#get', () => {
         port: 1234,
         rewriteBasePath: false,
         ssl: { enabled: false, certificate: 'cert', key: 'key' },
+        compression: { enabled: true },
         someNotSupportedValue: 'val',
       },
     });

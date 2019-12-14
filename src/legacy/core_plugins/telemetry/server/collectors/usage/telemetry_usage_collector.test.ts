@@ -25,20 +25,15 @@ import {
   createTelemetryUsageCollector,
   isFileReadable,
   readTelemetryFile,
-  KibanaHapiServer,
   MAX_FILE_SIZE,
 } from './telemetry_usage_collector';
 
-const getMockServer = (): KibanaHapiServer =>
-  ({
-    usage: {
-      collectorSet: { makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg) },
-    },
-  } as KibanaHapiServer & Server);
+const mockUsageCollector = () => ({
+  makeUsageCollector: jest.fn().mockImplementationOnce((arg: object) => arg),
+});
 
-const serverWithConfig = (configPath: string): KibanaHapiServer & Server => {
+const serverWithConfig = (configPath: string): Server => {
   return {
-    ...getMockServer(),
     config: () => ({
       get: (key: string) => {
         if (key !== 'telemetry.config' && key !== 'xpack.xpack_main.telemetry.config') {
@@ -48,7 +43,7 @@ const serverWithConfig = (configPath: string): KibanaHapiServer & Server => {
         return configPath;
       },
     }),
-  } as KibanaHapiServer & Server;
+  } as Server;
 };
 
 describe('telemetry_usage_collector', () => {
@@ -80,7 +75,7 @@ describe('telemetry_usage_collector', () => {
     // empty
     writeFileSync(tempFiles.empty, '');
     // 1 byte too big
-    writeFileSync(tempFiles.too_big, new Buffer(MAX_FILE_SIZE + 1));
+    writeFileSync(tempFiles.too_big, Buffer.alloc(MAX_FILE_SIZE + 1));
     // write-only file
     writeFileSync(tempFiles.unreadable, 'valid: true', { mode: 0o222 });
     // valid
@@ -130,14 +125,15 @@ describe('telemetry_usage_collector', () => {
   });
 
   describe('createTelemetryUsageCollector', () => {
-    test('calls `collectorSet.makeUsageCollector`', async () => {
+    test('calls `makeUsageCollector`', async () => {
       // note: it uses the file's path to get the directory, then looks for 'telemetry.yml'
       // exclusively, which is indirectly tested by passing it the wrong "file" in the same
       // dir
-      const server: KibanaHapiServer & Server = serverWithConfig(tempFiles.unreadable);
+      const server: Server = serverWithConfig(tempFiles.unreadable);
 
       // the `makeUsageCollector` is mocked above to return the argument passed to it
-      const collectorOptions = createTelemetryUsageCollector(server);
+      const usageCollector = mockUsageCollector() as any;
+      const collectorOptions = createTelemetryUsageCollector(usageCollector, server);
 
       expect(collectorOptions.type).toBe('static_telemetry');
       expect(await collectorOptions.fetch()).toEqual(expectedObject);

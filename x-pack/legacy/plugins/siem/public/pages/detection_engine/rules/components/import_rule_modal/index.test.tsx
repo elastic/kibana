@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { ImportRuleModal } from './index';
+import { ImportRuleModalComponent } from './index';
 import { useKibanaUiSetting } from '../../../../../lib/settings/use_kibana_ui_setting';
 import { getMockKibanaUiSetting, MockFrameworks } from '../../../../../mock';
 import { DEFAULT_KBN_VERSION } from '../../../../../../common/constants';
@@ -23,7 +23,11 @@ describe('ImportRuleModal', () => {
       getMockKibanaUiSetting((DEFAULT_KBN_VERSION as unknown) as MockFrameworks)
     );
     const wrapper = shallow(
-      <ImportRuleModal showModal={true} closeModal={jest.fn()} importComplete={jest.fn()} />
+      <ImportRuleModalComponent
+        showModal={true}
+        closeModal={jest.fn()}
+        importComplete={jest.fn()}
+      />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });

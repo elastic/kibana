@@ -18,7 +18,7 @@ const actionTypeRegistryParams = {
 beforeEach(() => jest.resetAllMocks());
 
 const executor: ExecutorType = async options => {
-  return { status: 'ok' };
+  return { status: 'ok', actionId: options.actionId };
 };
 
 describe('register()', () => {

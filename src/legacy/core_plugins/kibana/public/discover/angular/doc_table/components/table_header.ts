@@ -17,11 +17,10 @@
  * under the License.
  */
 import { wrapInI18nContext } from 'ui/i18n';
-import { getServices } from '../../../kibana_services';
+import { IUiSettingsClient } from 'kibana/public';
 import { TableHeader } from './table_header/table_header';
-const module = getServices().uiModules.get('app/discover');
 
-module.directive('kbnTableHeader', function(reactDirective: any, config: any) {
+export function createTableHeaderDirective(reactDirective: any, config: IUiSettingsClient) {
   return reactDirective(
     wrapInI18nContext(TableHeader),
     [
@@ -40,4 +39,4 @@ module.directive('kbnTableHeader', function(reactDirective: any, config: any) {
       isShortDots: config.get('shortDots:enable'),
     }
   );
-});
+}

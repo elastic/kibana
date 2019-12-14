@@ -19,7 +19,6 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import uuid from 'uuid';
 
 import { Note } from '../../../lib/note';
@@ -47,7 +46,7 @@ type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 
-export const StarIcon = pure<{
+export const StarIcon = React.memo<{
   isFavorite: boolean;
   timelineId: string;
   updateIsFavorite: UpdateIsFavorite;
@@ -70,61 +69,73 @@ export const StarIcon = pure<{
 ));
 StarIcon.displayName = 'StarIcon';
 
-export const Description = pure<{
+interface DescriptionProps {
   description: string;
   timelineId: string;
   updateDescription: UpdateDescription;
-}>(({ description, timelineId, updateDescription }) => (
-  <EuiToolTip data-test-subj="timeline-description-tool-tip" content={i18n.DESCRIPTION_TOOL_TIP}>
-    <DescriptionContainer data-test-subj="description-container">
-      <EuiFieldText
-        aria-label={i18n.TIMELINE_DESCRIPTION}
-        data-test-subj="timeline-description"
-        fullWidth={true}
-        onChange={e => updateDescription({ id: timelineId, description: e.target.value })}
-        placeholder={i18n.DESCRIPTION}
-        spellCheck={true}
-        value={description}
-      />
-    </DescriptionContainer>
-  </EuiToolTip>
-));
-Description.displayName = 'Description';
+}
 
-export const Name = pure<{ timelineId: string; title: string; updateTitle: UpdateTitle }>(
-  ({ timelineId, title, updateTitle }) => (
-    <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
-      <NameField
-        aria-label={i18n.TIMELINE_TITLE}
-        data-test-subj="timeline-title"
-        onChange={e => updateTitle({ id: timelineId, title: e.target.value })}
-        placeholder={i18n.UNTITLED_TIMELINE}
-        spellCheck={true}
-        value={title}
-      />
+export const Description = React.memo<DescriptionProps>(
+  ({ description, timelineId, updateDescription }) => (
+    <EuiToolTip data-test-subj="timeline-description-tool-tip" content={i18n.DESCRIPTION_TOOL_TIP}>
+      <DescriptionContainer data-test-subj="description-container">
+        <EuiFieldText
+          aria-label={i18n.TIMELINE_DESCRIPTION}
+          data-test-subj="timeline-description"
+          fullWidth={true}
+          onChange={e => updateDescription({ id: timelineId, description: e.target.value })}
+          placeholder={i18n.DESCRIPTION}
+          spellCheck={true}
+          value={description}
+        />
+      </DescriptionContainer>
     </EuiToolTip>
   )
 );
+Description.displayName = 'Description';
+
+interface NameProps {
+  timelineId: string;
+  title: string;
+  updateTitle: UpdateTitle;
+}
+
+export const Name = React.memo<NameProps>(({ timelineId, title, updateTitle }) => (
+  <EuiToolTip data-test-subj="timeline-title-tool-tip" content={i18n.TITLE}>
+    <NameField
+      aria-label={i18n.TIMELINE_TITLE}
+      data-test-subj="timeline-title"
+      onChange={e => updateTitle({ id: timelineId, title: e.target.value })}
+      placeholder={i18n.UNTITLED_TIMELINE}
+      spellCheck={true}
+      value={title}
+    />
+  </EuiToolTip>
+));
 Name.displayName = 'Name';
 
-export const NewTimeline = pure<{
+interface NewTimelineProps {
   createTimeline: CreateTimeline;
   onClosePopover: () => void;
   timelineId: string;
-}>(({ createTimeline, onClosePopover, timelineId }) => (
-  <EuiButtonEmpty
-    data-test-subj="timeline-new"
-    color="text"
-    iconSide="left"
-    iconType="plusInCircle"
-    onClick={() => {
-      createTimeline({ id: timelineId, show: true });
-      onClosePopover();
-    }}
-  >
-    {i18n.NEW_TIMELINE}
-  </EuiButtonEmpty>
-));
+}
+
+export const NewTimeline = React.memo<NewTimelineProps>(
+  ({ createTimeline, onClosePopover, timelineId }) => (
+    <EuiButtonEmpty
+      data-test-subj="timeline-new"
+      color="text"
+      iconSide="left"
+      iconType="plusInCircle"
+      onClick={() => {
+        createTimeline({ id: timelineId, show: true });
+        onClosePopover();
+      }}
+    >
+      {i18n.NEW_TIMELINE}
+    </EuiButtonEmpty>
+  )
+);
 NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
@@ -142,47 +153,54 @@ interface NotesButtonProps {
 
 const getNewNoteId = (): string => uuid.v4();
 
-const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNotes: () => void }>(
-  ({ noteIds, text, toggleShowNotes }) => (
-    <EuiButton
-      data-test-subj="timeline-notes-button-large"
-      onClick={() => toggleShowNotes()}
-      size="m"
-    >
-      <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon color="subdued" size="m" type="editorComment" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {text && text.length ? <LabelText>{text}</LabelText> : null}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <NotesCountBadge data-test-subj="timeline-notes-count" color="hollow">
-            {noteIds.length}
-          </NotesCountBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiButton>
-  )
-);
+interface LargeNotesButtonProps {
+  noteIds: string[];
+  text?: string;
+  toggleShowNotes: () => void;
+}
+
+const LargeNotesButton = React.memo<LargeNotesButtonProps>(({ noteIds, text, toggleShowNotes }) => (
+  <EuiButton
+    data-test-subj="timeline-notes-button-large"
+    onClick={() => toggleShowNotes()}
+    size="m"
+  >
+    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <EuiIcon color="subdued" size="m" type="editorComment" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {text && text.length ? <LabelText>{text}</LabelText> : null}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <NotesCountBadge data-test-subj="timeline-notes-count" color="hollow">
+          {noteIds.length}
+        </NotesCountBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiButton>
+));
 LargeNotesButton.displayName = 'LargeNotesButton';
 
-const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }>(
-  ({ noteIds, toggleShowNotes }) => (
-    <EuiButtonIcon
-      aria-label={i18n.NOTES}
-      data-test-subj="timeline-notes-button-small"
-      iconType="editorComment"
-      onClick={() => toggleShowNotes()}
-    />
-  )
-);
+interface SmallNotesButtonProps {
+  noteIds: string[];
+  toggleShowNotes: () => void;
+}
+
+const SmallNotesButton = React.memo<SmallNotesButtonProps>(({ noteIds, toggleShowNotes }) => (
+  <EuiButtonIcon
+    aria-label={i18n.NOTES}
+    data-test-subj="timeline-notes-button-small"
+    iconType="editorComment"
+    onClick={() => toggleShowNotes()}
+  />
+));
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 /**
  * The internal implementation of the `NotesButton`
  */
-const NotesButtonComponent = pure<NotesButtonProps>(
+const NotesButtonComponent = React.memo<NotesButtonProps>(
   ({
     animate = true,
     associateNote,
@@ -220,7 +238,7 @@ const NotesButtonComponent = pure<NotesButtonProps>(
 );
 NotesButtonComponent.displayName = 'NotesButtonComponent';
 
-export const NotesButton = pure<NotesButtonProps>(
+export const NotesButton = React.memo<NotesButtonProps>(
   ({
     animate = true,
     associateNote,

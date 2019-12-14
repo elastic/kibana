@@ -81,6 +81,54 @@ const ToolbarTranslations = {
   Count: i18n.translate('xpack.infra.waffle.metricOptions.countText', {
     defaultMessage: 'Count',
   }),
+  DiskIOReadBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOReadBytes', {
+    defaultMessage: 'Disk Reads',
+  }),
+  DiskIOWriteBytes: i18n.translate('xpack.infra.waffle.metricOptions.diskIOWriteBytes', {
+    defaultMessage: 'Disk Writes',
+  }),
+  s3BucketSize: i18n.translate('xpack.infra.waffle.metricOptions.s3BucketSize', {
+    defaultMessage: 'Bucket Size',
+  }),
+  s3TotalRequests: i18n.translate('xpack.infra.waffle.metricOptions.s3TotalRequests', {
+    defaultMessage: 'Total Requests',
+  }),
+  s3NumberOfObjects: i18n.translate('xpack.infra.waffle.metricOptions.s3NumberOfObjects', {
+    defaultMessage: 'Number of Objects',
+  }),
+  s3DownloadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3DownloadBytes', {
+    defaultMessage: 'Downloads (Bytes)',
+  }),
+  s3UploadBytes: i18n.translate('xpack.infra.waffle.metricOptions.s3UploadBytes', {
+    defaultMessage: 'Uploads (Bytes)',
+  }),
+  rdsConnections: i18n.translate('xpack.infra.waffle.metricOptions.rdsConnections', {
+    defaultMessage: 'Connections',
+  }),
+  rdsQueriesExecuted: i18n.translate('xpack.infra.waffle.metricOptions.rdsQueriesExecuted', {
+    defaultMessage: 'Queries Executed',
+  }),
+  rdsActiveTransactions: i18n.translate('xpack.infra.waffle.metricOptions.rdsActiveTransactions', {
+    defaultMessage: 'Active Transactions',
+  }),
+  rdsLatency: i18n.translate('xpack.infra.waffle.metricOptions.rdsLatency', {
+    defaultMessage: 'Latency',
+  }),
+  sqsMessagesVisible: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesVisible', {
+    defaultMessage: 'Messages Available',
+  }),
+  sqsMessagesDelayed: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesDelayed', {
+    defaultMessage: 'Messages Delayed',
+  }),
+  sqsMessagesSent: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesSent', {
+    defaultMessage: 'Messages Added',
+  }),
+  sqsMessagesEmpty: i18n.translate('xpack.infra.waffle.metricOptions.sqsMessagesEmpty', {
+    defaultMessage: 'Messages Returned Empty',
+  }),
+  sqsOldestMessage: i18n.translate('xpack.infra.waffle.metricOptions.sqsOldestMessage', {
+    defaultMessage: 'Oldest Message',
+  }),
 };
 
 export const toGroupByOpt = (field: string) => ({
@@ -125,6 +173,86 @@ export const toMetricOpt = (metric: InfraSnapshotMetricType) => {
       return {
         text: ToolbarTranslations.Count,
         value: InfraSnapshotMetricType.count,
+      };
+    case InfraSnapshotMetricType.diskIOReadBytes:
+      return {
+        text: ToolbarTranslations.DiskIOReadBytes,
+        value: InfraSnapshotMetricType.diskIOReadBytes,
+      };
+    case InfraSnapshotMetricType.diskIOWriteBytes:
+      return {
+        text: ToolbarTranslations.DiskIOWriteBytes,
+        value: InfraSnapshotMetricType.diskIOWriteBytes,
+      };
+    case InfraSnapshotMetricType.s3BucketSize:
+      return {
+        text: ToolbarTranslations.s3BucketSize,
+        value: InfraSnapshotMetricType.s3BucketSize,
+      };
+    case InfraSnapshotMetricType.s3TotalRequests:
+      return {
+        text: ToolbarTranslations.s3TotalRequests,
+        value: InfraSnapshotMetricType.s3TotalRequests,
+      };
+    case InfraSnapshotMetricType.s3NumberOfObjects:
+      return {
+        text: ToolbarTranslations.s3NumberOfObjects,
+        value: InfraSnapshotMetricType.s3NumberOfObjects,
+      };
+    case InfraSnapshotMetricType.s3DownloadBytes:
+      return {
+        text: ToolbarTranslations.s3DownloadBytes,
+        value: InfraSnapshotMetricType.s3DownloadBytes,
+      };
+    case InfraSnapshotMetricType.s3UploadBytes:
+      return {
+        text: ToolbarTranslations.s3UploadBytes,
+        value: InfraSnapshotMetricType.s3UploadBytes,
+      };
+    case InfraSnapshotMetricType.rdsConnections:
+      return {
+        text: ToolbarTranslations.rdsConnections,
+        value: InfraSnapshotMetricType.rdsConnections,
+      };
+    case InfraSnapshotMetricType.rdsQueriesExecuted:
+      return {
+        text: ToolbarTranslations.rdsQueriesExecuted,
+        value: InfraSnapshotMetricType.rdsQueriesExecuted,
+      };
+    case InfraSnapshotMetricType.rdsActiveTransactions:
+      return {
+        text: ToolbarTranslations.rdsActiveTransactions,
+        value: InfraSnapshotMetricType.rdsActiveTransactions,
+      };
+    case InfraSnapshotMetricType.rdsLatency:
+      return {
+        text: ToolbarTranslations.rdsLatency,
+        value: InfraSnapshotMetricType.rdsLatency,
+      };
+    case InfraSnapshotMetricType.sqsMessagesVisible:
+      return {
+        text: ToolbarTranslations.sqsMessagesVisible,
+        value: InfraSnapshotMetricType.sqsMessagesVisible,
+      };
+    case InfraSnapshotMetricType.sqsMessagesDelayed:
+      return {
+        text: ToolbarTranslations.sqsMessagesDelayed,
+        value: InfraSnapshotMetricType.sqsMessagesDelayed,
+      };
+    case InfraSnapshotMetricType.sqsMessagesSent:
+      return {
+        text: ToolbarTranslations.sqsMessagesSent,
+        value: InfraSnapshotMetricType.sqsMessagesSent,
+      };
+    case InfraSnapshotMetricType.sqsMessagesEmpty:
+      return {
+        text: ToolbarTranslations.sqsMessagesEmpty,
+        value: InfraSnapshotMetricType.sqsMessagesEmpty,
+      };
+    case InfraSnapshotMetricType.sqsOldestMessage:
+      return {
+        text: ToolbarTranslations.sqsOldestMessage,
+        value: InfraSnapshotMetricType.sqsOldestMessage,
       };
   }
 };

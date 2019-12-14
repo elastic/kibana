@@ -18,6 +18,8 @@ jest.mock('ui/i18n', () => {
   return { I18nContext };
 });
 
+jest.mock('ui/new_platform');
+
 const POLICY_NAME = 'my_policy';
 const SNAPSHOT_NAME = 'my_snapshot';
 const MIN_COUNT = '5';
@@ -101,7 +103,6 @@ describe.skip('<PolicyAdd />', () => {
         test('should require at least one index', async () => {
           const { find, form, component } = testBed;
 
-          // @ts-ignore (remove when react 16.9.0 is released)
           await act(async () => {
             // Toggle "All indices" switch
             form.toggleEuiSwitch('allIndicesToggle', false);
@@ -141,6 +142,25 @@ describe.skip('<PolicyAdd />', () => {
             'Minimum count cannot be greater than maximum count.',
           ]);
         });
+
+        test('should not allow negative values for the delete after, minimum and maximum counts', () => {
+          const { find, form } = testBed;
+
+          form.setInputValue('expireAfterValueInput', '-1');
+          find('expireAfterValueInput').simulate('blur');
+
+          form.setInputValue('minCountInput', '-1');
+          find('minCountInput').simulate('blur');
+
+          form.setInputValue('maxCountInput', '-1');
+          find('maxCountInput').simulate('blur');
+
+          expect(form.getErrorsMessages()).toEqual([
+            'Delete after cannot be negative.',
+            'Minimum count cannot be negative.',
+            'Maximum count cannot be negative.',
+          ]);
+        });
       });
     });
 
@@ -166,7 +186,6 @@ describe.skip('<PolicyAdd />', () => {
       it('should send the correct payload', async () => {
         const { actions } = testBed;
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();
@@ -202,7 +221,6 @@ describe.skip('<PolicyAdd />', () => {
 
         httpRequestsMockHelpers.setAddPolicyResponse(undefined, { body: error });
 
-        // @ts-ignore (remove when react 16.9.0 is released)
         await act(async () => {
           actions.clickSubmitButton();
           await nextTick();

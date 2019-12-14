@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { StartTrial } from '../public/sections/license_dashboard/start_trial';
+import { StartTrial } from '../public/np_ready/application/sections/license_dashboard/start_trial';
 import { createMockLicense, getComponent } from './util';
 jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
@@ -13,7 +13,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('basic'),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -23,7 +23,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('gold'),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -34,7 +34,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('trial'),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -44,7 +44,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('platinum'),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -54,7 +54,7 @@ describe('StartTrial component when trial is allowed', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('platinum', 0),
-        trialStatus: { canStartTrial: true }
+        trialStatus: { canStartTrial: true },
       },
       StartTrial
     );
@@ -67,7 +67,7 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('basic'),
-        trialStatus: { canStartTrial: false }
+        trialStatus: { canStartTrial: false },
       },
       StartTrial
     );
@@ -77,7 +77,7 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('gold'),
-        trialStatus: { canStartTrial: false }
+        trialStatus: { canStartTrial: false },
       },
       StartTrial
     );
@@ -87,7 +87,7 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('platinum'),
-        trialStatus: { canStartTrial: false }
+        trialStatus: { canStartTrial: false },
       },
       StartTrial
     );
@@ -98,7 +98,7 @@ describe('StartTrial component when trial is not available', () => {
     const rendered = getComponent(
       {
         license: createMockLicense('gold'),
-        trialStatus: { canStartTrial: false }
+        trialStatus: { canStartTrial: false },
       },
       StartTrial
     );

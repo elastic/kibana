@@ -43,60 +43,72 @@ jest.mock('../../services/job_service', () => ({
       mockJobConfigClone.datafeed_config.indices = [`farequote-2017-${jobId}`];
       return mockJobConfigClone;
     },
-    detectorsByJob: mockDetectorsByJob
-  }
+    detectorsByJob: mockDetectorsByJob,
+  },
 }));
 
-jest.mock('../../services/results_service', () => ({
-  mlResultsService: {
-    getMetricData(indices) {
-      // this is for 'call anomalyChangeListener with actual series config'
-      if (indices[0] === 'farequote-2017') {
-        return Promise.resolve(mockSeriesPromisesResponse[0][0]);
-      }
-      // this is for 'filtering should skip values of null'
-      return Promise.resolve(mockMetricClone);
+jest.mock('../../services/results_service', () => {
+  const { of } = require('rxjs');
+  return {
+    mlResultsService: {
+      getMetricData(indices) {
+        // this is for 'call anomalyChangeListener with actual series config'
+        if (indices[0] === 'farequote-2017') {
+          return of(mockSeriesPromisesResponse[0][0]);
+        }
+        // this is for 'filtering should skip values of null'
+        return of(mockMetricClone);
+      },
+      getRecordsForCriteria() {
+        return of(mockSeriesPromisesResponse[0][1]);
+      },
+      getScheduledEventsByBucket() {
+        return of(mockSeriesPromisesResponse[0][2]);
+      },
+      getEventDistributionData(indices) {
+        // this is for 'call anomalyChangeListener with actual series config'
+        if (indices[0] === 'farequote-2017') {
+          return Promise.resolve([]);
+        }
+        // this is for 'filtering should skip values of null' and
+        // resolves with a dummy object to trigger the processing
+        // of the event distribution chartdata filtering
+        return Promise.resolve([
+          {
+            entity: 'mock',
+          },
+        ]);
+      },
     },
-    getRecordsForCriteria() {
-      return Promise.resolve(mockSeriesPromisesResponse[0][1]);
-    },
-    getScheduledEventsByBucket() {
-      return Promise.resolve(mockSeriesPromisesResponse[0][2]);
-    },
-    getEventDistributionData(indices) {
-      // this is for 'call anomalyChangeListener with actual series config'
-      if (indices[0] === 'farequote-2017') {
-        return Promise.resolve([]);
-      }
-      // this is for 'filtering should skip values of null' and
-      // resolves with a dummy object to trigger the processing
-      // of the event distribution chartdata filtering
-      return Promise.resolve([{
-        entity: 'mock'
-      }]);
-    }
-  }
-}));
+  };
+});
 
 jest.mock('../../util/string_utils', () => ({
-  mlEscape(d) { return d; }
+  mlEscape(d) {
+    return d;
+  },
 }));
 
 jest.mock('../legacy_utils', () => ({
-  getChartContainerWidth() { return 1140; }
+  getChartContainerWidth() {
+    return 1140;
+  },
 }));
 
 jest.mock('ui/chrome', () => ({
-  getBasePath: (path) => path,
+  getBasePath: path => path,
   getUiSettingsClient: () => ({
-    get: () => null
+    get: () => null,
   }),
 }));
 
-import { explorerChartsContainerServiceFactory, getDefaultChartsData } from './explorer_charts_container_service';
+import {
+  explorerChartsContainerServiceFactory,
+  getDefaultChartsData,
+} from './explorer_charts_container_service';
 
 describe('explorerChartsContainerService', () => {
-  test('Initialize factory', (done) => {
+  test('Initialize factory', done => {
     explorerChartsContainerServiceFactory(callback);
 
     function callback(data) {
@@ -105,28 +117,24 @@ describe('explorerChartsContainerService', () => {
     }
   });
 
-  test('call anomalyChangeListener with empty series config', (done) => {
+  test('call anomalyChangeListener with empty series config', done => {
     // callback will be called multiple times.
     // the callbackData array contains the expected data values for each consecutive call.
     const callbackData = [];
     callbackData.push(getDefaultChartsData());
     callbackData.push({
       ...getDefaultChartsData(),
-      chartsPerRow: 2
+      chartsPerRow: 2,
     });
 
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
 
-    anomalyDataChangeListener(
-      [],
-      1486656000000,
-      1486670399999
-    );
+    anomalyDataChangeListener([], 1486656000000, 1486670399999);
 
     function callback(data) {
       if (callbackData.length > 0) {
         expect(data).toEqual({
-          ...callbackData.shift()
+          ...callbackData.shift(),
         });
       }
       if (callbackData.length === 0) {
@@ -135,17 +143,13 @@ describe('explorerChartsContainerService', () => {
     }
   });
 
-  test('call anomalyChangeListener with actual series config', (done) => {
+  test('call anomalyChangeListener with actual series config', done => {
     let callbackCount = 0;
     const expectedTestCount = 3;
 
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
 
-    anomalyDataChangeListener(
-      mockAnomalyChartRecords,
-      1486656000000,
-      1486670399999
-    );
+    anomalyDataChangeListener(mockAnomalyChartRecords, 1486656000000, 1486670399999);
 
     function callback(data) {
       callbackCount++;
@@ -156,22 +160,18 @@ describe('explorerChartsContainerService', () => {
     }
   });
 
-  test('filtering should skip values of null', (done) => {
+  test('filtering should skip values of null', done => {
     let callbackCount = 0;
     const expectedTestCount = 3;
 
     const anomalyDataChangeListener = explorerChartsContainerServiceFactory(callback);
 
-    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map((d) => {
+    const mockAnomalyChartRecordsClone = _.cloneDeep(mockAnomalyChartRecords).map(d => {
       d.job_id = 'mock-job-id-distribution';
       return d;
     });
 
-    anomalyDataChangeListener(
-      mockAnomalyChartRecordsClone,
-      1486656000000,
-      1486670399999
-    );
+    anomalyDataChangeListener(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
 
     function callback(data) {
       callbackCount++;
@@ -196,7 +196,7 @@ describe('explorerChartsContainerService', () => {
     }
   });
 
-  test('field value with trailing dot should not throw an error', (done) => {
+  test('field value with trailing dot should not throw an error', done => {
     let callbackCount = 0;
     const expectedTestCount = 3;
 
@@ -206,12 +206,7 @@ describe('explorerChartsContainerService', () => {
     mockAnomalyChartRecordsClone[1].partition_field_value = 'AAL.';
 
     expect(() => {
-      anomalyDataChangeListener(
-        mockAnomalyChartRecordsClone,
-        1486656000000,
-        1486670399999
-      );
-
+      anomalyDataChangeListener(mockAnomalyChartRecordsClone, 1486656000000, 1486670399999);
     }).not.toThrow();
 
     function callback() {

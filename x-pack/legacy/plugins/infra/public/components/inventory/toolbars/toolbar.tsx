@@ -5,7 +5,6 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
 import { Action } from 'typescript-fsa';
 import { EuiFlexItem } from '@elastic/eui';
 import { findToolbar } from '../../../../common/inventory_models/toolbars';
@@ -21,9 +20,10 @@ import { InfraGroupByOptions } from '../../../lib/lib';
 import { WithWaffleViewState } from '../../../containers/waffle/with_waffle_view_state';
 import { SavedViewsToolbarControls } from '../../saved_views/toolbar_control';
 import { inventoryViewSavedObjectType } from '../../../../common/saved_objects/inventory_view';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
 
 export interface ToolbarProps {
-  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => StaticIndexPattern;
+  createDerivedIndexPattern: (type: 'logs' | 'metrics' | 'both') => IIndexPattern;
   changeMetric: (payload: InfraSnapshotMetricInput) => Action<InfraSnapshotMetricInput>;
   changeGroupBy: (payload: InfraSnapshotGroupbyInput[]) => Action<InfraSnapshotGroupbyInput[]>;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => Action<InfraGroupByOptions[]>;

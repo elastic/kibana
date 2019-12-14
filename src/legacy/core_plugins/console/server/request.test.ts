@@ -24,7 +24,7 @@ import { fail } from 'assert';
 
 describe(`Console's send request`, () => {
   let sandbox: sinon.SinonSandbox;
-  let stub: sinon.SinonStub<Parameters<typeof http['request']>, ClientRequest>;
+  let stub: sinon.SinonStub<Parameters<typeof http.request>, ClientRequest>;
   let fakeRequest: http.ClientRequest;
 
   beforeEach(() => {
@@ -52,7 +52,7 @@ describe(`Console's send request`, () => {
         method: 'get',
         payload: null as any,
         timeout: 0, // immediately timeout
-        uri: new URL('http://noone.nowhere.com'),
+        uri: new URL('http://noone.nowhere.none'),
       });
       fail('Should not reach here!');
     } catch (e) {

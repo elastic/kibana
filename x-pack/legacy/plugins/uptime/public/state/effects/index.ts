@@ -6,7 +6,9 @@
 
 import { fork } from 'redux-saga/effects';
 import { fetchMonitorDetailsEffect } from './monitor';
+import { fetchSnapshotCountSaga } from './snapshot';
 
 export function* rootEffect() {
   yield fork(fetchMonitorDetailsEffect);
+  yield fork(fetchSnapshotCountSaga);
 }

@@ -148,11 +148,12 @@ describe('execute()', () => {
       }
     `);
     expect(actionResponse).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "data": "data-here",
-                                                  "status": "ok",
-                                                }
-                                `);
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
   });
 
   test('should succeed with maximal valid params for trigger', async () => {
@@ -212,11 +213,12 @@ describe('execute()', () => {
       }
     `);
     expect(actionResponse).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "data": "data-here",
-                                                  "status": "ok",
-                                                }
-                                `);
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
   });
 
   test('should succeed with maximal valid params for acknowledge', async () => {
@@ -267,11 +269,12 @@ describe('execute()', () => {
       }
     `);
     expect(actionResponse).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "data": "data-here",
-                                                  "status": "ok",
-                                                }
-                                `);
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
   });
 
   test('should succeed with maximal valid params for resolve', async () => {
@@ -322,11 +325,12 @@ describe('execute()', () => {
       }
     `);
     expect(actionResponse).toMatchInlineSnapshot(`
-                                                Object {
-                                                  "data": "data-here",
-                                                  "status": "ok",
-                                                }
-                                `);
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
+      }
+    `);
   });
 
   test('should fail when sendPagerdury throws', async () => {
@@ -348,11 +352,13 @@ describe('execute()', () => {
     };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
-                        Object {
-                          "message": "error in pagerduty action \\"some-action-id\\" posting event: doing some testing",
-                          "status": "error",
-                        }
-                `);
+      Object {
+        "actionId": "some-action-id",
+        "message": "error posting pagerduty event",
+        "serviceMessage": "doing some testing",
+        "status": "error",
+      }
+    `);
   });
 
   test('should fail when sendPagerdury returns 429', async () => {
@@ -374,12 +380,13 @@ describe('execute()', () => {
     };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
-                  Object {
-                    "message": "error in pagerduty action \\"some-action-id\\" posting event: status 429, retry later",
-                    "retry": true,
-                    "status": "error",
-                  }
-            `);
+      Object {
+        "actionId": "some-action-id",
+        "message": "error posting pagerduty event: http status 429, retry later",
+        "retry": true,
+        "status": "error",
+      }
+    `);
   });
 
   test('should fail when sendPagerdury returns 501', async () => {
@@ -401,12 +408,13 @@ describe('execute()', () => {
     };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
-                  Object {
-                    "message": "error in pagerduty action \\"some-action-id\\" posting event: status 501, retry later",
-                    "retry": true,
-                    "status": "error",
-                  }
-            `);
+      Object {
+        "actionId": "some-action-id",
+        "message": "error posting pagerduty event: http status 501, retry later",
+        "retry": true,
+        "status": "error",
+      }
+    `);
   });
 
   test('should fail when sendPagerdury returns 418', async () => {
@@ -428,10 +436,11 @@ describe('execute()', () => {
     };
     const actionResponse = await actionType.executor(executorOptions);
     expect(actionResponse).toMatchInlineSnapshot(`
-                  Object {
-                    "message": "error in pagerduty action \\"some-action-id\\" posting event: unexpected status 418",
-                    "status": "error",
-                  }
-            `);
+      Object {
+        "actionId": "some-action-id",
+        "message": "error posting pagerduty event: unexpected status 418",
+        "status": "error",
+      }
+    `);
   });
 });

@@ -17,25 +17,30 @@
  * under the License.
  */
 
-import { fromKueryExpression, KueryNode, nodeTypes } from '@kbn/es-query';
 import { get, set } from 'lodash';
 import { SavedObjectsErrorHelpers } from './errors';
 import { IndexMapping } from '../../mappings';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { esKuery } from '../../../../../plugins/data/server';
+
+const astFunctionType = ['is', 'range', 'nested'];
 
 export const validateConvertFilterToKueryNode = (
   allowedTypes: string[],
   filter: string,
   indexMapping: IndexMapping
-): KueryNode => {
+): esKuery.KueryNode | undefined => {
   if (filter && filter.length > 0 && indexMapping) {
-    const filterKueryNode = fromKueryExpression(filter);
+    const filterKueryNode = esKuery.fromKueryExpression(filter);
 
-    const validationFilterKuery = validateFilterKueryNode(
-      filterKueryNode,
-      allowedTypes,
+    const validationFilterKuery = validateFilterKueryNode({
+      astFilter: filterKueryNode,
+      types: allowedTypes,
       indexMapping,
-      filterKueryNode.type === 'function' && ['is', 'range'].includes(filterKueryNode.function)
-    );
+      storeValue:
+        filterKueryNode.type === 'function' && astFunctionType.includes(filterKueryNode.function),
+      hasNestedKey: filterKueryNode.type === 'function' && filterKueryNode.function === 'nested',
+    });
 
     if (validationFilterKuery.length === 0) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -54,7 +59,7 @@ export const validateConvertFilterToKueryNode = (
 
     validationFilterKuery.forEach(item => {
       const path: string[] = item.astPath.length === 0 ? [] : item.astPath.split('.');
-      const existingKueryNode: KueryNode =
+      const existingKueryNode: esKuery.KueryNode =
         path.length === 0 ? filterKueryNode : get(filterKueryNode, path);
       if (item.isSavedObjectAttr) {
         existingKueryNode.arguments[0].value = existingKueryNode.arguments[0].value.split('.')[1];
@@ -63,8 +68,8 @@ export const validateConvertFilterToKueryNode = (
           set(
             filterKueryNode,
             path,
-            nodeTypes.function.buildNode('and', [
-              nodeTypes.function.buildNode('is', 'type', itemType[0]),
+            esKuery.nodeTypes.function.buildNode('and', [
+              esKuery.nodeTypes.function.buildNode('is', 'type', itemType[0]),
               existingKueryNode,
             ])
           );
@@ -79,7 +84,6 @@ export const validateConvertFilterToKueryNode = (
     });
     return filterKueryNode;
   }
-  return null;
 };
 
 interface ValidateFilterKueryNode {
@@ -90,42 +94,70 @@ interface ValidateFilterKueryNode {
   type: string | null;
 }
 
-export const validateFilterKueryNode = (
-  astFilter: KueryNode,
-  types: string[],
-  indexMapping: IndexMapping,
-  storeValue: boolean = false,
-  path: string = 'arguments'
-): ValidateFilterKueryNode[] => {
-  return astFilter.arguments.reduce((kueryNode: string[], ast: KueryNode, index: number) => {
-    if (ast.arguments) {
-      const myPath = `${path}.${index}`;
-      return [
-        ...kueryNode,
-        ...validateFilterKueryNode(
-          ast,
-          types,
-          indexMapping,
-          ast.type === 'function' && ['is', 'range'].includes(ast.function),
-          `${myPath}.arguments`
-        ),
-      ];
-    }
-    if (storeValue && index === 0) {
-      const splitPath = path.split('.');
-      return [
-        ...kueryNode,
-        {
-          astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
-          error: hasFilterKeyError(ast.value, types, indexMapping),
-          isSavedObjectAttr: isSavedObjectAttr(ast.value, indexMapping),
-          key: ast.value,
-          type: getType(ast.value),
-        },
-      ];
-    }
-    return kueryNode;
-  }, []);
+interface ValidateFilterKueryNodeParams {
+  astFilter: esKuery.KueryNode;
+  types: string[];
+  indexMapping: IndexMapping;
+  hasNestedKey?: boolean;
+  nestedKeys?: string;
+  storeValue?: boolean;
+  path?: string;
+}
+
+export const validateFilterKueryNode = ({
+  astFilter,
+  types,
+  indexMapping,
+  hasNestedKey = false,
+  nestedKeys,
+  storeValue = false,
+  path = 'arguments',
+}: ValidateFilterKueryNodeParams): ValidateFilterKueryNode[] => {
+  let localNestedKeys: string | undefined;
+  return astFilter.arguments.reduce(
+    (kueryNode: string[], ast: esKuery.KueryNode, index: number) => {
+      if (hasNestedKey && ast.type === 'literal' && ast.value != null) {
+        localNestedKeys = ast.value;
+      }
+      if (ast.arguments) {
+        const myPath = `${path}.${index}`;
+        return [
+          ...kueryNode,
+          ...validateFilterKueryNode({
+            astFilter: ast,
+            types,
+            indexMapping,
+            storeValue: ast.type === 'function' && astFunctionType.includes(ast.function),
+            path: `${myPath}.arguments`,
+            hasNestedKey: ast.type === 'function' && ast.function === 'nested',
+            nestedKeys: localNestedKeys,
+          }),
+        ];
+      }
+      if (storeValue && index === 0) {
+        const splitPath = path.split('.');
+        return [
+          ...kueryNode,
+          {
+            astPath: splitPath.slice(0, splitPath.length - 1).join('.'),
+            error: hasFilterKeyError(
+              nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value,
+              types,
+              indexMapping
+            ),
+            isSavedObjectAttr: isSavedObjectAttr(
+              nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value,
+              indexMapping
+            ),
+            key: nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value,
+            type: getType(nestedKeys != null ? `${nestedKeys}.${ast.value}` : ast.value),
+          },
+        ];
+      }
+      return kueryNode;
+    },
+    []
+  );
 };
 
 const getType = (key: string | undefined | null) =>
@@ -161,7 +193,6 @@ export const hasFilterKeyError = (
     return `This key '${key}' need to be wrapped by a saved object type like ${types.join()}`;
   } else if (key.includes('.')) {
     const keySplit = key.split('.');
-
     if (keySplit.length <= 1 || !types.includes(keySplit[0])) {
       return `This type ${keySplit[0]} is not allowed`;
     }
@@ -174,7 +205,10 @@ export const hasFilterKeyError = (
     if (
       (keySplit.length === 2 && !fieldDefined(indexMapping, keySplit[1])) ||
       (keySplit.length > 2 &&
-        !fieldDefined(indexMapping, keySplit[0] + '.' + keySplit.slice(2, keySplit.length)))
+        !fieldDefined(
+          indexMapping,
+          `${keySplit[0]}.${keySplit.slice(2, keySplit.length).join('.')}`
+        ))
     ) {
       return `This key '${key}' does NOT exist in ${types.join()} saved object index patterns`;
     }

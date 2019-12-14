@@ -21,6 +21,7 @@ import { migrateFilter } from './migrate_filter';
 import { filterMatchesIndex } from './filter_matches_index';
 import { Filter, cleanFilter, isFilterDisabled } from '../filters';
 import { IIndexPattern } from '../../index_patterns';
+import { handleNestedFilter } from './handle_nested_filter';
 
 /**
  * Create a filter that can be reversed for filters with negate set
@@ -54,25 +55,27 @@ const translateToQuery = (filter: Filter) => {
 
 export const buildQueryFromFilters = (
   filters: Filter[] = [],
-  indexPattern: IIndexPattern | null,
+  indexPattern: IIndexPattern | undefined,
   ignoreFilterIfFieldNotInIndex: boolean = false
 ) => {
   filters = filters.filter(filter => filter && !isFilterDisabled(filter));
 
+  const filtersToESQueries = (negate: boolean) => {
+    return filters
+      .filter(filterNegate(negate))
+      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
+      .map(filter => {
+        return migrateFilter(filter, indexPattern);
+      })
+      .map(filter => handleNestedFilter(filter, indexPattern))
+      .map(translateToQuery)
+      .map(cleanFilter);
+  };
+
   return {
     must: [],
-    filter: filters
-      .filter(filterNegate(false))
-      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map(translateToQuery)
-      .map(cleanFilter)
-      .map(filter => migrateFilter(filter, indexPattern)),
+    filter: filtersToESQueries(false),
     should: [],
-    must_not: filters
-      .filter(filterNegate(true))
-      .filter(filter => !ignoreFilterIfFieldNotInIndex || filterMatchesIndex(filter, indexPattern))
-      .map(translateToQuery)
-      .map(cleanFilter)
-      .map(filter => migrateFilter(filter, indexPattern)),
+    must_not: filtersToESQueries(true),
   };
 };

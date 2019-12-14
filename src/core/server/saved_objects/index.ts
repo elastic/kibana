@@ -35,6 +35,18 @@ export { SavedObjectsSerializer, RawDoc as SavedObjectsRawDoc } from './serializ
 
 export { SavedObjectsMigrationLogger } from './migrations/core/migration_logger';
 
-export { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects_service';
+export {
+  SavedObjectsService,
+  InternalSavedObjectsServiceStart,
+  SavedObjectsServiceStart,
+  SavedObjectsServiceSetup,
+  InternalSavedObjectsServiceSetup,
+} from './saved_objects_service';
+
+export {
+  ISavedObjectsRepository,
+  SavedObjectsIncrementCounterOptions,
+  SavedObjectsDeleteByNamespaceOptions,
+} from './service/lib/repository';
 
 export { config } from './saved_objects_config';

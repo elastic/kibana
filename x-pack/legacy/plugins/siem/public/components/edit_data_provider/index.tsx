@@ -49,8 +49,7 @@ HeaderContainer.displayName = 'HeaderContainer';
 // SIDE EFFECT: the following `createGlobalStyle` overrides the default styling
 // of euiComboBoxOptionsList because it's implemented as a popover, so it's
 // not selectable as a child of the styled component
-// eslint-disable-next-line no-unused-expressions
-createGlobalStyle`
+const StatefulEditDataProviderGlobalStyle = createGlobalStyle`
   .euiComboBoxOptionsList {
     z-index: 9999;
   }
@@ -158,104 +157,107 @@ export const StatefulEditDataProvider = React.memo<Props>(
     }, []);
 
     return (
-      <EuiPanel paddingSize="s">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiFormRow label={i18n.FIELD}>
-                  <EuiToolTip content={updatedField.length > 0 ? updatedField[0].label : null}>
-                    <EuiComboBox
-                      data-test-subj="field"
-                      isClearable={false}
-                      onChange={onFieldSelected}
-                      options={getCategorizedFieldNames(browserFields)}
-                      placeholder={i18n.FIELD_PLACEHOLDER}
-                      selectedOptions={updatedField}
-                      singleSelection={{ asPlainText: true }}
-                      style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
-                    />
-                  </EuiToolTip>
-                </EuiFormRow>
-              </EuiFlexItem>
+      <>
+        <EuiPanel paddingSize="s">
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label={i18n.FIELD}>
+                    <EuiToolTip content={updatedField.length > 0 ? updatedField[0].label : null}>
+                      <EuiComboBox
+                        data-test-subj="field"
+                        isClearable={false}
+                        onChange={onFieldSelected}
+                        options={getCategorizedFieldNames(browserFields)}
+                        placeholder={i18n.FIELD_PLACEHOLDER}
+                        selectedOptions={updatedField}
+                        singleSelection={{ asPlainText: true }}
+                        style={{ width: `${FIELD_COMBO_BOX_WIDTH}px` }}
+                      />
+                    </EuiToolTip>
+                  </EuiFormRow>
+                </EuiFlexItem>
 
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label={i18n.OPERATOR}>
+                    <EuiComboBox
+                      data-test-subj="operator"
+                      isClearable={false}
+                      onChange={onOperatorSelected}
+                      options={operatorLabels}
+                      placeholder={i18n.SELECT_AN_OPERATOR}
+                      selectedOptions={updatedOperator}
+                      singleSelection={{ asPlainText: true }}
+                      style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiSpacer />
+            </EuiFlexItem>
+
+            {updatedOperator.length > 0 &&
+            updatedOperator[0].label !== i18n.EXISTS &&
+            updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
               <EuiFlexItem grow={false}>
-                <EuiFormRow label={i18n.OPERATOR}>
-                  <EuiComboBox
-                    data-test-subj="operator"
-                    isClearable={false}
-                    onChange={onOperatorSelected}
-                    options={operatorLabels}
-                    placeholder={i18n.SELECT_AN_OPERATOR}
-                    selectedOptions={updatedOperator}
-                    singleSelection={{ asPlainText: true }}
-                    style={{ width: `${OPERATOR_COMBO_BOX_WIDTH}px` }}
+                <EuiFormRow label={i18n.VALUE_LABEL}>
+                  <EuiFieldText
+                    className={VALUE_INPUT_CLASS_NAME}
+                    data-test-subj="value"
+                    onChange={onValueChange}
+                    placeholder={i18n.VALUE}
+                    value={sanatizeValue(updatedValue)}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+            ) : null}
 
-          <EuiFlexItem grow={false}>
-            <EuiSpacer />
-          </EuiFlexItem>
-
-          {updatedOperator.length > 0 &&
-          updatedOperator[0].label !== i18n.EXISTS &&
-          updatedOperator[0].label !== i18n.DOES_NOT_EXIST ? (
             <EuiFlexItem grow={false}>
-              <EuiFormRow label={i18n.VALUE_LABEL}>
-                <EuiFieldText
-                  className={VALUE_INPUT_CLASS_NAME}
-                  data-test-subj="value"
-                  onChange={onValueChange}
-                  placeholder={i18n.VALUE}
-                  value={sanatizeValue(updatedValue)}
-                />
-              </EuiFormRow>
+              <EuiSpacer />
             </EuiFlexItem>
-          ) : null}
 
-          <EuiFlexItem grow={false}>
-            <EuiSpacer />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  autoFocus
-                  className={SAVE_CLASS_NAME}
-                  color="primary"
-                  data-test-subj="save"
-                  fill={true}
-                  isDisabled={
-                    !selectionsAreValid({
-                      browserFields,
-                      selectedField: updatedField,
-                      selectedOperator: updatedOperator,
-                    })
-                  }
-                  onClick={() => {
-                    onDataProviderEdited({
-                      andProviderId,
-                      excluded: getExcludedFromSelection(updatedOperator),
-                      field: updatedField.length > 0 ? updatedField[0].label : '',
-                      id: timelineId,
-                      operator: getQueryOperatorFromSelection(updatedOperator),
-                      providerId,
-                      value: updatedValue,
-                    });
-                  }}
-                  size="s"
-                >
-                  {i18n.SAVE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    autoFocus
+                    className={SAVE_CLASS_NAME}
+                    color="primary"
+                    data-test-subj="save"
+                    fill={true}
+                    isDisabled={
+                      !selectionsAreValid({
+                        browserFields,
+                        selectedField: updatedField,
+                        selectedOperator: updatedOperator,
+                      })
+                    }
+                    onClick={() => {
+                      onDataProviderEdited({
+                        andProviderId,
+                        excluded: getExcludedFromSelection(updatedOperator),
+                        field: updatedField.length > 0 ? updatedField[0].label : '',
+                        id: timelineId,
+                        operator: getQueryOperatorFromSelection(updatedOperator),
+                        providerId,
+                        value: updatedValue,
+                      });
+                    }}
+                    size="s"
+                  >
+                    {i18n.SAVE}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        <StatefulEditDataProviderGlobalStyle />
+      </>
     );
   }
 );

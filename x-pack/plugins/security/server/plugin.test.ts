@@ -7,6 +7,7 @@
 import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { IClusterClient, CoreSetup } from '../../../../src/core/server';
+import { elasticsearchClientPlugin } from './elasticsearch_client_plugin';
 import { Plugin, PluginSetupDependencies } from './plugin';
 
 import { coreMock, elasticsearchServiceMock } from '../../../../src/core/server/mocks';
@@ -20,7 +21,10 @@ describe('Security Plugin', () => {
     plugin = new Plugin(
       coreMock.createPluginInitializerContext({
         cookieName: 'sid',
-        sessionTimeout: 1500,
+        session: {
+          idleTimeout: 1500,
+          lifespan: null,
+        },
         authc: {
           providers: ['saml', 'token'],
           saml: { realm: 'saml1', maxRedirectURLSize: new ByteSizeValue(2048) },
@@ -45,15 +49,9 @@ describe('Security Plugin', () => {
               Object {
                 "__legacyCompat": Object {
                   "config": Object {
-                    "authc": Object {
-                      "providers": Array [
-                        "saml",
-                        "token",
-                      ],
-                    },
                     "cookieName": "sid",
+                    "loginAssistanceMessage": undefined,
                     "secureCookies": true,
-                    "sessionTimeout": 1500,
                   },
                   "license": Object {
                     "getFeatures": [Function],
@@ -65,6 +63,7 @@ describe('Security Plugin', () => {
                 "authc": Object {
                   "createAPIKey": [Function],
                   "getCurrentUser": [Function],
+                  "getSessionInfo": [Function],
                   "invalidateAPIKey": [Function],
                   "isAuthenticated": [Function],
                   "login": [Function],
@@ -107,7 +106,7 @@ describe('Security Plugin', () => {
 
       expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledTimes(1);
       expect(mockCoreSetup.elasticsearch.createClient).toHaveBeenCalledWith('security', {
-        plugins: [require('../../../legacy/server/lib/esjs_shield_plugin')],
+        plugins: [elasticsearchClientPlugin],
       });
     });
   });

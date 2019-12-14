@@ -19,21 +19,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { TAB_SETTINGS } from '../../../../../constants';
-import {
-  settingsToDisplay,
-  readOnlySettings
-} from '../../../../../lib/edit_settings';
+import { settingsToDisplay, readOnlySettings } from '../../../../../lib/edit_settings';
 import { createAceEditor } from '../../../../../lib/ace';
 import _ from 'lodash';
 
 import { flattenObject } from '../../../../../lib/flatten_object';
 
-
 export class EditSettingsJson extends React.PureComponent {
   constructor() {
     super();
     this.state = {
-      valid: true
+      valid: true,
     };
   }
 
@@ -56,7 +52,7 @@ export class EditSettingsJson extends React.PureComponent {
     }
     return newSettings;
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { indexName } = this.props;
     this.props.loadIndexData({ dataType: TAB_SETTINGS, indexName });
   }
@@ -68,12 +64,7 @@ export class EditSettingsJson extends React.PureComponent {
       this.originalSettings = newSettings;
       const prettyJson = JSON.stringify(newSettings, null, 2);
       const settingsKeys = Object.keys(newSettings);
-      const editor = this.editor = createAceEditor(
-        this.aceDiv,
-        prettyJson,
-        false,
-        settingsKeys
-      );
+      const editor = (this.editor = createAceEditor(this.aceDiv, prettyJson, false, settingsKeys));
       const session = editor.getSession();
       session.on('changeAnnotation', () => {
         this.setState({ valid: session.getAnnotations().length === 0 });

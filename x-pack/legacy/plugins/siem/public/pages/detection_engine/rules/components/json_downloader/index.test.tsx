@@ -7,7 +7,7 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { JSONDownloader, jsonToNDJSON, ndjsonToJSON } from './index';
+import { JSONDownloaderComponent, jsonToNDJSON, ndjsonToJSON } from './index';
 
 const jsonArray = [
   {
@@ -35,7 +35,7 @@ const ndjsonSorted = `{"created_by":"elastic","description":"Detecting root and 
 describe('JSONDownloader', () => {
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <JSONDownloader filename={'export_rules.ndjson'} onExportComplete={jest.fn()} />
+      <JSONDownloaderComponent filename={'export_rules.ndjson'} onExportComplete={jest.fn()} />
     );
     expect(toJson(wrapper)).toMatchSnapshot();
   });

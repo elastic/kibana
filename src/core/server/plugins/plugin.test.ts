@@ -66,7 +66,9 @@ configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let coreId: symbol;
 let env: Env;
 let coreContext: CoreContext;
+
 const setupDeps = coreMock.createInternalSetup();
+
 beforeEach(() => {
   coreId = Symbol('core');
   env = Env.createDefault(getEnvOptions());

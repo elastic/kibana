@@ -52,7 +52,7 @@ class GaugePanelConfigUi extends Component {
     this.state = { selectedTab: 'data' };
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     const { model } = this.props;
     const parts = {};
     if (

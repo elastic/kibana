@@ -10,12 +10,12 @@ import {
   PluginInitializerContext,
   RecursiveReadonly,
 } from '../../../../src/core/server';
-import { Capabilities as UICapabilities } from '../../../../src/core/public';
+import { Capabilities as UICapabilities } from '../../../../src/core/server';
 import { deepFreeze } from '../../../../src/core/utils';
 import { XPackInfo } from '../../../legacy/plugins/xpack_main/server/lib/xpack_info';
 import { PluginSetupContract as TimelionSetupContract } from '../../../../src/plugins/timelion/server';
 import { FeatureRegistry } from './feature_registry';
-import { Feature, FeatureWithAllOrReadPrivileges } from './feature';
+import { Feature, FeatureWithAllOrReadPrivileges } from '../common/feature';
 import { uiCapabilitiesForFeatures } from './ui_capabilities_for_features';
 import { buildOSSFeatures } from './oss_features';
 import { defineRoutes } from './routes';

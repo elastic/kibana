@@ -5,9 +5,8 @@
  */
 
 import Boom from 'boom';
-import { oncePerServer } from '../../lib/once_per_server';
 
-function reportingFeaturePreRoutingFn(server) {
+export const reportingFeaturePreRoutingFactory = function reportingFeaturePreRoutingFn(server) {
   const xpackMainPlugin = server.plugins.xpack_main;
   const pluginId = 'reporting';
 
@@ -24,6 +23,4 @@ function reportingFeaturePreRoutingFn(server) {
       }
     };
   };
-}
-
-export const reportingFeaturePreRoutingFactory = oncePerServer(reportingFeaturePreRoutingFn);
+};

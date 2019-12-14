@@ -7,11 +7,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiRange, EuiSelect } from '@elastic/eui';
-import {
-  UiSettingsClientContract,
-  SavedObjectsClientContract,
-  HttpServiceBase,
-} from 'src/core/public';
+import { IUiSettingsClient, SavedObjectsClientContract, HttpServiceBase } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { createMockedIndexPattern } from '../../mocks';
 import { TermsIndexPatternColumn } from './terms';
@@ -22,7 +18,7 @@ jest.mock('ui/new_platform');
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
-  uiSettings: {} as UiSettingsClientContract,
+  uiSettings: {} as IUiSettingsClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   http: {} as HttpServiceBase,

@@ -26,41 +26,46 @@ interface LineToolTipContentProps {
   featureProps: FeatureProperty[];
 }
 
-export const LineToolTipContent = React.memo<LineToolTipContentProps>(
-  ({ contextId, featureProps }) => {
-    const lineProps = featureProps.reduce<Record<string, string[]>>(
-      (acc, f) => ({
-        ...acc,
-        ...{ [f._propertyKey]: Array.isArray(f._rawValue) ? f._rawValue : [f._rawValue] },
-      }),
-      {}
-    );
+export const LineToolTipContentComponent = ({
+  contextId,
+  featureProps,
+}: LineToolTipContentProps) => {
+  const lineProps = featureProps.reduce<Record<string, string[]>>(
+    (acc, f) => ({
+      ...acc,
+      ...{ [f._propertyKey]: Array.isArray(f._rawValue) ? f._rawValue : [f._rawValue] },
+    }),
+    {}
+  );
 
-    return (
-      <EuiFlexGroup justifyContent="center" gutterSize="none">
-        <EuiFlexItem>
-          <FlowBadge color="hollow">
-            <EuiFlexGroupStyled direction="column">
-              <EuiFlexItem grow={false}>{i18n.SOURCE}</EuiFlexItem>
-            </EuiFlexGroupStyled>
-          </FlowBadge>
-        </EuiFlexItem>
-        <SourceDestinationArrows
-          contextId={contextId}
-          destinationBytes={lineProps[SUM_OF_DESTINATION_BYTES]}
-          eventId={`map-line-tooltip-${contextId}`}
-          sourceBytes={lineProps[SUM_OF_SOURCE_BYTES]}
-        />
-        <EuiFlexItem>
-          <FlowBadge color="hollow">
-            <EuiFlexGroupStyled>
-              <EuiFlexItem grow={false}>{i18n.DESTINATION}</EuiFlexItem>
-            </EuiFlexGroupStyled>
-          </FlowBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
-);
+  return (
+    <EuiFlexGroup justifyContent="center" gutterSize="none">
+      <EuiFlexItem>
+        <FlowBadge color="hollow">
+          <EuiFlexGroupStyled direction="column">
+            <EuiFlexItem grow={false}>{i18n.SOURCE}</EuiFlexItem>
+          </EuiFlexGroupStyled>
+        </FlowBadge>
+      </EuiFlexItem>
+      <SourceDestinationArrows
+        contextId={contextId}
+        destinationBytes={lineProps[SUM_OF_DESTINATION_BYTES]}
+        eventId={`map-line-tooltip-${contextId}`}
+        sourceBytes={lineProps[SUM_OF_SOURCE_BYTES]}
+      />
+      <EuiFlexItem>
+        <FlowBadge color="hollow">
+          <EuiFlexGroupStyled>
+            <EuiFlexItem grow={false}>{i18n.DESTINATION}</EuiFlexItem>
+          </EuiFlexGroupStyled>
+        </FlowBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+LineToolTipContentComponent.displayName = 'LineToolTipContentComponent';
+
+export const LineToolTipContent = React.memo(LineToolTipContentComponent);
 
 LineToolTipContent.displayName = 'LineToolTipContent';

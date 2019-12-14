@@ -8,7 +8,6 @@ import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './help
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../../src/legacy/ui/public/index_patterns';
 
 jest.mock('ui/new_platform');
-jest.mock('ui/index_patterns');
 
 const { setup } = pageHelpers.autoFollowPatternAdd;
 
@@ -128,7 +127,9 @@ describe('Create Auto-follow pattern', () => {
 
       describe('when there was an error loading the remote clusters', () => {
         test('should indicate no clusters found and have a button to add one', async () => {
-          httpRequestsMockHelpers.setLoadRemoteClustersResponse(undefined, { body: 'Houston we got a problem' });
+          httpRequestsMockHelpers.setLoadRemoteClustersResponse(undefined, {
+            body: 'Houston we got a problem',
+          });
 
           ({ component } = setup());
           await nextTick();
@@ -141,11 +142,13 @@ describe('Create Auto-follow pattern', () => {
 
       describe('when none of the remote clusters is connected', () => {
         const clusterName = 'new-york';
-        const remoteClusters = [{
-          name: clusterName,
-          seeds: ['localhost:9600'],
-          isConnected: false,
-        }];
+        const remoteClusters = [
+          {
+            name: clusterName,
+            seeds: ['localhost:9600'],
+            isConnected: false,
+          },
+        ];
 
         beforeEach(async () => {
           httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
@@ -159,7 +162,9 @@ describe('Create Auto-follow pattern', () => {
           const errorCallOut = find('notConnectedError');
 
           expect(errorCallOut.length).toBe(1);
-          expect(errorCallOut.find('.euiCallOutHeader__title').text()).toBe(`Remote cluster '${clusterName}' is not connected`);
+          expect(errorCallOut.find('.euiCallOutHeader__title').text()).toBe(
+            `Remote cluster '${clusterName}' is not connected`
+          );
           expect(exists('notConnectedError.editButton')).toBe(true);
         });
 
@@ -191,9 +196,11 @@ describe('Create Auto-follow pattern', () => {
       });
 
       test('should not allow invalid characters', () => {
-        const expectInvalidChar = (char) => {
+        const expectInvalidChar = char => {
           form.setComboBoxValue('indexPatternInput', `with${char}space`);
-          expect(form.getErrorsMessages()).toContain(`Remove the character ${char} from the index pattern.`);
+          expect(form.getErrorsMessages()).toContain(
+            `Remove the character ${char} from the index pattern.`
+          );
         };
 
         return INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE.reduce((promise, char) => {

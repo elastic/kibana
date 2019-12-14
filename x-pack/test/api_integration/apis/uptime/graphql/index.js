@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
+export default function({ loadTestFile }) {
   describe('graphql', () => {
     // each of these test files imports a GQL query from
     // the uptime app and runs it against the live HTTP server,
@@ -17,7 +17,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./monitor_states'));
     loadTestFile(require.resolve('./monitor_status_bar'));
     loadTestFile(require.resolve('./ping_list'));
-    loadTestFile(require.resolve('./snapshot'));
     loadTestFile(require.resolve('./snapshot_histogram'));
   });
 }

@@ -5,9 +5,9 @@
  */
 
 import { EuiButton, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 
-import { RuleStepProps, RuleStep } from '../../types';
+import { RuleStepProps, RuleStep, AboutStepRule } from '../../types';
 import * as CreateRuleI18n from '../../translations';
 import { Field, Form, FormDataProvider, getUseField, UseField, useForm } from '../shared_imports';
 import { AddItem } from '../add_item_form';
@@ -15,24 +15,30 @@ import { defaultRiskScoreBySeverity, severityOptions, SeverityValue } from './da
 import { defaultValue } from './default_value';
 import { schema } from './schema';
 import * as I18n from './translations';
+import { StepRuleDescription } from '../description_step';
+import { AddMitreThreat } from '../mitre';
 
 const CommonUseField = getUseField({ component: Field });
 
-export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) => {
+export const StepAboutRule = memo<RuleStepProps>(({ isEditView, isLoading, setStepData }) => {
+  const [myStepData, setMyStepData] = useState<AboutStepRule>(defaultValue);
   const { form } = useForm({
-    schema,
-    defaultValue,
+    defaultValue: myStepData,
     options: { stripEmptyFields: false },
+    schema,
   });
 
   const onSubmit = useCallback(async () => {
-    const { isValid: newIsValid, data } = await form.submit();
-    if (newIsValid) {
-      setStepData(RuleStep.aboutRule, data, newIsValid);
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      setStepData(RuleStep.aboutRule, data, isValid);
+      setMyStepData({ ...data, isNew: false } as AboutStepRule);
     }
   }, [form]);
 
-  return (
+  return isEditView && myStepData != null ? (
+    <StepRuleDescription schema={schema} data={myStepData} />
+  ) : (
     <>
       <Form form={form} data-test-subj="stepAboutRule">
         <CommonUseField
@@ -109,6 +115,16 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
             dataTestSubj: 'detectionEngineStepAboutRuleFalsePositives',
           }}
         />
+        <UseField
+          path="threats"
+          component={AddMitreThreat}
+          componentProps={{
+            compressed: true,
+            idAria: 'detectionEngineStepAboutRuleMitreThreats',
+            isDisabled: isLoading,
+            dataTestSubj: 'detectionEngineStepAboutRuleMitreThreats',
+          }}
+        />
         <CommonUseField
           path="tags"
           componentProps={{
@@ -136,7 +152,7 @@ export const StepAboutRule = memo<RuleStepProps>(({ isLoading, setStepData }) =>
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton fill onClick={onSubmit} isDisabled={isLoading}>
-            {CreateRuleI18n.CONTINUE}
+            {myStepData.isNew ? CreateRuleI18n.CONTINUE : CreateRuleI18n.UPDATE}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

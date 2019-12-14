@@ -7,7 +7,7 @@
 import DateMath from '@elastic/datemath';
 import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { SourceQuery } from '../../../common/graphql/types';
 import {
   MetricsExplorerAggregation,
@@ -24,7 +24,7 @@ function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOpt
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
   source: SourceQuery.Query['source']['configuration'],
-  derivedIndexPattern: StaticIndexPattern,
+  derivedIndexPattern: IIndexPattern,
   timerange: MetricsExplorerTimeOptions,
   afterKey: string | null,
   signal: any
@@ -96,6 +96,9 @@ export function useMetricsExplorerData(
       }
       setLoading(false);
     })();
+
+    // TODO: fix this dependency list while preserving the semantics
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options, source, timerange, signal, afterKey]);
   return { error, loading, data };
 }

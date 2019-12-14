@@ -1,0 +1,186 @@
+{
+  "mappings": {
+    "properties": {
+      "signal": {
+        "properties": {
+          "parent": {
+            "properties": {
+              "index": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
+          },
+          "rule": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "rule_id": {
+                "type": "keyword"
+              },
+              "false_positives": {
+                "type": "keyword"
+              },
+              "saved_id": {
+                "type": "keyword"
+              },
+              "max_signals": {
+                "type": "keyword"
+              },
+              "risk_score": {
+                "type": "keyword"
+              },
+              "output_index": {
+                "type": "keyword"
+              },
+              "description": {
+                "type": "keyword"
+              },
+              "filter": {
+                "type": "object"
+              },
+              "from": {
+                "type": "keyword"
+              },
+              "immutable": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "interval": {
+                "type": "keyword"
+              },
+              "language": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "query": {
+                "type": "keyword"
+              },
+              "references": {
+                "type": "keyword"
+              },
+              "severity": {
+                "type": "keyword"
+              },
+              "tags": {
+                "type": "keyword"
+              },
+              "threats": {
+                "type": "object"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "size": {
+                "type": "keyword"
+              },
+              "to": {
+                "type": "keyword"
+              },
+              "enabled": {
+                "type": "keyword"
+              },
+              "filters": {
+                "type": "object"
+              },
+              "created_by": {
+                "type": "keyword"
+              },
+              "updated_by": {
+                "type": "keyword"
+              }
+            }
+          },
+          "original_time": {
+            "type": "date"
+          },
+          "original_event": {
+            "properties": {
+              "action": {
+                "type": "keyword"
+              },
+              "category": {
+                "type": "keyword"
+              },
+              "code": {
+                "type": "keyword"
+              },
+              "created": {
+                "type": "date"
+              },
+              "dataset": {
+                "type": "keyword"
+              },
+              "duration": {
+                "type": "long"
+              },
+              "end": {
+                "type": "date"
+              },
+              "hash": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "kind": {
+                "type": "keyword"
+              },
+              "module": {
+                "type": "keyword"
+              },
+              "original": {
+                "doc_values": false,
+                "index": false,
+                "type": "keyword"
+              },
+              "outcome": {
+                "type": "keyword"
+              },
+              "provider": {
+                "type": "keyword"
+              },
+              "risk_score": {
+                "type": "float"
+              },
+              "risk_score_norm": {
+                "type": "float"
+              },
+              "sequence": {
+                "type": "long"
+              },
+              "severity": {
+                "type": "long"
+              },
+              "start": {
+                "type": "date"
+              },
+              "timezone": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              }
+            }
+          },
+          "status": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}

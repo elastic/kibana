@@ -6,48 +6,39 @@
 
 import { Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { CapabilitiesModifier } from 'src/legacy/server/capabilities';
+import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { HomeServerPluginSetup } from 'src/plugins/home/server';
 import {
   SavedObjectsLegacyService,
   CoreSetup,
-  KibanaRequest,
   Logger,
   PluginInitializerContext,
 } from '../../../../src/core/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { PluginSetupContract as SecurityPluginSetup } from '../../security/server';
 import { LicensingPluginSetup } from '../../licensing/server';
-import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/xpack_main';
+import { XPackMainPlugin } from '../../../legacy/plugins/xpack_main/server/xpack_main';
 import { createDefaultSpace } from './lib/create_default_space';
 // @ts-ignore
 import { AuditLogger } from '../../../../server/lib/audit_logger';
 import { spacesSavedObjectsClientWrapperFactory } from './lib/saved_objects_client/saved_objects_client_wrapper_factory';
 import { SpacesAuditLogger } from './lib/audit_logger';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
-import { getSpacesUsageCollector } from './lib/get_spaces_usage_collector';
+import { registerSpacesUsageCollector } from './lib/spaces_usage_collector';
 import { SpacesService } from './spaces_service';
-import { SpacesServiceSetup } from './spaces_service/spaces_service';
+import { SpacesServiceSetup } from './spaces_service';
 import { ConfigType } from './config';
 import { toggleUICapabilities } from './lib/toggle_ui_capabilities';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { initExternalSpacesApi } from './routes/api/external';
-import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 /**
  * Describes a set of APIs that is available in the legacy platform only and required by this plugin
  * to function properly.
  */
 export interface LegacyAPI {
   savedObjects: SavedObjectsLegacyService;
-  usage: {
-    collectorSet: {
-      register: (collector: any) => void;
-    };
-  };
   tutorial: {
     addScopedTutorialContextFactory: (factory: any) => void;
-  };
-  capabilities: {
-    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
   };
   auditLogger: {
     create: (pluginId: string) => AuditLogger;
@@ -62,6 +53,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
   licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
+  usageCollection?: UsageCollectionSetup;
   home?: HomeServerPluginSetup;
 }
 
@@ -135,6 +127,16 @@ export class Plugin {
       features: plugins.features,
     });
 
+    core.capabilities.registerSwitcher(async (request, uiCapabilities) => {
+      try {
+        const activeSpace = await spacesService.getActiveSpace(request);
+        const features = plugins.features.getFeatures();
+        return toggleUICapabilities(features, uiCapabilities, activeSpace);
+      } catch (e) {
+        return uiCapabilities;
+      }
+    });
+
     if (plugins.security) {
       plugins.security.registerSpacesService(spacesService);
     }
@@ -150,7 +152,12 @@ export class Plugin {
       __legacyCompat: {
         registerLegacyAPI: (legacyAPI: LegacyAPI) => {
           this.legacyAPI = legacyAPI;
-          this.setupLegacyComponents(spacesService, plugins.features, plugins.licensing);
+          this.setupLegacyComponents(
+            spacesService,
+            plugins.features,
+            plugins.licensing,
+            plugins.usageCollection
+          );
         },
         createDefaultSpace: async () => {
           const esClient = await core.elasticsearch.adminClient$.pipe(take(1)).toPromise();
@@ -168,7 +175,8 @@ export class Plugin {
   private setupLegacyComponents(
     spacesService: SpacesServiceSetup,
     featuresSetup: FeaturesPluginSetup,
-    licensingSetup: LicensingPluginSetup
+    licensingSetup: LicensingPluginSetup,
+    usageCollectionSetup?: UsageCollectionSetup
   ) {
     const legacyAPI = this.getLegacyAPI();
     const { addScopedSavedObjectsClientWrapperFactory, types } = legacyAPI.savedObjects;
@@ -180,23 +188,11 @@ export class Plugin {
     legacyAPI.tutorial.addScopedTutorialContextFactory(
       createSpacesTutorialContextFactory(spacesService)
     );
-    legacyAPI.capabilities.registerCapabilitiesModifier(async (request, uiCapabilities) => {
-      try {
-        const activeSpace = await spacesService.getActiveSpace(KibanaRequest.from(request));
-        const features = featuresSetup.getFeatures();
-        return toggleUICapabilities(features, uiCapabilities, activeSpace);
-      } catch (e) {
-        return uiCapabilities;
-      }
-    });
     // Register a function with server to manage the collection of usage stats
-    legacyAPI.usage.collectorSet.register(
-      getSpacesUsageCollector({
-        kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
-        usage: legacyAPI.usage,
-        features: featuresSetup,
-        licensing: licensingSetup,
-      })
-    );
+    registerSpacesUsageCollector(usageCollectionSetup, {
+      kibanaIndex: legacyAPI.legacyConfig.kibanaIndex,
+      features: featuresSetup,
+      licensing: licensingSetup,
+    });
   }
 }

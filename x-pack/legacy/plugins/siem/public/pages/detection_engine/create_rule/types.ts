@@ -12,34 +12,24 @@ export enum RuleStep {
   aboutRule = 'about-rule',
   scheduleRule = 'schedule-rule',
 }
+export type RuleStatusType = 'passive' | 'active' | 'valid';
 
 export interface RuleStepData {
-  isValid: boolean;
   data: unknown;
+  isValid: boolean;
 }
 
 export interface RuleStepProps {
   setStepData: (step: RuleStep, data: unknown, isValid: boolean) => void;
+  isEditView: boolean;
   isLoading: boolean;
+  resizeParentContainer?: (height: number) => void;
 }
 
-export interface DefineStepRule {
-  outputIndex: string;
-  useIndicesConfig: string;
-  index: string[];
-  queryBar: FieldValueQueryBar;
+interface StepRuleData {
+  isNew: boolean;
 }
-
-export interface DefineStepRuleJson {
-  output_index: string;
-  index: string[];
-  filters: esFilters.Filter[];
-  saved_id?: string;
-  query: string;
-  language: string;
-}
-
-export interface AboutStepRule {
+export interface AboutStepRule extends StepRuleData {
   name: string;
   description: string;
   severity: string;
@@ -47,6 +37,28 @@ export interface AboutStepRule {
   references: string[];
   falsePositives: string[];
   tags: string[];
+  threats: IMitreEnterpriseAttack[];
+}
+
+export interface DefineStepRule extends StepRuleData {
+  useIndicesConfig: string;
+  index: string[];
+  queryBar: FieldValueQueryBar;
+}
+
+export interface ScheduleStepRule extends StepRuleData {
+  enabled: boolean;
+  interval: string;
+  from: string;
+  to?: string;
+}
+
+export interface DefineStepRuleJson {
+  index: string[];
+  filters: esFilters.Filter[];
+  saved_id?: string;
+  query: string;
+  language: string;
 }
 
 export interface AboutStepRuleJson {
@@ -57,14 +69,20 @@ export interface AboutStepRuleJson {
   references: string[];
   false_positives: string[];
   tags: string[];
+  threats: IMitreEnterpriseAttack[];
 }
 
-export interface ScheduleStepRule {
-  enabled: boolean;
-  interval: string;
-  from: string;
-  to?: string;
-}
 export type ScheduleStepRuleJson = ScheduleStepRule;
 
 export type FormatRuleType = 'query' | 'saved_query';
+
+export interface IMitreAttack {
+  id: string;
+  name: string;
+  reference: string;
+}
+export interface IMitreEnterpriseAttack {
+  framework: string;
+  tactic: IMitreAttack;
+  techniques: IMitreAttack[];
+}

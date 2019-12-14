@@ -48,7 +48,7 @@ function getMockData(overwrites: Record<string, any> = {}) {
     alertTypeId: '123',
     interval: '10s',
     throttle: null,
-    alertTypeParams: {
+    params: {
       bar: true,
     },
     actions: [
@@ -74,19 +74,32 @@ describe('create()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
         alertTypeId: '123',
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -130,25 +143,26 @@ describe('create()', () => {
     });
     const result = await alertsClient.create({ data });
     expect(result).toMatchInlineSnapshot(`
-                                                                                                      Object {
-                                                                                                        "actions": Array [
-                                                                                                          Object {
-                                                                                                            "group": "default",
-                                                                                                            "id": "1",
-                                                                                                            "params": Object {
-                                                                                                              "foo": true,
-                                                                                                            },
-                                                                                                          },
-                                                                                                        ],
-                                                                                                        "alertTypeId": "123",
-                                                                                                        "alertTypeParams": Object {
-                                                                                                          "bar": true,
-                                                                                                        },
-                                                                                                        "id": "1",
-                                                                                                        "interval": "10s",
-                                                                                                        "scheduledTaskId": "task-123",
-                                                                                                      }
-                                                                    `);
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "id": "1",
+        "interval": "10s",
+        "params": Object {
+          "bar": true,
+        },
+        "scheduledTaskId": "task-123",
+      }
+    `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.create.mock.calls[0]).toHaveLength(3);
     expect(savedObjectsClient.create.mock.calls[0][0]).toEqual('alert');
@@ -157,6 +171,7 @@ describe('create()', () => {
         "actions": Array [
           Object {
             "actionRef": "action_0",
+            "actionTypeId": "test",
             "group": "default",
             "params": Object {
               "foo": true,
@@ -164,9 +179,6 @@ describe('create()', () => {
           },
         ],
         "alertTypeId": "123",
-        "alertTypeParams": Object {
-          "bar": true,
-        },
         "apiKey": undefined,
         "apiKeyOwner": undefined,
         "createdBy": "elastic",
@@ -175,6 +187,9 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
+        "params": Object {
+          "bar": true,
+        },
         "tags": Array [
           "foo",
         ],
@@ -224,6 +239,184 @@ describe('create()', () => {
                                                                             `);
   });
 
+  test('creates an alert with multiple actions', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const data = getMockData({
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+        },
+        {
+          group: 'default',
+          id: '2',
+          params: {
+            foo: true,
+          },
+        },
+      ],
+    });
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      name: 'Test',
+      actionGroups: ['default'],
+      async executor() {},
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+        {
+          id: '2',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test2',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: '123',
+        interval: '10s',
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_2',
+            actionTypeId: 'test2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    taskManager.schedule.mockResolvedValueOnce({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: 'idle',
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+    });
+    const result = await alertsClient.create({ data });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test2",
+            "group": "default",
+            "id": "2",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "id": "1",
+        "interval": "10s",
+        "params": Object {
+          "bar": true,
+        },
+        "scheduledTaskId": "task-123",
+      }
+    `);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+      {
+        id: '1',
+        type: 'action',
+      },
+      {
+        id: '2',
+        type: 'action',
+      },
+    ]);
+  });
+
   test('creates a disabled alert', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData({ enabled: false });
@@ -233,6 +426,18 @@ describe('create()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
@@ -240,13 +445,14 @@ describe('create()', () => {
         enabled: false,
         alertTypeId: '123',
         interval: 10000,
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -263,30 +469,31 @@ describe('create()', () => {
     });
     const result = await alertsClient.create({ data });
     expect(result).toMatchInlineSnapshot(`
-                                                                                                                  Object {
-                                                                                                                    "actions": Array [
-                                                                                                                      Object {
-                                                                                                                        "group": "default",
-                                                                                                                        "id": "1",
-                                                                                                                        "params": Object {
-                                                                                                                          "foo": true,
-                                                                                                                        },
-                                                                                                                      },
-                                                                                                                    ],
-                                                                                                                    "alertTypeId": "123",
-                                                                                                                    "alertTypeParams": Object {
-                                                                                                                      "bar": true,
-                                                                                                                    },
-                                                                                                                    "enabled": false,
-                                                                                                                    "id": "1",
-                                                                                                                    "interval": 10000,
-                                                                                                                  }
-                                                                            `);
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "enabled": false,
+        "id": "1",
+        "interval": 10000,
+        "params": Object {
+          "bar": true,
+        },
+      }
+    `);
     expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).toHaveBeenCalledTimes(0);
   });
 
-  test('should validate alertTypeParams', async () => {
+  test('should validate params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     const data = getMockData();
     alertTypeRegistry.get.mockReturnValueOnce({
@@ -302,8 +509,25 @@ describe('create()', () => {
       async executor() {},
     });
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
+      `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
+  });
+
+  test('throws error if loading actions fails', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    const data = getMockData();
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      name: 'Test',
+      actionGroups: ['default'],
+      async executor() {},
+    });
+    savedObjectsClient.bulkGet.mockRejectedValueOnce(new Error('Test Error'));
+    await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Test Error"`
+    );
+    expect(savedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 
   test('throws error if create saved object fails', async () => {
@@ -314,6 +538,18 @@ describe('create()', () => {
       name: 'Test',
       actionGroups: ['default'],
       async executor() {},
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
     });
     savedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -331,19 +567,32 @@ describe('create()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
         alertTypeId: '123',
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -381,19 +630,32 @@ describe('create()', () => {
       actionGroups: ['default'],
       async executor() {},
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
         alertTypeId: '123',
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -442,19 +704,32 @@ describe('create()', () => {
       created: true,
       result: { id: '123', api_key: 'abc' },
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
         alertTypeId: '123',
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -506,12 +781,13 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
+            actionTypeId: 'test',
             params: { foo: true },
           },
         ],
         alertTypeId: '123',
         name: 'abc',
-        alertTypeParams: { bar: true },
+        params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
         createdBy: 'elastic',
@@ -923,7 +1199,7 @@ describe('get()', () => {
       attributes: {
         alertTypeId: '123',
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
@@ -946,24 +1222,24 @@ describe('get()', () => {
     });
     const result = await alertsClient.get({ id: '1' });
     expect(result).toMatchInlineSnapshot(`
-                                                                                                      Object {
-                                                                                                        "actions": Array [
-                                                                                                          Object {
-                                                                                                            "group": "default",
-                                                                                                            "id": "1",
-                                                                                                            "params": Object {
-                                                                                                              "foo": true,
-                                                                                                            },
-                                                                                                          },
-                                                                                                        ],
-                                                                                                        "alertTypeId": "123",
-                                                                                                        "alertTypeParams": Object {
-                                                                                                          "bar": true,
-                                                                                                        },
-                                                                                                        "id": "1",
-                                                                                                        "interval": "10s",
-                                                                                                      }
-                                                                    `);
+      Object {
+        "actions": Array [
+          Object {
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "alertTypeId": "123",
+        "id": "1",
+        "interval": "10s",
+        "params": Object {
+          "bar": true,
+        },
+      }
+    `);
     expect(savedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
                                                                                                                   Array [
@@ -981,7 +1257,7 @@ describe('get()', () => {
       attributes: {
         alertTypeId: '123',
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
@@ -1016,7 +1292,7 @@ describe('find()', () => {
           attributes: {
             alertTypeId: '123',
             interval: '10s',
-            alertTypeParams: {
+            params: {
               bar: true,
             },
             actions: [
@@ -1041,31 +1317,31 @@ describe('find()', () => {
     });
     const result = await alertsClient.find();
     expect(result).toMatchInlineSnapshot(`
-                                                                              Object {
-                                                                                "data": Array [
-                                                                                  Object {
-                                                                                    "actions": Array [
-                                                                                      Object {
-                                                                                        "group": "default",
-                                                                                        "id": "1",
-                                                                                        "params": Object {
-                                                                                          "foo": true,
-                                                                                        },
-                                                                                      },
-                                                                                    ],
-                                                                                    "alertTypeId": "123",
-                                                                                    "alertTypeParams": Object {
-                                                                                      "bar": true,
-                                                                                    },
-                                                                                    "id": "1",
-                                                                                    "interval": "10s",
-                                                                                  },
-                                                                                ],
-                                                                                "page": 1,
-                                                                                "perPage": 10,
-                                                                                "total": 1,
-                                                                              }
-                                                    `);
+      Object {
+        "data": Array [
+          Object {
+            "actions": Array [
+              Object {
+                "group": "default",
+                "id": "1",
+                "params": Object {
+                  "foo": true,
+                },
+              },
+            ],
+            "alertTypeId": "123",
+            "id": "1",
+            "interval": "10s",
+            "params": Object {
+              "bar": true,
+            },
+          },
+        ],
+        "page": 1,
+        "perPage": 10,
+        "total": 1,
+      }
+    `);
     expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.find.mock.calls[0]).toMatchInlineSnapshot(`
                                                                                                                   Array [
@@ -1086,7 +1362,7 @@ describe('delete()', () => {
       attributes: {
         alertTypeId: '123',
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         scheduledTaskId: 'task-123',
@@ -1149,19 +1425,32 @@ describe('update()', () => {
       references: [],
       version: '123',
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     savedObjectsClient.update.mockResolvedValueOnce({
       id: '1',
       type: 'alert',
       attributes: {
         enabled: true,
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1183,7 +1472,7 @@ describe('update()', () => {
         interval: '10s',
         name: 'abc',
         tags: ['foo'],
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
@@ -1198,25 +1487,26 @@ describe('update()', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(`
-                                                                                                      Object {
-                                                                                                        "actions": Array [
-                                                                                                          Object {
-                                                                                                            "group": "default",
-                                                                                                            "id": "1",
-                                                                                                            "params": Object {
-                                                                                                              "foo": true,
-                                                                                                            },
-                                                                                                          },
-                                                                                                        ],
-                                                                                                        "alertTypeParams": Object {
-                                                                                                          "bar": true,
-                                                                                                        },
-                                                                                                        "enabled": true,
-                                                                                                        "id": "1",
-                                                                                                        "interval": "10s",
-                                                                                                        "scheduledTaskId": "task-123",
-                                                                                                      }
-                                                                    `);
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "enabled": true,
+        "id": "1",
+        "interval": "10s",
+        "params": Object {
+          "bar": true,
+        },
+        "scheduledTaskId": "task-123",
+      }
+    `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
     expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
@@ -1226,6 +1516,7 @@ describe('update()', () => {
         "actions": Array [
           Object {
             "actionRef": "action_0",
+            "actionTypeId": "test",
             "group": "default",
             "params": Object {
               "foo": true,
@@ -1233,14 +1524,14 @@ describe('update()', () => {
           },
         ],
         "alertTypeId": "123",
-        "alertTypeParams": Object {
-          "bar": true,
-        },
         "apiKey": null,
         "apiKeyOwner": null,
         "enabled": true,
         "interval": "10s",
         "name": "abc",
+        "params": Object {
+          "bar": true,
+        },
         "scheduledTaskId": "task-123",
         "tags": Array [
           "foo",
@@ -1262,6 +1553,183 @@ describe('update()', () => {
                                                                             `);
   });
 
+  it('updates with multiple actions', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+    alertTypeRegistry.get.mockReturnValueOnce({
+      id: '123',
+      name: 'Test',
+      actionGroups: ['default'],
+      async executor() {},
+    });
+    savedObjectsClient.get.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        alertTypeId: '123',
+        scheduledTaskId: 'task-123',
+      },
+      references: [],
+      version: '123',
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+        {
+          id: '2',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test2',
+          },
+          references: [],
+        },
+      ],
+    });
+    savedObjectsClient.update.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        interval: '10s',
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_1',
+            actionTypeId: 'test',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            actionRef: 'action_2',
+            actionTypeId: 'test2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        scheduledTaskId: 'task-123',
+      },
+      references: [
+        {
+          name: 'action_0',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_1',
+          type: 'action',
+          id: '1',
+        },
+        {
+          name: 'action_2',
+          type: 'action',
+          id: '2',
+        },
+      ],
+    });
+    const result = await alertsClient.update({
+      id: '1',
+      data: {
+        interval: '10s',
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+        },
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+          {
+            group: 'default',
+            id: '2',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+      },
+    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+          Object {
+            "actionTypeId": "test2",
+            "group": "default",
+            "id": "2",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "enabled": true,
+        "id": "1",
+        "interval": "10s",
+        "params": Object {
+          "bar": true,
+        },
+        "scheduledTaskId": "task-123",
+      }
+    `);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+      {
+        id: '1',
+        type: 'action',
+      },
+      {
+        id: '2',
+        type: 'action',
+      },
+    ]);
+  });
+
   it('calls the createApiKey function', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     alertTypeRegistry.get.mockReturnValueOnce({
@@ -1281,6 +1749,18 @@ describe('update()', () => {
       references: [],
       version: '123',
     });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'test',
+          },
+          references: [],
+        },
+      ],
+    });
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       created: true,
       result: { id: '123', api_key: 'abc' },
@@ -1291,13 +1771,14 @@ describe('update()', () => {
       attributes: {
         enabled: true,
         interval: '10s',
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
           {
             group: 'default',
             actionRef: 'action_0',
+            actionTypeId: 'test',
             params: {
               foo: true,
             },
@@ -1320,7 +1801,7 @@ describe('update()', () => {
         interval: '10s',
         name: 'abc',
         tags: ['foo'],
-        alertTypeParams: {
+        params: {
           bar: true,
         },
         actions: [
@@ -1335,26 +1816,27 @@ describe('update()', () => {
       },
     });
     expect(result).toMatchInlineSnapshot(`
-                                          Object {
-                                            "actions": Array [
-                                              Object {
-                                                "group": "default",
-                                                "id": "1",
-                                                "params": Object {
-                                                  "foo": true,
-                                                },
-                                              },
-                                            ],
-                                            "alertTypeParams": Object {
-                                              "bar": true,
-                                            },
-                                            "apiKey": "MTIzOmFiYw==",
-                                            "enabled": true,
-                                            "id": "1",
-                                            "interval": "10s",
-                                            "scheduledTaskId": "task-123",
-                                          }
-                            `);
+      Object {
+        "actions": Array [
+          Object {
+            "actionTypeId": "test",
+            "group": "default",
+            "id": "1",
+            "params": Object {
+              "foo": true,
+            },
+          },
+        ],
+        "apiKey": "MTIzOmFiYw==",
+        "enabled": true,
+        "id": "1",
+        "interval": "10s",
+        "params": Object {
+          "bar": true,
+        },
+        "scheduledTaskId": "task-123",
+      }
+    `);
     expect(savedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.update.mock.calls[0]).toHaveLength(4);
     expect(savedObjectsClient.update.mock.calls[0][0]).toEqual('alert');
@@ -1364,6 +1846,7 @@ describe('update()', () => {
         "actions": Array [
           Object {
             "actionRef": "action_0",
+            "actionTypeId": "test",
             "group": "default",
             "params": Object {
               "foo": true,
@@ -1371,14 +1854,14 @@ describe('update()', () => {
           },
         ],
         "alertTypeId": "123",
-        "alertTypeParams": Object {
-          "bar": true,
-        },
         "apiKey": "MTIzOmFiYw==",
         "apiKeyOwner": "elastic",
         "enabled": true,
         "interval": "10s",
         "name": "abc",
+        "params": Object {
+          "bar": true,
+        },
         "scheduledTaskId": "task-123",
         "tags": Array [
           "foo",
@@ -1400,7 +1883,7 @@ describe('update()', () => {
                                 `);
   });
 
-  it('should validate alertTypeParams', async () => {
+  it('should validate params', async () => {
     const alertsClient = new AlertsClient(alertsClientParams);
     alertTypeRegistry.get.mockReturnValueOnce({
       id: '123',
@@ -1428,7 +1911,7 @@ describe('update()', () => {
           interval: '10s',
           name: 'abc',
           tags: ['foo'],
-          alertTypeParams: {
+          params: {
             bar: true,
           },
           actions: [
@@ -1443,7 +1926,7 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"alertTypeParams invalid: [param1]: expected value of type [string] but got [undefined]"`
+      `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
     );
   });
 });

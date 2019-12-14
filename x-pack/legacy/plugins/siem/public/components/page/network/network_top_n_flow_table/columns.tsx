@@ -7,7 +7,7 @@
 import { get } from 'lodash/fp';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
+import { IIndexPattern } from 'src/plugins/data/public';
 
 import { CountryFlag } from '../../../source_destination/country_flag';
 import {
@@ -48,7 +48,7 @@ export type NetworkTopNFlowColumnsIpDetails = [
 ];
 
 export const getNetworkTopNFlowColumns = (
-  indexPattern: StaticIndexPattern,
+  indexPattern: IIndexPattern,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string
@@ -233,7 +233,7 @@ export const getNetworkTopNFlowColumns = (
 ];
 
 export const getNFlowColumnsCurated = (
-  indexPattern: StaticIndexPattern,
+  indexPattern: IIndexPattern,
   flowTarget: FlowTargetSourceDest,
   type: networkModel.NetworkType,
   tableId: string

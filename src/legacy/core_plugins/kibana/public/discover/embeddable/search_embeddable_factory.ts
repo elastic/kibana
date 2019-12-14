@@ -16,18 +16,17 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { IPrivate } from 'ui/private';
 import { i18n } from '@kbn/i18n';
 import { TExecuteTriggerActions } from 'src/plugins/ui_actions/public';
-import '../angular/doc_table';
+import { IInjector } from 'ui/chrome';
 import { getServices } from '../kibana_services';
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   Container,
 } from '../../../../../../plugins/embeddable/public';
+
 import { TimeRange } from '../../../../../../plugins/data/public';
-import { SavedSearchLoader } from '../types';
 import { SearchEmbeddable } from './search_embeddable';
 import { SearchInput, SearchOutput } from './types';
 import { SEARCH_EMBEDDABLE_TYPE } from './constants';
@@ -38,8 +37,15 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
   SearchEmbeddable
 > {
   public readonly type = SEARCH_EMBEDDABLE_TYPE;
+  private $injector: IInjector | null;
+  private getInjector: () => Promise<IInjector> | null;
+  public isEditable: () => boolean;
 
-  constructor(private readonly executeTriggerActions: TExecuteTriggerActions) {
+  constructor(
+    private readonly executeTriggerActions: TExecuteTriggerActions,
+    getInjector: () => Promise<IInjector>,
+    isEditable: () => boolean
+  ) {
     super({
       savedObjectMetaData: {
         name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
@@ -49,10 +55,9 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
         getIconForSavedObject: () => 'search',
       },
     });
-  }
-
-  public isEditable() {
-    return getServices().capabilities.discover.save as boolean;
+    this.$injector = null;
+    this.getInjector = getInjector;
+    this.isEditable = isEditable;
   }
 
   public canCreateNew() {
@@ -70,29 +75,29 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     input: Partial<SearchInput> & { id: string; timeRange: TimeRange },
     parent?: Container
   ): Promise<SearchEmbeddable | ErrorEmbeddable> {
-    const $injector = await getServices().getInjector();
+    if (!this.$injector) {
+      this.$injector = await this.getInjector();
+    }
+    const $injector = this.$injector as IInjector;
 
     const $compile = $injector.get<ng.ICompileService>('$compile');
     const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
-    const searchLoader = $injector.get<SavedSearchLoader>('savedSearches');
-    const editUrl = await getServices().addBasePath(
-      `/app/kibana${searchLoader.urlFor(savedObjectId)}`
-    );
+    const filterManager = getServices().filterManager;
 
-    const Private = $injector.get<IPrivate>('Private');
-
-    const queryFilter = Private(getServices().FilterBarQueryFilterProvider);
+    const url = await getServices().getSavedSearchUrlById(savedObjectId);
+    const editUrl = getServices().addBasePath(`/app/kibana${url}`);
     try {
-      const savedObject = await searchLoader.get(savedObjectId);
+      const savedObject = await getServices().getSavedSearchById(savedObjectId);
+      const indexPattern = savedObject.searchSource.getField('index');
       return new SearchEmbeddable(
         {
           savedSearch: savedObject,
           $rootScope,
           $compile,
           editUrl,
-          queryFilter,
+          filterManager,
           editable: getServices().capabilities.discover.save as boolean,
-          indexPatterns: _.compact([savedObject.searchSource.getField('index')]),
+          indexPatterns: indexPattern ? [indexPattern] : [],
         },
         input,
         this.executeTriggerActions,
@@ -108,6 +113,3 @@ export class SearchEmbeddableFactory extends EmbeddableFactory<
     return new ErrorEmbeddable('Saved searches can only be created from a saved object', input);
   }
 }
-
-const factory = new SearchEmbeddableFactory(getServices().uiActions.executeTriggerActions);
-getServices().embeddable.registerEmbeddableFactory(factory.type, factory);

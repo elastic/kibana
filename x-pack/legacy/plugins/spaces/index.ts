@@ -8,7 +8,7 @@ import { resolve } from 'path';
 import KbnServer, { Server } from 'src/legacy/server/kbn_server';
 import { Legacy } from 'kibana';
 import { KibanaRequest } from '../../../../src/core/server';
-import { SpacesServiceSetup } from '../../../plugins/spaces/server/spaces_service/spaces_service';
+import { SpacesServiceSetup } from '../../../plugins/spaces/server';
 import { SpacesPluginSetup } from '../../../plugins/spaces/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
@@ -126,12 +126,8 @@ export const spaces = (kibana: Record<string, any>) =>
           kibanaIndex: config.get('kibana.index'),
         },
         savedObjects: server.savedObjects,
-        usage: server.usage,
         tutorial: {
           addScopedTutorialContextFactory: server.addScopedTutorialContextFactory,
-        },
-        capabilities: {
-          registerCapabilitiesModifier: server.registerCapabilitiesModifier,
         },
         auditLogger: {
           create: (pluginId: string) =>

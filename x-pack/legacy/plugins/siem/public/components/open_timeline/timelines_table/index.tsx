@@ -6,7 +6,6 @@
 
 import { EuiBasicTable } from '@elastic/eui';
 import * as React from 'react';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
@@ -25,11 +24,11 @@ import { getIconHeaderColumns } from './icon_header_columns';
 
 const BasicTable = styled(EuiBasicTable)`
   .euiTableCellContent {
-    animation: none; //Prevents applying max-height from animation
+    animation: none; /* Prevents applying max-height from animation */
   }
 
   .euiTableRow-isExpandedRow .euiTableCellContent__text {
-    width: 100%; //Fixes collapsing nested flex content in IE11
+    width: 100%; /* Fixes collapsing nested flex content in IE11 */
   }
 `;
 BasicTable.displayName = 'BasicTable';
@@ -93,7 +92,7 @@ export interface TimelinesTableProps {
  * Renders a table that displays metadata about timelines, (i.e. name,
  * description, etc.)
  */
-export const TimelinesTable = pure<TimelinesTableProps>(
+export const TimelinesTable = React.memo<TimelinesTableProps>(
   ({
     deleteTimelines,
     defaultPageSize,

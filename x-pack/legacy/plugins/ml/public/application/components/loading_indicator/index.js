@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-
-import './loading_indicator_directive';
+export { LoadingIndicator } from './loading_indicator';

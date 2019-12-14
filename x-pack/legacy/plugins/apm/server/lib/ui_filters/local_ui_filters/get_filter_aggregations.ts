@@ -5,11 +5,11 @@
  */
 
 import { omit } from 'lodash';
+import { IIndexPattern } from 'src/plugins/data/server';
 import { Projection } from '../../../../common/projections/typings';
 import { UIFilters } from '../../../../typings/ui-filters';
 import { getUiFiltersES } from '../../helpers/convert_ui_filters/get_ui_filters_es';
 import { localUIFilters, LocalUIFilterName } from './config';
-import { StaticIndexPattern } from '../../../../../../../../src/legacy/core_plugins/data/public';
 
 export const getFilterAggregations = ({
   indexPattern,
@@ -17,7 +17,7 @@ export const getFilterAggregations = ({
   projection,
   localFilterNames
 }: {
-  indexPattern: StaticIndexPattern | undefined;
+  indexPattern: IIndexPattern | undefined;
   uiFilters: UIFilters;
   projection: Projection;
   localFilterNames: LocalUIFilterName[];

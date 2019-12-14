@@ -47,3 +47,10 @@ export const CRITICAL = i18n.translate(
     defaultMessage: 'Critical',
   }
 );
+
+export const CUSTOM_MITRE_ATTACK_TECHNIQUES_REQUIRED = i18n.translate(
+  'xpack.siem.detectionEngine.createRule.stepDefineRule.customMitreAttackTechniquesFieldRequiredError',
+  {
+    defaultMessage: 'At least one Technique is required with a Tactic.',
+  }
+);

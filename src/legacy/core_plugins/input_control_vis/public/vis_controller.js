@@ -35,8 +35,7 @@ class VisController {
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
 
     this.filterManager = npStart.plugins.data.query.filterManager;
-    this.updateSubsciption = this.filterManager.getUpdates$()
-      .subscribe(this.queryBarUpdateHandler);
+    this.updateSubsciption = this.filterManager.getUpdates$().subscribe(this.queryBarUpdateHandler);
   }
 
   async render(visData, visParams, status) {
@@ -69,22 +68,23 @@ class VisController {
           refreshControl={this.refreshControl}
         />
       </I18nContext>,
-      this.el);
-  }
+      this.el
+    );
+  };
 
   async initControls() {
-    const controlParamsList = this.visParams.controls.filter((controlParams) => {
+    const controlParamsList = this.visParams.controls.filter(controlParams => {
       // ignore controls that do not have indexPattern or field
       return controlParams.indexPattern && controlParams.fieldName;
     });
 
-    const controlFactoryPromises = controlParamsList.map((controlParams) => {
+    const controlFactoryPromises = controlParamsList.map(controlParams => {
       const factory = controlFactory(controlParams);
       return factory(controlParams, this.visParams.useTimeFilter, SearchSource);
     });
     const controls = await Promise.all(controlFactoryPromises);
 
-    const getControl = (id) => {
+    const getControl = id => {
       return controls.find(control => {
         return id === control.id;
       });
@@ -117,24 +117,24 @@ class VisController {
       await this.updateNestedControls();
       this.drawVis();
     }
-  }
+  };
 
   submitFilters = () => {
-    const stagedControls = this.controls.filter((control) => {
+    const stagedControls = this.controls.filter(control => {
       return control.hasChanged();
     });
 
     const newFilters = stagedControls
-      .filter((control) => {
+      .filter(control => {
         return control.hasKbnFilter();
       })
-      .map((control) => {
+      .map(control => {
         return control.getKbnFilter();
       });
 
-    stagedControls.forEach((control) => {
+    stagedControls.forEach(control => {
       // to avoid duplicate filters, remove any old filters for control
-      control.filterManager.findFilters().forEach((existingFilter) => {
+      control.filterManager.findFilters().forEach(existingFilter => {
         this.filterManager.removeFilter(existingFilter);
       });
     });
@@ -142,35 +142,35 @@ class VisController {
     // Clean up filter pills for nested controls that are now disabled because ancestors are not set.
     // This has to be done after looking up the staged controls because otherwise removing a filter
     // will re-sync the controls of all other filters.
-    this.controls.map((control) => {
+    this.controls.map(control => {
       if (control.hasAncestors() && control.hasUnsetAncestor()) {
-        control.filterManager.findFilters().forEach((existingFilter) => {
+        control.filterManager.findFilters().forEach(existingFilter => {
           this.filterManager.removeFilter(existingFilter);
         });
       }
     });
 
     this.filterManager.addFilters(newFilters, this.visParams.pinFilters);
-  }
+  };
 
   clearControls = async () => {
-    this.controls.forEach((control) => {
+    this.controls.forEach(control => {
       control.clear();
     });
     await this.updateNestedControls();
     this.drawVis();
-  }
+  };
 
   updateControlsFromKbn = async () => {
-    this.controls.forEach((control) => {
+    this.controls.forEach(control => {
       control.reset();
     });
     await this.updateNestedControls();
     this.drawVis();
-  }
+  };
 
   async updateNestedControls() {
-    const fetchPromises = this.controls.map(async (control) => {
+    const fetchPromises = this.controls.map(async control => {
       if (control.hasAncestors()) {
         await control.fetch();
       }
@@ -179,27 +179,29 @@ class VisController {
   }
 
   hasChanges = () => {
-    return this.controls.map((control) => {
-      return control.hasChanged();
-    })
+    return this.controls
+      .map(control => {
+        return control.hasChanged();
+      })
       .reduce((a, b) => {
         return a || b;
       });
-  }
+  };
 
   hasValues = () => {
-    return this.controls.map((control) => {
-      return control.hasValue();
-    })
+    return this.controls
+      .map(control => {
+        return control.hasValue();
+      })
       .reduce((a, b) => {
         return a || b;
       });
-  }
+  };
 
   refreshControl = async (controlIndex, query) => {
     await this.controls[controlIndex].fetch(query);
     this.drawVis();
-  }
+  };
 }
 
 export { VisController };

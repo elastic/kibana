@@ -36,7 +36,7 @@ export class DeprecationLoggingToggleUI extends React.Component<
     };
   }
 
-  public componentWillMount() {
+  public UNSAFE_componentWillMount() {
     this.loadData();
   }
 
