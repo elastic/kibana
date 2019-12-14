@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint max-len: 0 */
 import { mapNodesMetrics } from '../map_nodes_metrics';
 
 describe('map nodes metrics', () => {

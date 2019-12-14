@@ -442,7 +442,7 @@ export class IndexPattern implements IIndexPattern {
                 {
                   defaultMessage:
                     'Unable to write index pattern! Refresh the page to get the most up to date changes for this index pattern.',
-                } // eslint-disable-line max-len
+                }
               );
               const { toasts } = getNotifications();
 

@@ -1301,7 +1301,6 @@ export class TimeSeriesExplorer extends React.Component {
             title={
               <FormattedMessage
                 id="xpack.ml.timeSeriesExplorer.singleMetricRequiredMessage"
-                /* eslint-disable-next-line max-len */
                 defaultMessage="To view a single metric you must select {missingValuesCount, plural, one {a value for {fieldName1}} other {values for {fieldName1} and {fieldName2}}}"
                 values={{
                   missingValuesCount: fieldNamesWithEmptyValues.length,
