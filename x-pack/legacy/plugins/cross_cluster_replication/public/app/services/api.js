@@ -53,51 +53,49 @@ export const getHttpClient = () => {
 
 // ---
 
-const extractData = (response) => response.data;
+const extractData = response => response.data;
 
-const createIdString = (ids) => ids.map(id => encodeURIComponent(id)).join(',');
+const createIdString = ids => ids.map(id => encodeURIComponent(id)).join(',');
 
 /* Auto Follow Pattern */
-export const loadAutoFollowPatterns = () => (
-  httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(extractData)
-);
+export const loadAutoFollowPatterns = () =>
+  httpClient.get(`${apiPrefix}/auto_follow_patterns`).then(extractData);
 
-export const getAutoFollowPattern = (id) => (
-  httpClient.get(`${apiPrefix}/auto_follow_patterns/${encodeURIComponent(id)}`).then(extractData)
-);
+export const getAutoFollowPattern = id =>
+  httpClient.get(`${apiPrefix}/auto_follow_patterns/${encodeURIComponent(id)}`).then(extractData);
 
-export const loadRemoteClusters = () => (
-  httpClient.get(apiPrefixRemoteClusters).then(extractData)
-);
+export const loadRemoteClusters = () => httpClient.get(apiPrefixRemoteClusters).then(extractData);
 
-export const createAutoFollowPattern = (autoFollowPattern) => {
+export const createAutoFollowPattern = autoFollowPattern => {
   const request = httpClient.post(`${apiPrefix}/auto_follow_patterns`, autoFollowPattern);
   return trackUserRequest(request, UIM_AUTO_FOLLOW_PATTERN_CREATE).then(extractData);
 };
 
 export const updateAutoFollowPattern = (id, autoFollowPattern) => {
-  const request = httpClient.put(`${apiPrefix}/auto_follow_patterns/${encodeURIComponent(id)}`, autoFollowPattern);
+  const request = httpClient.put(
+    `${apiPrefix}/auto_follow_patterns/${encodeURIComponent(id)}`,
+    autoFollowPattern
+  );
   return trackUserRequest(request, UIM_AUTO_FOLLOW_PATTERN_UPDATE).then(extractData);
 };
 
-export const deleteAutoFollowPattern = (id) => {
+export const deleteAutoFollowPattern = id => {
   const ids = arrify(id);
   const idString = ids.map(_id => encodeURIComponent(_id)).join(',');
   const request = httpClient.delete(`${apiPrefix}/auto_follow_patterns/${idString}`);
-  const uiMetric = ids.length > 1 ? UIM_AUTO_FOLLOW_PATTERN_DELETE_MANY : UIM_AUTO_FOLLOW_PATTERN_DELETE;
+  const uiMetric =
+    ids.length > 1 ? UIM_AUTO_FOLLOW_PATTERN_DELETE_MANY : UIM_AUTO_FOLLOW_PATTERN_DELETE;
   return trackUserRequest(request, uiMetric).then(extractData);
 };
 
 /* Follower Index */
-export const loadFollowerIndices = () => (
-  httpClient.get(`${apiPrefix}/follower_indices`).then(extractData)
-);
+export const loadFollowerIndices = () =>
+  httpClient.get(`${apiPrefix}/follower_indices`).then(extractData);
 
-export const getFollowerIndex = (id) => (
-  httpClient.get(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`).then(extractData)
-);
+export const getFollowerIndex = id =>
+  httpClient.get(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`).then(extractData);
 
-export const createFollowerIndex = (followerIndex) => {
+export const createFollowerIndex = followerIndex => {
   const uiMetrics = [UIM_FOLLOWER_INDEX_CREATE];
   const isUsingAdvancedSettings = !areAllSettingsDefault(followerIndex);
   if (isUsingAdvancedSettings) {
@@ -107,7 +105,7 @@ export const createFollowerIndex = (followerIndex) => {
   return trackUserRequest(request, uiMetrics).then(extractData);
 };
 
-export const pauseFollowerIndex = (id) => {
+export const pauseFollowerIndex = id => {
   const ids = arrify(id);
   const idString = createIdString(ids);
   const request = httpClient.put(`${apiPrefix}/follower_indices/${idString}/pause`);
@@ -115,7 +113,7 @@ export const pauseFollowerIndex = (id) => {
   return trackUserRequest(request, uiMetric).then(extractData);
 };
 
-export const resumeFollowerIndex = (id) => {
+export const resumeFollowerIndex = id => {
   const ids = arrify(id);
   const idString = createIdString(ids);
   const request = httpClient.put(`${apiPrefix}/follower_indices/${idString}/resume`);
@@ -123,7 +121,7 @@ export const resumeFollowerIndex = (id) => {
   return trackUserRequest(request, uiMetric).then(extractData);
 };
 
-export const unfollowLeaderIndex = (id) => {
+export const unfollowLeaderIndex = id => {
   const ids = arrify(id);
   const idString = createIdString(ids);
   const request = httpClient.put(`${apiPrefix}/follower_indices/${idString}/unfollow`);
@@ -137,14 +135,16 @@ export const updateFollowerIndex = (id, followerIndex) => {
   if (isUsingAdvancedSettings) {
     uiMetrics.push(UIM_FOLLOWER_INDEX_USE_ADVANCED_OPTIONS);
   }
-  const request = httpClient.put(`${apiPrefix}/follower_indices/${encodeURIComponent(id)}`, followerIndex);
+  const request = httpClient.put(
+    `${apiPrefix}/follower_indices/${encodeURIComponent(id)}`,
+    followerIndex
+  );
   return trackUserRequest(request, uiMetrics).then(extractData);
 };
 
 /* Stats */
-export const loadAutoFollowStats = () => (
-  httpClient.get(`${apiPrefix}/stats/auto_follow`).then(extractData)
-);
+export const loadAutoFollowStats = () =>
+  httpClient.get(`${apiPrefix}/stats/auto_follow`).then(extractData);
 
 /* Indices */
 let canceler = null;
@@ -154,13 +154,12 @@ export const loadIndices = () => {
     canceler.resolve();
   }
   canceler = $q.defer();
-  return httpClient.get(`${apiPrefixIndexManagement}/indices`, { timeout: canceler.promise })
-    .then((response) => {
+  return httpClient
+    .get(`${apiPrefixIndexManagement}/indices`, { timeout: canceler.promise })
+    .then(response => {
       canceler = null;
       return extractData(response);
     });
 };
 
-export const loadPermissions = () => (
-  httpClient.get(`${apiPrefix}/permissions`).then(extractData)
-);
+export const loadPermissions = () => httpClient.get(`${apiPrefix}/permissions`).then(extractData);

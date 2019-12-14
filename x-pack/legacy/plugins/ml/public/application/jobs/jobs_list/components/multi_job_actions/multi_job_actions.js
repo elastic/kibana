@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import PropTypes from 'prop-types';
-import React, {
-  Component, Fragment
-} from 'react';
+import React, { Component, Fragment } from 'react';
 
-import {
-  EuiTitle
-} from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 
 import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
@@ -27,15 +22,12 @@ export class MultiJobActions extends Component {
   }
 
   render() {
-    const jobsSelected = (this.props.selectedJobs.length > 0);
+    const jobsSelected = this.props.selectedJobs.length > 0;
     return (
       <div className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}>
-        {jobsSelected &&
+        {jobsSelected && (
           <Fragment>
-            <EuiTitle
-              size="s"
-              style={{ display: 'inline' }}
-            >
+            <EuiTitle size="s" style={{ display: 'inline' }}>
               <h3>
                 <FormattedMessage
                   id="xpack.ml.jobsList.multiJobsActions.jobsSelectedLabel"
@@ -60,7 +52,7 @@ export class MultiJobActions extends Component {
               refreshJobs={this.props.refreshJobs}
             />
           </Fragment>
-        }
+        )}
       </div>
     );
   }

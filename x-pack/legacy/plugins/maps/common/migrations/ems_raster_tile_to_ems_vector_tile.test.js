@@ -9,7 +9,6 @@
 import { emsRasterTileToEmsVectorTile } from './ems_raster_tile_to_ems_vector_tile';
 
 describe('emsRasterTileToEmsVectorTile', () => {
-
   test('Should handle missing layerListJSON attribute', () => {
     const attributes = {
       title: 'my map',
@@ -24,17 +23,17 @@ describe('emsRasterTileToEmsVectorTile', () => {
       {
         type: 'TILE',
         sourceDescriptor: {
-          type: 'EMS_TMS'
-        }
-      }
+          type: 'EMS_TMS',
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(emsRasterTileToEmsVectorTile({ attributes })).toEqual({
       title: 'my map',
-      layerListJSON: '[{\"type\":\"VECTOR_TILE\",\"sourceDescriptor\":{\"type\":\"EMS_TMS\"}}]',
+      layerListJSON: '[{"type":"VECTOR_TILE","sourceDescriptor":{"type":"EMS_TMS"}}]',
     });
   });
 
@@ -43,13 +42,13 @@ describe('emsRasterTileToEmsVectorTile', () => {
       {
         type: 'TILE',
         sourceDescriptor: {
-          type: 'KIBANA_TILEMAP'
-        }
-      }
+          type: 'KIBANA_TILEMAP',
+        },
+      },
     ]);
     const attributes = {
       title: 'my map',
-      layerListJSON
+      layerListJSON,
     };
     expect(emsRasterTileToEmsVectorTile({ attributes })).toEqual({
       title: 'my map',

@@ -32,12 +32,12 @@ describe('Model Updater for Angular Controller with React Components', () => {
     updater.updateModel({
       foo: 'bar',
       bar: 'baz',
-      error: 'monkeywrench'
+      error: 'monkeywrench',
     });
     expect(model).toEqual({
       foo: 'bar',
       bar: 'baz',
-      error: 'monkeywrench'
+      error: 'monkeywrench',
     });
   });
 
@@ -45,11 +45,11 @@ describe('Model Updater for Angular Controller with React Components', () => {
     model.errors = ['first'];
     updater.updateModel({
       errors: 'second',
-      primitive: 'hello'
+      primitive: 'hello',
     });
     expect(model).toEqual({
       errors: ['first', 'second'],
-      primitive: 'hello'
+      primitive: 'hello',
     });
   });
 });

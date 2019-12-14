@@ -54,9 +54,9 @@ const CAN_REPL = canRequire(REPL_PATH);
 const XPACK_DIR = resolve(__dirname, '../../../x-pack');
 const XPACK_INSTALLED = canRequire(XPACK_DIR);
 
-const pathCollector = function () {
+const pathCollector = function() {
   const paths = [];
-  return function (path) {
+  return function(path) {
     paths.push(resolve(process.cwd(), path));
     return paths;
   };
@@ -105,12 +105,15 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
 
       const elasticsearchHosts = (
-        (customElasticsearchHosts.length > 0 && customElasticsearchHosts) ||
-        ['https://localhost:9200']
+        (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
+          'https://localhost:9200',
+        ]
       ).map(hostUrl => {
         const parsedUrl = url.parse(hostUrl);
         if (parsedUrl.hostname !== 'localhost') {
-          throw new Error(`Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`);
+          throw new Error(
+            `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
+          );
         }
         return `https://localhost:${parsedUrl.port}`;
       });
@@ -136,26 +139,28 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     set('plugins.initialize', false);
   }
 
-  set('plugins.scanDirs', _.compact([].concat(
-    get('plugins.scanDirs'),
-    opts.pluginDir
-  )));
+  set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
 
-  set('plugins.paths', _.compact([].concat(
-    get('plugins.paths'),
-    opts.pluginPath,
-    opts.runExamples ? [
-      // Ideally this would automatically include all plugins in the examples dir
-      fromRoot('examples/demo_search'),
-      fromRoot('examples/search_explorer'),
-      fromRoot('examples/embeddable_examples'),
-      fromRoot('examples/embeddable_explorer'),
-    ] : [],
+  set(
+    'plugins.paths',
+    _.compact(
+      [].concat(
+        get('plugins.paths'),
+        opts.pluginPath,
+        opts.runExamples
+          ? [
+              // Ideally this would automatically include all plugins in the examples dir
+              fromRoot('examples/demo_search'),
+              fromRoot('examples/search_explorer'),
+              fromRoot('examples/embeddable_examples'),
+              fromRoot('examples/embeddable_explorer'),
+            ]
+          : [],
 
-    XPACK_INSTALLED && !opts.oss
-      ? [XPACK_DIR]
-      : [],
-  )));
+        XPACK_INSTALLED && !opts.oss ? [XPACK_DIR] : []
+      )
+    )
+  );
 
   merge(extraCliOptions);
   merge(readKeystore(get('path.data')));
@@ -163,7 +168,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   return rawConfig;
 }
 
-export default function (program) {
+export default function(program) {
   const command = program.command('serve');
 
   command
@@ -174,7 +179,7 @@ export default function (program) {
       '-c, --config <path>',
       'Path to the config file, use multiple --config args to include multiple config files',
       configPathCollector,
-      [ getConfigPath() ]
+      [getConfigPath()]
     )
     .option('-p, --port <port>', 'The port to bind to', parseInt)
     .option('-q, --quiet', 'Prevent all logging except errors')
@@ -185,17 +190,14 @@ export default function (program) {
     .option(
       '--plugin-dir <path>',
       'A path to scan for plugins, this can be specified multiple ' +
-      'times to specify multiple directories',
+        'times to specify multiple directories',
       pluginDirCollector,
-      [
-        fromRoot('plugins'),
-        fromRoot('src/legacy/core_plugins')
-      ]
+      [fromRoot('plugins'), fromRoot('src/legacy/core_plugins')]
     )
     .option(
       '--plugin-path <path>',
       'A path to a plugin which should be included by the server, ' +
-    'this can be specified multiple times to specify multiple paths',
+        'this can be specified multiple times to specify multiple paths',
       pluginPathCollector,
       []
     )
@@ -209,7 +211,10 @@ export default function (program) {
   if (!IS_KIBANA_DISTRIBUTABLE) {
     command
       .option('--oss', 'Start Kibana without X-Pack')
-      .option('--run-examples', 'Adds plugin paths for all the Kibana example plugins and runs with no base path');
+      .option(
+        '--run-examples',
+        'Adds plugin paths for all the Kibana example plugins and runs with no base path'
+      );
   }
 
   if (CAN_CLUSTER) {
@@ -217,50 +222,51 @@ export default function (program) {
       .option('--dev', 'Run the server with development mode defaults')
       .option('--open', 'Open a browser window to the base url after the server is started')
       .option('--ssl', 'Run the dev server using HTTPS')
-      .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
+      .option(
+        '--no-base-path',
+        "Don't put a proxy in front of the dev server, which adds a random basePath"
+      )
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode');
   }
 
-  command
-    .action(async function (opts) {
-      if (opts.dev && opts.devConfig !== false) {
-        try {
-          const kbnDevConfig = fromRoot('config/kibana.dev.yml');
-          if (statSync(kbnDevConfig).isFile()) {
-            opts.config.push(kbnDevConfig);
-          }
-        } catch (err) {
-          // ignore, kibana.dev.yml does not exist
+  command.action(async function(opts) {
+    if (opts.dev && opts.devConfig !== false) {
+      try {
+        const kbnDevConfig = fromRoot('config/kibana.dev.yml');
+        if (statSync(kbnDevConfig).isFile()) {
+          opts.config.push(kbnDevConfig);
         }
+      } catch (err) {
+        // ignore, kibana.dev.yml does not exist
       }
+    }
 
-      const unknownOptions = this.getUnknownOptions();
-      await bootstrap({
-        configs: [].concat(opts.config || []),
-        cliArgs: {
-          dev: !!opts.dev,
-          open: !!opts.open,
-          envName: unknownOptions.env ? unknownOptions.env.name : undefined,
-          quiet: !!opts.quiet,
-          silent: !!opts.silent,
-          watch: !!opts.watch,
-          repl: !!opts.repl,
-          // We want to run without base path when the `--run-examples` flag is given so that we can use local
-          // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
-          // We can tell users they only have to run with `yarn start --run-examples` to get those
-          // local links to work.  Similar to what we do for "View in Console" links in our
-          // elastic.co links.
-          basePath: opts.runExamples ? false : !!opts.basePath,
-          optimize: !!opts.optimize,
-          oss: !!opts.oss
-        },
-        features: {
-          isClusterModeSupported: CAN_CLUSTER,
-          isReplModeSupported: CAN_REPL,
-        },
-        applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
-      });
+    const unknownOptions = this.getUnknownOptions();
+    await bootstrap({
+      configs: [].concat(opts.config || []),
+      cliArgs: {
+        dev: !!opts.dev,
+        open: !!opts.open,
+        envName: unknownOptions.env ? unknownOptions.env.name : undefined,
+        quiet: !!opts.quiet,
+        silent: !!opts.silent,
+        watch: !!opts.watch,
+        repl: !!opts.repl,
+        // We want to run without base path when the `--run-examples` flag is given so that we can use local
+        // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
+        // We can tell users they only have to run with `yarn start --run-examples` to get those
+        // local links to work.  Similar to what we do for "View in Console" links in our
+        // elastic.co links.
+        basePath: opts.runExamples ? false : !!opts.basePath,
+        optimize: !!opts.optimize,
+        oss: !!opts.oss,
+      },
+      features: {
+        isClusterModeSupported: CAN_CLUSTER,
+        isReplModeSupported: CAN_REPL,
+      },
+      applyConfigOverrides: rawConfig => applyConfigOverrides(rawConfig, opts, unknownOptions),
     });
-
+  });
 }

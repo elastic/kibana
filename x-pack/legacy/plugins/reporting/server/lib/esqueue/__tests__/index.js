@@ -19,53 +19,53 @@ const { Esqueue } = proxyquire.noPreserveCache()('../index', {
   './worker': { Worker: WorkerMock },
 });
 
-describe('Esqueue class', function () {
+describe('Esqueue class', function() {
   let client;
 
-  beforeEach(function () {
+  beforeEach(function() {
     client = new ClientMock();
   });
 
-  it('should be an event emitter', function () {
+  it('should be an event emitter', function() {
     const queue = new Esqueue('esqueue', { client });
     expect(queue).to.be.an(events.EventEmitter);
   });
 
-  describe('Option validation', function () {
-    it('should throw without an index', function () {
+  describe('Option validation', function() {
+    it('should throw without an index', function() {
       const init = () => new Esqueue();
       expect(init).to.throwException(/must.+specify.+index/i);
     });
   });
 
-  describe('Queue construction', function () {
-    it('should ping the ES server', function () {
+  describe('Queue construction', function() {
+    it('should ping the ES server', function() {
       const pingSpy = sinon.spy(client, 'callWithInternalUser').withArgs('ping');
       new Esqueue('esqueue', { client });
       sinon.assert.calledOnce(pingSpy);
     });
   });
 
-  describe('Adding jobs', function () {
+  describe('Adding jobs', function() {
     let indexName;
     let jobType;
     let payload;
     let queue;
 
-    beforeEach(function () {
+    beforeEach(function() {
       indexName = 'esqueue-index';
       jobType = 'test-test';
       payload = { payload: true };
       queue = new Esqueue(indexName, { client });
     });
 
-    it('should throw with invalid dateSeparator setting', function () {
+    it('should throw with invalid dateSeparator setting', function() {
       queue = new Esqueue(indexName, { client, dateSeparator: 'a' });
       const fn = () => queue.addJob(jobType, payload);
       expect(fn).to.throwException();
     });
 
-    it('should pass queue instance, index name, type and payload', function () {
+    it('should pass queue instance, index name, type and payload', function() {
       const job = queue.addJob(jobType, payload);
       expect(job.getProp('queue')).to.equal(queue);
       expect(job.getProp('index')).to.match(new RegExp(indexName));
@@ -73,17 +73,17 @@ describe('Esqueue class', function () {
       expect(job.getProp('payload')).to.equal(payload);
     });
 
-    it('should pass default settings', function () {
+    it('should pass default settings', function() {
       const job = queue.addJob(jobType, payload);
       const options = job.getProp('options');
       expect(options).to.have.property('timeout', constants.DEFAULT_SETTING_TIMEOUT);
     });
 
-    it('should pass queue index settings', function () {
+    it('should pass queue index settings', function() {
       const indexSettings = {
         index: {
-          number_of_shards: 1
-        }
+          number_of_shards: 1,
+        },
       };
 
       queue = new Esqueue(indexName, { client, indexSettings });
@@ -91,25 +91,25 @@ describe('Esqueue class', function () {
       expect(job.getProp('options')).to.have.property('indexSettings', indexSettings);
     });
 
-    it('should pass headers from options', function () {
+    it('should pass headers from options', function() {
       const options = {
         headers: {
-          authorization: 'Basic cXdlcnR5'
-        }
+          authorization: 'Basic cXdlcnR5',
+        },
       };
       const job = queue.addJob(jobType, payload, options);
       expect(job.getProp('options')).to.have.property('headers', options.headers);
     });
   });
 
-  describe('Registering workers', function () {
+  describe('Registering workers', function() {
     let queue;
 
-    beforeEach(function () {
+    beforeEach(function() {
       queue = new Esqueue('esqueue', { client });
     });
 
-    it('should keep track of workers', function () {
+    it('should keep track of workers', function() {
       expect(queue.getWorkers()).to.eql([]);
       expect(queue.getWorkers()).to.have.length(0);
 
@@ -119,7 +119,7 @@ describe('Esqueue class', function () {
       expect(queue.getWorkers()).to.have.length(3);
     });
 
-    it('should pass instance of queue, type, and worker function', function () {
+    it('should pass instance of queue, type, and worker function', function() {
       const workerType = 'test-worker';
       const workerFn = () => true;
 
@@ -129,7 +129,7 @@ describe('Esqueue class', function () {
       expect(worker.getProp('workerFn')).to.equal(workerFn);
     });
 
-    it('should pass worker options', function () {
+    it('should pass worker options', function() {
       const workerOptions = {
         size: 12,
       };
@@ -141,17 +141,18 @@ describe('Esqueue class', function () {
     });
   });
 
-  describe('Destroy', function () {
-    it('should destroy workers', function () {
+  describe('Destroy', function() {
+    it('should destroy workers', function() {
       const queue = new Esqueue('esqueue', { client });
-      const stubs = times(3, () => { return { destroy: sinon.stub() }; });
-      stubs.forEach((stub) => queue._workers.push(stub));
+      const stubs = times(3, () => {
+        return { destroy: sinon.stub() };
+      });
+      stubs.forEach(stub => queue._workers.push(stub));
       expect(queue.getWorkers()).to.have.length(3);
 
       queue.destroy();
-      stubs.forEach((stub) => sinon.assert.calledOnce(stub.destroy));
+      stubs.forEach(stub => sinon.assert.calledOnce(stub.destroy));
       expect(queue.getWorkers()).to.have.length(0);
     });
   });
-
 });

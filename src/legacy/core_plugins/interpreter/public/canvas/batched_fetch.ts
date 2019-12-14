@@ -18,13 +18,15 @@
  */
 
 import _ from 'lodash';
+import { filter, map } from 'rxjs/operators';
+// eslint-disable-next-line
+import { split } from '../../../../../plugins/bfetch/public/streaming';
+import { BfetchPublicApi } from '../../../../../plugins/bfetch/public';
+import { defer } from '../../../../../plugins/kibana_utils/public';
 import { FUNCTIONS_URL } from './consts';
 
-// TODO: Import this type from kibana_util.
-type AjaxStream = any;
-
 export interface Options {
-  ajaxStream: any;
+  fetchStreaming: BfetchPublicApi['fetchStreaming'];
   serialize: any;
   ms?: number;
 }
@@ -47,7 +49,7 @@ export interface Request {
  * Create a function which executes an Expression function on the
  * server as part of a larger batch of executions.
  */
-export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
+export function batchedFetch({ fetchStreaming, serialize, ms = 10 }: Options) {
   // Uniquely identifies each function call in a batch operation
   // so that the appropriate promise can be resolved / rejected later.
   let id = 0;
@@ -66,7 +68,7 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
   };
 
   const runBatch = () => {
-    processBatch(ajaxStream, batch);
+    processBatch(fetchStreaming, batch);
     reset();
   };
 
@@ -92,7 +94,7 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
     }
 
     // If not, create a new promise, id, and add it to the batched collection.
-    const future = createFuture();
+    const future = defer();
     const newId = nextId();
     request.id = newId;
 
@@ -106,48 +108,39 @@ export function batchedFetch({ ajaxStream, serialize, ms = 10 }: Options) {
 }
 
 /**
- * An externally resolvable / rejectable promise, used to make sure
- * individual batch responses go to the correct caller.
- */
-function createFuture() {
-  let resolve;
-  let reject;
-  const promise = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-
-  return {
-    resolve,
-    reject,
-    promise,
-  };
-}
-
-/**
  * Runs the specified batch of functions on the server, then resolves
  * the related promises.
  */
-async function processBatch(ajaxStream: AjaxStream, batch: Batch) {
-  try {
-    await ajaxStream({
-      url: FUNCTIONS_URL,
-      body: JSON.stringify({
-        functions: Object.values(batch).map(({ request }) => request),
-      }),
-      onResponse({ id, statusCode, result }: any) {
-        const { future } = batch[id];
+async function processBatch(fetchStreaming: BfetchPublicApi['fetchStreaming'], batch: Batch) {
+  const { stream, promise } = fetchStreaming({
+    url: FUNCTIONS_URL,
+    body: JSON.stringify({
+      functions: Object.values(batch).map(({ request }) => request),
+    }),
+  });
 
-        if (statusCode >= 400) {
-          future.reject(result);
-        } else {
-          future.resolve(result);
-        }
-      },
+  stream
+    .pipe(
+      split('\n'),
+      filter<string>(Boolean),
+      map<string, any>((json: string) => JSON.parse(json))
+    )
+    .subscribe((message: any) => {
+      const { id, statusCode, result } = message;
+      const { future } = batch[id];
+
+      if (statusCode >= 400) {
+        future.reject(result);
+      } else {
+        future.resolve(result);
+      }
     });
-  } catch (err) {
+
+  try {
+    await promise;
+  } catch (error) {
     Object.values(batch).forEach(({ future }) => {
-      future.reject(err);
+      future.reject(error);
     });
   }
 }
