@@ -73,7 +73,7 @@ export class Table extends Component {
       },
       {
         title:
-          'You can also specify that really long content wraps instead of becoming truncated with an ellipsis (which is the default behavior)', // eslint-disable-line max-len
+          'You can also specify that really long content wraps instead of becoming truncated with an ellipsis (which is the default behavior)',
         isLink: true,
         isWrapped: true,
         status: 'danger',
