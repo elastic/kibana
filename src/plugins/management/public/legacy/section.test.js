@@ -85,7 +85,7 @@ describe('ManagementSection', () => {
       expect(section.register('about').parent).toBe(section);
     });
 
-    it('adds item', function () {
+    it('adds item', function() {
       section.register('about', { description: 'test' });
 
       expect(section.items).toHaveLength(1);

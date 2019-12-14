@@ -23,7 +23,7 @@ import { resolve } from 'path';
 function generateUrls({ version, plugin }) {
   return [
     plugin,
-    `https://artifacts.elastic.co/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`
+    `https://artifacts.elastic.co/downloads/kibana-plugins/${plugin}/${plugin}-${version}.zip`,
   ];
 }
 
@@ -49,14 +49,14 @@ export function parse(command, options, kbnPackage) {
     optimize: options.optimize,
     plugin: command,
     version: kbnPackage.version,
-    pluginDir: options.pluginDir || ''
+    pluginDir: options.pluginDir || '',
   };
 
   settings.urls = generateUrls(settings);
   settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
   settings.tempArchiveFile = resolve(settings.workingPath, 'archive.part');
   settings.tempPackageFile = resolve(settings.workingPath, 'package.json');
-  settings.setPlugin = function (plugin) {
+  settings.setPlugin = function(plugin) {
     settings.plugin = plugin;
     settings.pluginPath = resolve(settings.pluginDir, settings.plugin.name);
   };

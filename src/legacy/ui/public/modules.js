@@ -107,7 +107,7 @@ export function get(moduleName, requires) {
     module.close = _.partial(close, moduleName);
 
     // ensure that it is required by linked modules
-    _.each(links, function (app) {
+    _.each(links, function(app) {
       if (!~app.requires.indexOf(moduleName)) app.requires.push(moduleName);
     });
   }
@@ -131,7 +131,7 @@ export function close(moduleName) {
   if (i > -1) links.splice(i, 1);
 
   // remove from linked modules list of required modules
-  _.each(links, function (app) {
+  _.each(links, function(app) {
     _.pull(app.requires, moduleName);
   });
 

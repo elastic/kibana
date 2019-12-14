@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pageHelpers, setupEnvironment, nextTick, getRandomString, findTestSubject } from './helpers';
+import {
+  pageHelpers,
+  setupEnvironment,
+  nextTick,
+  getRandomString,
+  findTestSubject,
+} from './helpers';
 
 import { getRouter } from '../../public/app/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
@@ -80,7 +86,7 @@ describe('<RemoteClusterList />', () => {
       isConnected: false,
       connectedNodesCount: 0,
       seeds: ['localhost:9500'],
-      isConfiguredByNode: true
+      isConfiguredByNode: true,
     });
 
     const remoteClusters = [remoteCluster1, remoteCluster2];
@@ -89,13 +95,7 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       // Mount the component
-      ({
-        component,
-        find,
-        exists,
-        table,
-        actions,
-      } = setup());
+      ({ component, find, exists, table, actions } = setup());
 
       await nextTick(); // Make sure that the Http request is fulfilled
       component.update();
@@ -115,24 +115,30 @@ describe('<RemoteClusterList />', () => {
     test('should list the remote clusters in the table', () => {
       expect(tableCellsValues.length).toEqual(remoteClusters.length);
       expect(tableCellsValues).toEqual([
-        [ '', // Empty because the first column is the checkbox to select the row
+        [
+          '', // Empty because the first column is the checkbox to select the row
           remoteCluster1.name,
           remoteCluster1.seeds.join(', '),
           'Connected',
           remoteCluster1.connectedNodesCount.toString(),
-          '' // Empty because the last column is for the "actions" on the resource
-        ], [ '',
+          '', // Empty because the last column is for the "actions" on the resource
+        ],
+        [
+          '',
           remoteCluster2.name,
           remoteCluster2.seeds.join(', '),
           'Not connected',
           remoteCluster2.connectedNodesCount.toString(),
-          '' ]
+          '',
+        ],
       ]);
     });
 
     test('should have a tooltip to indicate that the cluster has been defined in elasticsearch.yml', () => {
       const secondRow = rows[1].reactWrapper; // The second cluster has been defined by node
-      expect(findTestSubject(secondRow, 'remoteClustersTableListClusterDefinedByNodeTooltip').length).toBe(1);
+      expect(
+        findTestSubject(secondRow, 'remoteClustersTableListClusterDefinedByNodeTooltip').length
+      ).toBe(1);
     });
 
     describe('bulk delete button', () => {
@@ -226,7 +232,11 @@ describe('<RemoteClusterList />', () => {
 
       test('should have a "Status" section', () => {
         actions.clickRemoteClusterAt(0);
-        expect(find('remoteClusterDetailPanelStatusSection').find('h3').text()).toEqual('Status');
+        expect(
+          find('remoteClusterDetailPanelStatusSection')
+            .find('h3')
+            .text()
+        ).toEqual('Status');
         expect(exists('remoteClusterDetailPanelStatusValues')).toBe(true);
       });
 
@@ -234,11 +244,17 @@ describe('<RemoteClusterList />', () => {
         actions.clickRemoteClusterAt(0);
 
         expect(find('remoteClusterDetailIsConnected').text()).toEqual('Connected');
-        expect(find('remoteClusterDetailConnectedNodesCount').text()).toEqual(remoteCluster1.connectedNodesCount.toString());
+        expect(find('remoteClusterDetailConnectedNodesCount').text()).toEqual(
+          remoteCluster1.connectedNodesCount.toString()
+        );
         expect(find('remoteClusterDetailSeeds').text()).toEqual(remoteCluster1.seeds.join(' '));
         expect(find('remoteClusterDetailSkipUnavailable').text()).toEqual('No');
-        expect(find('remoteClusterDetailMaxConnections').text()).toEqual(remoteCluster1.maxConnectionsPerCluster.toString());
-        expect(find('remoteClusterDetailInitialConnectTimeout').text()).toEqual(remoteCluster1.initialConnectTimeout);
+        expect(find('remoteClusterDetailMaxConnections').text()).toEqual(
+          remoteCluster1.maxConnectionsPerCluster.toString()
+        );
+        expect(find('remoteClusterDetailInitialConnectTimeout').text()).toEqual(
+          remoteCluster1.initialConnectTimeout
+        );
       });
 
       test('should have a "close", "delete" and "edit" button in the footer', () => {
