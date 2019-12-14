@@ -23,8 +23,6 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TelemetryForm } from './telemetry_form';
 import { TelemetryOptInProvider } from '../services';
 
-jest.mock('ui/new_platform');
-
 const buildTelemetryOptInProvider = () => {
   const mockHttp = {
     post: jest.fn()
