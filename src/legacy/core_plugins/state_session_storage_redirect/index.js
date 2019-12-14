@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     uiExports: {
       app: {
@@ -26,7 +26,7 @@ export default function (kibana) {
         id: 'stateSessionStorageRedirect',
         main: 'plugins/state_session_storage_redirect',
         hidden: true,
-      }
-    }
+      },
+    },
   });
 }

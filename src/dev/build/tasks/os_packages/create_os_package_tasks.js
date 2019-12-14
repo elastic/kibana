@@ -25,21 +25,20 @@ export const CreateDebPackageTask = {
 
   async run(config, log, build) {
     await runFpm(config, log, build, 'deb', [
-      '--architecture', 'amd64',
-      '--deb-priority', 'optional'
+      '--architecture',
+      'amd64',
+      '--deb-priority',
+      'optional',
     ]);
-  }
+  },
 };
 
 export const CreateRpmPackageTask = {
   description: 'Creating rpm package',
 
   async run(config, log, build) {
-    await runFpm(config, log, build, 'rpm', [
-      '--architecture', 'x86_64',
-      '--rpm-os', 'linux'
-    ]);
-  }
+    await runFpm(config, log, build, 'rpm', ['--architecture', 'x86_64', '--rpm-os', 'linux']);
+  },
 };
 
 export const CreateDockerPackageTask = {
@@ -51,5 +50,5 @@ export const CreateDockerPackageTask = {
 
     // Builds Docker target default with ubi7 base image
     await runDockerGeneratorForUBI(config, log, build);
-  }
+  },
 };

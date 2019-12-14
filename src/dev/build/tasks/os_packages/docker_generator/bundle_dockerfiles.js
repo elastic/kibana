@@ -22,13 +22,13 @@ import { compress, copyAll, mkdirp, write } from '../../../lib';
 import { dockerfileTemplate } from './templates';
 
 export async function bundleDockerFiles(config, log, build, scope) {
-  log.info(`Generating kibana${ scope.imageFlavor }${ scope.ubiImageFlavor } docker build context bundle`);
-
-  const dockerFilesDirName = `kibana${ scope.imageFlavor }${ scope.ubiImageFlavor }-${ scope.versionTag }-docker-build-context`;
-  const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
-  const dockerFilesOutputDir = config.resolveFromTarget(
-    `${ dockerFilesDirName }.tar.gz`
+  log.info(
+    `Generating kibana${scope.imageFlavor}${scope.ubiImageFlavor} docker build context bundle`
   );
+
+  const dockerFilesDirName = `kibana${scope.imageFlavor}${scope.ubiImageFlavor}-${scope.versionTag}-docker-build-context`;
+  const dockerFilesBuildDir = resolve(scope.dockerBuildDir, dockerFilesDirName);
+  const dockerFilesOutputDir = config.resolveFromTarget(`${dockerFilesDirName}.tar.gz`);
 
   // Create dockerfiles dir inside docker build dir
   await mkdirp(dockerFilesBuildDir);
@@ -38,20 +38,14 @@ export async function bundleDockerFiles(config, log, build, scope) {
     resolve(dockerFilesBuildDir, dockerfileTemplate.name),
     dockerfileTemplate.generator({
       ...scope,
-      usePublicArtifact: true
+      usePublicArtifact: true,
     })
   );
 
   // Move relevant docker build files inside
   // dockerfiles folder
-  await copyAll(
-    resolve(scope.dockerBuildDir, 'bin'),
-    resolve(dockerFilesBuildDir, 'bin'),
-  );
-  await copyAll(
-    resolve(scope.dockerBuildDir, 'config'),
-    resolve(dockerFilesBuildDir, 'config'),
-  );
+  await copyAll(resolve(scope.dockerBuildDir, 'bin'), resolve(dockerFilesBuildDir, 'bin'));
+  await copyAll(resolve(scope.dockerBuildDir, 'config'), resolve(dockerFilesBuildDir, 'config'));
 
   // Compress dockerfiles dir created inside
   // docker build dir as output it as a target
@@ -62,10 +56,10 @@ export async function bundleDockerFiles(config, log, build, scope) {
       archiverOptions: {
         gzip: true,
         gzipOptions: {
-          level: 9
-        }
+          level: 9,
+        },
       },
-      createRootDirectory: false
+      createRootDirectory: false,
     },
     dockerFilesBuildDir,
     dockerFilesOutputDir

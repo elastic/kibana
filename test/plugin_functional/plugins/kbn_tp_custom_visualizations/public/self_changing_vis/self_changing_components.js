@@ -19,16 +19,13 @@
 
 import React from 'react';
 
-import {
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 
 export class SelfChangingComponent extends React.Component {
-
   onClick = () => {
     this.props.vis.params.counter++;
     this.props.vis.updateState();
-  }
+  };
 
   render() {
     return (

@@ -16,20 +16,18 @@ set(WatchTypes, WATCH_TYPES.THRESHOLD, ThresholdWatch);
 set(WatchTypes, WATCH_TYPES.MONITORING, MonitoringWatch);
 
 export class Watch {
-
   static getWatchTypes = () => {
     return WatchTypes;
-  }
+  };
 
   static fromUpstreamJson(upstreamWatch = {}) {
     const type = get(upstreamWatch, 'type');
     const WatchType = WatchTypes[type];
 
     Object.assign(upstreamWatch, {
-      isNew: false
+      isNew: false,
     });
 
     return WatchType.fromUpstreamJson(upstreamWatch);
   }
-
 }

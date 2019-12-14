@@ -32,21 +32,11 @@ import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import '../../../../persisted_state';
 import { VisConfig } from '../../../lib/vis_config';
 
-const dateHistogramArray = [
-  series,
-  columns,
-  rows,
-  stackedSeries
-];
-const names = [
-  'series',
-  'columns',
-  'rows',
-  'stackedSeries'
-];
+const dateHistogramArray = [series, columns, rows, stackedSeries];
+const names = ['series', 'columns', 'rows', 'stackedSeries'];
 
-dateHistogramArray.forEach(function (data, i) {
-  describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function () {
+dateHistogramArray.forEach(function(data, i) {
+  describe('Vislib Layout Class Test Suite for ' + names[i] + ' Data', function() {
     let vis;
     let persistedState;
     let numberOfCharts;
@@ -54,8 +44,8 @@ dateHistogramArray.forEach(function (data, i) {
 
     beforeEach(ngMock.module('kibana'));
 
-    beforeEach(function () {
-      ngMock.inject(function (Private, $injector) {
+    beforeEach(function() {
+      ngMock.inject(function(Private, $injector) {
         vis = Private(FixturesVislibVisFixtureProvider)();
         persistedState = new ($injector.get('PersistedState'))();
         vis.render(data, persistedState);
@@ -63,12 +53,12 @@ dateHistogramArray.forEach(function (data, i) {
       });
     });
 
-    afterEach(function () {
+    afterEach(function() {
       vis.destroy();
     });
 
-    describe('createLayout Method', function () {
-      it('should append all the divs', function () {
+    describe('createLayout Method', function() {
+      it('should append all the divs', function() {
         expect($(vis.el).find('.visWrapper').length).to.be(1);
         expect($(vis.el).find('.visAxis--y').length).to.be(2);
         expect($(vis.el).find('.visWrapper__column').length).to.be(1);
@@ -83,82 +73,95 @@ dateHistogramArray.forEach(function (data, i) {
       });
     });
 
-    describe('layout Method', function () {
-      beforeEach(function () {
-        const visConfig = new VisConfig({
-          type: 'histogram'
-        }, data, persistedState, vis.el);
+    describe('layout Method', function() {
+      beforeEach(function() {
+        const visConfig = new VisConfig(
+          {
+            type: 'histogram',
+          },
+          data,
+          persistedState,
+          vis.el
+        );
         testLayout = new Layout(visConfig);
       });
 
-      it('should append a div with the correct class name', function () {
+      it('should append a div with the correct class name', function() {
         expect($(vis.el).find('.chart').length).to.be(numberOfCharts);
       });
 
-      it('should bind data to the DOM element', function () {
-        expect(!!$(vis.el).find('.chart').data()).to.be(true);
+      it('should bind data to the DOM element', function() {
+        expect(
+          !!$(vis.el)
+            .find('.chart')
+            .data()
+        ).to.be(true);
       });
 
-      it('should create children', function () {
+      it('should create children', function() {
         expect(typeof $(vis.el).find('.x-axis-div')).to.be('object');
       });
 
-      it('should call split function when provided', function () {
+      it('should call split function when provided', function() {
         expect(typeof $(vis.el).find('.x-axis-div')).to.be('object');
       });
 
-      it('should throw errors when incorrect arguments provided', function () {
-        expect(function () {
+      it('should throw errors when incorrect arguments provided', function() {
+        expect(function() {
           testLayout.layout({
             parent: vis.el,
             type: undefined,
-            class: 'chart'
+            class: 'chart',
           });
         }).to.throwError();
 
-        expect(function () {
+        expect(function() {
           testLayout.layout({
             type: 'div',
-            class: 'chart'
+            class: 'chart',
           });
         }).to.throwError();
 
-        expect(function () {
+        expect(function() {
           testLayout.layout({
             parent: 'histogram',
-            type: 'div'
+            type: 'div',
           });
         }).to.throwError();
 
-        expect(function () {
+        expect(function() {
           testLayout.layout({
             parent: vis.el,
-            type: function (d) { return d; },
-            class: 'chart'
+            type: function(d) {
+              return d;
+            },
+            class: 'chart',
           });
         }).to.throwError();
       });
     });
 
-    describe('appendElem Method', function () {
-      beforeEach(function () {
+    describe('appendElem Method', function() {
+      beforeEach(function() {
         vis.handler.layout.appendElem(vis.el, 'svg', 'column');
         vis.handler.layout.appendElem('.visChart', 'div', 'test');
       });
 
-      it('should append DOM element to el with a class name', function () {
+      it('should append DOM element to el with a class name', function() {
         expect(typeof $(vis.el).find('.column')).to.be('object');
         expect(typeof $(vis.el).find('.test')).to.be('object');
       });
     });
 
-    describe('removeAll Method', function () {
-      beforeEach(function () {
-        d3.select(vis.el).append('div').attr('class', 'visualize');
+    describe('removeAll Method', function() {
+      beforeEach(function() {
+        d3.select(vis.el)
+          .append('div')
+          .attr('class', 'visualize');
         vis.handler.layout.removeAll(vis.el);
       });
 
-      it('should remove all DOM elements from the el', function () {
+      it('should remove all DOM elements from the el', function() {
         expect($(vis.el).children().length).to.be(0);
       });
     });

@@ -19,13 +19,20 @@
 
 import dedent from 'dedent';
 
-function generator({ artifactTarball, versionTag, license, usePublicArtifact, baseOSImage, ubiImageFlavor }) {
+function generator({
+  artifactTarball,
+  versionTag,
+  license,
+  usePublicArtifact,
+  baseOSImage,
+  ubiImageFlavor,
+}) {
   const copyArtifactTarballInsideDockerOptFolder = () => {
     if (usePublicArtifact) {
-      return `RUN cd /opt && curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/${ artifactTarball } && cd -`;
+      return `RUN cd /opt && curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/${artifactTarball} && cd -`;
     }
 
-    return `COPY ${ artifactTarball } /opt`;
+    return `COPY ${artifactTarball} /opt`;
   };
 
   const packageManager = () => {
@@ -45,13 +52,13 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact, ba
   # Build stage 0
   # Extract Kibana and make various file manipulations.
   ################################################################################
-  FROM ${ baseOSImage } AS prep_files
+  FROM ${baseOSImage} AS prep_files
   # Add tar and gzip
   RUN ${packageManager()} update -y && ${packageManager()} install -y tar gzip && ${packageManager()} clean all
   ${copyArtifactTarballInsideDockerOptFolder()}
   RUN mkdir /usr/share/kibana
   WORKDIR /usr/share/kibana
-  RUN tar --strip-components=1 -zxf /opt/${ artifactTarball }
+  RUN tar --strip-components=1 -zxf /opt/${artifactTarball}
   # Ensure that group permissions are the same as user permissions.
   # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
   # OpenShift does this, for example.
@@ -63,7 +70,7 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact, ba
   # Build stage 1
   # Copy prepared files from the previous stage and complete the image.
   ################################################################################
-  FROM ${ baseOSImage }
+  FROM ${baseOSImage}
   EXPOSE 5601
 
   # Add Reporting dependencies.
@@ -104,11 +111,11 @@ function generator({ artifactTarball, versionTag, license, usePublicArtifact, ba
   LABEL org.label-schema.schema-version="1.0" \\
     org.label-schema.vendor="Elastic" \\
     org.label-schema.name="kibana" \\
-    org.label-schema.version="${ versionTag }" \\
+    org.label-schema.version="${versionTag}" \\
     org.label-schema.url="https://www.elastic.co/products/kibana" \\
     org.label-schema.vcs-url="https://github.com/elastic/kibana" \\
-    org.label-schema.license="${ license }" \\
-    license="${ license }"
+    org.label-schema.license="${license}" \\
+    license="${license}"
 
   ENTRYPOINT ["/usr/local/bin/dumb-init", "--"]
 

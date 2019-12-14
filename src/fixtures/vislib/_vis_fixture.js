@@ -38,28 +38,33 @@ const $visCanvas = $('<div>')
 let count = 0;
 const visHeight = $visCanvas.height();
 
-$visCanvas.new = function () {
+$visCanvas.new = function() {
   count += 1;
   if (count > 1) $visCanvas.height(visHeight * count);
-  return $('<div>').addClass('visChart').appendTo($visCanvas);
+  return $('<div>')
+    .addClass('visChart')
+    .appendTo($visCanvas);
 };
 
-afterEach(function () {
+afterEach(function() {
   $visCanvas.empty();
   if (count > 1) $visCanvas.height(visHeight);
   count = 0;
 });
 
 export default function VislibFixtures(Private) {
-  return function (visLibParams) {
+  return function(visLibParams) {
     const Vis = Private(VislibVisProvider);
-    return new Vis($visCanvas.new(), _.defaults({}, visLibParams || {}, {
-      addTooltip: true,
-      addLegend: true,
-      defaultYExtents: false,
-      setYExtents: false,
-      yAxis: {},
-      type: 'histogram'
-    }));
+    return new Vis(
+      $visCanvas.new(),
+      _.defaults({}, visLibParams || {}, {
+        addTooltip: true,
+        addLegend: true,
+        defaultYExtents: false,
+        setYExtents: false,
+        yAxis: {},
+        type: 'histogram',
+      })
+    );
   };
 }

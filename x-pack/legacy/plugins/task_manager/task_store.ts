@@ -15,6 +15,9 @@ import {
   SavedObjectAttributes,
   SavedObjectsSerializer,
   SavedObjectsRawDoc,
+  // Task manager uses an unconventional directory structure so the linter marks this as a violation, server files should
+  // be moved under task_manager/server/
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from 'src/core/server';
 import {
   ConcreteTaskInstance,

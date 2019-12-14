@@ -19,7 +19,14 @@
 
 import dedent from 'dedent';
 
-function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir, baseOSImage, ubiImageFlavor }) {
+function generator({
+  imageTag,
+  imageFlavor,
+  versionTag,
+  dockerOutputDir,
+  baseOSImage,
+  ubiImageFlavor,
+}) {
   return dedent(`
   #!/usr/bin/env bash
   #
@@ -27,12 +34,12 @@ function generator({ imageTag, imageFlavor, versionTag, dockerOutputDir, baseOSI
   #
   set -euo pipefail
 
-  docker pull ${ baseOSImage }
+  docker pull ${baseOSImage}
 
-  echo "Building: kibana${ imageFlavor }${ ubiImageFlavor }-docker"; \\
-  docker build -t ${ imageTag }${ imageFlavor }${ ubiImageFlavor }:${ versionTag } -f Dockerfile . || exit 1;
+  echo "Building: kibana${imageFlavor}${ubiImageFlavor}-docker"; \\
+  docker build -t ${imageTag}${imageFlavor}${ubiImageFlavor}:${versionTag} -f Dockerfile . || exit 1;
 
-  docker save ${ imageTag }${ imageFlavor }${ ubiImageFlavor }:${ versionTag } | gzip -c > ${ dockerOutputDir }
+  docker save ${imageTag}${imageFlavor}${ubiImageFlavor}:${versionTag} | gzip -c > ${dockerOutputDir}
 
   exit 0
   `);
