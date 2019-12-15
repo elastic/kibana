@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 
 import {
   ConfigurationForm,
@@ -27,6 +28,8 @@ interface Props {
 
 export const MappingsEditor = React.memo(
   ({ onUpdate, defaultValue = {}, indexSettings }: Props) => {
+    const [selectedTab, selectTab] = useState<'fields' | 'advanced'>('fields');
+
     const { configurationDefaultValue, sourceFieldDefaultValue, fieldsDefaultValue } = useMemo(
       () => ({
         configurationDefaultValue: pick(
@@ -50,13 +53,41 @@ export const MappingsEditor = React.memo(
                 <DocumentFields />
               );
 
+            const content =
+              selectedTab === 'fields' ? (
+                <>
+                  <DocumentFieldsHeader />
+                  <EuiSpacer size="m" />
+                  {editor}
+                </>
+              ) : (
+                <ConfigurationForm
+                  configurationDefaultValue={configurationDefaultValue}
+                  sourceFieldDefaultValue={sourceFieldDefaultValue}
+                />
+              );
+
             return (
               <div className="mappingsEditor">
-                <ConfigurationForm defaultValue={configurationDefaultValue} />
-                <EuiSpacer />
-                <DocumentFieldsHeader />
-                <EuiSpacer />
-                {editor}
+                <EuiTabs>
+                  <EuiTab onClick={() => selectTab('fields')} isSelected={selectedTab === 'fields'}>
+                    {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
+                      defaultMessage: 'Fields',
+                    })}
+                  </EuiTab>
+                  <EuiTab
+                    onClick={() => selectTab('advanced')}
+                    isSelected={selectedTab === 'advanced'}
+                  >
+                    {i18n.translate('xpack.idxMgmt.mappingsEditor.advancedTabLabel', {
+                      defaultMessage: 'Advanced options',
+                    })}
+                  </EuiTab>
+                </EuiTabs>
+
+                <EuiSpacer size="m" />
+
+                {content}
               </div>
             );
           }}
