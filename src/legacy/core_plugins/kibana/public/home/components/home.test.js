@@ -66,6 +66,7 @@ describe('home', () => {
       onOptInSeen() {
         return false;
       },
+      getOptInStatus: jest.fn(),
     };
   });
 

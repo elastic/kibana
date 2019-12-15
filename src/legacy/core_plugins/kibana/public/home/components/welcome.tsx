@@ -43,7 +43,6 @@ interface Props {
   urlBasePath: string;
   onSkip: () => void;
   onOptInSeen: () => any;
-  showTelemetryDisclaimer: boolean;
   currentOptInStatus: boolean;
 }
 
@@ -52,7 +51,6 @@ interface Props {
  */
 export class Welcome extends React.Component<Props> {
   private services = getServices();
-  private optInStatusFromConfig = this.services.getInjected('telemetryOptedIn');
 
   private hideOnEsc = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -86,10 +84,7 @@ export class Welcome extends React.Component<Props> {
   }
 
   private renderTelemetryEnabledOrDisabledText = () => {
-    if (
-      this.optInStatusFromConfig &&
-      this.optInStatusFromConfig !== this.props.currentOptInStatus
-    ) {
+    if (this.props.currentOptInStatus) {
       return (
         <Fragment>
           <FormattedMessage
@@ -123,8 +118,7 @@ export class Welcome extends React.Component<Props> {
   };
 
   render() {
-    const { urlBasePath, showTelemetryDisclaimer } = this.props;
-
+    const { urlBasePath } = this.props;
     return (
       <EuiPortal>
         <div className="homWelcome">

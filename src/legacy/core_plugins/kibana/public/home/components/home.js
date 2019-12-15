@@ -228,7 +228,6 @@ export class Home extends Component {
       <Welcome
         onSkip={this.skipWelcome}
         urlBasePath={this.props.urlBasePath}
-        showTelemetryDisclaimer={this.state.showTelemetryDisclaimer}
         onOptInSeen={this.props.onOptInSeen}
         currentOptInStatus={this.state.currentOptInStatus}
       />
