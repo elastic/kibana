@@ -22,7 +22,7 @@ const fieldPathComboBoxConfig = {
 export const sourceFieldSchema: FormSchema<SourceField> = {
   enabled: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldLabel', {
-      defaultMessage: 'Enable source field',
+      defaultMessage: 'Enable _source field',
     }),
     type: FIELD_TYPES.TOGGLE,
     defaultValue: true,

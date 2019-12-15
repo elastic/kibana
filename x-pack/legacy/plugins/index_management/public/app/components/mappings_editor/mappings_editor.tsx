@@ -72,7 +72,7 @@ export const MappingsEditor = React.memo(
                 <EuiTabs>
                   <EuiTab onClick={() => selectTab('fields')} isSelected={selectedTab === 'fields'}>
                     {i18n.translate('xpack.idxMgmt.mappingsEditor.fieldsTabLabel', {
-                      defaultMessage: 'Fields',
+                      defaultMessage: 'Mapped fields',
                     })}
                   </EuiTab>
                   <EuiTab
