@@ -62,7 +62,7 @@ pipeline {
       steps {
         notifyStatus('Starting services', 'PENDING')
         dir("${APM_ITS}"){
-          sh './scripts/compose.py start master --no-kibana --no-xpack-secure'
+          sh './scripts/compose.py start master --no-kibana'
         }
       }
       post {
