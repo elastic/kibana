@@ -21,7 +21,7 @@ import {
   UpdatedCaseType,
   UpdatedCommentType,
 } from '../routes/api/types';
-import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server/plugin';
+import { PluginSetupContract as SecurityPluginSetup } from '../../../security/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 
 interface ClientArgs {

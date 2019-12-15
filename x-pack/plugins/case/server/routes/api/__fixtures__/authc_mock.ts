@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Authentication } from '../../../../../security/server/authentication/index';
+import { Authentication } from '../../../../../security/server';
 
 const getCurrentUser = jest.fn().mockReturnValue({
   username: 'awesome',

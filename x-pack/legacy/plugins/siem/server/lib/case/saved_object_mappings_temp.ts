@@ -5,11 +5,11 @@
  */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 /* eslint-disable @typescript-eslint/camelcase */
-import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
 import {
   NewCaseFormatted,
   NewCommentFormatted,
-} from '../../../../../../plugins/case/server/routes/api/types';
+} from '../../../../../../../x-pack/plugins/case/server';
+import { ElasticsearchMappingOf } from '../../utils/typed_elasticsearch_mappings';
 
 // Temporary file to write mappings for case
 // while Saved Object Mappings API is programmed for the NP
