@@ -31,7 +31,7 @@ import {
 // add the module deps to this module
 uiModules.get('apps/management');
 
-npStart.plugin.management.legacy.getSection('kibana').register('objects', {
+npStart.plugins.management.legacy.getSection('kibana').register('objects', {
   display: i18n.translate('kbn.management.objects.savedObjectsSectionLabel', {
     defaultMessage: 'Saved Objects',
   }),

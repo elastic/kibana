@@ -82,6 +82,7 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
 routes.defaults(/\/management/, {
   resolve: {
     watcherManagementSection: () => {
+      // @ts-ignore
       const watchesSection = management.getSection('elasticsearch/watcher');
       const licenseStatus = xpackInfo.get(`features.${PLUGIN.ID}`);
       const { status } = licenseStatus;
