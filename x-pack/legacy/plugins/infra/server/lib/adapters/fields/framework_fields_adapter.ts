@@ -5,7 +5,6 @@
  */
 
 import { startsWith, uniq, first } from 'lodash';
-import { idx } from '@kbn/elastic-idx';
 import { RequestHandlerContext } from 'src/core/server';
 import { InfraDatabaseSearchResponse } from '../framework';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
@@ -105,8 +104,9 @@ export class FrameworkFieldsAdapter implements FieldsAdapter {
 
     const bucketSelector = (response: InfraDatabaseSearchResponse<{}, DataSetResponse>) =>
       (response.aggregations && response.aggregations.datasets.buckets) || [];
-    const handleAfterKey = createAfterKeyHandler('body.aggs.datasets.composite.after', input =>
-      idx(input, _ => _.aggregations.datasets.after_key)
+    const handleAfterKey = createAfterKeyHandler(
+      'body.aggs.datasets.composite.after',
+      input => input?.aggregations?.datasets?.after_key
     );
 
     const buckets = await getAllCompositeData<DataSetResponse, Bucket>(

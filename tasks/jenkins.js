@@ -17,10 +17,8 @@
  * under the License.
  */
 
-module.exports = function (grunt) {
-  grunt.registerTask('jenkins:docs', [
-    'docker:docs'
-  ]);
+module.exports = function(grunt) {
+  grunt.registerTask('jenkins:docs', ['docker:docs']);
 
   grunt.registerTask('jenkins:unit', [
     'run:eslint',

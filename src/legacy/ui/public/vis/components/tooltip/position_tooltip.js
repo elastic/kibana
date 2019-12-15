@@ -26,7 +26,7 @@ let $clone;
 // translate css properties into their basic direction
 const propDirs = {
   top: 'north',
-  left: 'west'
+  left: 'west',
 };
 
 export function positionTooltip(opts, html) {
@@ -56,7 +56,7 @@ function getTtSize(ttHtml, $sizer) {
 
   const size = {
     width: $sizer.outerWidth(),
-    height: $sizer.outerHeight()
+    height: $sizer.outerHeight(),
   };
 
   return size;
@@ -67,7 +67,7 @@ function getBasePosition(size, event) {
     east: event.clientX + OFFSET,
     west: event.clientX - size.width - OFFSET,
     south: event.clientY + OFFSET,
-    north: event.clientY - size.height - OFFSET
+    north: event.clientY - size.height - OFFSET,
   };
 }
 
@@ -88,19 +88,20 @@ function getBounds($el) {
 function getOverflow(size, pos, containers) {
   const overflow = {};
 
-  containers.map(getBounds)
-    .sort(function (a, b) {
-    // ensure smallest containers are merged first
+  containers
+    .map(getBounds)
+    .sort(function(a, b) {
+      // ensure smallest containers are merged first
       return a.area - b.area;
     })
-    .forEach(function (bounds) {
-    // number of pixels that the tooltip would overflow it's far
-    // side, if we placed it that way. (negative === no overflow)
+    .forEach(function(bounds) {
+      // number of pixels that the tooltip would overflow it's far
+      // side, if we placed it that way. (negative === no overflow)
       mergeOverflows(overflow, {
         north: bounds.top - pos.north,
-        east: (pos.east + size.width) - bounds.right,
-        south: (pos.south + size.height) - bounds.bottom,
-        west: bounds.left - pos.west
+        east: pos.east + size.width - bounds.right,
+        south: pos.south + size.height - bounds.bottom,
+        west: bounds.left - pos.west,
       });
     });
 
@@ -109,7 +110,7 @@ function getOverflow(size, pos, containers) {
 }
 
 function mergeOverflows(dest, src) {
-  _.merge(dest, src, function (a, b) {
+  _.merge(dest, src, function(a, b) {
     if (a == null || b == null) return a || b;
     if (a < 0 && b < 0) return Math.min(a, b);
     return Math.max(a, b);
@@ -175,8 +176,7 @@ positionTooltip.getBasePosition = getBasePosition;
 positionTooltip.getOverflow = getOverflow;
 positionTooltip.getBounds = getBounds;
 positionTooltip.placeToAvoidOverflow = placeToAvoidOverflow;
-positionTooltip.removeClone = function () {
+positionTooltip.removeClone = function() {
   $clone && $clone.remove();
   $clone = null;
 };
-

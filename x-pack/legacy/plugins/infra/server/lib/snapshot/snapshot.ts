@@ -4,16 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '@kbn/elastic-idx';
 import { RequestHandlerContext } from 'src/core/server';
-import {
-  InfraSnapshotGroupbyInput,
-  InfraSnapshotMetricInput,
-  InfraSnapshotNode,
-  InfraTimerangeInput,
-  InfraNodeType,
-  InfraSourceConfiguration,
-} from '../../graphql/types';
+import { InfraSnapshotNode } from '../../graphql/types';
 import { InfraDatabaseSearchResponse } from '../adapters/framework';
 import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { InfraSources } from '../sources';
@@ -33,18 +25,11 @@ import {
   InfraSnapshotNodeGroupByBucket,
   InfraSnapshotNodeMetricsBucket,
 } from './response_helpers';
-import { IP_FIELDS } from '../constants';
 import { getAllCompositeData } from '../../utils/get_all_composite_data';
 import { createAfterKeyHandler } from '../../utils/create_afterkey_handler';
-
-export interface InfraSnapshotRequestOptions {
-  nodeType: InfraNodeType;
-  sourceConfiguration: InfraSourceConfiguration;
-  timerange: InfraTimerangeInput;
-  groupBy: InfraSnapshotGroupbyInput[];
-  metric: InfraSnapshotMetricInput;
-  filterQuery: JsonObject | undefined;
-}
+import { findInventoryModel } from '../../../common/inventory_models';
+import { InfraSnapshotRequestOptions } from './types';
+import { createTimeRangeWithInterval } from './create_timerange_with_interval';
 
 export class InfraSnapshot {
   constructor(private readonly libs: { sources: InfraSources; framework: KibanaFramework }) {}
@@ -57,8 +42,22 @@ export class InfraSnapshot {
     // in order to page through the results of their respective composite aggregations.
     // Both chains of requests are supposed to run in parallel, and their results be merged
     // when they have both been completed.
-    const groupedNodesPromise = requestGroupedNodes(requestContext, options, this.libs.framework);
-    const nodeMetricsPromise = requestNodeMetrics(requestContext, options, this.libs.framework);
+    const timeRangeWithIntervalApplied = await createTimeRangeWithInterval(
+      this.libs.framework,
+      requestContext,
+      options
+    );
+    const optionsWithTimerange = { ...options, timerange: timeRangeWithIntervalApplied };
+    const groupedNodesPromise = requestGroupedNodes(
+      requestContext,
+      optionsWithTimerange,
+      this.libs.framework
+    );
+    const nodeMetricsPromise = requestNodeMetrics(
+      requestContext,
+      optionsWithTimerange,
+      this.libs.framework
+    );
 
     const groupedNodeBuckets = await groupedNodesPromise;
     const nodeMetricBuckets = await nodeMetricsPromise;
@@ -70,8 +69,9 @@ const bucketSelector = (
   response: InfraDatabaseSearchResponse<{}, InfraSnapshotAggregationResponse>
 ) => (response.aggregations && response.aggregations.nodes.buckets) || [];
 
-const handleAfterKey = createAfterKeyHandler('body.aggregations.nodes.composite.after', input =>
-  idx(input, _ => _.aggregations.nodes.after_key)
+const handleAfterKey = createAfterKeyHandler(
+  'body.aggregations.nodes.composite.after',
+  input => input?.aggregations?.nodes?.after_key
 );
 
 const requestGroupedNodes = async (
@@ -79,6 +79,7 @@ const requestGroupedNodes = async (
   options: InfraSnapshotRequestOptions,
   framework: KibanaFramework
 ): Promise<InfraSnapshotNodeGroupByBucket[]> => {
+  const inventoryModel = findInventoryModel(options.nodeType);
   const query = {
     allowNoIndices: true,
     index: `${options.sourceConfiguration.logAlias},${options.sourceConfiguration.metricAlias}`,
@@ -112,7 +113,7 @@ const requestGroupedNodes = async (
               top_hits: {
                 sort: [{ [options.sourceConfiguration.fields.timestamp]: { order: 'desc' } }],
                 _source: {
-                  includes: [IP_FIELDS[options.nodeType]],
+                  includes: inventoryModel.fields.ip ? [inventoryModel.fields.ip] : [],
                 },
                 size: 1,
               },

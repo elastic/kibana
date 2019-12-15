@@ -9,19 +9,60 @@ To use {reporting} with {security} enabled, you need to
 <<using-kibana-with-security,set up {kib} to work with {security}>>.
 If you are automatically generating reports with
 {ref}/xpack-alerting.html[{watcher}], you also need to configure {watcher}
-to trust the {kib} server's certificate. For more information, see
+to trust the {kib} server's certificate.
+////
+For more information, see
 <<securing-reporting>>.
+////
 
 [[reporting-app-users]]
-To enable users to generate reports, assign them the built-in `reporting_user`
-role.  Users will also need the appropriate <<kibana-privileges, {kib} privileges>> to access the objects 
+To enable users to generate reports, you must assign them the built-in `reporting_user`
+role.  Users will also need the appropriate <<kibana-privileges, {kib} privileges>> to access the objects
 to report on and the {es} indices.
 
-* If you're using the `native` realm, you can assign roles through
-**Management > Users** UI in Kibana or with the `user` API. For example,
-the following request creates a `reporter` user that has the
-`reporting_user` role and the `kibana_user` role:
+[float]
+[[reporting-roles-management-ui]]
+=== If you are using the `native` realm
+
+You can assign roles through the
+*Management* app in Kibana or with the <<reporting-roles-user-api, user API>>.
+This example shows how to use *Management* to create a user who has a custom role and the
+`reporting_user` role.
+
+. Go to *Management > Roles*, and click *Create role*.
+
+. Give the new role a name, for example, `custom_reporting_user`.
+
+. Specify the indices and privileges.
 +
+Access to data is an index-level privilege, so in *Create role*,
+add a line for each index that contains the data for the report and give each
+index `read` and `view_index_metadata` privileges.
+For more information, see {ref}/security-privileges.html[Security privileges].
++
+[role="screenshot"]
+image::user/security/images/reporting-privileges-example.png["Reporting privileges"]
+
+. Add space privileges.
++
+Reporting users typically save searches, create
+visualizations, and build dashboards. They require a space
+that provides read and write privileges in
+*Discover*, *Visualize*, and *Dashboard*.
+
+. Save your new role.
+
+. Create a user account with the proper roles.
++
+Go to *Management > Users*, add a new user, and assign the user the built-in
+`reporting_user` role and your new custom role, `custom_reporting_user`.
+
+[float]
+[[reporting-roles-user-api]]
+==== With the user API
+This example uses the {ref}/security-api-put-user.html[user API] to create a user who has the
+`reporting_user` role and the `kibana_user` role:
+
 [source, sh]
 ---------------------------------------------------------------
 POST /_security/user/reporter
@@ -32,13 +73,17 @@ POST /_security/user/reporter
 }
 ---------------------------------------------------------------
 
-* If you are using an LDAP or Active Directory realm, you can either assign
+[float]
+=== If you are using an external identity provider
+
+If you are using an external identity provider, such as
+LDAP or Active Directory, you can either assign
 roles on a per user basis, or assign roles to groups of users. By default, role
 mappings are configured in
 {ref}/mapping-roles.html[`config/shield/role_mapping.yml`].
 For example, the following snippet assigns the user named Bill Murray the
 `kibana_user` and `reporting_user` roles:
-+
+
 [source,yaml]
 --------------------------------------------------------------------------------
 kibana_user:

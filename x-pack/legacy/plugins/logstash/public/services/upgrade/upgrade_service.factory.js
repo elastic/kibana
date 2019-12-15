@@ -7,8 +7,7 @@
 import { uiModules } from 'ui/modules';
 import { UpgradeService } from './upgrade_service';
 
-uiModules.get('xpack/logstash')
-  .factory('upgradeService', ($injector) => {
-    const $http = $injector.get('$http');
-    return new UpgradeService($http);
-  });
+uiModules.get('xpack/logstash').factory('upgradeService', $injector => {
+  const $http = $injector.get('$http');
+  return new UpgradeService($http);
+});

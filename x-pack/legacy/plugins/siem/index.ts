@@ -29,6 +29,7 @@ import {
   DEFAULT_SIGNALS_INDEX_KEY,
 } from './common/constants';
 import { defaultIndexPattern } from './default_index_pattern';
+import { initServerWithKibana } from './server/kibana.index';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const siem = (kibana: any) => {
@@ -147,45 +148,29 @@ export const siem = (kibana: any) => {
       },
     },
     init(server: Server) {
-      const {
-        config,
-        getInjectedUiAppVars,
-        indexPatternsServiceFactory,
-        injectUiAppVars,
-        newPlatform,
-        plugins,
-        route,
-        savedObjects,
-      } = server;
-
-      const {
-        env,
-        coreContext: { logger },
-        setup,
-      } = newPlatform;
-      const initializerContext = { logger, env };
+      const { config, newPlatform, plugins, route } = server;
+      const { coreContext, env, setup } = newPlatform;
+      const initializerContext = { ...coreContext, env } as PluginInitializerContext;
 
       const serverFacade = {
         config,
-        getInjectedUiAppVars,
-        indexPatternsServiceFactory,
-        injectUiAppVars,
         plugins: {
           alerting: plugins.alerting,
-          xpack_main: plugins.xpack_main,
+          elasticsearch: plugins.elasticsearch,
           spaces: plugins.spaces,
         },
         route: route.bind(server),
-        savedObjects,
       };
+      // @ts-ignore-next-line: setup.plugins is too loosely typed
+      plugin(initializerContext).setup(setup.core, setup.plugins);
 
-      plugin(initializerContext as PluginInitializerContext).setup(
-        setup.core,
-        setup.plugins,
-        serverFacade
-      );
+      initServerWithKibana(initializerContext, serverFacade);
     },
     config(Joi: Root) {
+      // See x-pack/plugins/siem/server/config.ts if you're adding another
+      // value where the configuration has to be duplicated at the moment.
+      // When we move over to the new platform completely this will be
+      // removed and only server/config.ts should be used.
       return Joi.object()
         .keys({
           enabled: Joi.boolean().default(true),
