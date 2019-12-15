@@ -35,6 +35,7 @@ import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 
+import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
@@ -218,6 +219,7 @@ export class Server {
   public async setupCoreConfig() {
     const schemas: Array<[ConfigPath, Type<unknown>]> = [
       [pathConfig.path, pathConfig.schema],
+      [cspConfig.path, cspConfig.schema],
       [elasticsearchConfig.path, elasticsearchConfig.schema],
       [loggingConfig.path, loggingConfig.schema],
       [httpConfig.path, httpConfig.schema],

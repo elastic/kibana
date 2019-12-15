@@ -4,19 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import {
-  EuiButton,
-  EuiLink,
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import { EuiButton, EuiLink, EuiInMemoryTable } from '@elastic/eui';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-
 
 export const CalendarsListTable = injectI18n(function CalendarsListTable({
   calendarsList,
@@ -27,19 +20,18 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
   canDeleteCalendar,
   mlNodesAvailable,
   itemsSelected,
-  intl
+  intl,
 }) {
-
   const sorting = {
     sort: {
       field: 'calendar_id',
       direction: 'asc',
-    }
+    },
   };
 
   const pagination = {
     initialPageSize: 20,
-    pageSizeOptions: [10, 20]
+    pageSizeOptions: [10, 20],
   };
 
   const columns = [
@@ -47,23 +39,17 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
       field: 'calendar_id',
       name: intl.formatMessage({
         id: 'xpack.ml.calendarsList.table.idColumnName',
-        defaultMessage: 'ID'
+        defaultMessage: 'ID',
       }),
       sortable: true,
       truncateText: true,
-      render: (id) => (
-        <EuiLink
-          href={`#/settings/calendars_list/edit_calendar/${id}`}
-        >
-          {id}
-        </EuiLink>
-      )
+      render: id => <EuiLink href={`#/settings/calendars_list/edit_calendar/${id}`}>{id}</EuiLink>,
     },
     {
       field: 'job_ids_string',
       name: intl.formatMessage({
         id: 'xpack.ml.calendarsList.table.jobsColumnName',
-        defaultMessage: 'Jobs'
+        defaultMessage: 'Jobs',
       }),
       sortable: true,
       truncateText: true,
@@ -72,58 +58,54 @@ export const CalendarsListTable = injectI18n(function CalendarsListTable({
       field: 'events_length',
       name: intl.formatMessage({
         id: 'xpack.ml.calendarsList.table.eventsColumnName',
-        defaultMessage: 'Events'
+        defaultMessage: 'Events',
       }),
       sortable: true,
-      render: (eventsLength) => intl.formatMessage(
-        {
-          id: 'xpack.ml.calendarsList.table.eventsCountLabel',
-          defaultMessage: '{eventsLength, plural, one {# event} other {# events}}'
-        },
-        { eventsLength }
-      )
-    }
+      render: eventsLength =>
+        intl.formatMessage(
+          {
+            id: 'xpack.ml.calendarsList.table.eventsCountLabel',
+            defaultMessage: '{eventsLength, plural, one {# event} other {# events}}',
+          },
+          { eventsLength }
+        ),
+    },
   ];
 
   const tableSelection = {
-    onSelectionChange: (selection) => setSelectedCalendarList(selection)
+    onSelectionChange: selection => setSelectedCalendarList(selection),
   };
 
   const search = {
     toolsRight: [
-      (
-        <EuiButton
-          size="s"
-          data-test-subj="mlCalendarButtonCreate"
-          key="new_calendar_button"
-          href="#/settings/calendars_list/new_calendar"
-          isDisabled={(canCreateCalendar === false || mlNodesAvailable === false)}
-        >
-          <FormattedMessage
-            id="xpack.ml.calendarsList.table.newButtonLabel"
-            defaultMessage="New"
-          />
-        </EuiButton>
-      ),
-      (
-        <EuiButton
-          size="s"
-          color="danger"
-          iconType="trash"
-          onClick={onDeleteClick}
-          isDisabled={(canDeleteCalendar === false || mlNodesAvailable === false || itemsSelected === false)}
-        >
-          <FormattedMessage
-            id="xpack.ml.calendarsList.table.deleteButtonLabel"
-            defaultMessage="Delete"
-          />
-        </EuiButton>
-      )
+      <EuiButton
+        size="s"
+        data-test-subj="mlCalendarButtonCreate"
+        key="new_calendar_button"
+        href="#/settings/calendars_list/new_calendar"
+        isDisabled={canCreateCalendar === false || mlNodesAvailable === false}
+      >
+        <FormattedMessage id="xpack.ml.calendarsList.table.newButtonLabel" defaultMessage="New" />
+      </EuiButton>,
+      <EuiButton
+        size="s"
+        color="danger"
+        iconType="trash"
+        onClick={onDeleteClick}
+        isDisabled={
+          canDeleteCalendar === false || mlNodesAvailable === false || itemsSelected === false
+        }
+      >
+        <FormattedMessage
+          id="xpack.ml.calendarsList.table.deleteButtonLabel"
+          defaultMessage="Delete"
+        />
+      </EuiButton>,
     ],
     box: {
       incremental: true,
     },
-    filters: []
+    filters: [],
   };
 
   return (

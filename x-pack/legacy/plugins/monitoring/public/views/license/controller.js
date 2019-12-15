@@ -34,10 +34,12 @@ export class LicenseViewController {
     const title = $injector.get('title');
     const $route = $injector.get('$route');
 
-    const cluster = find($route.current.locals.clusters, { cluster_uuid: globalState.cluster_uuid });
+    const cluster = find($route.current.locals.clusters, {
+      cluster_uuid: globalState.cluster_uuid,
+    });
     $scope.cluster = cluster;
     const routeTitle = i18n.translate('xpack.monitoring.license.licenseRouteTitle', {
-      defaultMessage: 'License'
+      defaultMessage: 'License',
     });
     title($scope.cluster, routeTitle);
 

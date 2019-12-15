@@ -10,17 +10,17 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 export function validateRollupCron(rollupCron) {
   if (!rollupCron || !rollupCron.trim()) {
-    return [(
+    return [
       <FormattedMessage
         id="xpack.rollupJobs.create.errors.rollupCronMissing"
         defaultMessage="Cron pattern or basic interval is required."
-      />
-    )];
+      />,
+    ];
   }
 
   try {
     cronstrue.toString(rollupCron);
-  } catch(error) {
+  } catch (error) {
     const prefix = 'Error: ';
     const prefixIndex = error.indexOf(prefix);
 

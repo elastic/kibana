@@ -8,12 +8,10 @@ import expect from '@kbn/expect';
 import { Cluster } from '../cluster';
 
 describe('cluster', () => {
-
   describe('Cluster', () => {
-
     describe('fromUpstreamJSON factory method', () => {
       const upstreamJSON = {
-        cluster_uuid: 'S-S4NNZDRV-g9c-JrIhx6A'
+        cluster_uuid: 'S-S4NNZDRV-g9c-JrIhx6A',
       };
 
       it('returns correct Cluster instance', () => {

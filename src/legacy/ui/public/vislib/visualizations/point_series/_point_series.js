@@ -35,7 +35,10 @@ export class PointSeries {
     this.chartEl = seriesEl;
     this.chartData = seriesData;
     this.seriesConfig = seriesConfig;
-    this.thresholdLineOptions = _.defaults(handler.visConfig.get('thresholdLine', {}), thresholdLineDefaults);
+    this.thresholdLineOptions = _.defaults(
+      handler.visConfig.get('thresholdLine', {}),
+      thresholdLineDefaults
+    );
   }
 
   getGroupedCount() {
@@ -69,15 +72,19 @@ export class PointSeries {
   }
 
   getValueAxis() {
-    return _.find(this.handler.valueAxes, axis => {
-      return axis.axisConfig.get('id') === this.seriesConfig.valueAxis;
-    }) || this.handler.valueAxes[0];
+    return (
+      _.find(this.handler.valueAxes, axis => {
+        return axis.axisConfig.get('id') === this.seriesConfig.valueAxis;
+      }) || this.handler.valueAxes[0]
+    );
   }
 
   getCategoryAxis() {
-    return _.find(this.handler.categoryAxes, axis => {
-      return axis.axisConfig.get('id') === this.seriesConfig.categoryAxis;
-    }) || this.handler.categoryAxes[0];
+    return (
+      _.find(this.handler.categoryAxes, axis => {
+        return axis.axisConfig.get('id') === this.seriesConfig.categoryAxis;
+      }) || this.handler.categoryAxes[0]
+    );
   }
 
   addCircleEvents(element) {
@@ -114,7 +121,11 @@ export class PointSeries {
       return yScale(y);
     }
 
-    if (valueAxisDomain && valueAxisDomain[0] <= thresholdValue && valueAxisDomain[1] >= thresholdValue) {
+    if (
+      valueAxisDomain &&
+      valueAxisDomain[0] <= thresholdValue &&
+      valueAxisDomain[1] >= thresholdValue
+    ) {
       svgElem
         .append('line')
         .attr('x1', isHorizontal ? 0 : y(thresholdValue))
@@ -125,6 +136,5 @@ export class PointSeries {
         .attr('stroke-dasharray', thresholdLineStyle)
         .attr('stroke', lineColor);
     }
-
   }
 }

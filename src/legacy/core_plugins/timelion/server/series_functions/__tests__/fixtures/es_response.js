@@ -29,7 +29,7 @@
 
 export default {
   _shards: {
-    total: 1
+    total: 1,
   },
   aggregations: {
     q: {
@@ -52,15 +52,15 @@ export default {
                           {
                             key: 1000,
                             MetricA: { value: 264 },
-                            MetricB: { value: 398 }
+                            MetricB: { value: 398 },
                           },
                           {
                             key: 2000,
                             MetricA: { value: 264 },
-                            MetricB: { value: 1124 }
-                          }
-                        ]
-                      }
+                            MetricB: { value: 1124 },
+                          },
+                        ],
+                      },
                     },
                     {
                       key: 'Value2B',
@@ -70,18 +70,18 @@ export default {
                           {
                             key: 1000,
                             MetricA: { value: 699 },
-                            MetricB: { value: 457 }
+                            MetricB: { value: 457 },
                           },
                           {
                             key: 2000,
                             MetricA: { value: 110 },
-                            MetricB: { value: 506 }
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
+                            MetricB: { value: 506 },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
               },
               {
                 key: 'ValueB',
@@ -96,15 +96,15 @@ export default {
                           {
                             key: 1000,
                             MetricA: { value: 152 },
-                            MetricB: { value: 61 }
+                            MetricB: { value: 61 },
                           },
                           {
                             key: 2000,
                             MetricA: { value: 518 },
-                            MetricB: { value: 77 }
-                          }
-                        ]
-                      }
+                            MetricB: { value: 77 },
+                          },
+                        ],
+                      },
                     },
                     {
                       key: 'Value2A',
@@ -114,21 +114,21 @@ export default {
                           {
                             key: 1000,
                             MetricA: { value: 114 },
-                            MetricB: { value: 23 }
+                            MetricB: { value: 23 },
                           },
                           {
                             key: 2000,
                             MetricA: { value: 264 },
-                            MetricB: { value: 45 }
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
+                            MetricB: { value: 45 },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
         },
         QueryB: {
           FieldA: {
@@ -147,15 +147,15 @@ export default {
                           {
                             key: 1000,
                             MetricA: { value: 621 },
-                            MetricB: { value: 12 }
+                            MetricB: { value: 12 },
                           },
                           {
                             key: 2000,
                             MetricA: { value: 751 },
-                            MetricB: { value: 12 }
-                          }
-                        ]
-                      }
+                            MetricB: { value: 12 },
+                          },
+                        ],
+                      },
                     },
                     {
                       key: 'Value2A',
@@ -165,18 +165,18 @@ export default {
                           {
                             key: 1000,
                             MetricA: { value: 110 },
-                            MetricB: { value: 11 }
+                            MetricB: { value: 11 },
                           },
                           {
                             key: 2000,
                             MetricA: { value: 648 },
-                            MetricB: { value: 12 }
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
+                            MetricB: { value: 12 },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
               },
               {
                 key: 'ValueC',
@@ -191,15 +191,15 @@ export default {
                           {
                             key: 1000,
                             MetricA: { value: 755 },
-                            MetricB: { value: 10 }
+                            MetricB: { value: 10 },
                           },
                           {
                             key: 2000,
                             MetricA: { value: 713 },
-                            MetricB: { value: 18 }
-                          }
-                        ]
-                      }
+                            MetricB: { value: 18 },
+                          },
+                        ],
+                      },
                     },
                     {
                       key: 'Value2A',
@@ -209,23 +209,23 @@ export default {
                           {
                             key: 1000,
                             MetricA: { value: 391 },
-                            MetricB: { value: 4 }
+                            MetricB: { value: 4 },
                           },
                           {
                             key: 2000,
                             MetricA: { value: 802 },
-                            MetricB: { value: 4 }
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
-      }
-    }
-  }
+                            MetricB: { value: 4 },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
 };
