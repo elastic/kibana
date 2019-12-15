@@ -85,7 +85,7 @@ export const MappingsEditor = React.memo(
                   </EuiTab>
                 </EuiTabs>
 
-                <EuiSpacer size="m" />
+                <EuiSpacer size="l" />
 
                 {content}
               </div>

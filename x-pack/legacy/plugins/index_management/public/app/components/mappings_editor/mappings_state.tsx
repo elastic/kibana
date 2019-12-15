@@ -104,6 +104,7 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
       state.documentFields.status === 'creatingField' && emptyNameValue;
 
     onUpdate({
+      // Output a mappings object from the user's input.
       getData: (isValid: boolean) => {
         let nextState = state;
 
@@ -121,16 +122,31 @@ export const MappingsState = React.memo(({ children, onUpdate, defaultValue }: P
           }
         }
 
+        const {
+          enabled: dynamicMappingsEnabled,
+          throwErrorsForUnmappedFields,
+          ...configurationData
+        } = nextState.configuration.data.format();
+
+        const dynamicMapping = dynamicMappingsEnabled
+          ? true
+          : throwErrorsForUnmappedFields
+          ? 'strict'
+          : false;
+
+        // Pull the mappings properties from the current editor
+        const fields =
+          nextState.documentFields.editor === 'json'
+            ? nextState.fieldsJsonEditor.format()
+            : deNormalize(nextState.fields);
+
         return {
-          ...nextState.configuration.data.format(),
+          dynamic: dynamicMapping,
+          ...configurationData,
           _source: {
             ...nextState.sourceField.data.format(),
           },
-          properties:
-            // Pull the mappings properties from the current editor
-            nextState.documentFields.editor === 'json'
-              ? nextState.fieldsJsonEditor.format()
-              : deNormalize(nextState.fields),
+          properties: fields,
         };
       },
       validate: async () => {

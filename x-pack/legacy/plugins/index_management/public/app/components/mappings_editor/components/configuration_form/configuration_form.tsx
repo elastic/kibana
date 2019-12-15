@@ -24,7 +24,7 @@ export const ConfigurationForm = React.memo(
     return (
       <>
         <DynamicMappingForm defaultValue={configurationDefaultValue} />
-        <EuiSpacer size="m" />
+        <EuiSpacer size="xl" />
         <SourceFieldForm defaultValue={sourceFieldDefaultValue} />
       </>
     );
