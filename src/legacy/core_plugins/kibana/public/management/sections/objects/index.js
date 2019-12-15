@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import './_view';
 import './_objects';
 import 'ace';
@@ -31,7 +31,7 @@ import {
 // add the module deps to this module
 uiModules.get('apps/management');
 
-management.getSection('kibana').register('objects', {
+npStart.plugin.management.legacy.getSection('kibana').register('objects', {
   display: i18n.translate('kbn.management.objects.savedObjectsSectionLabel', {
     defaultMessage: 'Saved Objects',
   }),

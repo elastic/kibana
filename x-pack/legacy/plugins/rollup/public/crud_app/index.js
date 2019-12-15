@@ -13,7 +13,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import routes from 'ui/routes';
 
 import { CRUD_APP_BASE_PATH } from './constants';
@@ -22,7 +22,7 @@ import { App } from './app';
 import template from './main.html';
 import { rollupJobsStore } from './store';
 
-const esSection = management.getSection('elasticsearch');
+const esSection = npStart.plugins.management.legacy.getSection('elasticsearch');
 
 esSection.register('rollup_jobs', {
   visible: true,

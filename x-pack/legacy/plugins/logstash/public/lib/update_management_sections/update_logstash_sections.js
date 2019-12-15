@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 
 export function updateLogstashSections(pipelineId) {
+  const management = npStart.plugins.management.legacy;
   const editSection = management.getSection('logstash/pipelines/pipeline/edit');
   const newSection = management.getSection('logstash/pipelines/pipeline/new');
 

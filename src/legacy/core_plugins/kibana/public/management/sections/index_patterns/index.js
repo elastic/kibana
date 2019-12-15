@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import { setup as managementSetup } from '../../../../../management/public/legacy';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
@@ -168,7 +168,7 @@ uiModules
     };
   });
 
-management.getSection('kibana').register('index_patterns', {
+npStart.plugins.management.legacy.getSection('kibana').register('index_patterns', {
   display: i18n.translate('kbn.management.indexPattern.sectionsHeader', {
     defaultMessage: 'Index Patterns',
   }),

@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import { createUiStatsReporter } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 export interface LegacyStart {
   management: {
-    getSection: typeof management.getSection;
+    // @ts-ignore
+    getSection: typeof npStart.plugins.management.legacy.getSection;
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
@@ -20,7 +22,10 @@ export interface LegacyStart {
 
 export const __LEGACYStart = {
   management: {
-    getSection: management.getSection.bind(management),
+    // @ts-ignore
+    getSection: npStart.plugins.management.legacy.getSection.bind(
+      npStart.plugins.management.legacy
+    ),
     constants: {
       BREADCRUMB: MANAGEMENT_BREADCRUMB,
     },

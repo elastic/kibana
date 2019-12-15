@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import chrome from 'ui/chrome';
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import { BASE_PATH } from '../common/constants';
-const esSection = management.getSection('elasticsearch');
+const esSection = npStart.plugins.management.legacy.getSection('elasticsearch');
 if (chrome.getInjected('ilmUiEnabled')) {
   esSection.register('index_lifecycle_policies', {
     visible: true,

@@ -10,8 +10,8 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import 'ui/autoload/all';
 import chrome from 'ui/chrome';
 // @ts-ignore not typed yet
-import { management } from 'ui/management';
 import routes from 'ui/routes';
+import { npStart } from 'ui/new_platform';
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 import { INDEX_NAMES } from '../../../common/constants/index_names';
@@ -48,7 +48,8 @@ export function compose(): FrontendLibs {
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
       camelCase(PLUGIN.ID),
-      management,
+      // @ts-ignore
+      npStart.plugins.management.legacy,
       routes,
       chrome.getBasePath,
       onKibanaReady,

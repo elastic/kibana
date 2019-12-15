@@ -7,11 +7,11 @@ import { i18n } from '@kbn/i18n';
 import 'plugins/spaces/views/management/page_routes';
 import React from 'react';
 import {
-  management,
   PAGE_SUBTITLE_COMPONENT,
   PAGE_TITLE_COMPONENT,
   registerSettingsComponent,
 } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 // @ts-ignore
 import routes from 'ui/routes';
 import { setup as managementSetup } from '../../../../../../../src/legacy/core_plugins/management/public/legacy';
@@ -26,7 +26,8 @@ routes.defaults(/\/management/, {
   resolve: {
     spacesManagementSection(activeSpace: any, serverBasePath: string) {
       function getKibanaSection() {
-        return management.getSection('kibana');
+        // @ts-ignore
+        return npStart.plugins.management.legacy.getSection('kibana');
       }
 
       function deregisterSpaces() {

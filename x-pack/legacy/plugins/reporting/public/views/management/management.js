@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import routes from 'ui/routes';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
@@ -14,7 +14,7 @@ import 'plugins/reporting/views/management/jobs';
 routes.defaults(/\/management/, {
   resolve: {
     reportingManagementSection: function() {
-      const kibanaManagementSection = management.getSection('kibana');
+      const kibanaManagementSection = npStart.plugins.management.legacy.getSection('kibana');
       const showReportingLinks = xpackInfo.get('features.reporting.management.showLinks');
 
       kibanaManagementSection.deregister('reporting');

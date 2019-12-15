@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import { BASE_PATH, PLUGIN } from '../common/constants';
 
-management.getSection('elasticsearch').register('license_management', {
+// @ts-ignore
+npStart.plugins.management.legacy.getSection('elasticsearch').register('license_management', {
   visible: true,
   display: PLUGIN.TITLE,
   order: 99,

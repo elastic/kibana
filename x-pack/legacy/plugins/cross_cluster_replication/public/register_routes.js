@@ -6,7 +6,7 @@
 
 import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import routes from 'ui/routes';
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import { i18n } from '@kbn/i18n';
@@ -22,7 +22,7 @@ const isLicenseOK = isAvailable && isActive;
 const isCcrUiEnabled = chrome.getInjected('ccrUiEnabled');
 
 if (isLicenseOK && isCcrUiEnabled) {
-  const esSection = management.getSection('elasticsearch');
+  const esSection = npStart.plugins.management.legacy.getSection('elasticsearch');
 
   esSection.register('ccr', {
     visible: true,

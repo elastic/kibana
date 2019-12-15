@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import { capabilities } from 'ui/capabilities';
@@ -99,7 +99,7 @@ uiModules.get('apps/management').directive('kbnManagementAdvanced', function(con
   };
 });
 
-management.getSection('kibana').register('settings', {
+npStart.plugins.management.legacy.getSection('kibana').register('settings', {
   display: i18n.translate('kbn.management.settings.sectionLabel', {
     defaultMessage: 'Advanced Settings',
   }),

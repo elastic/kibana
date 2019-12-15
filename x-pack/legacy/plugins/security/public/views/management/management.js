@@ -16,7 +16,7 @@ import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
 import '../../services/shield_user';
 import { ROLES_PATH, USERS_PATH, API_KEYS_PATH } from './management_urls';
 
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -38,6 +38,7 @@ routes
     resolve: {
       securityManagementSection: function(ShieldUser) {
         const showSecurityLinks = xpackInfo.get('features.security.showLinks');
+        const management = npStart.plugins.management.legacy;
 
         function deregisterSecurity() {
           management.deregister('security');

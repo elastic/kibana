@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 /* Legacy UI imports */
 import { npSetup, npStart } from 'ui/new_platform';
 import routes from 'ui/routes';
-import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { TimeBuckets } from 'ui/time_buckets';
 // @ts-ignore
 import { xpackInfo } from 'plugins/xpack_main/services/xpack_info';
@@ -21,6 +21,7 @@ import { PLUGIN } from '../common/constants';
 import { LICENSE_STATUS_INVALID, LICENSE_STATUS_UNAVAILABLE } from '../../../common/constants';
 import { manageAngularLifecycle } from './manage_angular_lifecycle';
 
+const management = npStart.plugins.management.legacy;
 const template = `<kbn-management-app section="elasticsearch/watcher">
   <div id="watchReactRoot"></div>
 </kbn-management-app>`;
@@ -94,6 +95,7 @@ routes.defaults(/\/management/, {
   },
 });
 
+// @ts-ignore
 management.getSection('elasticsearch').register('watcher', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.watcherDisplayName', {
     defaultMessage: 'Watcher',
@@ -102,6 +104,7 @@ management.getSection('elasticsearch').register('watcher', {
   url: '#/management/elasticsearch/watcher/',
 } as any);
 
+// @ts-ignore
 management.getSection('elasticsearch/watcher').register('watches', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.watchesDisplayName', {
     defaultMessage: 'Watches',
@@ -109,10 +112,12 @@ management.getSection('elasticsearch/watcher').register('watches', {
   order: 1,
 } as any);
 
+// @ts-ignore
 management.getSection('elasticsearch/watcher').register('watch', {
   visible: false,
 } as any);
 
+// @ts-ignore
 management.getSection('elasticsearch/watcher/watch').register('status', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.statusDisplayName', {
     defaultMessage: 'Status',
@@ -121,6 +126,7 @@ management.getSection('elasticsearch/watcher/watch').register('status', {
   visible: false,
 } as any);
 
+// @ts-ignore
 management.getSection('elasticsearch/watcher/watch').register('edit', {
   display: i18n.translate('xpack.watcher.sections.watchList.managementSection.editDisplayName', {
     defaultMessage: 'Edit',
@@ -129,6 +135,7 @@ management.getSection('elasticsearch/watcher/watch').register('edit', {
   visible: false,
 } as any);
 
+// @ts-ignore
 management.getSection('elasticsearch/watcher/watch').register('new', {
   display: i18n.translate(
     'xpack.watcher.sections.watchList.managementSection.newWatchDisplayName',
@@ -140,6 +147,7 @@ management.getSection('elasticsearch/watcher/watch').register('new', {
   visible: false,
 } as any);
 
+// @ts-ignore
 management.getSection('elasticsearch/watcher/watch').register('history-item', {
   order: 1,
   visible: false,

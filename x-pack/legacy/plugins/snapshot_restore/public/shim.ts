@@ -9,7 +9,8 @@ import { I18nContext } from 'ui/i18n';
 
 import chrome from 'ui/chrome';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
-import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import { fatalError, toastNotifications } from 'ui/notify';
 import routes from 'ui/routes';
 import { docTitle } from 'ui/doc_title/doc_title';
@@ -36,7 +37,7 @@ export interface AppCore {
 
 export interface AppPlugins {
   management: {
-    sections: typeof management;
+    sections: typeof npStart.plugins.management.legacy;
   };
 }
 
@@ -61,7 +62,7 @@ export interface Core extends AppCore {
 
 export interface Plugins extends AppPlugins {
   management: {
-    sections: typeof management;
+    sections: typeof npStart.plugins.management.legacy;
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
@@ -119,7 +120,7 @@ export function createShim(): { core: Core; plugins: Plugins } {
     },
     plugins: {
       management: {
-        sections: management,
+        sections: npStart.plugins.management.legacy,
         constants: {
           BREADCRUMB: MANAGEMENT_BREADCRUMB,
         },

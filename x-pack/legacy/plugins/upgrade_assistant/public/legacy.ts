@@ -8,9 +8,8 @@ import { ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
 
 /* LEGACY IMPORTS */
-import { npSetup } from 'ui/new_platform';
+import { npSetup, npStart } from 'ui/new_platform';
 import { wrapInI18nContext } from 'ui/i18n';
-import { management } from 'ui/management';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
 import routes from 'ui/routes';
@@ -66,15 +65,18 @@ function startApp() {
         get(_: string) {
           return {
             registerApp(app) {
-              management.getSection('elasticsearch').register('upgrade_assistant', {
-                visible: true,
-                display: i18n.translate('xpack.upgradeAssistant.appTitle', {
-                  defaultMessage: '{version} Upgrade Assistant',
-                  values: { version: `${NEXT_MAJOR_VERSION}.0` },
-                }),
-                order: 100,
-                url: `#${BASE_PATH}`,
-              });
+              // @ts-ignore
+              npStart.plugins.management.legacy
+                .getSection('elasticsearch')
+                .register('upgrade_assistant', {
+                  visible: true,
+                  display: i18n.translate('xpack.upgradeAssistant.appTitle', {
+                    defaultMessage: '{version} Upgrade Assistant',
+                    values: { version: `${NEXT_MAJOR_VERSION}.0` },
+                  }),
+                  order: 100,
+                  url: `#${BASE_PATH}`,
+                });
 
               app.mount(
                 {},

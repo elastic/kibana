@@ -5,11 +5,10 @@
  */
 import 'ui/autoload/all';
 // @ts-ignore: path dynamic for kibana
-import { management } from 'ui/management';
-// @ts-ignore: path dynamic for kibana
 import { uiModules } from 'ui/modules';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
+import { npStart } from 'ui/new_platform';
 import { configBlockSchemas } from '../../../common/config_schemas';
 import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 // @ts-ignore: path dynamic for kibana
@@ -50,7 +49,8 @@ export function compose(
   const framework = new FrameworkLib(
     new KibanaFrameworkAdapter(
       pluginUIModule,
-      management,
+      // @ts-ignore
+      npStart.plugins.management.legacy,
       routes,
       () => '',
       onKibanaReady,

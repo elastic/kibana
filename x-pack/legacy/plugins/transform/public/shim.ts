@@ -6,7 +6,7 @@
 
 import { npStart } from 'ui/new_platform';
 
-import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import routes from 'ui/routes';
 import { docTitle } from 'ui/doc_title/doc_title';
 
@@ -22,7 +22,7 @@ export type AppCore = Pick<npCore, 'chrome' | 'http' | 'i18n' | 'savedObjects' |
 
 export interface AppPlugins {
   management: {
-    sections: typeof management;
+    sections: typeof npStart.plugins.management.legacy;
   };
   savedSearches: {
     getClient(): any;
@@ -55,7 +55,7 @@ export interface Core extends npCore {
 
 export interface Plugins extends AppPlugins {
   management: {
-    sections: typeof management;
+    sections: typeof npStart.plugins.management.legacy;
     constants: {
       BREADCRUMB: typeof MANAGEMENT_BREADCRUMB;
     };
@@ -100,7 +100,7 @@ export function createPublicShim(): { core: Core; plugins: Plugins } {
     },
     plugins: {
       management: {
-        sections: management,
+        sections: npStart.plugins.management.legacy,
         constants: {
           BREADCRUMB: MANAGEMENT_BREADCRUMB,
         },

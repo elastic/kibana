@@ -28,7 +28,8 @@ import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 import appTemplate from './app.html';
 import landingTemplate from './landing.html';
-import { management, SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { npStart } from 'ui/new_platform';
+import { SidebarNav, MANAGEMENT_BREADCRUMB } from 'ui/management';
 import {
   FeatureCatalogueRegistryProvider,
   FeatureCatalogueCategory,
@@ -133,6 +134,7 @@ uiModules.get('apps/management').directive('kbnManagementApp', function($locatio
     },
 
     link: function($scope) {
+      const management = npStart.plugins.management.legacy;
       timefilter.disableAutoRefreshSelector();
       timefilter.disableTimeRangeSelector();
       $scope.sections = management.visibleItems;
@@ -158,7 +160,7 @@ uiModules.get('apps/management').directive('kbnManagementLanding', function(kbnV
   return {
     restrict: 'E',
     link: function($scope) {
-      $scope.sections = management.visibleItems;
+      $scope.sections = npStart.plugins.management.legacy.visibleItems;
       $scope.kbnVersion = kbnVersion;
     },
   };

@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import { i18n } from '@kbn/i18n';
+
+const management = npStart.plugins.management.legacy;
 
 management.getSection('logstash').register('pipelines', {
   display: i18n.translate('xpack.logstash.managementSection.pipelinesTitle', {

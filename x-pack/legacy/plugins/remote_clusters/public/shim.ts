@@ -5,7 +5,7 @@
  */
 
 import { npStart } from 'ui/new_platform';
-import { management, MANAGEMENT_BREADCRUMB } from 'ui/management';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { fatalError } from 'ui/notify';
 import { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL } from 'ui/documentation_links';
 
@@ -31,7 +31,10 @@ export function createShim() {
     },
     pluginsStart: {
       management: {
-        getSection: management.getSection.bind(management),
+        // @ts-ignore
+        getSection: npStart.plugins.management.legacy.getSection.bind(
+          npStart.plugins.management.legacy
+        ),
         breadcrumb: MANAGEMENT_BREADCRUMB,
       },
       uiMetric: {

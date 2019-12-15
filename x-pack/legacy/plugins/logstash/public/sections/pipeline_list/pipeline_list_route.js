@@ -5,7 +5,7 @@
  */
 
 import routes from 'ui/routes';
-import { management } from 'ui/management';
+import { npStart } from 'ui/new_platform';
 import template from './pipeline_list_route.html';
 import './components/pipeline_list';
 import 'plugins/logstash/services/license';
@@ -20,7 +20,7 @@ routes.defaults(/\/management/, {
   resolve: {
     logstashManagementSection: $injector => {
       const licenseService = $injector.get('logstashLicenseService');
-      const logstashSection = management.getSection('logstash/pipelines');
+      const logstashSection = npStart.plugins.management.legacy.getSection('logstash/pipelines');
 
       if (licenseService.enableLinks) {
         logstashSection.show();
