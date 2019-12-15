@@ -10,7 +10,6 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 import { mockBrowserFields } from '../../../../../../public/containers/source/mock';
@@ -20,12 +19,15 @@ import {
   mockEndgameUserLogon,
   mockEndgameUserLogoff,
 } from '../../../../../../public/mock/mock_endgame_ecs_data';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 import { EndgameSecurityEventDetails } from './endgame_security_event_details';
 
 describe('EndgameSecurityEventDetails', () => {
+  const mount = useMountAppended();
+
   test('it renders the expected text given an Endgame Security user_logon event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
           browserFields={mockBrowserFields}
@@ -41,7 +43,7 @@ describe('EndgameSecurityEventDetails', () => {
   });
 
   test('it renders the expected text given an Endgame Security admin_logon event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
           browserFields={mockBrowserFields}
@@ -57,7 +59,7 @@ describe('EndgameSecurityEventDetails', () => {
   });
 
   test('it renders the expected text given an Endgame Security explicit_user_logon event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
           browserFields={mockBrowserFields}
@@ -73,7 +75,7 @@ describe('EndgameSecurityEventDetails', () => {
   });
 
   test('it renders the expected text given an Endgame Security user_logoff event', () => {
-    const wrapper = mountWithIntl(
+    const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
           browserFields={mockBrowserFields}

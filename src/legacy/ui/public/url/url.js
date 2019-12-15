@@ -22,8 +22,9 @@ import { i18n } from '@kbn/i18n';
 import { uiModules } from '../modules';
 import { AppStateProvider } from '../state_management/app_state';
 
-uiModules.get('kibana/url')
-  .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
+uiModules.get('kibana/url').service('kbnUrl', function(Private) {
+  return Private(KbnUrlProvider);
+});
 
 export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
   /**
@@ -53,7 +54,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {Object} [paramObj] - optional set of parameters for the url template
    * @return {undefined}
    */
-  self.change = function (url, paramObj, appState) {
+  self.change = function(url, paramObj, appState) {
     self._changeLocation('url', url, paramObj, false, appState);
   };
 
@@ -65,7 +66,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {Object} [paramObj] - optional set of parameters for the path template
    * @return {undefined}
    */
-  self.changePath = function (path, paramObj) {
+  self.changePath = function(path, paramObj) {
     self._changeLocation('path', path, paramObj);
   };
 
@@ -76,7 +77,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {Object} [paramObj] - optional set of parameters for the url template
    * @return {undefined}
    */
-  self.redirect = function (url, paramObj, appState) {
+  self.redirect = function(url, paramObj, appState) {
     self._changeLocation('url', url, paramObj, true, appState);
   };
 
@@ -88,7 +89,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {Object} [paramObj] - optional set of parameters for the path template
    * @return {undefined}
    */
-  self.redirectPath = function (path, paramObj) {
+  self.redirectPath = function(path, paramObj) {
     self._changeLocation('path', path, paramObj, true);
   };
 
@@ -101,10 +102,10 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @return {String} - the evaluated result
    * @throws {Error} If any of the expressions can't be parsed.
    */
-  self.eval = function (template, paramObj) {
+  self.eval = function(template, paramObj) {
     paramObj = paramObj || {};
 
-    return template.replace(/\{\{([^\}]+)\}\}/g, function (match, expr) {
+    return template.replace(/\{\{([^\}]+)\}\}/g, function(match, expr) {
       // remove filters
       const key = expr.split('|')[0].trim();
 
@@ -116,8 +117,9 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
         throw new Error(
           i18n.translate('common.ui.url.replacementFailedErrorMessage', {
             defaultMessage: 'Replacement failed, unresolved expression: {expr}',
-            values: { expr }
-          }));
+            values: { expr },
+          })
+        );
       }
 
       return encodeURIComponent($parse(expr)(paramObj));
@@ -132,7 +134,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {string} route - the route name
    * @return {string} - the computed href
    */
-  self.getRouteHref = function (obj, route) {
+  self.getRouteHref = function(obj, route) {
     return '#' + self.getRouteUrl(obj, route);
   };
 
@@ -143,7 +145,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {string} route - the route name
    * @return {string} - the computed url
    */
-  self.getRouteUrl = function (obj, route) {
+  self.getRouteUrl = function(obj, route) {
     const template = obj && obj.routes && obj.routes[route];
     if (template) return self.eval(template, obj);
   };
@@ -156,7 +158,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {string} route - the route name
    * @return {undefined}
    */
-  self.redirectToRoute = function (obj, route) {
+  self.redirectToRoute = function(obj, route) {
     self.redirect(self.getRouteUrl(obj, route));
   };
 
@@ -168,7 +170,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @param  {string} route - the route name
    * @return {undefined}
    */
-  self.changeToRoute = function (obj, route) {
+  self.changeToRoute = function(obj, route) {
     self.change(self.getRouteUrl(obj, route));
   };
 
@@ -177,7 +179,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * history.
    * @param param
    */
-  self.removeParam = function (param) {
+  self.removeParam = function(param) {
     $location.search(param, null).replace();
   };
 
@@ -186,10 +188,10 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
   /////
   let reloading;
 
-  self._changeLocation = function (type, url, paramObj, replace, appState) {
+  self._changeLocation = function(type, url, paramObj, replace, appState) {
     const prev = {
       path: $location.path(),
-      search: $location.search()
+      search: $location.search(),
     };
 
     url = self.eval(url, paramObj);
@@ -202,7 +204,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
 
     const next = {
       path: $location.path(),
-      search: $location.search()
+      search: $location.search(),
     };
 
     if ($injector.has('$route')) {
@@ -212,7 +214,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
         const appState = Private(AppStateProvider).getAppState();
         if (appState) appState.destroy();
 
-        reloading = $rootScope.$on('$locationChangeSuccess', function () {
+        reloading = $rootScope.$on('$locationChangeSuccess', function() {
           // call the "unlisten" function returned by $on
           reloading();
           reloading = false;
@@ -224,7 +226,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
   };
 
   // determine if the router will automatically reload the route
-  self._shouldForceReload = function (next, prev, $route) {
+  self._shouldForceReload = function(next, prev, $route) {
     if (reloading) return false;
 
     const route = $route.current && $route.current.$$route;

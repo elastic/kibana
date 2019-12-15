@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
@@ -12,6 +12,7 @@ import { BrowserFields } from '../../../../../containers/source';
 import { mockBrowserFields } from '../../../../../containers/source/mock';
 import { Ecs } from '../../../../../graphql/types';
 import { getMockNetflowData, TestProviders } from '../../../../../mock';
+import { useMountAppended } from '../../../../../utils/use_mount_appended';
 
 import {
   eventActionMatches,
@@ -27,6 +28,8 @@ export const justIdAndTimestamp: Ecs = {
 jest.mock('../../../../../lib/settings/use_kibana_ui_setting');
 
 describe('netflowRowRenderer', () => {
+  const mount = useMountAppended();
+
   test('renders correctly against snapshot', () => {
     const browserFields: BrowserFields = {};
     const children = netflowRowRenderer.renderRow({

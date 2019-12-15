@@ -32,16 +32,16 @@ export function logstashOverviewRoute(server) {
     config: {
       validate: {
         params: Joi.object({
-          clusterUuid: Joi.string().required()
+          clusterUuid: Joi.string().required(),
         }),
         payload: Joi.object({
           ccs: Joi.string().optional(),
           timeRange: Joi.object({
             min: Joi.date().required(),
-            max: Joi.date().required()
-          }).required()
-        })
-      }
+            max: Joi.date().required(),
+          }).required(),
+        }),
+      },
     },
     async handler(req) {
       const config = server.config();
@@ -50,18 +50,18 @@ export function logstashOverviewRoute(server) {
       const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       try {
-        const [ metrics, clusterStatus ] = await Promise.all([
+        const [metrics, clusterStatus] = await Promise.all([
           getMetrics(req, lsIndexPattern, metricSet),
-          getClusterStatus(req, lsIndexPattern, { clusterUuid })
+          getClusterStatus(req, lsIndexPattern, { clusterUuid }),
         ]);
 
         return {
           metrics,
           clusterStatus,
         };
-      } catch(err) {
+      } catch (err) {
         throw handleError(err, req);
       }
-    }
+    },
   });
 }
