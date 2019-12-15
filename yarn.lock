@@ -26355,19 +26355,12 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
   integrity sha1-tf3AjxKH6hF4Yo5BXiUTK3NkbG0=
 
-simple-git@1.116.0:
-  version "1.116.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-1.116.0.tgz#ea6e533466f1e0152186e306e004d4eefa6e3e00"
-  integrity sha512-Pbo3tceqMYy0j3U7jzMKabOWcx5+67GdgQUjpK83XUxGhA+1BX93UPvlWNzbCRoFwd7EJTyDSCC2XCoT4NTLYQ==
+simple-git@1.129.0, simple-git@^1.129.0:
+  version "1.129.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-1.129.0.tgz#eddd2611d2bf41c77e1d08cd70c0b7f3af785040"
+  integrity sha512-XbzNmugMTeV2crZnPl+b1ZJn+nqXCUNyrZxDXpLM0kHL3B85sbPlpd8q9I4qtAHI9D2FxTB6w4BuiAGKYtyzKw==
   dependencies:
     debug "^4.0.1"
-
-simple-git@^1.91.0:
-  version "1.92.0"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-1.92.0.tgz#6061468eb7d19f0141078fc742e62457e910f547"
-  integrity sha1-YGFGjrfRnwFBB4/HQuYkV+kQ9Uc=
-  dependencies:
-    debug "^3.1.0"
 
 simple-swizzle@^0.2.2:
   version "0.2.2"
